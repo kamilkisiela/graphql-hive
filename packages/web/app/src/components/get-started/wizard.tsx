@@ -1,6 +1,12 @@
 import { ReactElement } from 'react';
 import { Circle, CircleCheck } from 'lucide-react';
-import { Drawer } from '@/components/v2/drawer';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
 export function GetStartedWizard({
@@ -22,55 +28,58 @@ export function GetStartedWizard({
   };
 }): ReactElement {
   return (
-    <Drawer open={isOpen} onOpenChange={onClose} width={450}>
-      <div className="space-y-2 px-2 pt-4">
-        <div className="text-lg font-semibold leading-none tracking-tight">Get Started</div>
-        <div className="text-muted-foreground text-sm">
-          Follow the steps to set up your organization and experience the full power of GraphQL Hive
-        </div>
-      </div>
-      <div className="mt-4 space-y-3">
-        <Task
-          link={docsUrl('/management/projects#create-a-new-project')}
-          completed={tasks.creatingProject}
-          title="Create a project"
-          description="A project represents a GraphQL API"
-        />
-        <Task
-          link={docsUrl('/features/schema-registry#publish-a-schema')}
-          completed={tasks.publishingSchema}
-          title="Publish a schema"
-          description="Publish your first schema to the registry"
-        />
-        <Task
-          link={docsUrl('/features/schema-registry#check-a-schema')}
-          completed={tasks.checkingSchema}
-          title="Check a schema"
-          description="Run a schema check to validate your changes"
-        />
-        {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[500px] sm:max-w-none">
+        <SheetHeader>
+          <SheetTitle>Get Started</SheetTitle>
+          <SheetDescription>
+            Follow the steps to set up your organization and experience the full power of GraphQL
+            Hive
+          </SheetDescription>
+        </SheetHeader>
+        <div className="space-y-3 py-4">
           <Task
-            link={docsUrl('/management/organizations#members')}
-            completed={tasks.invitingMembers}
-            title="Invite members"
-            description="Invite your team members to collaborate on your projects"
+            link={docsUrl('/management/projects#create-a-new-project')}
+            completed={tasks.creatingProject}
+            title="Create a project"
+            description="A project represents a GraphQL API"
           />
-        ) : null}
+          <Task
+            link={docsUrl('/features/schema-registry#publish-a-schema')}
+            completed={tasks.publishingSchema}
+            title="Publish a schema"
+            description="Publish your first schema to the registry"
+          />
+          <Task
+            link={docsUrl('/features/schema-registry#check-a-schema')}
+            completed={tasks.checkingSchema}
+            title="Check a schema"
+            description="Run a schema check to validate your changes"
+          />
+          {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
+            <Task
+              link={docsUrl('/management/organizations#members')}
+              completed={tasks.invitingMembers}
+              title="Invite members"
+              description="Invite your team members to collaborate on your projects"
+            />
+          ) : null}
 
-        <Task
-          link={docsUrl('/features/usage-reporting')}
-          completed={tasks.reportingOperations}
-          title="Report operations"
-          description="Collect and analyze your GraphQL API usage"
-        />
-        <Task
-          link={docsUrl('/management/targets#conditional-breaking-changes')}
-          completed={tasks.enablingUsageBasedBreakingChanges}
-          title="Enable usage-based schema checking"
-          description="Detect breaking changes based on real usage data"
-        />
-      </div>
-    </Drawer>
+          <Task
+            link={docsUrl('/features/usage-reporting')}
+            completed={tasks.reportingOperations}
+            title="Report operations"
+            description="Collect and analyze your GraphQL API usage"
+          />
+          <Task
+            link={docsUrl('/management/targets#conditional-breaking-changes')}
+            completed={tasks.enablingUsageBasedBreakingChanges}
+            title="Enable usage-based schema checking"
+            description="Detect breaking changes based on real usage data"
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 

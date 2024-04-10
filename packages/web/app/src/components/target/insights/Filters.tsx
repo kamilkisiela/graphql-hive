@@ -5,7 +5,8 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Button } from '@/components/ui/button';
-import { Checkbox, Drawer, Input, Button as LegacyButton, Spinner } from '@/components/v2';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Checkbox, Input, Button as LegacyButton, Spinner } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/gql/graphql';
 import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
@@ -114,62 +115,66 @@ function OperationsFilter({
   );
 
   return (
-    <Drawer open={isOpen} onOpenChange={onClose} width={500}>
-      <Drawer.Title>Filter by operation</Drawer.Title>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[500px] sm:max-w-none">
+        <SheetHeader>
+          <SheetTitle>Filter by operation</SheetTitle>
+        </SheetHeader>
 
-      <div className="flex h-full flex-col space-y-3">
-        <Input
-          size="medium"
-          placeholder="Search for operation..."
-          onChange={onChange}
-          value={searchTerm}
-          onClear={() => {
-            setSearchTerm('');
-            setVisibleOperations(operations.nodes);
-          }}
-        />
-        <div className="flex w-full items-center gap-2">
-          <LegacyButton variant="link" onClick={selectAll}>
-            All
-          </LegacyButton>
-          <LegacyButton variant="link" onClick={selectNone}>
-            None
-          </LegacyButton>
-          <LegacyButton className="ml-auto" onClick={selectAll}>
-            Reset
-          </LegacyButton>
-          <LegacyButton
-            variant="primary"
-            disabled={selectedItems.length === 0}
-            onClick={() => {
-              onFilter(selectedItems);
-              onClose();
+        <div className="flex h-full flex-col space-y-3 py-4">
+          <Input
+            size="medium"
+            placeholder="Search for operation..."
+            onChange={onChange}
+            value={searchTerm}
+            onClear={() => {
+              setSearchTerm('');
+              setVisibleOperations(operations.nodes);
             }}
-          >
-            Save
-          </LegacyButton>
+          />
+          <div className="flex w-full items-center gap-2">
+            <LegacyButton variant="link" onClick={selectAll}>
+              All
+            </LegacyButton>
+            <LegacyButton variant="link" onClick={selectNone}>
+              None
+            </LegacyButton>
+            <LegacyButton className="ml-auto" onClick={selectAll}>
+              Reset
+            </LegacyButton>
+            <LegacyButton
+              variant="primary"
+              disabled={selectedItems.length === 0}
+              onClick={() => {
+                onFilter(selectedItems);
+                onClose();
+              }}
+            >
+              Save
+            </LegacyButton>
+          </div>
+          <div className="grow pl-1">
+            <AutoSizer>
+              {({ height, width }) =>
+                !height || !width ? (
+                  <></>
+                ) : (
+                  <FixedSizeList
+                    height={height}
+                    width={width}
+                    itemCount={visibleOperations.length}
+                    itemSize={24}
+                    overscanCount={5}
+                  >
+                    {renderRow}
+                  </FixedSizeList>
+                )
+              }
+            </AutoSizer>
+          </div>
         </div>
-        <div className="grow pl-1">
-          <AutoSizer>
-            {({ height, width }) =>
-              !height || !width ? (
-                <></>
-              ) : (
-                <FixedSizeList
-                  height={height}
-                  width={width}
-                  itemCount={visibleOperations.length}
-                  itemSize={24}
-                  overscanCount={5}
-                >
-                  {renderRow}
-                </FixedSizeList>
-              )
-            }
-          </AutoSizer>
-        </div>
-      </div>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -443,62 +448,66 @@ function ClientsFilter({
   );
 
   return (
-    <Drawer open={isOpen} onOpenChange={onClose} width={500}>
-      <Drawer.Title>Filter by client</Drawer.Title>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[500px] sm:max-w-none">
+        <SheetHeader>
+          <SheetTitle>Filter by client</SheetTitle>
+        </SheetHeader>
 
-      <div className="flex h-full flex-col space-y-3">
-        <Input
-          size="medium"
-          placeholder="Search for operation..."
-          onChange={onChange}
-          value={searchTerm}
-          onClear={() => {
-            setSearchTerm('');
-            setVisibleOperations(clientConnection.nodes);
-          }}
-        />
-        <div className="flex w-full items-center gap-2">
-          <LegacyButton variant="link" onClick={selectAll}>
-            All
-          </LegacyButton>
-          <LegacyButton variant="link" onClick={selectNone}>
-            None
-          </LegacyButton>
-          <LegacyButton className="ml-auto" onClick={selectAll}>
-            Reset
-          </LegacyButton>
-          <LegacyButton
-            variant="primary"
-            disabled={selectedItems.length === 0}
-            onClick={() => {
-              onFilter(selectedItems);
-              onClose();
+        <div className="flex h-full flex-col space-y-3 py-4">
+          <Input
+            size="medium"
+            placeholder="Search for operation..."
+            onChange={onChange}
+            value={searchTerm}
+            onClear={() => {
+              setSearchTerm('');
+              setVisibleOperations(clientConnection.nodes);
             }}
-          >
-            Save
-          </LegacyButton>
+          />
+          <div className="flex w-full items-center gap-2">
+            <LegacyButton variant="link" onClick={selectAll}>
+              All
+            </LegacyButton>
+            <LegacyButton variant="link" onClick={selectNone}>
+              None
+            </LegacyButton>
+            <LegacyButton className="ml-auto" onClick={selectAll}>
+              Reset
+            </LegacyButton>
+            <LegacyButton
+              variant="primary"
+              disabled={selectedItems.length === 0}
+              onClick={() => {
+                onFilter(selectedItems);
+                onClose();
+              }}
+            >
+              Save
+            </LegacyButton>
+          </div>
+          <div className="grow pl-1">
+            <AutoSizer>
+              {({ height, width }) =>
+                !height || !width ? (
+                  <></>
+                ) : (
+                  <FixedSizeList
+                    height={height}
+                    width={width}
+                    itemCount={visibleOperations.length}
+                    itemSize={24}
+                    overscanCount={5}
+                  >
+                    {renderRow}
+                  </FixedSizeList>
+                )
+              }
+            </AutoSizer>
+          </div>
         </div>
-        <div className="grow pl-1">
-          <AutoSizer>
-            {({ height, width }) =>
-              !height || !width ? (
-                <></>
-              ) : (
-                <FixedSizeList
-                  height={height}
-                  width={width}
-                  itemCount={visibleOperations.length}
-                  itemSize={24}
-                  overscanCount={5}
-                >
-                  {renderRow}
-                </FixedSizeList>
-              )
-            }
-          </AutoSizer>
-        </div>
-      </div>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
 
