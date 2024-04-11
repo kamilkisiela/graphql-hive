@@ -7,7 +7,7 @@ export const action: Action = async (exec, _query, isHiveCloud) => {
     // Starts aggregating data the next day of the migration (deployment)
     const tomorrow = new Date();
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    const startOfTomorrow = new Date(tomorrow.toISOString().split('T')[0]);
+    const startOfTomorrow = tomorrow.toISOString().split('T')[0];
 
     where = `WHERE toDate(timestamp) >= toDate('${startOfTomorrow}')`;
   }
