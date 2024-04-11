@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.31.0
+
+### Minor Changes
+
+- [#4484](https://github.com/kamilkisiela/graphql-hive/pull/4484) [`7ddf063`](https://github.com/kamilkisiela/graphql-hive/commit/7ddf063984f2fd39acf7bc55eecbf7a315c030bf) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Accepts now CDN endpoint without /services /supergraph etc subdirectories
+
 ## 0.30.0
 
 ### Minor Changes
