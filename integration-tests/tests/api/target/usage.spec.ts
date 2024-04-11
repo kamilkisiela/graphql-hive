@@ -1,5 +1,5 @@
-import formatISO from 'date-fns/formatISO';
-import subHours from 'date-fns/subHours';
+import { formatISO } from 'date-fns/formatISO';
+import { subHours } from 'date-fns/subHours';
 import { buildASTSchema, parse, print } from 'graphql';
 import { createLogger } from 'graphql-yoga';
 import { execute } from 'testkit/graphql';
@@ -75,6 +75,31 @@ test.concurrent(
       organizationScopes: [OrganizationAccessScope.Read],
     });
 
+    // registry:read-only token should not be able to publish schema
+    await registryReadToken
+      .publishSchema({
+        author: 'Kamil',
+        commit: 'abc123',
+        sdl: `type Query { ping: String me: String }`,
+      })
+      .then(r => r.expectGraphQLErrors());
+    // usage:read-only token should not be able to publish schema
+    await usageReadToken
+      .publishSchema({
+        author: 'Kamil',
+        commit: 'abc123',
+        sdl: `type Query { ping: String me: String }`,
+      })
+      .then(r => r.expectGraphQLErrors());
+    // usage:read-write token should not be able to publish schema
+    await usageWriteToken
+      .publishSchema({
+        author: 'Kamil',
+        commit: 'abc123',
+        sdl: `type Query { ping: String me: String }`,
+      })
+      .then(r => r.expectGraphQLErrors());
+
     const schemaPublishResult = await registryWriteToken
       .publishSchema({
         author: 'Kamil',
@@ -95,6 +120,60 @@ test.concurrent(
       .checkSchema(`type Query { me: String }`)
       .then(r => r.expectNoGraphQLErrors());
     expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
+
+    // usage:read-only token should not be able to collect operations
+    expect(
+      usageReadToken
+        .collectLegacyOperations([
+          {
+            operation: 'query ping { ping }',
+            operationName: 'ping',
+            fields: ['Query', 'Query.ping'],
+            execution: {
+              ok: true,
+              duration: 200_000_000,
+              errorsTotal: 0,
+            },
+          },
+        ])
+        .then(r => r.status),
+    ).resolves.toEqual(403);
+
+    // registry:read-only token should not be able to collect operations
+    expect(
+      registryReadToken
+        .collectLegacyOperations([
+          {
+            operation: 'query ping { ping }',
+            operationName: 'ping',
+            fields: ['Query', 'Query.ping'],
+            execution: {
+              ok: true,
+              duration: 200_000_000,
+              errorsTotal: 0,
+            },
+          },
+        ])
+        .then(r => r.status),
+    ).resolves.toEqual(403);
+
+    // registry:read-write token should not be able to collect operations
+    expect(
+      registryWriteToken
+        .collectLegacyOperations([
+          {
+            operation: 'query ping { ping }',
+            operationName: 'ping',
+            fields: ['Query', 'Query.ping'],
+            execution: {
+              ok: true,
+              duration: 200_000_000,
+              errorsTotal: 0,
+            },
+          },
+        ])
+        .then(r => r.status),
+    ).resolves.toEqual(403);
 
     const collectResult = await usageWriteToken.collectLegacyOperations([
       {
@@ -1615,6 +1694,8 @@ test.concurrent(
         TargetAccessScope.Read,
         TargetAccessScope.RegistryRead,
         TargetAccessScope.RegistryWrite,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
         TargetAccessScope.Settings,
       ],
       projectScopes: [ProjectAccessScope.Read],
