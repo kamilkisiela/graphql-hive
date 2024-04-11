@@ -305,7 +305,7 @@ function ModalContent(props: {
     selectedRegistryScope === 'no-access' && selectedUsageScope === 'no-access';
 
   return (
-    <DialogContent className="max-h-5/6 w-[650px]">
+    <DialogContent className="w-[650px]">
       {mutation.data?.createToken.ok ? (
         <>
           <DialogHeader>
