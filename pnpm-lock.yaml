@@ -1900,8 +1900,8 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(@types/react-dom@18.2.24)(@types/react@18.2.75)(react-dom@18.2.0)(react@18.2.0)
       '@theguild/components':
-        specifier: 6.5.1
-        version: 6.5.1(@types/react@18.2.75)(next@14.1.4)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.5)(webpack@4.47.0)
+        specifier: 6.5.2
+        version: 6.5.2(@types/react@18.2.75)(next@14.1.4)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.5)(webpack@4.47.0)
       clsx:
         specifier: 2.1.0
         version: 2.1.0
@@ -14026,8 +14026,8 @@ packages:
     dev: true
     patched: true
 
-  /@theguild/components@6.5.1(@types/react@18.2.75)(next@14.1.4)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.5)(webpack@4.47.0):
-    resolution: {integrity: sha512-mWKEVaJsPxjUhHcjiqPxZgg8GrW7TddEVOinoZ8ND5gM+6lPgk3OUU2y/vFg4rVG25haippZ/BzH/budkb7KAg==}
+  /@theguild/components@6.5.2(@types/react@18.2.75)(next@14.1.4)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.5)(webpack@4.47.0):
+    resolution: {integrity: sha512-ZgU1xr0b4wap57gjwSwYG27lLMCez/rEEvGgxbxCEUziyFK/fVsCEQC6wIzbJfJt2CHvsR2gjiUcnNsaHSQM9Q==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -14046,7 +14046,6 @@ packages:
       react-paginate: 8.2.0(react@18.2.0)
       react-player: 2.16.0(react@18.2.0)
       remark-mdx-disable-explicit-jsx: 0.1.0
-      search-insights: 2.13.0
       semver: 7.5.4
     transitivePeerDependencies:
       - '@types/react'
@@ -30580,10 +30579,6 @@ packages:
   /scuid@1.1.0:
     resolution: {integrity: sha512-MuCAyrGZcTLfQoH2XoBlQ8C6bzwN88XT/0slOGz0pn8+gIP85BOAfYa44ZXQUTOwRwPU0QvgU+V+OSajl/59Xg==}
     dev: true
-
-  /search-insights@2.13.0:
-    resolution: {integrity: sha512-Orrsjf9trHHxFRuo9/rzm0KIWmgzE8RMlZMzuhZOJ01Rnz3D0YBAe+V6473t6/H6c7irs6Lt48brULAiRWb3Vw==}
-    dev: false
 
   /section-matter@1.0.0:
     resolution: {integrity: sha512-vfD3pmTzGpufjScBh50YHKzEu2lxBWhVEHsNGoEXmCmn2hKGfeNLYMzCJpe8cD7gqX7TJluOVpBkAequ6dgMmA==}
