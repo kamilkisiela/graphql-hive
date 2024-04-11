@@ -1214,7 +1214,9 @@ export class SchemaManager {
           ),
           {
             native: true,
-            external: null,
+            external: {
+              enabled: false,
+            },
             contracts: null,
           },
         );

@@ -364,7 +364,7 @@ export interface Orchestrator {
   composeAndValidate(
     schemas: SchemaObject[],
     config: {
-      external: Project['externalComposition'] | null;
+      external: Project['externalComposition'];
       native: boolean;
       contracts: ContractsInputType | null;
     },
