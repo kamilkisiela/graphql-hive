@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import axios from 'axios';
 import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/types.js';
+import { joinUrl } from './internal/utils.js';
 import { version } from './version.js';
 
 interface Schema {
@@ -9,18 +10,22 @@ interface Schema {
   name: string;
 }
 
-function createFetcher({ endpoint, key }: SchemaFetcherOptions & ServicesFetcherOptions) {
+function createFetcher(options: SchemaFetcherOptions & ServicesFetcherOptions) {
   let cacheETag: string | null = null;
   let cached: {
     id: string;
     supergraphSdl: string;
   } | null = null;
 
+  const endpoint = options.endpoint.endsWith('/services')
+    ? options.endpoint
+    : joinUrl(options.endpoint, 'services');
+
   return function fetcher(): Promise<readonly Schema[] | Schema> {
     const headers: {
       [key: string]: string;
     } = {
-      'X-Hive-CDN-Key': key,
+      'X-Hive-CDN-Key': options.key,
       accept: 'application/json',
       'User-Agent': `hive-client/${version}`,
     };
@@ -43,7 +48,7 @@ function createFetcher({ endpoint, key }: SchemaFetcherOptions & ServicesFetcher
 
     const fetchWithRetry = (): Promise<readonly Schema[] | Schema> => {
       return axios
-        .get(endpoint + '/services', {
+        .get(endpoint, {
           headers,
           responseType: 'json',
         })
@@ -81,8 +86,8 @@ function createFetcher({ endpoint, key }: SchemaFetcherOptions & ServicesFetcher
   };
 }
 
-export function createSchemaFetcher({ endpoint, key }: SchemaFetcherOptions) {
-  const fetcher = createFetcher({ endpoint, key });
+export function createSchemaFetcher(options: SchemaFetcherOptions) {
+  const fetcher = createFetcher(options);
 
   return function schemaFetcher() {
     return fetcher().then(schema => {
@@ -108,8 +113,8 @@ export function createSchemaFetcher({ endpoint, key }: SchemaFetcherOptions) {
   };
 }
 
-export function createServicesFetcher({ endpoint, key }: ServicesFetcherOptions) {
-  const fetcher = createFetcher({ endpoint, key });
+export function createServicesFetcher(options: ServicesFetcherOptions) {
+  const fetcher = createFetcher(options);
 
   return function schemaFetcher() {
     return fetcher().then(services => {

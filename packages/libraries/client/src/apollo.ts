@@ -8,21 +8,24 @@ import type {
   HivePluginOptions,
   SupergraphSDLFetcherOptions,
 } from './internal/types.js';
-import { isHiveClient } from './internal/utils.js';
+import { isHiveClient, joinUrl } from './internal/utils.js';
 import { version } from './version.js';
 
-export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetcherOptions) {
+export function createSupergraphSDLFetcher(options: SupergraphSDLFetcherOptions) {
   let cacheETag: string | null = null;
   let cached: {
     id: string;
     supergraphSdl: string;
   } | null = null;
+  const endpoint = options.endpoint.endsWith('/supergraph')
+    ? options.endpoint
+    : joinUrl(options.endpoint, 'supergraph');
 
   return function supergraphSDLFetcher() {
     const headers: {
       [key: string]: string;
     } = {
-      'X-Hive-CDN-Key': key,
+      'X-Hive-CDN-Key': options.key,
       'User-Agent': `hive-client/${version}`,
     };
 
@@ -44,7 +47,7 @@ export function createSupergraphSDLFetcher({ endpoint, key }: SupergraphSDLFetch
 
     const fetchWithRetry = (): Promise<{ id: string; supergraphSdl: string }> => {
       return axios
-        .get(endpoint + '/supergraph', {
+        .get(endpoint, {
           headers,
         })
         .then(response => {

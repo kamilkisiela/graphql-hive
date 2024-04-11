@@ -129,3 +129,12 @@ export function logIf(condition: boolean, message: string, logFn: (message: stri
     logFn(message);
   }
 }
+
+export function joinUrl(url: string, subdirectory: string) {
+  const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+  const normalizedSubdirectory = subdirectory.startsWith('/')
+    ? subdirectory.slice(1)
+    : subdirectory;
+
+  return normalizedUrl + '/' + normalizedSubdirectory;
+}
