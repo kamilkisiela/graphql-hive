@@ -73,8 +73,8 @@ export const action: Action = async (exec, _query, isHiveCloud) => {
           sum(total) AS total,
           coordinate
         FROM default.operation_collection
-        ${where}
         ARRAY JOIN coordinates as coordinate
+        ${where}
         GROUP BY
           target,
           coordinate,
