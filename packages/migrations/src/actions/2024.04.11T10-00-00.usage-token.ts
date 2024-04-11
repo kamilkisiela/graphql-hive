@@ -5,25 +5,36 @@ export default {
   noTransaction: true,
   run: ({ sql }) => [
     {
-      name: 'Update scopes in organization_member_roles',
+      name: 'Update scopes in "organization_member_roles"',
       query: sql`
         UPDATE organization_member_roles
-        SET scopes = array_append(scopes, 'target:usage:write')
-        WHERE scopes @> ARRAY['target:registry:write'];
+          SET scopes = array_append(scopes, 'target:usage:write')
+          WHERE scopes @> ARRAY['target:registry:write'];
         UPDATE organization_member_roles
-        SET scopes = array_append(scopes, 'target:usage:read')
-        WHERE scopes @> ARRAY['target:registry:read'];
+          SET scopes = array_append(scopes, 'target:usage:read')
+          WHERE scopes @> ARRAY['target:registry:read'];
       `,
     },
     {
-      name: 'Update scopes in organization_member',
+      name: 'Update scopes in "organization_member"',
       query: sql`
         UPDATE organization_member
-        SET scopes = array_append(scopes, 'target:usage:write')
-        WHERE scopes @> ARRAY['target:registry:write'];
+          SET scopes = array_append(scopes, 'target:usage:write')
+          WHERE scopes @> ARRAY['target:registry:write'];
         UPDATE organization_member
-        SET scopes = array_append(scopes, 'target:usage:read')
-        WHERE scopes @> ARRAY['target:registry:read'];
+          SET scopes = array_append(scopes, 'target:usage:read')
+          WHERE scopes @> ARRAY['target:registry:read'];
+      `,
+    },
+    {
+      name: 'Update scopes in "tokens"',
+      query: sql`
+        UPDATE tokens
+          SET scopes = array_append(scopes, 'target:usage:write')
+          WHERE scopes @> ARRAY['target:registry:write'];
+        UPDATE tokens
+          SET scopes = array_append(scopes, 'target:usage:read')
+          WHERE scopes @> ARRAY['target:registry:read'];
       `,
     },
   ],
