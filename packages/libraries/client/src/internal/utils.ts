@@ -131,8 +131,10 @@ export function logIf(condition: boolean, message: string, logFn: (message: stri
 }
 
 export function joinUrl(url: string, subdirectory: string) {
-  const normalizedUrl = url.replace(/[\/]+$/, '');
-  const normalizedSubdirectory = subdirectory.replace(/^[\/]+/, '');
+  const normalizedUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+  const normalizedSubdirectory = subdirectory.startsWith('/')
+    ? subdirectory.slice(1)
+    : subdirectory;
 
   return normalizedUrl + '/' + normalizedSubdirectory;
 }
