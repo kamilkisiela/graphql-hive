@@ -6,8 +6,7 @@ import { initMigrationTestingEnvironment } from './utils/testkit';
 
 await describe('migration: organization-member-roles', async () => {
   await test('should incrementally adopt roles without corrupting existing and new data', async () => {
-    const { db, runTo, complete, done, seed, connectionString } =
-      await initMigrationTestingEnvironment();
+    const { db, runTo, done, seed, connectionString } = await initMigrationTestingEnvironment();
     const storage = await createStorage(connectionString, 1);
     try {
       // Run migrations all the way to the point before the one we are testing
@@ -133,7 +132,7 @@ await describe('migration: organization-member-roles', async () => {
       );
 
       // Run the remaining migrations
-      await complete();
+      await runTo('2023.11.20T10-00-00.organization-member-roles.ts');
 
       // assert scopes are still in place and identical
       assert.deepStrictEqual(

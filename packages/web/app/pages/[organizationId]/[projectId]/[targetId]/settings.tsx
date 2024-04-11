@@ -1,6 +1,5 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
-import clsx from 'clsx';
 import { formatISO } from 'date-fns';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
@@ -42,6 +41,7 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TargetSettings_TargetValidationSettingsFragment = graphql(`
@@ -528,7 +528,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
           </CardDescription>
         </CardHeader>
         <CardContent
-          className={clsx('text-gray-300', !isEnabled && 'pointer-events-none opacity-25')}
+          className={cn('text-gray-300', !isEnabled && 'pointer-events-none opacity-25')}
         >
           <div>
             A schema change is considered as breaking only if it affects more than

@@ -9,7 +9,7 @@ import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
 import type { Storage, StorageItem } from './storage';
 
 function generateKey(hashedToken: string) {
-  return `tokens:cache:${hashedToken}`;
+  return `tokens:v2:cache:${hashedToken}`;
 }
 
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
