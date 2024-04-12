@@ -20,8 +20,7 @@ test('should not leak the exception', async () => {
     },
   });
 
-  const result = await hive
-    .info()
+  const result = await Promise.resolve(hive.info())
     .then(() => 'OK')
     .catch(() => 'ERROR');
 
@@ -78,8 +77,7 @@ test('should use selfHosting.graphqlEndpoint if provided', async () => {
     },
   });
 
-  const result = await hive
-    .info()
+  const result = await Promise.resolve(hive.info())
     .then(() => 'OK')
     .catch(() => 'ERROR');
 

@@ -64,6 +64,40 @@ server.listen(4000, () => {
 })
 ```
 
+#### Cloudflare Workers
+
+To use Hive with Cloudflare Workers, you can use
+[GraphQL Yoga](https://the-guild.dev/graphql/yoga-server) (as shown below) or use the generic
+[Hive client](../api-reference/client#custom-integration) with your own GraphQL server
+implementation.
+
+Here's an example of how to use Hive with GraphQL Yoga on Cloudflare Workers:
+
+```typescript
+import { useYogaHive, createYogaHive, useYogaHive } from '@graphql-hive/client'
+import { createYoga } from 'graphql-yoga'
+
+export default {
+  async fetch(request, env, ctx) {
+    const hive = createYogaHive({
+      enabled: true, // Enable/Disable Hive Client
+      token: 'YOUR-TOKEN',
+      usage: true // Collects schema usage based on operations
+    });
+
+    const yoga = createYoga({
+      plugins: [
+        useYogaHive(hive)
+      ]
+    });
+
+    const response = await yoga.fetch(request, env, ctx);
+    ctx.waitUntil(hive.dispose());
+    return response;
+  }
+}
+```
+
 ##### Client Information
 
 You can associate a client name and version with any operation reported to Hive, by sending the

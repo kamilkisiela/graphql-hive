@@ -15,8 +15,7 @@ test("should log that it's not enabled", async () => {
     token: '',
   });
 
-  const result = await hive
-    .info()
+  const result = await Promise.resolve(hive.info())
     .then(() => 'OK')
     .catch(() => 'ERROR');
 
@@ -36,13 +35,8 @@ test("should not log that it's not enabled", async () => {
     agent: { logger },
   });
 
-  const result = await hive
-    .info()
-    .then(() => 'OK')
-    .catch(() => 'ERROR');
-
   expect(logger.info).not.toBeCalled();
-  expect(result).toBe('OK');
+  expect(hive.info()).toBeUndefined();
 });
 
 test('should not throw exception about missing token when disabled', async () => {
@@ -57,11 +51,6 @@ test('should not throw exception about missing token when disabled', async () =>
     agent: { logger },
   });
 
-  const result = await hive
-    .info()
-    .then(() => 'OK')
-    .catch(() => 'ERROR');
-
   expect(logger.info).not.toBeCalled();
-  expect(result).toBe('OK');
+  expect(hive.info()).toBeUndefined();
 });

@@ -14,7 +14,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "3.556.0",
     "@aws-sdk/s3-request-presigner": "3.556.0",
-    "@graphql-hive/core": "0.2.4",
+    "@graphql-hive/core": "workspace:*",
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
     "@hive/cdn-script": "workspace:*",
     "@hive/emails": "workspace:*",

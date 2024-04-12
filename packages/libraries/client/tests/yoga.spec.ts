@@ -1,6 +1,5 @@
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import { createServer } from 'node:http';
-import axios from 'axios';
 import { GraphQLError } from 'graphql';
 import { createClient } from 'graphql-ws';
 import { useServer as useWSServer } from 'graphql-ws/lib/use/ws';
@@ -22,7 +21,7 @@ it('reports usage', async ({ expect }) => {
     .post('/usage', body => {
       expect(body.map).toMatchInlineSnapshot(`
         {
-          0063ba7bf2695b896c464057aef29cdc: {
+          f25063b60ab942d0c0d14cdd9cd3172de2e7ebc4: {
             fields: [
               Query.hi,
             ],
@@ -102,17 +101,14 @@ it('reports usage', async ({ expect }) => {
   graphqlScope.done();
 });
 
-it('reports usage with response cache', async ({ expect }) => {
-  axios.interceptors.request.use(config => {
-    return config;
-  });
+test('reports usage with response cache', async ({ expect }) => {
   let usageCount = 0;
   const graphqlScope = nock('http://localhost')
     .post('/usage', body => {
       usageCount++;
       expect(body.map).toMatchInlineSnapshot(`
         {
-          0063ba7bf2695b896c464057aef29cdc: {
+          f25063b60ab942d0c0d14cdd9cd3172de2e7ebc4: {
             fields: [
               Query.hi,
             ],
@@ -236,37 +232,26 @@ it('does not report usage for operation that does not pass validation', async ({
     ],
   });
 
-  await new Promise<void>((resolve, reject) => {
-    setTimeout(() => {
-      resolve();
-    }, 1000);
-    nock.emitter.once('no match', (req: any) => {
-      reject(new Error(`Unexpected request was sent to ${req.path}`));
-    });
-
-    (async () => {
-      const res = await yoga.fetch('http://localhost/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: /* GraphQL */ `
-            {
-              __schema {
-                types {
-                  name
-                }
-              }
+  const res = await yoga.fetch('http://localhost/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          __schema {
+            types {
+              name
             }
-          `,
-        }),
-      });
-
-      expect(res.status).toBe(200);
-      expect(await res.text()).toContain('GraphQL introspection has been disabled');
-    })().catch(reject);
+          }
+        }
+      `,
+    }),
   });
+
+  expect(res.status).toBe(200);
+  expect(await res.text()).toContain('GraphQL introspection has been disabled');
   expect(callback).not.toHaveBeenCalled();
 });
 
@@ -313,36 +298,21 @@ it('does not report usage if context creating raises an error', async ({ expect 
     ],
   });
 
-  // eslint-disable-next-line no-async-promise-executor
-  await new Promise<void>((resolve, reject) => {
-    nock.emitter.once('no match', (req: any) => {
-      reject(new Error(`Unexpected request was sent to ${req.path}`));
-    });
-
-    setTimeout(() => {
-      resolve();
-    }, 1000);
-
-    (async () => {
-      const res = await yoga.fetch('http://localhost/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: /* GraphQL */ `
-            {
-              hi
-            }
-          `,
-        }),
-      });
-      expect(res.status).toBe(200);
-      expect(await res.text()).toMatchInlineSnapshot(
-        `{"errors":[{"message":"Not authenticated."}]}`,
-      );
-    })().catch(reject);
+  const res = await yoga.fetch('http://localhost/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hi
+        }
+      `,
+    }),
   });
+  expect(res.status).toBe(200);
+  expect(await res.text()).toMatchInlineSnapshot(`{"errors":[{"message":"Not authenticated."}]}`);
 
   expect(callback).not.toHaveBeenCalled();
 });
@@ -353,7 +323,7 @@ describe('subscription usage reporting', () => {
       const graphqlScope = nock('http://localhost')
         .post('/usage', body => {
           expect(body.map).toEqual({
-            c6cc5505189a301dcadc408034c21a2d: {
+            '74cf03b67c3846231d04927b02e1fca45e727223': {
               fields: ['Subscription.hi'],
               operation: 'subscription{hi}',
               operationName: 'anonymous',
@@ -363,7 +333,7 @@ describe('subscription usage reporting', () => {
           expect(body.operations).toBeUndefined();
           expect(body.subscriptionOperations).toMatchObject([
             {
-              operationMapKey: 'c6cc5505189a301dcadc408034c21a2d',
+              operationMapKey: '74cf03b67c3846231d04927b02e1fca45e727223',
               metadata: {
                 client: {
                   name: 'brrr',
@@ -468,7 +438,7 @@ describe('subscription usage reporting', () => {
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
           {
-            c6cc5505189a301dcadc408034c21a2d: {
+            74cf03b67c3846231d04927b02e1fca45e727223: {
               fields: [
                 Subscription.hi,
               ],
@@ -481,7 +451,7 @@ describe('subscription usage reporting', () => {
           expect(body).toMatchObject({
             subscriptionOperations: [
               {
-                operationMapKey: 'c6cc5505189a301dcadc408034c21a2d',
+                operationMapKey: '74cf03b67c3846231d04927b02e1fca45e727223',
                 metadata: {
                   client: {
                     name: 'brrr',
@@ -591,7 +561,7 @@ describe('subscription usage reporting', () => {
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
           {
-            c6cc5505189a301dcadc408034c21a2d: {
+            74cf03b67c3846231d04927b02e1fca45e727223: {
               fields: [
                 Subscription.hi,
               ],
@@ -712,7 +682,7 @@ describe('subscription usage reporting', () => {
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
           {
-            c6cc5505189a301dcadc408034c21a2d: {
+            74cf03b67c3846231d04927b02e1fca45e727223: {
               fields: [
                 Subscription.hi,
               ],
@@ -830,7 +800,7 @@ describe('subscription usage reporting', () => {
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
         {
-          c6cc5505189a301dcadc408034c21a2d: {
+          74cf03b67c3846231d04927b02e1fca45e727223: {
             fields: [
               Subscription.hi,
             ],
@@ -1002,7 +972,7 @@ describe('subscription usage reporting', () => {
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
         {
-          c6cc5505189a301dcadc408034c21a2d: {
+          74cf03b67c3846231d04927b02e1fca45e727223: {
             fields: [
               Subscription.hi,
             ],
@@ -1175,7 +1145,7 @@ describe('incremental delivery usage reporting', () => {
       .post('/usage', body => {
         expect(body.map).toMatchInlineSnapshot(`
           {
-            4c76cedb3f9db3810a8080b299e93f1a: {
+            b78b2367025b1253b17f5362d5f0b4d5b27c4a08: {
               fields: [
                 Query.greetings,
               ],

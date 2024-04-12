@@ -8,10 +8,9 @@ import {
 } from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
-import { isAsyncIterable } from '@graphql-tools/utils';
-import { autoDisposeSymbol, createHive } from './client.js';
+import { autoDisposeSymbol, createHive as createHiveClient } from './client.js';
 import type { CollectUsageCallback, HiveClient, HivePluginOptions } from './internal/types.js';
-import { isHiveClient } from './internal/utils.js';
+import { isAsyncIterable, isHiveClient } from './internal/utils.js';
 
 type CacheRecord = {
   callback: CollectUsageCallback;
@@ -20,18 +19,20 @@ type CacheRecord = {
   parsedDocument?: DocumentNode;
 };
 
+export function createHive(clientOrOptions: HivePluginOptions) {
+  return createHiveClient({
+    ...clientOrOptions,
+    agent: {
+      name: 'hive-client-yoga',
+      ...clientOrOptions.agent,
+    },
+  });
+}
+
 export function useHive(clientOrOptions: HiveClient): Plugin;
 export function useHive(clientOrOptions: HivePluginOptions): Plugin;
 export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin {
-  const hive = isHiveClient(clientOrOptions)
-    ? clientOrOptions
-    : createHive({
-        ...clientOrOptions,
-        agent: {
-          name: 'hive-client-yoga',
-          ...clientOrOptions.agent,
-        },
-      });
+  const hive = isHiveClient(clientOrOptions) ? clientOrOptions : createHive(clientOrOptions);
 
   void hive.info();
 
@@ -104,7 +105,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               errors.push(...ctx.result.errors);
             },
             onEnd() {
-              record.callback(args, errors.length ? { errors } : {});
+              void record.callback(args, errors.length ? { errors } : {});
             },
           };
         },
@@ -126,7 +127,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
       // Report if execution happened (aka executionArgs have been set within onExecute)
       if (record.executionArgs) {
-        record.callback(
+        void record.callback(
           {
             ...record.executionArgs,
             document: record.parsedDocument ?? record.executionArgs.document,
@@ -148,7 +149,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             document = parse(record.paramsArgs.query);
             parsedDocumentCache.set(record.paramsArgs.query, document);
           }
-          record.callback(
+          void record.callback(
             {
               document,
               schema: latestSchema,

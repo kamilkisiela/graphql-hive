@@ -1,7 +1,6 @@
-import { createHash } from 'node:crypto';
-import axios from 'axios';
+import { get } from './internal/http-client.js';
 import type { SchemaFetcherOptions, ServicesFetcherOptions } from './internal/types.js';
-import { joinUrl } from './internal/utils.js';
+import { createHash, joinUrl } from './internal/utils.js';
 import { version } from './version.js';
 
 interface Schema {
@@ -47,39 +46,27 @@ function createFetcher(options: SchemaFetcherOptions & ServicesFetcherOptions) {
     };
 
     const fetchWithRetry = (): Promise<readonly Schema[] | Schema> => {
-      return axios
-        .get(endpoint, {
-          headers,
-          responseType: 'json',
-        })
-        .then(response => {
-          if (response.status >= 200 && response.status < 300) {
-            const result = response.data;
+      return get(endpoint, {
+        headers,
+      }).then(async response => {
+        if (response.ok) {
+          const result = await response.json();
 
-            const etag = response.headers['etag'];
-            if (etag) {
-              cached = result;
-              cacheETag = etag;
-            }
-
-            return result;
+          const etag = response.headers.get('etag');
+          if (etag) {
+            cached = result;
+            cacheETag = etag;
           }
 
-          return retry(response.status);
-        })
-        .catch(async error => {
-          if (axios.isAxiosError(error)) {
-            if (error.response?.status === 304 && cached !== null) {
-              return cached;
-            }
+          return result;
+        }
 
-            if (error.response?.status) {
-              return retry(error.response.status);
-            }
-          }
+        if (response.status === 304 && cached !== null) {
+          return cached;
+        }
 
-          throw error;
-        });
+        return retry(response.status);
+      });
     };
 
     return fetchWithRetry();
@@ -117,12 +104,11 @@ export function createServicesFetcher(options: ServicesFetcherOptions) {
   const fetcher = createFetcher(options);
 
   return function schemaFetcher() {
-    return fetcher().then(services => {
+    return fetcher().then(async services => {
       if (services instanceof Array) {
-        return services.map(service => ({
-          id: createSchemaId(service),
-          ...service,
-        }));
+        return Promise.all(
+          services.map(service => createSchemaId(service).then(id => ({ id, ...service }))),
+        );
       }
       throw new Error(
         'Encountered a single service instead of a multiple services. Please use createSchemaFetcher instead.',
@@ -132,7 +118,7 @@ export function createServicesFetcher(options: ServicesFetcherOptions) {
 }
 
 const createSchemaId = (service: Schema) =>
-  createHash('sha256')
+  createHash('SHA-256')
     .update(service.sdl)
     .update(service.url || '')
     .update(service.name)
