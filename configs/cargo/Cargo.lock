@@ -131,15 +131,14 @@ checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 
 [[package]]
 name = "apollo-compiler"
-version = "1.0.0-beta.13"
+version = "1.0.0-beta.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e779ed0ba21149a5ffc7266aedd34779da85405da2b2b4f4bc326b85375439a6"
+checksum = "00ed7af048c0beb66c9201c032b25a81b1b450397ddb2cb277ca57bcae2d9e13"
 dependencies = [
  "apollo-parser",
  "ariadne",
  "indexmap 2.2.5",
  "rowan",
- "salsa",
  "serde",
  "serde_json_bytes",
  "sptr",
@@ -150,9 +149,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-federation"
-version = "0.0.8"
+version = "0.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c810d52e0d9ac684ac2b0583df9479a4efbe3035b466b4c374eeaa388f4a1e93"
+checksum = "45c675747dd20db0f124d07b9764265b3ae67afbdd1044345673c184888cd018"
 dependencies = [
  "apollo-compiler",
  "derive_more",
@@ -180,9 +179,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.43.2"
+version = "1.44.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e46f71c9ee6ebe7331c68978b83cf9610f17b6f114b305950efcd97bc1a5d167"
+checksum = "a77e7fb8bcdfa787eab81a059db210c9fc21b1ce962f5ec10f22694b478eeadb"
 dependencies = [
  "access-json",
  "anyhow",
@@ -4341,9 +4340,9 @@ dependencies = [
 
 [[package]]
 name = "router-bridge"
-version = "0.5.16+v2.7.1"
+version = "0.5.17+v2.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "224f69e11bdc5c16b582f82cd18647e305d31c9c20110635fcdf790c46405777"
+checksum = "2f183e217179b38a4283e76ca62e3149ebe96512e9b1bd6b3933abab863f9a2c"
 dependencies = [
  "anyhow",
  "async-channel",
