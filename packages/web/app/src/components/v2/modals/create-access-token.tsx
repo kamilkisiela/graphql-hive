@@ -177,19 +177,25 @@ function Presets(props: {
         if (value === 'usage-reporting') {
           props.onSelected({
             value,
-            usageScope: TargetAccessScope.UsageRead,
-            registryScope: TargetAccessScope.RegistryRead,
+            usageScope: TargetAccessScope.UsageWrite,
+            registryScope: 'no-access',
           });
         } else if (value === 'schema-push') {
           props.onSelected({
             value,
-            usageScope: TargetAccessScope.UsageRead,
+            usageScope: 'no-access',
             registryScope: TargetAccessScope.RegistryWrite,
           });
         } else if (value === 'schema-check') {
           props.onSelected({
             value,
-            usageScope: TargetAccessScope.UsageRead,
+            usageScope: 'no-access',
+            registryScope: TargetAccessScope.RegistryRead,
+          });
+        } else if (value === 'registry-readonly') {
+          props.onSelected({
+            value,
+            usageScope: 'no-access',
             registryScope: TargetAccessScope.RegistryRead,
           });
         } else {
@@ -217,7 +223,7 @@ function Presets(props: {
           description="Use Hive CLI (schema:check) to detect changes and validate your schema"
         />
         <PresetOption
-          value="schema-check"
+          value="registry-readonly"
           name="Reading from Schema Registry"
           description="Consume schema and its metadata from the registry"
         />
