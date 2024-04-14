@@ -64,6 +64,7 @@ export function RoleSelector<T>(props: {
             <CommandGroup>
               {props.onNoRole ? (
                 <CommandItem
+                  value="none"
                   className={cn('flex cursor-pointer flex-col items-start space-y-1 px-4 py-2')}
                   onSelect={() => {
                     if (props.onNoRole) {
@@ -90,6 +91,7 @@ export function RoleSelector<T>(props: {
                     <Tooltip delayDuration={200} {...(isActive ? { open: false } : {})}>
                       <TooltipTrigger className="w-full text-left">
                         <CommandItem
+                          value={role.id}
                           onSelect={() => {
                             setPhase('busy');
                             setOpen(false);

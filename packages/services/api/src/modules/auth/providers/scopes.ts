@@ -70,6 +70,14 @@ export enum TargetAccessScope {
    */
   REGISTRY_WRITE = 'target:registry:write',
   /**
+   * Who can read reported operations
+   */
+  USAGE_READ = 'target:usage:read',
+  /**
+   * Who can write reported operations
+   */
+  USAGE_WRITE = 'target:usage:write',
+  /**
    * Who can read tokens
    */
   TOKENS_READ = 'target:tokens:read',

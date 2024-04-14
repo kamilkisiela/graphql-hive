@@ -39,7 +39,7 @@ export function createTokens(config: { endpoint: string; logger: ServiceLogger }
       });
 
       if (info) {
-        const result = info.scopes.includes('target:registry:write')
+        const result = info.scopes.includes('target:usage:write')
           ? {
               target: info.target,
               project: info.project,

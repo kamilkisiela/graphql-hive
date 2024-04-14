@@ -108,7 +108,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return await this.reader.readOperation({
@@ -145,7 +145,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return await this.reader.countUniqueDocuments({
@@ -162,7 +162,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return hasCollectedOperationsCached(target, () =>
@@ -178,7 +178,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.getHasCollectedSubscriptionOperations({
@@ -206,7 +206,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader
@@ -235,7 +235,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader
@@ -261,7 +261,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.countOperationsWithoutDetails({
@@ -307,7 +307,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.countFailures({
@@ -329,7 +329,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     const [totalField, total] = await Promise.all([
@@ -380,7 +380,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.readFieldListStats({
@@ -410,7 +410,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     // Maybe it needs less data
@@ -453,7 +453,7 @@ export class OperationsManager {
           organization,
           project,
           target,
-          scope: TargetAccessScope.REGISTRY_READ,
+          scope: TargetAccessScope.USAGE_READ,
         }),
       ),
     );
@@ -514,7 +514,7 @@ export class OperationsManager {
           organization,
           project,
           target,
-          scope: TargetAccessScope.REGISTRY_READ,
+          scope: TargetAccessScope.USAGE_READ,
         }),
       ),
     );
@@ -552,7 +552,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.requestsOverTime({
@@ -589,7 +589,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.failuresOverTime({
@@ -625,7 +625,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.durationOverTime({
@@ -654,7 +654,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.generalDurationPercentiles({
@@ -690,7 +690,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.durationPercentiles({
@@ -721,7 +721,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.countUniqueClients({
@@ -745,7 +745,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.readUniqueClientNames({
@@ -772,7 +772,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.readClientVersions({
@@ -803,7 +803,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.countClientVersions({
@@ -857,7 +857,7 @@ export class OperationsManager {
       organization: args.organization,
       project: args.project,
       target: args.target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     const loader = this.getClientNamesPerCoordinateOfTypeLoader({
@@ -936,7 +936,7 @@ export class OperationsManager {
       organization: args.organizationId,
       project: args.projectId,
       target: args.targetId,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     const loader = this.getTopOperationForTypeLoader({
@@ -958,7 +958,7 @@ export class OperationsManager {
       organization: args.organizationId,
       project: args.projectId,
       target: args.targetId,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     return this.reader.getReportedSchemaCoordinates({
@@ -1014,7 +1014,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     const rows = await this.reader.countCoordinatesOfType({
@@ -1060,7 +1060,7 @@ export class OperationsManager {
       organization,
       project,
       target,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.USAGE_READ,
     });
 
     const rows = await this.reader.countCoordinatesOfTarget({
