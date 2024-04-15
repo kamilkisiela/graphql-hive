@@ -2369,9 +2369,10 @@ export class SchemaPublisher {
   }
 
   private changesToMarkdown(changes: ReadonlyArray<SchemaChangeType>): string {
-    const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
-    const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
-    const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
+    const breakingChanges = changes.filter(
+      change => change.criticality === CriticalityLevel.Breaking,
+    );
+    const safeChanges = changes.filter(change => change.criticality !== CriticalityLevel.Breaking);
 
     const lines: string[] = [
       `## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`,
@@ -2382,24 +2383,15 @@ export class SchemaPublisher {
       lines.push(`Breaking: ${breakingChanges.length}`);
     }
 
-    if (dangerousChanges.length) {
-      lines.push(`Dangerous: ${dangerousChanges.length}`);
-    }
-
     if (safeChanges.length) {
       lines.push(`Safe: ${safeChanges.length}`);
     }
 
     writeChanges('Breaking', breakingChanges, lines);
-    writeChanges('Dangerous', dangerousChanges, lines);
     writeChanges('Safe', safeChanges, lines);
 
     return lines.join('\n');
   }
-}
-
-function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: SchemaChangeType) => change.criticality === level;
 }
 
 function writeChanges(
