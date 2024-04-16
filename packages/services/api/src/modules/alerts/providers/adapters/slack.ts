@@ -7,7 +7,6 @@ import { WEB_APP_URL } from '../../../shared/providers/tokens';
 import {
   ChannelConfirmationInput,
   CommunicationAdapter,
-  filterChangesByLevel,
   SchemaChangeNotificationInput,
   slackCoderize,
 } from './common';
@@ -128,9 +127,10 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
 }
 
 function createAttachments(changes: readonly SchemaChangeType[], messages: readonly string[]) {
-  const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
-  const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
-  const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
+  const breakingChanges = changes.filter(
+    change => change.criticality === CriticalityLevel.Breaking,
+  );
+  const safeChanges = changes.filter(change => change.criticality !== CriticalityLevel.Breaking);
 
   const attachments: MessageAttachment[] = [];
 
@@ -140,16 +140,6 @@ function createAttachments(changes: readonly SchemaChangeType[], messages: reado
         color: '#E74C3B',
         title: 'Breaking changes',
         changes: breakingChanges,
-      }),
-    );
-  }
-
-  if (dangerousChanges.length) {
-    attachments.push(
-      renderAttachments({
-        color: '#F0C418',
-        title: 'Dangerous changes',
-        changes: dangerousChanges,
       }),
     );
   }

@@ -1,4 +1,3 @@
-import { CriticalityLevel } from '@graphql-inspector/core';
 import type { SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../../__generated__/types';
 import type {
@@ -65,8 +64,4 @@ export function quotesTransformer(msg: string, symbols = '**') {
   }
 
   return msg.replace(findSingleQuotes, transformm).replace(findDoubleQuotes, transformm);
-}
-
-export function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: SchemaChangeType) => change.criticality === level;
 }

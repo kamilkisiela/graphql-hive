@@ -14,7 +14,7 @@ const indent = '  ';
 const criticalityMap: Record<CriticalityLevel, string> = {
   [CriticalityLevel.Breaking]: colors.red('-'),
   [CriticalityLevel.Safe]: colors.green('-'),
-  [CriticalityLevel.Dangerous]: colors.yellow('-'),
+  [CriticalityLevel.Dangerous]: colors.green('-'),
 };
 
 export function renderErrors(this: baseCommand, errors: SchemaErrorConnection) {
@@ -49,9 +49,6 @@ export function renderChanges(
   const changes = unmaskFragment(RenderChanges_SchemaChanges, maskedChanges);
   type ChangeType = (typeof changes)['nodes'][number];
 
-  const filterChangesByLevel = (level: CriticalityLevel) => {
-    return (change: ChangeType) => change.criticality === level;
-  };
   const writeChanges = (changes: ChangeType[]) => {
     changes.forEach(change => {
       const messageParts = [
@@ -76,18 +73,16 @@ export function renderChanges(
   this.info(`Detected ${changes.total} change${changes.total > 1 ? 's' : ''}`);
   this.log('');
 
-  const breakingChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
-  const dangerousChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
-  const safeChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Safe));
+  const breakingChanges = changes.nodes.filter(
+    change => change.criticality === CriticalityLevel.Breaking,
+  );
+  const safeChanges = changes.nodes.filter(
+    change => change.criticality !== CriticalityLevel.Breaking,
+  );
 
   if (breakingChanges.length) {
     this.log(String(indent), `Breaking changes:`);
     writeChanges(breakingChanges);
-  }
-
-  if (dangerousChanges.length) {
-    this.log(String(indent), `Dangerous changes:`);
-    writeChanges(dangerousChanges);
   }
 
   if (safeChanges.length) {
