@@ -1,4 +1,3 @@
-import { CriticalityLevel } from '@graphql-inspector/core';
 import type { SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../../__generated__/types';
 import type {
