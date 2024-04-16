@@ -626,8 +626,8 @@ importers:
         specifier: 7.110.0
         version: 7.110.0
       '@slack/web-api':
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 7.0.3
+        version: 7.0.3
       '@theguild/buddy':
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
@@ -12117,13 +12117,14 @@ packages:
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
     dev: true
 
-  /@slack/web-api@7.0.2:
-    resolution: {integrity: sha512-nY1KO+7i4iURihThS1kMOElzesx4jqRJtkxLS9FOT8Debh7vQAzzbzxpMB4QauSs15030eyJ16HCf1IfCT4BKQ==}
+  /@slack/web-api@7.0.3:
+    resolution: {integrity: sha512-X2fc8Yr0477TroIOE7Iw0JC3RmRVYW94GNJMxZ1hEewIcJoGq+6S2152IhnMsVguvlrplxNTOsmKB9aadmQfyg==}
     engines: {node: '>= 18', npm: '>= 8.6.0'}
     dependencies:
       '@slack/logger': 4.0.0
       '@slack/types': 2.11.0
       '@types/node': 20.12.7
+      '@types/retry': 0.12.0
       axios: 1.6.5
       eventemitter3: 5.0.1
       form-data: 4.0.0
