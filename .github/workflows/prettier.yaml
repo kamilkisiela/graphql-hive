@@ -1,18 +1,18 @@
-name: "Prettier"
+name: 'Prettier'
 
 on:
   workflow_dispatch:
     inputs:
       branch:
         required: true
-        description: "Name of the branch to run prettier"
+        description: 'Name of the branch to run prettier'
 
 run-name: 'Prettify "${{ github.event.inputs.branch }}" (by ${{ github.actor }})'
 
 jobs:
   prettier:
     runs-on: ubuntu-22.04
-    
+
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -52,4 +52,3 @@ jobs:
               git commit -am "Prettier"
               git push
           fi
-          
