@@ -66,7 +66,3 @@ export function quotesTransformer(msg: string, symbols = '**') {
 
   return msg.replace(findSingleQuotes, transformm).replace(findDoubleQuotes, transformm);
 }
-
-export function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: SchemaChangeType) => change.criticality === level;
-}
