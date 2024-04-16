@@ -44,7 +44,7 @@ jobs:
       - name: push changes
         shell: sh
         run: |
-          changed=`git diff-index --exit-code HEAD`
+          changed=`git diff-index HEAD`
           if [ -n "$changed" ]
           then
               git commit -am "Prettier"
