@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 2
           ref: ${{ github.event.inputs.branch }}
-          token: ${{ secrets.GUILD_BOT_TOKEN }}
+          token: ${{ secrets.GH_PAT_WORKFLOW }}
 
       - name: setup environment
         uses: ./.github/actions/setup
