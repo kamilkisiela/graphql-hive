@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "@apollo/server": "4.10.2",
+    "@apollo/server": "4.10.3",
     "@apollo/subgraph": "2.7.2",
     "@envelop/types": "5.0.0",
     "@graphql-tools/schema": "10.0.3",
