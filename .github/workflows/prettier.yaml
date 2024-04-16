@@ -1,0 +1,53 @@
+name: "Prettier"
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        required: true
+        description: "Name of the branch to run prettier"
+
+run-name: 'Prettify "${{ github.event.inputs.branch }}" (by ${{ github.actor }})'
+
+jobs:
+  prettier:
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event.inputs.branch }}
+          token: ${{ secrets.GUILD_BOT_TOKEN }}
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          actor: prettier
+          cacheNext: false
+          cacheTurbo: false
+
+      - name: Cache ESLint and Prettier
+        uses: actions/cache@v4
+        with:
+          path: |
+            .eslintcache
+            node_modules/.cache/prettier
+          key: lint-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            lint-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+      - name: prettier
+        run: pnpm prettier
+
+      - name: push changes
+        shell: sh
+        run: |
+          changed=`git diff-index --exit-code HEAD`
+          if [ -n "$changed" ]
+          then
+              git commit -am "Prettier"
+              git push
+          fi
+          
