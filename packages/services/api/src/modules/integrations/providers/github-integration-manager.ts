@@ -309,6 +309,8 @@ export class GitHubIntegrationManager {
       title: string;
       /** The summary of the check run. This parameter supports Markdown. */
       summary: string;
+      /** Use this summary when the `summary` is over the limit of characters  */
+      shortSummaryFallback: string;
     };
     detailsUrl: string | null;
   }) {
@@ -428,19 +430,16 @@ export class GitHubIntegrationManager {
     return this.storage.enableProjectNameInGithubCheck(input);
   }
 
-  private limitOutput(output: {
-    /** The title of the check run. */
-    title: string;
-    /** The summary of the check run. This parameter supports Markdown. */
-    summary: string;
-  }) {
+  private limitOutput(output: { title: string; summary: string; shortSummaryFallback?: string }) {
     if (output.summary.length <= 65_000) {
       return output;
     }
 
     return {
       title: output.title,
-      summary: 'Too many changes to display in the summary. Please check the details link.',
+      summary: output.shortSummaryFallback
+        ? output.shortSummaryFallback + '\n\nPlease check the details link.'
+        : 'Please check the details link.',
     };
   }
 }
