@@ -1,6 +1,8 @@
 import got from 'got';
 import pLimit from 'p-limit';
+import { createPool, sql } from 'slonik';
 import z from 'zod';
+import { createConnectionString } from '../connection-string.js';
 import { env } from './environment.js';
 
 function log(...args: any[]) {
@@ -41,35 +43,12 @@ const OrganizationsResponse = z.union([
   FailedClickHouseResponse,
 ]);
 
-const TargetsResponse = z.union([
-  SuccessfulClickHouseResponse.extend({
-    data: z.array(
-      z.object({
-        target: z.string(),
-      }),
-    ),
-  }),
-  FailedClickHouseResponse,
-]);
-
 const PastMonthOperationsResponse = z.union([
   SuccessfulClickHouseResponse.extend({
     data: z.array(
       z.object({
         total: z.string().transform(value => Number(value)),
         date: z.string(),
-      }),
-    ),
-  }),
-  FailedClickHouseResponse,
-]);
-
-const PreviousMonthsResponse = z.union([
-  SuccessfulClickHouseResponse.extend({
-    data: z.array(
-      z.object({
-        total: z.string().transform(value => Number(value)),
-        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD format required'),
       }),
     ),
   }),
@@ -110,10 +89,16 @@ async function main() {
     throw new Error('WTF');
   }
 
-  const { clickhouse } = env;
+  const { clickhouse, postgres } = env;
   const poolSize = 5;
   const limit = pLimit(poolSize);
   const startedAt = Date.now();
+
+  const slonik = await createPool(createConnectionString(postgres), {
+    // 30 seconds timeout per statement
+    statementTimeout: 30 * 1000,
+    maximumPoolSize: poolSize,
+  });
 
   const endpoint = `${clickhouse.protocol}://${clickhouse.host}:${clickhouse.port}`;
 
@@ -184,17 +169,14 @@ async function main() {
 
   async function fetchTargets(organizationId: string) {
     log(`Fetching targets for organization ${organizationId}`);
-
-    const response = await execute(
-      `
-        SELECT DISTINCT target FROM operations_daily
-        WHERE timestamp >= toStartOfMonth(now() - INTERVAL 2 MONTH) AND organization = '${organizationId}'
-      `,
-    );
-
-    const parsed = TargetsResponse.safeParse(response.body);
-
-    return ensureData(parsed, 'fetchTargets').map(row => row.target);
+    return slonik.oneFirst<string[]>(sql`
+      SELECT array_agg(DISTINCT t.id) as targets
+      FROM organizations AS o
+      LEFT JOIN projects AS p ON (p.org_id = o.id)
+      LEFT JOIN targets as t ON (t.project_id = p.id)
+      WHERE o.id = ${organizationId}
+      GROUP BY o.id
+    `);
   }
 
   async function migrateOrganization(organizationId: string, migrationDate: string): Promise<void> {
