@@ -49,6 +49,7 @@ import {
   updateMemberRole,
   updateRegistryModel,
   updateSchemaVersionStatus,
+  updateTargetValidationSettings,
 } from './flow';
 import { execute } from './graphql';
 import { UpdateSchemaPolicyForOrganization, UpdateSchemaPolicyForProject } from './schema-policy';
@@ -490,6 +491,30 @@ export function initSeed() {
                       ).then(r => r.expectNoGraphQLErrors());
 
                       return result;
+                    },
+                    async updateTargetValidationSettings({
+                      excludedClients,
+                      percentage,
+                    }: {
+                      excludedClients?: string[];
+                      percentage: number;
+                    }) {
+                      const result = await updateTargetValidationSettings(
+                        {
+                          organization: organization.cleanId,
+                          project: project.cleanId,
+                          target: target.cleanId,
+                          excludedClients,
+                          percentage,
+                          period: 2,
+                          targets: [target.id],
+                        },
+                        {
+                          token: secret,
+                        },
+                      ).then(r => r.expectNoGraphQLErrors());
+
+                      return result.updateTargetValidationSettings;
                     },
                     async fetchMetadataFromCDN() {
                       return fetchMetadataFromCDN(
