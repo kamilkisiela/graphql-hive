@@ -244,7 +244,7 @@ export class GitHubIntegrationManager {
         name: input.name,
         head_sha: input.sha,
         status: 'in_progress',
-        output: input.output,
+        output: input.output ? this.limitOutput(input.output) : undefined,
         details_url: input.detailsUrl ?? undefined,
       });
 
@@ -309,6 +309,8 @@ export class GitHubIntegrationManager {
       title: string;
       /** The summary of the check run. This parameter supports Markdown. */
       summary: string;
+      /** Use this summary when the `summary` is over the limit of characters  */
+      shortSummaryFallback: string;
     };
     detailsUrl: string | null;
   }) {
@@ -332,7 +334,7 @@ export class GitHubIntegrationManager {
       repo: args.githubCheckRun.repository,
       check_run_id: args.githubCheckRun.id,
       conclusion: args.conclusion,
-      output: args.output,
+      output: this.limitOutput(args.output),
       details_url: args.detailsUrl ?? undefined,
     });
 
@@ -426,6 +428,19 @@ export class GitHubIntegrationManager {
     }
 
     return this.storage.enableProjectNameInGithubCheck(input);
+  }
+
+  private limitOutput(output: { title: string; summary: string; shortSummaryFallback?: string }) {
+    if (output.summary.length <= 65_000) {
+      return output;
+    }
+
+    return {
+      title: output.title,
+      summary: output.shortSummaryFallback
+        ? output.shortSummaryFallback + '\n\nPlease check the details link.'
+        : 'Please check the details link.',
+    };
   }
 }
 

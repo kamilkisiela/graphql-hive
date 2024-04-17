@@ -2075,14 +2075,17 @@ export class SchemaPublisher {
     try {
       let title: string;
       let summary: string;
+      let shortSummaryFallback: string;
 
       if (conclusion === SchemaCheckConclusion.Success) {
         if (!changes || changes.length === 0) {
           title = 'No changes';
           summary = 'No changes detected';
+          shortSummaryFallback = summary;
         } else {
           title = 'No breaking changes';
           summary = this.changesToMarkdown(changes);
+          shortSummaryFallback = this.changesToMarkdown(changes, false);
         }
       } else {
         const total =
@@ -2101,6 +2104,19 @@ export class SchemaPublisher {
         ]
           .filter(Boolean)
           .join('\n\n');
+
+        shortSummaryFallback = [
+          errors?.length ? `Errors: ${errors.length}` : null,
+          warnings?.length ? `Warnings: ${warnings.length}` : null,
+          compositionErrors?.length ? `Composition errors: ${compositionErrors.length}` : null,
+          breakingChanges?.length ? `Breaking changes: ${breakingChanges.length}` : null,
+          changes?.length ? `Changes: ${changes.length}` : null,
+          args.failedContractCompositionCount > 0
+            ? `Contract check failures: ${args.failedContractCompositionCount}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join('\n\n');
       }
 
       const checkRun = await this.gitHubIntegrationManager.updateCheckRun({
@@ -2109,7 +2125,8 @@ export class SchemaPublisher {
         githubCheckRun: args.githubCheckRun,
         output: {
           title,
-          summary: summary.length > 60_000 ? summary.slice(0, 60_000) + '...' : summary,
+          summary,
+          shortSummaryFallback,
         },
         detailsUrl:
           (schemaCheckId &&
@@ -2298,17 +2315,21 @@ export class SchemaPublisher {
     try {
       let title: string;
       let summary: string;
+      let shortSummaryFallback: string;
 
       if (valid) {
         if (initial) {
           title = 'Schema published';
           summary = 'Initial Schema published';
+          shortSummaryFallback = summary;
         } else if (changes.length === 0) {
           title = 'No changes';
           summary = 'No changes detected';
+          shortSummaryFallback = summary;
         } else {
           title = 'No breaking changes';
           summary = this.changesToMarkdown(changes);
+          shortSummaryFallback = this.changesToMarkdown(changes, false);
         }
       } else {
         title = `Detected ${errors.length} error${errors.length === 1 ? '' : 's'}`;
@@ -2318,10 +2339,18 @@ export class SchemaPublisher {
         ]
           .filter(Boolean)
           .join('\n\n');
+
+        shortSummaryFallback = [
+          errors ? `Errors: ${errors.length}` : null,
+          changes ? `Changes: ${changes.length}` : null,
+        ]
+          .filter(Boolean)
+          .join('\n\n');
       }
 
       if (messages?.length) {
         summary += `\n\n${messages.map(val => `- ${val}`).join('\n')}`;
+        shortSummaryFallback += `\n\n${messages.map(val => `- ${val}`).join('\n')}`;
       }
 
       if (valid === false && force === true) {
@@ -2335,6 +2364,7 @@ export class SchemaPublisher {
         output: {
           title,
           summary,
+          shortSummaryFallback,
         },
         detailsUrl,
       });
@@ -2368,7 +2398,10 @@ export class SchemaPublisher {
     ].join('\n');
   }
 
-  private changesToMarkdown(changes: ReadonlyArray<SchemaChangeType>): string {
+  private changesToMarkdown(
+    changes: ReadonlyArray<SchemaChangeType>,
+    printListOfChanges: boolean = true,
+  ): string {
     const breakingChanges = changes.filter(
       change => change.criticality === CriticalityLevel.Breaking,
     );
@@ -2387,8 +2420,10 @@ export class SchemaPublisher {
       lines.push(`Safe: ${safeChanges.length}`);
     }
 
-    writeChanges('Breaking', breakingChanges, lines);
-    writeChanges('Safe', safeChanges, lines);
+    if (printListOfChanges) {
+      writeChanges('Breaking', breakingChanges, lines);
+      writeChanges('Safe', safeChanges, lines);
+    }
 
     return lines.join('\n');
   }
