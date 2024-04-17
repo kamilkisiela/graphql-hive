@@ -244,7 +244,7 @@ export class GitHubIntegrationManager {
         name: input.name,
         head_sha: input.sha,
         status: 'in_progress',
-        output: input.output,
+        output: input.output ? this.limitOutput(input.output) : undefined,
         details_url: input.detailsUrl ?? undefined,
       });
 
@@ -332,7 +332,7 @@ export class GitHubIntegrationManager {
       repo: args.githubCheckRun.repository,
       check_run_id: args.githubCheckRun.id,
       conclusion: args.conclusion,
-      output: args.output,
+      output: this.limitOutput(args.output),
       details_url: args.detailsUrl ?? undefined,
     });
 
@@ -426,6 +426,22 @@ export class GitHubIntegrationManager {
     }
 
     return this.storage.enableProjectNameInGithubCheck(input);
+  }
+
+  private limitOutput(output: {
+    /** The title of the check run. */
+    title: string;
+    /** The summary of the check run. This parameter supports Markdown. */
+    summary: string;
+  }) {
+    if (output.summary.length <= 65_000) {
+      return output;
+    }
+
+    return {
+      title: output.title,
+      summary: 'Too many changes to display in the summary. Please check the details link.',
+    };
   }
 }
 

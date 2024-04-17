@@ -2109,7 +2109,7 @@ export class SchemaPublisher {
         githubCheckRun: args.githubCheckRun,
         output: {
           title,
-          summary: summary.length > 60_000 ? summary.slice(0, 60_000) + '...' : summary,
+          summary,
         },
         detailsUrl:
           (schemaCheckId &&
