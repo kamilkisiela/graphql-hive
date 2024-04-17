@@ -158,6 +158,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/005-subscription-conditional-breaking-changes'),
     import('./clickhouse-actions/006-monthly-operations-log'),
     import('./clickhouse-actions/007-james-bond-aggregates-hourly-and-minutely'),
+    import('./clickhouse-actions/008-daily-operations-log'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
