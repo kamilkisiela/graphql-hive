@@ -219,7 +219,9 @@ export class SchemaPublisher {
           excludedClientNames: settings.validation.excludedClients?.length
             ? settings.validation.excludedClients
             : null,
-          requestCountThreshold: totalRequestCount * settings.validation.percentage,
+          requestCountThreshold: Math.ceil(
+            totalRequestCount * (settings.validation.percentage / 100),
+          ),
         },
         retentionInDays: settings.validation.period,
         percentage: settings.validation.percentage,

@@ -1,5 +1,5 @@
-import formatISO from 'date-fns/formatISO';
-import subHours from 'date-fns/subHours';
+import { formatISO } from 'date-fns/formatISO';
+import { subHours } from 'date-fns/subHours';
 import { buildASTSchema, parse, print } from 'graphql';
 import { createLogger } from 'graphql-yoga';
 import { execute } from 'testkit/graphql';
@@ -1564,6 +1564,224 @@ const SubscriptionSchemaCheckQuery = graphql(/* GraphQL */ `
   }
 `);
 
+test.concurrent('test threshold when using conditional breaking change detection', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
+  const token = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
+
+  const sdl = /* GraphQL */ `
+    type Query {
+      a: String
+      b: String
+      c: String
+    }
+  `;
+
+  const queryA = parse(/* GraphQL */ `
+    query {
+      a
+    }
+  `);
+  const queryB = parse(/* GraphQL */ `
+    query {
+      b
+    }
+  `);
+
+  function collectA() {
+    client.collectUsage()(
+      {
+        document: queryA,
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+      {},
+    );
+  }
+
+  function collectB() {
+    client.collectUsage()(
+      {
+        document: queryB,
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+      {},
+    );
+  }
+
+  const schema = buildASTSchema(parse(sdl));
+
+  const schemaPublishResult = await token
+    .publishSchema({
+      sdl,
+      author: 'Kamil',
+      commit: 'initial',
+    })
+    .then(res => res.expectNoGraphQLErrors());
+
+  expect(schemaPublishResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+  await token.toggleTargetValidation(true);
+
+  const unused = await token
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        b: String
+        c: String
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  if (unused.schemaCheck.__typename !== 'SchemaCheckSuccess') {
+    throw new Error(`Expected SchemaCheckSuccess, got ${unused.schemaCheck.__typename}`);
+  }
+
+  expect(unused.schemaCheck.changes).toEqual(
+    expect.objectContaining({
+      nodes: expect.arrayContaining([
+        expect.objectContaining({
+          message: "Field 'a' was removed from object type 'Query' (non-breaking based on usage)",
+        }),
+      ]),
+      total: 1,
+    }),
+  );
+
+  const usageAddress = await getServiceHost('usage', 8081);
+
+  const client = createHive({
+    enabled: true,
+    token: token.secret,
+    usage: true,
+    debug: false,
+    agent: {
+      logger: createLogger('debug'),
+      maxSize: 1,
+    },
+    selfHosting: {
+      usageEndpoint: 'http://' + usageAddress,
+      graphqlEndpoint: 'http://noop/',
+      applicationUrl: 'http://noop/',
+    },
+  });
+
+  const request = new Request('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: {
+      'x-graphql-client-name': 'integration-tests',
+      'x-graphql-client-version': '6.6.6',
+    },
+  });
+
+  collectA();
+
+  await waitFor(5000);
+
+  const used = await token
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        b: String
+        c: String
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  if (used.schemaCheck.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${used.schemaCheck.__typename}`);
+  }
+
+  expect(used.schemaCheck.errors).toEqual({
+    nodes: [
+      {
+        message: "Field 'a' was removed from object type 'Query'",
+      },
+    ],
+    total: 1,
+  });
+
+  // Now let's make Query.a below threshold by making 3 queries for Query.b
+
+  collectB();
+  collectB();
+  collectB();
+
+  await token.updateTargetValidationSettings({
+    excludedClients: [],
+    percentage: 50,
+  });
+
+  await waitFor(5000);
+
+  const below = await token
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        b: String
+        c: String
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  if (below.schemaCheck.__typename !== 'SchemaCheckSuccess') {
+    throw new Error(`Expected SchemaCheckSuccess, got ${below.schemaCheck.__typename}`);
+  }
+
+  expect(below.schemaCheck.changes).toEqual(
+    expect.objectContaining({
+      nodes: expect.arrayContaining([
+        expect.objectContaining({
+          message: "Field 'a' was removed from object type 'Query' (non-breaking based on usage)",
+        }),
+      ]),
+      total: 1,
+    }),
+  );
+
+  // Make it above threshold again, by making 3 queries for Query.a
+
+  collectA();
+  collectA();
+  collectA();
+
+  await waitFor(5000);
+
+  const relevant = await token
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        b: String
+        c: String
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  if (relevant.schemaCheck.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${relevant.schemaCheck.__typename}`);
+  }
+
+  expect(relevant.schemaCheck.errors).toEqual({
+    nodes: [
+      {
+        message: "Field 'a' was removed from object type 'Query'",
+      },
+    ],
+    total: 1,
+  });
+});
+
 test.concurrent(
   'subscription operation is used for conditional breaking change detection',
   async () => {
@@ -1593,6 +1811,8 @@ test.concurrent(
       }
     `;
 
+    const schema = buildASTSchema(parse(sdl));
+
     const schemaPublishResult = await token
       .publishSchema({
         sdl,
@@ -1604,6 +1824,35 @@ test.concurrent(
     expect(schemaPublishResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
 
     await token.toggleTargetValidation(true);
+
+    const unused = await token
+      .checkSchema(/* GraphQL */ `
+        type Query {
+          a: String
+          b: String
+        }
+
+        type Subscription {
+          b: String
+        }
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (unused.schemaCheck.__typename !== 'SchemaCheckSuccess') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${unused.schemaCheck.__typename}`);
+    }
+
+    expect(unused.schemaCheck.changes).toEqual(
+      expect.objectContaining({
+        nodes: expect.arrayContaining([
+          expect.objectContaining({
+            message:
+              "Field 'a' was removed from object type 'Subscription' (non-breaking based on usage)",
+          }),
+        ]),
+        total: 1,
+      }),
+    );
 
     const usageAddress = await getServiceHost('usage', 8081);
 
@@ -1638,7 +1887,7 @@ test.concurrent(
             a
           }
         `),
-        schema: buildASTSchema(parse(sdl)),
+        schema,
         contextValue: {
           request,
         },
@@ -1647,7 +1896,7 @@ test.concurrent(
 
     await waitFor(5000);
 
-    const result = await token
+    const used = await token
       .checkSchema(/* GraphQL */ `
         type Query {
           a: String
@@ -1660,11 +1909,11 @@ test.concurrent(
       `)
       .then(r => r.expectNoGraphQLErrors());
 
-    if (result.schemaCheck.__typename !== 'SchemaCheckError') {
-      throw new Error(`Expected SchemaCheckError, got ${result.schemaCheck.__typename}`);
+    if (used.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${used.schemaCheck.__typename}`);
     }
 
-    expect(result.schemaCheck.errors).toEqual({
+    expect(used.schemaCheck.errors).toEqual({
       nodes: [
         {
           message: "Field 'a' was removed from object type 'Subscription'",
@@ -1673,16 +1922,16 @@ test.concurrent(
       total: 1,
     });
 
-    const schemaCheckId = result.schemaCheck.schemaCheck?.id;
+    const firstSchemaCheckId = used.schemaCheck.schemaCheck?.id;
 
-    if (!schemaCheckId) {
+    if (!firstSchemaCheckId) {
       throw new Error('Expected schemaCheckId to be defined');
     }
 
-    const schemaCheck = await execute({
+    const firstSchemaCheck = await execute({
       document: SubscriptionSchemaCheckQuery,
       variables: {
-        id: schemaCheckId,
+        id: firstSchemaCheckId,
         selector: {
           organization: organization.cleanId,
           project: project.cleanId,
@@ -1692,11 +1941,12 @@ test.concurrent(
       authToken: token.secret,
     }).then(r => r.expectNoGraphQLErrors());
 
-    const node = schemaCheck.target?.schemaCheck?.breakingSchemaChanges?.nodes[0];
+    const node = firstSchemaCheck.target?.schemaCheck?.breakingSchemaChanges?.nodes[0];
 
     if (!node) {
       throw new Error('Expected node to be defined');
     }
+
     expect(node.isSafeBasedOnUsage).toEqual(false);
     expect(node.usageStatistics?.topAffectedOperations).toEqual([
       {
@@ -1713,5 +1963,156 @@ test.concurrent(
         percentageFormatted: '100.00%',
       },
     ]);
+
+    // Now let's make subscription insignificant by making 3 queries
+
+    client.collectUsage()(
+      {
+        document: parse(/* GraphQL */ `
+          query {
+            a
+          }
+        `),
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+      {},
+    );
+    client.collectUsage()(
+      {
+        document: parse(/* GraphQL */ `
+          query {
+            a
+          }
+        `),
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+      {},
+    );
+    client.collectUsage()(
+      {
+        document: parse(/* GraphQL */ `
+          query {
+            a
+          }
+        `),
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+      {},
+    );
+
+    await token.updateTargetValidationSettings({
+      excludedClients: [],
+      percentage: 50,
+    });
+
+    await waitFor(5000);
+
+    const irrelevant = await token
+      .checkSchema(/* GraphQL */ `
+        type Query {
+          a: String
+          b: String
+        }
+
+        type Subscription {
+          b: String
+        }
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (irrelevant.schemaCheck.__typename !== 'SchemaCheckSuccess') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${irrelevant.schemaCheck.__typename}`);
+    }
+
+    expect(irrelevant.schemaCheck.changes).toEqual(
+      expect.objectContaining({
+        nodes: expect.arrayContaining([
+          expect.objectContaining({
+            message:
+              "Field 'a' was removed from object type 'Subscription' (non-breaking based on usage)",
+          }),
+        ]),
+        total: 1,
+      }),
+    );
+
+    // Make it relevant again, by making 3 subscriptions
+
+    client.collectSubscriptionUsage({
+      args: {
+        document: parse(/* GraphQL */ `
+          subscription {
+            a
+          }
+        `),
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+    });
+    client.collectSubscriptionUsage({
+      args: {
+        document: parse(/* GraphQL */ `
+          subscription {
+            a
+          }
+        `),
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+    });
+    client.collectSubscriptionUsage({
+      args: {
+        document: parse(/* GraphQL */ `
+          subscription {
+            a
+          }
+        `),
+        schema,
+        contextValue: {
+          request,
+        },
+      },
+    });
+
+    await waitFor(5000);
+
+    const relevant = await token
+      .checkSchema(/* GraphQL */ `
+        type Query {
+          a: String
+          b: String
+        }
+
+        type Subscription {
+          b: String
+        }
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (relevant.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${relevant.schemaCheck.__typename}`);
+    }
+
+    expect(relevant.schemaCheck.errors).toEqual({
+      nodes: [
+        {
+          message: "Field 'a' was removed from object type 'Subscription'",
+        },
+      ],
+      total: 1,
+    });
   },
 );
