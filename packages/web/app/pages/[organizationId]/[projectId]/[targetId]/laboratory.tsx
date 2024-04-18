@@ -518,16 +518,16 @@ function useOperationCollectionsPlugin({
                     <Accordion.Content className="pr-0">
                       {collection.operations.edges.length
                         ? collection.operations.edges.map(({ node }) => (
-                          <CollectionItem
-                            key={node.id}
-                            node={node}
-                            canDelete={canDelete}
-                            canEdit={canEdit}
-                            onDelete={setOperationToDeleteId}
-                            onEdit={setOperationToEditId}
-                            isChanged={!isSame && node.id === queryParamsOperationId}
-                          />
-                        ))
+                            <CollectionItem
+                              key={node.id}
+                              node={node}
+                              canDelete={canDelete}
+                              canEdit={canEdit}
+                              onDelete={setOperationToDeleteId}
+                              onEdit={setOperationToEditId}
+                              isChanged={!isSame && node.id === queryParamsOperationId}
+                            />
+                          ))
                         : null}
                       <AddCollectionItemButton collectionId={collection.id} />
                     </Accordion.Content>
@@ -920,8 +920,8 @@ function LaboratoryPageContent() {
                 className={clsx(
                   'text-xs hover:text-white',
                   !query.fetching &&
-                  actualSelectedApiEndpoint === 'mockApi' &&
-                  'bg-gray-800 text-white',
+                    actualSelectedApiEndpoint === 'mockApi' &&
+                    'bg-gray-800 text-white',
                 )}
                 disabled={query.fetching}
               >
@@ -934,8 +934,8 @@ function LaboratoryPageContent() {
                 className={clsx(
                   'text-xs hover:text-white',
                   !query.fetching &&
-                  actualSelectedApiEndpoint === 'linkedApi' &&
-                  'bg-gray-800 text-white',
+                    actualSelectedApiEndpoint === 'linkedApi' &&
+                    'bg-gray-800 text-white',
                 )}
                 disabled={!query.data?.target?.graphqlEndpointUrl || query.fetching}
               >
