@@ -276,11 +276,12 @@ const AddCollectionItemButton = (props: { collectionId: string }): ReactElement 
         if (result.data?.createOperationInDocumentCollection.ok) {
           void router.push(
             {
+              pathname: '/[organizationId]/[projectId]/[targetId]/laboratory',
               query: {
-                operation: result.data.createOperationInDocumentCollection.ok.operation.id,
-                orgId: router.organizationId,
+                organizationId: router.organizationId,
                 projectId: router.projectId,
                 targetId: router.targetId,
+                operation: result.data.createOperationInDocumentCollection.ok.operation.id,
               },
             },
             undefined,
