@@ -193,7 +193,7 @@ services:
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
       TS_NODE_TRANSPILE_ONLY: 'true'
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
 
   server:
     image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'
@@ -251,7 +251,7 @@ services:
       CDN_AUTH_PRIVATE_KEY: ${CDN_AUTH_PRIVATE_KEY}
       CDN_API: '1'
       CDN_API_BASE_URL: 'http://localhost:8082'
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       # Auth
       AUTH_ORGANIZATION_OIDC: '1'
       AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
@@ -271,7 +271,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3012
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
@@ -295,7 +295,7 @@ services:
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
       PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
 
   tokens:
     image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
@@ -315,7 +315,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
       PORT: 3003
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
@@ -334,7 +334,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
@@ -355,7 +355,7 @@ services:
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
       EMAIL_FROM: no-reply@graphql-hive.com
       EMAIL_PROVIDER: sendmail
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
@@ -382,7 +382,7 @@ services:
       KAFKA_BUFFER_INTERVAL: 1000
       KAFKA_BUFFER_DYNAMIC: '1'
       PORT: 3006
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
       PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
@@ -409,7 +409,7 @@ services:
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
       PORT: 3007
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
       PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
@@ -428,6 +428,6 @@ services:
       GRAPHQL_PUBLIC_ORIGIN: http://localhost:8082
       AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
       AUTH_ORGANIZATION_OIDC: '1'
-      LOG_LEVEL: '${LOG_LEVEL:-info}'
+      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
