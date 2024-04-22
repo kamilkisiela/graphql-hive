@@ -3,9 +3,11 @@ import { AddressInfo } from 'node:net';
 import axios from 'axios';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { createSchema, createYoga } from 'graphql-yoga';
+/* eslint-disable-next-line import/no-extraneous-dependencies */
 import nock from 'nock';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ApolloServer } from '@apollo/server';
+/* eslint-disable-next-line import/no-extraneous-dependencies */
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { createHive, hiveApollo, useHive } from '../src';
 import { waitFor } from './test-utils';

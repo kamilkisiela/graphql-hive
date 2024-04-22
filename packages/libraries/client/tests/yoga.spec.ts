@@ -314,15 +314,10 @@ it('does not report usage if context creating raises an error', async ({ expect 
   });
 
   // eslint-disable-next-line no-async-promise-executor
-  await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((_, reject) => {
     nock.emitter.once('no match', (req: any) => {
       reject(new Error(`Unexpected request was sent to ${req.path}`));
     });
-
-    const timeout = setTimeout(() => {
-      resolve();
-    }, 1000);
-    let requestCount = 0;
 
     (async () => {
       const res = await yoga.fetch('http://localhost/graphql', {
