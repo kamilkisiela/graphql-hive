@@ -19,34 +19,6 @@ beforeAll(() => {
 
 it('reports usage', async ({ expect }) => {
   const graphqlScope = nock('http://localhost')
-    .post('/graphql')
-    .reply(200, {
-      data: {
-        __typename: 'Query',
-        tokenInfo: {
-          __typename: 'TokenInfo',
-          token: {
-            name: 'brrrt',
-          },
-          organization: {
-            name: 'mom',
-            cleanId: 'ur-mom',
-          },
-          project: {
-            name: 'projecto',
-            type: 'FEDERATION',
-            cleanId: 'projecto',
-          },
-          target: {
-            name: 'projecto',
-            cleanId: 'projecto',
-          },
-          canReportSchema: true,
-          canCollectUsage: true,
-          canReadOperations: true,
-        },
-      },
-    })
     .post('/usage', body => {
       expect(body.map).toMatchInlineSnapshot(`
         {
@@ -136,34 +108,6 @@ it('reports usage with response cache', async ({ expect }) => {
   });
   let usageCount = 0;
   const graphqlScope = nock('http://localhost')
-    .post('/graphql')
-    .reply(200, {
-      data: {
-        __typename: 'Query',
-        tokenInfo: {
-          __typename: 'TokenInfo',
-          token: {
-            name: 'brrrt',
-          },
-          organization: {
-            name: 'mom',
-            cleanId: 'ur-mom',
-          },
-          project: {
-            name: 'projecto',
-            type: 'FEDERATION',
-            cleanId: 'projecto',
-          },
-          target: {
-            name: 'projecto',
-            cleanId: 'projecto',
-          },
-          canReportSchema: true,
-          canCollectUsage: true,
-          canReadOperations: true,
-        },
-      },
-    })
     .post('/usage', body => {
       usageCount++;
       expect(body.map).toMatchInlineSnapshot(`
@@ -256,36 +200,6 @@ it('reports usage with response cache', async ({ expect }) => {
 
 it('does not report usage for operation that does not pass validation', async ({ expect }) => {
   const callback = vi.fn();
-  const graphqlScope = nock('http://localhost')
-    .post('/graphql')
-    .reply(200, {
-      data: {
-        __typename: 'Query',
-        tokenInfo: {
-          __typename: 'TokenInfo',
-          token: {
-            name: 'brrrt',
-          },
-          organization: {
-            name: 'mom',
-            cleanId: 'ur-mom',
-          },
-          project: {
-            name: 'projecto',
-            type: 'FEDERATION',
-            cleanId: 'projecto',
-          },
-          target: {
-            name: 'projecto',
-            cleanId: 'projecto',
-          },
-          canReportSchema: true,
-          canCollectUsage: true,
-          canReadOperations: true,
-        },
-      },
-    });
-
   const yoga = createYoga({
     schema: createSchema({
       typeDefs: /* GraphQL */ `
@@ -354,40 +268,10 @@ it('does not report usage for operation that does not pass validation', async ({
     })().catch(reject);
   });
   expect(callback).not.toHaveBeenCalled();
-  graphqlScope.done();
 });
 
 it('does not report usage if context creating raises an error', async ({ expect }) => {
   const callback = vi.fn();
-  const graphqlScope = nock('http://localhost')
-    .post('/graphql')
-    .reply(200, {
-      data: {
-        __typename: 'Query',
-        tokenInfo: {
-          __typename: 'TokenInfo',
-          token: {
-            name: 'brrrt',
-          },
-          organization: {
-            name: 'mom',
-            cleanId: 'ur-mom',
-          },
-          project: {
-            name: 'projecto',
-            type: 'FEDERATION',
-            cleanId: 'projecto',
-          },
-          target: {
-            name: 'projecto',
-            cleanId: 'projecto',
-          },
-          canReportSchema: true,
-          canCollectUsage: true,
-          canReadOperations: true,
-        },
-      },
-    });
 
   const yoga = createYoga({
     schema: createSchema({
@@ -435,18 +319,9 @@ it('does not report usage if context creating raises an error', async ({ expect 
       reject(new Error(`Unexpected request was sent to ${req.path}`));
     });
 
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       resolve();
     }, 1000);
-    let requestCount = 0;
-
-    graphqlScope.on('request', () => {
-      requestCount = requestCount + 1;
-      if (requestCount === 1) {
-        clearTimeout(timeout);
-        resolve();
-      }
-    });
 
     (async () => {
       const res = await yoga.fetch('http://localhost/graphql', {
@@ -469,7 +344,6 @@ it('does not report usage if context creating raises an error', async ({ expect 
     })().catch(reject);
   });
 
-  graphqlScope.done();
   expect(callback).not.toHaveBeenCalled();
 });
 
@@ -477,34 +351,6 @@ describe('subscription usage reporting', () => {
   describe('built-in see', () => {
     it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            __typename: 'Query',
-            tokenInfo: {
-              __typename: 'TokenInfo',
-              token: {
-                name: 'brrrt',
-              },
-              organization: {
-                name: 'mom',
-                cleanId: 'ur-mom',
-              },
-              project: {
-                name: 'projecto',
-                type: 'FEDERATION',
-                cleanId: 'projecto',
-              },
-              target: {
-                name: 'projecto',
-                cleanId: 'projecto',
-              },
-              canReportSchema: true,
-              canCollectUsage: true,
-              canReadOperations: true,
-            },
-          },
-        })
         .post('/usage', body => {
           expect(body.map).toEqual({
             c6cc5505189a301dcadc408034c21a2d: {
@@ -619,34 +465,6 @@ describe('subscription usage reporting', () => {
 
     it('reports usage for exception from subscription event stream', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            __typename: 'Query',
-            tokenInfo: {
-              __typename: 'TokenInfo',
-              token: {
-                name: 'brrrt',
-              },
-              organization: {
-                name: 'mom',
-                cleanId: 'ur-mom',
-              },
-              project: {
-                name: 'projecto',
-                type: 'FEDERATION',
-                cleanId: 'projecto',
-              },
-              target: {
-                name: 'projecto',
-                cleanId: 'projecto',
-              },
-              canReportSchema: true,
-              canCollectUsage: true,
-              canReadOperations: true,
-            },
-          },
-        })
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
           {
@@ -770,34 +588,6 @@ describe('subscription usage reporting', () => {
   describe('@graphql-yoga/plugin-graphql-sse (distinct connection mode)', () => {
     it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            __typename: 'Query',
-            tokenInfo: {
-              __typename: 'TokenInfo',
-              token: {
-                name: 'brrrt',
-              },
-              organization: {
-                name: 'mom',
-                cleanId: 'ur-mom',
-              },
-              project: {
-                name: 'projecto',
-                type: 'FEDERATION',
-                cleanId: 'projecto',
-              },
-              target: {
-                name: 'projecto',
-                cleanId: 'projecto',
-              },
-              canReportSchema: true,
-              canCollectUsage: true,
-              canReadOperations: true,
-            },
-          },
-        })
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
           {
@@ -919,34 +709,6 @@ describe('subscription usage reporting', () => {
 
     it.skip('reports usage for exception from subscription event stream', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            __typename: 'Query',
-            tokenInfo: {
-              __typename: 'TokenInfo',
-              token: {
-                name: 'brrrt',
-              },
-              organization: {
-                name: 'mom',
-                cleanId: 'ur-mom',
-              },
-              project: {
-                name: 'projecto',
-                type: 'FEDERATION',
-                cleanId: 'projecto',
-              },
-              target: {
-                name: 'projecto',
-                cleanId: 'projecto',
-              },
-              canReportSchema: true,
-              canCollectUsage: true,
-              canReadOperations: true,
-            },
-          },
-        })
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
           {
@@ -1065,34 +827,6 @@ describe('subscription usage reporting', () => {
   describe('graphql-ws', () => {
     it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            __typename: 'Query',
-            tokenInfo: {
-              __typename: 'TokenInfo',
-              token: {
-                name: 'brrrt',
-              },
-              organization: {
-                name: 'mom',
-                cleanId: 'ur-mom',
-              },
-              project: {
-                name: 'projecto',
-                type: 'FEDERATION',
-                cleanId: 'projecto',
-              },
-              target: {
-                name: 'projecto',
-                cleanId: 'projecto',
-              },
-              canReportSchema: true,
-              canCollectUsage: true,
-              canReadOperations: true,
-            },
-          },
-        })
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
         {
@@ -1265,34 +999,6 @@ describe('subscription usage reporting', () => {
     });
     it.skip('reports usage for exception from subscription event stream', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            __typename: 'Query',
-            tokenInfo: {
-              __typename: 'TokenInfo',
-              token: {
-                name: 'brrrt',
-              },
-              organization: {
-                name: 'mom',
-                cleanId: 'ur-mom',
-              },
-              project: {
-                name: 'projecto',
-                type: 'FEDERATION',
-                cleanId: 'projecto',
-              },
-              target: {
-                name: 'projecto',
-                cleanId: 'projecto',
-              },
-              canReportSchema: true,
-              canCollectUsage: true,
-              canReadOperations: true,
-            },
-          },
-        })
         .post('/usage', body => {
           expect(body.map).toMatchInlineSnapshot(`
         {
@@ -1466,34 +1172,6 @@ describe('subscription usage reporting', () => {
 describe('incremental delivery usage reporting', () => {
   it('reports usage for successful incremental deliver operation', async ({ expect }) => {
     const graphqlScope = nock('http://localhost')
-      .post('/graphql')
-      .reply(200, {
-        data: {
-          __typename: 'Query',
-          tokenInfo: {
-            __typename: 'TokenInfo',
-            token: {
-              name: 'brrrt',
-            },
-            organization: {
-              name: 'mom',
-              cleanId: 'ur-mom',
-            },
-            project: {
-              name: 'projecto',
-              type: 'FEDERATION',
-              cleanId: 'projecto',
-            },
-            target: {
-              name: 'projecto',
-              cleanId: 'projecto',
-            },
-            canReportSchema: true,
-            canCollectUsage: true,
-            canReadOperations: true,
-          },
-        },
-      })
       .post('/usage', body => {
         expect(body.map).toMatchInlineSnapshot(`
           {

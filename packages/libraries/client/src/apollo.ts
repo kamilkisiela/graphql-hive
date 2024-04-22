@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import axios from 'axios';
 import type { DocumentNode } from 'graphql';
-import type { ApolloServerPlugin } from '@apollo/server';
+import type { ApolloServerPlugin, HTTPGraphQLRequest } from '@apollo/server';
 import { autoDisposeSymbol, createHive } from './client.js';
 import type {
   HiveClient,
@@ -135,6 +135,16 @@ export function createSupergraphManager(
   };
 }
 
+function addRequestWithHeaders(context: any, http?: HTTPGraphQLRequest) {
+  if (!!http && !('request' in context)) {
+    context.request = {
+      headers: http.headers,
+    };
+  }
+
+  return context;
+}
+
 export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): ApolloServerPlugin {
   const hive = isHiveClient(clientOrOptions)
     ? clientOrOptions
@@ -164,7 +174,10 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
           return doc;
         },
         operationName: context.operationName,
-        contextValue: isLegacyV3 ? context.context : context.contextValue,
+        contextValue: addRequestWithHeaders(
+          isLegacyV3 ? context.context : context.contextValue,
+          context.request?.http,
+        ),
         variableValues: context.request.variables,
       };
 
