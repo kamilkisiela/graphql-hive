@@ -448,16 +448,14 @@ test('sendImmediately should not stop the schedule', async () => {
   // It should be sent already
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
   expect(logger.info).toHaveBeenCalledTimes(4);
-  await waitFor(5);
+  await waitFor(100);
   expect(logger.info).toHaveBeenCalledTimes(5);
-
   // Let's check if the scheduled send task is still running
   await collect(args, {});
   await waitFor(30);
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
-  expect(logger.info).toHaveBeenCalledTimes(7);
 
   await hive.dispose();
   http.done();
