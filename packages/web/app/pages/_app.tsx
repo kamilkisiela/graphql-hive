@@ -28,19 +28,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       gtag.pageview(url);
-
-      const orgId = Router.query.organizationId as string;
-      const lastVisitedOrgCookieValue = cookies.get(LAST_VISITED_ORG_KEY);
-
-      // Make sure we do have organizationId and the cookie is not in the legacy format
-      if (lastVisitedOrgCookieValue?.includes(':') && orgId) {
-        const [lastVisitedOrgId, checksum] = lastVisitedOrgCookieValue.split(':');
-
-        if (orgId !== lastVisitedOrgId) {
-          // Update the cookie with the new orgId
-          cookies.set(LAST_VISITED_ORG_KEY, `${orgId}:${checksum}`);
-        }
-      }
     };
 
     Router.events.on('routeChangeComplete', handleRouteChange);
