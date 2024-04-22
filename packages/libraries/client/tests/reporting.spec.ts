@@ -486,7 +486,6 @@ test('should send original schema of a federated (v2) service', async () => {
     },
   });
 
-  let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
     .matchHeader('Authorization', `Bearer ${token}`)

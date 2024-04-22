@@ -741,7 +741,7 @@ test('retry on non-200', async () => {
 
   const collect = hive.collectUsage();
 
-  collect(
+  await collect(
     {
       schema,
       document: op,
