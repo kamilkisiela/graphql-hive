@@ -1,5 +1,15 @@
 # @graphql-hive/client
 
+## 0.32.0
+
+### Minor Changes
+
+- [#4564](https://github.com/kamilkisiela/graphql-hive/pull/4564) [`5262934`](https://github.com/kamilkisiela/graphql-hive/commit/52629342d136e664491cb7fc6ad9f79987e51ca4) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Print token information only when debug mode is enabled
+
+### Patch Changes
+
+- [#4564](https://github.com/kamilkisiela/graphql-hive/pull/4564) [`5262934`](https://github.com/kamilkisiela/graphql-hive/commit/52629342d136e664491cb7fc6ad9f79987e51ca4) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix auto-detection of client name and version based on x-graphql-client-{name,version} header in Apollo Server integration
+
 ## 0.31.0
 
 ### Minor Changes
