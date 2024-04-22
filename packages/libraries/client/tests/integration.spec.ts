@@ -1,3 +1,4 @@
+/* eslint-disable-next-line import/no-extraneous-dependencies */
 import { createSchema, createYoga } from 'graphql-yoga';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ApolloServer } from '@apollo/server';
