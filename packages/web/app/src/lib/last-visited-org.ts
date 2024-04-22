@@ -9,3 +9,7 @@ export function useLastVisitedOrganizationWriter(orgId?: string | null) {
     }
   }, [orgId]);
 }
+
+export function useLastVisitedOrganizationReader() {
+  return Cookies.get(LAST_VISITED_ORG_KEY);
+}
