@@ -49,7 +49,7 @@ describe('GraphQL Yoga', () => {
       token: 'my-token',
       agent: {
         maxRetries: 0,
-        sendInterval: 100,
+        sendInterval: 10,
         timeout: 50,
         logger,
       },
@@ -88,7 +88,7 @@ describe('GraphQL Yoga', () => {
       }),
     );
 
-    await waitFor(300);
+    await waitFor(50);
 
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info] Error'));
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting] Failed'));
@@ -108,7 +108,7 @@ describe('GraphQL Yoga', () => {
       token: 'my-token',
       agent: {
         maxRetries: 0,
-        sendInterval: 100,
+        sendInterval: 10,
         timeout: 50,
         __testing: {
           fetch: fetchSpy,
@@ -145,7 +145,7 @@ describe('GraphQL Yoga', () => {
       },
     });
 
-    await waitFor(300);
+    await waitFor(50);
     await hive.dispose();
     clean();
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -174,7 +174,7 @@ describe('Apollo Server', () => {
           token: 'my-token',
           agent: {
             maxRetries: 0,
-            sendInterval: 100,
+            sendInterval: 10,
             timeout: 50,
             logger,
           },
@@ -197,7 +197,7 @@ describe('Apollo Server', () => {
         }
       `,
     });
-    await waitFor(300);
+    await waitFor(50);
     await apollo.stop();
     clean();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
@@ -221,7 +221,7 @@ describe('Apollo Server', () => {
           token: 'my-token',
           agent: {
             maxRetries: 0,
-            sendInterval: 100,
+            sendInterval: 10,
             timeout: 50,
             __testing: {
               fetch: fetchSpy,
@@ -257,7 +257,7 @@ describe('Apollo Server', () => {
       },
     });
 
-    await waitFor(300);
+    await waitFor(50);
     await apollo.stop();
     expect(fetchSpy).toHaveBeenCalledWith(
       'http://apollo.localhost:4200/usage',
