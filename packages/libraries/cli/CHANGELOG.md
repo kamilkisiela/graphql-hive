@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.36.0
+
+### Minor Changes
+
+- [#4519](https://github.com/kamilkisiela/graphql-hive/pull/4519) [`08d8706`](https://github.com/kamilkisiela/graphql-hive/commit/08d87069541543d81a4ca59c7dd2091fce357790) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - No longer show dangerous changes
+
 ## 0.35.0
 
 ### Minor Changes
