@@ -71,7 +71,7 @@ jobs:
             -f docker/docker-compose.end2end.yml \
             logs
 
-      - uses: actions/upload-artifact@v4.3.1
+      - uses: actions/upload-artifact@v4.3.3
         if: ${{ failure() }}
         with:
           name: cypress
