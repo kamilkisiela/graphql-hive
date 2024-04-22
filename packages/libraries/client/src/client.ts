@@ -42,7 +42,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
   }
 
   async function info(): Promise<void> {
-    if (enabled === false) {
+    if (enabled === false || !options.debug) {
       return;
     }
 
