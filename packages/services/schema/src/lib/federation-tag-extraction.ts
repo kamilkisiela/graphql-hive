@@ -253,8 +253,8 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   function fieldArgumentHandler(node: InputValueDefinitionNode) {
     const tagsOnNode = getTagsOnNode(node);
     if (
-      (filter.include && !hasIntersection(tagsOnNode, filter.include)) ||
-      (filter.exclude && hasIntersection(tagsOnNode, filter.exclude))
+      (filter.include.size && !hasIntersection(tagsOnNode, filter.include)) ||
+      (filter.exclude.size && hasIntersection(tagsOnNode, filter.exclude))
     ) {
       return {
         ...node,
@@ -294,8 +294,8 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
         }
 
         if (
-          (filter.include && !hasIntersection(tagsOnNode, filter.include)) ||
-          (filter.exclude && hasIntersection(tagsOnNode, filter.exclude))
+          (filter.include.size && !hasIntersection(tagsOnNode, filter.include)) ||
+          (filter.exclude.size && hasIntersection(tagsOnNode, filter.exclude))
         ) {
           return {
             ...node,
@@ -314,7 +314,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
 
     if (
       !rootTypeNames.has(node.name.value) &&
-      filter.exclude &&
+      filter.exclude.size &&
       hasIntersection(tagsOnNode, filter.exclude)
     ) {
       return {
@@ -346,8 +346,8 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
         const tagsOnNode = getTagsOnNode(node);
 
         if (
-          (filter.include && !hasIntersection(tagsOnNode, filter.include)) ||
-          (filter.exclude && hasIntersection(tagsOnNode, filter.exclude))
+          (filter.include.size && !hasIntersection(tagsOnNode, filter.include)) ||
+          (filter.exclude.size && hasIntersection(tagsOnNode, filter.exclude))
         ) {
           return {
             ...node,
@@ -364,7 +364,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
       }),
     };
 
-    if (filter.exclude && hasIntersection(tagsOnNode, filter.exclude)) {
+    if (filter.exclude.size && hasIntersection(tagsOnNode, filter.exclude)) {
       return {
         ...newNode,
         directives: transformTagDirectives(node, true),
@@ -387,8 +387,8 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     const tagsOnNode = getTagsOnNode(node);
 
     if (
-      (filter.include && !hasIntersection(tagsOnNode, filter.include)) ||
-      (filter.exclude && hasIntersection(tagsOnNode, filter.exclude))
+      (filter.include.size && !hasIntersection(tagsOnNode, filter.include)) ||
+      (filter.exclude.size && hasIntersection(tagsOnNode, filter.exclude))
     ) {
       return {
         ...node,
@@ -609,8 +609,8 @@ export function extractTagsFromFederation2SupergraphSDL(documentNode: DocumentNo
 }
 
 export type Federation2SubgraphDocumentNodeByTagsFilter = {
-  include: Set<string> | null;
-  exclude: Set<string> | null;
+  include: Set<string>;
+  exclude: Set<string>;
 };
 
 function buildGetTagsOnNode(directiveName: string) {
