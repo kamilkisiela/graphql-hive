@@ -93,7 +93,7 @@
     "regenerator-runtime": "0.14.1",
     "snarkdown": "2.0.0",
     "supertokens-auth-react": "0.35.6",
-    "supertokens-web-js": "0.8.0",
+    "supertokens-web-js": "0.10.1",
     "tailwind-merge": "2.2.2",
     "tslib": "2.6.2",
     "urql": "4.0.5",
