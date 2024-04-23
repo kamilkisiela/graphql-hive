@@ -16,7 +16,19 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/client#build": {
+    "@hive/libraries/core#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@hive/libraries/apollo#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@hive/libraries/yoga#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@hive/libraries/envelop#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
