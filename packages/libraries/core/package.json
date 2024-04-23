@@ -38,7 +38,7 @@
   },
   "typings": "dist/typings/index.d.ts",
   "scripts": {
-    "build": "bob build",
+    "build": "node ../../../scripts/generate-version.mjs && bob build",
     "check:build": "bob check"
   },
   "peerDependencies": {
