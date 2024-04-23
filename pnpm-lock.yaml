@@ -113,8 +113,8 @@ importers:
         specifier: 7.0.1
         version: 7.0.1(typescript@5.4.5)
       cypress:
-        specifier: 13.7.3
-        version: 13.7.3
+        specifier: 13.8.1
+        version: 13.8.1
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -9307,8 +9307,8 @@ packages:
     resolution: {integrity: sha512-QTaY0XjjhTQOdguARF0lGKm5/mEq9PD9/VhZZegHDIBq2tQwgNpHc3dneD4mGo2iJs+fTKv5Bp0fZ+BRuY3Z0g==}
     engines: {node: '>= 0.1.90'}
 
-  cypress@13.7.3:
-    resolution: {integrity: sha512-uoecY6FTCAuIEqLUYkTrxamDBjMHTYak/1O7jtgwboHiTnS1NaMOoR08KcTrbRZFCBvYOiS4tEkQRmsV+xcrag==}
+  cypress@13.8.1:
+    resolution: {integrity: sha512-Uk6ovhRbTg6FmXjeZW/TkbRM07KPtvM5gah1BIMp4Y2s+i/NMxgaLw0+PbYTOdw1+egE0FP3mWRiGcRkjjmhzA==}
     engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
     hasBin: true
 
@@ -27625,7 +27625,7 @@ snapshots:
       csv-stringify: 5.6.5
       stream-transform: 2.1.3
 
-  cypress@13.7.3:
+  cypress@13.8.1:
     dependencies:
       '@cypress/request': 3.0.1
       '@cypress/xvfb': 1.2.4(supports-color@8.1.1)
