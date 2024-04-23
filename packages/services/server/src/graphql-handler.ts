@@ -18,7 +18,7 @@ import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useSentry } from '@envelop/sentry';
-import { useYogaHive } from '@graphql-hive/client';
+import { useHive } from '@graphql-hive/yoga';
 import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
@@ -176,7 +176,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return resolveUser(ctx);
         },
       }),
-      useYogaHive({
+      useHive({
         debug: true,
         enabled: !!options.hiveConfig,
         token: options.hiveConfig?.token ?? '',

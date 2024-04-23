@@ -53,7 +53,9 @@
       "@hive/webhooks": ["./packages/services/webhooks/src/api.ts"],
       "@hive/emails": ["./packages/services/emails/src/api.ts"],
       "@hive/storage": ["./packages/services/storage/src/index.ts"],
-      "@graphql-hive/client": ["./packages/libraries/client/src/index.ts"],
+      "@graphql-hive/yoga": ["./packages/libraries/yoga/src/index.ts"],
+      "@graphql-hive/apollo": ["./packages/libraries/apollo/src/index.ts"],
+      "@graphql-hive/envelop": ["./packages/libraries/envelop/src/index.ts"],
       "@graphql-hive/external-composition": [
         "./packages/libraries/external-composition/src/index.ts"
       ],

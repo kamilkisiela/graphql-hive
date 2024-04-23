@@ -38,7 +38,7 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "@hive/migrations#build": {
-      "dependsOn": ["^build", "@graphql-hive/client#build"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "@hive/server#build": {

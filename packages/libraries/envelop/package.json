@@ -1,11 +1,12 @@
 {
-  "name": "@graphql-hive/core",
-  "version": "0.2.4",
+  "name": "@graphql-hive/envelop",
+  "version": "0.32.0",
   "type": "module",
+  "description": "GraphQL Hive + GraphQL Envelop",
   "repository": {
     "type": "git",
     "url": "kamilkisiela/graphql-hive",
-    "directory": "packages/libraries/core"
+    "directory": "packages/libraries/envelop"
   },
   "homepage": "https://graphql-hive.com",
   "author": {
@@ -42,23 +43,14 @@
     "check:build": "bob check"
   },
   "peerDependencies": {
+    "@envelop/types": "^5.0.0",
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
   },
   "dependencies": {
-    "@graphql-tools/utils": "^10.0.0",
-    "@whatwg-node/fetch": "0.9.17",
-    "async-retry": "1.3.3",
-    "lodash.sortby": "4.7.0",
-    "tiny-lru": "8.0.2"
+    "@graphql-hive/core": "workspace:*"
   },
   "devDependencies": {
-    "@apollo/federation": "0.38.1",
-    "@apollo/subgraph": "2.7.3",
-    "@types/lodash.sortby": "4.7.9",
-    "graphql": "16.8.1",
-    "nock": "14.0.0-beta.5",
-    "tslib": "2.6.2",
-    "vitest": "1.5.0"
+    "@envelop/types": "5.0.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

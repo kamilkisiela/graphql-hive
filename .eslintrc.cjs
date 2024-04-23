@@ -107,6 +107,8 @@ module.exports = {
               'packages/services/storage/tools/*.js',
               'packages/services/**',
               'packages/migrations/**',
+              '**/*.spec.ts',
+              '**/*.test.ts',
             ],
             optionalDependencies: false,
           },
