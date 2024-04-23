@@ -28,7 +28,7 @@
     "@octokit/request-error": "6.1.1",
     "@sentry/node": "7.110.1",
     "@sentry/types": "7.110.1",
-    "@slack/web-api": "7.0.3",
+    "@slack/web-api": "7.0.4",
     "@theguild/buddy": "0.1.0",
     "@theguild/federation-composition": "0.11.1",
     "@trpc/client": "10.45.2",
