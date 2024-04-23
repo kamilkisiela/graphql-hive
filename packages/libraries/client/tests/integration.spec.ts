@@ -1,14 +1,10 @@
-import { createServer } from 'node:http';
-import { AddressInfo } from 'node:net';
-import axios from 'axios';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { createSchema, createYoga } from 'graphql-yoga';
-/* eslint-disable-next-line import/no-extraneous-dependencies */
-import nock from 'nock';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ApolloServer } from '@apollo/server';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { Response } from '@whatwg-node/fetch';
 import { createHive, hiveApollo, useHive } from '../src';
 import { waitFor } from './test-utils';
 
@@ -53,7 +49,7 @@ describe('GraphQL Yoga', () => {
       token: 'my-token',
       agent: {
         maxRetries: 0,
-        sendInterval: 100,
+        sendInterval: 10,
         timeout: 50,
         logger,
       },
@@ -76,60 +72,35 @@ describe('GraphQL Yoga', () => {
       logging: false,
     });
 
-    const server = createServer(yoga);
+    await yoga.fetch(
+      new Request('http://localhost/graphql', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: /* GraphQL */ `
+            {
+              hello
+            }
+          `,
+        }),
+        headers: {
+          'content-type': 'application/json',
+        },
+      }),
+    );
 
-    async function stop() {
-      await new Promise(resolve => server.close(resolve));
-      await hive.dispose();
-    }
+    await waitFor(50);
 
-    await new Promise<void>(resolve => server.listen(0, resolve));
-    const port = (server.address() as AddressInfo).port;
-
-    await axios
-      .post(`http://localhost:${port}/graphql`, {
-        query: /* GraphQL */ `
-          {
-            hello
-          }
-        `,
-      })
-      .catch(async error => {
-        await stop();
-        return Promise.reject(error);
-      });
-
-    await waitFor(300);
-    await stop();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info] Error'));
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][reporting] Failed'));
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][usage] Failed'));
+    await hive.dispose();
     clean();
   }, 1_000);
 
   test('should capture client name and version headers', async () => {
-    const usageMock = nock('http://yoga.localhost')
-      .post(
-        '/usage',
-        (body: {
-          operations: [
-            {
-              metadata: {
-                client?: {
-                  name: string;
-                  version: string;
-                };
-              };
-            },
-          ];
-        }) => {
-          return (
-            body.operations[0].metadata.client?.name === 'vitest' &&
-            body.operations[0].metadata.client?.version === '1.0.0'
-          );
-        },
-      )
-      .reply(200);
+    const fetchSpy = vi.fn<[RequestInfo | URL, options: RequestInit | undefined]>(async () =>
+      Response.json({}, { status: 200 }),
+    );
     const clean = handleProcess();
     const hive = createHive({
       enabled: true,
@@ -137,12 +108,15 @@ describe('GraphQL Yoga', () => {
       token: 'my-token',
       agent: {
         maxRetries: 0,
-        sendInterval: 100,
+        sendInterval: 10,
         timeout: 50,
+        __testing: {
+          fetch: fetchSpy,
+        },
       },
       reporting: false,
       usage: {
-        endpoint: 'http://yoga.localhost/usage',
+        endpoint: 'http://yoga.localhost:4200/usage',
       },
     });
 
@@ -155,42 +129,31 @@ describe('GraphQL Yoga', () => {
       logging: false,
     });
 
-    const server = createServer(yoga);
+    await yoga.fetch(`http://localhost/graphql`, {
+      method: 'POST',
+      body: JSON.stringify({
+        query: /* GraphQL */ `
+          {
+            hello
+          }
+        `,
+      }),
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '1.0.0',
+      },
+    });
 
-    async function stop() {
-      await new Promise(resolve => server.close(resolve));
-      await hive.dispose();
-    }
-
-    await new Promise<void>(resolve => server.listen(0, resolve));
-    const port = (server.address() as AddressInfo).port;
-
-    await axios
-      .post(
-        `http://localhost:${port}/graphql`,
-        {
-          query: /* GraphQL */ `
-            {
-              hello
-            }
-          `,
-        },
-        {
-          headers: {
-            'x-graphql-client-name': 'vitest',
-            'x-graphql-client-version': '1.0.0',
-          },
-        },
-      )
-      .catch(async error => {
-        await stop();
-        return Promise.reject(error);
-      });
-
-    await waitFor(300);
-    await stop();
+    await waitFor(50);
+    await hive.dispose();
     clean();
-    usageMock.done();
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'http://yoga.localhost:4200/usage',
+      expect.objectContaining({
+        body: expect.stringContaining('"client":{"name":"vitest","version":"1.0.0"}'),
+      }),
+    );
   }, 1_000);
 });
 
@@ -211,7 +174,7 @@ describe('Apollo Server', () => {
           token: 'my-token',
           agent: {
             maxRetries: 0,
-            sendInterval: 100,
+            sendInterval: 10,
             timeout: 50,
             logger,
           },
@@ -234,7 +197,7 @@ describe('Apollo Server', () => {
         }
       `,
     });
-    await waitFor(300);
+    await waitFor(50);
     await apollo.stop();
     clean();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
@@ -244,28 +207,10 @@ describe('Apollo Server', () => {
 
   test('should capture client name and version headers', async () => {
     const clean = handleProcess();
-    const usageMock = nock('http://apollo.localhost')
-      .post(
-        '/usage',
-        (body: {
-          operations: [
-            {
-              metadata: {
-                client?: {
-                  name: string;
-                  version: string;
-                };
-              };
-            },
-          ];
-        }) => {
-          return (
-            body.operations[0].metadata.client?.name === 'vitest' &&
-            body.operations[0].metadata.client?.version === '1.0.0'
-          );
-        },
-      )
-      .reply(200);
+    const fetchSpy = vi.fn<[RequestInfo | URL, options: RequestInit | undefined]>(async () =>
+      Response.json({}, { status: 200 }),
+    );
+
     const apollo = new ApolloServer({
       typeDefs,
       resolvers,
@@ -276,12 +221,15 @@ describe('Apollo Server', () => {
           token: 'my-token',
           agent: {
             maxRetries: 0,
-            sendInterval: 100,
+            sendInterval: 10,
             timeout: 50,
+            __testing: {
+              fetch: fetchSpy,
+            },
           },
           reporting: false,
           usage: {
-            endpoint: 'http://apollo.localhost/usage',
+            endpoint: 'http://apollo.localhost:4200/usage',
           },
         }),
       ],
@@ -293,26 +241,30 @@ describe('Apollo Server', () => {
       },
     });
 
-    await axios.post(
-      'http://localhost:4000/graphql',
-      {
+    await fetch('http://localhost:4000/graphql', {
+      method: 'POST',
+      body: JSON.stringify({
         query: /* GraphQL */ `
           {
             hello
           }
         `,
+      }),
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '1.0.0',
       },
-      {
-        headers: {
-          'x-graphql-client-name': 'vitest',
-          'x-graphql-client-version': '1.0.0',
-        },
-      },
-    );
+    });
 
-    await waitFor(300);
+    await waitFor(50);
     await apollo.stop();
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'http://apollo.localhost:4200/usage',
+      expect.objectContaining({
+        body: expect.stringContaining('"client":{"name":"vitest","version":"1.0.0"}'),
+      }),
+    );
     clean();
-    usageMock.done();
   }, 1_000);
 });

@@ -1,6 +1,42 @@
-import { createHash } from 'node:crypto';
+import { crypto, TextEncoder } from '@whatwg-node/fetch';
 import { hiveClientSymbol } from '../client.js';
 import type { HiveClient, HivePluginOptions } from './types.js';
+
+export const isCloudflareWorker =
+  typeof caches !== 'undefined' && 'default' in caches && !!caches.default;
+
+async function digest(algo: 'SHA-256' | 'SHA-1', output: 'hex' | 'base64', data: string) {
+  const buffer = await crypto.subtle.digest(algo, new TextEncoder().encode(data));
+  if (output === 'hex') {
+    return arrayBufferToHEX(buffer);
+  }
+
+  return arrayBufferToBase64(buffer);
+}
+
+function arrayBufferToHEX(buffer: ArrayBuffer) {
+  return Array.prototype.map
+    .call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2))
+    .join('');
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  return btoa(String.fromCharCode.apply(null, new Uint8Array(buffer) as unknown as number[]));
+}
+
+export function createHash(algo: 'SHA-256' | 'SHA-1') {
+  let str: string = '';
+
+  return {
+    update(data: string) {
+      str += data;
+      return this;
+    },
+    async digest(output: 'hex' | 'base64') {
+      return digest(algo, output, str);
+    },
+  };
+}
 
 export function memo<R, A, K>(fn: (arg: A) => R, cacheKeyFn: (arg: A) => K): (arg: A) => R {
   let memoizedResult: R | null = null;
@@ -19,18 +55,22 @@ export function memo<R, A, K>(fn: (arg: A) => R, cacheKeyFn: (arg: A) => K): (ar
   };
 }
 
+export function isAsyncIterable<T>(value: any): value is AsyncIterable<T> {
+  return value?.[Symbol.asyncIterator] != null;
+}
+
 export function cache<R, A, K, V>(
   fn: (arg: A, arg2: V) => R,
-  cacheKeyFn: (arg: A, arg2: V) => K,
+  cacheKeyFn: (arg: A, arg2: V) => Promise<K>,
   cacheMap: {
     has(key: K): boolean;
     set(key: K, value: R): void;
     get(key: K): R | undefined;
   },
 ) {
-  return (arg: A, arg2: V) => {
-    const key = cacheKeyFn(arg, arg2);
-    const cachedValue = cacheMap.get(key);
+  return async (arg: A, arg2: V) => {
+    const key = await cacheKeyFn(arg, arg2);
+    const cachedValue = await cacheMap.get(key);
 
     if (cachedValue !== null && typeof cachedValue !== 'undefined') {
       return {
@@ -51,8 +91,8 @@ export function cache<R, A, K, V>(
   };
 }
 
-export function cacheDocumentKey<T, V>(doc: T, variables: V | null) {
-  const hasher = createHash('md5').update(JSON.stringify(doc));
+export async function cacheDocumentKey<T, V>(doc: T, variables: V | null) {
+  const hasher = createHash('SHA-1').update(JSON.stringify(doc));
 
   if (variables) {
     hasher.update(
@@ -75,9 +115,9 @@ export function cacheDocumentKey<T, V>(doc: T, variables: V | null) {
 const HR_TO_NS = 1e9;
 const NS_TO_MS = 1e6;
 
-function deltaFrom(hrtime: [number, number]): { ms: number; ns: number } {
-  const delta = process.hrtime(hrtime);
-  const ns = delta[0] * HR_TO_NS + delta[1];
+function deltaFrom(startedAt: number): { ms: number; ns: number } {
+  const endedAt = performance.now();
+  const ns = Math.round(((endedAt - startedAt) * HR_TO_NS) / 1000);
 
   return {
     ns,
@@ -88,7 +128,7 @@ function deltaFrom(hrtime: [number, number]): { ms: number; ns: number } {
 }
 
 export function measureDuration() {
-  const startAt = process.hrtime();
+  const startAt = performance.now();
 
   return function end() {
     return deltaFrom(startAt).ns;

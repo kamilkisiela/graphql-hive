@@ -48,6 +48,35 @@ const server = createYoga({
 server.start()
 ```
 
+### GraphQL Yoga and Cloudflare Workers
+
+If you're using Cloudflare Workers, you can use the following code:
+
+```typescript
+import { useYogaHive, createYogaHive, useYogaHive } from '@graphql-hive/client'
+import { createYoga } from 'graphql-yoga'
+
+export default {
+  async fetch(request, env, ctx) {
+    const hive = createYogaHive({
+      enabled: true, // Enable/Disable Hive Client
+      token: 'YOUR-TOKEN',
+      usage: true // Collects schema usage based on operations
+    });
+
+    const yoga = createYoga({
+      plugins: [
+        useYogaHive(hive)
+      ]
+    });
+
+    const response = await yoga.fetch(request, env, ctx);
+    ctx.waitUntil(hive.dispose());
+    return response;
+  }
+}
+```
+
 ### With Envelop
 
 If you're not familiar with Envelop - in "short" it's a lightweight JavaScript library for wrapping
@@ -150,6 +179,11 @@ app.post(
     }
   })
 )
+
+// When server is shutting down
+async function onShutdown() {
+  await hive.close()
+}
 ```
 
 ### Using the registry when Stitching

@@ -6,7 +6,7 @@ import type { SchemaReporter } from './reporting.js';
 export interface HiveClient {
   [hiveClientSymbol]: true;
   [autoDisposeSymbol]: boolean | NodeJS.Signals[];
-  info(): Promise<void>;
+  info(): void | Promise<void>;
   reportSchema: SchemaReporter['report'];
   /** Collect usage for Query and Mutation operations */
   collectUsage(): CollectUsageCallback;
@@ -28,7 +28,7 @@ export type AbortAction = {
 export type CollectUsageCallback = (
   args: ExecutionArgs,
   result: GraphQLErrorsResult | AbortAction,
-) => void;
+) => Promise<void>;
 export interface ClientInfo {
   name: string;
   version: string;
@@ -192,6 +192,11 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Disabled by default
      */
     reporting?: HiveReportingPluginOptions | false;
+    /**
+     * Print info about the token.
+     * Disabled by default (enabled by default only in debug mode)
+     */
+    printTokenInfo?: boolean;
     /**
      * Automatically dispose the client when the process is terminated
      *

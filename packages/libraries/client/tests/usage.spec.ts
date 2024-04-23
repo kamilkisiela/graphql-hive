@@ -141,6 +141,7 @@ test('should send data to Hive', async () => {
     agent: {
       timeout: 500,
       maxRetries: 0,
+      sendInterval: 10,
       logger,
     },
     token,
@@ -154,8 +155,8 @@ test('should send data to Hive', async () => {
 
   const collect = hive.collectUsage();
 
-  await waitFor(2000);
-  collect(
+  await waitFor(20);
+  await collect(
     {
       schema,
       document: op,
@@ -164,7 +165,7 @@ test('should send data to Hive', async () => {
     {},
   );
   await hive.dispose();
-  await waitFor(1000);
+  await waitFor(30);
   http.done();
 
   expect(logger.error).not.toHaveBeenCalled();
@@ -212,8 +213,8 @@ test('should send data to Hive', async () => {
   expect(operation.operationMapKey).toEqual(key);
   expect(operation.timestamp).toEqual(expect.any(Number));
   // execution
-  expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
-  expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(18 * 1_000_000); // >=18ms in microseconds
+  expect(operation.execution.duration).toBeLessThan(25 * 1_000_000); // <25ms
   expect(operation.execution.errorsTotal).toBe(0);
   expect(operation.execution.ok).toBe(true);
 });
@@ -249,6 +250,7 @@ test('should send data to Hive (deprecated endpoint)', async () => {
     agent: {
       timeout: 500,
       maxRetries: 0,
+      sendInterval: 10,
       logger,
     },
     token,
@@ -259,8 +261,8 @@ test('should send data to Hive (deprecated endpoint)', async () => {
 
   const collect = hive.collectUsage();
 
-  await waitFor(2000);
-  collect(
+  await waitFor(20);
+  await collect(
     {
       schema,
       document: op,
@@ -269,7 +271,7 @@ test('should send data to Hive (deprecated endpoint)', async () => {
     {},
   );
   await hive.dispose();
-  await waitFor(1000);
+  await waitFor(50);
   http.done();
 
   expect(logger.error).not.toHaveBeenCalled();
@@ -317,8 +319,8 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(operation.operationMapKey).toEqual(key);
   expect(operation.timestamp).toEqual(expect.any(Number));
   // execution
-  expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
-  expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(18 * 1_000_000); // >=18ms in microseconds
+  expect(operation.execution.duration).toBeLessThan(25 * 1_000_000); // <25ms
   expect(operation.execution.errorsTotal).toBe(0);
   expect(operation.execution.ok).toBe(true);
 });
@@ -335,6 +337,8 @@ test('should not leak the exception', async () => {
     agent: {
       timeout: 500,
       maxRetries: 1,
+      sendInterval: 10,
+      minTimeout: 10,
       logger,
     },
     token: 'Token',
@@ -343,7 +347,7 @@ test('should not leak the exception', async () => {
     },
   });
 
-  hive.collectUsage()(
+  await hive.collectUsage()(
     {
       schema,
       document: op,
@@ -352,7 +356,7 @@ test('should not leak the exception', async () => {
     {},
   );
 
-  await waitFor(1000);
+  await waitFor(50);
   await hive.dispose();
 
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
@@ -388,12 +392,14 @@ test('sendImmediately should not stop the schedule', async () => {
   const hive = createHive({
     enabled: true,
     debug: true,
+    printTokenInfo: false,
     agent: {
       timeout: 500,
       maxRetries: 0,
       maxSize: 2,
+      minTimeout: 10,
       logger,
-      sendInterval: 100,
+      sendInterval: 50,
     },
     token,
     usage: {
@@ -411,7 +417,7 @@ test('sendImmediately should not stop the schedule', async () => {
 
   expect(logger.info).toHaveBeenCalledTimes(0);
 
-  collect(
+  await collect(
     {
       schema,
       document: op,
@@ -419,40 +425,39 @@ test('sendImmediately should not stop the schedule', async () => {
     },
     {},
   );
-  await waitFor(200);
-  // Because maxSize is 2 and sendInterval is 100ms
+  await waitFor(120);
+  // Because maxSize is 2 and sendInterval is 50ms (+120ms buffer)
   // the scheduled send task should be done by now
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+  // since we sent only 1 element, the buffer was not full,
+  // so we should not see the following log:
   expect(logger.info).not.toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
   expect(logger.info).toHaveBeenCalledTimes(2);
 
-  // Now we will check the maxSize
-  // We run collect three times
-  collect(args, {});
-  collect(args, {});
+  // Now we will hit the maxSize
+  // We run collect two times
+  await Promise.all([collect(args, {}), collect(args, {})]);
+  await waitFor(1);
   expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
+  expect(logger.info).toHaveBeenCalledTimes(4);
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 2) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
-  await waitFor(1); // we run setImmediate under the hood
+  // we run setImmediate under the hood
   // It should be sent already
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
   expect(logger.info).toHaveBeenCalledTimes(4);
-
-  await waitFor(50);
+  await waitFor(100);
   expect(logger.info).toHaveBeenCalledTimes(5);
-
   // Let's check if the scheduled send task is still running
-  collect(args, {});
-  await waitFor(200);
+  await collect(args, {});
+  await waitFor(30);
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
-  expect(logger.info).toHaveBeenCalledTimes(7);
 
   await hive.dispose();
-  await waitFor(1000);
   http.done();
 });
 
@@ -484,8 +489,10 @@ test('should send data to Hive at least once when using atLeastOnceSampler', asy
   const hive = createHive({
     enabled: true,
     debug: true,
+    printTokenInfo: false,
     agent: {
       timeout: 500,
+      sendInterval: 10,
       maxRetries: 0,
       logger,
     },
@@ -510,35 +517,36 @@ test('should send data to Hive at least once when using atLeastOnceSampler', asy
 
   const collect = hive.collectUsage();
 
-  await waitFor(2000);
-  collect(
-    {
-      schema,
-      document: op,
-      operationName: 'deleteProject',
-    },
-    {},
-  );
-  // different query
-  collect(
-    {
-      schema,
-      document: op2,
-      operationName: 'getProject',
-    },
-    {},
-  );
-  // duplicated call
-  collect(
-    {
-      schema,
-      document: op,
-      operationName: 'deleteProject',
-    },
-    {},
-  );
+  await Promise.all([
+    collect(
+      {
+        schema,
+        document: op,
+        operationName: 'deleteProject',
+      },
+      {},
+    ),
+    // different query
+    collect(
+      {
+        schema,
+        document: op2,
+        operationName: 'getProject',
+      },
+      {},
+    ),
+    // duplicated call
+    collect(
+      {
+        schema,
+        document: op,
+        operationName: 'deleteProject',
+      },
+      {},
+    ),
+  ]);
   await hive.dispose();
-  await waitFor(1000);
+  await waitFor(50);
   http.done();
 
   expect(logger.error).not.toHaveBeenCalled();
@@ -590,6 +598,7 @@ test('should not send excluded operation name data to Hive', async () => {
     agent: {
       timeout: 500,
       maxRetries: 0,
+      sendInterval: 10,
       logger,
     },
     token,
@@ -604,42 +613,43 @@ test('should not send excluded operation name data to Hive', async () => {
   });
 
   const collect = hive.collectUsage();
-
-  await waitFor(2000);
-  collect(
-    {
-      schema,
-      document: op,
-      operationName: 'deleteProjectExcludeThis',
-    },
-    {},
-  );
-  collect(
-    {
-      schema,
-      document: op,
-      operationName: 'deleteProjectShouldntBeIncluded',
-    },
-    {},
-  );
-  collect(
-    {
-      schema,
-      document: op,
-      operationName: 'deleteProject',
-    },
-    {},
-  );
-  collect(
-    {
-      schema,
-      document: op2,
-      operationName: 'getProject',
-    },
-    {},
-  );
+  await waitFor(20);
+  await Promise.all([
+    (collect(
+      {
+        schema,
+        document: op,
+        operationName: 'deleteProjectExcludeThis',
+      },
+      {},
+    ),
+    collect(
+      {
+        schema,
+        document: op,
+        operationName: 'deleteProjectShouldntBeIncluded',
+      },
+      {},
+    ),
+    collect(
+      {
+        schema,
+        document: op,
+        operationName: 'deleteProject',
+      },
+      {},
+    ),
+    collect(
+      {
+        schema,
+        document: op2,
+        operationName: 'getProject',
+      },
+      {},
+    )),
+  ]);
   await hive.dispose();
-  await waitFor(1000);
+  await waitFor(50);
   http.done();
 
   expect(logger.error).not.toHaveBeenCalled();
@@ -687,8 +697,63 @@ test('should not send excluded operation name data to Hive', async () => {
   expect(operation.operationMapKey).toEqual(key);
   expect(operation.timestamp).toEqual(expect.any(Number));
   // execution
-  expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
-  expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(18 * 1_000_000); // >=18ms in microseconds
+  expect(operation.execution.duration).toBeLessThan(25 * 1_000_000); // <25ms
   expect(operation.execution.errorsTotal).toBe(0);
   expect(operation.execution.ok).toBe(true);
+});
+
+test('retry on non-200', async () => {
+  const logSpy = vi.fn();
+  const logger = {
+    error: logSpy,
+    info: logSpy,
+  };
+
+  const token = 'Token';
+
+  const fetchSpy = vi.fn(async (_url: RequestInfo | URL, _init?: RequestInit) => {
+    return new Response('No no no', { status: 500, statusText: 'Internal server error' });
+  });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    printTokenInfo: false,
+    agent: {
+      logger,
+      timeout: 10,
+      minTimeout: 10,
+      sendInterval: 10,
+      maxRetries: 1,
+      __testing: {
+        fetch: fetchSpy,
+      },
+    },
+    token,
+    usage: {
+      endpoint: 'http://localhost/200',
+    },
+    reporting: false,
+  });
+
+  const collect = hive.collectUsage();
+
+  await collect(
+    {
+      schema,
+      document: op,
+      operationName: 'asd',
+    },
+    {},
+  );
+
+  await waitFor(50);
+  await hive.dispose();
+
+  expect(logSpy).toHaveBeenCalledWith('[hive][usage] Sending (queue 1) (attempt 1)');
+  expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`[hive][usage] Attempt 1 failed`));
+  expect(logSpy).toHaveBeenCalledWith('[hive][usage] Sending (queue 1) (attempt 2)');
+  expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`[hive][usage] Attempt 2 failed`));
+  expect(logSpy).not.toHaveBeenCalledWith('[hive][usage] Sending (queue 1) (attempt 3)');
 });

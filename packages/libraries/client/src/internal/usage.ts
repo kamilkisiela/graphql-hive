@@ -50,7 +50,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
   if (!pluginOptions.usage || pluginOptions.enabled === false) {
     return {
       collect() {
-        return () => {};
+        return async () => {};
       },
       async dispose() {},
       collectSubscription() {},
@@ -81,6 +81,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       token: pluginOptions.token,
       enabled: pluginOptions.enabled,
       debug: pluginOptions.debug,
+      __testing: pluginOptions.agent?.__testing,
     },
     {
       prefix: 'usage',
@@ -133,7 +134,6 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       },
       headers() {
         return {
-          'Content-Type': 'application/json',
           'graphql-client-name': 'Hive Client',
           'graphql-client-version': version,
           'x-usage-api-version': '2',
@@ -169,7 +169,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     collect() {
       const finish = measureDuration();
 
-      return function complete(args, result) {
+      return async function complete(args, result) {
         const duration = finish();
         let providedOperationName: string | undefined = undefined;
         try {
@@ -212,29 +212,33 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               ttl: options.ttl,
               processVariables: options.processVariables ?? false,
             });
-            const { key, value: info } = collect(document, args.variableValues ?? null);
-            agent.capture({
-              type: 'request',
-              data: {
-                key,
-                timestamp: Date.now(),
-                operationName,
-                operation: info.document,
-                fields: info.fields,
-                execution: {
-                  ok: errors.length === 0,
-                  duration,
-                  errorsTotal: errors.length,
-                  errors,
-                },
-                // TODO: operationHash is ready to accept hashes of persisted operations
-                client:
-                  typeof args.contextValue !== 'undefined' &&
-                  typeof options.clientInfo !== 'undefined'
-                    ? options.clientInfo(args.contextValue)
-                    : createDefaultClientInfo()(args.contextValue),
-              },
-            });
+
+            agent.capture(
+              collect(document, args.variableValues ?? null).then(({ key, value: info }) => {
+                return {
+                  type: 'request',
+                  data: {
+                    key,
+                    timestamp: Date.now(),
+                    operationName,
+                    operation: info.document,
+                    fields: info.fields,
+                    execution: {
+                      ok: errors.length === 0,
+                      duration,
+                      errorsTotal: errors.length,
+                      errors,
+                    },
+                    // TODO: operationHash is ready to accept hashes of persisted operations
+                    client:
+                      typeof args.contextValue !== 'undefined' &&
+                      typeof options.clientInfo !== 'undefined'
+                        ? options.clientInfo(args.contextValue)
+                        : createDefaultClientInfo()(args.contextValue),
+                  },
+                };
+              }),
+            );
           }
         } catch (error) {
           const details = providedOperationName ? ` (name: "${providedOperationName}")` : '';
@@ -242,7 +246,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         }
       };
     },
-    collectSubscription({ args }) {
+    async collectSubscription({ args }) {
       const document = args.document;
       const rootOperation = document.definitions.find(
         o => o.kind === Kind.OPERATION_DEFINITION,
@@ -270,23 +274,25 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           ttl: options.ttl,
           processVariables: options.processVariables ?? false,
         });
-        const { key, value: info } = collect(document, args.variableValues ?? null);
 
-        agent.capture({
-          type: 'subscription',
-          data: {
-            key,
-            timestamp: Date.now(),
-            operationName,
-            operation: info.document,
-            fields: info.fields,
-            // TODO: operationHash is ready to accept hashes of persisted operations
-            client:
-              typeof args.contextValue !== 'undefined' && typeof options.clientInfo !== 'undefined'
-                ? options.clientInfo(args.contextValue)
-                : createDefaultClientInfo()(args.contextValue),
-          },
-        });
+        agent.capture(
+          collect(document, args.variableValues ?? null).then(({ key, value: info }) => ({
+            type: 'subscription',
+            data: {
+              key,
+              timestamp: Date.now(),
+              operationName,
+              operation: info.document,
+              fields: info.fields,
+              // TODO: operationHash is ready to accept hashes of persisted operations
+              client:
+                typeof args.contextValue !== 'undefined' &&
+                typeof options.clientInfo !== 'undefined'
+                  ? options.clientInfo(args.contextValue)
+                  : createDefaultClientInfo()(args.contextValue),
+            },
+          })),
+        );
       }
     },
   };

@@ -417,12 +417,12 @@ importers:
       '@graphql-tools/utils':
         specifier: ^10.0.0
         version: 10.0.0(graphql@16.8.1)
+      '@whatwg-node/fetch':
+        specifier: 0.9.17
+        version: 0.9.17
       async-retry:
         specifier: 1.3.3
         version: 1.3.3
-      axios:
-        specifier: ^1.6.0
-        version: 1.6.2
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -474,8 +474,8 @@ importers:
         specifier: 5.2.0
         version: 5.2.0(graphql@16.8.1)
       nock:
-        specifier: 13.5.4
-        version: 13.5.4
+        specifier: 14.0.0-beta.5
+        version: 14.0.0-beta.5
       vitest:
         specifier: 1.5.0
         version: 1.5.0(@types/node@20.12.7)
@@ -584,7 +584,7 @@ importers:
         specifier: 3.556.0
         version: 3.556.0
       '@graphql-hive/core':
-        specifier: 0.2.4
+        specifier: workspace:*
         version: link:../../libraries/core/dist
       '@graphql-inspector/core':
         specifier: 5.1.0-alpha-20231208113249-34700c8a
@@ -1455,7 +1455,7 @@ importers:
   packages/services/usage-ingestor:
     devDependencies:
       '@graphql-hive/core':
-        specifier: 0.2.4
+        specifier: workspace:*
         version: link:../../libraries/core/dist
       '@hive/service-common':
         specifier: workspace:*
@@ -16113,16 +16113,6 @@ packages:
       - debug
     dev: true
 
-  /axios@1.6.2:
-    resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
-    dependencies:
-      follow-redirects: 1.15.2
-      form-data: 4.0.0
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
   /axios@1.6.5:
     resolution: {integrity: sha512-Ii012v05KEVuUoFWmMW/UQv9aRIc3ZwkWDcM+h5Il8izZCtRVpDUfwpoFf7eOtajT3QiGR4yDUx7lPqHJULgbg==}
     dependencies:
@@ -20788,16 +20778,6 @@ packages:
     resolution: {integrity: sha512-Rwix9pBtC1Nuy5wysTmKy+UjbDJpIfg8eHjw0rjZ1mX4GNLz1Bmd16uDpI3Gk1i70Fgcs8Csg2lPm8HULFg9DQ==}
     dev: false
 
-  /follow-redirects@1.15.2:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-    dev: false
-
   /follow-redirects@1.15.4(debug@4.3.4):
     resolution: {integrity: sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==}
     engines: {node: '>=4.0'}
@@ -20884,6 +20864,7 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
+    dev: true
 
   /format@0.2.2:
     resolution: {integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==}
@@ -26555,15 +26536,12 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /nock@13.5.4:
-    resolution: {integrity: sha512-yAyTfdeNJGGBFxWdzSKCBYxs5FxLbCg5X5Q4ets974hcQzG1+qCxvIyOo4j2Ry6MUlhWVMX4OoYDefAIIwupjw==}
-    engines: {node: '>= 10.13'}
+  /nock@14.0.0-beta.5:
+    resolution: {integrity: sha512-u255tf4DYvyErTlPZA9uTfXghiZZy+NflUOFONPVKZ5tP0yaHwKig28zyFOLhu8y5YcCRC+V5vDk4HHileh2iw==}
+    engines: {node: '>= 18'}
     dependencies:
-      debug: 4.3.4(supports-color@8.1.1)
       json-stringify-safe: 5.0.1
       propagate: 2.0.1
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /node-abi@3.52.0:

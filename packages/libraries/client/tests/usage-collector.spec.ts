@@ -91,7 +91,8 @@ test('collect fields', async () => {
     schema,
     max: 1,
   });
-  const info = collect(op, {}).value;
+  const info$ = await collect(op, {});
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -117,7 +118,8 @@ test('collect input object types', async () => {
     schema,
     max: 1,
   });
-  const info = collect(op, {}).value;
+  const info$ = await collect(op, {});
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -143,7 +145,7 @@ test('collect enums and scalars as inputs', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($limit: Int!, $type: ProjectType!) {
         projects(filter: { pagination: { limit: $limit }, type: $type }) {
@@ -152,7 +154,8 @@ test('collect enums and scalars as inputs', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -176,7 +179,7 @@ test('collect scalars as hard-coded inputs', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       {
         projects(filter: { pagination: { limit: 20 } }) {
@@ -185,7 +188,8 @@ test('collect scalars as hard-coded inputs', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -204,7 +208,7 @@ test('collect enum values from object fields', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($limit: Int!) {
         projects(filter: { pagination: { limit: $limit }, type: FEDERATION }) {
@@ -213,7 +217,8 @@ test('collect enum values from object fields', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -234,7 +239,7 @@ test('collect enum values from arguments', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects {
         projectsByType(type: FEDERATION) {
@@ -243,7 +248,8 @@ test('collect enum values from arguments', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -260,7 +266,7 @@ test('collect arguments', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($limit: Int!, $type: ProjectType!) {
         projects(filter: { pagination: { limit: $limit }, type: $type }) {
@@ -269,7 +275,8 @@ test('collect arguments', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -293,7 +300,7 @@ test('skips argument directives', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($limit: Int!, $type: ProjectType!, $includeName: Boolean!) {
         projects(filter: { pagination: { limit: $limit }, type: $type }) {
@@ -311,7 +318,8 @@ test('skips argument directives', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -337,7 +345,7 @@ test('collect used-only input fields', async () => {
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($limit: Int!, $type: ProjectType!) {
         projects(filter: { pagination: { limit: $limit }, type: $type }) {
@@ -346,7 +354,8 @@ test('collect used-only input fields', async () => {
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -370,7 +379,7 @@ test('collect all input fields when `processVariables` has not been passed and i
     schema,
     max: 1,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($pagination: PaginationInput!, $type: ProjectType!) {
         projects(filter: { pagination: $pagination, type: $type }) {
@@ -379,7 +388,8 @@ test('collect all input fields when `processVariables` has not been passed and i
       }
     `),
     {},
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -411,14 +421,14 @@ test('should get a cache hit when document is the same but variables are differe
       }
     }
   `);
-  const first = collect(doc, {
+  const first = await collect(doc, {
     pagination: {
       limit: 1,
     },
     type: 'STITCHING',
   });
 
-  const second = collect(doc, {
+  const second = await collect(doc, {
     pagination: {
       offset: 2,
     },
@@ -442,21 +452,21 @@ test('(processVariables: true) should get a cache miss when document is the same
       }
     }
   `);
-  const first = collect(doc, {
+  const first = await collect(doc, {
     pagination: {
       limit: 1,
     },
     type: 'STITCHING',
   });
 
-  const second = collect(doc, {
+  const second = await collect(doc, {
     pagination: {
       offset: 2,
     },
     type: 'STITCHING',
   });
 
-  const third = collect(doc, {
+  const third = await collect(doc, {
     pagination: {
       offset: 2,
     },
@@ -474,7 +484,7 @@ test('(processVariables: true) collect used-only input fields', async () => {
     max: 1,
     processVariables: true,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($pagination: PaginationInput!, $type: ProjectType!) {
         projects(filter: { pagination: $pagination, type: $type }) {
@@ -488,7 +498,8 @@ test('(processVariables: true) collect used-only input fields', async () => {
       },
       type: 'STITCHING',
     },
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -513,7 +524,7 @@ test('(processVariables: true) should collect input object without fields when c
     max: 1,
     processVariables: true,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($pagination: PaginationInput, $type: ProjectType!) {
         projects(filter: { pagination: $pagination, type: $type }) {
@@ -524,7 +535,8 @@ test('(processVariables: true) should collect input object without fields when c
     {
       type: 'STITCHING',
     },
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [
@@ -548,7 +560,7 @@ test('(processVariables: true) collect used-only input type fields from an array
     max: 1,
     processVariables: true,
   });
-  const info = collect(
+  const info$ = await collect(
     parse(/* GraphQL */ `
       query getProjects($filter: FilterInput) {
         projects(filter: $filter) {
@@ -572,7 +584,8 @@ test('(processVariables: true) collect used-only input type fields from an array
         },
       },
     },
-  ).value;
+  );
+  const info = await info$.value;
 
   expect(info.fields).toMatchInlineSnapshot(`
     [

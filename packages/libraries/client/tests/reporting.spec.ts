@@ -29,8 +29,10 @@ test('should not leak the exception', async () => {
     enabled: true,
     debug: true,
     agent: {
-      timeout: 500,
+      timeout: 50,
       maxRetries: 1,
+      sendInterval: 10,
+      minTimeout: 10,
       logger,
     },
     token: 'Token',
@@ -49,7 +51,7 @@ test('should not leak the exception', async () => {
     `),
   });
 
-  await waitFor(2000);
+  await waitFor(50);
   await hive.dispose();
 
   expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
@@ -106,7 +108,9 @@ test('should send data to Hive', async () => {
     debug: true,
     agent: {
       timeout: 500,
-      maxRetries: 1,
+      minTimeout: 10,
+      sendInterval: 10,
+      maxRetries: 0,
       logger,
     },
     token,
@@ -130,7 +134,7 @@ test('should send data to Hive', async () => {
     `),
   });
 
-  await waitFor(2000);
+  await waitFor(50);
   await hive.dispose();
   http.done();
 
@@ -187,7 +191,9 @@ test('should send data to Hive (deprecated endpoint)', async () => {
     debug: true,
     agent: {
       timeout: 500,
-      maxRetries: 1,
+      minTimeout: 10,
+      sendInterval: 10,
+      maxRetries: 0,
       logger,
     },
     token,
@@ -208,7 +214,7 @@ test('should send data to Hive (deprecated endpoint)', async () => {
     `),
   });
 
-  await waitFor(2000);
+  await waitFor(50);
   await hive.dispose();
   http.done();
 
@@ -263,7 +269,9 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
     debug: true,
     agent: {
       timeout: 500,
-      maxRetries: 1,
+      minTimeout: 10,
+      sendInterval: 10,
+      maxRetries: 0,
       logger,
     },
     token,
@@ -281,7 +289,7 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
     `),
   });
 
-  await waitFor(2000);
+  await waitFor(50);
   await hive.dispose();
   http.done();
 
@@ -337,9 +345,9 @@ test('should send data to Hive immediately', async () => {
     debug: true,
     agent: {
       timeout: 500,
-      maxRetries: 1,
+      maxRetries: 0,
       logger,
-      sendInterval: 200,
+      sendInterval: 100,
     },
     token,
     reporting: {
@@ -376,7 +384,7 @@ test('should send data to Hive immediately', async () => {
   expect(body.variables.input.url).toBe(serviceUrl);
   expect(body.variables.input.force).toBe(true);
 
-  await waitFor(400);
+  await waitFor(100);
   expect(logger.info).toHaveBeenCalledTimes(4);
 
   await hive.dispose();
@@ -400,7 +408,9 @@ test('should send original schema of a federated (v1) service', async () => {
     debug: true,
     agent: {
       timeout: 500,
-      maxRetries: 1,
+      maxRetries: 0,
+      minTimeout: 10,
+      sendInterval: 10,
       logger,
     },
     token,
@@ -413,7 +423,6 @@ test('should send original schema of a federated (v1) service', async () => {
     },
   });
 
-  let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
     .matchHeader('Authorization', `Bearer ${token}`)
@@ -421,8 +430,13 @@ test('should send original schema of a federated (v1) service', async () => {
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
     .once()
-    .reply((_, _body) => {
-      body = _body;
+    .reply((_, body: any) => {
+      expect(body.variables.input.sdl).toBe(`type Query{bar:String}`);
+      expect(body.variables.input.author).toBe(author);
+      expect(body.variables.input.commit).toBe(commit);
+      expect(body.variables.input.service).toBe(serviceName);
+      expect(body.variables.input.url).toBe(serviceUrl);
+      expect(body.variables.input.force).toBe(true);
       return [200];
     });
 
@@ -438,13 +452,6 @@ test('should send original schema of a federated (v1) service', async () => {
 
   await hive.dispose();
   http.done();
-
-  expect(body.variables.input.sdl).toBe(`type Query{bar:String}`);
-  expect(body.variables.input.author).toBe(author);
-  expect(body.variables.input.commit).toBe(commit);
-  expect(body.variables.input.service).toBe(serviceName);
-  expect(body.variables.input.url).toBe(serviceUrl);
-  expect(body.variables.input.force).toBe(true);
 });
 
 test('should send original schema of a federated (v2) service', async () => {
@@ -464,7 +471,9 @@ test('should send original schema of a federated (v2) service', async () => {
     debug: true,
     agent: {
       timeout: 500,
-      maxRetries: 1,
+      sendInterval: 10,
+      minTimeout: 10,
+      maxRetries: 0,
       logger,
     },
     token,
@@ -477,7 +486,6 @@ test('should send original schema of a federated (v2) service', async () => {
     },
   });
 
-  let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
     .matchHeader('Authorization', `Bearer ${token}`)
@@ -485,8 +493,13 @@ test('should send original schema of a federated (v2) service', async () => {
     .matchHeader('graphql-client-name', headers['graphql-client-name'])
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
     .once()
-    .reply((_, _body) => {
-      body = _body;
+    .reply((_, body: any) => {
+      expect(body.variables.input.sdl).toBe(`type Query{bar:String}`);
+      expect(body.variables.input.author).toBe(author);
+      expect(body.variables.input.commit).toBe(commit);
+      expect(body.variables.input.service).toBe(serviceName);
+      expect(body.variables.input.url).toBe(serviceUrl);
+      expect(body.variables.input.force).toBe(true);
       return [200];
     });
 
@@ -502,13 +515,6 @@ test('should send original schema of a federated (v2) service', async () => {
 
   await hive.dispose();
   http.done();
-
-  expect(body.variables.input.sdl).toBe(`type Query{bar:String}`);
-  expect(body.variables.input.author).toBe(author);
-  expect(body.variables.input.commit).toBe(commit);
-  expect(body.variables.input.service).toBe(serviceName);
-  expect(body.variables.input.url).toBe(serviceUrl);
-  expect(body.variables.input.force).toBe(true);
 });
 
 test('should display SchemaPublishMissingServiceError', async () => {
@@ -633,4 +639,61 @@ test('should display SchemaPublishMissingUrlError', async () => {
   expect(logger.error).toHaveBeenCalledWith(
     `[hive][reporting] Failed to report schema: Service url is not defined`,
   );
+});
+
+test('retry on non-200', async () => {
+  const logSpy = vi.fn();
+  const logger = {
+    error: logSpy,
+    info: logSpy,
+  };
+
+  const token = 'Token';
+
+  const fetchSpy = vi.fn(async (_url: RequestInfo | URL, _init?: RequestInit) => {
+    return new Response('No no no', { status: 500, statusText: 'Internal server error' });
+  });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    printTokenInfo: false,
+    agent: {
+      logger,
+      timeout: 10,
+      minTimeout: 10,
+      sendInterval: 10,
+      maxRetries: 1,
+      __testing: {
+        fetch: fetchSpy,
+      },
+    },
+    token,
+    reporting: {
+      author: 'Test',
+      commit: 'Commit',
+      endpoint: 'http://localhost/registry',
+    },
+  });
+
+  hive.reportSchema({
+    schema: buildSchema(/* GraphQL */ `
+      type Query {
+        foo: String
+      }
+    `),
+  });
+
+  await waitFor(50);
+  await hive.dispose();
+
+  expect(logSpy).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
+  expect(logSpy).toHaveBeenCalledWith(
+    expect.stringContaining(`[hive][reporting] Attempt 1 failed`),
+  );
+  expect(logSpy).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
+  expect(logSpy).toHaveBeenCalledWith(
+    expect.stringContaining(`[hive][reporting] Attempt 2 failed`),
+  );
+  expect(logSpy).not.toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 3)');
 });
