@@ -69,7 +69,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('Federation 1', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema {
@@ -108,7 +108,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('Federation 2 without "import" argument', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0") {
@@ -147,7 +147,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('Federation 2 with "import" argument', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@inaccessible"]) {
@@ -186,7 +186,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('Federation 2 with "import" argument alias', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema
@@ -231,7 +231,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include of object type field via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -261,7 +261,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include of object type field via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -294,7 +294,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of object type field via single filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -324,7 +324,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of object type field via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -435,7 +435,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include of interface type field via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -473,7 +473,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include of interface type field via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -514,7 +514,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of interface type field via simple filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -554,7 +554,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of interface type field via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -639,7 +639,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include interface type via filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -687,7 +687,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include enum value via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -726,7 +726,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include enum value via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -768,7 +768,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of enum value via single filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -806,7 +806,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of enum type value via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -895,7 +895,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include input object type field via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -933,7 +933,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include input object value via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
       const sdl = parse(/* GraphQL */ `
         schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"]) {
@@ -976,7 +976,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of input object type field via single filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -1014,7 +1014,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of input object type field via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -1107,7 +1107,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('object field arguments are included via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -1136,7 +1136,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('object field arguments are included via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -1168,7 +1168,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of object field arguments via single filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -1198,7 +1198,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of object type field arguments via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
       const sdl = parse(/* GraphQL */ `
@@ -1264,7 +1264,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include of scalar type field via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -1298,7 +1298,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include of scalar type via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -1333,7 +1333,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of scalar type via single filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
 
@@ -1369,7 +1369,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude of scalar type via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
 
@@ -1444,7 +1444,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include union type via single filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -1492,7 +1492,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
     test('include union type via complex filter.include value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
         include: new Set(['tag1', 'tag2']),
-        exclude: null,
+        exclude: new Set(),
       };
 
       const sdl = parse(/* GraphQL */ `
@@ -1546,7 +1546,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude union type via single filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1']),
       };
 
@@ -1601,7 +1601,7 @@ describe('applyTagFilterToInaccessibleTransformOnSubgraphSchema', () => {
 
     test('exclude union type via complex filter.exclude value', () => {
       const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-        include: null,
+        include: new Set(),
         exclude: new Set(['tag1', 'tag2']),
       };
 
@@ -1715,7 +1715,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('object types are @inaccessible because all fields are @inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs = parse(/* GraphQL */ `
       type Query {
@@ -1745,7 +1745,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('object type that is only defined in one subgraph is inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@tag"])
@@ -1798,7 +1798,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('object types are accessible because at least one field is accessible in one subgraph, but not in another', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       type Query {
@@ -1845,7 +1845,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('object with object extension that has no tag is made @inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       type Query {
@@ -1883,7 +1883,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('object with object extension that has one tag is not made @inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       type Query {
@@ -1921,7 +1921,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('interface types are @inaccessible because all fields are @inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs = parse(/* GraphQL */ `
       type Query {
@@ -1957,7 +1957,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('interface types are accessible because at least one field is accessible in one subgraph, but not in another', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       type Query {
@@ -2028,7 +2028,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('input types are @inaccessible because all fields are @inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs = parse(/* GraphQL */ `
       type Query {
@@ -2056,7 +2056,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('input types are accessible because at least one field is accessible in one subgraph, but not in another', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       type Query {
@@ -2109,7 +2109,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('enum types are @inaccessible because all fields are @inaccessible', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs = parse(/* GraphQL */ `
       type Query {
@@ -2137,7 +2137,7 @@ describe('applyTagFilterOnSubgraphs', () => {
   test('enum types are accessible because at least one field is accessible in one subgraph, but not in another', () => {
     const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
       include: new Set(['tag1']),
-      exclude: null,
+      exclude: new Set(),
     };
     const typeDefs1 = parse(/* GraphQL */ `
       type Query {

@@ -698,8 +698,8 @@ const createFederation: (
         contracts.map(async contract => {
           // Apply tag filter to subgraph schemas (transform to inaccessible)
           const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
-            include: contract.filter.include ? new Set(contract.filter.include) : null,
-            exclude: contract.filter.exclude ? new Set(contract.filter.exclude) : null,
+            include: new Set(contract.filter.include),
+            exclude: new Set(contract.filter.exclude),
           };
 
           const filteredSubgraphs = applyTagFilterOnSubgraphs(subgraphs, filter);
