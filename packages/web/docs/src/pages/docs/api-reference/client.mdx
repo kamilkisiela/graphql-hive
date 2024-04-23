@@ -1,17 +1,26 @@
 import { Cards } from 'nextra/components'
+import { Tabs } from '@theguild/components'
 
 # Hive Client
 
 **Hive Client** is a set of libraries and utilities for interacting with Hive, for both
-[Schema Registry](/docs/features/schema-registry) and
-[Usage Reporting](/docs/features/usage-reporting).
+[Schema Registry](../features/schema-registry.mdx) and
+[Usage Reporting](../features/usage-reporting.mdx).
 
 ## Available Clients
 
-### JavaScript / NodeJS Client
+### JavaScript / NodeJS Clients
 
-[`@graphql-hive/client`](https://npmjs.com/package/@graphql-hive/client) is the official library for
-interacting with Hive's **Schema Registry** and **Usage Reporting**.
+Here's a list of official libraries for JavaScript and NodeJS:
+
+- [`@graphql-hive/core`](https://npmjs.com/package/@graphql-hive/core) - Core library for
+  interacting with Hive's **Schema Registry** and **Usage Reporting**.
+- [`@graphql-hive/yoga`](https://npmjs.com/package/@graphql-hive/yoga) - Integration with GraphQL
+  Yoga.
+- [`@graphql-hive/apollo`](https://npmjs.com/package/@graphql-hive/apollo) - Integration with Apollo
+  Server.
+- [`@graphql-hive/envelop`](https://npmjs.com/package/@graphql-hive/envelop) - Integration with
+  Envelop.
 
 You can refer to the following guides for getting started within your project, then revisit this
 page for configuring the client to your needs.
@@ -28,8 +37,9 @@ page for configuring the client to your needs.
 #### Configuration
 
 Refer to the
-[`HivePluginOptions` interface](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/client/src/internal/types.ts#LL40C29-L40C29)
-for complete list of options and configurations you can pass to the Hive JavaScript Client.
+[`HivePluginOptions` interface](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/core/src/client/types.ts)
+for complete list of options and configurations you can pass to the Hive JavaScript Client of
+choice.
 
 #### Client Information
 
@@ -41,13 +51,13 @@ key within the `connectionParams`.
 You can fully customize how to retrieve the client information by passing a custom `clientInfo`
 implementation.
 
-You can pass a custom `clientInfo` callback to the `HivePluginOptions` to have full control on how
-you detect a client's information.
+You can pass a custom `clientInfo` callback to have full control on how you detect a client's
+information.
 
 ```ts
-const config: HivePluginOptions = {
+useHive({
   usage: {
-    clientInfo(context) {
+    clientInfo(context /* Your GraphQL execution context */) {
       const name = context?.headers?.['x-graphql-client-name']
       const version = context?.headers?.['x-graphql-client-version']
 
@@ -58,7 +68,7 @@ const config: HivePluginOptions = {
       return null
     }
   }
-}
+})
 ```
 
 The context object is the context object as used within the GraphQL execution. Depending on your
@@ -72,11 +82,11 @@ You can pass a custom `exclude` array to the `HivePluginOptions` to ignore speci
 being reported to Hive.
 
 ```ts
-const config: HivePluginOptions = {
+useHive({
   usage: {
     exclude: ['unwantedOperationName', 'anotherOperationName']
   }
-}
+})
 ```
 
 #### Sampling
@@ -112,6 +122,12 @@ A sample rate between 0 and 1.
 - `true` = 100%
 - `false` = 0%
 
+The `samplingContext` object contains the following properties:
+
+- `operationName` - The name of the operation.
+- `document` - The operation AST.
+- `contextValue` - The context value passed to the GraphQL execution.
+
 ```typescript
 useHive({
   /* ... other options ... */,
@@ -133,10 +149,22 @@ If you want to make sure that every operation is reported at least once, you can
 `atLeastOnceSampler`. Every operation is reported at least once, but every next occurrence is
 decided by the sampler.
 
-```typescript
-import { useHive, atLeastOnceSampler} from '@graphql-hive/client';
+Both `keyFn` and `sampler` are required and receive the same `samplingContext` object.
 
-useHive({
+The `samplingContext` object contains the following properties:
+
+- `operationName` - The name of the operation.
+- `document` - The operation AST.
+- `contextValue` - The context value passed to the GraphQL execution.
+
+<Tabs items={['Custom', 'GraphQL Yoga', 'Apollo Server', 'Envelop']}>
+
+<Tabs.Tab>
+
+```typescript
+import { createHive, atLeastOnceSampler} from '@graphql-hive/core';
+
+const hive = createHive({
   /* ... other options ... */,
   usage: {
     sampler: atLeastOnceSampler({
@@ -148,7 +176,12 @@ useHive({
         // and some operations may have the same name but different body.
         return samplingContext.operationName;
       },
-      sampler(_samplingContext) {
+      sampler(samplingContext) {
+        // Use the context to decide if the operation should be sent to Hive.
+        if (samplingContext.contextValue.headers.get('x-graphql-client-name') === 'WebApp') {
+          return 1; // 100% of the operations from WebApp will be sent to Hive
+        }
+
         const hour = new Date().getHours();
 
         if (hour >= 9 && hour <= 17) {
@@ -162,13 +195,131 @@ useHive({
 })
 ```
 
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+import { useHive, atLeastOnceSampler} from '@graphql-hive/yoga';
+
+useHive({
+  /* ... other options ... */,
+  usage: {
+    sampler: atLeastOnceSampler({
+      // Produces a unique key for a given GraphQL request.
+      // This key is used to determine the uniqueness of a GraphQL operation.
+      keyFn(samplingContext) {
+        // Operation name is a good candidate for a key, but not perfect,
+        // as not all operations have names
+        // and some operations may have the same name but different body.
+        return samplingContext.operationName;
+      },
+      sampler(samplingContext) {
+        // Use the context to decide if the operation should be sent to Hive.
+        if (samplingContext.contextValue.headers.get('x-graphql-client-name') === 'WebApp') {
+          return 1; // 100% of the operations from WebApp will be sent to Hive
+        }
+
+        const hour = new Date().getHours();
+
+        if (hour >= 9 && hour <= 17) {
+          return 0.3;
+        }
+
+        return 0.8;
+      }
+    })
+  }
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+import { useHive, atLeastOnceSampler} from '@graphql-hive/apollo';
+
+useHive({
+  /* ... other options ... */,
+  usage: {
+    sampler: atLeastOnceSampler({
+      // Produces a unique key for a given GraphQL request.
+      // This key is used to determine the uniqueness of a GraphQL operation.
+      keyFn(samplingContext) {
+        // Operation name is a good candidate for a key, but not perfect,
+        // as not all operations have names
+        // and some operations may have the same name but different body.
+        return samplingContext.operationName;
+      },
+      sampler(samplingContext) {
+        // Use the context to decide if the operation should be sent to Hive.
+        if (samplingContext.contextValue.headers.get('x-graphql-client-name') === 'WebApp') {
+          return 1; // 100% of the operations from WebApp will be sent to Hive
+        }
+
+        const hour = new Date().getHours();
+
+        if (hour >= 9 && hour <= 17) {
+          return 0.3;
+        }
+
+        return 0.8;
+      }
+    })
+  }
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+import { useHive, atLeastOnceSampler} from '@graphql-hive/envelop';
+
+useHive({
+  /* ... other options ... */,
+  usage: {
+    sampler: atLeastOnceSampler({
+      // Produces a unique key for a given GraphQL request.
+      // This key is used to determine the uniqueness of a GraphQL operation.
+      keyFn(samplingContext) {
+        // Operation name is a good candidate for a key, but not perfect,
+        // as not all operations have names
+        // and some operations may have the same name but different body.
+        return samplingContext.operationName;
+      },
+      sampler(samplingContext) {
+        // Use the context to decide if the operation should be sent to Hive.
+        if (samplingContext.contextValue.headers.get('x-graphql-client-name') === 'WebApp') {
+          return 1; // 100% of the operations from WebApp will be sent to Hive
+        }
+
+        const hour = new Date().getHours();
+
+        if (hour >= 9 && hour <= 17) {
+          return 0.3;
+        }
+
+        return 0.8;
+      }
+    })
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
 #### Custom Integration
 
 If your GraphQL server is not listed above, you can implement a custom integration. Start by
 importing and creating a Hive instance using the `createHive` function.
 
 ```ts
-import { createHive } from '@graphql-hive/client'
+import { createHive } from '@graphql-hive/core'
 
 const hive = createHive({
   enabled: true,

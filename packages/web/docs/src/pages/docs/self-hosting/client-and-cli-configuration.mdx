@@ -1,3 +1,5 @@
+import { Tabs } from '@theguild/components'
+
 # Client & CLI Configuration
 
 By default, the Hive CLI and Hive Client SDK connect to the Hive Cloud version. In order to connect
@@ -7,8 +9,11 @@ to a local Hive Server, you need to configure both the client and SDK.
 
 Instantiate your Hive client with the `selfHosting` option.
 
-```ts filename="hive.ts"
-import { createHive } from '@graphql-hive/client'
+<Tabs items={['Custom', 'GraphQL Yoga', 'Apollo Server', 'Envelop']}>
+  <Tabs.Tab>
+
+```ts filename="custom.ts"
+import { createHive } from '@graphql-hive/core'
 
 const hive = createHive({
   enabled: true,
@@ -22,6 +27,85 @@ const hive = createHive({
   usage: true
 })
 ```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```ts filename="graphql-yoga.ts"
+import { createYoga } from 'graphql-yoga'
+import { useHive } from '@graphql-hive/yoga'
+
+const yoga = createYoga({
+  plugins: [
+    useHive({
+      enabled: true,
+      debug: true,
+      token,
+      selfHosting: {
+        graphqlEndpoint: 'http://localhost:8082/graphql',
+        usageEndpoint: 'http://localhost:8081',
+        applicationUrl: 'http://localhost:8080/'
+      },
+      usage: true
+    })
+  ]
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```ts filename="apollo-server.ts"
+import { createYoga } from '@apollo/server'
+import { useHive } from '@graphql-hive/apollo'
+
+const apollo = new ApolloServer({
+  plugins: [
+    useHive({
+      enabled: true,
+      debug: true,
+      token,
+      selfHosting: {
+        graphqlEndpoint: 'http://localhost:8082/graphql',
+        usageEndpoint: 'http://localhost:8081',
+        applicationUrl: 'http://localhost:8080/'
+      },
+      usage: true
+    })
+  ]
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```ts filename="envelop.ts"
+import { createYoga } from 'graphql-yoga'
+import { useHive } from '@graphql-hive/envelop'
+
+const yoga = createYoga({
+  plugins: [
+    useHive({
+      enabled: true,
+      debug: true,
+      token,
+      selfHosting: {
+        graphqlEndpoint: 'http://localhost:8082/graphql',
+        usageEndpoint: 'http://localhost:8081',
+        applicationUrl: 'http://localhost:8080/'
+      },
+      usage: true
+    })
+  ]
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 ## Configuring the CLI
 
