@@ -87,7 +87,8 @@ export default {
     const hive = createHive({
       enabled: true, // Enable/Disable Hive Client
       token: 'YOUR-TOKEN',
-      usage: true // Collects schema usage based on operations
+      usage: true // Collects schema usage based on operations,
+      autoDispose: false,
     })
 
     const yoga = createYoga({

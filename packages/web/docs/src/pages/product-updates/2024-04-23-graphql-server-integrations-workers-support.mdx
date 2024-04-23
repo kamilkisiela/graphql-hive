@@ -1,0 +1,118 @@
+---
+title: Specialized packages for GraphQL Servers & Cloudflare Worker Support
+description:
+  Enhanced integration with GraphQL servers, deprecating `@graphql-hive/client` and adding support
+  for Cloudflare Workers.
+date: 2024-04-23
+authors: [kamil]
+---
+
+import { Callout, Tabs } from '@theguild/components'
+
+Exciting News!
+
+We're thrilled to reveal two updates today: library-specific packages and support for Cloudflare
+Workers.
+
+## Enhanced integration with GraphQL servers
+
+We heard your feedback, and we're always looking for ways to improve Hive. Providing a single
+package for all GraphQL server libraries can be challenging, especially when it comes to type
+safety.
+
+To address this, **we're introducing library-specific packages**. These packages are designed to
+seamlessly integrate with your GraphQL server of choice, improving the developer experience.
+
+<Callout type="warning">
+  As part of this update, we'll be sunsetting the @graphql-hive/client package in favor of new
+  specialized packages.
+</Callout>
+
+### Migration guide
+
+<Tabs items={['GraphQL Yoga', 'Apollo Server', 'Envelop', 'Custom']}>
+  
+  <Tabs.Tab>
+
+1. Remove `@graphql-hive/client` from your dependencies.
+1. Install `@graphql-hive/yoga`.
+
+```diff filename="yoga.ts"
+import { createYoga } from 'graphql-yoga';
+- import { useHive } from '@graphql-hive/client';
++ import { useHive } from '@graphql-hive/yoga';
+```
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+
+1. Remove `@graphql-hive/client` from your dependencies.
+1. Install `@graphql-hive/apollo`.
+
+```diff filename="apollo-server.ts"
+import { ApolloServer } from '@apollo/server';
+- import { hiveApollo } from '@graphql-hive/client';
++ import { useHive } from '@graphql-hive/apollo';
+```
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+
+1. Remove `@graphql-hive/client` from your dependencies.
+1. Install `@graphql-hive/envelop`.
+
+```diff filename="envelop.ts"
+- import { useHive } from '@graphql-hive/client';
++ import { useHive } from '@graphql-hive/envelop';
+```
+
+  </Tabs.Tab>
+
+<Tabs.Tab>
+
+1. Remove `@graphql-hive/client` from your dependencies.
+1. Install `@graphql-hive/core`.
+
+```diff filename="custom-server.ts"
+- import { createHive } from '@graphql-hive/client';
++ import { createHive } from '@graphql-hive/core';
+```
+
+  </Tabs.Tab>
+
+</Tabs>
+
+## Cloudflare Worker Support
+
+We're delighted to announce that Hive now fully supports Cloudflare Workers. Thanks to making the
+core package node-agnostic, you can now use Hive in your Cloudflare Workers projects.
+
+We recommend leveraging [GraphQL Yoga](https://the-guild.dev/graphql/yoga-server) with Cloudflare
+Workers as it provides an excellent developer experience and is well-suited for serverless
+environments with the Fetch API.
+
+```typescript filename="worker.ts"
+import { createYoga } from 'graphql-yoga'
+import { createHive, useHive } from '@graphql-hive/yoga'
+
+export default {
+  async fetch(request, env, ctx) {
+    const hive = createHive({
+      enabled: true, // Enable/Disable Hive Client
+      token: env.HIVE_TOKEN,
+      usage: true // Collects schema usage based on operations,
+      autoDispose: false,
+    })
+
+    const yoga = createYoga({
+      plugins: [useHive(hive)]
+    })
+
+    const response = await yoga.fetch(request, env, ctx)
+    ctx.waitUntil(hive.dispose())
+    return response
+  }
+}
+```
