@@ -312,8 +312,8 @@ importers:
         specifier: 4.1.1
         version: 4.1.1
       ioredis:
-        specifier: 5.4.0
-        version: 5.4.0
+        specifier: 5.4.1
+        version: 5.4.1
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -734,11 +734,11 @@ importers:
         specifier: 5.3.0
         version: 5.3.0(graphql@16.8.1)
       ioredis:
-        specifier: 5.4.0
-        version: 5.4.0
+        specifier: 5.4.1
+        version: 5.4.1
       ioredis-mock:
         specifier: 8.9.0
-        version: 8.9.0(@types/ioredis-mock@8.2.5)(ioredis@5.4.0)
+        version: 8.9.0(@types/ioredis-mock@8.2.5)(ioredis@5.4.1)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -878,8 +878,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       ioredis:
-        specifier: 5.4.0
-        version: 5.4.0
+        specifier: 5.4.1
+        version: 5.4.1
       mjml:
         specifier: 4.14.0
         version: 4.14.0(encoding@0.1.13)
@@ -1058,11 +1058,11 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       ioredis:
-        specifier: 5.4.0
-        version: 5.4.0
+        specifier: 5.4.1
+        version: 5.4.1
       ioredis-mock:
         specifier: 8.9.0
-        version: 8.9.0(@types/ioredis-mock@8.2.5)(ioredis@5.4.0)
+        version: 8.9.0(@types/ioredis-mock@8.2.5)(ioredis@5.4.1)
       p-timeout:
         specifier: 6.1.2
         version: 6.1.2
@@ -1386,8 +1386,8 @@ importers:
         specifier: 4.26.2
         version: 4.26.2
       ioredis:
-        specifier: 5.4.0
-        version: 5.4.0
+        specifier: 5.4.1
+        version: 5.4.1
       ms:
         specifier: 2.1.3
         version: 2.1.3
@@ -1566,8 +1566,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       ioredis:
-        specifier: 5.4.0
-        version: 5.4.0
+        specifier: 5.4.1
+        version: 5.4.1
       p-timeout:
         specifier: 6.1.2
         version: 6.1.2
@@ -11470,8 +11470,8 @@ packages:
       '@types/ioredis-mock': ^8
       ioredis: ^5
 
-  ioredis@5.4.0:
-    resolution: {integrity: sha512-lGiiZyWFOskPu3pH4P8+uicHOZHpzYpgfKZFre68wLK6059zBo+KDTQpwxAVibBajKqpcrRJ5k+jl/uNHcCo3A==}
+  ioredis@5.4.1:
+    resolution: {integrity: sha512-2YZsvl7jopIa1gaePkeMtd9rAcSjOOjPtpcLlOeusyO+XH2SK5ZcT+UCrElPP+WVIInh2TzeI4XW9ENaSLVVHA==}
     engines: {node: '>=12.22.0'}
 
   ip@2.0.1:
@@ -25433,7 +25433,7 @@ snapshots:
   '@types/ioredis-mock@8.2.5':
     dependencies:
       '@types/node': 20.12.7
-      ioredis: 5.4.0
+      ioredis: 5.4.1
     transitivePeerDependencies:
       - supports-color
 
@@ -25443,7 +25443,7 @@ snapshots:
 
   '@types/ioredis@5.0.0':
     dependencies:
-      ioredis: 5.4.0
+      ioredis: 5.4.1
     transitivePeerDependencies:
       - supports-color
 
@@ -26716,7 +26716,7 @@ snapshots:
   bullmq@5.7.1:
     dependencies:
       cron-parser: 4.6.0
-      ioredis: 5.4.0
+      ioredis: 5.4.1
       msgpackr: 1.10.1
       node-abort-controller: 3.1.1
       semver: 7.5.4
@@ -30516,17 +30516,17 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
 
-  ioredis-mock@8.9.0(@types/ioredis-mock@8.2.5)(ioredis@5.4.0):
+  ioredis-mock@8.9.0(@types/ioredis-mock@8.2.5)(ioredis@5.4.1):
     dependencies:
       '@ioredis/as-callback': 3.0.0
       '@ioredis/commands': 1.2.0
       '@types/ioredis-mock': 8.2.5
       fengari: 0.1.4
       fengari-interop: 0.1.3(fengari@0.1.4)
-      ioredis: 5.4.0
+      ioredis: 5.4.1
       semver: 7.5.4
 
-  ioredis@5.4.0:
+  ioredis@5.4.1:
     dependencies:
       '@ioredis/commands': 1.2.0
       cluster-key-slot: 1.1.1
