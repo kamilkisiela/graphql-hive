@@ -13,7 +13,7 @@ import {
 } from '@app/gql/graphql';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
-import { createHive } from '../../../../packages/libraries/client/src';
+import { createHive } from '../../../../packages/libraries/core/src';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
 import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';

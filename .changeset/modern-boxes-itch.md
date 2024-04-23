@@ -1,5 +1,5 @@
 ---
-"@graphql-hive/client": minor
+"@graphql-hive/core": minor
 ---
 
 Node agnostic
