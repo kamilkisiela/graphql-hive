@@ -1,0 +1,71 @@
+{
+  "name": "@graphql-hive/apollo",
+  "version": "0.32.0",
+  "type": "module",
+  "description": "GraphQL Hive + Apollo Server",
+  "repository": {
+    "type": "git",
+    "url": "kamilkisiela/graphql-hive",
+    "directory": "packages/libraries/apollo"
+  },
+  "homepage": "https://the-guild.dev/graphql/hive",
+  "author": {
+    "email": "contact@the-guild.dev",
+    "name": "The Guild",
+    "url": "https://the-guild.dev"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/typings/index.d.cts",
+        "default": "./dist/cjs/index.js"
+      },
+      "import": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "default": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "typings": "dist/typings/index.d.ts",
+  "scripts": {
+    "build": "node ../../../scripts/generate-version.mjs && bob build",
+    "check:build": "bob check"
+  },
+  "peerDependencies": {
+    "@apollo/server": "^4.0.0",
+    "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"
+  },
+  "dependencies": {
+    "@graphql-hive/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@apollo/server": "4.10.4",
+    "@graphql-tools/schema": "10.0.3",
+    "body-parser": "1.20.2",
+    "express": "4.19.2",
+    "graphql-ws": "5.16.0",
+    "nock": "14.0.0-beta.5",
+    "vitest": "1.5.0",
+    "ws": "8.16.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "directory": "dist"
+  },
+  "sideEffects": false,
+  "typescript": {
+    "definition": "dist/typings/index.d.ts"
+  }
+}

@@ -183,8 +183,8 @@ const config: CodegenConfig = {
       },
     },
     // Client
-    'packages/libraries/client/src/__generated__/types.ts': {
-      documents: ['./packages/libraries/client/src/**/*.ts'],
+    'packages/libraries/core/src/client/__generated__/types.ts': {
+      documents: ['./packages/libraries/core/src/client/**/*.ts'],
       config: {
         flattenGeneratedTypes: true,
         onlyOperationTypes: true,

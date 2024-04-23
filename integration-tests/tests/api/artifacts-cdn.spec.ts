@@ -10,7 +10,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { createSupergraphManager } from '@graphql-hive/client';
+import { createSupergraphManager } from '@graphql-hive/apollo';
 import { graphql } from '../../testkit/gql';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';

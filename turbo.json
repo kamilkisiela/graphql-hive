@@ -16,7 +16,19 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/client#build": {
+    "@hive/libraries/core#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@hive/libraries/apollo#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@hive/libraries/yoga#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "@hive/libraries/envelop#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
@@ -38,7 +50,7 @@
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "@hive/migrations#build": {
-      "dependsOn": ["^build", "@graphql-hive/client#build"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "@hive/server#build": {

@@ -9,7 +9,7 @@ Hive.
 ## Installation
 
 ```sh npm2yarn
-npm i @graphql-hive/client
+npm i @graphql-hive/yoga
 ```
 
 <Callout type="info">
@@ -17,9 +17,14 @@ npm i @graphql-hive/client
   includes a runtime to send usage reports and schemas to Hive registry.
 </Callout>
 
-The `@graphql-hive/client` package exports a
+The `@graphql-hive/yoga` package exports a
 [Yoga plugin](https://the-guild.dev/graphql/yoga-server/docs/features/envelop-plugins), that can be
 used directly with [GraphQL-Yoga](https://the-guild.dev/graphql/yoga-server).
+
+## Configuration
+
+A full configuration guide can be found in the
+["Configuration"](../api-reference/client.mdx#configuration) page.
 
 ## Integration Guide
 
@@ -32,7 +37,7 @@ Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
 
 <Callout>
   For more configuration options, such as sampling, please refer to the [Hive client
-  configuration](/docs/api-reference/client#configuration) reference.
+  configuration](../api-reference/client.mdx#configuration) reference.
 </Callout>
 
 #### GraphQL over HTTP (default)
@@ -42,13 +47,13 @@ You can send usage reporting to Hive registry by using the `usage` section of th
 ```ts
 import { createServer } from 'node:http'
 import { createYoga } from 'graphql-yoga'
-import { useYogaHive } from '@graphql-hive/client'
+import { useHive } from '@graphql-hive/yoga'
 import { schema } from './schema'
 
 const yoga = createYoga({
   schema,
   plugins: [
-    useYogaHive({
+    useHive({
       enabled: true, // Enable/Disable Hive Client
       token: 'YOUR-TOKEN',
       // Collects and send usage reporting based on executed operations
@@ -74,26 +79,24 @@ implementation.
 Here's an example of how to use Hive with GraphQL Yoga on Cloudflare Workers:
 
 ```typescript
-import { useYogaHive, createYogaHive, useYogaHive } from '@graphql-hive/client'
 import { createYoga } from 'graphql-yoga'
+import { createHive, useHive } from '@graphql-hive/yoga'
 
 export default {
   async fetch(request, env, ctx) {
-    const hive = createYogaHive({
+    const hive = createHive({
       enabled: true, // Enable/Disable Hive Client
       token: 'YOUR-TOKEN',
       usage: true // Collects schema usage based on operations
-    });
+    })
 
     const yoga = createYoga({
-      plugins: [
-        useYogaHive(hive)
-      ]
-    });
+      plugins: [useHive(hive)]
+    })
 
-    const response = await yoga.fetch(request, env, ctx);
-    ctx.waitUntil(hive.dispose());
-    return response;
+    const response = await yoga.fetch(request, env, ctx)
+    ctx.waitUntil(hive.dispose())
+    return response
   }
 }
 ```
@@ -101,7 +104,8 @@ export default {
 ##### Client Information
 
 You can associate a client name and version with any operation reported to Hive, by sending the
-`x-client-nam`e and `x-client-version` HTTP headers for requests sent to your GraphQL Yoga server.
+`x-graphql-client-name` and `x-graphql-client-version` HTTP headers for requests sent to your
+GraphQL Yoga server.
 
 ```bash filename="Example HTTP Request with client headers" {2-3}
 curl \
@@ -111,7 +115,7 @@ curl \
   -H "accept: application/json" \
   -X POST \
   "http://localhost:4000/graphql" \
-  -d '{"query":"{ hello }"}
+  -d '{"query":"{ hello }"}'
 ```
 
 #### GraphQL over SSE
@@ -126,7 +130,7 @@ Just add the SSE plugin to your Yoga server and the usage reporting will be sent
 ```ts filename="SSE HTTP Request Client info" {4,10}
 import { createServer } from 'node:http'
 import { createYoga, type YogaInitialContext } from 'graphql-yoga'
-import { useYogaHive } from '@graphql-hive/client'
+import { useHive } from '@graphql-hive/yoga'
 import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse'
 import { schema } from './schema'
 
@@ -134,7 +138,7 @@ const yoga = createYoga({
   schema,
   plugins: [
     useGraphQLSSE(),
-    useYogaHive({
+    useHive({
       enabled: true,
       token: 'YOUR-TOKEN',
       usage: true
@@ -177,6 +181,7 @@ import { createServer } from 'node:http'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { createYoga } from 'graphql-yoga'
 import { WebSocketServer } from 'ws'
+import { useHive } from '@graphql-hive/yoga'
 import { schema } from './schema'
 
 const yoga = createYoga({
@@ -185,7 +190,7 @@ const yoga = createYoga({
     subscriptionsProtocol: 'WS'
   },
   plugins: [
-    useYogaHive({
+    useHive({
       enabled: true,
       token: 'YOUR-TOKEN',
       usage: true
@@ -257,6 +262,6 @@ const client = createClient({
 
 ## Additional Resources
 
-- [`@graphql-hive/client` source code](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/libraries/client)
-- [`HivePluginOptions` configuration reference](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/client/src/internal/types.ts#LL40C29-L40C29)
+- [`@graphql-hive/yoga` source code](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/libraries/yoga)
+- [`HivePluginOptions` configuration reference](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/core/src/client/types.ts)
 - [GraphQL Yoga](https://the-guild.dev/graphql/yoga-server)

@@ -5,7 +5,7 @@ import { Callout } from '@theguild/components'
 ## Installation
 
 ```sh npm2yarn
-npm i @graphql-hive/client
+npm i @graphql-hive/core
 ```
 
 <Callout type="info">
@@ -13,13 +13,13 @@ npm i @graphql-hive/client
   includes a runtime to send usage reports and schemas to Hive registry.
 </Callout>
 
-The `@graphql-hive/client` package exports a utility function called `createServicesFetcher` that
-can be used to fetch services definition from Hive's CDN. You can use it to create a GraphQL schema
-from the all services schemas published to Hive.
+The `@graphql-hive/core` package exports a utility function called `createServicesFetcher` that can
+be used to fetch services definition from Hive's CDN. You can use it to create a GraphQL schema from
+the all services schemas published to Hive.
 
 <Callout type="info">
-  The `createServicesFetcher` function is a part of the `@graphql-hive/client` package, and it can
-  be used with any GraphQL server runtime. You may use it with Apollo Server, GraphQL Yoga, or any
+  The `createServicesFetcher` function is a part of the `@graphql-hive/core` package, and it can be
+  used with any GraphQL server runtime. You may use it with Apollo Server, GraphQL Yoga, or any
   other library to implement a custom GraphQL gateway.
 </Callout>
 
@@ -34,7 +34,7 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
 import { createServer } from 'node:http'
 import { buildSchema } from 'graphql'
 import { createYoga } from 'graphql-yoga'
-import { createServicesFetcher } from '@graphql-hive/client'
+import { createServicesFetcher } from '@graphql-hive/core'
 import { buildHTTPExecutor } from '@graphql-tools/executor-http'
 import { stitchSchemas } from '@graphql-tools/stitch'
 

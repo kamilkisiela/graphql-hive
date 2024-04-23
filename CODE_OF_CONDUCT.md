@@ -93,7 +93,8 @@ distress.
 
 If you feel you have been falsely or unfairly accused of violating this Code of Conduct, you should
 notify with a concise description of your grievance. Your grievance will be handled in accordance
-with our existing governing policies. [Policy](https://graphql-hive.com/privacy-policy.pdf)
+with our existing governing policies.
+[Policy](https://the-guild.dev/graphql/hive/privacy-policy.pdf)
 
 ## 9. Scope
 
