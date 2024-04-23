@@ -2000,8 +2000,8 @@ importers:
   scripts:
     devDependencies:
       '@graphql-hive/core':
-        specifier: '*'
-        version: 0.2.4(graphql@16.8.1)
+        specifier: workspace:*
+        version: link:../packages/libraries/core/dist
 
 packages:
 
@@ -3950,12 +3950,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-
-  '@graphql-hive/core@0.2.4':
-    resolution: {integrity: sha512-yCCEV9SxL6XriJB24jzxa00R2TvHczSVte3zRl3TWxk+2D7xpJvrC553175QZ0mqrayHqqDmhfO8FWcJPhLMmg==}
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
   '@graphql-inspector/audit-command@4.0.3':
     resolution: {integrity: sha512-cm4EtieIp9PUSDBze+Sn5HHF80jDF9V7sYyXqFa7+Vtw4Jlet98Ig48dFVtoLuFCPtCv2eZ22I8JOkBKL5WgVA==}
@@ -19983,11 +19977,6 @@ snapshots:
       - encoding
       - supports-color
       - utf-8-validate
-
-  '@graphql-hive/core@0.2.4(graphql@16.8.1)':
-    dependencies:
-      graphql: 16.8.1
-      lodash.sortby: 4.7.0
 
   '@graphql-inspector/audit-command@4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)':
     dependencies:
