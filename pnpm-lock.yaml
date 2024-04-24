@@ -355,8 +355,8 @@ importers:
         specifier: 5.16.0
         version: 5.16.0(graphql@16.8.1)
       nock:
-        specifier: 14.0.0-beta.5
-        version: 14.0.0-beta.5
+        specifier: 14.0.0-beta.6
+        version: 14.0.0-beta.6
       vitest:
         specifier: 1.5.0
         version: 1.5.0(@types/node@20.12.7)(less@4.2.0)(terser@5.20.0)
@@ -475,8 +475,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       nock:
-        specifier: 14.0.0-beta.5
-        version: 14.0.0-beta.5
+        specifier: 14.0.0-beta.6
+        version: 14.0.0-beta.6
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -552,8 +552,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0(graphql@16.8.1)
       nock:
-        specifier: 14.0.0-beta.5
-        version: 14.0.0-beta.5
+        specifier: 14.0.0-beta.6
+        version: 14.0.0-beta.6
       vitest:
         specifier: 1.5.0
         version: 1.5.0(@types/node@20.12.7)(less@4.2.0)(terser@5.20.0)
@@ -13262,8 +13262,8 @@ packages:
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
 
-  nock@14.0.0-beta.5:
-    resolution: {integrity: sha512-u255tf4DYvyErTlPZA9uTfXghiZZy+NflUOFONPVKZ5tP0yaHwKig28zyFOLhu8y5YcCRC+V5vDk4HHileh2iw==}
+  nock@14.0.0-beta.6:
+    resolution: {integrity: sha512-b7lc7qvj1dQzxtbU7TqyTMnKbNKwGQd585xsRtcCZOv3I/yOK9Vwv4nOgnLFxFtX9m1yjhQDRbgqFCqNh9HuEw==}
     engines: {node: '>= 18'}
 
   node-abi@3.52.0:
@@ -32989,7 +32989,7 @@ snapshots:
       lower-case: 2.0.2
       tslib: 2.6.2
 
-  nock@14.0.0-beta.5:
+  nock@14.0.0-beta.6:
     dependencies:
       json-stringify-safe: 5.0.1
       propagate: 2.0.1

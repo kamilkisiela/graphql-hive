@@ -55,7 +55,7 @@
     "body-parser": "1.20.2",
     "express": "4.19.2",
     "graphql-ws": "5.16.0",
-    "nock": "14.0.0-beta.5",
+    "nock": "14.0.0-beta.6",
     "vitest": "1.5.0",
     "ws": "8.16.0"
   },
