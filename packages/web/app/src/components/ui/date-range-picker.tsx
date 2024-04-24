@@ -231,6 +231,49 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
     );
   };
 
+  // Dynamic presets
+  const [dynamicPresets, setDynamicPresets] = useState<Preset[]>([]);
+  useEffect(() => {
+    if (quickRangeFilter.trim().match(/^Last [0-9]+$/)) {
+      const number = parseInt(quickRangeFilter.trim().split(' ')[1], 10);
+      const dynamicPresets: Preset[] = [
+        {
+          name: `last${number}m`,
+          label: `Last ${number} minutes`,
+          range: { from: `now-${number}m`, to: 'now' },
+        },
+        {
+          name: `last${number}h`,
+          label: `Last ${number} hours`,
+          range: { from: `now-${number}h`, to: 'now' },
+        },
+        {
+          name: `last${number}d`,
+          label: `Last ${number} days`,
+          range: { from: `now-${number}d`, to: 'now' },
+        },
+        {
+          name: `last${number}w`,
+          label: `Last ${number} weeks`,
+          range: { from: `now-${number}w`, to: 'now' },
+        },
+      ];
+
+      // Filter out dynamic presets that use invalid units
+      const validDynamicPresets = dynamicPresets.filter(preset => {
+        const isValidFromUnit = validUnits?.some(unit => preset.range.from.endsWith(unit));
+        const isValidToUnit = validUnits?.some(unit => preset.range.to.endsWith(unit));
+        return isValidFromUnit && isValidToUnit;
+      });
+
+      setDynamicPresets(validDynamicPresets);
+    } else {
+      setDynamicPresets([]);
+    }
+  }, [quickRangeFilter, validUnits]);
+
+  presets = [...presets, ...dynamicPresets];
+
   return (
     <Popover
       modal
@@ -353,7 +396,9 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
           </div>
           <div className="flex w-full flex-1 flex-col items-start gap-1 overflow-y-scroll pb-2 pt-1">
             {presets
-              .filter(preset => preset.label.toLowerCase().includes(quickRangeFilter.trim()))
+              .filter(preset =>
+                preset.label.toLowerCase().includes(quickRangeFilter.toLowerCase().trim()),
+              )
               .map(preset => (
                 <PresetButton key={preset.name} preset={preset} />
               ))}
