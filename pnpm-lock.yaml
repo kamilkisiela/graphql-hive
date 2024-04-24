@@ -1816,10 +1816,10 @@ importers:
         version: 2.0.0
       supertokens-auth-react:
         specifier: 0.35.6
-        version: 0.35.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supertokens-web-js@0.8.0)
+        version: 0.35.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supertokens-web-js@0.10.1)
       supertokens-web-js:
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.10.1
+        version: 0.10.1
       tailwind-merge:
         specifier: 2.2.2
         version: 2.2.2
@@ -15894,11 +15894,11 @@ packages:
   supertokens-node@15.2.1:
     resolution: {integrity: sha512-3zJ2EsiHYJHnYwAzDQI5Alp+4x/KcwEOBgeoPN5bWglZY0Xw0AzcZvd8S3N71vjLGvab0J3XxWmHeEHqSz5dbg==}
 
-  supertokens-web-js@0.8.0:
-    resolution: {integrity: sha512-kkvuPbdy1I0e7nejVJAhpPJhR5h7EUHdn7Fh1YqfSjZfSJh46J3JU2qWGCgSDVZuD1hSuUKb6skF9CQnltHWrQ==}
+  supertokens-web-js@0.10.1:
+    resolution: {integrity: sha512-Z5Xx0Nsjl/SY2SeQzdONArMzakEEu3LNKCjSi3eK11zIGgjE7fGEU0KoEZT/aBOqwLJzTfNRasYpTTIjkOH6KQ==}
 
-  supertokens-website@17.0.4:
-    resolution: {integrity: sha512-ayWhEFvspUe26YhM1bq11ssEpnFCZIsoHZtJwJHgHsoflfMUKdgrzOix/bboI0PWJeNTUphHyZebw0ApctaS1Q==}
+  supertokens-website@19.0.1:
+    resolution: {integrity: sha512-ZXaKIo260LLEpIX8NB6Nv4CRM+lchwgIXESwkMXIQ1XSpF8zt5CDh2CBI+1b4DsGTU99q3vyaR5B+fbWc9xFqQ==}
 
   supports-color@4.5.0:
     resolution: {integrity: sha512-ycQR/UbvI9xIlEdQT1TQqwoXtEldExbCEAJgRo5YXlmSKjv6ThHnP9/vwGa1gr19Gfw+LkFd7KqYMhzrRC5JYw==}
@@ -36049,14 +36049,14 @@ snapshots:
       pirates: 4.0.5
       ts-interface-checker: 0.1.13
 
-  supertokens-auth-react@0.35.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supertokens-web-js@0.8.0):
+  supertokens-auth-react@0.35.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supertokens-web-js@0.10.1):
     dependencies:
       intl-tel-input: 17.0.19
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       supertokens-js-override: 0.0.4
-      supertokens-web-js: 0.8.0
+      supertokens-web-js: 0.10.1
 
   supertokens-js-override@0.0.4: {}
 
@@ -36078,12 +36078,12 @@ snapshots:
       - encoding
       - supports-color
 
-  supertokens-web-js@0.8.0:
+  supertokens-web-js@0.10.1:
     dependencies:
       supertokens-js-override: 0.0.4
-      supertokens-website: 17.0.4
+      supertokens-website: 19.0.1
 
-  supertokens-website@17.0.4:
+  supertokens-website@19.0.1:
     dependencies:
       browser-tabs-lock: 1.3.0
       supertokens-js-override: 0.0.4
