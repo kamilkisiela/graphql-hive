@@ -101,8 +101,8 @@ importers:
         specifier: 1.5.0
         version: 1.5.0(@swc/helpers@0.5.5)
       '@theguild/eslint-config':
-        specifier: 0.11.6
-        version: 0.11.6(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5)
+        specifier: 0.11.7
+        version: 0.11.7(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5)
       '@theguild/prettier-config':
         specifier: 2.0.6
         version: 2.0.6(prettier@3.2.5)
@@ -7241,8 +7241,8 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
 
-  '@theguild/eslint-config@0.11.6':
-    resolution: {integrity: sha512-mpZMPikRFkDH0tOi+seB7iPse0qX/5edDunmTnUfFOoLwcSEGjSf6Kfp5UTtS03eeLekv7qOS65lgyTGnxAjKQ==}
+  '@theguild/eslint-config@0.11.7':
+    resolution: {integrity: sha512-sO++09FXbamdYph7hFmjlmQMckdZJyQgQ36XPck7RverPnRj9Kg6JjhLJ3tUeqM9yDuyqa0AUDk/fkEK1DUW9A==}
     peerDependencies:
       eslint: ^8
       typescript: ^5
@@ -25085,7 +25085,7 @@ snapshots:
       - graphql
       - utf-8-validate
 
-  '@theguild/eslint-config@0.11.6(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5)':
+  '@theguild/eslint-config@0.11.7(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5)':
     dependencies:
       '@rushstack/eslint-patch': 1.6.1
       '@typescript-eslint/eslint-plugin': 7.1.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5)
