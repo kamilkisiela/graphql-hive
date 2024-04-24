@@ -22,7 +22,7 @@
     "react-countup": "6.5.3",
     "react-dom": "18.2.0",
     "react-icons": "5.1.0",
-    "tailwind-merge": "2.2.2"
+    "tailwind-merge": "2.3.0"
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.4.1",
