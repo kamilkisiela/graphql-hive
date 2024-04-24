@@ -14,7 +14,7 @@
     "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
     "@sentry/node": "7.112.1",
-    "@sinclair/typebox": "0.32.22",
+    "@sinclair/typebox": "0.32.23",
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",
     "ajv": "8.12.0",
