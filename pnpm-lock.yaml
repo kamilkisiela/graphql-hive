@@ -197,11 +197,11 @@ importers:
         specifier: 4.16.0
         version: 4.16.0(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/kubernetes':
-        specifier: 4.10.0
-        version: 4.10.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+        specifier: 4.11.0
+        version: 4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.10.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))
+        version: 0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))
       '@pulumi/pulumi':
         specifier: 3.113.3
         version: 3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
@@ -5630,8 +5630,8 @@ packages:
   '@pulumi/cloudflare@4.16.0':
     resolution: {integrity: sha512-cwdB70bLeKL/VNIqqOD5fpHQcocVmpHuiHH589eR+QUfbLa4f+M8yA/TTCcxx2AFFctTqO5wgVuC+faL8xZmWQ==}
 
-  '@pulumi/kubernetes@4.10.0':
-    resolution: {integrity: sha512-CPgZIU7JOSwt9nT+8UbzZluyhwCoWHAPLyvNtaCiDxyn0b9p4fxsB2WgV2qIqtsptYUnV4vtAf/9SQdMcQE44g==}
+  '@pulumi/kubernetes@4.11.0':
+    resolution: {integrity: sha512-Ylz1J3ctx/4rhmhNuRp37GQzRGZujSzWjh4XRNxjwD5194AKqyqkvGTIDldZiMKyvFByNJoVrip1EeHzC5eZ+Q==}
 
   '@pulumi/kubernetesx@0.1.6':
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
@@ -22535,7 +22535,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetes@4.10.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
+  '@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
       '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@types/node-fetch': 2.6.4
@@ -22551,9 +22551,9 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.10.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))':
+  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))':
     dependencies:
-      '@pulumi/kubernetes': 4.10.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/kubernetes': 4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
 
   '@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.0(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
