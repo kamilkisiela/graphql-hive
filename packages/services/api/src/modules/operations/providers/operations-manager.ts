@@ -67,7 +67,7 @@ export class OperationsManager {
     {
       targets: readonly string[];
       period: DateRange;
-      resolution: number;
+      interval: string;
     },
     {
       [target: string]: {
@@ -95,7 +95,7 @@ export class OperationsManager {
       {
         cacheKeyFn(selector) {
           return `${selector.period.from.toISOString()};${selector.period.to.toISOString()};${
-            selector.resolution
+            selector.interval
           };${selector.targets.join(',')}}`;
         },
         batchScheduleFn: callback => setTimeout(callback, 100),
@@ -425,12 +425,12 @@ export class OperationsManager {
 
   async readRequestsOverTimeOfProject({
     period,
-    resolution,
+    interval,
     organization,
     project,
   }: {
     period: DateRange;
-    resolution: number;
+    interval: string;
   } & ProjectSelector): Promise<
     Array<{
       date: any;
@@ -438,9 +438,9 @@ export class OperationsManager {
     }>
   > {
     this.logger.debug(
-      'Reading requests over time of project (period=%o, resolution=%s, project=%s)',
+      'Reading requests over time of project (period=%o, interval=%s, project=%s)',
       period,
-      resolution,
+      interval,
       project,
     );
     const targets = await this.storage.getTargetIdsOfProject({
@@ -461,7 +461,7 @@ export class OperationsManager {
     const groups = await this.requestsOverTimeOfTargetsLoader.load({
       targets,
       period,
-      resolution,
+      interval,
     });
 
     // Because we get data for each target separately, we need to sum(targets) per date
@@ -493,19 +493,19 @@ export class OperationsManager {
 
   async readRequestsOverTimeOfTargets({
     period,
-    resolution,
+    interval,
     organization,
     project,
     targets,
   }: {
     period: DateRange;
-    resolution: number;
+    interval: string;
     targets: string[];
   } & ProjectSelector) {
     this.logger.debug(
-      'Reading requests over time of targets (period=%o, resolution=%s, targets=%s)',
+      'Reading requests over time of targets (period=%o, interval=%s, targets=%s)',
       period,
-      resolution,
+      interval,
       targets.join(';'),
     );
     await Promise.all(
@@ -522,13 +522,13 @@ export class OperationsManager {
     return this.requestsOverTimeOfTargetsLoader.load({
       targets,
       period,
-      resolution,
+      interval,
     });
   }
 
   async readRequestsOverTime({
     period,
-    resolution,
+    interval,
     organization,
     project,
     target,
@@ -537,15 +537,15 @@ export class OperationsManager {
     schemaCoordinate,
   }: {
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
     schemaCoordinate?: string;
   } & TargetSelector) {
     this.logger.info(
-      'Reading requests over time (period=%o, resolution=%s, target=%s)',
+      'Reading requests over time (period=%o, interval=%s, target=%s)',
       period,
-      resolution,
+      interval,
       target,
     );
     await this.authManager.ensureTargetAccess({
@@ -558,7 +558,7 @@ export class OperationsManager {
     return this.reader.requestsOverTime({
       target,
       period,
-      resolution,
+      interval,
       operations,
       clients,
       schemaCoordinate,
@@ -567,7 +567,7 @@ export class OperationsManager {
 
   async readFailuresOverTime({
     period,
-    resolution,
+    interval,
     organization,
     project,
     target,
@@ -575,14 +575,14 @@ export class OperationsManager {
     clients,
   }: {
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
   } & TargetSelector) {
     this.logger.info(
-      'Reading failures over time (period=%o, resolution=%s, target=%s)',
+      'Reading failures over time (period=%o, interval=%s, target=%s)',
       period,
-      resolution,
+      interval,
       target,
     );
     await this.authManager.ensureTargetAccess({
@@ -595,7 +595,7 @@ export class OperationsManager {
     return this.reader.failuresOverTime({
       target,
       period,
-      resolution,
+      interval,
       operations,
       clients,
     });
@@ -603,7 +603,7 @@ export class OperationsManager {
 
   async readDurationOverTime({
     period,
-    resolution,
+    interval,
     organization,
     project,
     target,
@@ -611,14 +611,14 @@ export class OperationsManager {
     clients,
   }: {
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
   } & TargetSelector) {
     this.logger.info(
-      'Reading duration over time (period=%o, resolution=%s, target=%s)',
+      'Reading duration over time (period=%o, interval=%s, target=%s)',
       period,
-      resolution,
+      interval,
       target,
     );
     await this.authManager.ensureTargetAccess({
@@ -631,7 +631,7 @@ export class OperationsManager {
     return this.reader.durationOverTime({
       target,
       period,
-      resolution,
+      interval,
       operations,
       clients,
     });

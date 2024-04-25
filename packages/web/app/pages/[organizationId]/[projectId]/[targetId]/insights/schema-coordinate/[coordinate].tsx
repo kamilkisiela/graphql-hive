@@ -32,10 +32,10 @@ const SchemaCoordinateView_SchemaCoordinateStatsQuery = graphql(`
   query SchemaCoordinateView_SchemaCoordinateStatsQuery(
     $selector: SchemaCoordinateStatsInput!
     $targetSelector: TargetSelectorInput!
-    $resolution: Int!
+    $interval: String!
   ) {
     schemaCoordinateStats(selector: $selector) {
-      requestsOverTime(resolution: $resolution) {
+      requestsOverTime(interval: $interval) {
         date
         value
       }

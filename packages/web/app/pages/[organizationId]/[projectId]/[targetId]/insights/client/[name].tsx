@@ -21,9 +21,9 @@ import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { useChartStyles } from '@/utils';
 
 const ClientView_ClientStatsQuery = graphql(`
-  query ClientView_ClientStatsQuery($selector: ClientStatsInput!, $resolution: Int!) {
+  query ClientView_ClientStatsQuery($selector: ClientStatsInput!, $interval: String!) {
     clientStats(selector: $selector) {
-      requestsOverTime(resolution: $resolution) {
+      requestsOverTime(interval: $interval) {
         date
         value
       }

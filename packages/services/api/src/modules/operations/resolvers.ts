@@ -163,7 +163,7 @@ export const resolvers: OperationsModule.Resolvers = {
     },
     requestsOverTime(
       { organization, project, target, period, schemaCoordinate },
-      { resolution },
+      { interval },
       { injector },
     ) {
       return injector.get(OperationsManager).readRequestsOverTime({
@@ -171,7 +171,7 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         organization,
         period,
-        resolution,
+        interval,
         schemaCoordinate,
       });
     },
@@ -244,7 +244,7 @@ export const resolvers: OperationsModule.Resolvers = {
     },
     requestsOverTime(
       { organization, project, target, period, clientName },
-      { resolution },
+      { interval },
       { injector },
     ) {
       return injector.get(OperationsManager).readRequestsOverTime({
@@ -252,7 +252,7 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         organization,
         period,
-        resolution,
+        interval,
         clients: clientName === 'unknown' ? ['unknown', ''] : [clientName],
       });
     },
@@ -382,7 +382,7 @@ export const resolvers: OperationsModule.Resolvers = {
     },
     requestsOverTime(
       { organization, project, target, period, operations: operationsFilter, clients },
-      { resolution },
+      { interval },
       { injector },
     ) {
       return injector.get(OperationsManager).readRequestsOverTime({
@@ -390,14 +390,14 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         organization,
         period,
-        resolution,
+        interval,
         operations: operationsFilter,
         clients,
       });
     },
     failuresOverTime(
       { organization, project, target, period, operations: operationsFilter, clients },
-      { resolution },
+      { interval },
       { injector },
     ) {
       return injector.get(OperationsManager).readFailuresOverTime({
@@ -405,14 +405,14 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         organization,
         period,
-        resolution,
+        interval,
         operations: operationsFilter,
         clients,
       });
     },
     durationOverTime(
       { organization, project, target, period, operations: operationsFilter, clients },
-      { resolution },
+      { interval },
       { injector },
     ) {
       return injector.get(OperationsManager).readDurationOverTime({
@@ -420,7 +420,7 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         organization,
         period,
-        resolution,
+        interval,
         operations: operationsFilter,
         clients,
       });
@@ -489,12 +489,12 @@ export const resolvers: OperationsModule.Resolvers = {
         period: parseDateRangeInput(period),
       });
     },
-    requestsOverTime(project, { resolution, period }, { injector }) {
+    requestsOverTime(project, { interval, period }, { injector }) {
       return injector.get(OperationsManager).readRequestsOverTimeOfProject({
         project: project.id,
         organization: project.orgId,
         period: parseDateRangeInput(period),
-        resolution,
+        interval,
       });
     },
   },
@@ -507,13 +507,13 @@ export const resolvers: OperationsModule.Resolvers = {
         period: parseDateRangeInput(period),
       });
     },
-    async requestsOverTime(target, { resolution, period }, { injector }) {
+    async requestsOverTime(target, { interval, period }, { injector }) {
       const result = await injector.get(OperationsManager).readRequestsOverTimeOfTargets({
         project: target.projectId,
         organization: target.orgId,
         targets: [target.id],
         period: parseDateRangeInput(period),
-        resolution,
+        interval,
       });
 
       return result[target.id] ?? [];

@@ -89,7 +89,7 @@ export default gql`
   }
 
   type ClientStats {
-    requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+    requestsOverTime(interval: String!): [RequestsOverTime!]!
     totalRequests: SafeInt!
     totalVersions: SafeInt!
     operations: OperationStatsValuesConnection!
@@ -97,16 +97,16 @@ export default gql`
   }
 
   type SchemaCoordinateStats {
-    requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+    requestsOverTime(interval: String!): [RequestsOverTime!]!
     totalRequests: SafeInt!
     operations: OperationStatsValuesConnection!
     clients: ClientStatsValuesConnection!
   }
 
   type OperationsStats {
-    requestsOverTime(resolution: Int!): [RequestsOverTime!]!
-    failuresOverTime(resolution: Int!): [FailuresOverTime!]!
-    durationOverTime(resolution: Int!): [DurationOverTime!]!
+    requestsOverTime(interval: String!): [RequestsOverTime!]!
+    failuresOverTime(interval: String!): [FailuresOverTime!]!
+    durationOverTime(interval: String!): [DurationOverTime!]!
     totalRequests: SafeInt!
     totalFailures: SafeInt!
     totalOperations: Int!
@@ -208,13 +208,13 @@ export default gql`
   }
 
   extend type Target {
-    requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+    requestsOverTime(interval: String!, period: DateRangeInput!): [RequestsOverTime!]!
     totalRequests(period: DateRangeInput!): SafeInt!
     operation(hash: String!): Operation
   }
 
   extend type Project {
-    requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+    requestsOverTime(interval: String!, period: DateRangeInput!): [RequestsOverTime!]!
     totalRequests(period: DateRangeInput!): SafeInt!
   }
 `;

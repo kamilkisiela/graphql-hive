@@ -37,7 +37,7 @@ const Stats_GeneralOperationsStatsQuery = graphql(`
   query Stats_GeneralOperationsStats(
     $selector: OperationsStatsSelectorInput!
     $allOperationsSelector: OperationsStatsSelectorInput!
-    $resolution: Int!
+    $interval: String!
   ) {
     allOperations: operationsStats(selector: $allOperationsSelector) {
       totalRequests
@@ -252,11 +252,11 @@ function FailureRateStats({
 
 const OverTimeStats_OperationsStatsFragment = graphql(`
   fragment OverTimeStats_OperationsStatsFragment on OperationsStats {
-    failuresOverTime(resolution: $resolution) {
+    failuresOverTime(interval: $interval) {
       date
       value
     }
-    requestsOverTime(resolution: $resolution) {
+    requestsOverTime(interval: $interval) {
       date
       value
     }
@@ -765,7 +765,7 @@ function ClientsStats(props: {
 
 const LatencyOverTimeStats_OperationStatsFragment = graphql(`
   fragment LatencyOverTimeStats_OperationStatsFragment on OperationsStats {
-    durationOverTime(resolution: $resolution) {
+    durationOverTime(interval: $interval) {
       date
       duration {
         p75
@@ -903,7 +903,7 @@ function LatencyOverTimeStats({
 
 const RpmOverTimeStats_OperationStatsFragment = graphql(`
   fragment RpmOverTimeStats_OperationStatsFragment on OperationsStats {
-    requestsOverTime(resolution: $resolution) {
+    requestsOverTime(interval: $interval) {
       date
       value
     }

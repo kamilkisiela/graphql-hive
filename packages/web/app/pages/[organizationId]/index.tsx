@@ -235,7 +235,7 @@ const ProjectCard = (props: {
 const OrganizationProjectsPageQuery = graphql(`
   query OrganizationProjectsPageQuery(
     $organizationId: ID!
-    $chartResolution: Int!
+    $chartInterval: String!
     $period: DateRangeInput!
   ) {
     organization(selector: { organization: $organizationId }) {
@@ -252,7 +252,7 @@ const OrganizationProjectsPageQuery = graphql(`
         name
         ...ProjectCard_ProjectFragment
         totalRequests(period: $period)
-        requestsOverTime(resolution: $chartResolution, period: $period) {
+        requestsOverTime(interval: $chartInterval, period: $period) {
           date
           value
         }

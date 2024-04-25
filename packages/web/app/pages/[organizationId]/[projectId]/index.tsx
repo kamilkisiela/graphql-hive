@@ -338,7 +338,7 @@ const ProjectOverviewPageQuery = graphql(`
   query ProjectOverviewPageQuery(
     $organizationId: ID!
     $projectId: ID!
-    $chartResolution: Int!
+    $chartInterval: String!
     $period: DateRangeInput!
   ) {
     organization(selector: { organization: $organizationId }) {
@@ -359,7 +359,7 @@ const ProjectOverviewPageQuery = graphql(`
         name
         ...TargetCard_TargetFragment
         totalRequests(period: $period)
-        requestsOverTime(resolution: $chartResolution, period: $period) {
+        requestsOverTime(interval: $chartInterval, period: $period) {
           date
           value
         }

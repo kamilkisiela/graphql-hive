@@ -5,6 +5,7 @@ import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { batchBy } from '../../../shared/helpers';
 import { Logger } from '../../shared/providers/logger';
+import { ParsedInterval, parseInterval } from '../lib/interval';
 import { pickTableByPeriod } from '../lib/pick-table-by-provider';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
@@ -82,7 +83,8 @@ export class OperationsReader {
       };
     },
     period: DateRange | null,
-    resolution?: number,
+    interval?: ParsedInterval,
+    precision?: 'hourly' | 'minutely' | 'daily',
   ) {
     if (!period) {
       return {
@@ -91,16 +93,14 @@ export class OperationsReader {
       };
     }
 
-    if (resolution && (resolution < 1 || resolution > 90)) {
-      throw new Error('Invalid resolution provided.');
-    } else {
-      // default value :shrug:
-      resolution = 30;
-    }
-
     const now = new Date();
-
-    const resolvedTable = pickTableByPeriod({ now, period, logger: this.logger });
+    const resolvedTable = pickTableByPeriod({
+      now,
+      period,
+      interval,
+      precision,
+      logger: this.logger,
+    });
 
     return {
       ...queryMap[resolvedTable],
@@ -331,7 +331,8 @@ export class OperationsReader {
           timeout: 30_000,
         },
       },
-      period ?? null,
+      period,
+      // TODO: precision
     );
 
     const result = await this.clickHouse.query<{
@@ -354,6 +355,7 @@ export class OperationsReader {
       argument?: string | null;
     }[];
   }) {
+    // TODO: precision
     const [totalFields, total] = await Promise.all([
       this.countFields({
         fields: args.fields,
@@ -462,7 +464,8 @@ export class OperationsReader {
           timeout: 30_000,
         },
       },
-      period ?? null,
+      period,
+      // TODO: precision
     );
 
     const result = await this.clickHouse.query<{
@@ -551,6 +554,7 @@ export class OperationsReader {
         },
       },
       period,
+      // TODO: precision
     );
 
     const result = await this.clickHouse.query<{
@@ -661,6 +665,7 @@ export class OperationsReader {
         },
       },
       period,
+      // TODO: precision
     );
 
     const [operationsResult, registryResult] = await Promise.all([
@@ -928,6 +933,7 @@ export class OperationsReader {
           },
         },
         period,
+        // TODO: precision
       ),
     );
 
@@ -1053,6 +1059,7 @@ export class OperationsReader {
           },
         },
         period,
+        // TODO: precision
       ),
     );
 
@@ -1499,6 +1506,7 @@ export class OperationsReader {
           },
         },
         period,
+        // TODO: precision
       ),
     );
 
@@ -1717,7 +1725,7 @@ export class OperationsReader {
     selectors: ReadonlyArray<{
       targets: readonly string[];
       period: DateRange;
-      resolution: number;
+      interval: string;
     }>,
   ) {
     const aggregationMap = new Map<
@@ -1725,13 +1733,13 @@ export class OperationsReader {
       {
         targets: string[];
         period: DateRange;
-        resolution: number;
+        interval: ParsedInterval;
       }
     >();
 
-    const makeKey = (selector: { period: DateRange; resolution: number }) =>
+    const makeKey = (selector: { period: DateRange; interval: string }) =>
       `${selector.period.from.toISOString()};${selector.period.to.toISOString()};${
-        selector.resolution
+        selector.interval
       }`;
 
     const subSelectors = selectors
@@ -1739,13 +1747,13 @@ export class OperationsReader {
         selector.targets.map(target => ({
           target,
           period: selector.period,
-          resolution: selector.resolution,
+          interval: selector.interval,
         })),
       )
       .flat(1);
 
     // The idea here is to make the least possible number of queries to ClickHouse
-    // by fetching all data points of the same target, period and resolution.
+    // by fetching all data points of the same target, period and interval.
     for (const selector of subSelectors) {
       const key = makeKey(selector);
       const value = aggregationMap.get(key);
@@ -1754,7 +1762,7 @@ export class OperationsReader {
         aggregationMap.set(key, {
           targets: [selector.target],
           period: selector.period,
-          resolution: selector.resolution,
+          interval: parseInterval(selector.interval),
         });
       } else {
         value.targets.push(selector.target);
@@ -1772,7 +1780,7 @@ export class OperationsReader {
       >
     >();
 
-    for (const [key, { targets, period, resolution }] of aggregationMap) {
+    for (const [key, { targets, period, interval }] of aggregationMap) {
       aggregationResultMap.set(
         key,
         this.clickHouse
@@ -1788,9 +1796,7 @@ export class OperationsReader {
                     SELECT 
                       multiply(
                         toUnixTimestamp(
-                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                            calculateTimeWindow({ period, resolution }),
-                          )}, 'UTC'),
+                          toStartOfInterval(timestamp, INTERVAL ${sql.raw(interval.clickHouseInterval)}, 'UTC'),
                         'UTC'),
                       1000) as date,
                       sum(total) as total,
@@ -1808,9 +1814,7 @@ export class OperationsReader {
                     SELECT 
                       multiply(
                         toUnixTimestamp(
-                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                            calculateTimeWindow({ period, resolution }),
-                          )}, 'UTC'),
+                          toStartOfInterval(timestamp, INTERVAL ${sql.raw(interval.clickHouseInterval)}, 'UTC'),
                         'UTC'),
                       1000) as date,
                       sum(total) as total,
@@ -1828,9 +1832,7 @@ export class OperationsReader {
                     SELECT 
                       multiply(
                         toUnixTimestamp(
-                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                            calculateTimeWindow({ period, resolution }),
-                          )}, 'UTC'),
+                          toStartOfInterval(timestamp, INTERVAL ${sql.raw(interval.clickHouseInterval)}, 'UTC'),
                         'UTC'),
                       1000) as date,
                       sum(total) as total,
@@ -1845,7 +1847,8 @@ export class OperationsReader {
                 },
               },
               period,
-              resolution,
+              interval,
+              // TODO: precision
             ),
           )
           .then(result => result.data),
@@ -1897,14 +1900,14 @@ export class OperationsReader {
   async requestsOverTime({
     target,
     period,
-    resolution,
+    interval,
     operations,
     clients,
     schemaCoordinate,
   }: {
     target: string;
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
     schemaCoordinate?: string;
@@ -1912,7 +1915,7 @@ export class OperationsReader {
     const results = await this.getDurationAndCountOverTime({
       target,
       period,
-      resolution,
+      interval,
       operations,
       clients,
       schemaCoordinate,
@@ -1927,20 +1930,20 @@ export class OperationsReader {
   async failuresOverTime({
     target,
     period,
-    resolution,
+    interval,
     operations,
     clients,
   }: {
     target: string;
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
   }) {
     const result = await this.getDurationAndCountOverTime({
       target,
       period,
-      resolution,
+      interval,
       operations,
       clients,
     });
@@ -1954,13 +1957,13 @@ export class OperationsReader {
   async durationOverTime({
     target,
     period,
-    resolution,
+    interval,
     operations,
     clients,
   }: {
     target: string;
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
   }): Promise<
@@ -1972,7 +1975,7 @@ export class OperationsReader {
     return this.getDurationAndCountOverTime({
       target,
       period,
-      resolution,
+      interval,
       operations,
       clients,
     });
@@ -2026,6 +2029,7 @@ export class OperationsReader {
           },
         },
         period,
+        // TODO: precision
       ),
     );
 
@@ -2131,6 +2135,7 @@ export class OperationsReader {
           },
         },
         period,
+        // TODO: precision
       ),
     );
 
@@ -2167,25 +2172,25 @@ export class OperationsReader {
   private async getDurationAndCountOverTime({
     target,
     period,
-    resolution,
+    interval,
     operations,
     clients,
     schemaCoordinate,
   }: {
     target: string;
     period: DateRange;
-    resolution: number;
+    interval: string;
     operations?: readonly string[];
     clients?: readonly string[];
     schemaCoordinate?: string;
   }) {
-    const createSQLQuery = (tableName: string, isAggregation: boolean) => {
-      const startDateTimeFormatted = formatDate(period.from);
-      const endDateTimeFormatted = formatDate(period.to);
-      const interval = calculateTimeWindow({ period, resolution });
-      const intervalUnit =
-        interval.unit === 'd' ? 'DAY' : interval.unit === 'h' ? 'HOUR' : 'MINUTE';
+    const parsedInterval = parseInterval(interval);
+    const startDateTimeFormatted = formatDate(period.from);
+    const endDateTimeFormatted = formatDate(period.to);
+    const intervalUnit =
+      parsedInterval.unit === 'd' ? 'DAY' : parsedInterval.unit === 'h' ? 'HOUR' : 'MINUTE';
 
+    const createSQLQuery = (tableName: string, isAggregation: boolean) => {
       // TODO: remove this once we shift to the new table structure (PR #2712)
       const quantiles = isAggregation
         ? 'quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles)'
@@ -2198,7 +2203,7 @@ export class OperationsReader {
           toDateTime(${startDateTimeFormatted}, 'UTC') as start_date_time,
           toDateTime(${endDateTimeFormatted}, 'UTC') as end_date_time,
           ${intervalUnit} as interval_unit,
-          toUInt16(${String(interval.value)}) as interval_value
+          toUInt16(${String(parsedInterval.value)}) as interval_value
         SELECT
           multiply(toUnixTimestamp(date, 'UTC'), 1000) as date,
           percentiles,
@@ -2237,7 +2242,7 @@ export class OperationsReader {
           WITH FILL
             FROM toDateTime(${startDateTimeFormatted}, 'UTC')
             TO toDateTime(${endDateTimeFormatted}, 'UTC')
-            STEP INTERVAL ${this.clickHouse.translateWindow(interval)}
+            STEP INTERVAL ${sql.raw(parsedInterval.clickHouseInterval)}
         )
       `;
     };
@@ -2261,7 +2266,8 @@ export class OperationsReader {
         },
       },
       period,
-      resolution,
+      parsedInterval,
+      // TODO: precision
     );
 
     // multiply by 1000 to convert to milliseconds
@@ -2464,17 +2470,18 @@ export class OperationsReader {
   }) {
     const days = differenceInDays(period.to, period.from);
     const resolution = days <= 1 ? 60 : days;
+    const timeWindow = calculateTimeWindow({
+      period,
+      resolution,
+    });
+
+    const interval = parseInterval(`${timeWindow.value}${timeWindow.unit}`);
 
     const createSQL = (tableName: string) => sql`
       SELECT 
         multiply(
           toUnixTimestamp(
-            toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-              calculateTimeWindow({
-                period,
-                resolution,
-              }),
-            )}, 'UTC'),
+            toStartOfInterval(timestamp, INTERVAL ${sql.raw(interval.clickHouseInterval)}, 'UTC'),
           'UTC'),
         1000) as date,
         sum(total) as total
@@ -2510,7 +2517,8 @@ export class OperationsReader {
           },
         },
         period,
-        resolution,
+        interval,
+        // TODO: precision
       ),
     );
 
