@@ -499,6 +499,7 @@ export class OrganizationManager {
 
     if (currentUserMissingScopes.length > 0) {
       this.logger.debug(`Logged user scopes: %s`, currentUserAccessScopes.join(','));
+      this.logger.debug(`Missing scopes: %s`, currentUserMissingScopes.join(','));
       return {
         error: {
           message: `Not enough access to invite a member with this role`,

@@ -109,6 +109,7 @@ jobs:
         run: |
           rm -rf /usr/local/bin/node
           rm -rf /usr/local/lib/node
+          rm -rf /opt/homebrew/bin/node
 
           if command -v node &> /dev/null
           then

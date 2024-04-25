@@ -1,9 +1,12 @@
 import { ReactElement } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { LogOutIcon } from 'lucide-react';
 import { authenticated } from '@/components/authenticated-container';
 import { Button } from '@/components/ui/button';
+import { DottedBackground } from '@/components/ui/dotted-background';
 import { MetaTitle } from '@/components/v2';
+import { HiveLogo } from '@/components/v2/icon';
 import { CreateOrganizationForm } from '@/components/v2/modals/create-organization';
 
 function CreateOrgPage(): ReactElement {
@@ -11,18 +14,23 @@ function CreateOrgPage(): ReactElement {
   return (
     <>
       <MetaTitle title="Create Organization" />
-      <div className="flex h-full grow items-center">
-        <Button
-          variant="outline"
-          onClick={() => router.push('/logout')}
-          className="absolute right-6 top-6"
-        >
-          <LogOutIcon className="mr-2 size-4" /> Sign out
-        </Button>
-        <div className="container w-1/3">
-          <CreateOrganizationForm />
+      <DottedBackground>
+        <div className="flex h-full grow items-center">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/logout')}
+            className="absolute right-6 top-6"
+          >
+            <LogOutIcon className="mr-2 size-4" /> Sign out
+          </Button>
+          <Link href="/" className="absolute left-6 top-6">
+            <HiveLogo className="size-10" />
+          </Link>
+          <div className="container w-1/3">
+            <CreateOrganizationForm />
+          </div>
         </div>
-      </div>
+      </DottedBackground>
     </>
   );
 }
