@@ -13,7 +13,7 @@
     "@graphql-hive/core": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "@sentry/node": "7.112.1",
+    "@sentry/node": "7.112.2",
     "agentkeepalive": "4.5.0",
     "date-fns": "3.6.0",
     "dotenv": "16.4.5",
