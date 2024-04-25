@@ -1019,8 +1019,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/external-composition/dist
       '@graphql-tools/stitch':
-        specifier: 9.1.1
-        version: 9.1.1(graphql@16.8.1)
+        specifier: 9.1.2
+        version: 9.1.2(graphql@16.8.1)
       '@graphql-tools/stitching-directives':
         specifier: 3.0.2
         version: 3.0.2(graphql@16.8.1)
@@ -4319,8 +4319,8 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/stitch@9.1.1':
-    resolution: {integrity: sha512-6IWofdsCJCzJ/p+Mi6VTmdaNP58mLcV2F8nu7SqOMQL5dw7YojkyPfCTvJ8Id1ryHlzvDOo94WYYQB+WFCuOQw==}
+  '@graphql-tools/stitch@9.1.2':
+    resolution: {integrity: sha512-X1NoeZ+K7PvOQeoCE6uyAGfBOIAsXXrXl7rUxtZY3uYTktp2HdJKZhnYYgn6dYEiMpgVDCepNpW2iTEACNwV/A==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -20702,7 +20702,7 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/stitch@9.1.1(graphql@16.8.1)':
+  '@graphql-tools/stitch@9.1.2(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/batch-delegate': 9.0.1(graphql@16.8.1)
       '@graphql-tools/delegate': 10.0.4(graphql@16.8.1)
