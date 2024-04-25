@@ -1,9 +1,22 @@
 import { useRouter } from 'next/router';
-import { useFormik } from 'formik';
+import { useForm } from 'react-hook-form';
 import { useMutation } from 'urql';
-import * as Yup from 'yup';
-import { Button, Heading, Input, Spinner } from '@/components/v2';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export const CreateOrganizationMutation = graphql(`
   mutation CreateOrganizationMutation($input: CreateOrganizationInput!) {
@@ -29,80 +42,108 @@ export const CreateOrganizationMutation = graphql(`
   }
 `);
 
+const formSchema = z.object({
+  name: z
+    .string({
+      required_error: 'Organization name is required',
+    })
+    .min(2, {
+      message: 'Name must be at least 2 characters long',
+    })
+    .max(50, {
+      message: 'Name must be at most 50 characters long',
+    })
+    .regex(
+      /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
+      'Name restricted to alphanumerical characters, spaces and . , _ - / &',
+    ),
+});
+
 export const CreateOrganizationForm = () => {
   const [mutation, mutate] = useMutation(CreateOrganizationMutation);
+  const { toast } = useToast();
   const { push } = useRouter();
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched, isValid } =
-    useFormik({
-      initialValues: { name: '' },
-      validationSchema: Yup.object().shape({
-        name: Yup.string()
-          .min(2, 'Name must be at least 2 characters long')
-          .max(50, 'Name must be at most 50 characters long')
-          .matches(
-            /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
-            'Name restricted to alphanumerical characters, spaces and . , _ - / &',
-          )
-          .required('Organization name is required'),
-      }),
-      async onSubmit(values) {
-        const mutation = await mutate({
-          input: {
-            name: values.name,
-          },
-        });
+  const form = useForm<z.infer<typeof formSchema>>({
+    mode: 'onChange',
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+    },
+    disabled: mutation.fetching,
+  });
 
-        if (mutation.data?.createOrganization.ok) {
-          void push(
-            `/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`,
-          );
-        }
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const mutation = await mutate({
+      input: {
+        name: values.name,
       },
     });
 
+    if (mutation.data?.createOrganization.ok) {
+      toast({
+        title: 'Organization created',
+        description: `You are now an admin of "${values.name}" organization.`,
+      });
+      void push(
+        `/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`,
+      );
+    } else if (mutation.data?.createOrganization.error?.inputErrors?.name) {
+      form.setError('name', {
+        type: 'manual',
+        message: mutation.data.createOrganization.error.inputErrors.name,
+      });
+    } else if (mutation.error) {
+      toast({
+        title: 'Failed to create organization',
+        description: mutation.error.message,
+      });
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-      <Heading className="text-center">Create an organization</Heading>
-      <p className="text-sm text-gray-500">
-        An organization is built on top of <b>Projects</b>. You will become an <b>admin</b> and
-        don't worry, you can add members later.
-      </p>
-      <Input
-        placeholder="Organization name"
-        name="name"
-        value={values.name}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        disabled={isSubmitting}
-        isInvalid={touched.name && !!errors.name}
-        className="grow"
-      />
-      {touched.name && (errors.name || mutation.error) && (
-        <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error?.message}</div>
-      )}
-      {mutation.data?.createOrganization.error?.inputErrors.name && (
-        <div className="-mt-2 text-sm text-red-500">
-          {mutation.data.createOrganization.error.inputErrors.name}
-        </div>
-      )}
-      <div className="flex gap-2">
-        <Button
-          type="submit"
-          size="large"
-          block
-          variant="primary"
-          disabled={isSubmitting || !isValid}
-        >
-          {isSubmitting ? (
-            <>
-              <Spinner className="size-6 text-white" />
-              <span className="ml-4">Creating...</span>
-            </>
-          ) : (
-            'Create Organization'
-          )}
-        </Button>
-      </div>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-black">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Create an organization</CardTitle>
+            <CardDescription>
+              An organization is built on top of <b>Projects</b>. You will become an <b>admin</b>{' '}
+              and don't worry, you can add members later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Organization name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+          <CardFooter>
+            <Button
+              type="submit"
+              className="w-full"
+              variant="default"
+              disabled={form.formState.disabled}
+            >
+              {form.formState.isSubmitting ? (
+                <>
+                  <Spinner className="size-6 text-black" />
+                  <span className="ml-4">Creating...</span>
+                </>
+              ) : (
+                'Create Organization'
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </Form>
   );
 };
