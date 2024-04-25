@@ -1,18 +1,17 @@
 import { useCallback } from 'react';
+import Link from 'next/link';
+import { LogOutIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
-import { Button, DataWrapper } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { DottedBackground } from '@/components/ui/dotted-background';
+import { DataWrapper } from '@/components/v2';
+import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { cn } from '@/lib/utils';
-
-const classes = {
-  title: cn('sm:text-4xl text-3xl mb-4 font-medium text-white'),
-  description: cn('mb-8 leading-relaxed'),
-  actions: cn('flex flex-row gap-2 items-center justify-center'),
-};
 
 const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
   mutation JoinOrganizationPage_JoinOrganizationMutation($code: String!) {
@@ -78,54 +77,83 @@ function JoinOrganizationPage() {
   return (
     <>
       <Title title="Invitation" />
-      <DataWrapper query={query}>
-        {({ data }) => {
-          if (data.organizationByInviteCode == null) {
-            return null;
-          }
-          const invitation = data.organizationByInviteCode;
+      <DottedBackground>
+        <Button
+          variant="outline"
+          onClick={() => router.push('/logout')}
+          className="absolute right-6 top-6"
+        >
+          <LogOutIcon className="mr-2 size-4" /> Sign out
+        </Button>
+        <Link href="/" className="absolute left-6 top-6">
+          <HiveLogo className="size-10" />
+        </Link>
+        <div className="container md:w-3/5 lg:w-1/2">
+          <DataWrapper query={query}>
+            {({ data }) => {
+              if (data.organizationByInviteCode == null) {
+                return null;
+              }
+              const invitation = data.organizationByInviteCode;
 
-          return (
-            <div className="flex size-full flex-row items-center justify-center">
-              <div className="flex w-full flex-col text-center md:w-2/3">
-                {invitation.__typename === 'OrganizationInvitationError' ? (
-                  <>
-                    <h1 className={classes.title}>Invitation Error</h1>
-                    <p className={classes.description}>{invitation.message}</p>
+              if (invitation.__typename === 'OrganizationInvitationError') {
+                return (
+                  <div className="bg-black">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Invitation Error</CardTitle>
+                      </CardHeader>
+                      <CardContent>{invitation.message}</CardContent>
+                      <CardFooter>
+                        <Button className="w-full" onClick={goBack}>
+                          Back to Hive
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                );
+              }
 
-                    <div className={classes.actions}>
-                      <Button variant="secondary" size="large" onClick={goBack}>
-                        Back to Hive
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <h1 className={classes.title}>Join "{invitation.name}" organization?</h1>
-                    <p className={classes.description}>
-                      You've been invited to join "{invitation.name}" organization on GraphQL Hive.
-                    </p>
-
-                    <div className={classes.actions}>
+              return (
+                <div className="bg-black">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Join "{invitation.name}" organization</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p>
+                        You've been invited to become a member of{' '}
+                        <span className="font-semibold">{invitation.name}</span>.
+                      </p>
+                      <p className="text-muted-foreground mt-2">
+                        By accepting the invitation, you will be able to collaborate with other
+                        members of this organization.
+                      </p>
+                    </CardContent>
+                    <CardFooter className="flex flex-col gap-y-4 md:flex-row md:justify-evenly md:gap-x-4 md:gap-y-0">
                       <Button
-                        size="large"
-                        variant="primary"
+                        className="w-full md:flex-1"
+                        variant="outline"
+                        disabled={mutation.fetching}
+                        onClick={goBack}
+                      >
+                        Ignore
+                      </Button>
+                      <Button
+                        className="w-full md:flex-1"
                         onClick={accept}
                         disabled={mutation.fetching}
                       >
                         Accept
                       </Button>
-                      <Button size="large" danger disabled={mutation.fetching} onClick={goBack}>
-                        Ignore
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        }}
-      </DataWrapper>
+                    </CardFooter>
+                  </Card>
+                </div>
+              );
+            }}
+          </DataWrapper>
+        </div>
+      </DottedBackground>
     </>
   );
 }
