@@ -169,7 +169,6 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
   const [toValue, setToValue] = useState(activePreset?.range.to ?? '');
   const [range, setRange] = useState<DateRange | undefined>(undefined);
   const [quickRangeFilter, setQuickRangeFilter] = useState('');
-  console.log('quickRangeFilter', quickRangeFilter);
 
   const fromParsed = parse(fromValue);
   const toParsed = parse(toValue);
@@ -265,6 +264,7 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
         !hasInvalidUnitRegex?.test(preset.range.from) &&
         !hasInvalidUnitRegex?.test(preset.range.to),
     );
+
     if (number > 0 && validDynamicPresets.length > 0) {
       setDynamicPresets(validDynamicPresets);
     } else {
