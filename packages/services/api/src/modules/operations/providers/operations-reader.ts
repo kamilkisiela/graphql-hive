@@ -2512,9 +2512,6 @@ export class OperationsReader {
         STEP INTERVAL ${interval}
     `;
 
-    // Look at
-    // http://localhost:3000/manage?from=now-3d&to=now
-
     const result = await this.clickHouse.query<{
       date: string;
       total: string;
