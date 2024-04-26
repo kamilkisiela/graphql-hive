@@ -169,6 +169,7 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
   const [toValue, setToValue] = useState(activePreset?.range.to ?? '');
   const [range, setRange] = useState<DateRange | undefined>(undefined);
   const [quickRangeFilter, setQuickRangeFilter] = useState('');
+  console.log('quickRangeFilter', quickRangeFilter);
 
   const fromParsed = parse(fromValue);
   const toParsed = parse(toValue);
@@ -231,45 +232,45 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
     );
   };
 
-  // Dynamic presets
   const [dynamicPresets, setDynamicPresets] = useState<Preset[]>([]);
   useEffect(() => {
-    if (quickRangeFilter.trim().match(/^Last [0-9]+$/)) {
-      const number = parseInt(quickRangeFilter.trim().split(' ')[1], 10);
-      const dynamicPresets: Preset[] = [
-        {
-          name: `last${number}m`,
-          label: `Last ${number} minutes`,
-          range: { from: `now-${number}m`, to: 'now' },
-        },
-        {
-          name: `last${number}h`,
-          label: `Last ${number} hours`,
-          range: { from: `now-${number}h`, to: 'now' },
-        },
-        {
-          name: `last${number}d`,
-          label: `Last ${number} days`,
-          range: { from: `now-${number}d`, to: 'now' },
-        },
-        {
-          name: `last${number}w`,
-          label: `Last ${number} weeks`,
-          range: { from: `now-${number}w`, to: 'now' },
-        },
-      ];
-
-      // Filter out dynamic presets that use invalid units
-      const validDynamicPresets = dynamicPresets.filter(preset => {
-        const isValidFromUnit = validUnits?.some(unit => preset.range.from.endsWith(unit));
-        const isValidToUnit = validUnits?.some(unit => preset.range.to.endsWith(unit));
-        return isValidFromUnit && isValidToUnit;
-      });
-
+    const number = parseInt(quickRangeFilter.replace(/\D/g, ''));
+    const dynamicPresets: Preset[] = [
+      {
+        name: `last${number}m`,
+        label: `Last ${number} minutes`,
+        range: { from: `now-${number}m`, to: 'now' },
+      },
+      {
+        name: `last${number}h`,
+        label: `Last ${number} hours`,
+        range: { from: `now-${number}h`, to: 'now' },
+      },
+      {
+        name: `last${number}d`,
+        label: `Last ${number} days`,
+        range: { from: `now-${number}d`, to: 'now' },
+      },
+      {
+        name: `last${number}w`,
+        label: `Last ${number} weeks`,
+        range: { from: `now-${number}w`, to: 'now' },
+      },
+    ];
+    const uniqueDynamicPresets = dynamicPresets.filter(
+      preset => !presets.some(p => p.name === preset.name),
+    );
+    const validDynamicPresets = uniqueDynamicPresets.filter(
+      preset =>
+        !hasInvalidUnitRegex?.test(preset.range.from) &&
+        !hasInvalidUnitRegex?.test(preset.range.to),
+    );
+    if (number > 0 && validDynamicPresets.length > 0) {
       setDynamicPresets(validDynamicPresets);
     } else {
       setDynamicPresets([]);
     }
+
   }, [quickRangeFilter, validUnits]);
 
   presets = [...presets, ...dynamicPresets];
