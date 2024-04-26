@@ -270,7 +270,6 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
     } else {
       setDynamicPresets([]);
     }
-
   }, [quickRangeFilter, validUnits]);
 
   presets = [...presets, ...dynamicPresets];
