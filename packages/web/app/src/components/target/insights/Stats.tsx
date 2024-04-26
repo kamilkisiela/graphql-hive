@@ -31,7 +31,7 @@ import {
 } from '@/lib/hooks';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
-import { createEmptySeries, resolutionToMilliseconds } from './utils';
+import { resolutionToMilliseconds } from './utils';
 
 const Stats_GeneralOperationsStatsQuery = graphql(`
   query Stats_GeneralOperationsStats(
@@ -276,22 +276,22 @@ function OverTimeStats({
     useFragment(OverTimeStats_OperationsStatsFragment, operationStats) ?? {};
 
   const styles = useChartStyles();
-  const interval = resolutionToMilliseconds(resolution, period);
+
   const requests = useMemo(() => {
     if (requestsOverTime?.length) {
       return requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [requestsOverTime, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [requestsOverTime]);
 
   const failures = useMemo(() => {
     if (failuresOverTime?.length) {
       return failuresOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [failuresOverTime, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [failuresOverTime]);
 
   return (
     <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
@@ -317,8 +317,6 @@ function OverTimeStats({
                 {
                   type: 'time',
                   boundaryGap: false,
-                  min: period.from,
-                  max: period.to,
                 },
               ],
               yAxis: [
@@ -790,7 +788,6 @@ function LatencyOverTimeStats({
   operationStats?: FragmentType<typeof LatencyOverTimeStats_OperationStatsFragment> | null;
 }): ReactElement {
   const styles = useChartStyles();
-  const interval = resolutionToMilliseconds(resolution, period);
   const { durationOverTime: duration = [] } =
     useFragment(LatencyOverTimeStats_OperationStatsFragment, operationStats) ?? {};
   const p75 = useMemo(() => {
@@ -798,29 +795,29 @@ function LatencyOverTimeStats({
       return duration.map<[string, number]>(node => [node.date, node.duration.p75]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
   const p90 = useMemo(() => {
     if (duration?.length) {
       return duration.map<[string, number]>(node => [node.date, node.duration.p90]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
   const p95 = useMemo(() => {
     if (duration?.length) {
       return duration.map<[string, number]>(node => [node.date, node.duration.p95]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
   const p99 = useMemo(() => {
     if (duration?.length) {
       return duration.map<[string, number]>(node => [node.date, node.duration.p99]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
 
   function createSeries(name: string, color: string, data: [string, number][]) {
     return {
@@ -936,8 +933,8 @@ function RpmOverTimeStats({
       ]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [requests, interval, period, windowInM]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [requests, windowInM]);
 
   return (
     <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
@@ -963,8 +960,6 @@ function RpmOverTimeStats({
                 {
                   type: 'time',
                   boundaryGap: false,
-                  min: period.from,
-                  max: period.to,
                   splitLine: {
                     lineStyle: {
                       color: '#595959',

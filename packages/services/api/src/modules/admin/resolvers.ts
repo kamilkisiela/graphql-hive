@@ -1,3 +1,4 @@
+import { parseDateRangeInput } from '../../shared/helpers';
 import { AdminModule } from './__generated__/types';
 import { AdminManager } from './providers/admin-manager';
 
@@ -8,30 +9,34 @@ export const resolvers: AdminModule.Resolvers = {
     },
   },
   AdminQuery: {
-    stats(_, { period }) {
+    stats(_, { period, resolution }) {
       return {
         period,
+        resolution,
       };
     },
   },
   AdminStats: {
     organizations({ period }, __, { injector }) {
+      const dateRange = parseDateRangeInput(period);
       return injector.get(AdminManager).getStats({
-        from: new Date(period.from),
-        to: new Date(period.to),
+        from: dateRange.from,
+        to: dateRange.to,
       });
     },
-    general({ period }) {
-      return { period };
+    general({ period, resolution }) {
+      return { period, resolution };
     },
   },
   AdminGeneralStats: {
-    operationsOverTime({ period }, _, { injector }) {
+    operationsOverTime({ period, resolution }, _, { injector }) {
+      const dateRange = parseDateRangeInput(period);
       return injector.get(AdminManager).getOperationsOverTime({
         period: {
-          from: new Date(period.from),
-          to: new Date(period.to),
+          from: dateRange.from,
+          to: dateRange.to,
         },
+        resolution,
       });
     },
   },

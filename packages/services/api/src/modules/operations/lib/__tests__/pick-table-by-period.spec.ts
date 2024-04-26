@@ -1,4 +1,4 @@
-import { subDays } from 'date-fns';
+import { subDays } from '@/lib/date-time';
 import { pickTableByPeriod } from '../pick-table-by-provider';
 
 describe('pickTableByPeriod', () => {
@@ -7,7 +7,7 @@ describe('pickTableByPeriod', () => {
     const table = pickTableByPeriod({
       now,
       period: {
-        from: subDays(new Date(), 3),
+        from: subDays(now, 3),
         to: now,
       },
     });
@@ -18,7 +18,7 @@ describe('pickTableByPeriod', () => {
     const table = pickTableByPeriod({
       now,
       period: {
-        from: subDays(new Date(), 7),
+        from: subDays(now, 7),
         to: now,
       },
     });
@@ -29,18 +29,18 @@ describe('pickTableByPeriod', () => {
     const table = pickTableByPeriod({
       now,
       period: {
-        from: subDays(new Date(), 14),
+        from: subDays(now, 14),
         to: now,
       },
     });
     expect(table).toBe('hourly');
   });
-  test('28 day period -> hourly', () => {
+  test('28 day period -> daily', () => {
     const now = new Date();
     const table = pickTableByPeriod({
       now,
       period: {
-        from: subDays(new Date(), 28),
+        from: subDays(now, 28),
         to: now,
       },
     });

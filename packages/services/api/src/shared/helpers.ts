@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { InjectionToken } from 'graphql-modules';
 import ms from 'ms';
+import { UTCDate } from '@date-fns/utc';
 import type {
   DateRangeInput,
   OrganizationSelector,
@@ -148,19 +149,19 @@ function leapYear(year: number) {
 
 export function parseDateTime(value: number | string | Date): Date {
   if (value instanceof Date) {
-    return value;
+    return new UTCDate(value);
   }
 
   if (typeof value === 'string') {
     if (validateDateTime(value)) {
-      return new Date(value);
+      return new UTCDate(value);
     }
     throw new TypeError(`DateTime cannot represent an invalid date-time-string ${value}.`);
   }
 
   if (typeof value === 'number') {
     try {
-      return new Date(value);
+      return new UTCDate(value);
     } catch (e) {
       throw new TypeError('DateTime cannot represent an invalid Unix timestamp ' + value);
     }
@@ -181,7 +182,7 @@ export function parseDateRangeInput(period: DateRangeInput): DateRange {
 }
 
 export function createPeriod(period: string): DateRange {
-  const to = new Date();
+  const to = new UTCDate();
   const from = to.getTime() - ms(period);
 
   return {

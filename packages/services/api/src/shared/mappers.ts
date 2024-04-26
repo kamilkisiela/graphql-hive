@@ -346,6 +346,7 @@ export type AdminStats = {
     from: string;
     to: string;
   };
+  resolution: number;
 };
 
 export type SchemaCoordinateUsageTypeMapper =
