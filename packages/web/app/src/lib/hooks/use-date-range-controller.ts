@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import {
   addDays,
   addHours,
-  endOfDay,
   endOfHour,
   endOfMinute,
   formatISO,

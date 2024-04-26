@@ -264,12 +264,8 @@ const OverTimeStats_OperationsStatsFragment = graphql(`
 `);
 
 function OverTimeStats({
-  period,
-  resolution,
   operationStats,
 }: {
-  period: DateRangeInput;
-  resolution: number;
   operationStats: FragmentType<typeof OverTimeStats_OperationsStatsFragment> | null;
 }): ReactElement {
   const { failuresOverTime = [], requestsOverTime = [] } =
@@ -776,15 +772,8 @@ const LatencyOverTimeStats_OperationStatsFragment = graphql(`
 `);
 
 function LatencyOverTimeStats({
-  period,
-  resolution,
   operationStats,
 }: {
-  period: {
-    from: string;
-    to: string;
-  };
-  resolution: number;
   operationStats?: FragmentType<typeof LatencyOverTimeStats_OperationStatsFragment> | null;
 }): ReactElement {
   const styles = useChartStyles();
@@ -1137,11 +1126,7 @@ export function OperationsStats({
       </div>
       <div>
         <OperationsFallback state={state} refetch={refetch}>
-          <OverTimeStats
-            period={period}
-            resolution={resolution}
-            operationStats={operationsStats ?? null}
-          />
+          <OverTimeStats operationStats={operationsStats ?? null} />
         </OperationsFallback>
       </div>
       <div>
@@ -1155,11 +1140,7 @@ export function OperationsStats({
       </div>
       <div>
         <OperationsFallback state={state} refetch={refetch}>
-          <LatencyOverTimeStats
-            period={period}
-            operationStats={operationsStats ?? null}
-            resolution={resolution}
-          />
+          <LatencyOverTimeStats operationStats={operationsStats ?? null} />
         </OperationsFallback>
       </div>
     </section>
