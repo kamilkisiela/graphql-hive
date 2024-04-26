@@ -8,11 +8,6 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
-import {
-  createEmptySeries,
-  fullSeries,
-  resolutionToMilliseconds,
-} from '@/components/target/insights/utils';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -48,30 +43,21 @@ const ProjectCard = (props: {
   project: FragmentType<typeof ProjectCard_ProjectFragment> | null;
   cleanOrganizationId: string | null;
   highestNumberOfRequests: number;
-  period: {
-    from: string;
-    to: string;
-  };
   requestsOverTime: { date: string; value: number }[] | null;
   schemaVersionsCount: number | null;
   days: number;
 }): ReactElement | null => {
   const project = useFragment(ProjectCard_ProjectFragment, props.project);
 
-  const { period, highestNumberOfRequests } = props;
+  const { highestNumberOfRequests } = props;
 
-  const interval = resolutionToMilliseconds(props.days, period);
   const requests = useMemo(() => {
     if (props.requestsOverTime?.length) {
-      return fullSeries(
-        props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
-        interval,
-        props.period,
-      );
+      return props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [interval]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [props.requestsOverTime]);
 
   const totalNumberOfRequests = useMemo(
     () => requests.reduce((acc, [_, value]) => acc + value, 0),
@@ -361,7 +347,6 @@ function OrganizationPageContent() {
                       cleanOrganizationId={currentOrganization.cleanId}
                       days={days}
                       highestNumberOfRequests={highestNumberOfRequests}
-                      period={period.current!}
                       project={project}
                       requestsOverTime={project.requestsOverTime}
                       schemaVersionsCount={project.schemaVersionsCount}
@@ -376,7 +361,6 @@ function OrganizationPageContent() {
                   key={index}
                   days={days}
                   highestNumberOfRequests={highestNumberOfRequests}
-                  period={period.current!}
                   project={null}
                   cleanOrganizationId={null}
                   requestsOverTime={null}

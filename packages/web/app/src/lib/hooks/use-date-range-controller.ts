@@ -1,6 +1,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { addHours, formatISO, startOfHour, startOfMinute, subHours, subSeconds } from 'date-fns';
+import {
+  addDays,
+  addHours,
+  endOfHour,
+  endOfMinute,
+  formatISO,
+  startOfHour,
+  startOfMinute,
+  subHours,
+  subMilliseconds,
+  subSeconds,
+} from 'date-fns';
 import { availablePresets, buildDateRangeString, Preset } from '@/components/ui/date-range-picker';
 import { parse, resolveRange } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
@@ -114,8 +125,12 @@ function getUTCStartOfDay(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
-function resolveRangeAndResolution(range: { from: Date; to: Date }) {
-  const now = new Date();
+/** Get the UTC end date of a day */
+function getUTCEndOfDay(date: Date) {
+  return subMilliseconds(getUTCStartOfDay(addDays(date, 1)), 1);
+}
+
+export function resolveRangeAndResolution(range: { from: Date; to: Date }, now = new Date()) {
   const tableOldestDateTimePoint = {
     /** Because ClickHouse uses UTC and we aggregate to UTC start fo day, we need to get the UTC day here */
     daily: getUTCStartOfDay(subHours(now, tableTTLInHours.daily)),
@@ -140,9 +155,9 @@ function resolveRangeAndResolution(range: { from: Date; to: Date }) {
   ) {
     const resolvedRange = {
       from: getUTCStartOfDay(range.from),
-      to: subSeconds(getUTCStartOfDay(range.to), 1),
+      to: getUTCEndOfDay(range.to),
     };
-    const daysDifference = Math.round(
+    const daysDifference = Math.floor(
       (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msDay,
     );
 
@@ -163,9 +178,9 @@ function resolveRangeAndResolution(range: { from: Date; to: Date }) {
   ) {
     const resolvedRange = {
       from: startOfHour(range.from),
-      to: subSeconds(startOfHour(range.to), 1),
+      to: endOfHour(range.to),
     };
-    const hoursDifference = Math.round(
+    const hoursDifference = Math.floor(
       (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msHour,
     );
 
@@ -178,10 +193,10 @@ function resolveRangeAndResolution(range: { from: Date; to: Date }) {
 
   const resolvedRange = {
     from: startOfMinute(range.from),
-    to: subSeconds(startOfMinute(range.to), 1),
+    to: endOfMinute(range.to),
   };
 
-  const minutesDifference = Math.round(
+  const minutesDifference = Math.floor(
     (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msMinute,
   );
 

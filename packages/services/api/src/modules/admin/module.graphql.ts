@@ -6,7 +6,7 @@ export default gql`
   }
 
   type AdminQuery {
-    stats(period: DateRangeInput!): AdminStats!
+    stats(period: DateRangeInput!, resolution: Int!): AdminStats!
   }
 
   type AdminStats {

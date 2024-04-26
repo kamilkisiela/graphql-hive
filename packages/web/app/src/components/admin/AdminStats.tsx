@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { formatISO } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
@@ -82,10 +81,6 @@ const CollectedOperationsOverTime_OperationFragment = graphql(`
 `);
 
 function CollectedOperationsOverTime(props: {
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
   operations: FragmentType<typeof CollectedOperationsOverTime_OperationFragment>[];
 }): ReactElement {
   const operations = useFragment(CollectedOperationsOverTime_OperationFragment, props.operations);
@@ -115,8 +110,6 @@ function CollectedOperationsOverTime(props: {
               {
                 type: 'time',
                 boundaryGap: false,
-                min: props.dateRange.from,
-                max: props.dateRange.to,
               },
             ],
             yAxis: [
@@ -166,9 +159,9 @@ function OverallStat({ label, value }: { label: string; value: number }): ReactE
 }
 
 const AdminStatsQuery = graphql(`
-  query adminStats($period: DateRangeInput!) {
+  query adminStats($period: DateRangeInput!, $resolution: Int!) {
     admin {
-      stats(period: $period) {
+      stats(period: $period, resolution: $resolution) {
         organizations {
           organization {
             id
@@ -385,21 +378,24 @@ function OrganizationTable({ data }: { data: Organization[] }) {
 
 export function AdminStats({
   dateRange,
+  resolution,
   filters,
 }: {
   dateRange: {
-    from: Date;
-    to: Date;
+    from: string;
+    to: string;
   };
+  resolution: number;
   filters: Filters;
 }): ReactElement {
   const [query] = useQuery({
     query: AdminStatsQuery,
     variables: {
       period: {
-        from: formatISO(dateRange.from),
-        to: formatISO(dateRange.to),
+        from: dateRange.from,
+        to: dateRange.to,
       },
+      resolution,
     },
   });
 
@@ -453,10 +449,7 @@ export function AdminStats({
             <OverallStat label="Persisted Ops" value={overall.persistedOperations} />
             <OverallStat label="Collected Ops" value={overall.operations} />
           </div>
-          <CollectedOperationsOverTime
-            dateRange={dateRange}
-            operations={data.admin.stats.general.operationsOverTime}
-          />
+          <CollectedOperationsOverTime operations={data.admin.stats.general.operationsOverTime} />
           <OrganizationTable data={tableData} />
         </div>
       )}

@@ -15,6 +15,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@date-fns/utc": "1.2.0",
     "@graphiql/react": "0.18.0-alpha.0",
     "@graphiql/toolkit": "0.9.1",
     "@graphql-tools/mock": "9.0.2",

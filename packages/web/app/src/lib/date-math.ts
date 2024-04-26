@@ -176,8 +176,9 @@ export function parseDateMath(mathString: string, now: Date): Date | undefined {
 }
 
 export function resolveRange(period: Period) {
-  const from = parse(period.from);
-  const to = parse(period.to);
+  const now = new Date();
+  const from = parse(period.from, now);
+  const to = parse(period.to, now);
 
   if (!from || !to) {
     throw new Error('Could not parse date strings.' + JSON.stringify(period));

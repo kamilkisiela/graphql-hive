@@ -38,16 +38,19 @@ export class AdminManager {
 
   async getOperationsOverTime({
     period,
+    resolution,
   }: {
     period: {
       from: Date;
       to: Date;
     };
+    resolution: number;
   }) {
     this.logger.debug(
-      'Fetching collected operations over time (admin, from=%s, to=%s)',
+      'Fetching collected operations over time (admin, from=%s, to=%s, resolution=%s)',
       period.from,
       period.to,
+      resolution,
     );
     const user = await this.authManager.getCurrentUser();
 
@@ -57,6 +60,7 @@ export class AdminManager {
 
     const points = await this.operationsReader.adminOperationsOverTime({
       period,
+      resolution,
     });
 
     return points.map(point => ({

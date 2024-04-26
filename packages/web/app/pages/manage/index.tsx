@@ -1,19 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
-import { startOfMonth, subHours } from 'date-fns';
+import { useCallback, useState } from 'react';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { authenticated } from '@/components/authenticated-container';
 import { Page } from '@/components/common';
-import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
-import { Checkbox as RadixCheckbox, RadixSelect, Tooltip } from '@/components/v2';
-import { subDays } from '@/lib/date-time';
-
-type DateRangeOptions = Exclude<(typeof DATE_RANGE_OPTIONS)[number], { key: 'all' }>;
-
-function isNotAllOption(option: (typeof DATE_RANGE_OPTIONS)[number]): option is DateRangeOptions {
-  return option.key !== 'all';
-}
-
-const dateRangeOptions = DATE_RANGE_OPTIONS.filter(isNotAllOption);
+import { Checkbox } from '@/components/ui/checkbox';
+import { DateRangePicker, presetLast7Days } from '@/components/ui/date-range-picker';
+import { Tooltip } from '@/components/v2/tooltip';
+import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 
 type FilterKey = keyof Filters;
 
@@ -26,7 +18,10 @@ const CHECKBOXES: { value: FilterKey; label: string; tooltip?: string }[] = [
 ];
 
 function Manage() {
-  const [dateRangeKey, setDateRangeKey] = useState<DateRangeOptions['key']>('30d');
+  const dateRangeController = useDateRangeController({
+    dataRetentionInDays: 365,
+    defaultPreset: presetLast7Days,
+  });
   const [filters, setFilters] = useState<Filters>({});
   const onFiltersChange = useCallback(
     (keys: FilterKey[]) => {
@@ -49,42 +44,21 @@ function Manage() {
     [setFilters, filters],
   );
 
-  const dateRange = useMemo(() => {
-    const to = floorToMinute(new Date());
-
-    if (dateRangeKey === 'month') {
-      return {
-        from: startOfMonth(new Date()),
-        to,
-      };
-    }
-
-    const unit = dateRangeKey.endsWith('d') ? 'd' : 'h';
-    const value = parseInt(dateRangeKey.replace(unit, ''));
-
-    return {
-      from: unit === 'd' ? subDays(to, value) : subHours(to, value),
-      to,
-    };
-  }, [dateRangeKey]);
-
   return (
     <Page title="Hive Stats" className="mt-[84px]">
       <div className="grow overflow-x-auto">
         <div className="flex gap-4 pb-2">
+          <DateRangePicker
+            validUnits={['y', 'M', 'w', 'd', 'h', 'm']}
+            selectedRange={dateRangeController.selectedPreset.range}
+            startDate={dateRangeController.startDate}
+            align="end"
+            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+          />
           <Tooltip.Provider delayDuration={200}>
-            <Tooltip content="Date filter applies only to collected operations data">
-              <div>
-                <RadixSelect
-                  defaultValue={dateRangeKey}
-                  onChange={setDateRangeKey}
-                  options={dateRangeOptions.map(({ key, label }) => ({ value: key, label }))}
-                />
-              </div>
-            </Tooltip>
             {CHECKBOXES.map(({ value, label, tooltip }) => (
               <span className="flex items-center gap-2" key={value}>
-                <RadixCheckbox
+                <Checkbox
                   onCheckedChange={isChecked => {
                     const newFilters = {
                       ...filters,
@@ -115,7 +89,11 @@ function Manage() {
             ))}
           </Tooltip.Provider>
         </div>
-        <AdminStats dateRange={dateRange} filters={filters} />
+        <AdminStats
+          resolution={dateRangeController.resolution}
+          dateRange={dateRangeController.resolvedRange}
+          filters={filters}
+        />
       </div>
     </Page>
   );

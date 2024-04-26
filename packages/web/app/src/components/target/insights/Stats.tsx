@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { DateRangeInput } from '@/gql/graphql';
 import {
   formatDuration,
   formatNumber,
@@ -31,7 +30,7 @@ import {
 } from '@/lib/hooks';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
-import { createEmptySeries, resolutionToMilliseconds } from './utils';
+import { resolutionToMilliseconds } from './utils';
 
 const Stats_GeneralOperationsStatsQuery = graphql(`
   query Stats_GeneralOperationsStats(
@@ -264,34 +263,30 @@ const OverTimeStats_OperationsStatsFragment = graphql(`
 `);
 
 function OverTimeStats({
-  period,
-  resolution,
   operationStats,
 }: {
-  period: DateRangeInput;
-  resolution: number;
   operationStats: FragmentType<typeof OverTimeStats_OperationsStatsFragment> | null;
 }): ReactElement {
   const { failuresOverTime = [], requestsOverTime = [] } =
     useFragment(OverTimeStats_OperationsStatsFragment, operationStats) ?? {};
 
   const styles = useChartStyles();
-  const interval = resolutionToMilliseconds(resolution, period);
+
   const requests = useMemo(() => {
     if (requestsOverTime?.length) {
       return requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [requestsOverTime, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [requestsOverTime]);
 
   const failures = useMemo(() => {
     if (failuresOverTime?.length) {
       return failuresOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [failuresOverTime, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [failuresOverTime]);
 
   return (
     <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
@@ -317,8 +312,6 @@ function OverTimeStats({
                 {
                   type: 'time',
                   boundaryGap: false,
-                  min: period.from,
-                  max: period.to,
                 },
               ],
               yAxis: [
@@ -778,19 +771,11 @@ const LatencyOverTimeStats_OperationStatsFragment = graphql(`
 `);
 
 function LatencyOverTimeStats({
-  period,
-  resolution,
   operationStats,
 }: {
-  period: {
-    from: string;
-    to: string;
-  };
-  resolution: number;
   operationStats?: FragmentType<typeof LatencyOverTimeStats_OperationStatsFragment> | null;
 }): ReactElement {
   const styles = useChartStyles();
-  const interval = resolutionToMilliseconds(resolution, period);
   const { durationOverTime: duration = [] } =
     useFragment(LatencyOverTimeStats_OperationStatsFragment, operationStats) ?? {};
   const p75 = useMemo(() => {
@@ -798,29 +783,29 @@ function LatencyOverTimeStats({
       return duration.map<[string, number]>(node => [node.date, node.duration.p75]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
   const p90 = useMemo(() => {
     if (duration?.length) {
       return duration.map<[string, number]>(node => [node.date, node.duration.p90]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
   const p95 = useMemo(() => {
     if (duration?.length) {
       return duration.map<[string, number]>(node => [node.date, node.duration.p95]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
   const p99 = useMemo(() => {
     if (duration?.length) {
       return duration.map<[string, number]>(node => [node.date, node.duration.p99]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [duration, interval, period]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [duration]);
 
   function createSeries(name: string, color: string, data: [string, number][]) {
     return {
@@ -936,8 +921,8 @@ function RpmOverTimeStats({
       ]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [requests, interval, period, windowInM]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [requests, windowInM]);
 
   return (
     <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
@@ -963,8 +948,6 @@ function RpmOverTimeStats({
                 {
                   type: 'time',
                   boundaryGap: false,
-                  min: period.from,
-                  max: period.to,
                   splitLine: {
                     lineStyle: {
                       color: '#595959',
@@ -1142,11 +1125,7 @@ export function OperationsStats({
       </div>
       <div>
         <OperationsFallback state={state} refetch={refetch}>
-          <OverTimeStats
-            period={period}
-            resolution={resolution}
-            operationStats={operationsStats ?? null}
-          />
+          <OverTimeStats operationStats={operationsStats ?? null} />
         </OperationsFallback>
       </div>
       <div>
@@ -1160,11 +1139,7 @@ export function OperationsStats({
       </div>
       <div>
         <OperationsFallback state={state} refetch={refetch}>
-          <LatencyOverTimeStats
-            period={period}
-            operationStats={operationsStats ?? null}
-            resolution={resolution}
-          />
+          <LatencyOverTimeStats operationStats={operationsStats ?? null} />
         </OperationsFallback>
       </div>
     </section>

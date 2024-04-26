@@ -1,6 +1,6 @@
 import { ReactElement, useMemo, useRef } from 'react';
 import NextLink from 'next/link';
-import { formatISO } from 'date-fns';
+import { endOfDay, formatISO, startOfDay } from 'date-fns';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { Globe, History } from 'lucide-react';
@@ -8,11 +8,6 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, ProjectLayout } from '@/components/layouts/project';
-import {
-  createEmptySeries,
-  fullSeries,
-  resolutionToMilliseconds,
-} from '@/components/target/insights/utils';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -22,11 +17,7 @@ import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { cn, pluralize } from '@/lib/utils';
-
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
+import { UTCDate } from '@date-fns/utc';
 
 const TargetCard_TargetFragment = graphql(`
   fragment TargetCard_TargetFragment on Target {
@@ -39,10 +30,6 @@ const TargetCard_TargetFragment = graphql(`
 const TargetCard = (props: {
   target: FragmentType<typeof TargetCard_TargetFragment> | null;
   highestNumberOfRequests: number;
-  period: {
-    from: string;
-    to: string;
-  };
   requestsOverTime: { date: string; value: number }[] | null;
   schemaVersionsCount: number | null;
   days: number;
@@ -50,19 +37,14 @@ const TargetCard = (props: {
   const router = useRouteSelector();
   const target = useFragment(TargetCard_TargetFragment, props.target);
   const href = target ? `/${router.organizationId}/${router.projectId}/${target.cleanId}` : '';
-  const { period, highestNumberOfRequests } = props;
-  const interval = resolutionToMilliseconds(props.days, period);
+  const { highestNumberOfRequests } = props;
   const requests = useMemo(() => {
     if (props.requestsOverTime?.length) {
-      return fullSeries(
-        props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
-        interval,
-        props.period,
-      );
+      return props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return createEmptySeries({ interval, period });
-  }, [interval]);
+    return []; // it will use the previous data points when new data is not available yet (fetching)
+  }, [props.requestsOverTime]);
 
   const totalNumberOfRequests = useMemo(
     () => requests.reduce((acc, [_, value]) => acc + value, 0),
@@ -217,9 +199,9 @@ const ProjectsPageContent = () => {
   const days = 14;
 
   if (!period.current) {
-    const now = floorDate(new Date());
-    const from = formatISO(subDays(now, days));
-    const to = formatISO(now);
+    const now = new UTCDate();
+    const from = formatISO(startOfDay(subDays(now, days)));
+    const to = formatISO(endOfDay(now));
 
     period.current = { from, to };
   }
@@ -306,7 +288,6 @@ const ProjectsPageContent = () => {
                     target={target}
                     days={days}
                     highestNumberOfRequests={highestNumberOfRequests}
-                    period={period.current!}
                     requestsOverTime={target.requestsOverTime}
                     schemaVersionsCount={target.schemaVersionsCount}
                   />
@@ -320,7 +301,6 @@ const ProjectsPageContent = () => {
                   target={null}
                   days={days}
                   highestNumberOfRequests={highestNumberOfRequests}
-                  period={period.current!}
                   requestsOverTime={null}
                   schemaVersionsCount={null}
                 />

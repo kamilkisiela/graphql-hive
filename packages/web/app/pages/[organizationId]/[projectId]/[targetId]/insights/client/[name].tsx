@@ -214,8 +214,6 @@ function ClientView(props: {
                           {
                             type: 'time',
                             boundaryGap: false,
-                            min: dateRangeController.resolvedRange.from,
-                            max: dateRangeController.resolvedRange.to,
                           },
                         ],
                         yAxis: [

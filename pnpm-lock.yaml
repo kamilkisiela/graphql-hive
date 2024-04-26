@@ -628,6 +628,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: 3.556.0
         version: 3.556.0
+      '@date-fns/utc':
+        specifier: 1.2.0
+        version: 1.2.0
       '@graphql-hive/core':
         specifier: workspace:*
         version: link:../../libraries/core/dist
@@ -1583,6 +1586,9 @@ importers:
 
   packages/web/app:
     dependencies:
+      '@date-fns/utc':
+        specifier: 1.2.0
+        version: 1.2.0
       '@graphiql/react':
         specifier: 0.18.0-alpha.0
         version: 0.18.0-alpha.0(patch_hash=ugoj3rzenzo4dg36q22bjmg7me)(@codemirror/language@6.0.0)(@types/node@20.12.7)(@types/react-dom@18.2.25)(@types/react@18.2.79)(graphql-ws@5.16.0(graphql@16.8.1))(graphql@16.8.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -3185,6 +3191,9 @@ packages:
 
   '@cypress/xvfb@1.2.4':
     resolution: {integrity: sha512-skbBzPggOVYCbnGgV+0dmBdW/s77ZkAOXIC1knS8NagwDjBrNC1LuXtQJeiN6l+m7lzmHtaoUw/ctJKdqkG57Q==}
+
+  '@date-fns/utc@1.2.0':
+    resolution: {integrity: sha512-YLq+crMPJiBmIdkRmv9nZuZy1mVtMlDcUKlg4mvI0UsC/dZeIaGoGB5p/C4FrpeOhZ7zBTK03T58S0DFkRNMnw==}
 
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
@@ -19248,6 +19257,8 @@ snapshots:
       lodash.once: 4.1.1
     transitivePeerDependencies:
       - supports-color
+
+  '@date-fns/utc@1.2.0': {}
 
   '@discoveryjs/json-ext@0.5.7': {}
 
