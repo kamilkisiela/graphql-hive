@@ -2,7 +2,6 @@ import { ReactElement, useCallback } from 'react';
 import { useMutation } from 'urql';
 import { Button, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 
 const UpdateSchemaVersionStatusMutation = graphql(`
   mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
@@ -36,21 +35,23 @@ const MarkAsValid_SchemaVersionFragment = graphql(`
 
 export function MarkAsValid(props: {
   version: FragmentType<typeof MarkAsValid_SchemaVersionFragment>;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement | null {
-  const router = useRouteSelector();
   const version = useFragment(MarkAsValid_SchemaVersionFragment, props.version);
   const [mutation, mutate] = useMutation(UpdateSchemaVersionStatusMutation);
   const markAsValid = useCallback(async () => {
     await mutate({
       input: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+        target: props.targetId,
         version: version.id,
         valid: true,
       },
     });
-  }, [mutate, version, router]);
+  }, [mutate, version]);
 
   if (version?.valid) {
     return null;

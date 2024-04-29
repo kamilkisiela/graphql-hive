@@ -1,5 +1,6 @@
 import { ReactElement } from 'react';
-import { Link, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CurrencyFormatter, DateFormatter } from './helpers';
 
@@ -51,9 +52,11 @@ export function InvoicesList(props: {
             <Td>{DateFormatter.format(new Date(invoice.periodEnd))}</Td>
             <Td>
               {invoice.pdfLink && (
-                <Link variant="primary" href={invoice.pdfLink} target="_blank" rel="noreferrer">
-                  Download
-                </Link>
+                <Button variant="orangeLink" asChild>
+                  <a href={invoice.pdfLink} target="_blank" rel="noreferrer">
+                    Download
+                  </a>
+                </Button>
               )}
             </Td>
           </Tr>

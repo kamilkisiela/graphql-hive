@@ -1,7 +1,4 @@
 import { ReactElement, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { useFormik } from 'formik';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
@@ -21,10 +18,12 @@ import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
+import { cn } from '@/lib/utils';
+import { Link, useRouter } from '@tanstack/react-router';
 
 const classes = {
-  container: clsx('flex flex-col items-stretch gap-2'),
-  modal: clsx('w-[550px]'),
+  container: cn('flex flex-col items-stretch gap-2'),
+  modal: cn('w-[550px]'),
 };
 
 const OIDCIntegrationSection_OrganizationFragment = graphql(`
@@ -49,22 +48,23 @@ export function OIDCIntegrationSection(props: {
   const router = useRouter();
   const organization = useFragment(OIDCIntegrationSection_OrganizationFragment, props.organization);
 
-  const isCreateOIDCIntegrationModalOpen = router.asPath.endsWith('#create-oidc-integration');
-  const isUpdateOIDCIntegrationModalOpen = router.asPath.endsWith('#manage-oidc-integration');
-  const isDeleteOIDCIntegrationModalOpen = router.asPath.endsWith('#remove-oidc-integration');
-  const isDebugOIDCIntegrationModalOpen = router.asPath.endsWith('#debug-oidc-integration');
+  const hash = router.latestLocation.hash;
+  const isCreateOIDCIntegrationModalOpen = hash.endsWith('create-oidc-integration');
+  const isUpdateOIDCIntegrationModalOpen = hash.endsWith('manage-oidc-integration');
+  const isDeleteOIDCIntegrationModalOpen = hash.endsWith('remove-oidc-integration');
+  const isDebugOIDCIntegrationModalOpen = hash.endsWith('debug-oidc-integration');
+  const href = router.latestLocation.href;
 
   const closeModal = () => {
-    void router.push(router.asPath.split('#')[0], undefined, {
-      shallow: true,
-      scroll: false,
+    void router.navigate({
+      to: href,
     });
   };
 
-  const openCreateModalLink = `${router.asPath}#create-oidc-integration`;
-  const openEditModalLink = `${router.asPath}#manage-oidc-integration`;
-  const openDeleteModalLink = `${router.asPath}#remove-oidc-integration`;
-  const openDebugModalLink = `${router.asPath}#debug-oidc-integration`;
+  const openCreateModalLink = `${href}#create-oidc-integration`;
+  const openEditModalLink = `${href}#manage-oidc-integration`;
+  const openDeleteModalLink = `${href}#remove-oidc-integration`;
+  const openDebugModalLink = `${href}#debug-oidc-integration`;
 
   return (
     <>
@@ -76,7 +76,9 @@ export function OIDCIntegrationSection(props: {
               href={openEditModalLink}
               onClick={ev => {
                 ev.preventDefault();
-                void router.push(openEditModalLink);
+                void router.navigate({
+                  to: openEditModalLink,
+                });
               }}
             >
               <KeyIcon className="mr-2 size-4" />
@@ -84,21 +86,25 @@ export function OIDCIntegrationSection(props: {
               {extractDomain(organization.oidcIntegration.authorizationEndpoint)})
             </Link>
             <Link
-              className={clsx(buttonVariants({ variant: 'default' }), 'px-5')}
+              className={cn(buttonVariants({ variant: 'default' }), 'px-5')}
               href={openDebugModalLink}
               onClick={ev => {
                 ev.preventDefault();
-                void router.push(openDebugModalLink);
+                void router.navigate({
+                  to: openDebugModalLink,
+                });
               }}
             >
               Show Debug Logs
             </Link>
             <Link
-              className={clsx(buttonVariants({ variant: 'destructive' }), 'px-5')}
+              className={cn(buttonVariants({ variant: 'destructive' }), 'px-5')}
               href={openDeleteModalLink}
               onClick={ev => {
                 ev.preventDefault();
-                void router.push(openDeleteModalLink);
+                void router.navigate({
+                  to: openDeleteModalLink,
+                });
               }}
             >
               Remove
@@ -111,7 +117,9 @@ export function OIDCIntegrationSection(props: {
             href={openCreateModalLink}
             onClick={ev => {
               ev.preventDefault();
-              void router.push(openCreateModalLink);
+              void router.navigate({
+                to: openCreateModalLink,
+              });
             }}
           >
             <KeyIcon className="mr-2" />
@@ -126,7 +134,10 @@ export function OIDCIntegrationSection(props: {
         organizationId={organization.id}
         openEditModalLink={openEditModalLink}
         transitionToManageScreen={() => {
-          void router.replace(openEditModalLink);
+          // TODO(router)
+          void router.navigate({
+            hash: 'manage-oidc-integration',
+          });
         }}
       />
       <ManageOIDCIntegrationModal
@@ -480,10 +491,10 @@ function UpdateOIDCIntegrationForm(props: {
 
   return (
     <Modal open={props.isOpen} onOpenChange={props.close} className="flex min-h-[600px] w-[960px]">
-      <form className={clsx(classes.container, 'flex-1 gap-12')} onSubmit={formik.handleSubmit}>
+      <form className={cn(classes.container, 'flex-1 gap-12')} onSubmit={formik.handleSubmit}>
         <Heading>Manage OpenID Connect Integration</Heading>
         <div className="flex">
-          <div className={clsx(classes.container, 'flex flex-1 flex-col pr-5')}>
+          <div className={cn(classes.container, 'flex flex-1 flex-col pr-5')}>
             <Heading size="lg">OIDC Provider Instructions</Heading>
             <ul className="flex flex-col gap-5">
               <li>
@@ -502,7 +513,7 @@ function UpdateOIDCIntegrationForm(props: {
               </li>
             </ul>
           </div>
-          <div className={clsx(classes.container, 'flex-1 pl-5')}>
+          <div className={cn(classes.container, 'flex-1 pl-5')}>
             <Heading size="lg">Properties</Heading>
 
             <label className="text-sm font-semibold" htmlFor="tokenEndpoint">

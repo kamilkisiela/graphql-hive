@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic';
+import { lazy } from 'react';
 import {
   loader,
   DiffEditor as MonacoDiffEditor,
@@ -8,22 +8,19 @@ import pkg from '../../package.json' assert { type: 'json' };
 
 loader.config({
   paths: {
-    vs: `https://cdn.jsdelivr.net/npm/monaco-editor@${pkg.dependencies['monaco-editor']}/min/vs`,
+    vs: `https://cdn.jsdelivr.net/npm/monaco-editor@${pkg.devDependencies['monaco-editor']}/min/vs`,
   },
 });
 
 export { MonacoDiffEditor };
 export { MonacoEditor };
 
-export const SchemaEditor = dynamic({
-  async loader() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    await import('regenerator-runtime/runtime');
-    const { SchemaEditor } = await import('@theguild/editor');
-    return SchemaEditor;
-  },
-  ssr: false,
+export const SchemaEditor = lazy(async () => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  await import('regenerator-runtime/runtime');
+  const { SchemaEditor } = await import('@theguild/editor');
+  return { default: SchemaEditor };
 });
 
 export type { SchemaEditorProps } from '@theguild/editor';

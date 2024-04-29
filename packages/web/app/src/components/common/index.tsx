@@ -1,18 +1,10 @@
 import { ComponentProps, ReactElement, ReactNode } from 'react';
-import Head from 'next/head';
-import { clsx } from 'clsx';
-
-export const Title = ({ title }: { title: string }): ReactElement => (
-  <Head>
-    <title>{title} - GraphQL Hive</title>
-    <meta property="og:title" content={`${title} - GraphQL Hive`} key="title" />
-  </Head>
-);
+import { cn } from '@/lib/utils';
 
 export function Label({ className, children, ...props }: ComponentProps<'span'>): ReactElement {
   return (
     <span
-      className={clsx(
+      className={cn(
         `
   inline-block
   rounded bg-yellow-50
@@ -47,7 +39,7 @@ export const Page = ({
   className?: string;
 }): ReactElement => {
   return (
-    <div className={clsx('relative flex h-full flex-col', className)}>
+    <div className={cn('relative flex h-full flex-col', className)}>
       <div className="flex shrink-0 flex-row items-center justify-between p-4">
         <div>
           <h2 className="text-xl font-bold text-black dark:text-white">{title}</h2>
@@ -59,7 +51,7 @@ export const Page = ({
         children
       ) : (
         <div
-          className={clsx(
+          className={cn(
             'px-4 pb-4 dark:text-white',
             scrollable ? 'grow overflow-y-auto' : 'h-full',
           )}
@@ -73,17 +65,17 @@ export const Page = ({
 
 export const Section = {
   Title: ({ className, children, ...props }: ComponentProps<'h3'>): ReactElement => (
-    <h3 className={clsx('text-base font-bold text-black dark:text-white', className)} {...props}>
+    <h3 className={cn('text-base font-bold text-black dark:text-white', className)} {...props}>
       {children}
     </h3>
   ),
   BigTitle: ({ className, children, ...props }: ComponentProps<'h2'>): ReactElement => (
-    <h2 className={clsx('text-base font-bold text-black dark:text-white', className)} {...props}>
+    <h2 className={cn('text-base font-bold text-black dark:text-white', className)} {...props}>
       {children}
     </h2>
   ),
   Subtitle: ({ className, children, ...props }: ComponentProps<'div'>): ReactElement => (
-    <div className={clsx('text-sm text-gray-600 dark:text-gray-300', className)} {...props}>
+    <div className={cn('text-sm text-gray-600 dark:text-gray-300', className)} {...props}>
       {children}
     </div>
   ),
@@ -101,11 +93,11 @@ export function Scale({
   className?: string;
 }): ReactElement {
   return (
-    <div className={clsx('flex grow-0 flex-row space-x-1', className)}>
+    <div className={cn('flex grow-0 flex-row space-x-1', className)}>
       {new Array(size).fill(null).map((_, i) => (
         <div
           key={i}
-          className={clsx('h-4 w-1', value >= i * (max / size) ? 'bg-emerald-400' : 'bg-gray-200')}
+          className={cn('h-4 w-1', value >= i * (max / size) ? 'bg-emerald-400' : 'bg-gray-200')}
         />
       ))}
     </div>

@@ -1,5 +1,4 @@
 import { ReactElement, ReactNode } from 'react';
-import NextLink from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
@@ -8,8 +7,9 @@ import { PlusIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
+import { Link, useRouter } from '@tanstack/react-router';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
 export enum Page {
@@ -78,6 +78,8 @@ export function ProjectLayout({
   ...props
 }: {
   page: Page;
+  organizationId: string;
+  projectId: string;
   className?: string;
   me: FragmentType<typeof ProjectLayout_MeFragment> | null;
   currentOrganization: FragmentType<typeof ProjectLayout_CurrentOrganizationFragment> | null;
@@ -85,10 +87,8 @@ export function ProjectLayout({
   organizations: FragmentType<typeof ProjectLayout_OrganizationConnectionFragment> | null;
   children: ReactNode;
 }): ReactElement | null {
-  const router = useRouteSelector();
+  const router = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
-
-  const { organizationId: orgId } = router;
 
   const currentOrganization = useFragment(
     ProjectLayout_CurrentOrganizationFragment,
@@ -100,6 +100,8 @@ export function ProjectLayout({
     scope: ProjectAccessScope.Read,
     member: currentOrganization?.me ?? null,
     redirect: true,
+    organizationId: props.organizationId,
+    projectId: props.projectId,
   });
 
   useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
@@ -122,15 +124,13 @@ export function ProjectLayout({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             {currentOrganization ? (
-              <NextLink
-                href={{
-                  pathname: '/[organizationId]',
-                  query: { organizationId: currentOrganization.cleanId },
-                }}
+              <Link
+                to="/$organizationId"
+                params={{ organizationId: currentOrganization.cleanId }}
                 className="max-w-[200px] shrink-0 truncate font-medium"
               >
                 {currentOrganization.name}
-              </NextLink>
+              </Link>
             ) : (
               <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
             )}
@@ -140,9 +140,12 @@ export function ProjectLayout({
                 <Select
                   defaultValue={currentProject.cleanId}
                   onValueChange={id => {
-                    router.visitProject({
-                      organizationId: orgId,
-                      projectId: id,
+                    void router.navigate({
+                      to: '/$organizationId/$projectId',
+                      params: {
+                        organizationId: props.organizationId,
+                        projectId: id,
+                      },
                     });
                   }}
                 >
@@ -173,7 +176,7 @@ export function ProjectLayout({
       </header>
 
       {page === Page.Settings || currentProject?.registryModel !== 'LEGACY' ? null : (
-        <ProjectMigrationToast orgId={orgId} projectId={currentProject.cleanId} />
+        <ProjectMigrationToast orgId={props.organizationId} projectId={currentProject.cleanId} />
       )}
 
       <div className="relative border-b border-gray-800">
@@ -182,60 +185,52 @@ export function ProjectLayout({
             <Tabs value={page}>
               <Tabs.List>
                 <Tabs.Trigger value={Page.Targets} asChild>
-                  <NextLink
-                    href={{
-                      pathname: '/[organizationId]/[projectId]',
-                      query: {
-                        organizationId: currentOrganization.cleanId,
-                        projectId: currentProject.cleanId,
-                      },
+                  <Link
+                    to="/$organizationId/$projectId"
+                    params={{
+                      organizationId: currentOrganization.cleanId,
+                      projectId: currentProject.cleanId,
                     }}
                   >
                     Targets
-                  </NextLink>
+                  </Link>
                 </Tabs.Trigger>
                 {canAccessProject(ProjectAccessScope.Alerts, currentOrganization.me) && (
                   <Tabs.Trigger value={Page.Alerts} asChild>
-                    <NextLink
-                      href={{
-                        pathname: `/[organizationId]/[projectId]/view/${Page.Alerts}`,
-                        query: {
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                        },
+                    <Link
+                      to="/$organizationId/$projectId/view/alerts"
+                      params={{
+                        organizationId: currentOrganization.cleanId,
+                        projectId: currentProject.cleanId,
                       }}
                     >
                       Alerts
-                    </NextLink>
+                    </Link>
                   </Tabs.Trigger>
                 )}
                 {canAccessProject(ProjectAccessScope.Settings, currentOrganization.me) && (
                   <>
                     <Tabs.Trigger value={Page.Policy} asChild>
-                      <NextLink
-                        href={{
-                          pathname: `/[organizationId]/[projectId]/view/${Page.Policy}`,
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/view/policy"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
                         }}
                       >
                         Policy
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Settings} asChild>
-                      <NextLink
-                        href={{
-                          pathname: `/[organizationId]/[projectId]/view/${Page.Settings}`,
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/view/settings"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
                         }}
                       >
                         Settings
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                   </>
                 )}
@@ -254,7 +249,12 @@ export function ProjectLayout({
               New target
             </Button>
           ) : null}
-          <CreateTargetModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+          <CreateTargetModal
+            organizationId={props.organizationId}
+            projectId={props.projectId}
+            isOpen={isModalOpen}
+            toggleModalOpen={toggleModalOpen}
+          />
         </div>
       </div>
       <div className="container h-full pb-7">

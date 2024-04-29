@@ -1,6 +1,5 @@
 import { ReactElement, ReactNode } from 'react';
-import NextLink from 'next/link';
-import { Link } from 'lucide-react';
+import { LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
@@ -8,9 +7,10 @@ import { HiveLink, Tabs } from '@/components/v2';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { cn } from '@/lib/utils';
+import { Link, useRouter } from '@tanstack/react-router';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
 export enum Page {
@@ -93,6 +93,9 @@ export const TargetLayout = ({
   ...props
 }: {
   page: Page;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
   className?: string;
   children: ReactNode;
   connect?: ReactNode;
@@ -102,10 +105,10 @@ export const TargetLayout = ({
   organizations: FragmentType<typeof TargetLayout_OrganizationConnectionFragment> | null;
   isCDNEnabled: FragmentType<typeof TargetLayout_IsCDNEnabledFragment> | null;
 }): ReactElement | null => {
-  const router = useRouteSelector();
+  const router = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
-  const { organizationId: orgId, projectId } = router;
+  const { organizationId: orgId, projectId } = props;
 
   const currentOrganization = useFragment(
     TargetLayout_CurrentOrganizationFragment,
@@ -123,13 +126,16 @@ export const TargetLayout = ({
     currentProject?.targets,
   );
   const targets = targetConnection?.nodes;
-  const currentTarget = targets?.find(target => target.cleanId === router.targetId);
+  const currentTarget = targets?.find(target => target.cleanId === props.targetId);
   const isCDNEnabled = useFragment(TargetLayout_IsCDNEnabledFragment, props.isCDNEnabled);
 
   useTargetAccess({
     scope: TargetAccessScope.Read,
     member: currentOrganization?.me ?? null,
     redirect: true,
+    targetId: props.targetId,
+    projectId,
+    organizationId: orgId,
   });
 
   useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
@@ -150,34 +156,30 @@ export const TargetLayout = ({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             {currentOrganization ? (
-              <NextLink
-                href={{
-                  pathname: '/[organizationId]',
-                  query: {
-                    organizationId: currentOrganization.cleanId,
-                  },
+              <Link
+                to="/$organizationId"
+                params={{
+                  organizationId: currentOrganization.cleanId,
                 }}
                 className="max-w-[200px] shrink-0 truncate font-medium"
               >
                 {currentOrganization.name}
-              </NextLink>
+              </Link>
             ) : (
               <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
             )}
             <div className="italic text-gray-500">/</div>
             {currentOrganization && currentProject ? (
-              <NextLink
-                href={{
-                  pathname: '/[organizationId]/[projectId]',
-                  query: {
-                    organizationId: currentOrganization.cleanId,
-                    projectId: currentProject.cleanId,
-                  },
+              <Link
+                to="/$organizationId/$projectId"
+                params={{
+                  organizationId: currentOrganization.cleanId,
+                  projectId: currentProject.cleanId,
                 }}
                 className="max-w-[200px] shrink-0 truncate font-medium"
               >
                 {currentProject.name}
-              </NextLink>
+              </Link>
             ) : (
               <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
             )}
@@ -187,10 +189,13 @@ export const TargetLayout = ({
                 <Select
                   defaultValue={currentTarget.cleanId}
                   onValueChange={id => {
-                    router.visitTarget({
-                      organizationId: currentOrganization.cleanId,
-                      projectId: currentProject.cleanId,
-                      targetId: id,
+                    void router.navigate({
+                      to: '/$organizationId/$projectId/$targetId',
+                      params: {
+                        organizationId: currentOrganization.cleanId,
+                        projectId: currentProject.cleanId,
+                        targetId: id,
+                      },
                     });
                   }}
                 >
@@ -232,105 +237,91 @@ export const TargetLayout = ({
                 {canAccessSchema && (
                   <>
                     <Tabs.Trigger value={Page.Schema} asChild>
-                      <NextLink
-                        href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]',
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                            targetId: currentTarget.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/$targetId"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          targetId: currentTarget.cleanId,
                         }}
                       >
                         Schema
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Checks} asChild>
-                      <NextLink
-                        href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]/checks',
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                            targetId: currentTarget.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/$targetId/checks"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          targetId: currentTarget.cleanId,
                         }}
                       >
                         Checks
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Explorer} asChild>
-                      <NextLink
-                        href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]/explorer',
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                            targetId: currentTarget.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/$targetId/explorer"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          targetId: currentTarget.cleanId,
                         }}
                       >
                         Explorer
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.History} asChild>
-                      <NextLink
-                        href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]/history',
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                            targetId: currentTarget.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/$targetId/history"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          targetId: currentTarget.cleanId,
                         }}
                       >
                         History
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Insights} asChild>
-                      <NextLink
-                        href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]/insights',
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                            targetId: currentTarget.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/$targetId/insights"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          targetId: currentTarget.cleanId,
                         }}
                       >
                         Insights
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Laboratory} asChild>
-                      <NextLink
-                        href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]/laboratory',
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                            projectId: currentProject.cleanId,
-                            targetId: currentTarget.cleanId,
-                          },
+                      <Link
+                        to="/$organizationId/$projectId/$targetId/laboratory"
+                        params={{
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          targetId: currentTarget.cleanId,
                         }}
                       >
                         Laboratory
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                   </>
                 )}
                 {canAccessSettings && (
                   <Tabs.Trigger value={Page.Settings} asChild>
-                    <NextLink
-                      href={{
-                        pathname: '/[organizationId]/[projectId]/[targetId]/settings',
-                        query: {
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
-                        },
+                    <Link
+                      to="/$organizationId/$projectId/$targetId/settings"
+                      params={{
+                        organizationId: currentOrganization.cleanId,
+                        projectId: currentProject.cleanId,
+                        targetId: currentTarget.cleanId,
                       }}
                     >
                       Settings
-                    </NextLink>
+                    </Link>
                   </Tabs.Trigger>
                 )}
               </Tabs.List>
@@ -348,10 +339,16 @@ export const TargetLayout = ({
             ) : isCDNEnabled?.isCDNEnabled ? (
               <>
                 <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
-                  <Link size={16} className="mr-2" />
+                  <LinkIcon size={16} className="mr-2" />
                   Connect to CDN
                 </Button>
-                <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+                <ConnectSchemaModal
+                  organizationId={props.organizationId}
+                  projectId={props.projectId}
+                  targetId={props.targetId}
+                  isOpen={isModalOpen}
+                  toggleModalOpen={toggleModalOpen}
+                />
               </>
             ) : null
           ) : null}

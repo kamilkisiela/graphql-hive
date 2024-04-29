@@ -1,27 +1,17 @@
 import { ReactElement, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Button as OldButton,
-  Sortable,
-  Table,
-  TBody,
-  Td,
-  Th,
-  THead,
-  Tooltip,
-  Tr,
-} from '@/components/v2';
+import { Sortable, Table, TBody, Td, Th, THead, Tooltip, Tr } from '@/components/v2';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/gql/graphql';
 import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { Link } from '@tanstack/react-router';
 import {
   createTable,
   getCoreRowModel,
@@ -72,26 +62,25 @@ function OperationRow({
       <Tr>
         <Td className="font-medium">
           <div className="flex items-center gap-2">
-            <Link
-              href={{
-                pathname:
-                  '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                query: {
+            <Button variant="orangeLink" className="h-auto p-0" asChild>
+              <Link
+                className="block max-w-[300px] truncate"
+                to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                params={{
                   organizationId: organization,
                   projectId: project,
                   targetId: target,
                   operationName: operation.name,
                   operationHash: operation.hash,
+                }}
+                search={{
                   from: selectedPeriod?.from ? encodeURIComponent(selectedPeriod.from) : undefined,
                   to: selectedPeriod?.to ? encodeURIComponent(selectedPeriod.to) : undefined,
-                },
-              }}
-              passHref
-            >
-              <OldButton variant="link" as="a" className="block max-w-[300px] truncate">
+                }}
+              >
                 {operation.name}
-              </OldButton>
-            </Link>
+              </Link>
+            </Button>
             {operation.name === 'anonymous' && (
               <Tooltip.Provider delayDuration={200}>
                 <Tooltip content="Anonymous operation detected. Naming your operations is a recommended practice">

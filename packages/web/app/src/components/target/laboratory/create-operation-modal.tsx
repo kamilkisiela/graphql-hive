@@ -4,9 +4,8 @@ import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
+import { useCollections } from '@/pages/target-laboratory';
 import { useEditorContext } from '@graphiql/react';
-import { useCollections } from '../../../../pages/[organizationId]/[projectId]/[targetId]/laboratory';
 
 const CreateOperationMutation = graphql(`
   mutation CreateOperation(
@@ -48,19 +47,22 @@ const CreateOperationMutation = graphql(`
 
 export type CreateOperationMutationType = typeof CreateOperationMutation;
 
-export function CreateOperationModal({
-  isOpen,
-  close,
-  onSaveSuccess,
-}: {
+export function CreateOperationModal(props: {
   isOpen: boolean;
   close: () => void;
-  onSaveSuccess?: () => void;
+  onSaveSuccess?: (operationId?: string) => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const router = useRouteSelector();
+  const { isOpen, close, onSaveSuccess } = props;
   const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
 
-  const { collections, fetching } = useCollections();
+  const { collections, fetching } = useCollections({
+    organizationId: props.organizationId,
+    projectId: props.projectId,
+    targetId: props.targetId,
+  });
 
   const { queryEditor, variableEditor, headerEditor } = useEditorContext({
     nonNull: true,
@@ -88,9 +90,9 @@ export function CreateOperationModal({
     async onSubmit(values) {
       const response = await mutateCreate({
         selector: {
-          target: router.targetId,
-          organization: router.organizationId,
-          project: router.projectId,
+          target: props.targetId,
+          organization: props.organizationId,
+          project: props.projectId,
         },
         input: {
           name: values.name,
@@ -104,18 +106,7 @@ export function CreateOperationModal({
       const error = response.error || response.data?.createOperationInDocumentCollection.error;
 
       if (!error) {
-        if (result) {
-          const data = result.createOperationInDocumentCollection;
-
-          void router.push({
-            query: {
-              ...router.query,
-              operation: data.ok?.operation.id,
-            },
-          });
-        }
-
-        onSaveSuccess?.();
+        onSaveSuccess?.(result?.createOperationInDocumentCollection.ok?.operation.id);
         resetForm();
         close();
       }

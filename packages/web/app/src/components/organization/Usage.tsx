@@ -44,7 +44,7 @@ export function OrganizationUsageEstimationView(props: {
 
   return (
     <div className="right-4 top-7">
-      <DataWrapper query={query}>
+      <DataWrapper query={query} organizationId={organization.cleanId}>
         {result => (
           <Table>
             <THead>

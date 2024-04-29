@@ -7,7 +7,7 @@ const webAppPkgJsonFilepath = join(__dirname, '../../packages/web/app/package.js
 const webAppPkg = JSON.parse(readFileSync(webAppPkgJsonFilepath, 'utf8'));
 
 const cfConfig = new pulumi.Config('cloudflareCustom');
-const monacoEditorVersion = webAppPkg.dependencies['monaco-editor'];
+const monacoEditorVersion = webAppPkg.devDependencies['monaco-editor'];
 
 function toExpressionList(items: string[]): string {
   return items.map(v => `"${v}"`).join(' ');

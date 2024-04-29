@@ -39,7 +39,6 @@ import { TimeAgo } from '@/components/ui/time-ago';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DocsLink, Heading } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 
@@ -138,17 +137,20 @@ function DisableContractDialog(props: { contractId: string; onClose: () => void 
   );
 }
 
-export function SchemaContracts() {
-  const router = useRouteSelector();
+export function SchemaContracts(props: {
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
   const [disabledContractId, setDisabledContractId] = useState<string | null>(null);
 
   const [schemaContractsQuery, reexecuteQuery] = useQuery({
     query: SchemaContractsQuery,
     variables: {
       selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+        target: props.targetId,
       },
     },
   });

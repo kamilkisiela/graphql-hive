@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
-import Link from 'next/link';
 import { Tooltip } from '@/components/v2';
 import { PackageIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import { Link } from '@tanstack/react-router';
 
 function stringToHslColor(str: string, s = 30, l = 80) {
   let hash = 0;
@@ -16,20 +15,23 @@ function stringToHslColor(str: string, s = 30, l = 80) {
   return 'hsl(' + h + ', ' + s + '%, ' + l + '%)';
 }
 
-function SubgraphChip(props: { text: string; tooltip: boolean }): React.ReactElement {
-  const router = useRouteSelector();
-
+function SubgraphChip(props: {
+  text: string;
+  tooltip: boolean;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}): React.ReactElement {
   const inner = (
     <Link
-      href={{
-        pathname: '/[organizationId]/[projectId]/[targetId]',
-        query: {
-          organizationId: router.organizationId,
-          projectId: router.projectId,
-          targetId: router.targetId,
-        },
-        hash: `service-${props.text}`,
+      to="/$organizationId/$projectId/$targetId"
+      params={{
+        organizationId: props.organizationId,
+        projectId: props.projectId,
+        targetId: props.targetId,
       }}
+      // TODO(router)
+      hash={`service-${props.text}`}
       style={{ backgroundColor: stringToHslColor(props.text) }}
       className="my-[2px] ml-[6px] inline-block h-[22px] max-w-[100px] cursor-pointer items-center justify-between truncate rounded-[16px] py-0 pl-[8px] pr-[6px] text-[10px] font-normal normal-case leading-loose text-[#4f4f4f] drop-shadow-md"
     >
@@ -65,6 +67,9 @@ const tooltipColor = 'rgb(36, 39, 46)';
 const previewThreshold = 3;
 
 export function SupergraphMetadataList(props: {
+  organizationId: string;
+  projectId: string;
+  targetId: string;
   supergraphMetadata: FragmentType<typeof SupergraphMetadataList_SupergraphMetadataFragment>;
 }) {
   const supergraphMetadata = useFragment(
@@ -80,7 +85,14 @@ export function SupergraphMetadataList(props: {
     if (supergraphMetadata.ownedByServiceNames.length <= previewThreshold) {
       return [
         supergraphMetadata.ownedByServiceNames.map((serviceName, index) => (
-          <SubgraphChip key={`${serviceName}-${index}`} text={serviceName} tooltip />
+          <SubgraphChip
+            organizationId={props.organizationId}
+            projectId={props.projectId}
+            targetId={props.targetId}
+            key={`${serviceName}-${index}`}
+            text={serviceName}
+            tooltip
+          />
         )),
         null,
       ] as const;
@@ -90,10 +102,24 @@ export function SupergraphMetadataList(props: {
       supergraphMetadata.ownedByServiceNames
         .slice(0, previewThreshold)
         .map((serviceName, index) => (
-          <SubgraphChip key={`${serviceName}-${index}`} text={serviceName} tooltip />
+          <SubgraphChip
+            organizationId={props.organizationId}
+            projectId={props.projectId}
+            targetId={props.targetId}
+            key={`${serviceName}-${index}`}
+            text={serviceName}
+            tooltip
+          />
         )),
       supergraphMetadata.ownedByServiceNames.map((serviceName, index) => (
-        <SubgraphChip key={`${serviceName}-${index}`} text={serviceName} tooltip={false} />
+        <SubgraphChip
+          organizationId={props.organizationId}
+          projectId={props.projectId}
+          targetId={props.targetId}
+          key={`${serviceName}-${index}`}
+          text={serviceName}
+          tooltip={false}
+        />
       )),
     ] as const;
   }, [supergraphMetadata.ownedByServiceNames]);

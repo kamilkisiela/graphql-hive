@@ -1,6 +1,4 @@
 import { useMemo } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
@@ -10,6 +8,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Autocomplete } from '@/components/v2';
 import { graphql } from '@/gql';
+import {
+  Link,
+  RegisteredRouter,
+  RoutePaths,
+  ToPathOption,
+  useRouter,
+} from '@tanstack/react-router';
 import { useArgumentListToggle, usePeriodSelector } from './provider';
 
 const TypeFilter_AllTypes = graphql(`
@@ -93,9 +98,15 @@ export function TypeFilter(props: {
       defaultValue={props.typename ? { value: props.typename, label: props.typename } : null}
       options={types}
       onChange={option => {
-        void router.push(
-          `/${props.organizationId}/${props.projectId}/${props.targetId}/explorer/${option.value}`,
-        );
+        void router.navigate({
+          to: '/$organizationId/$projectId/$targetId/explorer/$typename',
+          params: {
+            organizationId: props.organizationId,
+            projectId: props.projectId,
+            targetId: props.targetId,
+            typename: option.value,
+          },
+        });
       }}
       loading={query.fetching}
     />
@@ -110,25 +121,18 @@ export function FieldByNameFilter() {
       className="w-[200px] grow cursor-text"
       placeholder="Filter by field name"
       onChange={e => {
-        if (e.target.value === '') {
-          const routerQuery = router.query;
-          delete routerQuery.search;
-          void router.push({ query: routerQuery }, undefined, { shallow: true });
-          return;
-        }
-
-        void router.push(
-          {
-            query: {
-              ...router.query,
-              search: e.target.value === '' ? undefined : e.target.value,
-            },
+        void router.navigate({
+          search: {
+            search: e.target.value === '' ? undefined : e.target.value,
           },
-          undefined,
-          { shallow: true },
-        );
+        });
       }}
-      value={typeof router.query.search === 'string' ? router.query.search : ''}
+      value={
+        'search' in router.latestLocation.search &&
+        typeof router.latestLocation.search.search === 'string'
+          ? router.latestLocation.search.search
+          : ''
+      }
     />
   );
 }
@@ -154,7 +158,7 @@ export function ArgumentVisibilityFilter() {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <div className="bg-secondary flex h-[40px] flex-row items-center gap-x-4 rounded-md border px-3">
             <div>
               <Label htmlFor="filter-toggle-arguments" className="text-sm font-normal">
@@ -177,23 +181,28 @@ export function ArgumentVisibilityFilter() {
   );
 }
 
-const variants = [
+const variants: Array<{
+  value: 'all' | 'unused' | 'deprecated';
+  label: string;
+  pathname: ToPathOption<RegisteredRouter, RoutePaths<RegisteredRouter['routeTree']>, ''>;
+  tooltip: string;
+}> = [
   {
     value: 'all',
     label: 'All',
-    pathname: '/[organizationId]/[projectId]/[targetId]/explorer',
+    pathname: '/$organizationId/$projectId/$targetId/explorer',
     tooltip: 'Shows all types, including unused and deprecated ones',
   },
   {
     value: 'unused',
     label: 'Unused',
-    pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
+    pathname: '/$organizationId/$projectId/$targetId/explorer/unused',
     tooltip: 'Shows only types that are not used in any operation',
   },
   {
     value: 'deprecated',
     label: 'Deprecated',
-    pathname: '/[organizationId]/[projectId]/[targetId]/explorer/deprecated',
+    pathname: '/$organizationId/$projectId/$targetId/explorer/deprecated',
     tooltip: 'Shows only types that are marked as deprecated',
   },
 ];
@@ -210,19 +219,19 @@ export function SchemaVariantFilter(props: {
         <TabsList>
           {variants.map(variant => (
             <Tooltip key={variant.value}>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 {props.variant === variant.value ? (
-                  <TabsTrigger value={variant.value}>{variant.label}</TabsTrigger>
+                  <div>
+                    <TabsTrigger value={variant.value}>{variant.label}</TabsTrigger>
+                  </div>
                 ) : (
                   <TabsTrigger value={variant.value} asChild>
                     <Link
-                      href={{
-                        pathname: variant.pathname,
-                        query: {
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
-                        },
+                      to={variant.pathname}
+                      params={{
+                        organizationId: props.organizationId,
+                        projectId: props.projectId,
+                        targetId: props.targetId,
                       }}
                     >
                       {variant.label}

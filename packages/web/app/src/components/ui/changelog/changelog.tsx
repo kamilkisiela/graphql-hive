@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect } from 'react';
-import Link from 'next/link';
 import { format } from 'date-fns/format';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -50,7 +49,7 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
   return (
     <Popover open={isOpen} onOpenChange={toggle}>
       {props.changes.length > 0 ? (
-        <PopoverTrigger>
+        <PopoverTrigger asChild>
           <Button variant="outline" className="relative text-sm">
             Latest changes
             {displayDot ? (
@@ -86,14 +85,14 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
                   {format(new Date(change.date), 'do MMMM yyyy')}
                 </time>
                 <h3 className="text-pretty text-base font-semibold text-white hover:underline">
-                  <Link
+                  <a
                     target="_blank"
-                    rel="noopener"
+                    rel="noreferrer"
                     onClick={() => handleChangelogClick(change)}
                     href={change.href}
                   >
                     {change.title}
-                  </Link>
+                  </a>
                 </h3>
                 <div className="mb-4 mt-1 text-pretty text-sm font-normal text-white/80">
                   {change.description}
@@ -104,13 +103,13 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
         </div>
         <div className="flex flex-row items-center justify-center">
           <Button variant="link" asChild className="text-left text-sm">
-            <Link
+            <a
               rel="noopener noreferrer"
               href="https://the-guild.dev/graphql/hive/product-updates"
               target="_blank"
             >
               View all updates
-            </Link>
+            </a>
           </Button>
         </div>
       </PopoverContent>

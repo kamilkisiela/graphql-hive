@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
@@ -17,6 +16,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from '@tanstack/react-router';
 
 export const CreateOrganizationMutation = graphql(`
   mutation CreateOrganizationMutation($input: CreateOrganizationInput!) {
@@ -62,7 +62,7 @@ const formSchema = z.object({
 export const CreateOrganizationForm = () => {
   const [mutation, mutate] = useMutation(CreateOrganizationMutation);
   const { toast } = useToast();
-  const { push } = useRouter();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     mode: 'onChange',
     resolver: zodResolver(formSchema),
@@ -84,9 +84,13 @@ export const CreateOrganizationForm = () => {
         title: 'Organization created',
         description: `You are now an admin of "${values.name}" organization.`,
       });
-      void push(
-        `/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`,
-      );
+      void router.navigate({
+        to: '/$organizationId',
+        params: {
+          organizationId:
+            mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
+        },
+      });
     } else if (mutation.data?.createOrganization.error?.inputErrors?.name) {
       form.setError('name', {
         type: 'manual',

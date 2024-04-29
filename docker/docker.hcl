@@ -62,13 +62,6 @@ target "service-base" {
   }
 }
 
-target "app-base" {
-  dockerfile = "${PWD}/docker/app.dockerfile"
-  args = {
-    RELEASE = "${RELEASE}"
-  }
-}
-
 target "router-base" {
   dockerfile = "${PWD}/docker/router.dockerfile"
   args = {
@@ -367,15 +360,17 @@ target "composition-federation-2" {
 }
 
 target "app" {
-  inherits = ["app-base", get_target()]
+  inherits = ["service-base", get_target()]
   contexts = {
     dist = "${PWD}/packages/web/app/dist"
     shared = "${PWD}/docker/shared"
   }
   args = {
+    SERVICE_DIR_NAME = "@hive/app"
     IMAGE_TITLE = "graphql-hive/app"
     PORT = "3000"
     IMAGE_DESCRIPTION = "The app of the GraphQL Hive project."
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/api/health"
   }
   tags = [
     local_image_tag("app"),

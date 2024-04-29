@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import clsx from 'clsx';
 import { useMutation } from 'urql';
 import { Section } from '@/components/common';
@@ -8,6 +7,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { CardElement } from '@stripe/react-stripe-js';
+import { useRouter } from '@tanstack/react-router';
 
 const GenerateStripeLinkMutation = graphql(`
   mutation GenerateStripeLinkMutation($selector: OrganizationSelectorInput!) {
@@ -67,7 +67,10 @@ export const ManagePaymentMethod = (props: {
                 },
               }).then(result => {
                 if (result.data?.generateStripePortalLink) {
-                  void router.push(result.data.generateStripePortalLink);
+                  void router.navigate({
+                    to: result.data.generateStripePortalLink,
+                  });
+                  // void router.push(result.data.generateStripePortalLink);
                 }
               });
             }}

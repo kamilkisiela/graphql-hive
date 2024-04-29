@@ -1,8 +1,6 @@
-import '../public/styles.css';
+import '../src/index.css';
 
-console.log('[dark]');
 if (!document.body.className.includes('dark')) {
-  console.log('[dark] added');
   document.body.className += ' ' + 'dark';
 }
 

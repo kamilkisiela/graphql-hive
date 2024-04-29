@@ -3,18 +3,18 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "downlevelIteration": true,
+    "useDefineForClassFields": true,
     "allowJs": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "jsx": "react-jsx",
     "plugins": [
       {
         "name": "@0no-co/graphqlsp",
@@ -25,6 +25,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "modules.d.ts", "src", "pages"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

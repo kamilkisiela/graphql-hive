@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Checkbox, Input, Button as LegacyButton, Spinner } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/gql/graphql';
-import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
+import { useFormattedNumber, useToggle } from '@/lib/hooks';
 
 const OperationsFilter_OperationStatsValuesConnectionFragment = graphql(`
   fragment OperationsFilter_OperationStatsValuesConnectionFragment on OperationStatsValuesConnection {
@@ -195,21 +195,26 @@ function OperationsFilterContainer({
   onClose,
   onFilter,
   selected,
+  organizationId,
+  projectId,
+  targetId,
 }: {
   onFilter(keys: string[]): void;
   onClose(): void;
   isOpen: boolean;
   period: DateRangeInput;
   selected?: string[];
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement | null {
-  const router = useRouteSelector();
   const [query, refresh] = useQuery({
     query: OperationsFilterContainer_OperationStatsQuery,
     variables: {
       selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
         period,
         operations: [],
       },
@@ -290,10 +295,16 @@ export function OperationsFilterTrigger({
   period,
   onFilter,
   selected,
+  organizationId,
+  projectId,
+  targetId,
 }: {
   period: DateRangeInput;
   onFilter(keys: string[]): void;
   selected?: string[];
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
   const [isOpen, toggle] = useToggle();
 
@@ -304,6 +315,9 @@ export function OperationsFilterTrigger({
         <FilterIcon className="ml-2 size-4" />
       </Button>
       <OperationsFilterContainer
+        organizationId={organizationId}
+        projectId={projectId}
+        targetId={targetId}
         isOpen={isOpen}
         onClose={toggle}
         period={period}
@@ -530,21 +544,26 @@ function ClientsFilterContainer({
   onClose,
   onFilter,
   selected,
+  organizationId,
+  projectId,
+  targetId,
 }: {
   onFilter(keys: string[]): void;
   onClose(): void;
   isOpen: boolean;
   period: DateRangeInput;
   selected?: string[];
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement | null {
-  const router = useRouteSelector();
   const [query, refresh] = useQuery({
     query: ClientsFilterContainer_ClientStatsQuery,
     variables: {
       selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
         period,
         operations: [],
       },
@@ -584,10 +603,16 @@ export function ClientsFilterTrigger({
   period,
   onFilter,
   selected,
+  organizationId,
+  projectId,
+  targetId,
 }: {
   period: DateRangeInput;
   onFilter(keys: string[]): void;
   selected?: string[];
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
   const [isOpen, toggle] = useToggle();
 
@@ -598,6 +623,9 @@ export function ClientsFilterTrigger({
         <FilterIcon className="ml-2 size-4" />
       </Button>
       <ClientsFilterContainer
+        organizationId={organizationId}
+        projectId={projectId}
+        targetId={targetId}
         isOpen={isOpen}
         onClose={toggle}
         period={period}

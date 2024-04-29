@@ -10,6 +10,5 @@ export function getAllEnv(): Record<string, string | undefined> {
     return (window as any)['__ENV'] ?? {};
   }
 
-  // eslint-disable-next-line no-process-env
-  return process.env;
+  throw new Error('getAllEnv should only be called in the browser');
 }

@@ -1,5 +1,5 @@
-import { useRouter } from 'next/router';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { useRouter } from '@tanstack/react-router';
 import { GraphQLFields, GraphQLTypeCard } from './common';
 
 export const GraphQLObjectTypeComponent_TypeFragment = graphql(`
@@ -32,6 +32,9 @@ export function GraphQLObjectTypeComponent(props: {
 }) {
   const ttype = useFragment(GraphQLObjectTypeComponent_TypeFragment, props.type);
   const router = useRouter();
+  const searchObj = router.latestLocation.search;
+  const search =
+    'search' in searchObj && typeof searchObj.search === 'string' ? searchObj.search : undefined;
 
   return (
     <GraphQLTypeCard
@@ -47,7 +50,7 @@ export function GraphQLObjectTypeComponent(props: {
       <GraphQLFields
         typeName={ttype.name}
         fields={ttype.fields}
-        filterValue={typeof router.query.search === 'string' ? router.query.search : undefined}
+        filterValue={search}
         totalRequests={props.totalRequests}
         collapsed={props.collapsed}
         targetCleanId={props.targetCleanId}

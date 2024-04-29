@@ -1,10 +1,10 @@
 import { ReactElement } from 'react';
-import NextLink from 'next/link';
 import { Book, Megaphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getDocsUrl, getProductUpdatesUrl } from '@/lib/docs-url';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import { Link as RouterLink } from '@tanstack/react-router';
 import { Link } from './link';
 
 export const DocsNote = ({ children, warn }: { warn?: boolean; children: React.ReactNode }) => {
@@ -69,17 +69,16 @@ export const ProductUpdatesLink = ({
 
   return (
     <Button variant="link" className={cn('p-0 text-blue-500', className)} asChild>
-      <NextLink
+      <RouterLink
         href={fullUrl}
         target={isExternal ? '_blank' : undefined}
         rel="noreferrer"
         className="font-medium transition-colors hover:underline"
-        scroll={false}
       >
         {icon ?? <Megaphone className="mr-2 size-4" />}
         {children}
         {isExternal ? <ExternalLinkIcon className="inline pl-1" /> : null}
-      </NextLink>
+      </RouterLink>
     </Button>
   );
 };

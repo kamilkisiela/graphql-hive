@@ -1,10 +1,9 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
+import { useRouter } from '@tanstack/react-router';
 
 export const DeleteProjectMutation = graphql(`
   mutation deleteProject($selector: ProjectSelectorInput!) {
@@ -21,16 +20,15 @@ export const DeleteProjectMutation = graphql(`
   }
 `);
 
-export const DeleteProjectModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
+export const DeleteProjectModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
 }): ReactElement => {
+  const { isOpen, toggleModalOpen } = props;
   const [, mutate] = useMutation(DeleteProjectMutation);
-  const router = useRouteSelector();
-  const { replace } = useRouter();
+  const router = useRouter();
 
   return (
     <Modal
@@ -54,12 +52,17 @@ export const DeleteProjectModal = ({
           onClick={async () => {
             await mutate({
               selector: {
-                organization: router.organizationId,
-                project: router.projectId,
+                organization: props.organizationId,
+                project: props.projectId,
               },
             });
             toggleModalOpen();
-            void replace(`/${router.organizationId}`);
+            void router.navigate({
+              to: `/${props.organizationId}`,
+              params: {
+                organizationId: props.organizationId,
+              },
+            });
           }}
         >
           Delete

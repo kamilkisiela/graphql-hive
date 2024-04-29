@@ -1,9 +1,8 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react';
-import NextLink from 'next/link';
-import { useRouter } from 'next/router';
+import { ReactElement, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -23,7 +22,7 @@ import { InlineCode } from '@/components/v2/inline-code';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
-import { useRouteSelector } from '@/lib/hooks';
+import { Link, useRouter } from '@tanstack/react-router';
 
 const CDNAccessTokeRowFragment = graphql(`
   fragment CDNAccessTokens_CdnAccessTokenRowFragment on CdnAccessToken {
@@ -55,8 +54,10 @@ const CDNAccessTokenCreateMutation = graphql(`
 function CreateCDNAccessTokenModal(props: {
   onCreateCDNAccessToken: () => void;
   onClose: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const router = useRouteSelector();
   const [createCdnAccessToken, mutate] = useMutation(CDNAccessTokenCreateMutation);
 
   const form = useFormik({
@@ -71,9 +72,9 @@ function CreateCDNAccessTokenModal(props: {
       await mutate({
         input: {
           selector: {
-            organization: router.organizationId,
-            project: router.projectId,
-            target: router.targetId,
+            organization: props.organizationId,
+            project: props.projectId,
+            target: props.targetId,
           },
           alias: values.alias,
         },
@@ -193,8 +194,10 @@ function DeleteCDNAccessTokenModal(props: {
   cdnAccessTokenId: string;
   onDeletedAccessTokenId: (deletedAccessTokenId: string) => void;
   onClose: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const router = useRouteSelector();
   const [deleteCdnAccessToken, mutate] = useMutation(CDNAccessTokenDeleteMutation);
 
   useEffect(() => {
@@ -230,9 +233,9 @@ function DeleteCDNAccessTokenModal(props: {
             mutate({
               input: {
                 selector: {
-                  organization: router.organizationId,
-                  project: router.projectId,
-                  target: router.targetId,
+                  organization: props.organizationId,
+                  project: props.projectId,
+                  target: props.targetId,
                 },
                 cdnAccessTokenId: props.cdnAccessTokenId,
               },
@@ -315,42 +318,43 @@ const CDNAccessTokensQuery = graphql(`
   }
 `);
 
-const isDeleteCDNAccessTokenModalPath = (path: string): null | string => {
-  const pattern = /#delete-cdn-access-token\?id=(([a-zA-Z-\d]*))$/;
-
-  const result = path.match(pattern);
-  if (result === null) {
-    return null;
-  }
-
-  return result[1];
-};
-
 const CDNAccessTokens_MeFragment = graphql(`
   fragment CDNAccessTokens_MeFragment on Member {
     ...CanAccessTarget_MemberFragment
   }
 `);
 
+const CDNSearchParams = z.discriminatedUnion('cdn', [
+  z.object({
+    cdn: z.literal('create').optional(),
+  }),
+  z.object({
+    cdn: z.literal('delete'),
+    id: z.string(),
+  }),
+]);
+
 export function CDNAccessTokens(props: {
   me: FragmentType<typeof CDNAccessTokens_MeFragment>;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): React.ReactElement {
   const me = useFragment(CDNAccessTokens_MeFragment, props.me);
-  const routerSelector = useRouteSelector();
-  const router = useRouter();
 
   const [endCursors, setEndCursors] = useState<Array<string>>([]);
+  const router = useRouter();
+  const searchParamsResult = CDNSearchParams.safeParse(router.latestLocation.search);
 
-  const openCreateCDNAccessTokensModalLink = `${router.asPath}#create-cdn-access-token`;
-  const isCreateCDNAccessTokensModalOpen = router.asPath.endsWith('#create-cdn-access-token');
+  if (!searchParamsResult.success) {
+    console.error('Invalid search params', searchParamsResult.error);
+  }
 
-  const deleteCDNAccessTokenId = useMemo(() => {
-    return isDeleteCDNAccessTokenModalPath(router.asPath);
-  }, [router.asPath]);
+  const searchParams = searchParamsResult.data ?? { cdn: undefined };
 
   const closeModal = () => {
-    void router.push(router.asPath.split('#')[0], undefined, {
-      scroll: false,
+    void router.navigate({
+      search: {},
     });
   };
 
@@ -358,9 +362,9 @@ export function CDNAccessTokens(props: {
     query: CDNAccessTokensQuery,
     variables: {
       selector: {
-        organization: routerSelector.organizationId,
-        project: routerSelector.projectId,
-        target: routerSelector.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+        target: props.targetId,
       },
       first: 10,
       after: endCursors[endCursors.length - 1] ?? null,
@@ -391,7 +395,13 @@ export function CDNAccessTokens(props: {
         {canManage && (
           <div className="my-3.5 flex justify-between">
             <Button asChild>
-              <NextLink href={openCreateCDNAccessTokensModalLink}>Create new CDN token</NextLink>
+              <Link
+                search={{
+                  cdn: 'create',
+                }}
+              >
+                Create new CDN token
+              </Link>
             </Button>
           </div>
         )}
@@ -414,9 +424,12 @@ export function CDNAccessTokens(props: {
                       className="hover:text-red-500"
                       variant="ghost"
                       onClick={() => {
-                        void router.push(
-                          `${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`,
-                        );
+                        void router.navigate({
+                          search: {
+                            cdn: 'delete',
+                            id: edge.node.id,
+                          },
+                        });
                       }}
                     >
                       <TrashIcon />
@@ -463,21 +476,27 @@ export function CDNAccessTokens(props: {
           ) : null}
         </div>
       </CardContent>
-      {isCreateCDNAccessTokensModalOpen ? (
+      {searchParams.cdn === 'create' ? (
         <CreateCDNAccessTokenModal
           onCreateCDNAccessToken={() => {
             reexecuteQuery({ requestPolicy: 'network-only' });
           }}
           onClose={closeModal}
+          organizationId={props.organizationId}
+          projectId={props.projectId}
+          targetId={props.targetId}
         />
       ) : null}
-      {deleteCDNAccessTokenId ? (
+      {searchParams.cdn === 'delete' ? (
         <DeleteCDNAccessTokenModal
-          cdnAccessTokenId={deleteCDNAccessTokenId}
+          cdnAccessTokenId={searchParams.id}
           onDeletedAccessTokenId={() => {
             reexecuteQuery({ requestPolicy: 'network-only' });
           }}
           onClose={closeModal}
+          organizationId={props.organizationId}
+          projectId={props.projectId}
+          targetId={props.targetId}
         />
       ) : null}
     </Card>

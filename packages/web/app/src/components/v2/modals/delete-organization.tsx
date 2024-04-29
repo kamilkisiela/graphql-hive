@@ -1,10 +1,9 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { FragmentType, graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
+import { useRouter } from '@tanstack/react-router';
 
 export const DeleteOrganizationDocument = graphql(`
   mutation deleteOrganization($selector: OrganizationSelectorInput!) {
@@ -26,17 +25,15 @@ const DeleteOrganizationModal_OrganizationFragment = graphql(`
   }
 `);
 
-export const DeleteOrganizationModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
+export const DeleteOrganizationModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organization: FragmentType<typeof DeleteOrganizationModal_OrganizationFragment>;
+  organizationId: string;
 }): ReactElement => {
+  const { isOpen, toggleModalOpen } = props;
   const [, mutate] = useMutation(DeleteOrganizationDocument);
-  const router = useRouteSelector();
-  const { replace } = useRouter();
+  const router = useRouter();
 
   return (
     <Modal
@@ -61,10 +58,12 @@ export const DeleteOrganizationModal = ({
           onClick={async () => {
             await mutate({
               selector: {
-                organization: router.organizationId,
+                organization: props.organizationId,
               },
             });
-            void (await replace('/'));
+            void router.navigate({
+              to: '/',
+            });
             toggleModalOpen();
           }}
         >

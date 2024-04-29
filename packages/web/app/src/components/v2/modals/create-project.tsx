@@ -1,12 +1,10 @@
-import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
-import { useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@tanstack/react-router';
 
 export const CreateProjectMutation = graphql(`
   mutation CreateProject_CreateProject($input: CreateProjectInput!) {
@@ -36,16 +34,14 @@ export const CreateProjectMutation = graphql(`
   }
 `);
 
-export const CreateProjectModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
+export const CreateProjectModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-}): ReactElement => {
+  organizationId: string;
+}) => {
+  const { isOpen, toggleModalOpen } = props;
   const [mutation, mutate] = useMutation(CreateProjectMutation);
-  const { push } = useRouter();
-  const router = useRouteSelector();
+  const router = useRouter();
 
   const {
     handleSubmit,
@@ -68,13 +64,19 @@ export const CreateProjectModal = ({
     async onSubmit(values) {
       const { data } = await mutate({
         input: {
-          organization: router.organizationId,
+          organization: props.organizationId,
           ...values,
         },
       });
       if (data?.createProject.ok) {
         toggleModalOpen();
-        void push(`/${router.organizationId}/${data.createProject.ok.createdProject.cleanId}`);
+        void router.navigate({
+          to: '/$organizationId/$projectId',
+          params: {
+            organizationId: props.organizationId,
+            projectId: data.createProject.ok.createdProject.cleanId,
+          },
+        });
       }
     },
   });

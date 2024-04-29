@@ -13,7 +13,6 @@ import {
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
-import { useRouteSelector } from '@/lib/hooks';
 
 const ConnectSchemaModalQuery = graphql(`
   query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
@@ -56,23 +55,23 @@ function composeEndpoint(baseUrl: string, artifactType: CdnArtifactType): string
   return `${baseUrl}/${artifactType}`;
 }
 
-export const ConnectSchemaModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
+export const ConnectSchemaModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement => {
+  const { isOpen, toggleModalOpen } = props;
   const [selectedGraph, setSelectedGraph] = useState<string>('DEFAULT_GRAPH');
   const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
-  const router = useRouteSelector();
   const [query] = useQuery({
     query: ConnectSchemaModalQuery,
     variables: {
       targetSelector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+        target: props.targetId,
       },
     },
     requestPolicy: 'cache-and-network',
@@ -168,13 +167,11 @@ export const ConnectSchemaModal = ({
             <Link
               variant="primary"
               className="font-bold underline"
-              href={{
-                pathname: '/[organizationId]/[projectId]/[targetId]/settings',
-                query: {
-                  organizationId: router.organizationId,
-                  projectId: router.projectId,
-                  targetId: router.targetId,
-                },
+              to="/$organizationId/$projectId/$targetId/settings"
+              params={{
+                organizationId: props.organizationId,
+                projectId: props.projectId,
+                targetId: props.targetId,
               }}
               target="_blank"
               rel="noreferrer"
@@ -199,7 +196,7 @@ export const ConnectSchemaModal = ({
                 variant="primary"
                 target="_blank"
                 rel="noreferrer"
-                href={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn')}
+                to={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn')}
               >
                 Using the Registry with a Apollo Gateway
               </Link>{' '}

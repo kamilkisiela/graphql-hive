@@ -4,7 +4,6 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 
 const CollectionQuery = graphql(`
   query Collection($selector: TargetSelectorInput!, $id: ID!) {
@@ -102,16 +101,15 @@ const UpdateCollectionMutation = graphql(`
   }
 `);
 
-export function CreateCollectionModal({
-  isOpen,
-  toggleModalOpen,
-  collectionId,
-}: {
+export function CreateCollectionModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   collectionId?: string;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const router = useRouteSelector();
+  const { isOpen, toggleModalOpen, collectionId } = props;
   const [mutationCreate, mutateCreate] = useMutation(CreateCollectionMutation);
   const [mutationUpdate, mutateUpdate] = useMutation(UpdateCollectionMutation);
 
@@ -120,9 +118,9 @@ export function CreateCollectionModal({
     variables: {
       id: collectionId!,
       selector: {
-        target: router.targetId,
-        organization: router.organizationId,
-        project: router.projectId,
+        target: props.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
       },
     },
     pause: !collectionId,
@@ -168,9 +166,9 @@ export function CreateCollectionModal({
       const { error } = collectionId
         ? await mutateUpdate({
             selector: {
-              target: router.targetId,
-              organization: router.organizationId,
-              project: router.projectId,
+              target: props.targetId,
+              organization: props.organizationId,
+              project: props.projectId,
             },
             input: {
               collectionId,
@@ -181,9 +179,9 @@ export function CreateCollectionModal({
           })
         : await mutateCreate({
             selector: {
-              target: router.targetId,
-              organization: router.organizationId,
-              project: router.projectId,
+              target: props.targetId,
+              organization: props.organizationId,
+              project: props.projectId,
             },
             input: values,
           });

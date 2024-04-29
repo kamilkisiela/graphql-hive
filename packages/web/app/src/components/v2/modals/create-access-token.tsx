@@ -7,7 +7,6 @@ import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/comp
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { RegistryAccessScope } from '@/lib/access/common';
-import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateAccessToken_CreateTokenMutation = graphql(`
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
@@ -44,18 +43,18 @@ const CreateAccessTokenModalQuery = graphql(`
   }
 `);
 
-export function CreateAccessTokenModal({
-  isOpen,
-  toggleModalOpen,
-}: {
+export function CreateAccessTokenModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const router = useRouteSelector();
+  const { isOpen, toggleModalOpen } = props;
   const [organizationQuery] = useQuery({
     query: CreateAccessTokenModalQuery,
     variables: {
-      organizationId: router.organizationId,
+      organizationId: props.organizationId,
     },
   });
 
@@ -70,9 +69,9 @@ export function CreateAccessTokenModal({
       {organization ? (
         <ModalContent
           organization={organization}
-          organizationId={router.organizationId}
-          projectId={router.projectId}
-          targetId={router.targetId}
+          organizationId={props.organizationId}
+          projectId={props.projectId}
+          targetId={props.targetId}
           toggleModalOpen={toggleModalOpen}
         />
       ) : null}

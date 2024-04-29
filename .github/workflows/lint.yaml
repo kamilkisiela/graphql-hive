@@ -64,7 +64,7 @@ jobs:
       - name: Operation Check
         run: |
           npx graphql-inspector validate \
-            "packages/web/app/{src,pages}/**/*.{graphql,tsx}|packages/libraries/cli/**/*.graphql|packages/web/app/src/lib/**/*.ts" \
+            "packages/web/app/src/**/*.{graphql,tsx}|packages/libraries/cli/**/*.graphql|packages/web/app/src/lib/**/*.ts" \
             "packages/**/module.graphql.ts" \
             --maxDepth=20 \
             --maxAliasCount=20 \

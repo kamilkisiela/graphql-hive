@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { Button, Heading, Modal, Select } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AlertType } from '@/gql/graphql';
-import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateAlertModal_AddAlertMutation = graphql(`
   mutation CreateAlertModal_AddAlertMutation($input: AddAlertInput!) {
@@ -45,12 +44,13 @@ export const CreateAlertModal = (props: {
   toggleModalOpen: () => void;
   targets: FragmentType<typeof CreateAlertModal_TargetFragment>[];
   channels: FragmentType<typeof CreateAlertModal_AlertChannelFragment>[];
+  organizationId: string;
+  projectId: string;
 }): ReactElement => {
   const { isOpen, toggleModalOpen } = props;
   const targets = useFragment(CreateAlertModal_TargetFragment, props.targets);
   const channels = useFragment(CreateAlertModal_AlertChannelFragment, props.channels);
   const [mutation, mutate] = useMutation(CreateAlertModal_AddAlertMutation);
-  const router = useRouteSelector();
 
   const { handleSubmit, values, handleChange, errors, touched, isSubmitting } = useFormik({
     initialValues: {
@@ -76,8 +76,8 @@ export const CreateAlertModal = (props: {
     async onSubmit(values) {
       const { error, data } = await mutate({
         input: {
-          organization: router.organizationId,
-          project: router.projectId,
+          organization: props.organizationId,
+          project: props.projectId,
           target: values.target,
           channel: values.channel,
           type: values.type,
