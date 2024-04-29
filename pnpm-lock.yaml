@@ -1734,8 +1734,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2(echarts@5.5.0)(react@18.2.0)
       formik:
-        specifier: 2.4.5
-        version: 2.4.5(react@18.2.0)
+        specifier: 2.4.6
+        version: 2.4.6(react@18.2.0)
       framer-motion:
         specifier: 11.1.7
         version: 11.1.7(@emotion/is-prop-valid@0.8.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -10734,8 +10734,8 @@ packages:
     resolution: {integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==}
     engines: {node: '>=0.4.x'}
 
-  formik@2.4.5:
-    resolution: {integrity: sha512-Gxlht0TD3vVdzMDHwkiNZqJ7Mvg77xQNfmBRrNtvzcHZs72TJppSTDKHpImCMJZwcWPBJ8jSQQ95GJzXFf1nAQ==}
+  formik@2.4.6:
+    resolution: {integrity: sha512-A+2EI7U7aG296q2TLGvNapDNTZp1khVt5Vk0Q/fyfSROss0V/V6+txt2aJnwEos44IxTCW/LYAi/zgWzlevj+g==}
     peerDependencies:
       react: '>=16.8.0'
 
@@ -29552,7 +29552,7 @@ snapshots:
 
   format@0.2.2: {}
 
-  formik@2.4.5(react@18.2.0):
+  formik@2.4.6(react@18.2.0):
     dependencies:
       '@types/hoist-non-react-statics': 3.3.5
       deepmerge: 2.2.1

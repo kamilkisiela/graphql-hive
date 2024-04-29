@@ -64,7 +64,7 @@
     "dompurify": "3.1.0",
     "echarts": "5.5.0",
     "echarts-for-react": "3.0.2",
-    "formik": "2.4.5",
+    "formik": "2.4.6",
     "framer-motion": "11.1.7",
     "graphiql": "3.0.0-alpha.0",
     "graphql": "16.8.1",
