@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import { ActivityIcon, BookIcon, GlobeIcon, HistoryIcon, RefreshCw } from 'lucide-react';
@@ -18,6 +17,7 @@ import { CHART_PRIMARY_COLOR } from '@/constants';
 import { graphql } from '@/gql';
 import { formatNumber, formatThroughput, toDecimal, useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { useChartStyles } from '@/utils';
 
 const ClientView_ClientStatsQuery = graphql(`

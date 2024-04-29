@@ -16,7 +16,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { pluralize } from '@/lib/utils';
 
 function floorDate(date: Date): Date {
@@ -255,7 +255,7 @@ const OrganizationProjectsPageQuery = graphql(`
 `);
 
 function OrganizationPageContent() {
-  const router = useRouteSelector();
+  const router = useRouter();
   const days = 14;
   const period = useRef<{
     from: string;

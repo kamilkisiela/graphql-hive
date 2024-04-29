@@ -1,6 +1,5 @@
 import { ReactElement } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { LogOutIcon } from 'lucide-react';
 import { authenticated } from '@/components/authenticated-container';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { DottedBackground } from '@/components/ui/dotted-background';
 import { MetaTitle } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { CreateOrganizationForm } from '@/components/v2/modals/create-organization';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 function CreateOrgPage(): ReactElement {
   const router = useRouter();

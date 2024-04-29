@@ -1,11 +1,11 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import clsx from 'clsx';
 import { useMutation } from 'urql';
 import { Section } from '@/components/common';
 import { Button, Heading, Link } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { CardElement } from '@stripe/react-stripe-js';
 

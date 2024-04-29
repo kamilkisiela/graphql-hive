@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
@@ -10,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Autocomplete } from '@/components/v2';
 import { graphql } from '@/gql';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { useArgumentListToggle, usePeriodSelector } from './provider';
 
 const TypeFilter_AllTypes = graphql(`

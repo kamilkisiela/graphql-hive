@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
@@ -16,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 export const CreateOrganizationMutation = graphql(`

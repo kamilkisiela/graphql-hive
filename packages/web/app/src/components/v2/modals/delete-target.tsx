@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 export const DeleteTargetMutation = graphql(`

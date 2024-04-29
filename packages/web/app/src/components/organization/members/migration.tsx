@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { differenceInCalendarDays } from 'date-fns';
 import { InfoIcon, LightbulbIcon, PartyPopperIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -41,6 +40,7 @@ import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { Scope, scopes } from '@/lib/access/common';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PermissionsSpace } from '../Permissions';
 import { RoleSelector } from './common';

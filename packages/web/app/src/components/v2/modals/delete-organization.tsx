@@ -1,9 +1,9 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { FragmentType, graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 export const DeleteOrganizationDocument = graphql(`

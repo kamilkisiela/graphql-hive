@@ -1,11 +1,11 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 export const CreateTarget_CreateTargetMutation = graphql(`
   mutation CreateTarget_CreateTarget($input: CreateTargetInput!) {

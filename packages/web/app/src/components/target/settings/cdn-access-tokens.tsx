@@ -1,6 +1,5 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -24,6 +23,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 const CDNAccessTokeRowFragment = graphql(`
   fragment CDNAccessTokens_CdnAccessTokenRowFragment on CdnAccessToken {

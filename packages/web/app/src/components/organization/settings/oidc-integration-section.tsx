@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { clsx } from 'clsx';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
@@ -8,6 +7,7 @@ import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 const classes = {
   container: clsx('flex flex-col items-stretch gap-5'),

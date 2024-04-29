@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
@@ -7,6 +6,7 @@ import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 export const CreateProjectMutation = graphql(`
   mutation CreateProject_CreateProject($input: CreateProjectInput!) {

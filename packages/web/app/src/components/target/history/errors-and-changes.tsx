@@ -27,7 +27,7 @@ import { Heading } from '@/components/v2';
 import { PulseIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 
 export function labelize(message: string) {
@@ -163,7 +163,7 @@ function ChangeItem(props: {
     typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
   > | null;
 }) {
-  const router = useRouteSelector();
+  const router = useRouter();
   const change = isChangesBlock_SchemaChangeWithUsageFragment(props.change)
     ? useFragment(ChangesBlock_SchemaChangeWithUsageFragment, props.change)
     : useFragment(ChangesBlock_SchemaChangeFragment, props.change);
@@ -372,7 +372,7 @@ function SchemaChangeApproval(props: {
   const approval = useFragment(ChangesBlock_SchemaChangeApprovalFragment, props.approval);
   const approvalName = approval.approvedBy?.displayName ?? '<unknown>';
   const approvalDate = format(new Date(approval.approvedAt), 'do MMMM yyyy');
-  const route = useRouteSelector();
+  const route = useRouter();
   const schemaCheckPath =
     '/' +
     [route.organizationId, route.projectId, route.targetId, 'checks', approval.schemaCheckId].join(

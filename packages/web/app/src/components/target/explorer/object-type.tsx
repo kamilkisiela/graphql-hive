@@ -1,5 +1,5 @@
-import { useRouter } from 'next/router';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { GraphQLFields, GraphQLTypeCard } from './common';
 
 export const GraphQLObjectTypeComponent_TypeFragment = graphql(`

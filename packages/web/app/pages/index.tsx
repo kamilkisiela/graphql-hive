@@ -5,7 +5,7 @@ import { Title } from '@/components/common';
 import { QueryError } from '@/components/ui/query-error';
 import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import {
   useLastVisitedOrganizationReader,
   useLastVisitedOrganizationWriter,
@@ -30,7 +30,7 @@ function Home(): ReactElement {
       previouslyVisitedOrganizationId,
     },
   });
-  const router = useRouteSelector();
+  const router = useRouter();
   const result = query.data?.myDefaultOrganization;
 
   useLastVisitedOrganizationWriter(result?.organization?.cleanId);

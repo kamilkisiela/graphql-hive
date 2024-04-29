@@ -11,7 +11,7 @@ import { DataWrapper } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
   mutation JoinOrganizationPage_JoinOrganizationMutation($code: String!) {
@@ -49,7 +49,7 @@ const JoinOrganizationPage_OrganizationInvitationQuery = graphql(`
 `);
 
 function JoinOrganizationPage() {
-  const router = useRouteSelector();
+  const router = useRouter();
   const notify = useNotifications();
   const code = router.query.inviteCode as string;
   const [query] = useQuery({

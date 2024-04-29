@@ -24,7 +24,7 @@ import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 export const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
@@ -179,7 +179,7 @@ const TargetExplorerTypenamePageQuery = graphql(`
 `);
 
 function TypeExplorerPageContent({ typename }: { typename: string }) {
-  const router = useRouteSelector();
+  const router = useRouter();
   const { resolvedPeriod, dataRetentionInDays, setDataRetentionInDays } =
     useSchemaExplorerContext();
   const [query] = useQuery({
@@ -272,7 +272,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
 }
 
 function TypeExplorerPage() {
-  const router = useRouteSelector();
+  const router = useRouter();
   const { typename } = router.query;
 
   if (typeof typename !== 'string') {

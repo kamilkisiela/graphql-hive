@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import {
   defineConfig,
   FooterExtended,

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { EmailVerificationPreBuiltUI } from 'supertokens-auth-react/recipe/emailverification/prebuiltui';
 import { ThirdPartyEmailPasswordPreBuiltUI } from 'supertokens-auth-react/recipe/thirdpartyemailpassword/prebuiltui';
 import { getRoutingComponent } from 'supertokens-auth-react/ui';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/v2';
 import { env } from '@/env/frontend';
 import { useBrowser } from '@/lib/hooks/use-browser';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 

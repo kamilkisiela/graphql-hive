@@ -18,7 +18,7 @@ import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/gql/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { cn } from '@/lib/utils';
 import {
   CheckCircledIcon,
@@ -100,7 +100,7 @@ function ListPage({
   onLoadMore: (after: string) => void;
   versionId: string;
 }): ReactElement {
-  const router = useRouteSelector();
+  const router = useRouter();
 
   const [versionsQuery] = useQuery({
     query: HistoryPage_VersionsPageQuery,
@@ -674,7 +674,7 @@ const ActiveSchemaVersion_SchemaVersionQuery = graphql(`
 `);
 
 function ActiveSchemaVersion({ versionId }: { versionId: string }) {
-  const router = useRouteSelector();
+  const router = useRouter();
 
   const [query] = useQuery({
     query: ActiveSchemaVersion_SchemaVersionQuery,
@@ -752,7 +752,7 @@ const TargetHistoryPageQuery = graphql(`
 `);
 
 function HistoryPageContent() {
-  const router = useRouteSelector();
+  const router = useRouter();
   const [query] = useQuery({
     query: TargetHistoryPageQuery,
     variables: {

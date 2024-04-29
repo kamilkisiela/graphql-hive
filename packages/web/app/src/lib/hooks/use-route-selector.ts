@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter as useNextRouter } from 'next/router';
 
-export type Router = ReturnType<typeof useRouteSelector>;
+export type Router = ReturnType<typeof useRouter>;
 
-export function useRouteSelector() {
-  const router = useRouter();
+export function useRouter() {
+  const router = useNextRouter();
 
   const { push } = router;
 

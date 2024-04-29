@@ -1,5 +1,4 @@
 import { ReactElement, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
 import { AlertCircleIcon, RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -17,6 +16,7 @@ import { EmptyList, Link, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 const GraphQLOperationBody_OperationFragment = graphql(`
   fragment GraphQLOperationBody_OperationFragment on Operation {

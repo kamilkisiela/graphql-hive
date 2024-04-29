@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
 import { useMutation, useQuery } from 'urql';
@@ -28,6 +27,7 @@ import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { cn } from '@/lib/utils';
 import {
   Button as GraphiQLButton,

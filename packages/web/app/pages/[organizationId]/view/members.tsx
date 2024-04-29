@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
@@ -12,7 +11,7 @@ import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { cn } from '@/lib/utils';
 
 const OrganizationMembersPage_OrganizationFragment = graphql(`
@@ -177,7 +176,7 @@ const OrganizationMembersPageQuery = graphql(`
 `);
 
 function OrganizationMembersPageContent() {
-  const router = useRouteSelector();
+  const router = useRouter();
   const [query, refetch] = useQuery({
     query: OrganizationMembersPageQuery,
     variables: {

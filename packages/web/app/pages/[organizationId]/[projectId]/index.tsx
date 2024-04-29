@@ -15,7 +15,7 @@ import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { cn, pluralize } from '@/lib/utils';
 import { UTCDate } from '@date-fns/utc';
 
@@ -34,7 +34,7 @@ const TargetCard = (props: {
   schemaVersionsCount: number | null;
   days: number;
 }): ReactElement => {
-  const router = useRouteSelector();
+  const router = useRouter();
   const target = useFragment(TargetCard_TargetFragment, props.target);
   const href = target ? `/${router.organizationId}/${router.projectId}/${target.cleanId}` : '';
   const { highestNumberOfRequests } = props;
@@ -191,7 +191,7 @@ const TargetCard = (props: {
 };
 
 const ProjectsPageContent = () => {
-  const router = useRouteSelector();
+  const router = useRouter();
   const period = useRef<{
     from: string;
     to: string;

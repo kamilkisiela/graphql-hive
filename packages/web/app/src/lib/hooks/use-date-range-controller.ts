@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 import {
   addDays,
   addHours,
@@ -15,6 +14,7 @@ import {
 import { availablePresets, buildDateRangeString, Preset } from '@/components/ui/date-range-picker';
 import { parse, resolveRange } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 import { useResetState } from './use-reset-state';
 
 export function useDateRangeController(args: {

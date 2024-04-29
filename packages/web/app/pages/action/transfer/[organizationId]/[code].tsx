@@ -6,7 +6,7 @@ import { Title } from '@/components/common';
 import { Button, DataWrapper } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 const classes = {
   title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
@@ -47,7 +47,7 @@ const OrganizationTransferPage_AnswerRequest = graphql(`
 `);
 
 function OrganizationTransferPage() {
-  const router = useRouteSelector();
+  const router = useRouter();
   const notify = useNotifications();
   const orgId = router.query.organizationId as string;
   const code = router.query.code as string;

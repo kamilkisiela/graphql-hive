@@ -1,6 +1,6 @@
 import React from 'react';
-import { useRouter } from 'next/router';
 import { signOut } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 export default function LogOutPage() {
   const router = useRouter();

@@ -1,11 +1,11 @@
 import { ReactElement } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import cookies from 'js-cookie';
 import { LogOutIcon } from 'lucide-react';
 import { CombinedError } from 'urql';
 import { Button } from '@/components/ui/button';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
+import { useRouter } from '@/lib/hooks/use-route-selector';
 
 export function QueryError({
   error,
