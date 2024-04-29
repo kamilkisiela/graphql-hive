@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as url from 'url';
-import graphql, { Kind, parse, visit } from 'graphql';
+import { parse } from 'graphql';
 
 const dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -16,7 +16,7 @@ const persistedOperationsAppPath = path.join(
   'gql',
   'persisted-documents.json',
 );
-const persistedOperationsDistPath = path.join(dirname, '..', 'dist', 'persisted-operations.json');
+const persistedOperationsDistPath = path.join(dirname, '..', 'persisted-operations.json');
 
 const persistedOperations: Record<string, string> = JSON.parse(
   await fs.readFile(persistedOperationsAppPath, 'utf-8'),

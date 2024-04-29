@@ -3,6 +3,7 @@ import type { PubSub } from 'graphql-yoga';
 
 export type HivePubSub = PubSub<{
   publishedNewSchemaVersion: [targetId: string, payload: { publishedSchemaVersionId: string }];
+  oidcIntegrationLogs: [oidcIntegrationId: string, payload: { timestamp: string; message: string }];
 }>;
 
 export const PUB_SUB_CONFIG = new InjectionToken<HivePubSub>('PUB_SUB');
