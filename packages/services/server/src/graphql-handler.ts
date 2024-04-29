@@ -101,7 +101,8 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             allowArbitraryOperations: true,
             skipDocumentValidation: true,
             getPersistedOperation(key) {
-              return persistedOperations[key] ?? null;
+              const document = persistedOperations[key] ?? null;
+              return document;
             },
           })
         : {},

@@ -1,16 +1,19 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { clsx } from 'clsx';
+import { format } from 'date-fns';
 import { useFormik } from 'formik';
-import { useMutation } from 'urql';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { useClient, useMutation } from 'urql';
 import { Button, Heading, Input, Modal, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
+import { useResetState } from '@/lib/hooks/use-reset-state';
 
 const classes = {
-  container: clsx('flex flex-col items-stretch gap-5'),
+  container: clsx('flex flex-col items-stretch gap-2'),
   modal: clsx('w-[550px]'),
 };
 
@@ -39,6 +42,7 @@ export function OIDCIntegrationSection(props: {
   const isCreateOIDCIntegrationModalOpen = router.asPath.endsWith('#create-oidc-integration');
   const isUpdateOIDCIntegrationModalOpen = router.asPath.endsWith('#manage-oidc-integration');
   const isDeleteOIDCIntegrationModalOpen = router.asPath.endsWith('#remove-oidc-integration');
+  const isDebugOIDCIntegrationModalOpen = router.asPath.endsWith('#debug-oidc-integration');
 
   const closeModal = () => {
     void router.push(router.asPath.split('#')[0]);
@@ -47,6 +51,7 @@ export function OIDCIntegrationSection(props: {
   const openCreateModalLink = `${router.asPath}#create-oidc-integration`;
   const openEditModalLink = `${router.asPath}#manage-oidc-integration`;
   const openDeleteModalLink = `${router.asPath}#remove-oidc-integration`;
+  const openDebugModalLink = `${router.asPath}#debug-oidc-integration`;
 
   return (
     <>
@@ -66,6 +71,19 @@ export function OIDCIntegrationSection(props: {
               <KeyIcon className="mr-2" />
               Manage OIDC Provider (
               {extractDomain(organization.oidcIntegration.authorizationEndpoint)})
+            </Button>
+            <Button
+              variant="primary"
+              size="large"
+              className="px-5"
+              as="a"
+              href={openDebugModalLink}
+              onClick={ev => {
+                ev.preventDefault();
+                void router.push(openDebugModalLink);
+              }}
+            >
+              Debug
             </Button>
             <Button
               variant="primary"
@@ -116,6 +134,11 @@ export function OIDCIntegrationSection(props: {
       />
       <RemoveOIDCIntegrationModal
         isOpen={isDeleteOIDCIntegrationModalOpen}
+        close={closeModal}
+        oidcIntegrationId={organization.oidcIntegration?.id ?? null}
+      />
+      <DebugOIDCIntegrationModal
+        isOpen={isDebugOIDCIntegrationModalOpen}
         close={closeModal}
         oidcIntegrationId={organization.oidcIntegration?.id ?? null}
       />
@@ -452,15 +475,15 @@ function UpdateOIDCIntegrationForm(props: {
             <Heading size="lg">OIDC Provider Instructions</Heading>
             <ul className="flex flex-col gap-5">
               <li>
-                Set your OIDC Provider Sign-in redirect URI to{' '}
+                <div className="pb-1"> Set your OIDC Provider Sign-in redirect URI to </div>
                 <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
               </li>
               <li>
-                Set your OIDC Provider Sign-out redirect URI to{' '}
+                <div className="pb-1"> Set your OIDC Provider Sign-out redirect URI to </div>
                 <InlineCode content={`${env.appBaseUrl}/logout`} />
               </li>
               <li>
-                Your users can login to the organization via{' '}
+                <div className="pb-1">Your users can login to the organization via </div>
                 <InlineCode
                   content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
                 />
@@ -544,7 +567,7 @@ function UpdateOIDCIntegrationForm(props: {
             <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
           </div>
         </div>
-        <div className="mt-auto flex w-full gap-2 self-end">
+        <div className="mt-4 flex w-full gap-2 self-end">
           <Button type="button" size="large" block onClick={props.close} tabIndex={0}>
             Close
           </Button>
@@ -634,6 +657,130 @@ function RemoveOIDCIntegrationModal(props: {
           </>
         )}
       </div>
+    </Modal>
+  );
+}
+
+const SubscribeToOIDCIntegrationLogSubscription = graphql(`
+  subscription oidcProviderLog($oidcIntegrationId: ID!) {
+    oidcIntegrationLog(input: { oidcIntegrationId: $oidcIntegrationId }) {
+      timestamp
+      message
+    }
+  }
+`);
+
+type OIDCLogEventType = DocumentType<
+  typeof SubscribeToOIDCIntegrationLogSubscription
+>['oidcIntegrationLog'];
+
+function DebugOIDCIntegrationModal(props: {
+  isOpen: boolean;
+  close: () => void;
+  oidcIntegrationId: null | string;
+}) {
+  const client = useClient();
+
+  const [isSubscribing, setIsSubscribing] = useResetState(false, [props.isOpen]);
+
+  const [logs, setLogs] = useResetState<Array<OIDCLogEventType>>([], [props.isOpen]);
+  const ref = useRef<VirtuosoHandle>(null);
+  useEffect(() => {
+    ref.current?.scrollToIndex({
+      index: logs.length - 1,
+      behavior: 'smooth',
+    });
+  }, [logs]);
+
+  useEffect(() => {
+    if (isSubscribing && props.oidcIntegrationId && props.isOpen) {
+      setLogs(logs => [
+        ...logs,
+        {
+          __typename: 'OIDCIntegrationLogEvent',
+          timestamp: new Date().toISOString(),
+          message: 'Subscribing to logs...',
+        },
+      ]);
+      const sub = client
+        .subscription(SubscribeToOIDCIntegrationLogSubscription, {
+          oidcIntegrationId: props.oidcIntegrationId,
+        })
+        .subscribe(next => {
+          if (next.data?.oidcIntegrationLog) {
+            const log = next.data.oidcIntegrationLog;
+            setLogs(logs => [...logs, log]);
+          }
+        });
+
+      return () => {
+        setLogs(logs => [
+          ...logs,
+          {
+            __typename: 'OIDCIntegrationLogEvent',
+            timestamp: new Date().toISOString(),
+            message: 'Stopped subscribing to logs...',
+          },
+        ]);
+
+        sub.unsubscribe();
+      };
+    }
+  }, [props.oidcIntegrationId, props.isOpen, isSubscribing]);
+
+  return (
+    <Modal open={props.isOpen} onOpenChange={props.close} className="w-[750px]">
+      {props.oidcIntegrationId === null ? (
+        <div className={classes.container}>
+          <Heading>Debug OpenID Connect Integration</Heading>
+
+          <>
+            <p>This organization does not have an OIDC integration.</p>
+            <div className="flex w-full gap-2">
+              <Button type="button" size="large" block onClick={props.close}>
+                Close
+              </Button>
+            </div>
+          </>
+        </div>
+      ) : (
+        <div className={classes.container}>
+          <Heading>Debug OpenID Connect Integration</Heading>
+          <Virtuoso
+            ref={ref}
+            className='bg-red-50" h-[300px]'
+            initialTopMostItemIndex={logs.length - 1}
+            followOutput={true}
+            data={logs}
+            itemContent={(_, logRow) => {
+              return (
+                <div className="flex px-2 pb-1 font-mono text-xs">
+                  <time dateTime={logRow.timestamp} className="pr-4">
+                    {format(logRow.timestamp, 'HH:mm:ss')}
+                  </time>
+                  {logRow.message}
+                </div>
+              );
+            }}
+          />
+          <div className="mt-4 flex w-full gap-2 self-end">
+            <Button type="button" size="large" block onClick={props.close} tabIndex={0}>
+              Close
+            </Button>
+            <Button
+              type="submit"
+              size="large"
+              block
+              variant="primary"
+              onClick={() => {
+                setIsSubscribing(isSubscribed => !isSubscribed);
+              }}
+            >
+              {isSubscribing ? 'Stop subscription' : 'Subscribe to log'}
+            </Button>
+          </div>
+        </div>
+      )}
     </Modal>
   );
 }

@@ -450,6 +450,12 @@ export async function main() {
       storage,
       crypto,
       logger: server.log,
+      broadcastLog(id, message) {
+        pubSub.publish('oidcIntegrationLogs', id, {
+          timestamp: new Date().toISOString(),
+          message,
+        });
+      },
     });
 
     await server.register(formDataPlugin);

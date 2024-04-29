@@ -36,6 +36,10 @@ export const networkStatusExchange: Exchange = ({ forward }) => {
     const forward$ = pipe(
       operations$,
       map(op => {
+        // Skip subscription operations
+        if (op.kind === 'subscription') {
+          return op;
+        }
         if (op.kind === 'teardown') {
           end(getUniqueKey(op));
         } else {
