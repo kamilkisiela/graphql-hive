@@ -272,7 +272,15 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
     }
   }, [quickRangeFilter, validUnits]);
 
-  presets = [...presets, ...dynamicPresets];
+  presets = [...presets, ...dynamicPresets].sort((a, b) => {
+    if (a.label < b.label) {
+      return -1;
+    }
+    if (a.label > b.label) {
+      return 1;
+    }
+    return 0;
+  });
 
   return (
     <Popover
