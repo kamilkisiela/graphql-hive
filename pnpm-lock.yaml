@@ -361,8 +361,8 @@ importers:
         specifier: 1.5.2
         version: 1.5.2(@types/node@20.12.7)(less@4.2.0)(terser@5.20.0)
       ws:
-        specifier: 8.16.0
-        version: 8.16.0
+        specifier: 8.17.0
+        version: 8.17.0
     publishDirectory: dist
 
   packages/libraries/cli:
@@ -558,8 +558,8 @@ importers:
         specifier: 1.5.2
         version: 1.5.2(@types/node@20.12.7)(less@4.2.0)(terser@5.20.0)
       ws:
-        specifier: 8.16.0
-        version: 8.16.0
+        specifier: 8.17.0
+        version: 8.17.0
     publishDirectory: dist
 
   packages/migrations:
@@ -17223,8 +17223,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.16.0:
-    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
+  ws@8.17.0:
+    resolution: {integrity: sha512-uJq6108EgZMAl20KagGkzCKfMEjxmKvZHG7Tlq0Z6nOky7YF7aq4mOx6xK8TJ/i1LeK4Qus7INktacctDgY8Ow==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -20805,10 +20805,10 @@ snapshots:
       '@types/ws': 8.5.3
       '@whatwg-node/fetch': 0.8.8
       graphql: 16.8.1
-      isomorphic-ws: 5.0.0(ws@8.16.0)
+      isomorphic-ws: 5.0.0(ws@8.17.0)
       tslib: 2.6.2
       value-or-promise: 1.0.12
-      ws: 8.16.0
+      ws: 8.17.0
     transitivePeerDependencies:
       - '@types/node'
       - bufferutil
@@ -20827,10 +20827,10 @@ snapshots:
       '@types/ws': 8.5.3
       '@whatwg-node/fetch': 0.9.17
       graphql: 16.8.1
-      isomorphic-ws: 5.0.0(ws@8.16.0)
+      isomorphic-ws: 5.0.0(ws@8.17.0)
       tslib: 2.6.2
       value-or-promise: 1.0.12
-      ws: 8.16.0
+      ws: 8.17.0
     transitivePeerDependencies:
       - '@types/node'
       - bufferutil
@@ -24813,7 +24813,7 @@ snapshots:
       util: 0.12.5
       util-deprecate: 1.0.2
       watchpack: 2.4.0
-      ws: 8.16.0
+      ws: 8.17.0
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -31112,9 +31112,9 @@ snapshots:
     dependencies:
       ws: 8.13.0
 
-  isomorphic-ws@5.0.0(ws@8.16.0):
+  isomorphic-ws@5.0.0(ws@8.17.0):
     dependencies:
-      ws: 8.16.0
+      ws: 8.17.0
 
   isstream@0.1.2: {}
 
@@ -37698,7 +37698,7 @@ snapshots:
 
   ws@8.13.0: {}
 
-  ws@8.16.0: {}
+  ws@8.17.0: {}
 
   xml2js@0.4.19:
     dependencies:
