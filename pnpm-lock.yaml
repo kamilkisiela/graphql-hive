@@ -1025,8 +1025,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/external-composition/dist
       '@graphql-tools/stitch':
-        specifier: 9.2.3
-        version: 9.2.3(graphql@16.8.1)
+        specifier: 9.2.4
+        version: 9.2.4(graphql@16.8.1)
       '@graphql-tools/stitching-directives':
         specifier: 3.0.2
         version: 3.0.2(graphql@16.8.1)
@@ -4296,6 +4296,12 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
+  '@graphql-tools/merge@9.0.4':
+    resolution: {integrity: sha512-MivbDLUQ+4Q8G/Hp/9V72hbn810IJDEZQ57F01sHnlrrijyadibfVhaQfW/pNH+9T/l8ySZpaR/DpL5i+ruZ+g==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
   '@graphql-tools/mock@9.0.2':
     resolution: {integrity: sha512-xt8EdprEBwiUrBGAiLZ5gARB0JAr4xGPypY1qzqvpSezedzqvUeKwztCt7Oe6WddNRwUBff26Dabnd3hmrhQ2g==}
     engines: {node: '>=16.0.0'}
@@ -4331,8 +4337,8 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/stitch@9.2.3':
-    resolution: {integrity: sha512-r0RcRU+TIuR8ihx4m2tLvecj+JqEQ0bOSPDx7A/Hl3jvZ+L2sSu+ZXMHXAdriSyGgKKHK8SlgovKPyt5I6p1wA==}
+  '@graphql-tools/stitch@9.2.4':
+    resolution: {integrity: sha512-WGEhO5S+eVNKYxX2MItjPz8YC7NVC/3qGbyUvAuMRoZ4EbU0Nfd9U7juw7YFBm+LAeGTBHu5eKWVFp+SO64lhw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -20691,6 +20697,12 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
+  '@graphql-tools/merge@9.0.4(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      tslib: 2.6.2
+
   '@graphql-tools/mock@9.0.2(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
@@ -20758,12 +20770,12 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/stitch@9.2.3(graphql@16.8.1)':
+  '@graphql-tools/stitch@9.2.4(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/batch-delegate': 9.0.1(graphql@16.8.1)
       '@graphql-tools/delegate': 10.0.7(graphql@16.8.1)
       '@graphql-tools/executor': 1.2.6(graphql@16.8.1)
-      '@graphql-tools/merge': 9.0.3(graphql@16.8.1)
+      '@graphql-tools/merge': 9.0.4(graphql@16.8.1)
       '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       '@graphql-tools/wrap': 10.0.2(graphql@16.8.1)
