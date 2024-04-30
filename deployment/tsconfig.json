@@ -5,7 +5,6 @@
     "target": "es2016",
     "module": "commonjs",
     "moduleResolution": "node",
-    "typeRoots": ["./node_modules/@types"],
     "sourceMap": true,
     "experimentalDecorators": true,
     "pretty": true,
