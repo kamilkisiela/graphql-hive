@@ -797,8 +797,8 @@ importers:
         specifier: 4.2.2
         version: 4.2.2
       toucan-js:
-        specifier: 3.3.1
-        version: 3.3.1
+        specifier: 3.4.0
+        version: 3.4.0
       undici:
         specifier: 6.15.0
         version: 6.15.0
@@ -845,8 +845,8 @@ importers:
         specifier: 0.4.6
         version: 0.4.6
       toucan-js:
-        specifier: 3.3.1
-        version: 3.3.1
+        specifier: 3.4.0
+        version: 3.4.0
       zod:
         specifier: 3.23.4
         version: 3.23.4
@@ -6646,16 +6646,8 @@ packages:
     resolution: {integrity: sha512-gHPCcJobbMkk0VR18J65WYQTt3ED4qC6X9lHKp27Ddt63E+MDGkG6lvYBU1LS8cV7CdyBGC1XXDCfor61GvLsA==}
     engines: {node: '>=8'}
 
-  '@sentry/core@7.76.0':
-    resolution: {integrity: sha512-M+ptkCTeCNf6fn7p2MmEb1Wd9/JXUWxIT/0QEc+t11DNR4FYy1ZP2O9Zb3Zp2XacO7ORrlL3Yc+VIfl5JTgjfw==}
-    engines: {node: '>=8'}
-
   '@sentry/integrations@7.112.2':
     resolution: {integrity: sha512-ioC2yyU6DqtLkdmWnm87oNvdn2+9oKctJeA4t+jkS6JaJ10DcezjCwiLscX4rhB9aWJV3IWF7Op0O6K3w0t2Hg==}
-    engines: {node: '>=8'}
-
-  '@sentry/integrations@7.76.0':
-    resolution: {integrity: sha512-4ea0PNZrGN9wKuE/8bBCRrxxw4Cq5T710y8rhdKHAlSUpbLqr/atRF53h8qH3Fi+ec0m38PB+MivKem9zUwlwA==}
     engines: {node: '>=8'}
 
   '@sentry/nextjs@7.112.2':
@@ -6691,16 +6683,8 @@ packages:
     resolution: {integrity: sha512-kCMLt7yhY5OkWE9MeowlTNmox9pqDxcpvqguMo4BDNZM5+v9SEb1AauAdR78E1a1V8TyCzjBD7JDfXWhvpYBcQ==}
     engines: {node: '>=8'}
 
-  '@sentry/types@7.76.0':
-    resolution: {integrity: sha512-vj6z+EAbVrKAXmJPxSv/clpwS9QjPqzkraMFk2hIdE/kii8s8kwnkBwTSpIrNc8GnzV3qYC4r3qD+BXDxAGPaw==}
-    engines: {node: '>=8'}
-
   '@sentry/utils@7.112.2':
     resolution: {integrity: sha512-OjLh0hx0t1EcL4ZIjf+4svlmmP+tHUDGcr5qpFWH78tjmkPW4+cqPuZCZfHSuWcDdeiaXi8TnYoVRqDcJKK/eQ==}
-    engines: {node: '>=8'}
-
-  '@sentry/utils@7.76.0':
-    resolution: {integrity: sha512-40jFD+yfQaKpFYINghdhovzec4IEpB7aAuyH/GtE7E0gLpcqnC72r55krEIVILfqIR2Mlr5OKUzyeoCyWAU/yw==}
     engines: {node: '>=8'}
 
   '@sentry/vercel-edge@7.112.2':
@@ -16311,8 +16295,8 @@ packages:
     resolution: {integrity: sha512-gduQwd1rOdDMGxFG1gEvhV88Oirdo2p+KjoYFU7k2g+i7n6AFFbDQ5kMPUsW0pNbfQsB/cwXvT1i4Bue0s9g5g==}
     engines: {node: '>=6'}
 
-  toucan-js@3.3.1:
-    resolution: {integrity: sha512-9BpkHb/Pzsrtl1ItNq9OEQPnuUHwzce0nV2uG+DYFiQ4fPyiA6mKTBcDwQzcvNkfSER038U+8TzvdkCev+Maww==}
+  toucan-js@3.4.0:
+    resolution: {integrity: sha512-ifqPB5QIBC07gDGhWyMpSFp6Z6cjRLsjxhQ3wZmE6YGDntJZNCage77AIyrVihQLQM6/6T8TQumEJDuWlBw56w==}
 
   tough-cookie@4.1.3:
     resolution: {integrity: sha512-aX/y5pVRkfRnfmuX+OdbSdXvPe6ieKX/G2s7e98f4poJHnqH3281gDPm/metm6E/WRamfx7WC4HUqkWHfQHprw==}
@@ -23854,23 +23838,11 @@ snapshots:
       '@sentry/types': 7.112.2
       '@sentry/utils': 7.112.2
 
-  '@sentry/core@7.76.0':
-    dependencies:
-      '@sentry/types': 7.76.0
-      '@sentry/utils': 7.76.0
-
   '@sentry/integrations@7.112.2':
     dependencies:
       '@sentry/core': 7.112.2
       '@sentry/types': 7.112.2
       '@sentry/utils': 7.112.2
-      localforage: 1.10.0
-
-  '@sentry/integrations@7.76.0':
-    dependencies:
-      '@sentry/core': 7.76.0
-      '@sentry/types': 7.76.0
-      '@sentry/utils': 7.76.0
       localforage: 1.10.0
 
   '@sentry/nextjs@7.112.2(encoding@0.1.13)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.20.2))':
@@ -23926,15 +23898,9 @@ snapshots:
 
   '@sentry/types@7.112.2': {}
 
-  '@sentry/types@7.76.0': {}
-
   '@sentry/utils@7.112.2':
     dependencies:
       '@sentry/types': 7.112.2
-
-  '@sentry/utils@7.76.0':
-    dependencies:
-      '@sentry/types': 7.76.0
 
   '@sentry/vercel-edge@7.112.2':
     dependencies:
@@ -36649,12 +36615,12 @@ snapshots:
 
   totalist@1.1.0: {}
 
-  toucan-js@3.3.1:
+  toucan-js@3.4.0:
     dependencies:
-      '@sentry/core': 7.76.0
-      '@sentry/integrations': 7.76.0
-      '@sentry/types': 7.76.0
-      '@sentry/utils': 7.76.0
+      '@sentry/core': 7.112.2
+      '@sentry/integrations': 7.112.2
+      '@sentry/types': 7.112.2
+      '@sentry/utils': 7.112.2
 
   tough-cookie@4.1.3:
     dependencies:
