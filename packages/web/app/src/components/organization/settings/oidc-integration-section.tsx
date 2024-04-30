@@ -748,9 +748,9 @@ function DebugOIDCIntegrationModal(props: {
           <Heading>Debug OpenID Connect Integration</Heading>
           <Virtuoso
             ref={ref}
-            className='bg-red-50" h-[300px]'
+            className="h-[300px]"
             initialTopMostItemIndex={logs.length - 1}
-            followOutput={true}
+            followOutput
             data={logs}
             itemContent={(_, logRow) => {
               return (

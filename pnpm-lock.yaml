@@ -1181,6 +1181,9 @@ importers:
       hyperid:
         specifier: 3.2.0
         version: 3.2.0
+      ioredis:
+        specifier: 5.4.1
+        version: 5.4.1
       pino-pretty:
         specifier: 11.0.0
         version: 11.0.0
