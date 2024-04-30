@@ -5,7 +5,7 @@ export const InlineCode = (props: { content: string }) => {
   const post = useNotifications();
   return (
     <span className="flex items-center gap-2 break-all rounded-md bg-gray-800 py-1 font-mono text-sm">
-      <code className="flex-grow px-3">{props.content}</code>
+      <code className="grow px-3">{props.content}</code>
       <button
         className="cursor-pointer p-2 hover:text-orange-600"
         onClick={async ev => {

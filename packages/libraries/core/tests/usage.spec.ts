@@ -1,5 +1,4 @@
 import { buildSchema, parse } from 'graphql';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 import { createHive } from '../src/client/client';
 import { atLeastOnceSampler } from '../src/client/samplers';
