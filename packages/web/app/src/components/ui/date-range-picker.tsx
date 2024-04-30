@@ -231,6 +231,57 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
     );
   };
 
+  const [dynamicPresets, setDynamicPresets] = useState<Preset[]>([]);
+  useEffect(() => {
+    const number = parseInt(quickRangeFilter.replace(/\D/g, ''));
+    const dynamicPresets: Preset[] = [
+      {
+        name: `last${number}m`,
+        label: `Last ${number} minutes`,
+        range: { from: `now-${number}m`, to: 'now' },
+      },
+      {
+        name: `last${number}h`,
+        label: `Last ${number} hours`,
+        range: { from: `now-${number}h`, to: 'now' },
+      },
+      {
+        name: `last${number}d`,
+        label: `Last ${number} days`,
+        range: { from: `now-${number}d`, to: 'now' },
+      },
+      {
+        name: `last${number}w`,
+        label: `Last ${number} weeks`,
+        range: { from: `now-${number}w`, to: 'now' },
+      },
+    ];
+    const uniqueDynamicPresets = dynamicPresets.filter(
+      preset => !presets.some(p => p.name === preset.name),
+    );
+    const validDynamicPresets = uniqueDynamicPresets.filter(
+      preset =>
+        !hasInvalidUnitRegex?.test(preset.range.from) &&
+        !hasInvalidUnitRegex?.test(preset.range.to),
+    );
+
+    if (number > 0 && validDynamicPresets.length > 0) {
+      setDynamicPresets(validDynamicPresets);
+    } else {
+      setDynamicPresets([]);
+    }
+  }, [quickRangeFilter, validUnits]);
+
+  presets = [...presets, ...dynamicPresets].sort((a, b) => {
+    if (a.label < b.label) {
+      return -1;
+    }
+    if (a.label > b.label) {
+      return 1;
+    }
+    return 0;
+  });
+
   return (
     <Popover
       modal
@@ -353,7 +404,9 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
           </div>
           <div className="flex w-full flex-1 flex-col items-start gap-1 overflow-y-scroll pb-2 pt-1">
             {presets
-              .filter(preset => preset.label.toLowerCase().includes(quickRangeFilter.trim()))
+              .filter(preset =>
+                preset.label.toLowerCase().includes(quickRangeFilter.toLowerCase().trim()),
+              )
               .map(preset => (
                 <PresetButton key={preset.name} preset={preset} />
               ))}
