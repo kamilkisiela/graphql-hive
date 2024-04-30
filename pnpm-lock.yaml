@@ -6,6 +6,7 @@ settings:
 
 overrides:
   '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.f9c48c0.0
+  '@urql/core': 4.1.4
 
 patchedDependencies:
   '@apollo/federation@0.38.1':
@@ -8242,9 +8243,6 @@ packages:
 
   '@urql/core@4.1.4':
     resolution: {integrity: sha512-wFm67yljv4uFAWNtPwcS1NMhF/n+p/68i+kZU6R1dPxhfq2nBW0142p4szeZsBDrtO7pBdOhp7YeSZROFFlXZg==}
-
-  '@urql/core@5.0.3':
-    resolution: {integrity: sha512-NZ3YqRr6IphbpFjGqujJOuVuV8/QegYxfjy1zdmOSWpYYFLpmMBfVtzZ/L8IiqPERVAEAIKjUsryLnVtXJQo4w==}
 
   '@urql/exchange-auth@2.1.6':
     resolution: {integrity: sha512-snOlt7p5kYq0KnPDuXkKe2qW3/BucQZOElvTeo3svLQuk9JiNJVnm6ffQ6QGiGO+G3AtMrctnno1+X44fLtDuQ==}
@@ -26537,13 +26535,6 @@ snapshots:
     transitivePeerDependencies:
       - graphql
 
-  '@urql/core@5.0.3(graphql@16.8.1)':
-    dependencies:
-      '@0no-co/graphql.web': 1.0.7(graphql@16.8.1)
-      wonka: 6.3.4
-    transitivePeerDependencies:
-      - graphql
-
   '@urql/exchange-auth@2.1.6(graphql@16.8.1)':
     dependencies:
       '@urql/core': 4.1.4(graphql@16.8.1)
@@ -26561,7 +26552,7 @@ snapshots:
 
   '@urql/exchange-persisted@4.2.0(graphql@16.8.1)':
     dependencies:
-      '@urql/core': 5.0.3(graphql@16.8.1)
+      '@urql/core': 4.1.4(graphql@16.8.1)
       wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
