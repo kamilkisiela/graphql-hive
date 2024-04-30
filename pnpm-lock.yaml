@@ -872,8 +872,8 @@ importers:
         specifier: 1.4.7
         version: 1.4.7
       bullmq:
-        specifier: 5.7.5
-        version: 5.7.5
+        specifier: 5.7.6
+        version: 5.7.6
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1557,8 +1557,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       bullmq:
-        specifier: 5.7.5
-        version: 5.7.5
+        specifier: 5.7.6
+        version: 5.7.6
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -8818,8 +8818,8 @@ packages:
   builtins@5.0.1:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
 
-  bullmq@5.7.5:
-    resolution: {integrity: sha512-zWuMBXWI1Yx/XD4WPZsLarBMQSvdC4xoEDrNaFK1CenIsiP2IZb21VeXZGXmyPONv+3+JE/rxlP0IBbWkSV9KQ==}
+  bullmq@5.7.6:
+    resolution: {integrity: sha512-bDTNqqNDrmUGHcA5lw6tcestchS4vV7/VkTyywybvOiXGtkGZCyjuziBzCNwDYMKibPpWmKySe5yTJsEb5bIlw==}
 
   bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}
@@ -27172,13 +27172,13 @@ snapshots:
     dependencies:
       semver: 7.6.0
 
-  bullmq@5.7.5:
+  bullmq@5.7.6:
     dependencies:
       cron-parser: 4.6.0
       ioredis: 5.4.1
       msgpackr: 1.10.1
       node-abort-controller: 3.1.1
-      semver: 7.5.4
+      semver: 7.6.0
       tslib: 2.6.2
       uuid: 9.0.1
     transitivePeerDependencies:
