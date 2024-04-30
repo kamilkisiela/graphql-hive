@@ -63,7 +63,7 @@ importers:
         version: 5.0.2(graphql@16.8.1)
       '@graphql-codegen/cli':
         specifier: 5.0.2
-        version: 5.0.2(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)
+        version: 5.0.2(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)
       '@graphql-codegen/client-preset':
         specifier: 4.2.5
         version: 4.2.5(encoding@0.1.13)(graphql@16.8.1)
@@ -84,7 +84,7 @@ importers:
         version: 3.0.0(graphql@16.8.1)
       '@graphql-eslint/eslint-plugin':
         specifier: 3.20.1
-        version: 3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
+        version: 3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-inspector/cli':
         specifier: 4.0.3
         version: 4.0.3(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
@@ -201,10 +201,10 @@ importers:
         version: 4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))
+        version: 0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))
       '@pulumi/pulumi':
-        specifier: 3.113.3
-        version: 3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+        specifier: 3.114.0
+        version: 3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/random':
         specifier: 4.16.1
         version: 4.16.1(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
@@ -1943,7 +1943,7 @@ importers:
         version: 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@theguild/components':
         specifier: 6.5.3
-        version: 6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
+        version: 6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -1955,13 +1955,13 @@ importers:
         version: 4.0.3
       next:
         specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       next-sitemap:
         specifier: 4.2.3
-        version: 4.2.3(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))
+        version: 4.2.3(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))
       next-themes:
         specifier: '*'
-        version: 0.2.1(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 0.2.1(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -5275,12 +5275,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.4.1
 
-  '@opentelemetry/context-async-hooks@1.23.0':
-    resolution: {integrity: sha512-wazGJZDRevibOJ+VgyrT+9+8sybZAxpZx2G7vy30OAtk92OpZCg7HgNxT11NUx0VBDWcRx1dOatMYGOVplQ7QA==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
   '@opentelemetry/context-async-hooks@1.24.0':
     resolution: {integrity: sha512-s7xaQ9ifDpJvwbWRLkZD/J5hY35w+MECm4TQUkg6szRcny9lf6oVhWij4w3JJFQgvHQMXU7oXOpX8Z05HxV/8g==}
     engines: {node: '>=14'}
@@ -5313,12 +5307,6 @@ packages:
 
   '@opentelemetry/exporter-trace-otlp-proto@0.51.0':
     resolution: {integrity: sha512-Fi7r0iMqGoFCQQ+WY0pYOWp395vdinZJIkYKnNbnreHxAN/kVDBl2FxbV3DeOKuRxEY08Gyb9ggPf+Zrqp7l/w==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-
-  '@opentelemetry/exporter-zipkin@1.23.0':
-    resolution: {integrity: sha512-2LOGvNUGONuIcWhynFaJorVyqv03uZkURScciLmOxvBf2lWTNPEj77br1dCpShIWBM+YlrH7Tc+JXAs+GC7DqA==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
@@ -5611,20 +5599,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/propagator-b3@1.23.0':
-    resolution: {integrity: sha512-cZ6rl8y2bdxYQ4e+zP2CQ+QmuPebaLBLO1skjFpj3eEu7zar+6hBzUP3llMOUupkQeQSwXz+4c8dZ26OhYfG/g==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
   '@opentelemetry/propagator-b3@1.24.0':
     resolution: {integrity: sha512-7TMIDE4+NO5vnkor+zned42wqca+hmhW5gWKhmYjUHC5B5uojo1PvtmBrd7kigFu96XvL4ZUWVzibWRWIQ/++Q==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
-  '@opentelemetry/propagator-jaeger@1.23.0':
-    resolution: {integrity: sha512-6iArixfgIl3ZgzeltQ5jyiKbjZygM+MbM84pXi1HL0Qs4x4Ck5rM6wEtjhZffFnlDMWEkEqrnM0xF6bTfbiMAQ==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.9.0'
@@ -5702,12 +5678,6 @@ packages:
 
   '@opentelemetry/sdk-trace-base@1.24.0':
     resolution: {integrity: sha512-H9sLETZ4jw9UJ3totV8oM5R0m4CW0ZIOLfp4NV3g0CM8HD5zGZcaW88xqzWDgiYRpctFxd+WmHtGX/Upoa2vRg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
-  '@opentelemetry/sdk-trace-node@1.23.0':
-    resolution: {integrity: sha512-dwnin5Go2r6VzJZkVc9JBPupssWp7j2EFto+S7qRkwQ00WDykWeq3x2Skk7I1Jr448FeBSvGCQVPgV5e6s6O3w==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.9.0'
@@ -5829,8 +5799,8 @@ packages:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
 
-  '@pulumi/pulumi@3.113.3':
-    resolution: {integrity: sha512-q7Agc4nkIKNuoOmzIvmvbH3axIkdhEbVA+GPlosRM0MUJkJdRlU82hO4EGBhkyGbBPbLWvirqCjXOAQ66LgCfg==}
+  '@pulumi/pulumi@3.114.0':
+    resolution: {integrity: sha512-+GDzWl/Udpw5uRs/DaM4X3Hl8LR4bvdmiHl4PFL9aaSUN+4x3TMIuKsg+IEpfK5apLW34gb3MnIkZZweNcOx5A==}
     engines: {node: '>=18'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -19846,7 +19816,7 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-codegen/cli@5.0.2(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)':
+  '@graphql-codegen/cli@5.0.2(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
       '@babel/generator': 7.23.6
       '@babel/template': 7.22.15
@@ -19856,7 +19826,7 @@ snapshots:
       '@graphql-codegen/plugin-helpers': 5.0.3(graphql@16.8.1)
       '@graphql-tools/apollo-engine-loader': 8.0.0(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-tools/code-file-loader': 8.1.0(graphql@16.8.1)
-      '@graphql-tools/git-loader': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/git-loader': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/github-loader': 8.0.0(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-tools/graphql-file-loader': 8.0.0(graphql@16.8.1)
       '@graphql-tools/json-file-loader': 8.0.0(graphql@16.8.1)
@@ -20050,29 +20020,6 @@ snapshots:
       - encoding
       - supports-color
 
-  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)':
-    dependencies:
-      '@babel/code-frame': 7.21.4
-      '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      chalk: 4.1.2
-      debug: 4.3.4(supports-color@8.1.1)
-      fast-glob: 3.2.12
-      graphql: 16.8.1
-      graphql-config: 4.5.0(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
-      graphql-depth-limit: 1.1.0(graphql@16.8.1)
-      lodash.lowercase: 4.3.0
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@types/node'
-      - bufferutil
-      - cosmiconfig-toml-loader
-      - encoding
-      - supports-color
-      - utf-8-validate
-
   '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)':
     dependencies:
       '@babel/code-frame': 7.21.4
@@ -20125,7 +20072,7 @@ snapshots:
       '@graphql-inspector/graphql-loader': 4.0.2(graphql@16.8.1)
       '@graphql-inspector/introspect-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/json-loader': 4.0.2(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-inspector/serve-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/similar-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/url-loader': 4.0.2(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
@@ -20152,7 +20099,7 @@ snapshots:
   '@graphql-inspector/commands@4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)':
     dependencies:
       '@graphql-inspector/config': 4.0.2(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
       yargs: 17.7.2
@@ -20255,10 +20202,10 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-inspector/loaders@4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       '@graphql-inspector/config': 4.0.2(graphql@16.8.1)
-      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/load': 8.0.0(graphql@16.8.1)
       '@graphql-tools/utils': 10.0.3(graphql@16.8.1)
       graphql: 16.8.1
@@ -20367,18 +20314,6 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.22.9)(graphql@16.8.1)':
-    dependencies:
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      globby: 11.1.0
-      graphql: 16.8.1
-      tslib: 2.6.2
-      unixify: 1.0.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-
   '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.24.0)(graphql@16.8.1)
@@ -20394,6 +20329,18 @@ snapshots:
   '@graphql-tools/code-file-loader@8.0.1(@babel/core@7.22.9)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      globby: 11.1.0
+      graphql: 16.8.1
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
+  '@graphql-tools/code-file-loader@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       globby: 11.1.0
       graphql: 16.8.1
@@ -20582,6 +20529,19 @@ snapshots:
       - '@babel/core'
       - supports-color
 
+  '@graphql-tools/git-loader@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      is-glob: 4.0.3
+      micromatch: 4.0.5
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
   '@graphql-tools/github-loader@8.0.0(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)':
     dependencies:
       '@ardatan/sync-fetch': 0.0.1(encoding@0.1.13)
@@ -20615,19 +20575,6 @@ snapshots:
       tslib: 2.6.2
       unixify: 1.0.0
 
-  '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.22.9)(graphql@16.8.1)':
-    dependencies:
-      '@babel/parser': 7.24.0
-      '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.22.9)
-      '@babel/traverse': 7.24.0
-      '@babel/types': 7.24.0
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      graphql: 16.8.1
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-
   '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@babel/parser': 7.24.0
@@ -20645,6 +20592,19 @@ snapshots:
     dependencies:
       '@babel/parser': 7.24.0
       '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.22.9)
+      '@babel/traverse': 7.24.0
+      '@babel/types': 7.24.0
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
+  '@graphql-tools/graphql-tag-pluck@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@babel/parser': 7.24.0
+      '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.24.0)
       '@babel/traverse': 7.24.0
       '@babel/types': 7.24.0
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
@@ -21197,7 +21157,7 @@ snapshots:
 
   '@lbrlabs/pulumi-grafana@0.1.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -21550,7 +21510,7 @@ snapshots:
       promise-all-reject-late: 1.0.1
       promise-call-limit: 3.0.1
       read-package-json-fast: 3.0.2
-      semver: 7.5.4
+      semver: 7.6.0
       ssri: 10.0.5
       treeverse: 3.0.0
       walk-up-path: 3.0.1
@@ -21642,7 +21602,7 @@ snapshots:
   '@npmcli/map-workspaces@3.0.4':
     dependencies:
       '@npmcli/name-from-folder': 2.0.0
-      glob: 10.3.10
+      glob: 10.3.12
       minimatch: 9.0.3
       read-package-json-fast: 3.0.2
 
@@ -21691,7 +21651,7 @@ snapshots:
   '@npmcli/package-json@5.0.0':
     dependencies:
       '@npmcli/git': 5.0.4
-      glob: 10.3.10
+      glob: 10.3.12
       hosted-git-info: 7.0.1
       json-parse-even-better-errors: 3.0.0
       normalize-package-data: 6.0.0
@@ -21869,7 +21829,7 @@ snapshots:
       debug: 4.3.4(supports-color@8.1.1)
       http-call: 5.3.0
       lodash.template: 4.5.0
-      semver: 7.5.4
+      semver: 7.6.0
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -22168,10 +22128,6 @@ snapshots:
       - encoding
       - supports-color
 
-  '@opentelemetry/context-async-hooks@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-
   '@opentelemetry/context-async-hooks@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
@@ -22214,14 +22170,6 @@ snapshots:
       '@opentelemetry/otlp-transformer': 0.51.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/resources': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-base': 1.24.0(@opentelemetry/api@1.8.0)
-
-  '@opentelemetry/exporter-zipkin@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.23.0
 
   '@opentelemetry/exporter-zipkin@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
@@ -22569,7 +22517,7 @@ snapshots:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/api-metrics': 0.32.0
       require-in-the-middle: 5.2.0
-      semver: 7.5.4
+      semver: 7.6.0
       shimmer: 1.2.1
     transitivePeerDependencies:
       - supports-color
@@ -22636,20 +22584,10 @@ snapshots:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/core': 1.24.0(@opentelemetry/api@1.8.0)
 
-  '@opentelemetry/propagator-b3@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
-
   '@opentelemetry/propagator-b3@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/core': 1.24.0(@opentelemetry/api@1.8.0)
-
-  '@opentelemetry/propagator-jaeger@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
 
   '@opentelemetry/propagator-jaeger@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
@@ -22746,16 +22684,6 @@ snapshots:
       '@opentelemetry/core': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/resources': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/semantic-conventions': 1.24.0
-
-  '@opentelemetry/sdk-trace-node@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/context-async-hooks': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/propagator-b3': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/propagator-jaeger': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.23.0(@opentelemetry/api@1.8.0)
-      semver: 7.6.0
 
   '@opentelemetry/sdk-trace-node@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
@@ -22854,7 +22782,7 @@ snapshots:
 
   '@pulumi/cloudflare@4.16.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -22863,7 +22791,7 @@ snapshots:
 
   '@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
       glob: 10.3.10
@@ -22877,24 +22805,24 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))':
+  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5))':
     dependencies:
       '@pulumi/kubernetes': 4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
-      '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
 
-  '@pulumi/pulumi@3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
+  '@pulumi/pulumi@3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
       '@grpc/grpc-js': 1.10.1
       '@logdna/tail-file': 2.2.0
       '@npmcli/arborist': 7.4.0
       '@opentelemetry/api': 1.8.0
-      '@opentelemetry/exporter-zipkin': 1.23.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/exporter-zipkin': 1.24.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/instrumentation': 0.32.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/instrumentation-grpc': 0.32.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-node': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.23.0
+      '@opentelemetry/resources': 1.24.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-trace-base': 1.24.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-trace-node': 1.24.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/semantic-conventions': 1.24.0
       '@pulumi/query': 0.3.0
       '@types/google-protobuf': 3.15.12
       '@types/semver': 7.5.6
@@ -22910,7 +22838,7 @@ snapshots:
       picomatch: 3.0.1
       pkg-dir: 7.0.0
       require-from-string: 2.0.2
-      semver: 7.5.4
+      semver: 7.6.0
       source-map-support: 0.5.21
       tmp: 0.2.3
       upath: 1.2.0
@@ -22925,7 +22853,7 @@ snapshots:
 
   '@pulumi/random@4.16.1(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.113.3(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.114.0(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -25343,16 +25271,16 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))':
+  '@theguild/components@6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@next/bundle-analyzer': 13.4.2
       clsx: 2.1.0
       fuzzy: 0.1.3
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       next-videos: 1.5.0(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
-      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
-      nextra-theme-docs: 3.0.0-alpha.22(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
+      nextra-theme-docs: 3.0.0-alpha.22(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-paginate: 8.2.0(react@18.2.0)
@@ -27081,7 +27009,7 @@ snapshots:
     dependencies:
       '@npmcli/fs': 3.1.0
       fs-minipass: 3.0.0
-      glob: 10.3.10
+      glob: 10.3.12
       lru-cache: 10.2.0
       minipass: 7.0.4
       minipass-collect: 2.0.1
@@ -33176,17 +33104,17 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next-sitemap@4.2.3(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)):
+  next-sitemap@4.2.3(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.6
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
-  next-themes@0.2.1(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  next-themes@0.2.1(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -33197,32 +33125,6 @@ snapshots:
       file-loader: 4.3.0(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
     transitivePeerDependencies:
       - webpack
-
-  next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@next/env': 14.2.2
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001600
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(@babel/core@7.22.9)(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.2
-      '@next/swc-darwin-x64': 14.2.2
-      '@next/swc-linux-arm64-gnu': 14.2.2
-      '@next/swc-linux-arm64-musl': 14.2.2
-      '@next/swc-linux-x64-gnu': 14.2.2
-      '@next/swc-linux-x64-musl': 14.2.2
-      '@next/swc-win32-arm64-msvc': 14.2.2
-      '@next/swc-win32-ia32-msvc': 14.2.2
-      '@next/swc-win32-x64-msvc': 14.2.2
-      '@opentelemetry/api': 1.8.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
 
   next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -33250,7 +33152,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  nextra-theme-docs@3.0.0-alpha.22(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  nextra-theme-docs@3.0.0-alpha.22(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@headlessui/react': 1.7.17(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@popperjs/core': 2.11.8
@@ -33259,15 +33161,15 @@ snapshots:
       flexsearch: 0.7.43
       focus-visible: 5.2.0
       intersection-observer: 0.12.2
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next-themes: 0.2.1(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next-themes: 0.2.1(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.1.0
       zod: 3.23.4
 
-  nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5):
+  nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5):
     dependencies:
       '@headlessui/react': 1.7.17(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@mdx-js/mdx': 3.0.1
@@ -33285,7 +33187,7 @@ snapshots:
       gray-matter: 4.0.3
       hast-util-to-estree: 3.1.0
       katex: 0.16.9
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       p-limit: 4.0.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -33359,7 +33261,7 @@ snapshots:
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.1
-      glob: 10.3.10
+      glob: 10.3.12
       graceful-fs: 4.2.11
       make-fetch-happen: 13.0.0
       nopt: 7.2.0
@@ -33479,7 +33381,7 @@ snapshots:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.13.1
-      semver: 7.5.4
+      semver: 7.6.0
       validate-npm-package-license: 3.0.4
 
   normalize-package-data@5.0.0:
@@ -33493,7 +33395,7 @@ snapshots:
     dependencies:
       hosted-git-info: 7.0.1
       is-core-module: 2.13.1
-      semver: 7.5.4
+      semver: 7.6.0
       validate-npm-package-license: 3.0.4
 
   normalize-path@2.1.1:
@@ -35092,14 +34994,14 @@ snapshots:
 
   read-package-json@6.0.3:
     dependencies:
-      glob: 10.3.10
+      glob: 10.3.12
       json-parse-even-better-errors: 3.0.0
       normalize-package-data: 5.0.0
       npm-normalize-package-bin: 3.0.1
 
   read-package-json@7.0.0:
     dependencies:
-      glob: 10.3.10
+      glob: 10.3.12
       json-parse-even-better-errors: 3.0.0
       normalize-package-data: 6.0.0
       npm-normalize-package-bin: 3.0.1
@@ -36317,13 +36219,6 @@ snapshots:
       hey-listen: 1.0.8
       tslib: 2.6.2
 
-  styled-jsx@5.1.1(@babel/core@7.22.9)(react@18.2.0):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.2.0
-    optionalDependencies:
-      '@babel/core': 7.22.9
-
   styled-jsx@5.1.1(@babel/core@7.24.0)(react@18.2.0):
     dependencies:
       client-only: 0.0.1
@@ -36987,7 +36882,7 @@ snapshots:
       '@ungap/structured-clone': 1.2.0
       concat-stream: 2.0.0
       debug: 4.3.4(supports-color@8.1.1)
-      glob: 10.3.10
+      glob: 10.3.12
       ignore: 5.3.0
       is-empty: 1.2.0
       is-plain-obj: 4.1.0
@@ -37858,7 +37753,7 @@ snapshots:
       preferred-pm: 3.0.3
       pretty-bytes: 5.6.0
       readable-stream: 4.4.0
-      semver: 7.5.4
+      semver: 7.6.0
       slash: 3.0.0
       strip-ansi: 6.0.1
       text-table: 0.2.0
@@ -37881,7 +37776,7 @@ snapshots:
       pacote: 15.2.0
       read-pkg-up: 7.0.1
       run-async: 2.4.1
-      semver: 7.5.4
+      semver: 7.6.0
       shelljs: 0.8.5
       sort-keys: 4.2.0
       text-table: 0.2.0
