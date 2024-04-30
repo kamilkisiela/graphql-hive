@@ -63,7 +63,7 @@ importers:
         version: 5.0.2(graphql@16.8.1)
       '@graphql-codegen/cli':
         specifier: 5.0.2
-        version: 5.0.2(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)
+        version: 5.0.2(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)
       '@graphql-codegen/client-preset':
         specifier: 4.2.5
         version: 4.2.5(encoding@0.1.13)(graphql@16.8.1)
@@ -84,7 +84,7 @@ importers:
         version: 3.0.0(graphql@16.8.1)
       '@graphql-eslint/eslint-plugin':
         specifier: 3.20.1
-        version: 3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
+        version: 3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-inspector/cli':
         specifier: 4.0.3
         version: 4.0.3(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
@@ -1773,8 +1773,8 @@ importers:
         specifier: 14.2.2
         version: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       pino:
-        specifier: 8.20.0
-        version: 8.20.0
+        specifier: 8.21.0
+        version: 8.21.0
       pino-http:
         specifier: 9.0.0
         version: 9.0.0
@@ -1943,7 +1943,7 @@ importers:
         version: 1.0.7(@types/react-dom@18.2.25)(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@theguild/components':
         specifier: 6.5.3
-        version: 6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
+        version: 6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -1955,13 +1955,13 @@ importers:
         version: 4.0.3
       next:
         specifier: 14.2.2
-        version: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       next-sitemap:
         specifier: 4.2.3
-        version: 4.2.3(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))
+        version: 4.2.3(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))
       next-themes:
         specifier: '*'
-        version: 0.2.1(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        version: 0.2.1(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -14164,6 +14164,9 @@ packages:
   pino-abstract-transport@1.1.0:
     resolution: {integrity: sha512-lsleG3/2a/JIWUtf9Q5gUNErBqwIu1tUKTT3dUzaf5DySw9ra1wcqKjJjLX1VTY64Wk1eEOYsVGSaGfCK85ekA==}
 
+  pino-abstract-transport@1.2.0:
+    resolution: {integrity: sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==}
+
   pino-http@9.0.0:
     resolution: {integrity: sha512-Q9QDNEz0vQmbJtMFjOVr2c9yL92vHudjmr3s3m6J1hbw3DBGFZJm3TIj9TWyynZ4GEsEA9SOtni4heRUr6lNOg==}
 
@@ -14178,8 +14181,8 @@ packages:
     resolution: {integrity: sha512-oswmokxkav9bADfJ2ifrvfHUwad6MLp73Uat0IkQWY3iAw5xTRoznXbXksZs8oaOUMpmhVWD+PZogNzllWpJaA==}
     hasBin: true
 
-  pino@8.20.0:
-    resolution: {integrity: sha512-uhIfMj5TVp+WynVASaVEJFTncTUe4dHBq6CWplu/vBgvGHhvBvQfxz+vcOrnnBQdORH3izaGEurLfNlq3YxdFQ==}
+  pino@8.21.0:
+    resolution: {integrity: sha512-ip4qdzjkAyDDZklUaZkcRFb2iA118H9SgRh8yzTkSQK8HilsOJF7rSY8HoW5+I0M46AZgX/pxbprf2vvzQCE0Q==}
     hasBin: true
 
   pirates@4.0.5:
@@ -16199,6 +16202,9 @@ packages:
 
   thread-stream@2.3.0:
     resolution: {integrity: sha512-kaDqm1DET9pp3NXwR8382WHbnpXnRkN9xGN9dQt3B2+dmXiW8X1SOwmFOxAErEQ47ObhZ96J6yhZNXuyCOL7KA==}
+
+  thread-stream@2.7.0:
+    resolution: {integrity: sha512-qQiRWsU/wvNolI6tbbCKd9iKaTnCXsTwVxhhKM6nctPdujTyztjlbUkUTUymidWcMnZ5pWR0ej4a0tjsW021vw==}
 
   throttleit@1.0.0:
     resolution: {integrity: sha512-rkTVqu6IjfQ/6+uNuuc3sZek4CEYxTJom3IktzgdSxcZqdARuebbA/f4QmAxMQIxqq9ZLEUkSYqvuk1I6VKq4g==}
@@ -19846,7 +19852,7 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-codegen/cli@5.0.2(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)':
+  '@graphql-codegen/cli@5.0.2(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
       '@babel/generator': 7.23.6
       '@babel/template': 7.22.15
@@ -19856,7 +19862,7 @@ snapshots:
       '@graphql-codegen/plugin-helpers': 5.0.3(graphql@16.8.1)
       '@graphql-tools/apollo-engine-loader': 8.0.0(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-tools/code-file-loader': 8.1.0(graphql@16.8.1)
-      '@graphql-tools/git-loader': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/git-loader': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/github-loader': 8.0.0(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-tools/graphql-file-loader': 8.0.0(graphql@16.8.1)
       '@graphql-tools/json-file-loader': 8.0.0(graphql@16.8.1)
@@ -20050,29 +20056,6 @@ snapshots:
       - encoding
       - supports-color
 
-  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.22.9)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)':
-    dependencies:
-      '@babel/code-frame': 7.21.4
-      '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      chalk: 4.1.2
-      debug: 4.3.4(supports-color@8.1.1)
-      fast-glob: 3.2.12
-      graphql: 16.8.1
-      graphql-config: 4.5.0(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
-      graphql-depth-limit: 1.1.0(graphql@16.8.1)
-      lodash.lowercase: 4.3.0
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@types/node'
-      - bufferutil
-      - cosmiconfig-toml-loader
-      - encoding
-      - supports-color
-      - utf-8-validate
-
   '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.24.0)(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)':
     dependencies:
       '@babel/code-frame': 7.21.4
@@ -20125,7 +20108,7 @@ snapshots:
       '@graphql-inspector/graphql-loader': 4.0.2(graphql@16.8.1)
       '@graphql-inspector/introspect-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/json-loader': 4.0.2(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-inspector/serve-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/similar-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/url-loader': 4.0.2(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)
@@ -20152,7 +20135,7 @@ snapshots:
   '@graphql-inspector/commands@4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)':
     dependencies:
       '@graphql-inspector/config': 4.0.2(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
       yargs: 17.7.2
@@ -20255,10 +20238,10 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-inspector/loaders@4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       '@graphql-inspector/config': 4.0.2(graphql@16.8.1)
-      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/load': 8.0.0(graphql@16.8.1)
       '@graphql-tools/utils': 10.0.3(graphql@16.8.1)
       graphql: 16.8.1
@@ -20367,18 +20350,6 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.22.9)(graphql@16.8.1)':
-    dependencies:
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      globby: 11.1.0
-      graphql: 16.8.1
-      tslib: 2.6.2
-      unixify: 1.0.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-
   '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.24.0)(graphql@16.8.1)
@@ -20394,6 +20365,18 @@ snapshots:
   '@graphql-tools/code-file-loader@8.0.1(@babel/core@7.22.9)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      globby: 11.1.0
+      graphql: 16.8.1
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
+  '@graphql-tools/code-file-loader@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       globby: 11.1.0
       graphql: 16.8.1
@@ -20582,6 +20565,19 @@ snapshots:
       - '@babel/core'
       - supports-color
 
+  '@graphql-tools/git-loader@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      is-glob: 4.0.3
+      micromatch: 4.0.5
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
   '@graphql-tools/github-loader@8.0.0(@types/node@20.12.7)(encoding@0.1.13)(graphql@16.8.1)':
     dependencies:
       '@ardatan/sync-fetch': 0.0.1(encoding@0.1.13)
@@ -20615,19 +20611,6 @@ snapshots:
       tslib: 2.6.2
       unixify: 1.0.0
 
-  '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.22.9)(graphql@16.8.1)':
-    dependencies:
-      '@babel/parser': 7.24.0
-      '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.22.9)
-      '@babel/traverse': 7.24.0
-      '@babel/types': 7.24.0
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      graphql: 16.8.1
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-
   '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@babel/parser': 7.24.0
@@ -20645,6 +20628,19 @@ snapshots:
     dependencies:
       '@babel/parser': 7.24.0
       '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.22.9)
+      '@babel/traverse': 7.24.0
+      '@babel/types': 7.24.0
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
+  '@graphql-tools/graphql-tag-pluck@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@babel/parser': 7.24.0
+      '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.24.0)
       '@babel/traverse': 7.24.0
       '@babel/types': 7.24.0
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
@@ -25343,16 +25339,16 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))':
+  '@theguild/components@6.5.3(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@next/bundle-analyzer': 13.4.2
       clsx: 2.1.0
       fuzzy: 0.1.3
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       next-videos: 1.5.0(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
-      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
-      nextra-theme-docs: 3.0.0-alpha.22(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
+      nextra-theme-docs: 3.0.0-alpha.22(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-paginate: 8.2.0(react@18.2.0)
@@ -33176,17 +33172,17 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next-sitemap@4.2.3(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)):
+  next-sitemap@4.2.3(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.6
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
 
-  next-themes@0.2.1(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  next-themes@0.2.1(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
@@ -33197,32 +33193,6 @@ snapshots:
       file-loader: 4.3.0(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
     transitivePeerDependencies:
       - webpack
-
-  next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      '@next/env': 14.2.2
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001600
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      styled-jsx: 5.1.1(@babel/core@7.22.9)(react@18.2.0)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.2
-      '@next/swc-darwin-x64': 14.2.2
-      '@next/swc-linux-arm64-gnu': 14.2.2
-      '@next/swc-linux-arm64-musl': 14.2.2
-      '@next/swc-linux-x64-gnu': 14.2.2
-      '@next/swc-linux-x64-musl': 14.2.2
-      '@next/swc-win32-arm64-msvc': 14.2.2
-      '@next/swc-win32-ia32-msvc': 14.2.2
-      '@next/swc-win32-x64-msvc': 14.2.2
-      '@opentelemetry/api': 1.8.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
 
   next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
@@ -33250,7 +33220,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  nextra-theme-docs@3.0.0-alpha.22(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+  nextra-theme-docs@3.0.0-alpha.22(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@headlessui/react': 1.7.17(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@popperjs/core': 2.11.8
@@ -33259,15 +33229,15 @@ snapshots:
       flexsearch: 0.7.43
       focus-visible: 5.2.0
       intersection-observer: 0.12.2
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      next-themes: 0.2.1(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next-themes: 0.2.1(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      nextra: 3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       scroll-into-view-if-needed: 3.1.0
       zod: 3.23.4
 
-  nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5):
+  nextra@3.0.0-alpha.22(@types/react@18.2.79)(next@14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5):
     dependencies:
       '@headlessui/react': 1.7.17(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@mdx-js/mdx': 3.0.1
@@ -33285,7 +33255,7 @@ snapshots:
       gray-matter: 4.0.3
       hast-util-to-estree: 3.1.0
       katex: 0.16.9
-      next: 14.2.2(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      next: 14.2.2(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       p-limit: 4.0.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -34265,10 +34235,15 @@ snapshots:
       readable-stream: 4.4.0
       split2: 4.1.0
 
+  pino-abstract-transport@1.2.0:
+    dependencies:
+      readable-stream: 4.4.0
+      split2: 4.1.0
+
   pino-http@9.0.0:
     dependencies:
       get-caller-file: 2.0.5
-      pino: 8.20.0
+      pino: 8.21.0
       pino-std-serializers: 6.2.2
       process-warning: 3.0.0
 
@@ -34305,19 +34280,19 @@ snapshots:
       sonic-boom: 3.7.0
       thread-stream: 2.3.0
 
-  pino@8.20.0:
+  pino@8.21.0:
     dependencies:
       atomic-sleep: 1.0.0
       fast-redact: 3.1.2
       on-exit-leak-free: 2.1.0
-      pino-abstract-transport: 1.1.0
+      pino-abstract-transport: 1.2.0
       pino-std-serializers: 6.2.2
       process-warning: 3.0.0
       quick-format-unescaped: 4.0.4
       real-require: 0.2.0
       safe-stable-stringify: 2.4.2
       sonic-boom: 3.7.0
-      thread-stream: 2.3.0
+      thread-stream: 2.7.0
 
   pirates@4.0.5: {}
 
@@ -36317,13 +36292,6 @@ snapshots:
       hey-listen: 1.0.8
       tslib: 2.6.2
 
-  styled-jsx@5.1.1(@babel/core@7.22.9)(react@18.2.0):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.2.0
-    optionalDependencies:
-      '@babel/core': 7.22.9
-
   styled-jsx@5.1.1(@babel/core@7.24.0)(react@18.2.0):
     dependencies:
       client-only: 0.0.1
@@ -36578,6 +36546,10 @@ snapshots:
       any-promise: 1.3.0
 
   thread-stream@2.3.0:
+    dependencies:
+      real-require: 0.2.0
+
+  thread-stream@2.7.0:
     dependencies:
       real-require: 0.2.0
 
