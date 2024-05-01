@@ -1794,8 +1794,8 @@ importers:
         specifier: 7.51.3
         version: 7.51.3(react@18.3.1)
       react-icons:
-        specifier: 5.1.0
-        version: 5.1.0(react@18.3.1)
+        specifier: 5.2.0
+        version: 5.2.0(react@18.3.1)
       react-select:
         specifier: 5.8.0
         version: 5.8.0(@babel/core@7.24.0)(@types/react@18.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1975,8 +1975,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       react-icons:
-        specifier: 5.1.0
-        version: 5.1.0(react@18.3.1)
+        specifier: 5.2.0
+        version: 5.2.0(react@18.3.1)
       tailwind-merge:
         specifier: 2.3.0
         version: 2.3.0
@@ -14871,8 +14871,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18
 
-  react-icons@5.1.0:
-    resolution: {integrity: sha512-D3zug1270S4hbSlIRJ0CUS97QE1yNNKDjzQe3HqY0aefp2CBn9VgzgES27sRR2gOvFK+0CNx/BW0ggOESp6fqQ==}
+  react-icons@5.2.0:
+    resolution: {integrity: sha512-n52Y7Eb4MgQZHsSZOhSXv1zs2668/hBYKfSRIvKh42yExjyhZu0d1IK2CLLZ3BZB1oo13lDfwx2vOh2z9FTV6Q==}
     peerDependencies:
       react: '*'
 
@@ -34887,7 +34887,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  react-icons@5.1.0(react@18.3.1):
+  react-icons@5.2.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
