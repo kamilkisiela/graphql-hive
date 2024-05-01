@@ -170,8 +170,8 @@ importers:
         specifier: 8.0.2
         version: 8.0.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(postcss@8.4.38)(ts-node@10.9.2(@swc/core@1.5.2(@swc/helpers@0.5.5))(@types/node@20.12.7)(typescript@5.4.5))(typescript@5.4.5)
       tsx:
-        specifier: 4.7.3
-        version: 4.7.3
+        specifier: 4.8.1
+        version: 4.8.1
       turbo:
         specifier: 1.13.3
         version: 1.13.3
@@ -243,8 +243,8 @@ importers:
         specifier: 0.2.3
         version: 0.2.3
       tsx:
-        specifier: 4.7.3
-        version: 4.7.3
+        specifier: 4.8.1
+        version: 4.8.1
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -10934,6 +10934,9 @@ packages:
   get-tsconfig@4.7.2:
     resolution: {integrity: sha512-wuMsz4leaj5hbGgg4IvDU0bqJagpftG5l5cXIAvo8uZrqn0NJqwtfupTN00VnkQJPcIRrxYrm1Ue24btpCha2A==}
 
+  get-tsconfig@4.7.3:
+    resolution: {integrity: sha512-ZvkrzoUA0PQZM6fy6+/Hce561s+faD1rsNwhnO5FelNjyy7EMGJ3Rz1AQ8GYDWjhRs/7dBLOEJvhK8MiEJOAFg==}
+
   getos@3.2.1:
     resolution: {integrity: sha512-U56CfOK17OKgTVqozZjUKNdkfEv6jk5WISBJ8SHoagjE6L69zOwl3Z+O8myjY9MEW3i2HPWQBt/LTbCgcC973Q==}
 
@@ -16409,8 +16412,8 @@ packages:
       typescript:
         optional: true
 
-  tsx@4.7.3:
-    resolution: {integrity: sha512-+fQnMqIp/jxZEXLcj6WzYy9FhcS5/Dfk8y4AtzJ6ejKcKqmfTF8Gso/jtrzDggCF2zTU20gJa6n8XqPYwDAUYQ==}
+  tsx@4.8.1:
+    resolution: {integrity: sha512-xkdE3/l+gZPHKfcZDCeCrCj2aJS5V8WFF2lPmMfj5ZAPa9RNN74XQsXA6lnPDe3uToGMCZ0ybytLvoP2rv8f5Q==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -29800,6 +29803,10 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
+  get-tsconfig@4.7.3:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+
   getos@3.2.1:
     dependencies:
       async: 3.2.4
@@ -36706,10 +36713,10 @@ snapshots:
       - supports-color
       - ts-node
 
-  tsx@4.7.3:
+  tsx@4.8.1:
     dependencies:
-      esbuild: 0.19.11
-      get-tsconfig: 4.7.2
+      esbuild: 0.20.2
+      get-tsconfig: 4.7.3
     optionalDependencies:
       fsevents: 2.3.3
 
