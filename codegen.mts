@@ -197,6 +197,12 @@ const config: CodegenConfig = {
       preset: 'client',
       plugins: [],
     },
+    './schema.graphql': {
+      plugins: ['schema-ast'],
+      config: {
+        includeDirectives: true,
+      },
+    },
   },
 };
 

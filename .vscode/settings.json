@@ -20,5 +20,6 @@
     "https://json.schemastore.org/github-workflow.json": ".github/workflows/deploy.yaml"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
   "git.mergeEditor": false
 }
