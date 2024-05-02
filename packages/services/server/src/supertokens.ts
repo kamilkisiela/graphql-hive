@@ -165,6 +165,7 @@ export const backendConfig = (requirements: {
         },
       }),
       SessionNode.init({
+        exposeAccessTokenToFrontendInCookieBasedAuth: true,
         override: {
           functions: originalImplementation => ({
             ...originalImplementation,

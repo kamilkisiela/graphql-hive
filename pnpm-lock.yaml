@@ -1788,6 +1788,9 @@ importers:
       pino-http:
         specifier: 9.0.0
         version: 9.0.0
+      quick-stable-stringify:
+        specifier: 0.1.8
+        version: 0.1.8
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -14885,6 +14888,10 @@ packages:
 
   quick-lru@5.1.1:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
+    engines: {node: '>=10'}
+
+  quick-stable-stringify@0.1.8:
+    resolution: {integrity: sha512-RL1Y/aC+JZ2CWS/BSacWi07he5YpPubjxnuhUPs4koFELpqyRseiMkve+tzPZYIJXl6nz+XM92gZPVrGrgHKqw==}
     engines: {node: '>=10'}
 
   railroad-diagrams@1.0.0:
@@ -35065,6 +35072,8 @@ snapshots:
   quick-lru@4.0.1: {}
 
   quick-lru@5.1.1: {}
+
+  quick-stable-stringify@0.1.8: {}
 
   railroad-diagrams@1.0.0: {}
 
