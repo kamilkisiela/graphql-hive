@@ -25,7 +25,6 @@ const usePersistedOperations = env.graphql.persistedOperations;
 export type WorkerSubscriptionSubscribeEvent = {
   type: 'subscriptionStart';
   id: string;
-  accessToken: string;
   graphql: {
     query?: string;
     operationName?: string;
@@ -79,6 +78,7 @@ const subscriptions = new Map<
 if (globalThis.window) {
   worker = new SharedWorker(new URL('./graphql-subscriptions-worker', import.meta.url), {
     name: 'hive-graphql-subscriptions-worker',
+    credentials: 'include',
   });
 
   worker.port.addEventListener('message', event => {
@@ -222,29 +222,20 @@ export const urqlClient = createClient({
               };
             }
 
-            let isEnded = false;
-
             const id = crypto.randomUUID();
 
-            Session.getAccessToken().then(accessToken => {
-              if (isEnded || !accessToken) {
-                return;
-              }
-
-              worker.port.postMessage(
-                JSON.stringify({
-                  type: 'subscriptionStart',
-                  id,
-                  accessToken: accessToken,
-                  graphql: {
-                    query: usePersistedOperations ? undefined : operation.query,
-                    operationName: operation.operationName,
-                    variables: operation.variables,
-                    extensions: operation.extensions,
-                  },
-                } as WorkerSubscriptionSubscribeEvent),
-              );
-            });
+            worker.port.postMessage(
+              JSON.stringify({
+                type: 'subscriptionStart',
+                id,
+                graphql: {
+                  query: usePersistedOperations ? undefined : operation.query,
+                  operationName: operation.operationName,
+                  variables: operation.variables,
+                  extensions: operation.extensions,
+                },
+              } as WorkerSubscriptionSubscribeEvent),
+            );
 
             subscriptions.set(id, {
               close: () => {
@@ -257,7 +248,6 @@ export const urqlClient = createClient({
 
             return {
               unsubscribe: () => {
-                isEnded = true;
                 worker?.port.postMessage(
                   JSON.stringify({
                     type: 'subscriptionEnd',

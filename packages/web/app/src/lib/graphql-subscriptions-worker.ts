@@ -65,6 +65,11 @@ function endOperation(id: string) {
   activeSubscriptions.delete(mapping.hash);
 }
 
+const client = createClient({
+  url: 'http://localhost:3001/graphql',
+  credentials: 'include',
+});
+
 onconnect = (event: MessageEvent) => {
   const port = event.ports[0];
 
@@ -115,11 +120,6 @@ onconnect = (event: MessageEvent) => {
           return;
         }
 
-        const client = createClient({
-          url: 'http://localhost:3001/graphql',
-          headers: { Authorization: 'Bearer ' + data.accessToken },
-        });
-
         const unsubscribe = client.subscribe(
           {
             query: data.graphql.query!,
@@ -154,6 +154,7 @@ onconnect = (event: MessageEvent) => {
               console.error(err);
 
               // TODO: check if we should forward error to main thread
+              // NOTE: we probably need to as we need to refresh the access - instead of doing it for every tab we should probably only one to avoid ddossing our own server
             },
             complete() {
               const subs = activeSubscriptions.get(hash);
