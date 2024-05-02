@@ -1773,8 +1773,8 @@ importers:
         specifier: 14.2.3
         version: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       pino:
-        specifier: 8.21.0
-        version: 8.21.0
+        specifier: 9.0.0
+        version: 9.0.0
       pino-http:
         specifier: 9.0.0
         version: 9.0.0
@@ -14162,6 +14162,10 @@ packages:
 
   pino@8.21.0:
     resolution: {integrity: sha512-ip4qdzjkAyDDZklUaZkcRFb2iA118H9SgRh8yzTkSQK8HilsOJF7rSY8HoW5+I0M46AZgX/pxbprf2vvzQCE0Q==}
+    hasBin: true
+
+  pino@9.0.0:
+    resolution: {integrity: sha512-uI1ThkzTShNSwvsUM6b4ND8ANzWURk9zTELMztFkmnCQeR/4wkomJ+echHee5GMWGovoSfjwdeu80DsFIt7mbA==}
     hasBin: true
 
   pirates@4.0.5:
@@ -34238,6 +34242,20 @@ snapshots:
       thread-stream: 2.3.0
 
   pino@8.21.0:
+    dependencies:
+      atomic-sleep: 1.0.0
+      fast-redact: 3.1.2
+      on-exit-leak-free: 2.1.0
+      pino-abstract-transport: 1.2.0
+      pino-std-serializers: 6.2.2
+      process-warning: 3.0.0
+      quick-format-unescaped: 4.0.4
+      real-require: 0.2.0
+      safe-stable-stringify: 2.4.2
+      sonic-boom: 3.7.0
+      thread-stream: 2.7.0
+
+  pino@9.0.0:
     dependencies:
       atomic-sleep: 1.0.0
       fast-redact: 3.1.2
