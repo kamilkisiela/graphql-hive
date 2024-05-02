@@ -1,12 +1,56 @@
-import { createClient } from 'graphql-sse';
+import { createClient, type Client as SSEClient } from 'graphql-sse';
 import stringify from 'quick-stable-stringify';
-import type {
-  WorkerCompleteResponse,
-  WorkerEvent,
-  WorkerNextResponse,
-  WorkerPing,
-  WorkerSubscriptionSubscribeEvent,
-} from './urql';
+
+export type WorkerSubscriptionSubscribeEvent = {
+  type: 'subscriptionStart';
+  id: string;
+  graphql: {
+    query?: string;
+    operationName?: string;
+    variables?: Record<string, unknown>;
+    extensions?: Record<string, unknown>;
+  };
+};
+
+export type WorkerSubscriptionUnsubscribeEvent = {
+  type: 'subscriptionEnd';
+  id: string;
+};
+
+/** Sent by tab to worker to see if worker is still alive. */
+export type WorkerPongEvent = {
+  type: 'pong';
+};
+
+export type WorkerConfigurationEvent = {
+  type: 'configuration';
+  url: string;
+};
+
+/** Messages sent from port/tab/window -> worker */
+export type WorkerReceiveMessage =
+  | WorkerSubscriptionSubscribeEvent
+  | WorkerSubscriptionUnsubscribeEvent
+  | WorkerConfigurationEvent
+  | WorkerPongEvent;
+
+export type WorkerNextResponse = {
+  type: 'next';
+  id: string;
+  result: any;
+};
+
+export type WorkerPing = {
+  type: 'ping';
+};
+
+export type WorkerCompleteResponse = {
+  type: 'complete';
+  id: string;
+};
+
+/** Messages sent from worker -> port/tab/window */
+export type WorkerSendMessage = WorkerNextResponse | WorkerCompleteResponse | WorkerPing;
 
 /**
  * Mapping of hash -> subscriptions
@@ -23,7 +67,7 @@ const activeSubscriptions = new Map<
 /**
  * Keeps reference from operation id to hash and port
  */
-const idToHashAndPortMapping = new Map<
+const operationIdToHashAndPortMapping = new Map<
   string,
   {
     hash: string;
@@ -31,14 +75,15 @@ const idToHashAndPortMapping = new Map<
   }
 >();
 
-const hashValue = (val: string) =>
-  crypto.subtle.digest('SHA-256', new TextEncoder().encode(val)).then(h => {
-    let hexes = [],
-      view = new DataView(h);
-    for (let i = 0; i < view.byteLength; i += 4)
-      hexes.push(('00000000' + view.getUint32(i).toString(16)).slice(-8));
-    return hexes.join('');
-  });
+async function hashValue(value: string): Promise<string> {
+  const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  const hexes: Array<string> = [];
+  const view = new DataView(arrayBuffer);
+  for (let i = 0; i < view.byteLength; i += 4) {
+    hexes.push(('00000000' + view.getUint32(i).toString(16)).slice(-8));
+  }
+  return hexes.join('');
+}
 
 async function getDedupeHash(data: WorkerSubscriptionSubscribeEvent['graphql']): Promise<string> {
   return hashValue(stringify(data)!);
@@ -46,7 +91,7 @@ async function getDedupeHash(data: WorkerSubscriptionSubscribeEvent['graphql']):
 
 /** End an operation with a specific id. */
 function endOperation(id: string) {
-  const mapping = idToHashAndPortMapping.get(id);
+  const mapping = operationIdToHashAndPortMapping.get(id);
   if (!mapping) {
     return;
   }
@@ -55,7 +100,7 @@ function endOperation(id: string) {
     return;
   }
 
-  idToHashAndPortMapping.delete(id);
+  operationIdToHashAndPortMapping.delete(id);
   sub.ids.delete(id);
   if (sub.ids.size !== 0) {
     return;
@@ -65,21 +110,65 @@ function endOperation(id: string) {
   activeSubscriptions.delete(mapping.hash);
 }
 
-const client = createClient({
-  url: 'http://localhost:3001/graphql',
-  credentials: 'include',
-});
+/** Handle operation result streamed from the server */
+function handleNext(hash: string, result: any) {
+  const subs = activeSubscriptions.get(hash);
+  if (!subs) {
+    return;
+  }
 
-onconnect = (event: MessageEvent) => {
+  for (const id of subs.ids) {
+    const mapping = operationIdToHashAndPortMapping.get(id);
+    if (!mapping) {
+      continue;
+    }
+    mapping.port.postMessage(
+      JSON.stringify({
+        type: 'next',
+        id,
+        result,
+      } satisfies WorkerNextResponse),
+    );
+  }
+}
+
+/** Handle operation that is completed by the server */
+function handleComplete(hash: string) {
+  const subs = activeSubscriptions.get(hash);
+  if (!subs) {
+    return;
+  }
+
+  for (const id of subs.ids) {
+    const mapping = operationIdToHashAndPortMapping.get(id);
+    if (!mapping) {
+      continue;
+    }
+    mapping.port.postMessage(
+      JSON.stringify({
+        type: 'complete',
+        id,
+      } satisfies WorkerCompleteResponse),
+    );
+
+    // TODO: check if we need to do additional cleanup
+  }
+}
+
+let client: SSEClient;
+
+const self = globalThis as unknown as SharedWorkerGlobalScope;
+
+self.onconnect = (event: MessageEvent) => {
   const port = event.ports[0];
 
   /** All IDs retained by this port */
   const portOperationIds = new Set<string>();
 
-  /** If Tab closes we need to do some cleanup :) */
+  /** if tab/window becomes unresponsive, we need to do some cleanup :) */
   function scheduleTimeout() {
     console.log('send ping');
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       console.log('timeout clean up operations for port');
       for (const operationId of portOperationIds) {
         endOperation(operationId);
@@ -94,9 +183,21 @@ onconnect = (event: MessageEvent) => {
   let timeout = scheduleTimeout();
 
   port.onmessage = async event => {
-    const data: WorkerEvent = JSON.parse(event.data);
+    const data: WorkerReceiveMessage = JSON.parse(event.data);
 
     switch (data.type) {
+      case 'configuration': {
+        console.log('received configuration', data);
+        if (client) {
+          console.log('client already configured');
+          return;
+        }
+        client = createClient({
+          url: data.url,
+          credentials: 'include',
+        });
+        return;
+      }
       case 'pong': {
         console.log('received pong');
 
@@ -115,7 +216,7 @@ onconnect = (event: MessageEvent) => {
 
         if (subscriptionsForHash) {
           subscriptionsForHash.ids.add(data.id);
-          idToHashAndPortMapping.set(data.id, { hash, port });
+          operationIdToHashAndPortMapping.set(data.id, { hash, port });
           portOperationIds.add(data.id);
           return;
         }
@@ -129,54 +230,17 @@ onconnect = (event: MessageEvent) => {
           },
           {
             next(result) {
-              const subs = activeSubscriptions.get(hash);
               console.log(hash, 'next', result);
-
-              if (!subs) {
-                return;
-              }
-
-              for (const id of subs.ids) {
-                const mapping = idToHashAndPortMapping.get(id);
-                if (!mapping) {
-                  continue;
-                }
-                mapping.port.postMessage(
-                  JSON.stringify({
-                    type: 'next',
-                    id,
-                    result,
-                  } satisfies WorkerNextResponse),
-                );
-              }
+              handleNext(hash, result);
             },
             error(err) {
               console.error(err);
-
               // TODO: check if we should forward error to main thread
-              // NOTE: we probably need to as we need to refresh the access - instead of doing it for every tab we should probably only one to avoid ddossing our own server
+              // what are potential errors?
             },
             complete() {
-              const subs = activeSubscriptions.get(hash);
               console.log(hash, 'complete');
-
-              if (!subs) {
-                return;
-              }
-              for (const id of subs.ids) {
-                const mapping = idToHashAndPortMapping.get(id);
-                if (!mapping) {
-                  continue;
-                }
-                mapping.port.postMessage(
-                  JSON.stringify({
-                    type: 'complete',
-                    id,
-                  } satisfies WorkerCompleteResponse),
-                );
-
-                // TODO: check if we need to do additional cleanup
-              }
+              handleComplete(hash);
             },
           },
         );
@@ -184,7 +248,7 @@ onconnect = (event: MessageEvent) => {
           ids: new Set([data.id]),
           unsubscribe,
         });
-        idToHashAndPortMapping.set(data.id, { hash, port });
+        operationIdToHashAndPortMapping.set(data.id, { hash, port });
         portOperationIds.add(data.id);
 
         return;

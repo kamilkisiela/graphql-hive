@@ -1921,6 +1921,9 @@ importers:
       '@types/react-window':
         specifier: 1.8.8
         version: 1.8.8
+      '@types/sharedworker':
+        specifier: 0.0.114
+        version: 0.0.114
       autoprefixer:
         specifier: 10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -7967,6 +7970,9 @@ packages:
 
   '@types/service-worker-mock@2.0.4':
     resolution: {integrity: sha512-MEBT2eiqYfhxjqYm/oAf2AvKLbPTPwJJAYrMdheKnGyz1yG9XBRfxCzi93h27qpSvI7jOYfXqFLVMLBXFDqo4A==}
+
+  '@types/sharedworker@0.0.114':
+    resolution: {integrity: sha512-Vc53fZHV8aAWs6fW299AexmDvlpnPKP1wPYWn0oyGddWxMoVysFklTwtxvcLwvyCZcBDP2Rux2xc6vq9ItlSkw==}
 
   '@types/shimmer@1.0.5':
     resolution: {integrity: sha512-9Hp0ObzwwO57DpLFF0InUjUm/II8GmKAvzbefxQTihCb7KI6yc9yzf0nLc4mVdby5N4DRCgQM2wCup9KTieeww==}
@@ -26132,6 +26138,8 @@ snapshots:
       '@types/node': 20.12.7
 
   '@types/service-worker-mock@2.0.4': {}
+
+  '@types/sharedworker@0.0.114': {}
 
   '@types/shimmer@1.0.5': {}
 

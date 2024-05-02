@@ -125,6 +125,7 @@
     "@types/react-highlight-words": "0.16.7",
     "@types/react-virtualized-auto-sizer": "1.0.4",
     "@types/react-window": "1.8.8",
+    "@types/sharedworker": "0.0.114",
     "autoprefixer": "10.4.19",
     "pino-pretty": "11.0.0",
     "postcss": "8.4.38",

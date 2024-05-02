@@ -6,6 +6,13 @@ import schema from '@/gql/schema';
 import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
+import type {
+  WorkerConfigurationEvent,
+  WorkerPongEvent,
+  WorkerSendMessage,
+  WorkerSubscriptionSubscribeEvent,
+  WorkerSubscriptionUnsubscribeEvent,
+} from './graphql-subscriptions-worker';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
 
@@ -21,49 +28,6 @@ const sseClient = createSSEClient({
 });
 
 const usePersistedOperations = env.graphql.persistedOperations;
-
-export type WorkerSubscriptionSubscribeEvent = {
-  type: 'subscriptionStart';
-  id: string;
-  graphql: {
-    query?: string;
-    operationName?: string;
-    variables?: Record<string, unknown>;
-    extensions?: Record<string, unknown>;
-  };
-};
-
-type WorkerSubscriptionUnsubscribeEvent = {
-  type: 'subscriptionEnd';
-  id: string;
-};
-
-/** Sent by tab to worker to see if worker is still alive. */
-type WorkerPongEvent = {
-  type: 'pong';
-};
-
-export type WorkerEvent =
-  | WorkerSubscriptionSubscribeEvent
-  | WorkerSubscriptionUnsubscribeEvent
-  | WorkerPongEvent;
-
-export type WorkerNextResponse = {
-  type: 'next';
-  id: string;
-  result: any;
-};
-
-export type WorkerPing = {
-  type: 'ping';
-};
-
-export type WorkerCompleteResponse = {
-  type: 'complete';
-  id: string;
-};
-
-export type WorkerResponseEvent = WorkerNextResponse | WorkerCompleteResponse | WorkerPing;
 
 let worker: SharedWorker | null = null;
 
@@ -82,7 +46,7 @@ if (globalThis.window) {
   });
 
   worker.port.addEventListener('message', event => {
-    const data = JSON.parse(event.data) as WorkerResponseEvent;
+    const data = JSON.parse(event.data) as WorkerSendMessage;
     switch (data.type) {
       case 'next': {
         subscriptions.get(data.id)?.push(data.result);
@@ -101,6 +65,12 @@ if (globalThis.window) {
   });
 
   worker.port.start();
+  worker.port.postMessage(
+    JSON.stringify({
+      type: 'configuration',
+      url: SERVER_BASE_PATH,
+    } satisfies WorkerConfigurationEvent),
+  );
 }
 
 export const urqlClient = createClient({
