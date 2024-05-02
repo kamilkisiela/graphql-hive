@@ -50,8 +50,8 @@ importers:
   .:
     devDependencies:
       '@0no-co/graphqlsp':
-        specifier: 0.11.1
-        version: 0.11.1(encoding@0.1.13)(graphql@16.8.1)
+        specifier: 1.12.1
+        version: 1.12.1(encoding@0.1.13)(typescript@5.4.5)
       '@actions/core':
         specifier: 1.10.1
         version: 1.10.1
@@ -73,6 +73,9 @@ importers:
       '@graphql-codegen/graphql-modules-preset':
         specifier: 4.0.6
         version: 4.0.6(encoding@0.1.13)(graphql@16.8.1)
+      '@graphql-codegen/schema-ast':
+        specifier: 4.0.2
+        version: 4.0.2(graphql@16.8.1)
       '@graphql-codegen/typescript':
         specifier: 4.0.6
         version: 4.0.6(encoding@0.1.13)(graphql@16.8.1)
@@ -2013,8 +2016,18 @@ packages:
       graphql:
         optional: true
 
-  '@0no-co/graphqlsp@0.11.1':
-    resolution: {integrity: sha512-IGrstMRdffI9gwM/S4KgR6bg38xtduVI6glkt58clST9f/e2Xxx54CdL2tam9NiLzTeJbZUz58T/l5MqATR9Ng==}
+  '@0no-co/graphql.web@1.0.7':
+    resolution: {integrity: sha512-E3Qku4mTzdrlwVWGPxklDnME5ANrEGetvYw4i2GCRlppWXXE4QD66j7pwb8HelZwS6LnqEChhrSOGCXpbiu6MQ==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+
+  '@0no-co/graphqlsp@1.12.1':
+    resolution: {integrity: sha512-KHMs1a9qXoiwA4aUKGgcsyM38SXH6ddQFwu4Hf2p8XjUOkRKHy38pd4qYM0hgA1vpkUf8WSj5GyDAbezhApfpw==}
+    peerDependencies:
+      typescript: ^5.0.0
 
   '@aashutoshrathi/word-wrap@1.2.6':
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
@@ -3892,6 +3905,12 @@ packages:
     peerDependencies:
       react: ^16 || ^17 || ^18
       react-dom: ^16 || ^17 || ^18
+
+  '@gql.tada/internal@0.3.3':
+    resolution: {integrity: sha512-lBOiN0c/Fx5eY5KGwkzB5+6asUv9IAoD6f5rZjN8r9h4hvSk4V5Kuuu6EfKixF6h5/o/xDRgA/BU3355udnK3g==}
+    peerDependencies:
+      graphql: ^16.8.1
+      typescript: ^5.0.0
 
   '@graphiql/react@0.18.0-alpha.0':
     resolution: {integrity: sha512-d+Ra22v9bkyJFhgqZseemBqg+7WFASskerX3Wg5QJ3t3XUSu05teH6MP7R6NtlQhue0VUKjxccp7rkTC48nkMg==}
@@ -6772,10 +6791,6 @@ packages:
 
   '@sinclair/typebox@0.32.27':
     resolution: {integrity: sha512-JHRrubCKiXi6VKlbBTpTQnExkUFasPMIaXCJYJhqVBGLliQVt1yBZZgiZo3/uSmvAdXlIIdGoTAT6RB09L0QqA==}
-
-  '@sindresorhus/fnv1a@2.0.1':
-    resolution: {integrity: sha512-suq9tRQ6bkpMukTG5K5z0sPWB7t0zExMzZCdmYm6xTSSIm/yCKNm7VCL36wVeyTsFr597/UhU1OAYdHGMDiHrw==}
-    engines: {node: '>=10'}
 
   '@sindresorhus/is@4.6.0':
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
@@ -11176,12 +11191,6 @@ packages:
 
   graphql-language-service@5.1.6:
     resolution: {integrity: sha512-sl9HTlE/sBoFvZ2SPGnApwpp/a4ahl1d49SOxGm2OIYOslFv00MK7AYms9Yx91omOwAp74is10S7Cjamh5TRQw==}
-    hasBin: true
-    peerDependencies:
-      graphql: ^15.5.0 || ^16.0.0
-
-  graphql-language-service@5.2.0:
-    resolution: {integrity: sha512-o/ZgTS0pBxWm3hSF4+6GwiV1//DxzoLWEbS38+jqpzzy1d/QXBidwQuVYTOksclbtOJZ3KR/tZ8fi/tI6VpVMg==}
     hasBin: true
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
@@ -17420,22 +17429,18 @@ snapshots:
     optionalDependencies:
       graphql: 16.8.1
 
-  '@0no-co/graphqlsp@0.11.1(encoding@0.1.13)(graphql@16.8.1)':
+  '@0no-co/graphql.web@1.0.7(graphql@16.8.1)':
+    optionalDependencies:
+      graphql: 16.8.1
+
+  '@0no-co/graphqlsp@1.12.1(encoding@0.1.13)(typescript@5.4.5)':
     dependencies:
-      '@graphql-codegen/add': 5.0.2(graphql@16.8.1)
-      '@graphql-codegen/core': 4.0.2(graphql@16.8.1)
-      '@graphql-codegen/typed-document-node': 5.0.6(encoding@0.1.13)(graphql@16.8.1)
-      '@graphql-codegen/typescript': 4.0.6(encoding@0.1.13)(graphql@16.8.1)
-      '@graphql-codegen/typescript-operations': 4.2.0(encoding@0.1.13)(graphql@16.8.1)
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
-      '@sindresorhus/fnv1a': 2.0.1
-      graphql-language-service: 5.2.0(graphql@16.8.1)
-      lru-cache: 10.2.0
+      '@gql.tada/internal': 0.3.3(graphql@16.8.1)(typescript@5.4.5)
+      graphql: 16.8.1
       node-fetch: 2.6.12(encoding@0.1.13)
+      typescript: 5.4.5
     transitivePeerDependencies:
       - encoding
-      - graphql
-      - supports-color
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
@@ -19929,6 +19934,12 @@ snapshots:
       giscus: 1.5.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  '@gql.tada/internal@0.3.3(graphql@16.8.1)(typescript@5.4.5)':
+    dependencies:
+      '@0no-co/graphql.web': 1.0.7(graphql@16.8.1)
+      graphql: 16.8.1
+      typescript: 5.4.5
 
   '@graphiql/react@0.18.0-alpha.0(patch_hash=ugoj3rzenzo4dg36q22bjmg7me)(@codemirror/language@6.0.0)(@types/node@20.12.8)(@types/react-dom@18.3.0)(@types/react@18.3.1)(graphql-ws@5.16.0(graphql@16.8.1))(graphql@16.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -24094,8 +24105,6 @@ snapshots:
   '@sinclair/typebox@0.27.8': {}
 
   '@sinclair/typebox@0.32.27': {}
-
-  '@sindresorhus/fnv1a@2.0.1': {}
 
   '@sindresorhus/is@4.6.0': {}
 
@@ -30277,12 +30286,6 @@ snapshots:
       - utf-8-validate
 
   graphql-language-service@5.1.6(graphql@16.8.1):
-    dependencies:
-      graphql: 16.8.1
-      nullthrows: 1.1.1
-      vscode-languageserver-types: 3.17.2
-
-  graphql-language-service@5.2.0(graphql@16.8.1):
     dependencies:
       graphql: 16.8.1
       nullthrows: 1.1.1

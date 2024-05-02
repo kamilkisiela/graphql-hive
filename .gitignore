@@ -138,3 +138,5 @@ _redirects
 deployment/utils/opentelemetry-collector.types.ts
 deployment/utils/vector.types.ts
 deployment/utils/contour.types.ts
+
+schema.graphql
