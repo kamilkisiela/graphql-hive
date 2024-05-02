@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QueryError } from '@/components/ui/query-error';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,7 +45,6 @@ import {
   InfoCircledIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
@@ -1048,7 +1048,6 @@ function ConditionalBreakingChangesMetadataSection(props: {
     props.schemaCheck,
   );
 
-
   if (!schemaCheck.conditionalBreakingChangeMetadata) {
     return (
       <div className="mb-5 mt-10 text-sm text-gray-400">
@@ -1061,28 +1060,26 @@ function ConditionalBreakingChangesMetadataSection(props: {
           Learn more about conditional breaking changes.
         </DocsLink>
       </div>
-    )
+    );
   }
 
   const numberOfTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.length;
-  const truncatedTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.slice(0, 3);
+  const truncatedTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.slice(
+    0,
+    3,
+  );
   const excludedTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.slice(3);
   const allTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets;
-
-
 
   return (
     <div className="mb-5 mt-10 text-sm text-gray-400">
       <p>
         Based on{' '}
         <span className="text-white">
-          {schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCountFormatted}{' '}
-          requests
+          {schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCountFormatted} requests
         </span>{' '}
         from target
-        {numberOfTargets === 1
-          ? ''
-          : 's'}{' '}
+        {numberOfTargets === 1 ? '' : 's'}{' '}
         {numberOfTargets <= 3 && (
           <>
             {allTargets.map((target, index) => (
@@ -1104,11 +1101,13 @@ function ConditionalBreakingChangesMetadataSection(props: {
             {' and '}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant='link' className='p-0'>{excludedTargets.length} more</Button>
+                <Button variant="link" className="p-0">
+                  {excludedTargets.length} more
+                </Button>
               </PopoverTrigger>
               <PopoverContent>
                 <div className="p-2">
-                  <h4 className="text-sm font-semibold text-white mb-2">All Targets</h4>
+                  <h4 className="mb-2 text-sm font-semibold text-white">All Targets</h4>
                   <ScrollArea className="h-44 w-full">
                     <div className="grid grid-cols-1 divide-y divide-gray-800">
                       {allTargets.map((target, index) => (
@@ -1144,7 +1143,7 @@ function ConditionalBreakingChangesMetadataSection(props: {
           Learn more about conditional breaking changes.
         </DocsLink>
       </p>
-    </div >
+    </div>
   );
 }
 
@@ -1272,8 +1271,8 @@ function ContractCheckView(props: {
               </div>
             )}
             {!contractCheck.breakingSchemaChanges &&
-              !contractCheck.safeSchemaChanges &&
-              !contractCheck.schemaCompositionErrors ? (
+            !contractCheck.safeSchemaChanges &&
+            !contractCheck.schemaCompositionErrors ? (
               <NoGraphChanges />
             ) : (
               <ConditionalBreakingChangesMetadataSection schemaCheck={schemaCheck} />
