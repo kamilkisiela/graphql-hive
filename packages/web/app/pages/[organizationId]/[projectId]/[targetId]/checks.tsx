@@ -44,6 +44,7 @@ import {
   InfoCircledIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
@@ -1047,62 +1048,103 @@ function ConditionalBreakingChangesMetadataSection(props: {
     props.schemaCheck,
   );
 
+
+  if (!schemaCheck.conditionalBreakingChangeMetadata) {
+    return (
+      <div className="mb-5 mt-10 text-sm text-gray-400">
+        Get more out of schema checks by enabling conditional breaking changes based on usage data.
+        <br />
+        <DocsLink
+          href="/management/targets#conditional-breaking-changes"
+          className="text-gray-500 hover:text-gray-300"
+        >
+          Learn more about conditional breaking changes.
+        </DocsLink>
+      </div>
+    )
+  }
+
+  const numberOfTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.length;
+  const truncatedTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.slice(0, 3);
+  const excludedTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets.slice(3);
+  const allTargets = schemaCheck.conditionalBreakingChangeMetadata.settings.targets;
+
+
+
   return (
     <div className="mb-5 mt-10 text-sm text-gray-400">
-      {schemaCheck.conditionalBreakingChangeMetadata ? (
-        <p>
-          Based on{' '}
-          <span className="text-white">
-            {schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCountFormatted}{' '}
-            requests
-          </span>{' '}
-          from target
-          {schemaCheck.conditionalBreakingChangeMetadata.settings.targets.length === 1
-            ? ''
-            : 's'}{' '}
-          {schemaCheck.conditionalBreakingChangeMetadata.settings.targets.map(
-            (target, index, arr) => (
+      <p>
+        Based on{' '}
+        <span className="text-white">
+          {schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCountFormatted}{' '}
+          requests
+        </span>{' '}
+        from target
+        {numberOfTargets === 1
+          ? ''
+          : 's'}{' '}
+        {numberOfTargets <= 3 && (
+          <>
+            {allTargets.map((target, index) => (
               <>
                 <span className="text-white">{target.name}</span>
-                {index === arr.length - 1 ? null : index === arr.length - 2 ? 'and' : ','}
+                {index === allTargets.length - 1 ? null : ', '}
               </>
-            ),
-          )}
-          . <br />
-          Usage data ranges from{' '}
-          <span className="text-white">
-            {format(schemaCheck.conditionalBreakingChangeMetadata.period.from, 'do MMM yyyy HH:mm')}
-          </span>{' '}
-          to{' '}
-          <span className="text-white">
-            {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'do MMM yyyy HH:mm')} (
-            {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'z')})
-          </span>{' '}
-          (period of {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays} day
-          {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays === 1 ? '' : 's'}
-          ).
-          <br />
-          <DocsLink
-            href="/management/targets#conditional-breaking-changes"
-            className="text-gray-500 hover:text-gray-300"
-          >
-            Learn more about conditional breaking changes.
-          </DocsLink>
-        </p>
-      ) : (
-        <p>
-          Get more out of schema checks by enabling conditional breaking changes based on usage
-          data.
-          <br />
-          <DocsLink
-            href="/management/targets#conditional-breaking-changes"
-            className="text-gray-500 hover:text-gray-300"
-          >
-            Learn more about conditional breaking changes.
-          </DocsLink>
-        </p>
-      )}
-    </div>
+            ))}
+          </>
+        )}
+        {numberOfTargets > 3 && (
+          <>
+            {truncatedTargets.map((target, index) => (
+              <>
+                <span className="text-white">{target.name}</span>
+                {index === truncatedTargets.length - 1 ? null : ', '}
+              </>
+            ))}
+            {' and '}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant='link' className='p-0'>{excludedTargets.length} more</Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <div className="p-2">
+                  <h4 className="text-sm font-semibold text-white mb-2">All Targets</h4>
+                  <ScrollArea className="h-44 w-full">
+                    <div className="grid grid-cols-1 divide-y divide-gray-800">
+                      {allTargets.map((target, index) => (
+                        <div key={index} className="py-2">
+                          <div className="line-clamp-3 text-sm text-gray-400">{target.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </>
+        )}{' '}
+        . <br />
+        Usage data ranges from{' '}
+        <span className="text-white">
+          {format(schemaCheck.conditionalBreakingChangeMetadata.period.from, 'do MMM yyyy HH:mm')}
+        </span>{' '}
+        to{' '}
+        <span className="text-white">
+          {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'do MMM yyyy HH:mm')} (
+          {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'z')})
+        </span>{' '}
+        (period of {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays} day
+        {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays === 1 ? '' : 's'}
+        ).
+        <br />
+        <DocsLink
+          href="/management/targets#conditional-breaking-changes"
+          className="text-gray-500 hover:text-gray-300"
+        >
+          Learn more about conditional breaking changes.
+        </DocsLink>
+      </p>
+    </div >
   );
 }
 
@@ -1230,8 +1272,8 @@ function ContractCheckView(props: {
               </div>
             )}
             {!contractCheck.breakingSchemaChanges &&
-            !contractCheck.safeSchemaChanges &&
-            !contractCheck.schemaCompositionErrors ? (
+              !contractCheck.safeSchemaChanges &&
+              !contractCheck.schemaCompositionErrors ? (
               <NoGraphChanges />
             ) : (
               <ConditionalBreakingChangesMetadataSection schemaCheck={schemaCheck} />
