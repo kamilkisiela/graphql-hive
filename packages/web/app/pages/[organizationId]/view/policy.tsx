@@ -12,6 +12,7 @@ import { graphql } from '@/gql';
 import { OrganizationAccessScope, RegistryModel } from '@/gql/graphql';
 import { useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks';
+import { useToast } from '@/components/ui/use-toast';
 
 const OrganizationPolicyPageQuery = graphql(`
   query OrganizationPolicyPageQuery($selector: OrganizationSelectorInput!) {
@@ -108,6 +109,7 @@ function PolicyPageContent() {
   if (query.error) {
     return <QueryError error={query.error} />;
   }
+  const { toast } = useToast();
 
   return (
     <OrganizationLayout
@@ -183,6 +185,20 @@ function PolicyPageContent() {
                     },
                     policy: newPolicy,
                     allowOverrides,
+                  }).then(() => {
+                    if (mutation.error) {
+                      toast({
+                        variant: 'destructive',
+                        title: 'Error',
+                        description: mutation.error.message,
+                      });
+                    } else {
+                      toast({
+                        variant: 'default',
+                        title: 'Success',
+                        description: 'Policy updated successfully',
+                      })
+                    }
                   }).catch();
                 }}
                 currentState={currentOrganization.schemaPolicy}

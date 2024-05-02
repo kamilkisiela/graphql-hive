@@ -4,6 +4,7 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
+import { useToast } from '../ui/use-toast';
 
 const UserSettings_MeQuery = graphql(`
   query UserSettings_MeQuery {
@@ -46,6 +47,7 @@ export function UserSettingsModal({
 }): ReactElement {
   const [meQuery] = useQuery({ query: UserSettings_MeQuery });
   const [mutation, mutate] = useMutation(UpdateMeMutation);
+  const { toast } = useToast();
 
   const me = meQuery.data?.me;
 
@@ -64,6 +66,18 @@ export function UserSettingsModal({
         const { data } = await mutate({ input: values });
         if (data?.updateMe.ok) {
           toggleModalOpen();
+          toast({
+            variant: 'default',
+            title: 'Profile updated',
+            description: 'Your profile has been updated successfully',
+          })
+        }
+        if (data?.updateMe.error) {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: data.updateMe.error.message,
+          });
         }
       },
     });

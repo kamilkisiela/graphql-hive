@@ -31,6 +31,7 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useToast } from '@/components/ui/use-toast';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
   query Integrations_CheckIntegrationsQuery($selector: OrganizationSelectorInput!) {
@@ -237,6 +238,7 @@ const SettingsPageRenderer = (props: {
   const router = useRouteSelector();
   const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
   const [isTransferModalOpen, toggleTransferModalOpen] = useToggle();
+  const { toast } = useToast();
 
   const [mutation, mutate] = useMutation(UpdateOrganizationNameMutation);
 
@@ -261,6 +263,20 @@ const SettingsPageRenderer = (props: {
               result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
                 .organization;
             void router.replace(`/${newOrgId}/view/settings`);
+          }
+        }).then(() => {
+          if (mutation.error) {
+            toast({
+              variant: 'destructive',
+              title: 'Error',
+              description: mutation.error.message,
+            });
+          } else {
+            toast({
+              variant: 'default',
+              title: 'Success',
+              description: 'Organization name updated',
+            })
           }
         }),
     });

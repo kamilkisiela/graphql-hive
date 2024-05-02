@@ -11,6 +11,7 @@ import { graphql } from '@/gql';
 import { ProjectAccessScope, RegistryModel } from '@/gql/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks';
+import { useToast } from '@/components/ui/use-toast';
 
 const ProjectPolicyPageQuery = graphql(`
   query ProjectPolicyPageQuery($organizationId: ID!, $projectId: ID!) {
@@ -106,6 +107,7 @@ function ProjectPolicyContent() {
   }
 
   const isLegacyProject = currentProject?.registryModel === RegistryModel.Legacy;
+  const { toast } = useToast();
 
   return (
     <ProjectLayout
@@ -161,7 +163,7 @@ function ProjectPolicyContent() {
             </CardHeader>
             <CardContent>
               {currentProject.parentSchemaPolicy === null ||
-              currentProject.parentSchemaPolicy?.allowOverrides ? (
+                currentProject.parentSchemaPolicy?.allowOverrides ? (
                 <PolicySettings
                   saving={mutation.fetching}
                   rulesInParent={currentProject.parentSchemaPolicy?.rules.map(r => r.rule.id)}
@@ -176,6 +178,20 @@ function ProjectPolicyContent() {
                         project: router.projectId,
                       },
                       policy: newPolicy,
+                    }).then(() => {
+                      if (mutation.error) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Error',
+                          description: mutation.error.message,
+                        });
+                      } else {
+                        toast({
+                          variant: 'default',
+                          title: 'Success',
+                          description: 'Policy updated successfully',
+                        })
+                      }
                     });
                   }}
                   currentState={currentProject.schemaPolicy}

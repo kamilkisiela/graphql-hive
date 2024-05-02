@@ -28,6 +28,7 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
+import { useToast } from '@/components/ui/use-toast';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
@@ -257,6 +258,7 @@ function ProjectSettingsContent() {
     member: organization?.me ?? null,
     redirect: true,
   });
+  const { toast } = useToast();
 
   const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectNameMutation);
 
@@ -280,6 +282,20 @@ function ProjectSettingsContent() {
           if (result?.data?.updateProjectName?.ok) {
             const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
             void router.replace(`/${router.organizationId}/${newProjectId}/view/settings`);
+          }
+        }).then(() => {
+          if (mutation.error) {
+            toast({
+              variant: 'destructive',
+              title: 'Error',
+              description: mutation.error.message,
+            });
+          } else {
+            toast({
+              variant: 'default',
+              title: 'Success',
+              description: 'Project name updated successfully',
+            })
           }
         }),
     });
@@ -356,7 +372,7 @@ function ProjectSettingsContent() {
                 </form>
 
                 {query.data?.isGitHubIntegrationFeatureEnabled &&
-                !project.isProjectNameInGitHubCheckEnabled ? (
+                  !project.isProjectNameInGitHubCheckEnabled ? (
                   <GitHubIntegration
                     organizationName={organization.name}
                     projectName={project.name}
