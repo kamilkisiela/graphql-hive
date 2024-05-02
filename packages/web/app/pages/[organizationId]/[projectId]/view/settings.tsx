@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, Input, MetaTitle } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
@@ -28,7 +29,6 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
-import { useToast } from '@/components/ui/use-toast';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
@@ -278,26 +278,28 @@ function ProjectSettingsContent() {
             project: router.projectId,
             name: values.name,
           },
-        }).then(result => {
-          if (result?.data?.updateProjectName?.ok) {
-            const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
-            void router.replace(`/${router.organizationId}/${newProjectId}/view/settings`);
-          }
-        }).then(() => {
-          if (mutation.error) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: mutation.error.message,
-            });
-          } else {
-            toast({
-              variant: 'default',
-              title: 'Success',
-              description: 'Project name updated successfully',
-            })
-          }
-        }),
+        })
+          .then(result => {
+            if (result?.data?.updateProjectName?.ok) {
+              const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
+              void router.replace(`/${router.organizationId}/${newProjectId}/view/settings`);
+            }
+          })
+          .then(() => {
+            if (mutation.error) {
+              toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: mutation.error.message,
+              });
+            } else {
+              toast({
+                variant: 'default',
+                title: 'Success',
+                description: 'Project name updated successfully',
+              });
+            }
+          }),
     });
 
   if (query.error) {
@@ -372,7 +374,7 @@ function ProjectSettingsContent() {
                 </form>
 
                 {query.data?.isGitHubIntegrationFeatureEnabled &&
-                  !project.isProjectNameInGitHubCheckEnabled ? (
+                !project.isProjectNameInGitHubCheckEnabled ? (
                   <GitHubIntegration
                     organizationName={organization.name}
                     projectName={project.name}

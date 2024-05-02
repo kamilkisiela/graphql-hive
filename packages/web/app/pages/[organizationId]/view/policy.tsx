@@ -7,12 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, DocsNote, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { OrganizationAccessScope, RegistryModel } from '@/gql/graphql';
 import { useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks';
-import { useToast } from '@/components/ui/use-toast';
 
 const OrganizationPolicyPageQuery = graphql(`
   query OrganizationPolicyPageQuery($selector: OrganizationSelectorInput!) {
@@ -185,21 +185,23 @@ function PolicyPageContent() {
                     },
                     policy: newPolicy,
                     allowOverrides,
-                  }).then(() => {
-                    if (mutation.error) {
-                      toast({
-                        variant: 'destructive',
-                        title: 'Error',
-                        description: mutation.error.message,
-                      });
-                    } else {
-                      toast({
-                        variant: 'default',
-                        title: 'Success',
-                        description: 'Policy updated successfully',
-                      })
-                    }
-                  }).catch();
+                  })
+                    .then(() => {
+                      if (mutation.error) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Error',
+                          description: mutation.error.message,
+                        });
+                      } else {
+                        toast({
+                          variant: 'default',
+                          title: 'Success',
+                          description: 'Policy updated successfully',
+                        });
+                      }
+                    })
+                    .catch();
                 }}
                 currentState={currentOrganization.schemaPolicy}
               >

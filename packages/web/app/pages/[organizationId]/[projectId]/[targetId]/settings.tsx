@@ -22,6 +22,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import {
   DocsLink,
   Input,
@@ -42,7 +43,6 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useToast } from '@/components/ui/use-toast';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TargetSettings_TargetValidationSettingsFragment = graphql(`
@@ -231,7 +231,6 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   const [baseSchema, setBaseSchema] = useState(props.baseSchema);
   const { toast } = useToast();
 
-
   const isUnsaved = baseSchema?.trim() !== props.baseSchema?.trim();
 
   return (
@@ -292,7 +291,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
                   variant: 'default',
                   title: 'Success',
                   description: 'Base schema updated successfully',
-                })
+                });
               }
             });
           }}
@@ -515,7 +514,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
             variant: 'default',
             title: 'Success',
             description: 'Conditional breaking changes settings updated successfully',
-          })
+          });
         }
       }),
   });
@@ -738,28 +737,30 @@ function TargetName(props: {
             target: props.targetId,
             name: values.name,
           },
-        }).then(result => {
-          if (result?.data?.updateTargetName?.ok) {
-            const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
-            void router.replace(
-              `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
-            );
-          }
-        }).then(() => {
-          if (mutation.error) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: mutation.error.message,
-            });
-          } else {
-            toast({
-              variant: 'default',
-              title: 'Success',
-              description: 'Target name updated successfully',
-            })
-          }
-        }),
+        })
+          .then(result => {
+            if (result?.data?.updateTargetName?.ok) {
+              const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
+              void router.replace(
+                `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
+              );
+            }
+          })
+          .then(() => {
+            if (mutation.error) {
+              toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: mutation.error.message,
+              });
+            } else {
+              toast({
+                variant: 'default',
+                title: 'Success',
+                description: 'Target name updated successfully',
+              });
+            }
+          }),
     });
 
   return (
@@ -872,7 +873,7 @@ function GraphQLEndpointUrl(props: {
               variant: 'default',
               title: 'Success',
               description: 'GraphQL endpoint url updated successfully',
-            })
+            });
           }
         }),
     });

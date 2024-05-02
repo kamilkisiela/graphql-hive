@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, Input, MetaTitle, Tag } from '@/components/v2';
 import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
@@ -31,7 +32,6 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useToast } from '@/components/ui/use-toast';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
   query Integrations_CheckIntegrationsQuery($selector: OrganizationSelectorInput!) {
@@ -257,28 +257,30 @@ const SettingsPageRenderer = (props: {
             organization: router.organizationId,
             name: values.name,
           },
-        }).then(result => {
-          if (result.data?.updateOrganizationName?.ok) {
-            const newOrgId =
-              result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
-                .organization;
-            void router.replace(`/${newOrgId}/view/settings`);
-          }
-        }).then(() => {
-          if (mutation.error) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: mutation.error.message,
-            });
-          } else {
-            toast({
-              variant: 'default',
-              title: 'Success',
-              description: 'Organization name updated',
-            })
-          }
-        }),
+        })
+          .then(result => {
+            if (result.data?.updateOrganizationName?.ok) {
+              const newOrgId =
+                result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
+                  .organization;
+              void router.replace(`/${newOrgId}/view/settings`);
+            }
+          })
+          .then(() => {
+            if (mutation.error) {
+              toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: mutation.error.message,
+              });
+            } else {
+              toast({
+                variant: 'default',
+                title: 'Success',
+                description: 'Organization name updated',
+              });
+            }
+          }),
     });
 
   return (

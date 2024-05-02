@@ -6,12 +6,12 @@ import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectAccessScope, RegistryModel } from '@/gql/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks';
-import { useToast } from '@/components/ui/use-toast';
 
 const ProjectPolicyPageQuery = graphql(`
   query ProjectPolicyPageQuery($organizationId: ID!, $projectId: ID!) {
@@ -163,7 +163,7 @@ function ProjectPolicyContent() {
             </CardHeader>
             <CardContent>
               {currentProject.parentSchemaPolicy === null ||
-                currentProject.parentSchemaPolicy?.allowOverrides ? (
+              currentProject.parentSchemaPolicy?.allowOverrides ? (
                 <PolicySettings
                   saving={mutation.fetching}
                   rulesInParent={currentProject.parentSchemaPolicy?.rules.map(r => r.rule.id)}
@@ -190,7 +190,7 @@ function ProjectPolicyContent() {
                           variant: 'default',
                           title: 'Success',
                           description: 'Policy updated successfully',
-                        })
+                        });
                       }
                     });
                   }}

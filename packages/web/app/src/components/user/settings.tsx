@@ -70,7 +70,7 @@ export function UserSettingsModal({
             variant: 'default',
             title: 'Profile updated',
             description: 'Your profile has been updated successfully',
-          })
+          });
         }
         if (data?.updateMe.error) {
           toast({
