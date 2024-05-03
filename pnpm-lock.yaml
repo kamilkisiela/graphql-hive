@@ -50,8 +50,8 @@ importers:
   .:
     devDependencies:
       '@0no-co/graphqlsp':
-        specifier: 1.12.1
-        version: 1.12.1(encoding@0.1.13)(typescript@5.4.5)
+        specifier: 1.12.2
+        version: 1.12.2(encoding@0.1.13)(graphql@16.8.1)(typescript@5.4.5)
       '@actions/core':
         specifier: 1.10.1
         version: 1.10.1
@@ -2024,9 +2024,10 @@ packages:
       graphql:
         optional: true
 
-  '@0no-co/graphqlsp@1.12.1':
-    resolution: {integrity: sha512-KHMs1a9qXoiwA4aUKGgcsyM38SXH6ddQFwu4Hf2p8XjUOkRKHy38pd4qYM0hgA1vpkUf8WSj5GyDAbezhApfpw==}
+  '@0no-co/graphqlsp@1.12.2':
+    resolution: {integrity: sha512-bUYuwoHuvlTIZZpt2l0furjcNMpd80T5JB4YzmOdcv+wlndHpRWeFwgnGH7qgyy986oGKxgomS0oBXjxmEMtYg==}
     peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
 
   '@aashutoshrathi/word-wrap@1.2.6':
@@ -17445,7 +17446,7 @@ snapshots:
     optionalDependencies:
       graphql: 16.8.1
 
-  '@0no-co/graphqlsp@1.12.1(encoding@0.1.13)(typescript@5.4.5)':
+  '@0no-co/graphqlsp@1.12.2(encoding@0.1.13)(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
       '@gql.tada/internal': 0.3.3(graphql@16.8.1)(typescript@5.4.5)
       graphql: 16.8.1
