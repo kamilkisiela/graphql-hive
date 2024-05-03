@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, DocsNote, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { OrganizationAccessScope, RegistryModel } from '@/gql/graphql';
@@ -108,6 +109,7 @@ function PolicyPageContent() {
   if (query.error) {
     return <QueryError error={query.error} />;
   }
+  const { toast } = useToast();
 
   return (
     <OrganizationLayout
@@ -183,7 +185,23 @@ function PolicyPageContent() {
                     },
                     policy: newPolicy,
                     allowOverrides,
-                  }).catch();
+                  })
+                    .then(() => {
+                      if (mutation.error) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Error',
+                          description: mutation.error.message,
+                        });
+                      } else {
+                        toast({
+                          variant: 'default',
+                          title: 'Success',
+                          description: 'Policy updated successfully',
+                        });
+                      }
+                    })
+                    .catch();
                 }}
                 currentState={currentOrganization.schemaPolicy}
               >

@@ -22,6 +22,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import {
   DocsLink,
   Input,
@@ -228,6 +229,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const router = useRouteSelector();
   const [baseSchema, setBaseSchema] = useState(props.baseSchema);
+  const { toast } = useToast();
 
   const isUnsaved = baseSchema?.trim() !== props.baseSchema?.trim();
 
@@ -277,6 +279,20 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
                 target: router.targetId,
                 newBase: baseSchema,
               },
+            }).then(() => {
+              if (mutation.error) {
+                toast({
+                  variant: 'destructive',
+                  title: 'Error',
+                  description: mutation.error.message,
+                });
+              } else {
+                toast({
+                  variant: 'default',
+                  title: 'Success',
+                  description: 'Base schema updated successfully',
+                });
+              }
             });
           }}
         >
@@ -449,6 +465,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   const settings = targetSettings.data?.target?.validationSettings;
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
+  const { toast } = useToast();
 
   const {
     handleSubmit,
@@ -485,6 +502,20 @@ const ConditionalBreakingChanges = (): ReactElement => {
           target: router.targetId,
           ...values,
         },
+      }).then(() => {
+        if (mutation.error) {
+          toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: mutation.error.message,
+          });
+        } else {
+          toast({
+            variant: 'default',
+            title: 'Success',
+            description: 'Conditional breaking changes settings updated successfully',
+          });
+        }
       }),
   });
 
@@ -686,6 +717,7 @@ function TargetName(props: {
   targetId: string;
 }) {
   const router = useRouteSelector();
+  const { toast } = useToast();
 
   const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetNameMutation);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -705,14 +737,30 @@ function TargetName(props: {
             target: props.targetId,
             name: values.name,
           },
-        }).then(result => {
-          if (result?.data?.updateTargetName?.ok) {
-            const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
-            void router.replace(
-              `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
-            );
-          }
-        }),
+        })
+          .then(result => {
+            if (result?.data?.updateTargetName?.ok) {
+              const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
+              void router.replace(
+                `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
+              );
+            }
+          })
+          .then(() => {
+            if (mutation.error) {
+              toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: mutation.error.message,
+              });
+            } else {
+              toast({
+                variant: 'default',
+                title: 'Success',
+                description: 'Target name updated successfully',
+              });
+            }
+          }),
     });
 
   return (
@@ -791,6 +839,7 @@ function GraphQLEndpointUrl(props: {
   targetId: string;
 }): ReactElement {
   const router = useRouteSelector();
+  const { toast } = useToast();
   const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetGraphQLEndpointUrl);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
@@ -812,6 +861,20 @@ function GraphQLEndpointUrl(props: {
             target: props.targetId,
             graphqlEndpointUrl: values.graphqlEndpointUrl === '' ? null : values.graphqlEndpointUrl,
           },
+        }).then(() => {
+          if (mutation.error) {
+            toast({
+              variant: 'destructive',
+              title: 'Error',
+              description: mutation.error.message,
+            });
+          } else {
+            toast({
+              variant: 'default',
+              title: 'Success',
+              description: 'GraphQL endpoint url updated successfully',
+            });
+          }
         }),
     });
 

@@ -6,6 +6,7 @@ import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectAccessScope, RegistryModel } from '@/gql/graphql';
@@ -106,6 +107,7 @@ function ProjectPolicyContent() {
   }
 
   const isLegacyProject = currentProject?.registryModel === RegistryModel.Legacy;
+  const { toast } = useToast();
 
   return (
     <ProjectLayout
@@ -176,6 +178,20 @@ function ProjectPolicyContent() {
                         project: router.projectId,
                       },
                       policy: newPolicy,
+                    }).then(() => {
+                      if (mutation.error) {
+                        toast({
+                          variant: 'destructive',
+                          title: 'Error',
+                          description: mutation.error.message,
+                        });
+                      } else {
+                        toast({
+                          variant: 'default',
+                          title: 'Success',
+                          description: 'Policy updated successfully',
+                        });
+                      }
                     });
                   }}
                   currentState={currentProject.schemaPolicy}

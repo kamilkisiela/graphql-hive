@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { useToast } from '@/components/ui/use-toast';
 import { DocsLink, Input, MetaTitle } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
@@ -257,6 +258,7 @@ function ProjectSettingsContent() {
     member: organization?.me ?? null,
     redirect: true,
   });
+  const { toast } = useToast();
 
   const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectNameMutation);
 
@@ -276,12 +278,28 @@ function ProjectSettingsContent() {
             project: router.projectId,
             name: values.name,
           },
-        }).then(result => {
-          if (result?.data?.updateProjectName?.ok) {
-            const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
-            void router.replace(`/${router.organizationId}/${newProjectId}/view/settings`);
-          }
-        }),
+        })
+          .then(result => {
+            if (result?.data?.updateProjectName?.ok) {
+              const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
+              void router.replace(`/${router.organizationId}/${newProjectId}/view/settings`);
+            }
+          })
+          .then(() => {
+            if (mutation.error) {
+              toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: mutation.error.message,
+              });
+            } else {
+              toast({
+                variant: 'default',
+                title: 'Success',
+                description: 'Project name updated successfully',
+              });
+            }
+          }),
     });
 
   if (query.error) {
