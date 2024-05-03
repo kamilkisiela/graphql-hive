@@ -22,6 +22,10 @@ export type WorkerPongEvent = {
   type: 'pong';
 };
 
+export type WorkerCloseEvent = {
+  type: 'close';
+};
+
 export type WorkerConfigurationEvent = {
   type: 'configuration';
   url: string;
@@ -32,6 +36,7 @@ export type WorkerReceiveMessage =
   | WorkerSubscriptionSubscribeEvent
   | WorkerSubscriptionUnsubscribeEvent
   | WorkerConfigurationEvent
+  | WorkerCloseEvent
   | WorkerPongEvent;
 
 export type WorkerNextResponse = {
@@ -206,6 +211,14 @@ self.onconnect = (event: MessageEvent) => {
           timeout = scheduleTimeout();
         }, 5000);
 
+        return;
+      }
+      case 'close': {
+        console.log('received close');
+        clearTimeout(timeout);
+        for (const operationId of portOperationIds) {
+          endOperation(operationId);
+        }
         return;
       }
       case 'subscriptionStart': {

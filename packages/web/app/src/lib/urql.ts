@@ -7,6 +7,7 @@ import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
 import type {
+  WorkerCloseEvent,
   WorkerConfigurationEvent,
   WorkerPongEvent,
   WorkerSendMessage,
@@ -39,7 +40,7 @@ const subscriptions = new Map<
   }
 >();
 
-if (globalThis.window) {
+if (globalThis.window?.SharedWorker) {
   worker = new SharedWorker(new URL('./graphql-subscriptions-worker', import.meta.url), {
     name: 'hive-graphql-subscriptions-worker',
     credentials: 'include',
@@ -62,6 +63,20 @@ if (globalThis.window) {
         break;
       }
     }
+  });
+
+  /**
+   * Note:
+   * Technically the unload can be canceled/prevented by another event listener.
+   * In praxis we don't do this and probably shouldn't do it as it is bad UX.
+   * If we ever decide to do it we need to change the logic here. 😇
+   */
+  globalThis.addEventListener('beforeunload', () => {
+    worker?.port.postMessage(
+      JSON.stringify({
+        type: 'close',
+      } as WorkerCloseEvent),
+    );
   });
 
   worker.port.start();
