@@ -243,8 +243,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       json-schema-to-typescript:
-        specifier: 14.0.0
-        version: 14.0.0
+        specifier: 14.0.4
+        version: 14.0.4
       tmp:
         specifier: 0.2.3
         version: 0.2.3
@@ -7863,10 +7863,6 @@ packages:
   '@types/pg@8.6.1':
     resolution: {integrity: sha512-1Kc4oAGzAl7uqUStZCDvaLFqZrW9qWSjXOmBfdgyBP5La7Us6Mg4GBvRlSoaZMhQF/zSj1C8CtKMBkoiT8eL8w==}
 
-  '@types/prettier@3.0.0':
-    resolution: {integrity: sha512-mFMBfMOz8QxhYVbuINtswBp9VL2b4Y0QqYHwqLz3YbgtfAcat2Dl6Y1o4e22S/OVE6Ebl9m7wWiMT2lSbAs1wA==}
-    deprecated: This is a stub types definition. prettier provides its own type definitions, so you do not need this installed.
-
   '@types/pretty-hrtime@1.0.1':
     resolution: {integrity: sha512-VjID5MJb1eGKthz2qUerWT8+R4b9N+CHvGCzg9fn4kWZgaF9AhdYikQio3R7wV8YY1NsQKPaCwKz1Yff+aHNUQ==}
 
@@ -12222,8 +12218,8 @@ packages:
   json-schema-ref-resolver@1.0.1:
     resolution: {integrity: sha512-EJAj1pgHc1hxF6vo2Z3s69fMjO1INq6eGHXZ8Z6wCQeldCuwxGK9Sxf4/cScGn3FZubCVUehfWtcDM/PLteCQw==}
 
-  json-schema-to-typescript@14.0.0:
-    resolution: {integrity: sha512-y/Pj93Ggu69LyRPxqpe16t8LA/5ZyJVoqmUf+o+2cBG33dH/GsDn5oDZD3EiOTkHXjVuZg4qWnWzTtS2LcoeiA==}
+  json-schema-to-typescript@14.0.4:
+    resolution: {integrity: sha512-covPOp3hrbD+oEcMvDxP5Rh6xNZj7lOTZkXAeQoDyu1PuEl1A6oRZ3Sy05HN11vXXmdJ6gLh5P3Qz0mgMPTzzw==}
     engines: {node: '>=16.0.0'}
     hasBin: true
 
@@ -24900,7 +24896,7 @@ snapshots:
       find-cache-dir: 3.3.2
       find-up: 5.0.0
       fs-extra: 11.2.0
-      glob: 10.3.10
+      glob: 10.3.12
       handlebars: 4.7.7
       lazy-universal-dotenv: 4.0.0
       node-fetch: 2.6.12(encoding@0.1.13)
@@ -25990,10 +25986,6 @@ snapshots:
       '@types/node': 20.12.8
       pg-protocol: 1.6.1
       pg-types: 2.2.0
-
-  '@types/prettier@3.0.0':
-    dependencies:
-      prettier: 3.2.5
 
   '@types/pretty-hrtime@1.0.1': {}
 
@@ -31402,12 +31394,11 @@ snapshots:
     dependencies:
       fast-deep-equal: 3.1.3
 
-  json-schema-to-typescript@14.0.0:
+  json-schema-to-typescript@14.0.4:
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.6.1
       '@types/json-schema': 7.0.15
       '@types/lodash': 4.17.0
-      '@types/prettier': 3.0.0
       cli-color: 2.0.4
       glob: 10.3.12
       is-glob: 4.0.3
