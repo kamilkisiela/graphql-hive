@@ -66,7 +66,7 @@ importers:
         version: 5.0.2(graphql@16.8.1)
       '@graphql-codegen/cli':
         specifier: 5.0.2
-        version: 5.0.2(@babel/core@7.22.9)(@types/node@20.12.8)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)
+        version: 5.0.2(@babel/core@7.24.0)(@types/node@20.12.8)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)
       '@graphql-codegen/client-preset':
         specifier: 4.2.5
         version: 4.2.5(encoding@0.1.13)(graphql@16.8.1)
@@ -90,7 +90,7 @@ importers:
         version: 3.0.0(graphql@16.8.1)
       '@graphql-eslint/eslint-plugin':
         specifier: 3.20.1
-        version: 3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.22.9)(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)
+        version: 3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.24.0)(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-inspector/cli':
         specifier: 4.0.3
         version: 4.0.3(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)
@@ -101,8 +101,8 @@ importers:
         specifier: 14.2.3
         version: 14.2.3
       '@sentry/cli':
-        specifier: 2.31.1
-        version: 2.31.1(encoding@0.1.13)
+        specifier: 2.31.2
+        version: 2.31.2(encoding@0.1.13)
       '@swc/core':
         specifier: 1.5.2
         version: 1.5.2(@swc/helpers@0.5.5)
@@ -677,11 +677,11 @@ importers:
         specifier: 6.1.1
         version: 6.1.1
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sentry/types':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@slack/web-api':
         specifier: 7.0.4
         version: 7.0.4
@@ -866,8 +866,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -947,11 +947,11 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sentry/tracing':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -992,8 +992,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -1040,8 +1040,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@theguild/federation-composition':
         specifier: 0.11.1
         version: 0.11.1(graphql@16.8.1)
@@ -1104,7 +1104,7 @@ importers:
         version: 6.3.0(@envelop/core@5.0.0)(graphql@16.8.1)
       '@envelop/sentry':
         specifier: 7.1.1
-        version: 7.1.1(@envelop/core@5.0.0)(@sentry/node@7.112.2)(graphql@16.8.1)
+        version: 7.1.1(@envelop/core@5.0.0)(@sentry/node@7.113.0)(graphql@16.8.1)
       '@envelop/types':
         specifier: 5.0.0
         version: 5.0.0
@@ -1148,11 +1148,11 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/integrations':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@swc/core':
         specifier: 1.5.2
         version: 1.5.2(@swc/helpers@0.5.5)
@@ -1245,14 +1245,14 @@ importers:
         specifier: 1.24.0
         version: 1.24.0
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sentry/types':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sentry/utils':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       fastify:
         specifier: 4.26.2
         version: 4.26.2
@@ -1284,11 +1284,11 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sentry/types':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@tgriesser/schemats':
         specifier: 9.0.1
         version: 9.0.1
@@ -1344,8 +1344,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -1383,8 +1383,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1434,8 +1434,8 @@ importers:
         specifier: workspace:*
         version: link:../usage-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@sinclair/typebox':
         specifier: 0.32.27
         version: 0.32.27
@@ -1485,8 +1485,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1521,8 +1521,8 @@ importers:
         specifier: workspace:*
         version: link:../usage-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       agentkeepalive:
         specifier: 4.5.0
         version: 4.5.0
@@ -1560,8 +1560,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1686,8 +1686,8 @@ importers:
         specifier: 3.0.5
         version: 3.0.5
       '@sentry/nextjs':
-        specifier: 7.112.2
-        version: 7.112.2(encoding@0.1.13)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.20.2))
+        specifier: 7.113.0
+        version: 7.113.0(encoding@0.1.13)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.20.2))
       '@stripe/react-stripe-js':
         specifier: 2.7.0
         version: 2.7.0(@stripe/stripe-js@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1867,8 +1867,8 @@ importers:
         specifier: workspace:*
         version: link:../../services/server
       '@sentry/types':
-        specifier: 7.112.2
-        version: 7.112.2
+        specifier: 7.113.0
+        version: 7.113.0
       '@storybook/addon-essentials':
         specifier: 8.0.9
         version: 8.0.9(@types/react@18.3.1)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1949,7 +1949,7 @@ importers:
         version: 1.0.7(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
         specifier: 6.5.3
-        version: 6.5.3(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
+        version: 6.5.3(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -1961,13 +1961,13 @@ importers:
         version: 4.0.3
       next:
         specifier: 14.2.3
-        version: 14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-sitemap:
         specifier: 4.2.3
-        version: 4.2.3(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        version: 4.2.3(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       next-themes:
         specifier: '*'
-        version: 0.2.1(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.2.1(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -6623,59 +6623,59 @@ packages:
   '@rushstack/eslint-patch@1.6.1':
     resolution: {integrity: sha512-UY+FGM/2jjMkzQLn8pxcHGMaVLh9aEitG3zY2CiY7XHdLiz3bZOwa6oDxNqEMv7zZkV+cj5DOdz0cQ1BP5Hjgw==}
 
-  '@sentry-internal/feedback@7.112.2':
-    resolution: {integrity: sha512-z+XP8BwB8B3pa+i8xqbrPsbtDWUFUS6wo+FJbmOYUqOusJJbVFDAhBoEdKoo5ZjOcsAZG7XR6cA9zrhJynIWBA==}
+  '@sentry-internal/feedback@7.113.0':
+    resolution: {integrity: sha512-eEmL8QXauUnM3FXGv0GT29RpL0Jo0pkn/uMu3aqjhQo7JKNqUGVYIUxJxiGWbVMbDXqPQ7L66bjjMS3FR1GM2g==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/replay-canvas@7.112.2':
-    resolution: {integrity: sha512-BCCCxrZ1wJvN6La5gg1JJbKitAhJI5MATCnhtklsZbUcHkHB9iZoj19J65+P56gwssvHz5xh63AjNiITaetIRg==}
+  '@sentry-internal/replay-canvas@7.113.0':
+    resolution: {integrity: sha512-K8uA42aobNF/BAXf14el15iSAi9fonLBUrjZi6nPDq7zaA8rPvfcTL797hwCbqkETz2zDf52Jz7I3WFCshDoUw==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/tracing@7.112.2':
-    resolution: {integrity: sha512-fT1Y46J4lfXZkgFkb03YMNeIEs2xS6jdKMoukMFQfRfVvL9fSWEbTgZpHPd/YTT8r2i082XzjtAoQNgklm/0Hw==}
+  '@sentry-internal/tracing@7.113.0':
+    resolution: {integrity: sha512-8MDnYENRMnEfQjvN4gkFYFaaBSiMFSU/6SQZfY9pLI3V105z6JQ4D0PGMAUVowXilwNZVpKNYohE7XByuhEC7Q==}
     engines: {node: '>=8'}
 
-  '@sentry/browser@7.112.2':
-    resolution: {integrity: sha512-wULwavCch84+d0bueAdFm6CDm1u0TfOjN91VgY+sj/vxUV2vesvDgI8zRZfmbZEor3MYA90zerkZT3ehZQKbYw==}
+  '@sentry/browser@7.113.0':
+    resolution: {integrity: sha512-PdyVHPOprwoxGfKGsP2dXDWO0MBDW1eyP7EZlfZvM1A4hjk6ZRNfCv30g+TrqX4hiZDKzyqN3+AdP7N/J2IX0Q==}
     engines: {node: '>=8'}
 
-  '@sentry/cli-darwin@2.31.1':
-    resolution: {integrity: sha512-u4iHQdfSsvk4N89zT0nC/oILv6Dc2whMzkdekCwWr8X6tjjuCgfBAJleXQ9oe3xXtYCPu6cVw2rEjyxMUTnb5Q==}
+  '@sentry/cli-darwin@2.31.2':
+    resolution: {integrity: sha512-BHA/JJXj1dlnoZQdK4efRCtHRnbBfzbIZUKAze7oRR1RfNqERI84BVUQeKateD3jWSJXQfEuclIShc61KOpbKw==}
     engines: {node: '>=10'}
     os: [darwin]
 
-  '@sentry/cli-linux-arm64@2.31.1':
-    resolution: {integrity: sha512-5Z3EpfywT2PrSxWjlyppWXavHTmxfs3WV7R70+d70HFeK821PvFLelFJxdsdQ7U0fy1wSU07lnVhsj9Hx11sRA==}
+  '@sentry/cli-linux-arm64@2.31.2':
+    resolution: {integrity: sha512-FLVKkJ/rWvPy/ka7OrUdRW63a/z8HYI1Gt8Pr6rWs50hb7YJja8lM8IO10tYmcFE/tODICsnHO9HTeUg2g2d1w==}
     engines: {node: '>=10'}
     cpu: [arm64]
     os: [linux, freebsd]
 
-  '@sentry/cli-linux-arm@2.31.1':
-    resolution: {integrity: sha512-YCz6hAGSp3nnGVZ57rSOD2hHW+cSa8PAiKAaEiinX83GEOqZbuj8fZvUSRGo1Wy667MZj+21oBHwazhcaQht7w==}
+  '@sentry/cli-linux-arm@2.31.2':
+    resolution: {integrity: sha512-W8k5mGYYZz/I/OxZH65YAK7dCkQAl+wbuoASGOQjUy5VDgqH0QJ8kGJufXvFPM+f3ZQGcKAnVsZ6tFqZXETBAw==}
     engines: {node: '>=10'}
     cpu: [arm]
     os: [linux, freebsd]
 
-  '@sentry/cli-linux-i686@2.31.1':
-    resolution: {integrity: sha512-oYH2TQTO39Xa77ovhvnMgc7fkNgaEfjpZweJL9wSciFX0gHIJuZet3KYk1XUPlJ9f+giwk3KHQ1lX5kH8DyMug==}
+  '@sentry/cli-linux-i686@2.31.2':
+    resolution: {integrity: sha512-A64QtzaPi3MYFpZ+Fwmi0mrSyXgeLJ0cWr4jdeTGrzNpeowSteKgd6tRKU+LVq0k5shKE7wdnHk+jXnoajulMA==}
     engines: {node: '>=10'}
     cpu: [x86, ia32]
     os: [linux, freebsd]
 
-  '@sentry/cli-linux-x64@2.31.1':
-    resolution: {integrity: sha512-YcDnX7FvqmjNn5xwaEn7XbaNBNZfDO8NV7AuDoSa9MH+VGHCxQAkvUlxqVjUqUMd2+l+KsjW8Jls78d7lMhSdg==}
+  '@sentry/cli-linux-x64@2.31.2':
+    resolution: {integrity: sha512-YL/r+15R4mOEiU3mzn7iFQOeFEUB6KxeKGTTrtpeOGynVUGIdq4nV5rHow5JDbIzOuBS3SpOmcIMluvo1NCh0g==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [linux, freebsd]
 
-  '@sentry/cli-win32-i686@2.31.1':
-    resolution: {integrity: sha512-8jbvuTzM1+ansQ4m1y1IocZYf2cZMtEyIT+i8oLrIH6AcVaxI9FmrTLrrxeeWQ9L6IIEc/u0RIxDNvrXV6QGBw==}
+  '@sentry/cli-win32-i686@2.31.2':
+    resolution: {integrity: sha512-Az/2bmW+TFI059RE0mSBIxTBcoShIclz7BDebmIoCkZ+retrwAzpmBnBCDAHow+Yi43utOow+3/4idGa2OxcLw==}
     engines: {node: '>=10'}
     cpu: [x86, ia32]
     os: [win32]
 
-  '@sentry/cli-win32-x64@2.31.1':
-    resolution: {integrity: sha512-OylWNw+8EVaj7ma+gGAQevMBFFVO+NBXrvPIcWjYp0E6wnsyG3uvMe89QDkps6rI7xqLWWKayx2/MBOXwROy+A==}
+  '@sentry/cli-win32-x64@2.31.2':
+    resolution: {integrity: sha512-XIzyRnJu539NhpFa+JYkotzVwv3NrZ/4GfHB/JWA2zReRvsk39jJG8D5HOmm0B9JA63QQT7Dt39RW8g3lkmb6w==}
     engines: {node: '>=10'}
     cpu: [x64]
     os: [win32]
@@ -6685,8 +6685,8 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
-  '@sentry/cli@2.31.1':
-    resolution: {integrity: sha512-8HT+G3BO7To4AnEDUK+y4TfQvY0xjZsW68Lxr6PTzrqqTn54NEhs1MARS+C/1lV85J9zo5hqc/Ei2slu6B2EOw==}
+  '@sentry/cli@2.31.2':
+    resolution: {integrity: sha512-2aKyUx6La2P+pplL8+2vO67qJ+c1C79KYWAyQBE0JIT5kvKK9JpwtdNoK1F0/2mRpwhhYPADCz3sVIRqmL8cQQ==}
     engines: {node: '>= 10'}
     hasBin: true
 
@@ -6694,12 +6694,20 @@ packages:
     resolution: {integrity: sha512-gHPCcJobbMkk0VR18J65WYQTt3ED4qC6X9lHKp27Ddt63E+MDGkG6lvYBU1LS8cV7CdyBGC1XXDCfor61GvLsA==}
     engines: {node: '>=8'}
 
+  '@sentry/core@7.113.0':
+    resolution: {integrity: sha512-pg75y3C5PG2+ur27A0Re37YTCEnX0liiEU7EOxWDGutH17x3ySwlYqLQmZsFZTSnvzv7t3MGsNZ8nT5O0746YA==}
+    engines: {node: '>=8'}
+
   '@sentry/integrations@7.112.2':
     resolution: {integrity: sha512-ioC2yyU6DqtLkdmWnm87oNvdn2+9oKctJeA4t+jkS6JaJ10DcezjCwiLscX4rhB9aWJV3IWF7Op0O6K3w0t2Hg==}
     engines: {node: '>=8'}
 
-  '@sentry/nextjs@7.112.2':
-    resolution: {integrity: sha512-cXxhNdvDRNg15D1fF0eo0AliRHj3eeiG1kpapKKr9rEDsVA+vRHquOyWf18X956gw5A81Y6s/BotBEWbaimioQ==}
+  '@sentry/integrations@7.113.0':
+    resolution: {integrity: sha512-w0sspGBQ+6+V/9bgCkpuM3CGwTYoQEVeTW6iNebFKbtN7MrM3XsGAM9I2cW1jVxFZROqCBPFtd2cs5n0j14aAg==}
+    engines: {node: '>=8'}
+
+  '@sentry/nextjs@7.113.0':
+    resolution: {integrity: sha512-lI5iJfbAC3dSakwq5+/JP58mLftxlDPPeY5ttcIuSHmNV/oobETJFTbWRIojUWYYn0E+Eea2OSdY5jPqxI7+iA==}
     engines: {node: '>=8'}
     peerDependencies:
       next: ^10.0.8 || ^11.0 || ^12.0 || ^13.0 || ^14.0
@@ -6709,34 +6717,42 @@ packages:
       webpack:
         optional: true
 
-  '@sentry/node@7.112.2':
-    resolution: {integrity: sha512-MNzkqER8jc2xOS3ArkCLH5hakzu15tcjeC7qjU7rQ1Ms4WuV+MG0docSRESux0/p23Qjzf9tZOc8C5Eq+Sxduw==}
+  '@sentry/node@7.113.0':
+    resolution: {integrity: sha512-Vam4Ia0I9fhVw8GJOzcLP7MiiHJSKl8L9LzLMMLG3+2/dFnDQOyS7sOfk3GqgpwzqPiusP9vFu7CFSX7EMQbTg==}
     engines: {node: '>=8'}
 
-  '@sentry/react@7.112.2':
-    resolution: {integrity: sha512-Xf6mc1+/ncCk6ZFIj0oT4or2o0UxqqJZk09U/21RYNvVCn7+DNyCdJZ/F5wXWgPqVE67PrjydLLYaQWiqLibiA==}
+  '@sentry/react@7.113.0':
+    resolution: {integrity: sha512-+zVPz+h5Wydq4ntekw3/dXq5jeHIpZoQ2iqhB96PA9Y94JIq178i/xIP204S1h6rN7cmWAqtR93vnPKdxnlUbQ==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
 
-  '@sentry/replay@7.112.2':
-    resolution: {integrity: sha512-7Ns/8D54WPsht1nlVj93Inf6rXyve2AZoibYN0YfcM2w3lI4NO51gPPHJU0lFEfMwzwK4ZBJWzOeW9098a+uEg==}
+  '@sentry/replay@7.113.0':
+    resolution: {integrity: sha512-UD2IaphOWKFdeGR+ZiaNAQ+wFsnwbJK6PNwcW6cHmWKv9COlKufpFt06lviaqFZ8jmNrM4H+r+R8YVTrqCuxgg==}
     engines: {node: '>=12'}
 
-  '@sentry/tracing@7.112.2':
-    resolution: {integrity: sha512-Dw641xm7seI+f3SAbKmSi6RNIpsLPrNPxPQbUhJpfDmJQOY6Rl00XANKAwW+QEiSqukGko1Evo3kU1NDxVmRgA==}
+  '@sentry/tracing@7.113.0':
+    resolution: {integrity: sha512-eE7fcIqcIpLAdgt2GKzdHobK802Jf66qo3MywoCAj0BaVuSZpGi4SET/Fcb+ca/s7x65uoaOi1EnmF7SsZpdcA==}
     engines: {node: '>=8'}
 
   '@sentry/types@7.112.2':
     resolution: {integrity: sha512-kCMLt7yhY5OkWE9MeowlTNmox9pqDxcpvqguMo4BDNZM5+v9SEb1AauAdR78E1a1V8TyCzjBD7JDfXWhvpYBcQ==}
     engines: {node: '>=8'}
 
+  '@sentry/types@7.113.0':
+    resolution: {integrity: sha512-PJbTbvkcPu/LuRwwXB1He8m+GjDDLKBtu3lWg5xOZaF5IRdXQU2xwtdXXsjge4PZR00tF7MO7X8ZynTgWbYaew==}
+    engines: {node: '>=8'}
+
   '@sentry/utils@7.112.2':
     resolution: {integrity: sha512-OjLh0hx0t1EcL4ZIjf+4svlmmP+tHUDGcr5qpFWH78tjmkPW4+cqPuZCZfHSuWcDdeiaXi8TnYoVRqDcJKK/eQ==}
     engines: {node: '>=8'}
 
-  '@sentry/vercel-edge@7.112.2':
-    resolution: {integrity: sha512-19fyAAw7+wvgtpLsaLijvqvdPpf94oPmu9PRyvxM8azVeAF2YUtVo2XZkTKuxZwxAmouuKCNLgwtSJ51YbLSIw==}
+  '@sentry/utils@7.113.0':
+    resolution: {integrity: sha512-nzKsErwmze1mmEsbW2AwL2oB+I5v6cDEJY4sdfLekA4qZbYZ8pV5iWza6IRl4XfzGTE1qpkZmEjPU9eyo0yvYw==}
+    engines: {node: '>=8'}
+
+  '@sentry/vercel-edge@7.113.0':
+    resolution: {integrity: sha512-cHbo+v7ECRNluVWMJZqsNelf3JrV5Qw/aRH4Dw74IdErCYROAQx1pEuE7BnM3rIEgOQAMR/J/Fu7GFGecSbzTA==}
     engines: {node: '>=8'}
 
   '@sentry/webpack-plugin@1.21.0':
@@ -19582,10 +19598,10 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.2
 
-  '@envelop/sentry@7.1.1(@envelop/core@5.0.0)(@sentry/node@7.112.2)(graphql@16.8.1)':
+  '@envelop/sentry@7.1.1(@envelop/core@5.0.0)(@sentry/node@7.113.0)(graphql@16.8.1)':
     dependencies:
       '@envelop/core': 5.0.0
-      '@sentry/node': 7.112.2
+      '@sentry/node': 7.113.0
       graphql: 16.8.1
       tslib: 2.6.2
 
@@ -19993,7 +20009,7 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-codegen/cli@5.0.2(@babel/core@7.22.9)(@types/node@20.12.8)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)':
+  '@graphql-codegen/cli@5.0.2(@babel/core@7.24.0)(@types/node@20.12.8)(encoding@0.1.13)(enquirer@2.3.6)(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
       '@babel/generator': 7.23.6
       '@babel/template': 7.22.15
@@ -20003,7 +20019,7 @@ snapshots:
       '@graphql-codegen/plugin-helpers': 5.0.3(graphql@16.8.1)
       '@graphql-tools/apollo-engine-loader': 8.0.0(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-tools/code-file-loader': 8.1.0(graphql@16.8.1)
-      '@graphql-tools/git-loader': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/git-loader': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/github-loader': 8.0.0(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-tools/graphql-file-loader': 8.0.0(graphql@16.8.1)
       '@graphql-tools/json-file-loader': 8.0.0(graphql@16.8.1)
@@ -20197,29 +20213,6 @@ snapshots:
       - encoding
       - supports-color
 
-  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.22.9)(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)':
-    dependencies:
-      '@babel/code-frame': 7.21.4
-      '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      chalk: 4.1.2
-      debug: 4.3.4(supports-color@8.1.1)
-      fast-glob: 3.2.12
-      graphql: 16.8.1
-      graphql-config: 4.5.0(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)
-      graphql-depth-limit: 1.1.0(graphql@16.8.1)
-      lodash.lowercase: 4.3.0
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@types/node'
-      - bufferutil
-      - cosmiconfig-toml-loader
-      - encoding
-      - supports-color
-      - utf-8-validate
-
   '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=n437g5o7zq7pnxdxldn52uql2q)(@babel/core@7.24.0)(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)':
     dependencies:
       '@babel/code-frame': 7.21.4
@@ -20272,7 +20265,7 @@ snapshots:
       '@graphql-inspector/graphql-loader': 4.0.2(graphql@16.8.1)
       '@graphql-inspector/introspect-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/json-loader': 4.0.2(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-inspector/serve-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/similar-command': 4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)
       '@graphql-inspector/url-loader': 4.0.2(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)
@@ -20299,7 +20292,7 @@ snapshots:
   '@graphql-inspector/commands@4.0.3(@graphql-inspector/config@4.0.2(graphql@16.8.1))(@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1))(graphql@16.8.1)(yargs@17.7.2)':
     dependencies:
       '@graphql-inspector/config': 4.0.2(graphql@16.8.1)
-      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
+      '@graphql-inspector/loaders': 4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
       yargs: 17.7.2
@@ -20402,10 +20395,10 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-inspector/loaders@4.0.3(@babel/core@7.22.9)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-inspector/loaders@4.0.3(@babel/core@7.24.0)(@graphql-inspector/config@4.0.2(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       '@graphql-inspector/config': 4.0.2(graphql@16.8.1)
-      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/code-file-loader': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/load': 8.0.0(graphql@16.8.1)
       '@graphql-tools/utils': 10.0.3(graphql@16.8.1)
       graphql: 16.8.1
@@ -20514,18 +20507,6 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.22.9)(graphql@16.8.1)':
-    dependencies:
-      '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.22.9)(graphql@16.8.1)
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      globby: 11.1.0
-      graphql: 16.8.1
-      tslib: 2.6.2
-      unixify: 1.0.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-
   '@graphql-tools/code-file-loader@7.3.23(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 7.5.2(@babel/core@7.24.0)(graphql@16.8.1)
@@ -20541,6 +20522,18 @@ snapshots:
   '@graphql-tools/code-file-loader@8.0.1(@babel/core@7.22.9)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.22.9)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      globby: 11.1.0
+      graphql: 16.8.1
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
+  '@graphql-tools/code-file-loader@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       globby: 11.1.0
       graphql: 16.8.1
@@ -20729,6 +20722,19 @@ snapshots:
       - '@babel/core'
       - supports-color
 
+  '@graphql-tools/git-loader@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-tools/graphql-tag-pluck': 8.0.1(@babel/core@7.24.0)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      is-glob: 4.0.3
+      micromatch: 4.0.5
+      tslib: 2.6.2
+      unixify: 1.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
   '@graphql-tools/github-loader@8.0.0(@types/node@20.12.8)(encoding@0.1.13)(graphql@16.8.1)':
     dependencies:
       '@ardatan/sync-fetch': 0.0.1(encoding@0.1.13)
@@ -20762,19 +20768,6 @@ snapshots:
       tslib: 2.6.2
       unixify: 1.0.0
 
-  '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.22.9)(graphql@16.8.1)':
-    dependencies:
-      '@babel/parser': 7.24.0
-      '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.22.9)
-      '@babel/traverse': 7.24.0
-      '@babel/types': 7.24.0
-      '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      graphql: 16.8.1
-      tslib: 2.6.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-
   '@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.24.0)(graphql@16.8.1)':
     dependencies:
       '@babel/parser': 7.24.0
@@ -20792,6 +20785,19 @@ snapshots:
     dependencies:
       '@babel/parser': 7.24.0
       '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.22.9)
+      '@babel/traverse': 7.24.0
+      '@babel/types': 7.24.0
+      '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - '@babel/core'
+      - supports-color
+
+  '@graphql-tools/graphql-tag-pluck@8.0.1(@babel/core@7.24.0)(graphql@16.8.1)':
+    dependencies:
+      '@babel/parser': 7.24.0
+      '@babel/plugin-syntax-import-assertions': 7.23.3(@babel/core@7.24.0)
       '@babel/traverse': 7.24.0
       '@babel/types': 7.24.0
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
@@ -23885,55 +23891,55 @@ snapshots:
 
   '@rushstack/eslint-patch@1.6.1': {}
 
-  '@sentry-internal/feedback@7.112.2':
+  '@sentry-internal/feedback@7.113.0':
     dependencies:
-      '@sentry/core': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry/core': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
-  '@sentry-internal/replay-canvas@7.112.2':
+  '@sentry-internal/replay-canvas@7.113.0':
     dependencies:
-      '@sentry/core': 7.112.2
-      '@sentry/replay': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry/core': 7.113.0
+      '@sentry/replay': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
-  '@sentry-internal/tracing@7.112.2':
+  '@sentry-internal/tracing@7.113.0':
     dependencies:
-      '@sentry/core': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry/core': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
-  '@sentry/browser@7.112.2':
+  '@sentry/browser@7.113.0':
     dependencies:
-      '@sentry-internal/feedback': 7.112.2
-      '@sentry-internal/replay-canvas': 7.112.2
-      '@sentry-internal/tracing': 7.112.2
-      '@sentry/core': 7.112.2
-      '@sentry/integrations': 7.112.2
-      '@sentry/replay': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry-internal/feedback': 7.113.0
+      '@sentry-internal/replay-canvas': 7.113.0
+      '@sentry-internal/tracing': 7.113.0
+      '@sentry/core': 7.113.0
+      '@sentry/integrations': 7.113.0
+      '@sentry/replay': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
-  '@sentry/cli-darwin@2.31.1':
+  '@sentry/cli-darwin@2.31.2':
     optional: true
 
-  '@sentry/cli-linux-arm64@2.31.1':
+  '@sentry/cli-linux-arm64@2.31.2':
     optional: true
 
-  '@sentry/cli-linux-arm@2.31.1':
+  '@sentry/cli-linux-arm@2.31.2':
     optional: true
 
-  '@sentry/cli-linux-i686@2.31.1':
+  '@sentry/cli-linux-i686@2.31.2':
     optional: true
 
-  '@sentry/cli-linux-x64@2.31.1':
+  '@sentry/cli-linux-x64@2.31.2':
     optional: true
 
-  '@sentry/cli-win32-i686@2.31.1':
+  '@sentry/cli-win32-i686@2.31.2':
     optional: true
 
-  '@sentry/cli-win32-x64@2.31.1':
+  '@sentry/cli-win32-x64@2.31.2':
     optional: true
 
   '@sentry/cli@1.77.1(encoding@0.1.13)':
@@ -23948,7 +23954,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/cli@2.31.1(encoding@0.1.13)':
+  '@sentry/cli@2.31.2(encoding@0.1.13)':
     dependencies:
       https-proxy-agent: 5.0.1
       node-fetch: 2.6.12(encoding@0.1.13)
@@ -23956,13 +23962,13 @@ snapshots:
       proxy-from-env: 1.1.0
       which: 2.0.2
     optionalDependencies:
-      '@sentry/cli-darwin': 2.31.1
-      '@sentry/cli-linux-arm': 2.31.1
-      '@sentry/cli-linux-arm64': 2.31.1
-      '@sentry/cli-linux-i686': 2.31.1
-      '@sentry/cli-linux-x64': 2.31.1
-      '@sentry/cli-win32-i686': 2.31.1
-      '@sentry/cli-win32-x64': 2.31.1
+      '@sentry/cli-darwin': 2.31.2
+      '@sentry/cli-linux-arm': 2.31.2
+      '@sentry/cli-linux-arm64': 2.31.2
+      '@sentry/cli-linux-i686': 2.31.2
+      '@sentry/cli-linux-x64': 2.31.2
+      '@sentry/cli-win32-i686': 2.31.2
+      '@sentry/cli-win32-x64': 2.31.2
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -23972,6 +23978,11 @@ snapshots:
       '@sentry/types': 7.112.2
       '@sentry/utils': 7.112.2
 
+  '@sentry/core@7.113.0':
+    dependencies:
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
+
   '@sentry/integrations@7.112.2':
     dependencies:
       '@sentry/core': 7.112.2
@@ -23979,16 +23990,23 @@ snapshots:
       '@sentry/utils': 7.112.2
       localforage: 1.10.0
 
-  '@sentry/nextjs@7.112.2(encoding@0.1.13)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.20.2))':
+  '@sentry/integrations@7.113.0':
+    dependencies:
+      '@sentry/core': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
+      localforage: 1.10.0
+
+  '@sentry/nextjs@7.113.0(encoding@0.1.13)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.20.2))':
     dependencies:
       '@rollup/plugin-commonjs': 24.0.0(rollup@2.78.0)
-      '@sentry/core': 7.112.2
-      '@sentry/integrations': 7.112.2
-      '@sentry/node': 7.112.2
-      '@sentry/react': 7.112.2(react@18.3.1)
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
-      '@sentry/vercel-edge': 7.112.2
+      '@sentry/core': 7.113.0
+      '@sentry/integrations': 7.113.0
+      '@sentry/node': 7.113.0
+      '@sentry/react': 7.113.0(react@18.3.1)
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
+      '@sentry/vercel-edge': 7.113.0
       '@sentry/webpack-plugin': 1.21.0(encoding@0.1.13)
       chalk: 3.0.0
       next: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -24002,47 +24020,53 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/node@7.112.2':
+  '@sentry/node@7.113.0':
     dependencies:
-      '@sentry-internal/tracing': 7.112.2
-      '@sentry/core': 7.112.2
-      '@sentry/integrations': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry-internal/tracing': 7.113.0
+      '@sentry/core': 7.113.0
+      '@sentry/integrations': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
-  '@sentry/react@7.112.2(react@18.3.1)':
+  '@sentry/react@7.113.0(react@18.3.1)':
     dependencies:
-      '@sentry/browser': 7.112.2
-      '@sentry/core': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry/browser': 7.113.0
+      '@sentry/core': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
 
-  '@sentry/replay@7.112.2':
+  '@sentry/replay@7.113.0':
     dependencies:
-      '@sentry-internal/tracing': 7.112.2
-      '@sentry/core': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry-internal/tracing': 7.113.0
+      '@sentry/core': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
-  '@sentry/tracing@7.112.2':
+  '@sentry/tracing@7.113.0':
     dependencies:
-      '@sentry-internal/tracing': 7.112.2
+      '@sentry-internal/tracing': 7.113.0
 
   '@sentry/types@7.112.2': {}
+
+  '@sentry/types@7.113.0': {}
 
   '@sentry/utils@7.112.2':
     dependencies:
       '@sentry/types': 7.112.2
 
-  '@sentry/vercel-edge@7.112.2':
+  '@sentry/utils@7.113.0':
     dependencies:
-      '@sentry-internal/tracing': 7.112.2
-      '@sentry/core': 7.112.2
-      '@sentry/integrations': 7.112.2
-      '@sentry/types': 7.112.2
-      '@sentry/utils': 7.112.2
+      '@sentry/types': 7.113.0
+
+  '@sentry/vercel-edge@7.113.0':
+    dependencies:
+      '@sentry-internal/tracing': 7.113.0
+      '@sentry/core': 7.113.0
+      '@sentry/integrations': 7.113.0
+      '@sentry/types': 7.113.0
+      '@sentry/utils': 7.113.0
 
   '@sentry/webpack-plugin@1.21.0(encoding@0.1.13)':
     dependencies:
@@ -25464,16 +25488,16 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@6.5.3(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))':
+  '@theguild/components@6.5.3(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@next/bundle-analyzer': 13.4.2
       clsx: 2.1.0
       fuzzy: 0.1.3
-      next: 14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-videos: 1.5.0(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
-      nextra: 3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
-      nextra-theme-docs: 3.0.0-alpha.22(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      nextra: 3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
+      nextra-theme-docs: 3.0.0-alpha.22(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-paginate: 8.2.0(react@18.3.1)
@@ -33297,17 +33321,17 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  next-sitemap@4.2.3(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
+  next-sitemap@4.2.3(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.6
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  next-themes@0.2.1(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next-themes@0.2.1(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      next: 14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -33318,32 +33342,6 @@ snapshots:
       file-loader: 4.3.0(webpack@5.89.0(@swc/core@1.5.2(@swc/helpers@0.5.5))(esbuild@0.19.11))
     transitivePeerDependencies:
       - webpack
-
-  next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@next/env': 14.2.3
-      '@swc/helpers': 0.5.5
-      busboy: 1.6.0
-      caniuse-lite: 1.0.30001600
-      graceful-fs: 4.2.11
-      postcss: 8.4.31
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(@babel/core@7.22.9)(react@18.3.1)
-    optionalDependencies:
-      '@next/swc-darwin-arm64': 14.2.3
-      '@next/swc-darwin-x64': 14.2.3
-      '@next/swc-linux-arm64-gnu': 14.2.3
-      '@next/swc-linux-arm64-musl': 14.2.3
-      '@next/swc-linux-x64-gnu': 14.2.3
-      '@next/swc-linux-x64-musl': 14.2.3
-      '@next/swc-win32-arm64-msvc': 14.2.3
-      '@next/swc-win32-ia32-msvc': 14.2.3
-      '@next/swc-win32-x64-msvc': 14.2.3
-      '@opentelemetry/api': 1.8.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - babel-plugin-macros
 
   next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -33371,7 +33369,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  nextra-theme-docs@3.0.0-alpha.22(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  nextra-theme-docs@3.0.0-alpha.22(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@headlessui/react': 1.7.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@popperjs/core': 2.11.8
@@ -33380,15 +33378,15 @@ snapshots:
       flexsearch: 0.7.43
       focus-visible: 5.2.0
       intersection-observer: 0.12.2
-      next: 14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      next-themes: 0.2.1(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      nextra: 3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
+      next: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next-themes: 0.2.1(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      nextra: 3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       scroll-into-view-if-needed: 3.1.0
       zod: 3.23.5
 
-  nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5):
+  nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5):
     dependencies:
       '@headlessui/react': 1.7.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mdx-js/mdx': 3.0.1
@@ -33406,7 +33404,7 @@ snapshots:
       gray-matter: 4.0.3
       hast-util-to-estree: 3.1.0
       katex: 0.16.9
-      next: 14.2.3(@babel/core@7.22.9)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       p-limit: 4.0.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -36456,13 +36454,6 @@ snapshots:
     dependencies:
       hey-listen: 1.0.8
       tslib: 2.6.2
-
-  styled-jsx@5.1.1(@babel/core@7.22.9)(react@18.3.1):
-    dependencies:
-      client-only: 0.0.1
-      react: 18.3.1
-    optionalDependencies:
-      '@babel/core': 7.22.9
 
   styled-jsx@5.1.1(@babel/core@7.24.0)(react@18.3.1):
     dependencies:
