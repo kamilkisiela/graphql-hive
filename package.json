@@ -68,7 +68,7 @@
     "@graphql-inspector/cli": "4.0.3",
     "@manypkg/get-packages": "2.2.1",
     "@next/eslint-plugin-next": "14.2.3",
-    "@sentry/cli": "2.31.1",
+    "@sentry/cli": "2.31.2",
     "@swc/core": "1.5.2",
     "@theguild/eslint-config": "0.11.8",
     "@theguild/prettier-config": "2.0.6",
