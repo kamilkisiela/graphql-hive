@@ -1788,6 +1788,9 @@ importers:
       pino-http:
         specifier: 9.0.0
         version: 9.0.0
+      quick-stable-stringify:
+        specifier: 0.1.8
+        version: 0.1.8
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -1918,6 +1921,9 @@ importers:
       '@types/react-window':
         specifier: 1.8.8
         version: 1.8.8
+      '@types/sharedworker':
+        specifier: 0.0.114
+        version: 0.0.114
       autoprefixer:
         specifier: 10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -7964,6 +7970,9 @@ packages:
 
   '@types/service-worker-mock@2.0.4':
     resolution: {integrity: sha512-MEBT2eiqYfhxjqYm/oAf2AvKLbPTPwJJAYrMdheKnGyz1yG9XBRfxCzi93h27qpSvI7jOYfXqFLVMLBXFDqo4A==}
+
+  '@types/sharedworker@0.0.114':
+    resolution: {integrity: sha512-Vc53fZHV8aAWs6fW299AexmDvlpnPKP1wPYWn0oyGddWxMoVysFklTwtxvcLwvyCZcBDP2Rux2xc6vq9ItlSkw==}
 
   '@types/shimmer@1.0.5':
     resolution: {integrity: sha512-9Hp0ObzwwO57DpLFF0InUjUm/II8GmKAvzbefxQTihCb7KI6yc9yzf0nLc4mVdby5N4DRCgQM2wCup9KTieeww==}
@@ -14885,6 +14894,10 @@ packages:
 
   quick-lru@5.1.1:
     resolution: {integrity: sha512-WuyALRjWPDGtt/wzJiadO5AXY+8hZ80hVpe6MyivgraREW751X3SbhRvG3eLKOYN+8VEvqLcf3wdnt44Z4S4SA==}
+    engines: {node: '>=10'}
+
+  quick-stable-stringify@0.1.8:
+    resolution: {integrity: sha512-RL1Y/aC+JZ2CWS/BSacWi07he5YpPubjxnuhUPs4koFELpqyRseiMkve+tzPZYIJXl6nz+XM92gZPVrGrgHKqw==}
     engines: {node: '>=10'}
 
   railroad-diagrams@1.0.0:
@@ -26126,6 +26139,8 @@ snapshots:
 
   '@types/service-worker-mock@2.0.4': {}
 
+  '@types/sharedworker@0.0.114': {}
+
   '@types/shimmer@1.0.5': {}
 
   '@types/sinonjs__fake-timers@8.1.1': {}
@@ -35065,6 +35080,8 @@ snapshots:
   quick-lru@4.0.1: {}
 
   quick-lru@5.1.1: {}
+
+  quick-stable-stringify@0.1.8: {}
 
   railroad-diagrams@1.0.0: {}
 

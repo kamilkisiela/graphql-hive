@@ -79,7 +79,7 @@ export function OIDCIntegrationSection(props: {
                 void router.push(openEditModalLink);
               }}
             >
-              <KeyIcon className="mr-2 h-4 w-4" />
+              <KeyIcon className="mr-2 size-4" />
               Manage OIDC Provider (
               {extractDomain(organization.oidcIntegration.authorizationEndpoint)})
             </Link>

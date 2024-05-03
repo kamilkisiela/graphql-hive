@@ -6,6 +6,14 @@ import schema from '@/gql/schema';
 import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
+import type {
+  WorkerCloseEvent,
+  WorkerConfigurationEvent,
+  WorkerPongEvent,
+  WorkerSendMessage,
+  WorkerSubscriptionSubscribeEvent,
+  WorkerSubscriptionUnsubscribeEvent,
+} from './graphql-subscriptions-worker';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
 
@@ -21,6 +29,64 @@ const sseClient = createSSEClient({
 });
 
 const usePersistedOperations = env.graphql.persistedOperations;
+
+let worker: SharedWorker | null = null;
+
+const subscriptions = new Map<
+  string,
+  {
+    close: () => void;
+    push: (data: any) => void;
+  }
+>();
+
+if (globalThis.window?.SharedWorker) {
+  worker = new SharedWorker(new URL('./graphql-subscriptions-worker', import.meta.url), {
+    name: 'hive-graphql-subscriptions-worker',
+    credentials: 'include',
+  });
+
+  worker.port.addEventListener('message', event => {
+    const data = JSON.parse(event.data) as WorkerSendMessage;
+    switch (data.type) {
+      case 'next': {
+        subscriptions.get(data.id)?.push(data.result);
+        break;
+      }
+      case 'complete': {
+        subscriptions.get(data.id)?.close();
+        subscriptions.delete(data.id);
+        break;
+      }
+      case 'ping': {
+        worker?.port.postMessage(JSON.stringify({ type: 'pong' } as WorkerPongEvent));
+        break;
+      }
+    }
+  });
+
+  /**
+   * Note:
+   * Technically the unload can be canceled/prevented by another event listener.
+   * In praxis we don't do this and probably shouldn't do it as it is bad UX.
+   * If we ever decide to do it we need to change the logic here. 😇
+   */
+  globalThis.addEventListener('beforeunload', () => {
+    worker?.port.postMessage(
+      JSON.stringify({
+        type: 'close',
+      } as WorkerCloseEvent),
+    );
+  });
+
+  worker.port.start();
+  worker.port.postMessage(
+    JSON.stringify({
+      type: 'configuration',
+      url: SERVER_BASE_PATH,
+    } satisfies WorkerConfigurationEvent),
+  );
+}
 
 export const urqlClient = createClient({
   url: SERVER_BASE_PATH,
@@ -124,19 +190,56 @@ export const urqlClient = createClient({
     subscriptionExchange({
       forwardSubscription(operation) {
         return {
-          subscribe: sink => {
-            const dispose = sseClient.subscribe(
-              {
-                // @ts-expect-error SSE client expects string, we pass undefined 😇
-                query: usePersistedOperations ? undefined : operation.query,
-                operationName: operation.operationName,
-                variables: operation.variables,
-                extensions: operation.extensions,
-              },
-              sink,
+          subscribe(sink) {
+            if (!worker) {
+              const dispose = sseClient.subscribe(
+                {
+                  // @ts-expect-error SSE client expects string, we pass undefined 😇
+                  query: usePersistedOperations ? undefined : operation.query,
+                  operationName: operation.operationName,
+                  variables: operation.variables,
+                  extensions: operation.extensions,
+                },
+                sink,
+              );
+              return {
+                unsubscribe: () => dispose(),
+              };
+            }
+
+            const id = crypto.randomUUID();
+
+            worker.port.postMessage(
+              JSON.stringify({
+                type: 'subscriptionStart',
+                id,
+                graphql: {
+                  query: usePersistedOperations ? undefined : operation.query,
+                  operationName: operation.operationName,
+                  variables: operation.variables,
+                  extensions: operation.extensions,
+                },
+              } as WorkerSubscriptionSubscribeEvent),
             );
+
+            subscriptions.set(id, {
+              close: () => {
+                sink.complete();
+              },
+              push: data => {
+                sink.next(data);
+              },
+            });
+
             return {
-              unsubscribe: () => dispose(),
+              unsubscribe: () => {
+                worker?.port.postMessage(
+                  JSON.stringify({
+                    type: 'subscriptionEnd',
+                    id,
+                  } as WorkerSubscriptionUnsubscribeEvent),
+                );
+              },
             };
           },
         };
