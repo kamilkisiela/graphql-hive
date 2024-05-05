@@ -336,8 +336,8 @@ importers:
         specifier: 1.6.0
         version: 1.6.0(@types/node@20.12.8)(less@4.2.0)(terser@5.20.0)
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/libraries/apollo:
     dependencies:
@@ -434,8 +434,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
     devDependencies:
       '@types/env-ci':
         specifier: 3.1.4
@@ -622,8 +622,8 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/api:
     dependencies:
@@ -782,11 +782,11 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
       zod-validation-error:
         specifier: 3.2.0
-        version: 3.2.0(zod@3.23.5)
+        version: 3.2.0(zod@3.23.6)
 
   packages/services/broker-worker:
     devDependencies:
@@ -818,8 +818,8 @@ importers:
         specifier: 0.1.15
         version: 0.1.15
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/cdn-worker:
     devDependencies:
@@ -857,8 +857,8 @@ importers:
         specifier: 3.4.0
         version: 3.4.0
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/emails:
     devDependencies:
@@ -911,8 +911,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/external-composition/federation-2:
     devDependencies:
@@ -935,8 +935,8 @@ importers:
         specifier: ^7.17.0
         version: 7.17.0
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/policy:
     devDependencies:
@@ -974,11 +974,11 @@ importers:
         specifier: 11.0.0
         version: 11.0.0
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
       zod-validation-error:
         specifier: 3.2.0
-        version: 3.2.0(zod@3.23.5)
+        version: 3.2.0(zod@3.23.6)
 
   packages/services/rate-limit:
     devDependencies:
@@ -1019,8 +1019,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/schema:
     devDependencies:
@@ -1082,8 +1082,8 @@ importers:
         specifier: 11.0.0
         version: 11.0.0
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/server:
     devDependencies:
@@ -1202,8 +1202,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/service-common:
     dependencies:
@@ -1272,8 +1272,8 @@ importers:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/storage:
     devDependencies:
@@ -1332,8 +1332,8 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/stripe-billing:
     devDependencies:
@@ -1371,8 +1371,8 @@ importers:
         specifier: 14.25.0
         version: 14.25.0
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/tokens:
     devDependencies:
@@ -1419,8 +1419,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/usage:
     devDependencies:
@@ -1467,8 +1467,8 @@ importers:
         specifier: 8.0.2
         version: 8.0.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/usage-common:
     devDependencies:
@@ -1506,8 +1506,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/usage-ingestor:
     devDependencies:
@@ -1551,8 +1551,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/services/webhooks:
     devDependencies:
@@ -1590,8 +1590,8 @@ importers:
         specifier: 2.6.2
         version: 2.6.2
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
 
   packages/web/app:
     dependencies:
@@ -1851,8 +1851,8 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
       zod:
-        specifier: 3.23.5
-        version: 3.23.5
+        specifier: 3.23.6
+        version: 3.23.6
     devDependencies:
       '@graphql-codegen/client-preset-swc-plugin':
         specifier: 0.2.0
@@ -17380,8 +17380,8 @@ packages:
     peerDependencies:
       zod: ^3.18.0
 
-  zod@3.23.5:
-    resolution: {integrity: sha512-fkwiq0VIQTksNNA131rDOsVJcns0pfVUjHzLrNBiF/O/Xxb5lQyEXkhZWcJ7npWsYlvs+h0jFWXXy4X46Em1JA==}
+  zod@3.23.6:
+    resolution: {integrity: sha512-RTHJlZhsRbuA8Hmp/iNL7jnfc4nZishjsanDAfEY1QpDQZCahUp3xDzl+zfweE9BklxMUcgBgS1b7Lvie/ZVwA==}
 
   zrender@5.5.0:
     resolution: {integrity: sha512-O3MilSi/9mwoovx77m6ROZM7sXShR/O/JIanvzTwjN3FORfLSr81PsUGd7jlaYOeds9d8tw82oP44+3YucVo+w==}
@@ -26852,7 +26852,7 @@ snapshots:
       tslib: 2.6.2
       typescript: 5.4.5
       yargs: 17.7.2
-      zod: 3.23.5
+      zod: 3.23.6
 
   body-parser@1.20.2:
     dependencies:
@@ -33264,7 +33264,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       scroll-into-view-if-needed: 3.1.0
-      zod: 3.23.5
+      zod: 3.23.6
 
   nextra@3.0.0-alpha.22(@types/react@18.3.1)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5):
     dependencies:
@@ -33302,8 +33302,8 @@ snapshots:
       unist-util-remove: 4.0.0
       unist-util-visit: 5.0.0
       yaml: 2.3.4
-      zod: 3.23.5
-      zod-validation-error: 1.5.0(zod@3.23.5)
+      zod: 3.23.6
+      zod-validation-error: 1.5.0(zod@3.23.6)
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -35970,7 +35970,7 @@ snapshots:
       roarr: 7.14.3
       serialize-error: 8.1.0
       through2: 4.0.2
-      zod: 3.23.5
+      zod: 3.23.6
     transitivePeerDependencies:
       - pg-native
 
@@ -37933,15 +37933,15 @@ snapshots:
 
   zen-observable@0.8.15: {}
 
-  zod-validation-error@1.5.0(zod@3.23.5):
+  zod-validation-error@1.5.0(zod@3.23.6):
     dependencies:
-      zod: 3.23.5
+      zod: 3.23.6
 
-  zod-validation-error@3.2.0(zod@3.23.5):
+  zod-validation-error@3.2.0(zod@3.23.6):
     dependencies:
-      zod: 3.23.5
+      zod: 3.23.6
 
-  zod@3.23.5: {}
+  zod@3.23.6: {}
 
   zrender@5.5.0:
     dependencies:
