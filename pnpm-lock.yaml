@@ -586,8 +586,8 @@ importers:
         specifier: 20.12.8
         version: 20.12.8
       '@types/pg':
-        specifier: 8.11.5
-        version: 8.11.5
+        specifier: 8.11.6
+        version: 8.11.6
       '@whatwg-node/fetch':
         specifier: 0.9.17
         version: 0.9.17
@@ -1299,8 +1299,8 @@ importers:
         specifier: 20.12.8
         version: 20.12.8
       '@types/pg':
-        specifier: 8.11.5
-        version: 8.11.5
+        specifier: 8.11.6
+        version: 8.11.6
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -7769,8 +7769,8 @@ packages:
   '@types/pg-pool@2.0.4':
     resolution: {integrity: sha512-qZAvkv1K3QbmHHFYSNRYPkRjOWRLBYrL4B9c+wG0GSVGBw0NtJwPcgx/DSddeDJvRGMHCEQ4VMEVfuJ/0gZ3XQ==}
 
-  '@types/pg@8.11.5':
-    resolution: {integrity: sha512-2xMjVviMxneZHDHX5p5S6tsRRs7TpDHeeK7kTTMe/kAC/mRRNjWHjZg0rkiY+e17jXSZV3zJYDxXV8Cy72/Vuw==}
+  '@types/pg@8.11.6':
+    resolution: {integrity: sha512-/2WmmBXHLsfRqzfHW7BNZ8SbYzE8OSk7i3WjFYvfgRHj7S1xj+16Je5fUKv3lVdVzk/zn9TXOqf+avFCFIE0yQ==}
 
   '@types/pg@8.6.1':
     resolution: {integrity: sha512-1Kc4oAGzAl7uqUStZCDvaLFqZrW9qWSjXOmBfdgyBP5La7Us6Mg4GBvRlSoaZMhQF/zSj1C8CtKMBkoiT8eL8w==}
@@ -25756,9 +25756,9 @@ snapshots:
 
   '@types/pg-pool@2.0.4':
     dependencies:
-      '@types/pg': 8.11.5
+      '@types/pg': 8.11.6
 
-  '@types/pg@8.11.5':
+  '@types/pg@8.11.6':
     dependencies:
       '@types/node': 20.12.8
       pg-protocol: 1.6.1
