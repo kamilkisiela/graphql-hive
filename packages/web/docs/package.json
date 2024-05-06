@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "next build && next-sitemap --config next-sitemap.config.cjs && pnpm run generate-rss",
+    "build": "pnpm run generate-rss && next build && next-sitemap --config next-sitemap.config.cjs",
     "dev": "next",
-    "generate-rss": "tsx ../../../scripts/rss-generator.ts"
+    "generate-rss": "tsx ./scripts/rss-generator.ts"
   },
   "dependencies": {
     "@next/env": "14.2.3",
