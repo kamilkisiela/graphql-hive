@@ -181,7 +181,7 @@ export class Proxy {
         timeouts: {
           'request-timeout': '60s',
           'connection-idle-timeout': '60s',
-          'stream-idle-timeout': '5m',
+          'stream-idle-timeout': '10m',
           'max-connection-duration': 'infinity',
         },
         // https://projectcontour.io/docs/1.26/config/tracing/
