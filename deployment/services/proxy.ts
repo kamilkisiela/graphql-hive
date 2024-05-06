@@ -42,13 +42,13 @@ export function deployProxy({
         name: 'app',
         path: '/',
         service: app.service,
-        timeoutInSeconds: 60,
+        timeoutInSeconds: '60s',
       },
       {
         name: 'server',
         path: '/server',
         service: graphql.service,
-        timeoutInSeconds: 60,
+        timeoutInSeconds: '60s',
       },
       {
         name: 'registry-api-health',
@@ -61,7 +61,7 @@ export function deployProxy({
         path: '/registry',
         customRewrite: '/graphql',
         service: graphql.service,
-        timeoutInSeconds: 60,
+        timeoutInSeconds: '60s',
         retriable: true,
       },
       {
@@ -69,7 +69,17 @@ export function deployProxy({
         path: '/graphql',
         customRewrite: '/graphql',
         service: graphql.service,
-        timeoutInSeconds: 60,
+        timeoutInSeconds: '60s',
+        retriable: true,
+      },
+      {
+        name: 'graphql-api-subscriptions',
+        path: '/graphql/stream',
+        customRewrite: '/graphql',
+        service: graphql.service,
+        timeoutInSeconds: 'infinity',
+        // we send a ping every 12 seconds
+        idleInSeconds: '15s',
         retriable: true,
       },
       {
@@ -77,7 +87,7 @@ export function deployProxy({
         path: '/auth-api',
         customRewrite: '/auth-api',
         service: graphql.service,
-        timeoutInSeconds: 60,
+        timeoutInSeconds: '60s',
         retriable: true,
       },
       {

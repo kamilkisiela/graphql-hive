@@ -16,7 +16,7 @@ const SERVER_BASE_PATH = env.graphqlPublicEndpoint;
 const isSome = <T>(value: T | null | undefined): value is T => value != null;
 
 const sseClient = createSSEClient({
-  url: SERVER_BASE_PATH,
+  url: SERVER_BASE_PATH + `/stream`,
   credentials: 'include',
 });
 
