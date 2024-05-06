@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   broker:
-    image: redpandadata/redpanda:v23.3.14
+    image: redpandadata/redpanda:v23.3.15
     container_name: broker
     hostname: broker
     networks:
