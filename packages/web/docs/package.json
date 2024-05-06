@@ -4,8 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "next build && next-sitemap --config next-sitemap.config.cjs",
-    "dev": "next"
+    "build": "pnpm run generate-rss && next build && next-sitemap --config next-sitemap.config.cjs",
+    "dev": "next",
+    "generate-rss": "tsx ./scripts/rss-generator.ts"
   },
   "dependencies": {
     "@next/env": "14.2.3",
@@ -22,6 +23,7 @@
     "react-countup": "6.5.3",
     "react-dom": "18.3.1",
     "react-icons": "5.2.0",
+    "rss": "1.2.2",
     "tailwind-merge": "2.3.0"
   },
   "devDependencies": {
