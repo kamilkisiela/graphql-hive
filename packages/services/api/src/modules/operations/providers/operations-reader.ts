@@ -1788,6 +1788,34 @@ export class OperationsReader {
       const startDateTimeFormatted = formatDate(period.from);
       const endDateTimeFormatted = formatDate(period.to);
 
+      const createQuery = (tableName: string) => sql`
+        WITH
+          toStartOfInterval(
+            toDateTime(${startDateTimeFormatted}, 'UTC'), 
+            INTERVAL ${interval}, 
+            'UTC'
+          ) as start_date,
+          toStartOfInterval(
+            dateAdd(toDateTime(${endDateTimeFormatted}, 'UTC'), INTERVAL ${interval}),
+            INTERVAL ${interval},
+            'UTC'
+          ) as end_date
+        SELECT 
+          timestamp as date,
+          sum(total) as total,
+          target
+        FROM ${sql.raw(tableName)}
+        ${this.createFilter({ target: targets, extra: [sql`timestamp >= start_date`, sql`timestamp < end_date`] })}
+        GROUP BY target, date
+        ORDER BY 
+          target,
+          date
+            WITH FILL
+              FROM start_date
+              TO end_date
+              STEP INTERVAL ${interval}
+       `;
+
       aggregationResultMap.set(
         key,
         this.clickHouse
@@ -1799,63 +1827,17 @@ export class OperationsReader {
             this.pickQueryByPeriod(
               {
                 daily: {
-                  query: sql`
-                    SELECT 
-                      toStartOfInterval(timestamp, INTERVAL ${interval}, 'UTC') as date,
-                      sum(total) as total,
-                      target
-                    FROM operations_daily
-                    ${this.createFilter({ target: targets, period })}
-                    GROUP BY target, date
-                    ORDER BY 
-                      target,
-                      date
-                        WITH FILL
-                          FROM toDateTime(${startDateTimeFormatted}, 'UTC')
-                          TO toDateTime(${endDateTimeFormatted}, 'UTC')
-                          STEP INTERVAL ${interval}
-                  `,
+                  query: createQuery('operations_daily'),
                   queryId: 'targets_count_over_time_daily',
                   timeout: 15_000,
                 },
                 hourly: {
-                  query: sql`
-                    SELECT 
-                      toStartOfInterval(timestamp, INTERVAL ${interval}, 'UTC') as date,
-                      sum(total) as total,
-                      target
-                    FROM operations_hourly
-                    ${this.createFilter({ target: targets, period })}
-                    GROUP BY target, date
-                    ORDER BY
-                      target,
-                      date
-                        WITH FILL
-                          FROM toDateTime(${startDateTimeFormatted}, 'UTC')
-                          TO toDateTime(${endDateTimeFormatted}, 'UTC')
-                          STEP INTERVAL ${interval}
-                  `,
+                  query: createQuery('operations_hourly'),
                   queryId: 'targets_count_over_time_hourly',
                   timeout: 15_000,
                 },
                 minutely: {
-                  query: sql`
-                    SELECT
-                      toStartOfInterval(timestamp, INTERVAL ${interval}, 'UTC') as date,
-                      sum(total) as total,
-                      target
-                    FROM operations_minutely
-                    ${this.createFilter({ target: targets, period })}
-                    GROUP BY target
-                    ORDER BY
-                      target,
-                      date
-                        WITH FILL
-                          FROM toDateTime(${startDateTimeFormatted}, 'UTC')
-                          TO toDateTime(${endDateTimeFormatted}, 'UTC')
-                          STEP INTERVAL ${interval}
-
-                  `,
+                  query: createQuery('operations_minutely'),
                   queryId: 'targets_count_over_time_regular',
                   timeout: 15_000,
                 },
@@ -2262,6 +2244,7 @@ export class OperationsReader {
             STEP INTERVAL ${this.clickHouse.translateWindow(interval)}
         )
       `;
+      // TODO: add the interval thingy
     };
 
     const query = this.pickQueryByPeriod(
@@ -2496,20 +2479,29 @@ export class OperationsReader {
     const endDateTimeFormatted = formatDate(period.to);
 
     const createSQL = (tableName: string) => sql`
-      SELECT
-        toStartOfInterval(timestamp, INTERVAL ${interval}, 'UTC') as date,
+      WITH
+      toStartOfInterval(
+        toDateTime(${startDateTimeFormatted}, 'UTC'), 
+        INTERVAL ${interval}, 
+        'UTC'
+      ) as start_date,
+      toStartOfInterval(
+        dateAdd(toDateTime(${endDateTimeFormatted}, 'UTC'), INTERVAL ${interval}),
+        INTERVAL ${interval},
+        'UTC'
+      ) as end_date
+      SELECT 
+        timestamp as date,
         sum(total) as total
       FROM ${sql.raw(tableName)}
-      PREWHERE 
-        timestamp >= toDateTime(${startDateTimeFormatted}, 'UTC')
-        AND
-        timestamp <= toDateTime(${endDateTimeFormatted}, 'UTC')
+      ${this.createFilter({ extra: [sql`timestamp >= start_date`, sql`timestamp < end_date`] })}
       GROUP BY date
-      ORDER BY date
-      WITH FILL
-        FROM toDateTime(${startDateTimeFormatted}, 'UTC')
-        TO toDateTime(${endDateTimeFormatted}, 'UTC')
-        STEP INTERVAL ${interval}
+      ORDER BY 
+        date
+          WITH FILL
+            FROM start_date
+            TO end_date
+            STEP INTERVAL ${interval}
     `;
 
     const result = await this.clickHouse.query<{
