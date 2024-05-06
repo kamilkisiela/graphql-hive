@@ -397,9 +397,9 @@ function useOperationCollectionsPlugin({
 
           if (queryParamsOperationId) {
             // Set selected operation in editors
-            editorContext.queryEditor.setValue(currentOperation.query);
-            editorContext.variableEditor.setValue(currentOperation.variables);
-            editorContext.headerEditor.setValue(currentOperation.headers);
+            editorContext.queryEditor?.setValue(currentOperation.query);
+            editorContext.variableEditor?.setValue(currentOperation.variables ?? '');
+            editorContext.headerEditor?.setValue(currentOperation.headers ?? '');
 
             if (!savedOperation) {
               return;
@@ -413,8 +413,8 @@ function useOperationCollectionsPlugin({
 
             const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
             if (savedOperation.updatedAt > currentOperationUpdatedAt) {
-              editorContext.queryEditor.setValue(savedOperation.query);
-              editorContext.variableEditor.setValue(savedOperation.variables);
+              editorContext.queryEditor?.setValue(savedOperation.query);
+              editorContext.variableEditor?.setValue(savedOperation.variables);
             }
           }
         }, [hasAllEditors, queryParamsOperationId, currentOperation]);
@@ -424,8 +424,8 @@ function useOperationCollectionsPlugin({
             return;
           }
           setSavedOperation({
-            query: editorContext.queryEditor?.getValue(),
-            variables: editorContext.variableEditor?.getValue(),
+            query: editorContext.queryEditor?.getValue() ?? '',
+            variables: editorContext.variableEditor?.getValue() ?? '',
           });
         }, [editorContext.queryEditor?.getValue(), editorContext.variableEditor?.getValue()]);
 
@@ -677,7 +677,7 @@ function Save(): ReactElement {
               disabled={isSame || !currentOperation}
               className="mb-0 text-red-600"
               onClick={async () => {
-                queryEditor.setValue(currentOperation.query);
+                queryEditor?.setValue(currentOperation.query);
                 clearOperation();
               }}
             >
