@@ -90,6 +90,7 @@ function ProjectPolicyContent() {
     },
     requestPolicy: 'cache-and-network',
   });
+  const { toast } = useToast();
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
@@ -107,7 +108,6 @@ function ProjectPolicyContent() {
   }
 
   const isLegacyProject = currentProject?.registryModel === RegistryModel.Legacy;
-  const { toast } = useToast();
 
   return (
     <ProjectLayout
