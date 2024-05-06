@@ -365,8 +365,8 @@ importers:
         specifier: 5.16.0
         version: 5.16.0(graphql@16.8.1)
       graphql-yoga:
-        specifier: 5.3.0-rc-20240326134807-f9133fb0
-        version: 5.3.0-rc-20240326134807-f9133fb0(graphql@16.8.1)
+        specifier: 5.3.0
+        version: 5.3.0(graphql@16.8.1)
       nock:
         specifier: 14.0.0-beta.6
         version: 14.0.0-beta.6
@@ -11468,8 +11468,8 @@ packages:
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
 
-  graphql-yoga@5.3.0-rc-20240326134807-f9133fb0:
-    resolution: {integrity: sha512-4yn6JlNccKr11QO4QdRis5GmWZjfbBwRJxY73z94jB1rLNhmTVAKg59U27NB6DbsXIRsyvaRe8Vwv/87V5uJXg==}
+  graphql-yoga@5.3.0:
+    resolution: {integrity: sha512-6mXoGE5AMN6YNugJvjBFIQ0dFUiOMloN0dAzLL8GFt4iJ5WlWRgjdzGHod2zZz7yWQokEVD42DHgrc7NY3Dm0w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
@@ -30730,7 +30730,7 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.2
 
-  graphql-yoga@5.3.0-rc-20240326134807-f9133fb0(graphql@16.8.1):
+  graphql-yoga@5.3.0(graphql@16.8.1):
     dependencies:
       '@envelop/core': 5.0.1
       '@graphql-tools/executor': 1.2.6(graphql@16.8.1)
