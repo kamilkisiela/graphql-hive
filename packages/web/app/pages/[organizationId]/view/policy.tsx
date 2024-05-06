@@ -87,6 +87,7 @@ function PolicyPageContent() {
     },
   });
   const [mutation, mutate] = useMutation(UpdateSchemaPolicyForOrganization);
+  const { toast } = useToast();
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
@@ -109,7 +110,6 @@ function PolicyPageContent() {
   if (query.error) {
     return <QueryError error={query.error} />;
   }
-  const { toast } = useToast();
 
   return (
     <OrganizationLayout
