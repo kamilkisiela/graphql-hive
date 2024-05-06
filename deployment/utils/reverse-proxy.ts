@@ -158,6 +158,7 @@ export class Proxy {
       configInline: {
         // https://projectcontour.io/docs/main/configuration/
         'accesslog-format': 'json',
+        // https://projectcontour.io/guides/structured-logs/
         // https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage
         'json-fields': [
           '@timestamp',
@@ -176,6 +177,14 @@ export class Proxy {
           'user_agent',
           'x_forwarded_for',
         ],
+        // https://projectcontour.io/docs/v1.9.0/configuration/#timeout-configuration
+        timeouts: {
+          'request-timeout': '60s',
+          'connection-idle-timeout': '60s',
+          'stream-idle-timeout': '5m',
+          'max-connection-duration': 'infinity',
+        },
+        // https://projectcontour.io/docs/1.26/config/tracing/
         tracing:
           options.tracing && tracingExtensionService
             ? {
