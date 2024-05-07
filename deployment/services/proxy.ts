@@ -79,7 +79,7 @@ export function deployProxy({
         service: graphql.service,
         timeoutInSeconds: 'infinity',
         // we send a ping every 12 seconds
-        idleInSeconds: '15s',
+        idleInSeconds: '30s',
         retriable: true,
       },
       {
