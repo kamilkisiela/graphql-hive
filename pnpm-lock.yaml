@@ -207,10 +207,10 @@ importers:
         version: 4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))
+        version: 0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))
       '@pulumi/pulumi':
-        specifier: 3.115.1
-        version: 3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
+        specifier: 3.115.2
+        version: 3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/random':
         specifier: 4.16.1
         version: 4.16.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
@@ -5810,8 +5810,8 @@ packages:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
 
-  '@pulumi/pulumi@3.115.1':
-    resolution: {integrity: sha512-gz4WUAsgHJlHDI4mW5hUv5HSZrtyRvi62xzazkHsNNAK4Og7swZmpi8ImcpNxHMCN5uM8mNSuT0lMbvPmy9ciQ==}
+  '@pulumi/pulumi@3.115.2':
+    resolution: {integrity: sha512-IgKk5UsBp7QfQetBcFKUvpkUfCz6JeiIjnD084uvEFML8okJPjzpTvHRkPGXlVvAIIj3q77UVlkB42NPI7vd+w==}
     engines: {node: '>=18'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -21162,7 +21162,7 @@ snapshots:
 
   '@lbrlabs/pulumi-grafana@0.1.0(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -22802,7 +22802,7 @@ snapshots:
 
   '@pulumi/cloudflare@4.16.0(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -22811,7 +22811,7 @@ snapshots:
 
   '@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
       glob: 10.3.10
@@ -22825,12 +22825,12 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))':
+  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5))':
     dependencies:
       '@pulumi/kubernetes': 4.11.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
-      '@pulumi/pulumi': 3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
 
-  '@pulumi/pulumi@3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)':
+  '@pulumi/pulumi@3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
       '@grpc/grpc-js': 1.10.1
       '@logdna/tail-file': 2.2.0
@@ -22873,7 +22873,7 @@ snapshots:
 
   '@pulumi/random@4.16.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.115.1(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.115.2(ts-node@10.9.2(@swc/core@1.5.3(@swc/helpers@0.5.5))(@types/node@20.12.10)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
