@@ -273,13 +273,32 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
   }, [quickRangeFilter, validUnits]);
 
   presets = [...presets, ...dynamicPresets].sort((a, b) => {
-    if (a.label < b.label) {
-      return -1;
+    const aWeight = a.label.includes('minutes')
+      ? 1
+      : a.label.includes('hours')
+        ? 2
+        : a.label.includes('days')
+          ? 3
+          : a.label.includes('weeks')
+            ? 4
+            : 5;
+    const bWeight = b.label.includes('minutes')
+      ? 1
+      : b.label.includes('hours')
+        ? 2
+        : b.label.includes('days')
+          ? 3
+          : b.label.includes('weeks')
+            ? 4
+            : 5;
+
+    if (aWeight !== bWeight) {
+      return aWeight - bWeight;
     }
-    if (a.label > b.label) {
-      return 1;
-    }
-    return 0;
+    const aNumber = parseInt(a.label.match(/\d+/)?.[0] || '0');
+    const bNumber = parseInt(b.label.match(/\d+/)?.[0] || '0');
+
+    return aNumber - bNumber;
   });
 
   return (
