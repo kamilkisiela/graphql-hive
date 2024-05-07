@@ -276,19 +276,16 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
         range: { from: `now-${number}y`, to: 'now' },
       },
     ];
-    console.log('dynamicPresets', dynamicPresets);
 
     const uniqueDynamicPresets = dynamicPresets.filter(
       preset => !presets.some(p => p.name === preset.name),
     );
-    console.log('uniqueDynamicPresets', uniqueDynamicPresets);
 
     const validDynamicPresets = uniqueDynamicPresets.filter(
       preset =>
         !hasInvalidUnitRegex?.test(preset.range.from) &&
         !hasInvalidUnitRegex?.test(preset.range.to),
     );
-    console.log('validDynamicPresets', validDynamicPresets);
 
     if (number > 0 && validDynamicPresets.length > 0) {
       setDynamicPresets(validDynamicPresets);
@@ -302,7 +299,6 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
 
     return aWeight - bWeight;
   });
-  console.log('presets', presets);
 
   return (
     <Popover
