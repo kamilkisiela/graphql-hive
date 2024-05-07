@@ -64,6 +64,16 @@ function resolveRange(rawFrom: string, rawTo: string): ResolvedDateRange | null 
   return null;
 }
 
+function calculateWeight(preset: Preset): number {
+  const from = parse(preset.range.from);
+  const to = parse(preset.range.to);
+  if (from && to) {
+    const durationInMinutes = Math.round((to.getTime() - from.getTime()) / (1000 * 60));
+    return durationInMinutes;
+  }
+  return 0;
+}
+
 export const presetLast7Days: Preset = {
   name: 'last7d',
   label: 'Last 7 days',
@@ -233,10 +243,10 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
 
   const [dynamicPresets, setDynamicPresets] = useState<Preset[]>([]);
   useEffect(() => {
-    const number = parseInt(quickRangeFilter.replace(/\D/g, ''));
+    const number = parseInt(quickRangeFilter.replace(/\D/g, ''), 10);
     const dynamicPresets: Preset[] = [
       {
-        name: `last${number}m`,
+        name: `last${number}min`,
         label: `Last ${number} minutes`,
         range: { from: `now-${number}m`, to: 'now' },
       },
@@ -255,15 +265,30 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
         label: `Last ${number} weeks`,
         range: { from: `now-${number}w`, to: 'now' },
       },
+      {
+        name: `last${number}M`,
+        label: `Last ${number} months`,
+        range: { from: `now-${number}M`, to: 'now' },
+      },
+      {
+        name: `last${number}y`,
+        label: `Last ${number} years`,
+        range: { from: `now-${number}y`, to: 'now' },
+      },
     ];
+    console.log('dynamicPresets', dynamicPresets);
+
     const uniqueDynamicPresets = dynamicPresets.filter(
       preset => !presets.some(p => p.name === preset.name),
     );
+    console.log('uniqueDynamicPresets', uniqueDynamicPresets);
+
     const validDynamicPresets = uniqueDynamicPresets.filter(
       preset =>
         !hasInvalidUnitRegex?.test(preset.range.from) &&
         !hasInvalidUnitRegex?.test(preset.range.to),
     );
+    console.log('validDynamicPresets', validDynamicPresets);
 
     if (number > 0 && validDynamicPresets.length > 0) {
       setDynamicPresets(validDynamicPresets);
@@ -271,35 +296,13 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
       setDynamicPresets([]);
     }
   }, [quickRangeFilter, validUnits]);
-
   presets = [...presets, ...dynamicPresets].sort((a, b) => {
-    const aWeight = a.label.includes('minutes')
-      ? 1
-      : a.label.includes('hours')
-        ? 2
-        : a.label.includes('days')
-          ? 3
-          : a.label.includes('weeks')
-            ? 4
-            : 5;
-    const bWeight = b.label.includes('minutes')
-      ? 1
-      : b.label.includes('hours')
-        ? 2
-        : b.label.includes('days')
-          ? 3
-          : b.label.includes('weeks')
-            ? 4
-            : 5;
+    const aWeight = calculateWeight(a);
+    const bWeight = calculateWeight(b);
 
-    if (aWeight !== bWeight) {
-      return aWeight - bWeight;
-    }
-    const aNumber = parseInt(a.label.match(/\d+/)?.[0] || '0');
-    const bNumber = parseInt(b.label.match(/\d+/)?.[0] || '0');
-
-    return aNumber - bNumber;
+    return aWeight - bWeight;
   });
+  console.log('presets', presets);
 
   return (
     <Popover
