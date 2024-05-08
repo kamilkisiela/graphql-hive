@@ -6,6 +6,7 @@ import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { batchBy } from '../../../shared/helpers';
 import { Logger } from '../../shared/providers/logger';
+import { toEndOfInterval, toStartOfInterval } from '../lib/date-time-helpers';
 import { pickTableByPeriod } from '../lib/pick-table-by-provider';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
@@ -1784,36 +1785,34 @@ export class OperationsReader {
     >();
 
     for (const [key, { targets, period, resolution }] of aggregationMap) {
-      const interval = this.clickHouse.translateWindow(calculateTimeWindow({ period, resolution }));
-      const startDateTimeFormatted = formatDate(period.from);
-      const endDateTimeFormatted = formatDate(period.to);
+      const interval = calculateTimeWindow({ period, resolution });
+      const intervalRaw = this.clickHouse.translateWindow(interval);
+      const roundedPeriod = {
+        from: toStartOfInterval(period.from, interval.value, interval.unit),
+        to: toEndOfInterval(period.to, interval.value, interval.unit),
+      };
+      const startDateTimeFormatted = formatDate(roundedPeriod.from);
+      const endDateTimeFormatted = formatDate(roundedPeriod.to);
 
       const createQuery = (tableName: string) => sql`
-        WITH
-          toStartOfInterval(
-            toDateTime(${startDateTimeFormatted}, 'UTC'), 
-            INTERVAL ${interval}, 
-            'UTC'
-          ) as start_date,
-          toStartOfInterval(
-            dateAdd(toDateTime(${endDateTimeFormatted}, 'UTC'), INTERVAL ${interval}),
-            INTERVAL ${interval},
-            'UTC'
-          ) as end_date
         SELECT 
-          timestamp as date,
+          toStartOfInterval(
+            timestamp,
+            INTERVAL ${intervalRaw},
+            'UTC'
+          ) as date,
           sum(total) as total,
           target
         FROM ${sql.raw(tableName)}
-        ${this.createFilter({ target: targets, extra: [sql`timestamp >= start_date`, sql`timestamp < end_date`] })}
+        ${this.createFilter({ target: targets, period: roundedPeriod })}
         GROUP BY target, date
         ORDER BY 
           target,
           date
             WITH FILL
-              FROM start_date
-              TO end_date
-              STEP INTERVAL ${interval}
+              FROM toDateTime(${startDateTimeFormatted}, 'UTC')
+              TO toDateTime(${endDateTimeFormatted}, 'UTC')
+              STEP INTERVAL ${intervalRaw}
        `;
 
       aggregationResultMap.set(
@@ -2184,12 +2183,6 @@ export class OperationsReader {
     schemaCoordinate?: string;
   }) {
     const createSQLQuery = (tableName: string, isAggregation: boolean) => {
-      const startDateTimeFormatted = formatDate(period.from);
-      const endDateTimeFormatted = formatDate(period.to);
-      const interval = calculateTimeWindow({ period, resolution });
-      const intervalUnit =
-        interval.unit === 'd' ? 'DAY' : interval.unit === 'h' ? 'HOUR' : 'MINUTE';
-
       // TODO: remove this once we shift to the new table structure (PR #2712)
       const quantiles = isAggregation
         ? 'quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles)'
@@ -2197,12 +2190,18 @@ export class OperationsReader {
       const total = isAggregation ? 'sum(total)' : 'count(*)';
       const totalOk = isAggregation ? 'sum(total_ok)' : 'sum(ok)';
 
+      const interval = calculateTimeWindow({ period, resolution });
+      const intervalRaw = this.clickHouse.translateWindow(interval);
+      const roundedPeriod = {
+        from: toStartOfInterval(period.from, interval.value, interval.unit),
+        to: toEndOfInterval(period.to, interval.value, interval.unit),
+      };
+      const startDateTimeFormatted = formatDate(roundedPeriod.from);
+      const endDateTimeFormatted = formatDate(roundedPeriod.to);
+      const intervalUnit =
+        interval.unit === 'd' ? 'DAY' : interval.unit === 'h' ? 'HOUR' : 'MINUTE';
+
       return sql`
-        WITH
-          toDateTime(${startDateTimeFormatted}, 'UTC') as start_date_time,
-          toDateTime(${endDateTimeFormatted}, 'UTC') as end_date_time,
-          ${intervalUnit} as interval_unit,
-          toUInt16(${String(interval.value)}) as interval_value
         SELECT
           date,
           percentiles,
@@ -2210,12 +2209,10 @@ export class OperationsReader {
           totalOk
         FROM (
           SELECT
-            date_add(
-                ${sql.raw(intervalUnit)},
-                ceil(
-                  date_diff(interval_unit, start_date_time, timestamp, 'UTC') / interval_value
-                ) as UInt16 * interval_value,
-                start_date_time
+            toStartOfInterval(
+              timestamp,
+              INTERVAL ${intervalRaw},
+              'UTC'
             ) as date,
             ${sql.raw(quantiles)} as percentiles,
             ${sql.raw(total)} as total,
@@ -2223,14 +2220,14 @@ export class OperationsReader {
           FROM ${sql.raw(tableName)}
           ${this.createFilter({
             target,
-            period,
+            period: roundedPeriod,
             operations,
             clients,
             extra: schemaCoordinate
               ? [
                   sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
                     target,
-                    period,
+                    period: roundedPeriod,
                     extra: [sql`coordinate = ${schemaCoordinate}`],
                   })})`,
                 ]
@@ -2241,10 +2238,9 @@ export class OperationsReader {
           WITH FILL
             FROM toDateTime(${startDateTimeFormatted}, 'UTC')
             TO toDateTime(${endDateTimeFormatted}, 'UTC')
-            STEP INTERVAL ${this.clickHouse.translateWindow(interval)}
+            STEP INTERVAL ${intervalRaw}
         )
       `;
-      // TODO: add the interval thingy
     };
 
     const query = this.pickQueryByPeriod(
@@ -2469,39 +2465,32 @@ export class OperationsReader {
     };
     resolution: number;
   }) {
-    const interval = this.clickHouse.translateWindow(
-      calculateTimeWindow({
-        period,
-        resolution,
-      }),
-    );
-    const startDateTimeFormatted = formatDate(period.from);
-    const endDateTimeFormatted = formatDate(period.to);
+    const interval = calculateTimeWindow({ period, resolution });
+    const intervalRaw = this.clickHouse.translateWindow(interval);
+    const roundedPeriod = {
+      from: toStartOfInterval(period.from, interval.value, interval.unit),
+      to: toEndOfInterval(period.to, interval.value, interval.unit),
+    };
+    const startDateTimeFormatted = formatDate(roundedPeriod.from);
+    const endDateTimeFormatted = formatDate(roundedPeriod.to);
 
     const createSQL = (tableName: string) => sql`
-      WITH
-      toStartOfInterval(
-        toDateTime(${startDateTimeFormatted}, 'UTC'), 
-        INTERVAL ${interval}, 
-        'UTC'
-      ) as start_date,
-      toStartOfInterval(
-        dateAdd(toDateTime(${endDateTimeFormatted}, 'UTC'), INTERVAL ${interval}),
-        INTERVAL ${interval},
-        'UTC'
-      ) as end_date
       SELECT 
-        timestamp as date,
+        toStartOfInterval(
+          timestamp, 
+          INTERVAL ${intervalRaw}, 
+          'UTC'
+        ) as date,
         sum(total) as total
       FROM ${sql.raw(tableName)}
-      ${this.createFilter({ extra: [sql`timestamp >= start_date`, sql`timestamp < end_date`] })}
+      ${this.createFilter({ period: roundedPeriod })}
       GROUP BY date
       ORDER BY 
         date
           WITH FILL
-            FROM start_date
-            TO end_date
-            STEP INTERVAL ${interval}
+            FROM toDateTime(${startDateTimeFormatted}, 'UTC')
+            TO toDateTime(${endDateTimeFormatted}, 'UTC')
+            STEP INTERVAL ${intervalRaw}
     `;
 
     const result = await this.clickHouse.query<{

@@ -30,9 +30,9 @@ export function calculateTimeWindow({
     d: 60 * 24,
   };
 
-  const value = Math.ceil(distanceInMinutes / resolution);
+  const value = Math.floor(distanceInMinutes / resolution);
   const unit = calculateUnit(value);
-  const correctedValue = Math.ceil(value / divideBy[unit]);
+  const correctedValue = Math.floor(value / divideBy[unit]);
 
   return {
     value: correctedValue,
