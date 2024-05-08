@@ -100,7 +100,7 @@
     "valtio": "1.13.2",
     "wonka": "6.3.4",
     "yup": "1.4.0",
-    "zod": "3.23.6"
+    "zod": "3.23.7"
   },
   "devDependencies": {
     "@graphql-codegen/client-preset-swc-plugin": "0.2.0",
