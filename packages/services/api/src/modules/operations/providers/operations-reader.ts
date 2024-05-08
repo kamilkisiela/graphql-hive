@@ -2198,8 +2198,6 @@ export class OperationsReader {
       };
       const startDateTimeFormatted = formatDate(roundedPeriod.from);
       const endDateTimeFormatted = formatDate(roundedPeriod.to);
-      const intervalUnit =
-        interval.unit === 'd' ? 'DAY' : interval.unit === 'h' ? 'HOUR' : 'MINUTE';
 
       return sql`
         SELECT
