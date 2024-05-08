@@ -517,8 +517,8 @@ importers:
         specifier: 0.20.2
         version: 0.20.2
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -842,8 +842,8 @@ importers:
         specifier: 0.20.2
         version: 0.20.2
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -965,8 +965,8 @@ importers:
         specifier: 8.57.0
         version: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1061,8 +1061,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       got:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
@@ -1169,8 +1169,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       got:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
@@ -1254,8 +1254,8 @@ importers:
         specifier: 7.113.0
         version: 7.113.0
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       fastify-plugin:
         specifier: 4.5.1
         version: 4.5.1
@@ -1395,8 +1395,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       fastify:
-        specifier: 4.26.2
-        version: 4.26.2
+        specifier: 4.27.0
+        version: 4.27.0
       ioredis:
         specifier: 5.4.1
         version: 5.4.1
@@ -10541,8 +10541,8 @@ packages:
   fastify-plugin@4.5.1:
     resolution: {integrity: sha512-stRHYGeuqpEZTL1Ef0Ovr2ltazUT9g844X5z/zEBFLG8RYlpDiOCIG+ATvYEp+/zmc7sN29mcIMp8gvYplYPIQ==}
 
-  fastify@4.26.2:
-    resolution: {integrity: sha512-90pjTuPGrfVKtdpLeLzND5nyC4woXZN5VadiNQCicj/iJU4viNHKhsAnb7jmv1vu2IzkLXyBiCzdWuzeXgQ5Ug==}
+  fastify@4.27.0:
+    resolution: {integrity: sha512-ci9IXzbigB8dyi0mSy3faa3Bsj0xWAPb9JeT4KRzubdSb6pNhcADRUaXCBml6V1Ss/a05kbtQls5LBmhHydoTA==}
 
   fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==}
@@ -14150,10 +14150,6 @@ packages:
   pino-std-serializers@6.2.2:
     resolution: {integrity: sha512-cHjPPsE+vhj/tnhCy/wiMh3M3z3h/j15zHQX+S9GkTBgqJuTuJzYJ4gUyACLhDaJ7kk9ba9iRDmbH2tJU03OiA==}
 
-  pino@8.19.0:
-    resolution: {integrity: sha512-oswmokxkav9bADfJ2ifrvfHUwad6MLp73Uat0IkQWY3iAw5xTRoznXbXksZs8oaOUMpmhVWD+PZogNzllWpJaA==}
-    hasBin: true
-
   pino@8.21.0:
     resolution: {integrity: sha512-ip4qdzjkAyDDZklUaZkcRFb2iA118H9SgRh8yzTkSQK8HilsOJF7rSY8HoW5+I0M46AZgX/pxbprf2vvzQCE0Q==}
     hasBin: true
@@ -16179,9 +16175,6 @@ packages:
 
   thenify@3.3.1:
     resolution: {integrity: sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==}
-
-  thread-stream@2.3.0:
-    resolution: {integrity: sha512-kaDqm1DET9pp3NXwR8382WHbnpXnRkN9xGN9dQt3B2+dmXiW8X1SOwmFOxAErEQ47ObhZ96J6yhZNXuyCOL7KA==}
 
   thread-stream@2.7.0:
     resolution: {integrity: sha512-qQiRWsU/wvNolI6tbbCKd9iKaTnCXsTwVxhhKM6nctPdujTyztjlbUkUTUymidWcMnZ5pWR0ej4a0tjsW021vw==}
@@ -29313,7 +29306,7 @@ snapshots:
 
   fastify-plugin@4.5.1: {}
 
-  fastify@4.26.2:
+  fastify@4.27.0:
     dependencies:
       '@fastify/ajv-compiler': 3.5.0
       '@fastify/error': 3.4.1
@@ -29324,12 +29317,12 @@ snapshots:
       fast-json-stringify: 5.12.0
       find-my-way: 8.1.0
       light-my-request: 5.11.0
-      pino: 8.19.0
+      pino: 9.0.0
       process-warning: 3.0.0
       proxy-addr: 2.0.7
       rfdc: 1.3.0
       secure-json-parse: 2.7.0
-      semver: 7.5.4
+      semver: 7.6.0
       toad-cache: 3.7.0
     transitivePeerDependencies:
       - supports-color
@@ -34189,20 +34182,6 @@ snapshots:
 
   pino-std-serializers@6.2.2: {}
 
-  pino@8.19.0:
-    dependencies:
-      atomic-sleep: 1.0.0
-      fast-redact: 3.1.2
-      on-exit-leak-free: 2.1.0
-      pino-abstract-transport: 1.1.0
-      pino-std-serializers: 6.2.2
-      process-warning: 3.0.0
-      quick-format-unescaped: 4.0.4
-      real-require: 0.2.0
-      safe-stable-stringify: 2.4.2
-      sonic-boom: 3.7.0
-      thread-stream: 2.3.0
-
   pino@8.21.0:
     dependencies:
       atomic-sleep: 1.0.0
@@ -36486,10 +36465,6 @@ snapshots:
   thenify@3.3.1:
     dependencies:
       any-promise: 1.3.0
-
-  thread-stream@2.3.0:
-    dependencies:
-      real-require: 0.2.0
 
   thread-stream@2.7.0:
     dependencies:
