@@ -35,12 +35,23 @@ describe('pickTableByPeriod', () => {
     });
     expect(table).toBe('hourly');
   });
-  test('28 day period -> daily', () => {
+  test('28 day period -> hourly', () => {
     const now = new Date();
     const table = pickTableByPeriod({
       now,
       period: {
         from: subDays(now, 28),
+        to: now,
+      },
+    });
+    expect(table).toBe('hourly');
+  });
+  test('31 day period -> daily', () => {
+    const now = new Date();
+    const table = pickTableByPeriod({
+      now,
+      period: {
+        from: subDays(now, 31),
         to: now,
       },
     });
