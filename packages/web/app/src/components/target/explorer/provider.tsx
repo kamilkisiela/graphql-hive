@@ -11,6 +11,7 @@ import { startOfDay } from 'date-fns';
 import { resolveRange, type Period } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
 import { useLocalStorage } from '@/lib/hooks';
+import { UTCDate } from '@date-fns/utc';
 
 type SchemaExplorerContextType = {
   isArgumentListCollapsed: boolean;
@@ -35,7 +36,7 @@ const SchemaExplorerContext = createContext<SchemaExplorerContextType>({
   isArgumentListCollapsed: true,
   setArgumentListCollapsed: () => {},
   dataRetentionInDays: 7,
-  startDate: startOfDay(subDays(new Date(), 7)),
+  startDate: startOfDay(subDays(new UTCDate(), 7)),
   period: defaultPeriod,
   resolvedPeriod: resolveRange(defaultPeriod),
   setPeriod: () => {},
@@ -49,7 +50,7 @@ export function SchemaExplorerProvider({ children }: { children: ReactNode }): R
   );
 
   const startDate = useMemo(
-    () => startOfDay(subDays(new Date(), dataRetentionInDays)),
+    () => startOfDay(subDays(new UTCDate(), dataRetentionInDays)),
     [dataRetentionInDays],
   );
 

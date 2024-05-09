@@ -1,6 +1,6 @@
 import { ReactElement, useMemo, useRef } from 'react';
 import NextLink from 'next/link';
-import { formatISO } from 'date-fns';
+import { endOfDay, formatISO, startOfDay } from 'date-fns';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { Globe, History } from 'lucide-react';
@@ -18,11 +18,7 @@ import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { pluralize } from '@/lib/utils';
-
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
+import { UTCDate } from '@date-fns/utc';
 
 const ProjectCard_ProjectFragment = graphql(`
   fragment ProjectCard_ProjectFragment on Project {
@@ -56,7 +52,10 @@ const ProjectCard = (props: {
       return props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return []; // it will use the previous data points when new data is not available yet (fetching)
+    return [
+      [new Date(subDays(new Date(), props.days)).toISOString(), 0],
+      [new Date().toISOString(), 0],
+    ] as [string, number][];
   }, [props.requestsOverTime]);
 
   const totalNumberOfRequests = useMemo(
@@ -263,9 +262,9 @@ function OrganizationPageContent() {
   }>();
 
   if (!period.current) {
-    const now = floorDate(new Date());
-    const from = formatISO(subDays(now, days));
-    const to = formatISO(now);
+    const now = new UTCDate();
+    const from = formatISO(startOfDay(subDays(now, days)));
+    const to = formatISO(endOfDay(now));
 
     period.current = { from, to };
   }

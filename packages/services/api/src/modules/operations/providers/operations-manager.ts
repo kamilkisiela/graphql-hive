@@ -197,7 +197,7 @@ export class OperationsManager {
     schemaCoordinate: string;
   } & Listify<TargetSelector, 'target'>) {
     this.logger.info(
-      'Counting requests with schema coordinate (period=%s, target=%s, coordinate=%s)',
+      'Counting requests with schema coordinate (period=%o, target=%s, coordinate=%s)',
       period,
       target,
       schemaCoordinate,
@@ -256,7 +256,7 @@ export class OperationsManager {
   }: {
     period: DateRange;
   } & Listify<TargetSelector, 'target'>): Promise<number> {
-    this.logger.info('Counting requests (period=%s, target=%s)', period, target);
+    this.logger.info('Counting requests (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -277,7 +277,7 @@ export class OperationsManager {
   }: {
     period: DateRange;
   } & ProjectSelector): Promise<number> {
-    this.logger.info('Counting requests of project (period=%s, project=%s)', period, project);
+    this.logger.info('Counting requests of project (period=%o, project=%s)', period, project);
     const targets = await this.storage.getTargetIdsOfProject({
       organization,
       project,
