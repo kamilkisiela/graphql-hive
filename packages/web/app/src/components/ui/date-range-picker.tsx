@@ -412,13 +412,17 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
             />
           </div>
           <div className="flex w-full flex-1 flex-col items-start gap-1 overflow-y-scroll pb-2 pt-1">
-            {presets
-              .filter(preset =>
-                preset.label.toLowerCase().includes(quickRangeFilter.toLowerCase().trim()),
-              )
-              .map(preset => (
-                <PresetButton key={preset.name} preset={preset} />
-              ))}
+            {dynamicPresets.length > 0
+              ? dynamicPresets
+                  .filter(preset =>
+                    preset.label.toLowerCase().includes(quickRangeFilter.toLowerCase().trim()),
+                  )
+                  .map(preset => <PresetButton key={preset.name} preset={preset} />)
+              : presets
+                  .filter(preset =>
+                    preset.label.toLowerCase().includes(quickRangeFilter.toLowerCase().trim()),
+                  )
+                  .map(preset => <PresetButton key={preset.name} preset={preset} />)}
           </div>
         </div>
         {showCalendar && (
