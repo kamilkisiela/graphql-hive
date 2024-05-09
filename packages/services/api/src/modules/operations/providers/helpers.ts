@@ -2,6 +2,12 @@ import type { DateRange } from '../../../shared/entities';
 
 export const maxResolution = 90;
 
+const inSeconds = {
+  m: 60,
+  h: 60 * 60,
+  d: 60 * 60 * 24,
+};
+
 export function calculateTimeWindow({
   period,
   resolution,
@@ -11,6 +17,7 @@ export function calculateTimeWindow({
 }): {
   value: number;
   unit: 'd' | 'h' | 'm';
+  seconds: number;
 } {
   if (!Number.isInteger(resolution)) {
     throw new Error(`Invalid resolution. Expected an integer, received ${resolution}`);
@@ -36,7 +43,8 @@ export function calculateTimeWindow({
 
   return {
     value: correctedValue,
-    unit: calculateUnit(value),
+    unit,
+    seconds: correctedValue * inSeconds[unit],
   };
 }
 

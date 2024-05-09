@@ -105,14 +105,17 @@ export class OperationsReader {
 
     if (resolution && (resolution < 1 || resolution > 90)) {
       throw new Error('Invalid resolution provided.');
-    } else {
-      // default value :shrug:
-      resolution = 30;
     }
 
     const now = new UTCDate();
+    const interval = resolution ? calculateTimeWindow({ period, resolution }) : null;
 
-    const resolvedTable = pickTableByPeriod({ now, period, logger: this.logger });
+    const resolvedTable = pickTableByPeriod({
+      now,
+      period,
+      intervalUnit: interval?.unit,
+      logger: this.logger,
+    });
 
     return {
       ...queryMap[resolvedTable],
@@ -1796,10 +1799,11 @@ export class OperationsReader {
 
       const createQuery = (tableName: string) => sql`
         SELECT 
-          toStartOfInterval(
-            timestamp,
-            INTERVAL ${intervalRaw},
-            'UTC'
+          toDateTime(
+              intDiv(
+                toUnixTimestamp(timestamp),
+                toUInt32(${String(interval.seconds)})
+              ) * toUInt32(${String(interval.seconds)})
           ) as date,
           sum(total) as total,
           target
@@ -2182,6 +2186,15 @@ export class OperationsReader {
     clients?: readonly string[];
     schemaCoordinate?: string;
   }) {
+    const interval = calculateTimeWindow({ period, resolution });
+    const intervalRaw = this.clickHouse.translateWindow(interval);
+    const roundedPeriod = {
+      from: toStartOfInterval(period.from, interval.value, interval.unit),
+      to: toEndOfInterval(period.to, interval.value, interval.unit),
+    };
+    const startDateTimeFormatted = formatDate(roundedPeriod.from);
+    const endDateTimeFormatted = formatDate(roundedPeriod.to);
+
     const createSQLQuery = (tableName: string, isAggregation: boolean) => {
       // TODO: remove this once we shift to the new table structure (PR #2712)
       const quantiles = isAggregation
@@ -2189,15 +2202,6 @@ export class OperationsReader {
         : 'quantiles(0.75, 0.90, 0.95, 0.99)(duration)';
       const total = isAggregation ? 'sum(total)' : 'count(*)';
       const totalOk = isAggregation ? 'sum(total_ok)' : 'sum(ok)';
-
-      const interval = calculateTimeWindow({ period, resolution });
-      const intervalRaw = this.clickHouse.translateWindow(interval);
-      const roundedPeriod = {
-        from: toStartOfInterval(period.from, interval.value, interval.unit),
-        to: toEndOfInterval(period.to, interval.value, interval.unit),
-      };
-      const startDateTimeFormatted = formatDate(roundedPeriod.from);
-      const endDateTimeFormatted = formatDate(roundedPeriod.to);
 
       return sql`
         SELECT
@@ -2207,10 +2211,11 @@ export class OperationsReader {
           totalOk
         FROM (
           SELECT
-            toStartOfInterval(
-              timestamp,
-              INTERVAL ${intervalRaw},
-              'UTC'
+            toDateTime(
+              intDiv(
+                toUnixTimestamp(timestamp),
+                toUInt32(${String(interval.seconds)})
+              ) * toUInt32(${String(interval.seconds)})
             ) as date,
             ${sql.raw(quantiles)} as percentiles,
             ${sql.raw(total)} as total,
@@ -2474,10 +2479,11 @@ export class OperationsReader {
 
     const createSQL = (tableName: string) => sql`
       SELECT 
-        toStartOfInterval(
-          timestamp, 
-          INTERVAL ${intervalRaw}, 
-          'UTC'
+        toDateTime(
+          intDiv(
+            toUnixTimestamp(timestamp),
+            toUInt32(${String(interval.seconds)})
+          ) * toUInt32(${String(interval.seconds)})
         ) as date,
         sum(total) as total
       FROM ${sql.raw(tableName)}

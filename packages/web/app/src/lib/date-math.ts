@@ -3,6 +3,7 @@
  * @source https://github.com/grafana/grafana/blob/411c89012febe13323e4b8aafc8d692f4460e680/packages/grafana-data/src/datetime/datemath.ts#L1C1-L208C2
  */
 import { add, format, formatISO, parse as parseDate, sub, type Duration } from 'date-fns';
+import { UTCDate } from '@date-fns/utc';
 
 export type Period = {
   from: string;
@@ -48,7 +49,7 @@ const dateStringFormat = 'yyyy-MM-dd';
 
 function parseDateString(input: string) {
   try {
-    return parseDate(input, dateStringFormat, new Date());
+    return parseDate(input, dateStringFormat, new UTCDate());
   } catch (error) {
     return undefined;
   }
@@ -69,7 +70,7 @@ function isValidDateString(input: string) {
  * @param roundUp See parseDateMath function.
  * @param timezone Only string 'utc' is acceptable here, for anything else, local timezone is used.
  */
-export function parse(text: string, now = new Date()): Date | undefined {
+export function parse(text: string, now = new UTCDate()): Date | undefined {
   if (!text) {
     return undefined;
   }
@@ -176,7 +177,7 @@ export function parseDateMath(mathString: string, now: Date): Date | undefined {
 }
 
 export function resolveRange(period: Period) {
-  const now = new Date();
+  const now = new UTCDate();
   const from = parse(period.from, now);
   const to = parse(period.to, now);
 

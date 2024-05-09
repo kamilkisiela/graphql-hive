@@ -43,7 +43,10 @@ const TargetCard = (props: {
       return props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
-    return []; // it will use the previous data points when new data is not available yet (fetching)
+    return [
+      [new Date(subDays(new Date(), props.days)).toISOString(), 0],
+      [new Date().toISOString(), 0],
+    ] as [string, number][];
   }, [props.requestsOverTime]);
 
   const totalNumberOfRequests = useMemo(
