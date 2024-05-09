@@ -88,6 +88,7 @@ export const presetLast1Day: Preset = {
 
 // Define presets
 export const availablePresets: Preset[] = [
+  { name: 'last30m', label: 'Last 30 minutes', range: { from: 'now-30m', to: 'now' } },
   { name: 'last1h', label: 'Last 1 hour', range: { from: 'now-1h', to: 'now' } },
   presetLast1Day,
   presetLast7Days,
