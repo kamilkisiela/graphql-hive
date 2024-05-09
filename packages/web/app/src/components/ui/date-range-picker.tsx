@@ -88,21 +88,11 @@ export const presetLast1Day: Preset = {
 
 // Define presets
 export const availablePresets: Preset[] = [
-  { name: 'last5min', label: 'Last 5 minutes', range: { from: 'now-5m', to: 'now' } },
-  { name: 'last10min', label: 'Last 10 minutes', range: { from: 'now-10m', to: 'now' } },
-  { name: 'last15min', label: 'Last 15 minutes', range: { from: 'now-15m', to: 'now' } },
-  { name: 'last30min', label: 'Last 30 minutes', range: { from: 'now-30m', to: 'now' } },
   { name: 'last1h', label: 'Last 1 hour', range: { from: 'now-1h', to: 'now' } },
-  { name: 'last3h', label: 'Last 3 hours', range: { from: 'now-3h', to: 'now' } },
-  { name: 'last6h', label: 'Last 6 hours', range: { from: 'now-6h', to: 'now' } },
-  { name: 'last12h', label: 'Last 12 hours', range: { from: 'now-12h', to: 'now' } },
   presetLast1Day,
-  { name: 'last2d', label: 'Last 2 days', range: { from: 'now-2d', to: 'now' } },
-  { name: 'last3d', label: 'Last 3 days', range: { from: 'now-3d', to: 'now' } },
   presetLast7Days,
   { name: 'last14d', label: 'Last 14 days', range: { from: 'now-14d', to: 'now' } },
   { name: 'last30d', label: 'Last 30 days', range: { from: 'now-30d', to: 'now' } },
-  { name: 'last60d', label: 'Last 60 days', range: { from: 'now-60d', to: 'now' } },
   { name: 'last90d', label: 'Last 90 days', range: { from: 'now-90d', to: 'now' } },
   { name: 'last6M', label: 'Last 6 months', range: { from: 'now-6M', to: 'now' } },
   { name: 'last1y', label: 'Last 1 year', range: { from: 'now-364d', to: 'now' } },
