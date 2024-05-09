@@ -165,9 +165,11 @@ export const backendConfig = (requirements: {
           functions: originalImplementation => ({
             ...originalImplementation,
             async createNewSession(input) {
+              console.log(`Creating a new session for "${input.userId}"`);
               const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
 
               if (!user) {
+                console.log(`Failed to find user with id "${input.userId}"`);
                 throw new Error(
                   `SuperTokens: Creating a new session failed. Could not find user with id ${input.userId}.`,
                 );
@@ -176,6 +178,8 @@ export const backendConfig = (requirements: {
               const externalUserId = user.thirdParty
                 ? `${user.thirdParty.id}|${user.thirdParty.userId}`
                 : null;
+
+              console.log(`External user id for user "${input.userId}" is "${externalUserId}"`);
 
               input.accessTokenPayload = {
                 version: '1',
@@ -336,6 +340,7 @@ export function initSupertokens(requirements: {
 }
 
 export async function resolveUser(ctx: { req: FastifyRequest; reply: FastifyReply }) {
+  ctx.req.log.debug('Resolving user');
   let session: SessionNode.SessionContainer | undefined;
 
   try {
@@ -344,6 +349,7 @@ export async function resolveUser(ctx: { req: FastifyRequest; reply: FastifyRepl
       antiCsrfCheck: false,
       checkDatabase: true,
     });
+    ctx.req.log.debug('Session resolution ended successfully');
   } catch (error) {
     if (SessionNode.Error.isErrorFromSuperTokens(error)) {
       // Check whether the email is already verified.
@@ -372,18 +378,31 @@ export async function resolveUser(ctx: { req: FastifyRequest; reply: FastifyRepl
     throw error;
   }
 
-  const payload = session?.getAccessTokenPayload();
+  if (!session) {
+    ctx.req.log.debug('No session found');
+    return null;
+  }
+
+  const payload = session.getAccessTokenPayload();
 
   if (!payload) {
+    ctx.req.log.error('No access token payload found');
     return null;
   }
 
   const result = SuperTokenAccessTokenModel.safeParse(payload);
 
   if (result.success === false) {
-    console.error(`SuperTokens session verification failed.\n` + JSON.stringify(payload));
-    throw new HiveError(`Invalid token provided`);
+    ctx.req.log.error('SuperTokens session payload is invalid');
+    ctx.req.log.debug('SuperTokens session payload: %s', JSON.stringify(payload));
+    ctx.req.log.debug(
+      'SuperTokens session parsing errors: %s',
+      JSON.stringify(result.error.flatten().fieldErrors),
+    );
+    throw new HiveError(`Invalid access token provided`);
   }
+
+  ctx.req.log.debug('User resolved successfully');
 
   return result.data;
 }

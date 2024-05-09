@@ -1,5 +1,7 @@
+import type { FastifyRequest } from '@hive/service-common';
+
 export interface RegistryContext {
-  req: any;
+  req: FastifyRequest;
   requestId: string;
   user: any;
   headers: Record<string, string | string[] | undefined>;
