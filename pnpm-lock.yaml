@@ -1683,8 +1683,8 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@repeaterjs/repeater':
-        specifier: 3.0.5
-        version: 3.0.5
+        specifier: 3.0.6
+        version: 3.0.6
       '@sentry/nextjs':
         specifier: 7.114.0
         version: 7.114.0(encoding@0.1.13)(next@14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.89.0(@swc/core@1.5.3(@swc/helpers@0.5.5))(esbuild@0.20.2))
@@ -6681,8 +6681,8 @@ packages:
   '@repeaterjs/repeater@3.0.4':
     resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
 
-  '@repeaterjs/repeater@3.0.5':
-    resolution: {integrity: sha512-l3YHBLAol6d/IKnB9LhpD0cEZWAoe3eFKUyTYWmFmCO2Q/WOckxLQAUyMZWwZV2M/m3+4vgRoaolFqaII82/TA==}
+  '@repeaterjs/repeater@3.0.6':
+    resolution: {integrity: sha512-Javneu5lsuhwNCryN+pXH93VPQ8g0dBX7wItHFgYiwQmzE1sVdg5tWHiOgHywzL2W21XQopa7IwIEnNbmeUJYA==}
 
   '@rollup/plugin-commonjs@24.0.0':
     resolution: {integrity: sha512-0w0wyykzdyRRPHOb0cQt14mIBLujfAv6GgP6g8nvg/iBxEm112t3YPPq+Buqe2+imvElTka+bjNlJ/gB56TD8g==}
@@ -20761,7 +20761,7 @@ snapshots:
   '@graphql-tools/executor-http@0.1.9(@types/node@20.12.10)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       '@whatwg-node/fetch': 0.8.8
       dset: 3.1.2
       extract-files: 11.0.0
@@ -20775,7 +20775,7 @@ snapshots:
   '@graphql-tools/executor-http@1.0.0(@types/node@20.12.10)(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       '@whatwg-node/fetch': 0.9.17
       dset: 3.1.2
       extract-files: 11.0.0
@@ -20823,7 +20823,7 @@ snapshots:
     dependencies:
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       graphql: 16.8.1
       tslib: 2.6.2
       value-or-promise: 1.0.12
@@ -20832,7 +20832,7 @@ snapshots:
     dependencies:
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       graphql: 16.8.1
       tslib: 2.6.2
       value-or-promise: 1.0.12
@@ -21245,25 +21245,25 @@ snapshots:
   '@graphql-yoga/subscription@4.0.0':
     dependencies:
       '@graphql-yoga/typed-event-target': 2.0.0
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       '@whatwg-node/events': 0.1.1
       tslib: 2.6.2
 
   '@graphql-yoga/subscription@5.0.0':
     dependencies:
       '@graphql-yoga/typed-event-target': 3.0.0
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       '@whatwg-node/events': 0.1.1
       tslib: 2.6.2
 
   '@graphql-yoga/typed-event-target@2.0.0':
     dependencies:
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       tslib: 2.6.2
 
   '@graphql-yoga/typed-event-target@3.0.0':
     dependencies:
-      '@repeaterjs/repeater': 3.0.5
+      '@repeaterjs/repeater': 3.0.6
       tslib: 2.6.2
 
   '@grpc/grpc-js@1.10.1':
@@ -24009,7 +24009,7 @@ snapshots:
 
   '@repeaterjs/repeater@3.0.4': {}
 
-  '@repeaterjs/repeater@3.0.5': {}
+  '@repeaterjs/repeater@3.0.6': {}
 
   '@rollup/plugin-commonjs@24.0.0(rollup@2.78.0)':
     dependencies:
