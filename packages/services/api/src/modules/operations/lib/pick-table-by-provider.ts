@@ -1,12 +1,4 @@
-import {
-  addMinutes,
-  format,
-  startOfDay,
-  startOfHour,
-  startOfMinute,
-  subHours,
-  subMinutes,
-} from 'date-fns';
+import { startOfDay, startOfHour, startOfMinute, subHours, subMinutes } from 'date-fns';
 import type { DateRange } from '../../../shared/entities';
 import type { Logger } from '../../shared/providers/logger';
 
@@ -16,10 +8,6 @@ const tableTTLInHours = {
   hourly: 30 * 24,
   minutely: 24,
 };
-
-function formatDate(date: Date): string {
-  return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
-}
 
 type Table = 'hourly' | 'daily' | 'minutely';
 
