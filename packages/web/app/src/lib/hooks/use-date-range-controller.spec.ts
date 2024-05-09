@@ -1,3 +1,4 @@
+import { UTCDate } from '@date-fns/utc';
 import { parse } from '../date-math';
 import { resolveRangeAndResolution } from './use-date-range-controller';
 
@@ -61,7 +62,7 @@ describe('useDateRangeController', () => {
 
   for (const testCase of testCases) {
     test(`${testCase.now} -> ${testCase.from} to ${testCase.to}`, () => {
-      const now = new Date(testCase.now);
+      const now = new UTCDate(testCase.now);
       const result = resolveRangeAndResolution(
         {
           from: parse(testCase.from, now)!,

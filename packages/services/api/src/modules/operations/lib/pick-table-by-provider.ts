@@ -41,10 +41,10 @@ const tableFromDateCheck = {
   daily: (date: Date) => date.getTime() === startOfDay(date).getTime(),
 };
 
-const performanceScore = {
-  minutely: 1,
+const precisionScore = {
+  minutely: 3,
   hourly: 2,
-  daily: 3,
+  daily: 1,
 };
 
 /** pick the correct materialized view table for request data based on the input period */
@@ -110,9 +110,9 @@ export function pickTableByPeriod(args: {
     throw new Error(`Requested start date is not supported by any possible table.`);
   }
 
-  // pick the table with the highest performance score
-  // e.g. if the period is 7 days and we can use hourly and daily tables, we should pick the daily table
-  const table = potentialTables.sort((a, b) => performanceScore[b] - performanceScore[a])[0];
+  // pick the table with the highest precision score
+  // e.g. if the period is 3 hours and we can use hourly and minutely tables, we should pick the minutely table
+  const table = potentialTables.sort((a, b) => precisionScore[b] - precisionScore[a])[0];
 
   args.logger?.debug('Selected table: %s', table);
 
