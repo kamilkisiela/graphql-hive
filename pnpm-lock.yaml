@@ -1031,8 +1031,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/external-composition/dist
       '@graphql-tools/stitch':
-        specifier: 9.2.7
-        version: 9.2.7(graphql@16.8.1)
+        specifier: 9.2.8
+        version: 9.2.8(graphql@16.8.1)
       '@graphql-tools/stitching-directives':
         specifier: 3.0.2
         version: 3.0.2(graphql@16.8.1)
@@ -4302,14 +4302,14 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/delegate@10.0.4':
-    resolution: {integrity: sha512-WswZRbQZMh/ebhc8zSomK9DIh6Pd5KbuiMsyiKkKz37TWTrlCOe+4C/fyrBFez30ksq6oFyCeSKMwfrCbeGo0Q==}
+  '@graphql-tools/delegate@10.0.10':
+    resolution: {integrity: sha512-OOqsPRfGatQG0qMKG3sxtxHiRg7cA6OWMTuETDvwZCoOuxqCc17K+nt8GvaqptNJi2/wBgeH7pi7wA5QzgiG1g==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/delegate@10.0.9':
-    resolution: {integrity: sha512-H+jGPLB0X23wlslw1JuB3y5j35NwZLUGhmjgaLYKkquAI/rtcs4+UwoW3hZ4SCN7h2LAKDa6HhsYYCRXyhdePA==}
+  '@graphql-tools/delegate@10.0.4':
+    resolution: {integrity: sha512-WswZRbQZMh/ebhc8zSomK9DIh6Pd5KbuiMsyiKkKz37TWTrlCOe+4C/fyrBFez30ksq6oFyCeSKMwfrCbeGo0Q==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -4500,8 +4500,8 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/stitch@9.2.7':
-    resolution: {integrity: sha512-FYF78kHUkdNp5lzjTr/tJHqQm/+ljxJ9b2KpSdjX3bwKNnIeYF4jViO9qxCrOKH7dXsJjB7bkINrH6PTDUoQAw==}
+  '@graphql-tools/stitch@9.2.8':
+    resolution: {integrity: sha512-xIENcmTw8dfMTslcplxBDshWi2LjFWtih2dG3rfhMGaj3iaWMM8JMbBB8nND7Jhm+fxfnGG7MuxOO9nqWtTuow==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -20604,7 +20604,7 @@ snapshots:
 
   '@graphql-tools/batch-delegate@9.0.1(graphql@16.8.1)':
     dependencies:
-      '@graphql-tools/delegate': 10.0.9(graphql@16.8.1)
+      '@graphql-tools/delegate': 10.0.10(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       dataloader: 2.2.2
       graphql: 16.8.1
@@ -20693,7 +20693,7 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/delegate@10.0.4(graphql@16.8.1)':
+  '@graphql-tools/delegate@10.0.10(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/batch-execute': 9.0.4(graphql@16.8.1)
       '@graphql-tools/executor': 1.2.6(graphql@16.8.1)
@@ -20703,7 +20703,7 @@ snapshots:
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@graphql-tools/delegate@10.0.9(graphql@16.8.1)':
+  '@graphql-tools/delegate@10.0.4(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/batch-execute': 9.0.4(graphql@16.8.1)
       '@graphql-tools/executor': 1.2.6(graphql@16.8.1)
@@ -21079,10 +21079,10 @@ snapshots:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@graphql-tools/stitch@9.2.7(graphql@16.8.1)':
+  '@graphql-tools/stitch@9.2.8(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/batch-delegate': 9.0.1(graphql@16.8.1)
-      '@graphql-tools/delegate': 10.0.9(graphql@16.8.1)
+      '@graphql-tools/delegate': 10.0.10(graphql@16.8.1)
       '@graphql-tools/executor': 1.2.6(graphql@16.8.1)
       '@graphql-tools/merge': 9.0.4(graphql@16.8.1)
       '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
@@ -21183,7 +21183,7 @@ snapshots:
 
   '@graphql-tools/wrap@10.0.2(graphql@16.8.1)':
     dependencies:
-      '@graphql-tools/delegate': 10.0.9(graphql@16.8.1)
+      '@graphql-tools/delegate': 10.0.10(graphql@16.8.1)
       '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       graphql: 16.8.1
