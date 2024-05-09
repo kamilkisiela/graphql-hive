@@ -20,11 +20,6 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { pluralize } from '@/lib/utils';
 import { UTCDate } from '@date-fns/utc';
 
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
-
 const ProjectCard_ProjectFragment = graphql(`
   fragment ProjectCard_ProjectFragment on Project {
     cleanId

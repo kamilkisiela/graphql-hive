@@ -10,19 +10,12 @@ import {
 import type { DateRange } from '../../../shared/entities';
 import type { Logger } from '../../shared/providers/logger';
 
-const msMinute = 60 * 1_000;
-const msHour = msMinute * 60;
-const msDay = msHour * 24;
-
 // How long rows are kept in the database, per table.
 const tableTTLInHours = {
   daily: 365 * 24,
   hourly: 30 * 24,
   minutely: 24,
 };
-
-const thresholdDataPointPerDay = 28;
-const thresholdDataPointPerHour = 24;
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
