@@ -540,17 +540,17 @@ importers:
         specifier: 10.0.3
         version: 10.0.3(graphql@16.8.1)
       '@graphql-yoga/plugin-defer-stream':
-        specifier: 3.3.0
-        version: 3.3.0(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)
+        specifier: 3.3.1
+        version: 3.3.1(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-yoga/plugin-disable-introspection':
-        specifier: 2.3.0
-        version: 2.3.0(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)
+        specifier: 2.3.1
+        version: 2.3.1(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-yoga/plugin-graphql-sse':
-        specifier: 3.3.0
-        version: 3.3.0(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)
+        specifier: 3.3.1
+        version: 3.3.1(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-yoga/plugin-response-cache':
-        specifier: 3.5.0
-        version: 3.5.0(@envelop/core@5.0.0)(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)
+        specifier: 3.5.1
+        version: 3.5.1(@envelop/core@5.0.1)(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
       '@whatwg-node/fetch':
         specifier: 0.9.17
         version: 0.9.17
@@ -558,8 +558,8 @@ importers:
         specifier: 5.16.0
         version: 5.16.0(graphql@16.8.1)
       graphql-yoga:
-        specifier: 5.3.0
-        version: 5.3.0(graphql@16.8.1)
+        specifier: 5.3.1
+        version: 5.3.1(graphql@16.8.1)
       nock:
         specifier: 14.0.0-beta.6
         version: 14.0.0-beta.6
@@ -743,8 +743,8 @@ importers:
         specifier: 1.23.0
         version: 1.23.0(graphql@16.8.1)
       graphql-yoga:
-        specifier: 5.3.0
-        version: 5.3.0(graphql@16.8.1)
+        specifier: 5.3.1
+        version: 5.3.1(graphql@16.8.1)
       ioredis:
         specifier: 5.4.1
         version: 5.4.1
@@ -1088,23 +1088,23 @@ importers:
   packages/services/server:
     devDependencies:
       '@envelop/core':
-        specifier: 5.0.0
-        version: 5.0.0
+        specifier: 5.0.1
+        version: 5.0.1
       '@envelop/generic-auth':
         specifier: 7.0.0
-        version: 7.0.0(@envelop/core@5.0.0)(graphql@16.8.1)
+        version: 7.0.0(@envelop/core@5.0.1)(graphql@16.8.1)
       '@envelop/graphql-jit':
         specifier: 8.0.3
-        version: 8.0.3(@envelop/core@5.0.0)(graphql@16.8.1)
+        version: 8.0.3(@envelop/core@5.0.1)(graphql@16.8.1)
       '@envelop/graphql-modules':
         specifier: 6.0.0
-        version: 6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0(graphql@16.8.1))(graphql@16.8.1)
+        version: 6.0.0(@envelop/core@5.0.1)(graphql-modules@2.3.0(graphql@16.8.1))(graphql@16.8.1)
       '@envelop/opentelemetry':
-        specifier: 6.3.0
-        version: 6.3.0(@envelop/core@5.0.0)(graphql@16.8.1)
+        specifier: 6.3.1
+        version: 6.3.1(@envelop/core@5.0.1)(graphql@16.8.1)
       '@envelop/sentry':
         specifier: 7.1.1
-        version: 7.1.1(@envelop/core@5.0.0)(@sentry/node@7.114.0)(graphql@16.8.1)
+        version: 7.1.1(@envelop/core@5.0.1)(@sentry/node@7.114.0)(graphql@16.8.1)
       '@envelop/types':
         specifier: 5.0.0
         version: 5.0.0
@@ -1130,11 +1130,11 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/yoga/dist
       '@graphql-yoga/plugin-persisted-operations':
-        specifier: 3.3.0
-        version: 3.3.0(@graphql-tools/utils@10.2.0(graphql@16.8.1))(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)
+        specifier: 3.3.1
+        version: 3.3.1(@graphql-tools/utils@10.2.0(graphql@16.8.1))(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
       '@graphql-yoga/plugin-response-cache':
-        specifier: 3.5.0
-        version: 3.5.0(@envelop/core@5.0.0)(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)
+        specifier: 3.5.1
+        version: 3.5.1(@envelop/core@5.0.1)(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
       '@hive/api':
         specifier: workspace:*
         version: link:../api
@@ -1178,8 +1178,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       graphql-yoga:
-        specifier: 5.3.0
-        version: 5.3.0(graphql@16.8.1)
+        specifier: 5.3.1
+        version: 5.3.1(graphql@16.8.1)
       hyperid:
         specifier: 3.2.0
         version: 3.2.0
@@ -3273,8 +3273,8 @@ packages:
     resolution: {integrity: sha512-O0Vz8E0TObT6ijAob8jYFVJavcGywKThM3UAsxUIBBVPYZTMiqI9lo2gmAnbMUnrDcAYkUTZEW9FDYPRdF5l6g==}
     engines: {node: '>=16.0.0'}
 
-  '@envelop/core@5.0.0':
-    resolution: {integrity: sha512-aJdnH/ptv+cvwfvciCBe7TSvccBwo9g0S5f6u35TBVzRVqIGkK03lFlIL+x1cnfZgN9EfR2b1PH2galrT1CdCQ==}
+  '@envelop/core@5.0.1':
+    resolution: {integrity: sha512-wxA8EyE1fPnlbP0nC/SFI7uU8wSNf4YjxZhAPu0P63QbgIvqHtHsH4L3/u+rsTruzhk3OvNRgQyLsMfaR9uzAQ==}
     engines: {node: '>=18.0.0'}
 
   '@envelop/extended-validation@4.0.0':
@@ -3313,11 +3313,11 @@ packages:
       '@envelop/core': ^5.0.0
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@envelop/opentelemetry@6.3.0':
-    resolution: {integrity: sha512-VSyEYmdOQgG812R384wrKoK4pIz0eI+eIgLfn0vVQ90/3jhbkWGlq+P9H6EUnO/CRS5b5BnHgySGsMXMRBP+TQ==}
+  '@envelop/opentelemetry@6.3.1':
+    resolution: {integrity: sha512-paauYvPtk+XgGDmNKEM31LAq+BkF2QRszC/Th1NE9EEsCG3ivDmMYJ5doyw32Rd6RTiAKYFlnoE5zbIB+D85KA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@envelop/core': ^5.0.0
+      '@envelop/core': ^5.0.1
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
   '@envelop/response-cache@6.1.2':
@@ -4576,41 +4576,41 @@ packages:
     resolution: {integrity: sha512-Mg8psdkAp+YTG1OGmvU+xa6xpsAmSir0hhr3yFYPyLNwzUj95DdIwsMpKadDj9xDpYgJcH3Hp/4JMal9DhQimA==}
     engines: {node: '>=18.0.0'}
 
-  '@graphql-yoga/plugin-defer-stream@3.3.0':
-    resolution: {integrity: sha512-R6pvnTV/m+CJApquqOV9fVMigTCmRNC55UP7XMRwBwM/flZs3dT18V9vh43fUhWw+tR2AfEr46I3dvy0hhtB3w==}
+  '@graphql-yoga/plugin-defer-stream@3.3.1':
+    resolution: {integrity: sha512-KgPgPOf6N69OczCN6QP953O2g6/rvzXjy++jiLQPFGFyrbkWu/3KcS0X6yv8JcUJRcT0dlRY6DPV6Tx3BcFqSQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^5.3.0
+      graphql-yoga: ^5.3.1
 
-  '@graphql-yoga/plugin-disable-introspection@2.3.0':
-    resolution: {integrity: sha512-BtLYOOMxFqDrVGUVIiMb+5cwZrXngIC9lF79Il4IhR3WuNMZu497SKrhaz3Kgom65vhlmqmW4imzikxu8JIawQ==}
+  '@graphql-yoga/plugin-disable-introspection@2.3.1':
+    resolution: {integrity: sha512-CTu6Ta6xczgn+n2vpm0QUzgi7BqPjDQQOg8gg8l7SmeavfmEvBHtz2NyaA97vHON2SsUeWRfjQxopCdPPFLETA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^5.3.0
+      graphql-yoga: ^5.3.1
 
-  '@graphql-yoga/plugin-graphql-sse@3.3.0':
-    resolution: {integrity: sha512-7zJqs9JxA5uX5sVpkBv0Jep0G44KHHzW+PtdSUgw+MydbFItC/3UZSPfXHwgvqOUlJZ5GxGlAncZtqP5CRqggw==}
+  '@graphql-yoga/plugin-graphql-sse@3.3.1':
+    resolution: {integrity: sha512-OSRsaAes1FSM8DRvVbiW0fVursBFkeyeIjMrQ9icCa3y6dX3b3IN3eEETiC8H9fX5GAV0qvF8fwjbvmFIUtlkQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^5.3.0
+      graphql-yoga: ^5.3.1
 
-  '@graphql-yoga/plugin-persisted-operations@3.3.0':
-    resolution: {integrity: sha512-6vR6/qKVT4MipMdDjTN9/o62wGXe3qFXRf9hABPQ/t1SfWYAFsBkPP7U9CcBqtleiVbLd/5AOz/FpdNxlvvvDA==}
+  '@graphql-yoga/plugin-persisted-operations@3.3.1':
+    resolution: {integrity: sha512-2FteUIepgAZL5q2JSPbTFozba4T6v34skb6I7FiqZp7XwNnp8Da9Jf5BpcwUb4buP51FzbO5WJW1UMyNptxuOA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@graphql-tools/utils': ^10.0.0
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^5.3.0
+      graphql-yoga: ^5.3.1
 
-  '@graphql-yoga/plugin-response-cache@3.5.0':
-    resolution: {integrity: sha512-LOel/QTbpCGM3CJBmInYje+yH1k/N2rxuAUk7KEhFgnJ+hFM4b0jj1sg4U5GqCPJ0Cooijz9hcX4bn3Uz5X3Ug==}
+  '@graphql-yoga/plugin-response-cache@3.5.1':
+    resolution: {integrity: sha512-XjJq1u0LQbxsriudIAkuU1Q3gx2m8KsBl5O/2hpTvq3aaanORWRaJ46xL2AzGh7kyfW9RHrwc5SATQnpRjmmiw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^5.3.0
+      graphql-yoga: ^5.3.1
 
   '@graphql-yoga/subscription@4.0.0':
     resolution: {integrity: sha512-0qsN/BPPZNMoC2CZ8i+P6PgiJyHh1H35aKDt37qARBDaIOKDQuvEOq7+4txUKElcmXi7DYFo109FkhSQoEajrg==}
@@ -5428,12 +5428,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.9.0'
 
-  '@opentelemetry/core@1.23.0':
-    resolution: {integrity: sha512-hdQ/a9TMzMQF/BO8Cz1juA43/L5YGtCSiKoOHmrTEf7VMDAZgy8ucpWx3eQTnQ3gBloRcWtzvcrMZABC3PTSKQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
   '@opentelemetry/core@1.24.0':
     resolution: {integrity: sha512-FP2oN7mVPqcdxJDTTnKExj4mi91EH+DNuArKfHTjPuJWe2K1JfMIVXNfahw1h3onJxQnxS8K0stKkogX05s+Aw==}
     engines: {node: '>=14'}
@@ -5828,12 +5822,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/resources@1.23.0':
-    resolution: {integrity: sha512-iPRLfVfcEQynYGo7e4Di+ti+YQTAY0h5mQEUJcHlU9JOqpb4x965O6PZ+wMcwYVY63G96KtdS86YCM1BF1vQZg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
   '@opentelemetry/resources@1.24.0':
     resolution: {integrity: sha512-mxC7E7ocUS1tLzepnA7O9/G8G6ZTdjCH2pXme1DDDuCuk6n2/53GADX+GWBuyX0dfIxeMInIbJAdjlfN9GNr6A==}
     engines: {node: '>=14'}
@@ -5871,12 +5859,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.9.0'
 
-  '@opentelemetry/sdk-trace-base@1.23.0':
-    resolution: {integrity: sha512-PzBmZM8hBomUqvCddF/5Olyyviayka44O5nDWq673np3ctnvwMOvNrsUORZjKja1zJbwEuD9niAGbnVrz3jwRQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
   '@opentelemetry/sdk-trace-base@1.24.0':
     resolution: {integrity: sha512-H9sLETZ4jw9UJ3totV8oM5R0m4CW0ZIOLfp4NV3g0CM8HD5zGZcaW88xqzWDgiYRpctFxd+WmHtGX/Upoa2vRg==}
     engines: {node: '>=14'}
@@ -5900,10 +5882,6 @@ packages:
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.9.0'
-
-  '@opentelemetry/semantic-conventions@1.23.0':
-    resolution: {integrity: sha512-MiqFvfOzfR31t8cc74CTP1OZfz7MbqpAnLCra8NqQoaHJX6ncIRTdYOQYBDQ2uFISDq0WY8Y9dDTWvsgzzBYRg==}
-    engines: {node: '>=14'}
 
   '@opentelemetry/semantic-conventions@1.24.0':
     resolution: {integrity: sha512-yL0jI6Ltuz8R+Opj7jClGrul6pOoYrdfVmzQS4SITXRPH7I5IRZbrwe/6/v8v4WYMa6MYZG480S1+uc/IGfqsA==}
@@ -8260,10 +8238,6 @@ packages:
 
   '@whatwg-node/node-fetch@0.5.7':
     resolution: {integrity: sha512-YZA+N3JcW1eh2QRi7o/ij+M07M0dqID73ltgsOEMRyEc2UYVDbyomaih+CWCEZqBIDHw4KMDveXvv4SBZ4TLIw==}
-    engines: {node: '>=16.0.0'}
-
-  '@whatwg-node/server@0.9.33':
-    resolution: {integrity: sha512-bHWZi6YhVsDKAzjlPn5EN7u5j7SvHqDI6Acr37hgMBjKyCzqHivfPFgC/sRZ6LLxM9pJNsXpFoAF1kySXhAn6w==}
     engines: {node: '>=16.0.0'}
 
   '@whatwg-node/server@0.9.34':
@@ -11392,8 +11366,8 @@ packages:
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
 
-  graphql-yoga@5.3.0:
-    resolution: {integrity: sha512-6mXoGE5AMN6YNugJvjBFIQ0dFUiOMloN0dAzLL8GFt4iJ5WlWRgjdzGHod2zZz7yWQokEVD42DHgrc7NY3Dm0w==}
+  graphql-yoga@5.3.1:
+    resolution: {integrity: sha512-n918QV6TF7xTjb9ASnozgsr4ydMc08c+x4eRAWKxxWVwSnzdP2xeN2zw1ljIzRD0ccSCNoBajGDKwcZkJDitPA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
@@ -19598,58 +19572,58 @@ snapshots:
       '@envelop/types': 4.0.1
       tslib: 2.6.2
 
-  '@envelop/core@5.0.0':
+  '@envelop/core@5.0.1':
     dependencies:
       '@envelop/types': 5.0.0
       tslib: 2.6.2
 
-  '@envelop/extended-validation@4.0.0(@envelop/core@5.0.0)(graphql@16.8.1)':
+  '@envelop/extended-validation@4.0.0(@envelop/core@5.0.1)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@envelop/generic-auth@7.0.0(@envelop/core@5.0.0)(graphql@16.8.1)':
+  '@envelop/generic-auth@7.0.0(@envelop/core@5.0.1)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
-      '@envelop/extended-validation': 4.0.0(@envelop/core@5.0.0)(graphql@16.8.1)
+      '@envelop/core': 5.0.1
+      '@envelop/extended-validation': 4.0.0(@envelop/core@5.0.1)(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@envelop/graphql-jit@8.0.3(@envelop/core@5.0.0)(graphql@16.8.1)':
+  '@envelop/graphql-jit@8.0.3(@envelop/core@5.0.1)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       graphql: 16.8.1
       graphql-jit: 0.8.6(graphql@16.8.1)
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  '@envelop/graphql-modules@6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0(graphql@16.8.1))(graphql@16.8.1)':
+  '@envelop/graphql-modules@6.0.0(@envelop/core@5.0.1)(graphql-modules@2.3.0(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       graphql: 16.8.1
       graphql-modules: 2.3.0(graphql@16.8.1)
       tslib: 2.6.2
 
-  '@envelop/on-resolve@4.1.0(@envelop/core@5.0.0)(graphql@16.8.1)':
+  '@envelop/on-resolve@4.1.0(@envelop/core@5.0.1)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       graphql: 16.8.1
 
-  '@envelop/opentelemetry@6.3.0(@envelop/core@5.0.0)(graphql@16.8.1)':
+  '@envelop/opentelemetry@6.3.1(@envelop/core@5.0.1)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
-      '@envelop/on-resolve': 4.1.0(@envelop/core@5.0.0)(graphql@16.8.1)
+      '@envelop/core': 5.0.1
+      '@envelop/on-resolve': 4.1.0(@envelop/core@5.0.1)(graphql@16.8.1)
       '@opentelemetry/api': 1.8.0
-      '@opentelemetry/sdk-trace-base': 1.23.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/sdk-trace-base': 1.24.1(@opentelemetry/api@1.8.0)
       graphql: 16.8.1
       tslib: 2.6.2
 
-  '@envelop/response-cache@6.1.2(@envelop/core@5.0.0)(graphql@16.8.1)':
+  '@envelop/response-cache@6.1.2(@envelop/core@5.0.1)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       '@whatwg-node/fetch': 0.9.17
       fast-json-stable-stringify: 2.1.0
@@ -19657,9 +19631,9 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.2
 
-  '@envelop/sentry@7.1.1(@envelop/core@5.0.0)(@sentry/node@7.114.0)(graphql@16.8.1)':
+  '@envelop/sentry@7.1.1(@envelop/core@5.0.1)(@sentry/node@7.114.0)(graphql@16.8.1)':
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       '@sentry/node': 7.114.0
       graphql: 16.8.1
       tslib: 2.6.2
@@ -19949,7 +19923,7 @@ snapshots:
     dependencies:
       graphql: 16.8.1
     optionalDependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       '@escape.tech/graphql-armor-types': 0.5.0
 
   '@escape.tech/graphql-armor-max-depth@2.2.0':
@@ -19970,7 +19944,7 @@ snapshots:
     dependencies:
       graphql: 16.8.1
     optionalDependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       '@escape.tech/graphql-armor-types': 0.5.0
 
   '@escape.tech/graphql-armor-types@0.5.0':
@@ -21211,34 +21185,34 @@ snapshots:
     dependencies:
       tslib: 2.6.2
 
-  '@graphql-yoga/plugin-defer-stream@3.3.0(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-yoga/plugin-defer-stream@3.3.1(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       graphql: 16.8.1
-      graphql-yoga: 5.3.0(graphql@16.8.1)
+      graphql-yoga: 5.3.1(graphql@16.8.1)
 
-  '@graphql-yoga/plugin-disable-introspection@2.3.0(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-yoga/plugin-disable-introspection@2.3.1(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       graphql: 16.8.1
-      graphql-yoga: 5.3.0(graphql@16.8.1)
+      graphql-yoga: 5.3.1(graphql@16.8.1)
 
-  '@graphql-yoga/plugin-graphql-sse@3.3.0(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-yoga/plugin-graphql-sse@3.3.1(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       graphql: 16.8.1
       graphql-sse: 2.5.2(graphql@16.8.1)
-      graphql-yoga: 5.3.0(graphql@16.8.1)
+      graphql-yoga: 5.3.1(graphql@16.8.1)
 
-  '@graphql-yoga/plugin-persisted-operations@3.3.0(@graphql-tools/utils@10.2.0(graphql@16.8.1))(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-yoga/plugin-persisted-operations@3.3.1(@graphql-tools/utils@10.2.0(graphql@16.8.1))(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       graphql: 16.8.1
-      graphql-yoga: 5.3.0(graphql@16.8.1)
+      graphql-yoga: 5.3.1(graphql@16.8.1)
 
-  '@graphql-yoga/plugin-response-cache@3.5.0(@envelop/core@5.0.0)(graphql-yoga@5.3.0(graphql@16.8.1))(graphql@16.8.1)':
+  '@graphql-yoga/plugin-response-cache@3.5.1(@envelop/core@5.0.1)(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)':
     dependencies:
-      '@envelop/response-cache': 6.1.2(@envelop/core@5.0.0)(graphql@16.8.1)
+      '@envelop/response-cache': 6.1.2(@envelop/core@5.0.1)(graphql@16.8.1)
       graphql: 16.8.1
-      graphql-yoga: 5.3.0(graphql@16.8.1)
+      graphql-yoga: 5.3.1(graphql@16.8.1)
     transitivePeerDependencies:
       - '@envelop/core'
 
@@ -22428,11 +22402,6 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.8.0
 
-  '@opentelemetry/core@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/semantic-conventions': 1.23.0
-
   '@opentelemetry/core@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
@@ -22970,12 +22939,6 @@ snapshots:
       - encoding
       - supports-color
 
-  '@opentelemetry/resources@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.23.0
-
   '@opentelemetry/resources@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
@@ -23028,13 +22991,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/sdk-trace-base@1.23.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.23.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.23.0
-
   '@opentelemetry/sdk-trace-base@1.24.0(@opentelemetry/api@1.8.0)':
     dependencies:
       '@opentelemetry/api': 1.8.0
@@ -23068,8 +23024,6 @@ snapshots:
       '@opentelemetry/propagator-jaeger': 1.24.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-base': 1.24.1(@opentelemetry/api@1.8.0)
       semver: 7.6.0
-
-  '@opentelemetry/semantic-conventions@1.23.0': {}
 
   '@opentelemetry/semantic-conventions@1.24.0': {}
 
@@ -26521,11 +26475,6 @@ snapshots:
       '@whatwg-node/events': 0.1.1
       busboy: 1.6.0
       fast-querystring: 1.1.2
-      tslib: 2.6.2
-
-  '@whatwg-node/server@0.9.33':
-    dependencies:
-      '@whatwg-node/fetch': 0.9.17
       tslib: 2.6.2
 
   '@whatwg-node/server@0.9.34':
@@ -30543,16 +30492,16 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.2
 
-  graphql-yoga@5.3.0(graphql@16.8.1):
+  graphql-yoga@5.3.1(graphql@16.8.1):
     dependencies:
-      '@envelop/core': 5.0.0
+      '@envelop/core': 5.0.1
       '@graphql-tools/executor': 1.2.6(graphql@16.8.1)
       '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
       '@graphql-tools/utils': 10.2.0(graphql@16.8.1)
       '@graphql-yoga/logger': 2.0.0
       '@graphql-yoga/subscription': 5.0.0
       '@whatwg-node/fetch': 0.9.17
-      '@whatwg-node/server': 0.9.33
+      '@whatwg-node/server': 0.9.34
       dset: 3.1.2
       graphql: 16.8.1
       lru-cache: 10.2.0
