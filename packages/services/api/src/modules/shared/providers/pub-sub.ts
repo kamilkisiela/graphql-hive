@@ -2,7 +2,6 @@ import { InjectionToken } from 'graphql-modules';
 import type { PubSub } from 'graphql-yoga';
 
 export type HivePubSub = PubSub<{
-  publishedNewSchemaVersion: [targetId: string, payload: { publishedSchemaVersionId: string }];
   oidcIntegrationLogs: [oidcIntegrationId: string, payload: { timestamp: string; message: string }];
 }>;
 

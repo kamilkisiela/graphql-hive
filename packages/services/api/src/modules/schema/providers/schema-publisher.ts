@@ -1412,11 +1412,6 @@ export class SchemaPublisher {
                   this.logger.error('Failed to trigger schema change notifications', err);
                 });
             }
-
-            this.schemaManager.publishNewSchemaVersionForTargetEvent({
-              targetId: input.target.id,
-              schemaVersionId: schemaVersion.id,
-            });
           }
 
           return {
@@ -1979,11 +1974,6 @@ export class SchemaPublisher {
               : undefined,
           })
         : null;
-
-    this.schemaManager.publishNewSchemaVersionForTargetEvent({
-      targetId: target.id,
-      schemaVersionId: schemaVersion.id,
-    });
 
     if (githubCheckRun) {
       return this.updateGithubCheckRunForSchemaPublish({

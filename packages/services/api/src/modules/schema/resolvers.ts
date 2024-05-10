@@ -517,17 +517,6 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
   },
-  Subscription: {
-    publishedNewSchemaVersion: {
-      subscribe: (_, args, { injector }) =>
-        injector.get(SchemaManager).subscribeToNewSchemaVersionsOfTarget({
-          target: args.input.target,
-          project: args.input.project,
-          organization: args.input.organization,
-        }),
-      resolve: (payload: { publishedSchemaVersionId: string }) => payload,
-    },
-  },
   Target: {
     async schemaVersions(target, args, { injector }) {
       return injector.get(SchemaManager).getPaginatedSchemaVersionsForTargetId({
