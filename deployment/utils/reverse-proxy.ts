@@ -20,8 +20,8 @@ export class Proxy {
       name: string;
       path: string;
       service: k8s.core.v1.Service;
-      timeoutInSeconds?: `${number}s` | 'infinity';
-      idleInSeconds?: `${number}s`;
+      requestTimeout?: `${number}s` | 'infinity';
+      idleTimeout?: `${number}s`;
       retriable?: boolean;
       customRewrite?: string;
       virtualHost?: Output<string>;
@@ -89,17 +89,17 @@ export class Proxy {
                       },
                     ],
                   },
-                  ...(route.timeoutInSeconds || route.idleInSeconds
+                  ...(route.requestTimeout || route.idleTimeout
                     ? {
                         timeoutPolicy: {
-                          ...(route.timeoutInSeconds
+                          ...(route.requestTimeout
                             ? {
-                                response: route.timeoutInSeconds,
+                                response: route.requestTimeout,
                               }
                             : {}),
-                          ...(route.idleInSeconds
+                          ...(route.idleTimeout
                             ? {
-                                idle: route.idleInSeconds,
+                                idle: route.idleTimeout,
                               }
                             : {}),
                         },
