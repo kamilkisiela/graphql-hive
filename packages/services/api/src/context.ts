@@ -5,7 +5,7 @@ export interface RegistryContext {
   requestId: string;
   user: any;
   headers: Record<string, string | string[] | undefined>;
-  abortSignal: AbortSignal;
+  request: Request;
 }
 
 declare global {

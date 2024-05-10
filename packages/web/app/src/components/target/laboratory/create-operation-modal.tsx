@@ -95,7 +95,7 @@ export function CreateOperationModal({
         input: {
           name: values.name,
           collectionId: values.collectionId,
-          query: queryEditor?.getValue(),
+          query: queryEditor?.getValue() ?? '',
           variables: variableEditor?.getValue(),
           headers: headerEditor?.getValue(),
         },

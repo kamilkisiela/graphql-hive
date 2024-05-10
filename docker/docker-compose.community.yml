@@ -404,6 +404,7 @@ services:
       NODE_ENV: production
       APP_BASE_URL: '${HIVE_APP_BASE_URL}'
       GRAPHQL_PUBLIC_ENDPOINT: http://localhost:8082/graphql
+      GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT: http://localhost:8082/graphql
       GRAPHQL_PUBLIC_ORIGIN: http://localhost:8082
       AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
       AUTH_ORGANIZATION_OIDC: '1'

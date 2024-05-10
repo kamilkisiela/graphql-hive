@@ -26,6 +26,23 @@ export default gql`
     deleteOIDCIntegration(input: DeleteOIDCIntegrationInput!): DeleteOIDCIntegrationResult!
   }
 
+  type Subscription {
+    """
+    Subscribe to logs from the OIDC provider integration.
+    Helpful for debugging failing logins.
+    """
+    oidcIntegrationLog(input: OIDCIntegrationLogSubscriptionInput!): OIDCIntegrationLogEvent!
+  }
+
+  input OIDCIntegrationLogSubscriptionInput {
+    oidcIntegrationId: ID!
+  }
+
+  type OIDCIntegrationLogEvent {
+    timestamp: DateTime!
+    message: String!
+  }
+
   input CreateOIDCIntegrationInput {
     organizationId: ID!
     clientId: ID!

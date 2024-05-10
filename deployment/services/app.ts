@@ -60,6 +60,7 @@ export function deployApp({
         ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         GRAPHQL_PUBLIC_ENDPOINT: `https://${environment.appDns}/graphql`,
+        GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT: `https://${environment.appDns}/graphql/stream`,
         GRAPHQL_PUBLIC_ORIGIN: `https://${environment.appDns}`,
         SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),
         APP_BASE_URL: `https://${environment.appDns}/`,

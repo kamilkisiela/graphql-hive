@@ -1,10 +1,12 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import zod from 'zod';
 import { OIDCIntegration } from '../../../shared/entities';
+import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
+import { PUB_SUB_CONFIG, type HivePubSub } from '../../shared/providers/pub-sub';
 import { Storage } from '../../shared/providers/storage';
 import { OIDC_INTEGRATIONS_ENABLED } from './tokens';
 
@@ -20,6 +22,7 @@ export class OIDCIntegrationsProvider {
     private storage: Storage,
     private authManager: AuthManager,
     private crypto: CryptoProvider,
+    @Inject(PUB_SUB_CONFIG) private pubSub: HivePubSub,
     @Inject(OIDC_INTEGRATIONS_ENABLED) private enabled: boolean,
   ) {
     this.logger = logger.child({ source: 'OIDCIntegrationsProvider' });
@@ -302,6 +305,23 @@ export class OIDCIntegrationsProvider {
       type: 'ok',
       organizationId: integration.linkedOrganizationId,
     } as const;
+  }
+
+  async subscribeToOIDCIntegrationLogs(args: { oidcIntegrationId: string }) {
+    const integration = await this.storage.getOIDCIntegrationById({
+      oidcIntegrationId: args.oidcIntegrationId,
+    });
+
+    if (!integration) {
+      throw new HiveError('Integration not found.');
+    }
+
+    await this.authManager.ensureOrganizationAccess({
+      organization: integration.linkedOrganizationId,
+      scope: OrganizationAccessScope.INTEGRATIONS,
+    });
+
+    return this.pubSub.subscribe('oidcIntegrationLogs', integration.id);
   }
 }
 

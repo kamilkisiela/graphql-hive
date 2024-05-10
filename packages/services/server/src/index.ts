@@ -9,10 +9,14 @@ import {
 } from 'supertokens-node/framework/fastify/index.js';
 import cors from '@fastify/cors';
 import type { FastifyCorsOptionsDelegateCallback } from '@fastify/cors';
+import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import 'reflect-metadata';
 import { hostname } from 'os';
+import { createPubSub } from 'graphql-yoga';
 import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
+import { HivePubSub } from '@hive/api/src/modules/shared/providers/pub-sub';
+import { createRedisClient } from '@hive/api/src/modules/shared/providers/redis';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
@@ -153,6 +157,19 @@ export async function main() {
     10,
     tracing ? [tracing.instrumentSlonik()] : [],
   );
+
+  const redis = createRedisClient('Redis', env.redis, server.log.child({ source: 'Redis' }));
+
+  const pubSub = createPubSub({
+    eventTarget: createRedisEventTarget({
+      publishClient: redis,
+      subscribeClient: createRedisClient(
+        'subscriber',
+        env.redis,
+        server.log.child({ source: 'RedisSubscribe' }),
+      ),
+    }),
+  }) as HivePubSub;
 
   let dbPurgeTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
 
@@ -310,11 +327,7 @@ export async function main() {
       },
       logger,
       storage,
-      redis: {
-        host: env.redis.host,
-        port: env.redis.port,
-        password: env.redis.password,
-      },
+      redis,
       githubApp: env.github,
       clickHouse: {
         protocol: env.clickhouse.protocol,
@@ -362,6 +375,7 @@ export async function main() {
         : {},
       organizationOIDC: env.organizationOIDC,
       supportConfig: env.zendeskSupport,
+      pubSub,
     });
 
     let persistedOperations: Record<string, DocumentNode | string> | null = null;
@@ -415,6 +429,12 @@ export async function main() {
       storage,
       crypto,
       logger: server.log,
+      broadcastLog(id, message) {
+        pubSub.publish('oidcIntegrationLogs', id, {
+          timestamp: new Date().toISOString(),
+          message,
+        });
+      },
     });
 
     await server.register(formDataPlugin);

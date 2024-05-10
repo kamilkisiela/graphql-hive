@@ -18,6 +18,7 @@ import { env } from './environment';
 import {
   createOIDCSuperTokensProvider,
   getOIDCSuperTokensOverrides,
+  type BroadcastOIDCIntegrationLog,
 } from './supertokens/oidc-provider';
 import { createThirdPartyEmailPasswordNodeOktaProvider } from './supertokens/okta-provider';
 
@@ -37,6 +38,7 @@ export const backendConfig = (requirements: {
   storage: Storage;
   crypto: CryptoProvider;
   logger: FastifyBaseLogger;
+  broadcastLog: BroadcastOIDCIntegrationLog;
 }): TypeInput => {
   const { logger } = requirements;
   const emailsService = createTRPCProxyClient<EmailsApi>({
@@ -89,6 +91,8 @@ export const backendConfig = (requirements: {
     providers.push(
       createOIDCSuperTokensProvider({
         internalApi,
+        broadcastLog: requirements.broadcastLog,
+        logger,
       }),
     );
   }
@@ -335,6 +339,7 @@ export function initSupertokens(requirements: {
   storage: Storage;
   crypto: CryptoProvider;
   logger: FastifyBaseLogger;
+  broadcastLog: BroadcastOIDCIntegrationLog;
 }) {
   supertokens.init(backendConfig(requirements));
 }

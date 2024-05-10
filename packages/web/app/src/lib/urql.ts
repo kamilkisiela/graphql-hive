@@ -1,5 +1,6 @@
+import { createClient as createSSEClient } from 'graphql-sse';
 import Session from 'supertokens-auth-react/recipe/session';
-import { createClient, fetchExchange } from 'urql';
+import { createClient, fetchExchange, subscriptionExchange } from 'urql';
 import { env } from '@/env/frontend';
 import schema from '@/gql/schema';
 import { authExchange } from '@urql/exchange-auth';
@@ -10,12 +11,17 @@ import { networkStatusExchange } from './urql-exchanges/state';
 
 const noKey = (): null => null;
 
-const SERVER_BASE_PATH = env.graphqlPublicEndpoint;
-
 const isSome = <T>(value: T | null | undefined): value is T => value != null;
 
+const sseClient = createSSEClient({
+  url: env.graphqlPublicSubscriptionEndpoint,
+  credentials: 'include',
+});
+
+const usePersistedOperations = env.graphql.persistedOperations;
+
 export const urqlClient = createClient({
-  url: SERVER_BASE_PATH,
+  url: env.graphqlPublicEndpoint,
   fetchOptions: {
     headers: {
       'graphql-client-name': 'Hive App',
@@ -101,10 +107,11 @@ export const urqlClient = createClient({
         },
       };
     }),
-    env.graphql.persistedOperations
+    usePersistedOperations
       ? persistedExchange({
           enforcePersistedQueries: true,
           enableForMutation: true,
+          enableForSubscriptions: true,
           generateHash: (_, document) => {
             // TODO: improve types here
             return Promise.resolve((document as any)?.['__meta__']?.['hash'] ?? '');
@@ -112,5 +119,26 @@ export const urqlClient = createClient({
         })
       : null,
     fetchExchange,
+    subscriptionExchange({
+      forwardSubscription(operation) {
+        return {
+          subscribe: sink => {
+            const dispose = sseClient.subscribe(
+              {
+                // @ts-expect-error SSE client expects string, we pass undefined 😇
+                query: usePersistedOperations ? undefined : operation.query,
+                operationName: operation.operationName,
+                variables: operation.variables,
+                extensions: operation.extensions,
+              },
+              sink,
+            );
+            return {
+              unsubscribe: () => dispose(),
+            };
+          },
+        };
+      },
+    }),
   ].filter(isSome),
 });

@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as url from 'url';
-import graphql, { Kind, parse, visit } from 'graphql';
+import { parse } from 'graphql';
 
 const dirname = url.fileURLToPath(new URL('.', import.meta.url));
 

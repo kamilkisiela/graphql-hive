@@ -1,4 +1,5 @@
 import { createApplication, Scope } from 'graphql-modules';
+import { Redis } from 'ioredis';
 import { AwsClient } from '@hive/cdn-script/aws';
 import { activityModule } from './modules/activity';
 import { adminModule } from './modules/admin';
@@ -50,7 +51,8 @@ import { IdTranslator } from './modules/shared/providers/id-translator';
 import { Logger } from './modules/shared/providers/logger';
 import { Mutex } from './modules/shared/providers/mutex';
 import { PG_POOL_CONFIG } from './modules/shared/providers/pg-pool';
-import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
+import { HivePubSub, PUB_SUB_CONFIG } from './modules/shared/providers/pub-sub';
+import { REDIS_INSTANCE } from './modules/shared/providers/redis';
 import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
 import { WEB_APP_URL } from './modules/shared/providers/tokens';
@@ -111,11 +113,12 @@ export function createRegistry({
   supportConfig,
   emailsEndpoint,
   organizationOIDC,
+  pubSub,
 }: {
   logger: Logger;
   storage: Storage;
   clickHouse: ClickHouseConfig;
-  redis: RedisConfig;
+  redis: Redis;
   tokens: TokensConfig;
   webhooks: WebhooksConfig;
   schemaService: SchemaServiceConfig;
@@ -144,6 +147,7 @@ export function createRegistry({
   supportConfig: SupportConfig | null;
   emailsEndpoint?: string;
   organizationOIDC: boolean;
+  pubSub: HivePubSub;
 }) {
   const s3Config: S3Config = {
     client: new AwsClient({
@@ -161,7 +165,6 @@ export function createRegistry({
   const providers = [
     HttpClient,
     IdTranslator,
-    RedisProvider,
     Mutex,
     DistributedCache,
     CryptoProvider,
@@ -221,7 +224,7 @@ export function createRegistry({
       scope: Scope.Singleton,
     },
     {
-      provide: REDIS_CONFIG,
+      provide: REDIS_INSTANCE,
       useValue: redis,
       scope: Scope.Singleton,
     },
@@ -265,6 +268,7 @@ export function createRegistry({
       scope: Scope.Singleton,
       useValue: storage.pool,
     },
+    { provide: PUB_SUB_CONFIG, scope: Scope.Singleton, useValue: pubSub },
     encryptionSecretProvider(encryptionSecret),
     provideSchemaModuleConfig(schemaConfig),
   ];

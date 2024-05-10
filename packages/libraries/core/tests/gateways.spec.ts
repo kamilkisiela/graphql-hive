@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 import { createSchemaFetcher, createServicesFetcher } from '../src/client/gateways';
 
