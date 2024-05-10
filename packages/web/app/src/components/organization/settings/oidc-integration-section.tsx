@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Heading, Input, Button as LegacyButton, Modal, Tag } from '@/components/v2';
+import { Input, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
@@ -49,82 +49,51 @@ export function OIDCIntegrationSection(props: {
   const organization = useFragment(OIDCIntegrationSection_OrganizationFragment, props.organization);
 
   const hash = router.latestLocation.hash;
-  const isCreateOIDCIntegrationModalOpen = hash.endsWith('create-oidc-integration');
-  const isUpdateOIDCIntegrationModalOpen = hash.endsWith('manage-oidc-integration');
-  const isDeleteOIDCIntegrationModalOpen = hash.endsWith('remove-oidc-integration');
-  const isDebugOIDCIntegrationModalOpen = hash.endsWith('debug-oidc-integration');
-  const href = router.latestLocation.href;
+  const openCreateModalHash = 'create-oidc-integration';
+  const openEditModalHash = 'manage-oidc-integration';
+  const openDeleteModalHash = 'remove-oidc-integration';
+  const openDebugModalHash = 'debug-oidc-integration';
+  const isCreateOIDCIntegrationModalOpen = hash.endsWith(openCreateModalHash);
+  const isUpdateOIDCIntegrationModalOpen = hash.endsWith(openEditModalHash);
+  const isDeleteOIDCIntegrationModalOpen = hash.endsWith(openDeleteModalHash);
+  const isDebugOIDCIntegrationModalOpen = hash.endsWith(openDebugModalHash);
 
   const closeModal = () => {
     void router.navigate({
-      to: href,
+      hash: undefined,
     });
   };
-
-  const openCreateModalLink = `${href}#create-oidc-integration`;
-  const openEditModalLink = `${href}#manage-oidc-integration`;
-  const openDeleteModalLink = `${href}#remove-oidc-integration`;
-  const openDebugModalLink = `${href}#debug-oidc-integration`;
 
   return (
     <>
       <div className="flex items-center gap-x-2">
         {organization.oidcIntegration ? (
           <>
-            <Link
-              className={buttonVariants({ variant: 'default' })}
-              href={openEditModalLink}
-              onClick={ev => {
-                ev.preventDefault();
-                void router.navigate({
-                  to: openEditModalLink,
-                });
-              }}
-            >
+            <Link className={buttonVariants({ variant: 'default' })} hash={openEditModalHash}>
               <KeyIcon className="mr-2 size-4" />
               Manage OIDC Provider (
               {extractDomain(organization.oidcIntegration.authorizationEndpoint)})
             </Link>
             <Link
               className={cn(buttonVariants({ variant: 'default' }), 'px-5')}
-              href={openDebugModalLink}
-              onClick={ev => {
-                ev.preventDefault();
-                void router.navigate({
-                  to: openDebugModalLink,
-                });
-              }}
+              hash={openDebugModalHash}
             >
               Show Debug Logs
             </Link>
             <Link
               className={cn(buttonVariants({ variant: 'destructive' }), 'px-5')}
-              href={openDeleteModalLink}
-              onClick={ev => {
-                ev.preventDefault();
-                void router.navigate({
-                  to: openDeleteModalLink,
-                });
-              }}
+              hash={openDeleteModalHash}
             >
               Remove
             </Link>
           </>
         ) : (
-          <LegacyButton
-            size="large"
-            as="a"
-            href={openCreateModalLink}
-            onClick={ev => {
-              ev.preventDefault();
-              void router.navigate({
-                to: openCreateModalLink,
-              });
-            }}
-          >
-            <KeyIcon className="mr-2" />
-            Connect Open ID Connect Provider
-          </LegacyButton>
+          <Button asChild>
+            <Link hash={openCreateModalHash}>
+              <KeyIcon className="mr-2" />
+              Connect Open ID Connect Provider
+            </Link>
+          </Button>
         )}
       </div>
       <CreateOIDCIntegrationModal
@@ -132,7 +101,7 @@ export function OIDCIntegrationSection(props: {
         close={closeModal}
         hasOIDCIntegration={!!organization.oidcIntegration}
         organizationId={organization.id}
-        openEditModalLink={openEditModalLink}
+        openEditModalHash={openEditModalHash}
         transitionToManageScreen={() => {
           // TODO(router)
           void router.navigate({
@@ -145,7 +114,7 @@ export function OIDCIntegrationSection(props: {
         oidcIntegration={organization.oidcIntegration ?? null}
         isOpen={isUpdateOIDCIntegrationModalOpen}
         close={closeModal}
-        openCreateModalLink={openCreateModalLink}
+        openCreateModalHash={openCreateModalHash}
       />
       <RemoveOIDCIntegrationModal
         isOpen={isDeleteOIDCIntegrationModalOpen}
@@ -192,42 +161,40 @@ function CreateOIDCIntegrationModal(props: {
   close: () => void;
   hasOIDCIntegration: boolean;
   organizationId: string;
-  openEditModalLink: string;
+  openEditModalHash: string;
   transitionToManageScreen: () => void;
 }): ReactElement {
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
-      {props.hasOIDCIntegration ? (
-        <div className={classes.container}>
-          <Heading>Connect OpenID Connect Provider</Heading>
-          <p>
-            You are trying to create an OpenID Connect integration for an organization that already
-            has a provider attached. Please instead configure the existing provider.
-          </p>
-          <div className="flex w-full gap-2">
-            <LegacyButton type="button" size="large" block onClick={props.close}>
-              Close
-            </LegacyButton>
-            <LegacyButton
-              type="submit"
-              size="large"
-              block
-              variant="primary"
-              href={props.openEditModalLink}
-            >
-              Edit OIDC Integration
-            </LegacyButton>
-          </div>
-        </div>
-      ) : (
-        <CreateOIDCIntegrationForm
-          organizationId={props.organizationId}
-          close={props.close}
-          key={props.organizationId}
-          transitionToManageScreen={props.transitionToManageScreen}
-        />
-      )}
-    </Modal>
+    <Dialog open={props.isOpen} onOpenChange={props.close}>
+      <DialogContent className={classes.modal}>
+        {props.hasOIDCIntegration ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Connect OpenID Connect Provider</DialogTitle>
+              <DialogDescription>
+                You are trying to create an OpenID Connect integration for an organization that
+                already has a provider attached. Please configure the existing provider instead.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="space-x-2 text-right">
+              <Button variant="outline" onClick={props.close}>
+                Close
+              </Button>
+              <Button asChild>
+                <Link hash={props.openEditModalHash}>Edit OIDC Integration</Link>
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <CreateOIDCIntegrationForm
+            organizationId={props.organizationId}
+            close={props.close}
+            key={props.organizationId}
+            transitionToManageScreen={props.transitionToManageScreen}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -272,94 +239,102 @@ function CreateOIDCIntegrationForm(props: {
 
   return (
     <form className={classes.container} onSubmit={formik.handleSubmit}>
-      <Heading>Connect OpenID Connect Provider</Heading>
-      <p>
-        Connecting an OIDC provider to this organization allows users to automatically log in and be
-        part of this organization.
-      </p>
-      <p>
-        Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible provider.
-      </p>
+      <DialogHeader>
+        <DialogTitle>Connect OpenID Connect Provider</DialogTitle>
+        <DialogDescription>
+          Connecting an OIDC provider to this organization allows users to automatically log in and
+          be part of this organization.
+        </DialogDescription>
+        <DialogDescription>
+          Use Okta, Auth0, Google Workspaces or any other OAuth2 Open ID Connect compatible
+          provider.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-2 pt-4">
+        <div>
+          <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
+            Token Endpoint
+          </label>
 
-      <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
-        Token Endpoint
-      </label>
+          <Input
+            placeholder="OAuth Token Endpoint API"
+            id="tokenEndpoint"
+            name="tokenEndpoint"
+            onChange={formik.handleChange}
+            value={formik.values.tokenEndpoint}
+            isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}
+          />
+          <div>{mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}</div>
+        </div>
 
-      <Input
-        placeholder="OAuth Token Endpoint API"
-        id="tokenEndpoint"
-        name="tokenEndpoint"
-        onChange={formik.handleChange}
-        value={formik.values.tokenEndpoint}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}
-      />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}</div>
+        <div>
+          <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
+            User Info Endpoint
+          </label>
+          <Input
+            placeholder="OAuth User Info Endpoint API"
+            id="userinfoEndpoint"
+            name="userinfoEndpoint"
+            onChange={formik.handleChange}
+            value={formik.values.userinfoEndpoint}
+            isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}
+          />
+          <div>{mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}</div>
+        </div>
 
-      <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
-        User Info Endpoint
-      </label>
-      <Input
-        placeholder="OAuth User Info Endpoint API"
-        id="userinfoEndpoint"
-        name="userinfoEndpoint"
-        onChange={formik.handleChange}
-        value={formik.values.userinfoEndpoint}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}
-      />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}</div>
+        <div>
+          <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
+            Authorization Endpoint
+          </label>
+          <Input
+            placeholder="OAuth Authorization Endpoint API"
+            id="authorizationEndpoint"
+            name="authorizationEndpoint"
+            onChange={formik.handleChange}
+            value={formik.values.authorizationEndpoint}
+            isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}
+          />
+          <div>{mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}</div>
+        </div>
 
-      <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
-        Authorization Endpoint
-      </label>
-      <Input
-        placeholder="OAuth Authorization Endpoint API"
-        id="authorizationEndpoint"
-        name="authorizationEndpoint"
-        onChange={formik.handleChange}
-        value={formik.values.authorizationEndpoint}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}
-      />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}</div>
+        <div>
+          <label className="text-sm font-semibold" htmlFor="clientId">
+            Client ID
+          </label>
+          <Input
+            placeholder="Client ID"
+            id="clientId"
+            name="clientId"
+            onChange={formik.handleChange}
+            value={formik.values.clientId}
+            isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientId}
+          />
+          <div>{mutation.data?.createOIDCIntegration.error?.details.clientId}</div>
+        </div>
 
-      <label className="text-sm font-semibold" htmlFor="clientId">
-        Client ID
-      </label>
-      <Input
-        placeholder="Client ID"
-        id="clientId"
-        name="clientId"
-        onChange={formik.handleChange}
-        value={formik.values.clientId}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientId}
-      />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.clientId}</div>
+        <div>
+          <label className="text-sm font-semibold" htmlFor="clientSecret">
+            Client Secret
+          </label>
+          <Input
+            placeholder="Client Secret"
+            id="clientSecret"
+            name="clientSecret"
+            onChange={formik.handleChange}
+            value={formik.values.clientSecret}
+            isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientSecret}
+          />
+          <div>{mutation.data?.createOIDCIntegration.error?.details.clientSecret}</div>
+        </div>
 
-      <label className="text-sm font-semibold" htmlFor="clientSecret">
-        Client Secret
-      </label>
-      <Input
-        placeholder="Client Secret"
-        id="clientSecret"
-        name="clientSecret"
-        onChange={formik.handleChange}
-        value={formik.values.clientSecret}
-        isInvalid={!!mutation.data?.createOIDCIntegration.error?.details.clientSecret}
-      />
-      <div>{mutation.data?.createOIDCIntegration.error?.details.clientSecret}</div>
-
-      <div className="flex w-full gap-2">
-        <LegacyButton type="button" size="large" block onClick={props.close}>
-          Cancel
-        </LegacyButton>
-        <LegacyButton
-          type="submit"
-          size="large"
-          block
-          variant="primary"
-          disabled={mutation.fetching}
-        >
-          Connect OIDC Provider
-        </LegacyButton>
+        <div className="flex w-full justify-end gap-x-2">
+          <Button variant="outline" disabled={mutation.fetching} onClick={props.close}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={mutation.fetching}>
+            Connect OIDC Provider
+          </Button>
+        </div>
       </div>
     </form>
   );
@@ -369,7 +344,7 @@ function ManageOIDCIntegrationModal(props: {
   isOpen: boolean;
   close: () => void;
   oidcIntegration: FragmentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment> | null;
-  openCreateModalLink: string;
+  openCreateModalHash: string;
 }): ReactElement {
   const oidcIntegration = useFragment(
     UpdateOIDCIntegration_OIDCIntegrationFragment,
@@ -377,29 +352,25 @@ function ManageOIDCIntegrationModal(props: {
   );
 
   return oidcIntegration == null ? (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
-      <div className={classes.container}>
-        <Heading>Manage OpenID Connect Integration</Heading>
-        <p>
-          You are trying to update an OpenID Connect integration for an organization that has no
-          integration.
-        </p>
-        <div className="flex w-full gap-2">
-          <LegacyButton type="button" size="large" block onClick={props.close}>
+    <Dialog open={props.isOpen} onOpenChange={props.close}>
+      <DialogContent className={classes.modal}>
+        <DialogHeader>
+          <DialogTitle>Manage OpenID Connect Integration</DialogTitle>
+          <DialogDescription>
+            You are trying to update an OpenID Connect integration for an organization that has no
+            integration.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="space-x-2 text-right">
+          <Button variant="outline" onClick={props.close}>
             Close
-          </LegacyButton>
-          <LegacyButton
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            href={props.openCreateModalLink}
-          >
-            Connect OIDC Provider
-          </LegacyButton>
-        </div>
-      </div>
-    </Modal>
+          </Button>
+          <Button asChild>
+            <Link hash={props.openCreateModalHash}>Connect OIDC Provider</Link>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   ) : (
     <UpdateOIDCIntegrationForm
       close={props.close}
@@ -490,122 +461,121 @@ function UpdateOIDCIntegrationForm(props: {
   });
 
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className="flex min-h-[600px] w-[960px]">
-      <form className={cn(classes.container, 'flex-1 gap-12')} onSubmit={formik.handleSubmit}>
-        <Heading>Manage OpenID Connect Integration</Heading>
-        <div className="flex">
-          <div className={cn(classes.container, 'flex flex-1 flex-col pr-5')}>
-            <Heading size="lg">OIDC Provider Instructions</Heading>
-            <ul className="flex flex-col gap-5">
-              <li>
-                <div className="pb-1"> Set your OIDC Provider Sign-in redirect URI to </div>
-                <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
-              </li>
-              <li>
-                <div className="pb-1"> Set your OIDC Provider Sign-out redirect URI to </div>
-                <InlineCode content={`${env.appBaseUrl}/logout`} />
-              </li>
-              <li>
-                <div className="pb-1">Your users can login to the organization via </div>
-                <InlineCode
-                  content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
-                />
-              </li>
-            </ul>
+    <Dialog open={props.isOpen} onOpenChange={props.close}>
+      <DialogContent className="flex min-h-[600px] w-[960px] max-w-none">
+        <form className={cn(classes.container, 'flex-1 gap-12')} onSubmit={formik.handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Manage OpenID Connect Integration</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex">
+            <div className={cn(classes.container, 'flex flex-1 flex-col pr-5')}>
+              <DialogTitle>OIDC Provider Instructions</DialogTitle>
+              <ul className="flex flex-col gap-5">
+                <li>
+                  <div className="pb-1"> Set your OIDC Provider Sign-in redirect URI to </div>
+                  <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
+                </li>
+                <li>
+                  <div className="pb-1"> Set your OIDC Provider Sign-out redirect URI to </div>
+                  <InlineCode content={`${env.appBaseUrl}/logout`} />
+                </li>
+                <li>
+                  <div className="pb-1">Your users can login to the organization via </div>
+                  <InlineCode
+                    content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
+                  />
+                </li>
+              </ul>
+            </div>
+            <div className={cn(classes.container, 'flex-1 pl-5')}>
+              <DialogTitle>Properties</DialogTitle>
+
+              <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
+                Token Endpoint
+              </label>
+              <Input
+                placeholder="OAuth Token Endpoint API"
+                id="tokenEndpoint"
+                name="tokenEndpoint"
+                onChange={formik.handleChange}
+                value={formik.values.tokenEndpoint}
+                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}
+              />
+              <div>{mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}</div>
+
+              <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
+                User Info Endpoint
+              </label>
+              <Input
+                placeholder="OAuth User Info Endpoint API"
+                id="userinfoEndpoint"
+                name="userinfoEndpoint"
+                onChange={formik.handleChange}
+                value={formik.values.userinfoEndpoint}
+                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}
+              />
+              <div>{mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}</div>
+
+              <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
+                Authorization Endpoint
+              </label>
+              <Input
+                placeholder="OAuth Authorization Endpoint API"
+                id="authorizationEndpoint"
+                name="authorizationEndpoint"
+                onChange={formik.handleChange}
+                value={formik.values.authorizationEndpoint}
+                isInvalid={
+                  !!mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint
+                }
+              />
+              <div>{mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint}</div>
+
+              <label className="text-sm font-semibold" htmlFor="clientId">
+                Client ID
+              </label>
+              <Input
+                placeholder="Client ID"
+                id="clientId"
+                name="clientId"
+                onChange={formik.handleChange}
+                value={formik.values.clientId}
+                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
+              />
+              <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
+
+              <label className="text-sm font-semibold" htmlFor="clientSecret">
+                Client Secret
+              </label>
+              <Input
+                placeholder={
+                  'Keep old value. (Ending with ' +
+                  props.oidcIntegration.clientSecretPreview.substring(
+                    props.oidcIntegration.clientSecretPreview.length - 4,
+                  ) +
+                  ')'
+                }
+                id="clientSecret"
+                name="clientSecret"
+                onChange={formik.handleChange}
+                value={formik.values.clientSecret}
+                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
+              />
+              <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
+            </div>
           </div>
-          <div className={cn(classes.container, 'flex-1 pl-5')}>
-            <Heading size="lg">Properties</Heading>
-
-            <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
-              Token Endpoint
-            </label>
-            <Input
-              placeholder="OAuth Token Endpoint API"
-              id="tokenEndpoint"
-              name="tokenEndpoint"
-              onChange={formik.handleChange}
-              value={formik.values.tokenEndpoint}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}
-            />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}</div>
-
-            <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
-              User Info Endpoint
-            </label>
-            <Input
-              placeholder="OAuth User Info Endpoint API"
-              id="userinfoEndpoint"
-              name="userinfoEndpoint"
-              onChange={formik.handleChange}
-              value={formik.values.userinfoEndpoint}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}
-            />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}</div>
-
-            <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
-              Authorization Endpoint
-            </label>
-            <Input
-              placeholder="OAuth Authorization Endpoint API"
-              id="authorizationEndpoint"
-              name="authorizationEndpoint"
-              onChange={formik.handleChange}
-              value={formik.values.authorizationEndpoint}
-              isInvalid={
-                !!mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint
-              }
-            />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint}</div>
-
-            <label className="text-sm font-semibold" htmlFor="clientId">
-              Client ID
-            </label>
-            <Input
-              placeholder="Client ID"
-              id="clientId"
-              name="clientId"
-              onChange={formik.handleChange}
-              value={formik.values.clientId}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
-            />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
-
-            <label className="text-sm font-semibold" htmlFor="clientSecret">
-              Client Secret
-            </label>
-            <Input
-              placeholder={
-                'Keep old value. (Ending with ' +
-                props.oidcIntegration.clientSecretPreview.substring(
-                  props.oidcIntegration.clientSecretPreview.length - 4,
-                ) +
-                ')'
-              }
-              id="clientSecret"
-              name="clientSecret"
-              onChange={formik.handleChange}
-              value={formik.values.clientSecret}
-              isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
-            />
-            <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
-          </div>
-        </div>
-        <div className="mt-4 flex w-full gap-2 self-end">
-          <LegacyButton type="button" size="large" block onClick={props.close} tabIndex={0}>
-            Close
-          </LegacyButton>
-          <LegacyButton
-            type="submit"
-            size="large"
-            block
-            variant="primary"
-            disabled={mutation.fetching}
-          >
-            Save
-          </LegacyButton>
-        </div>
-      </form>
-    </Modal>
+          <DialogFooter className="space-x-2 text-right">
+            <Button variant="outline" onClick={props.close} tabIndex={0}>
+              Close
+            </Button>
+            <Button type="submit" disabled={mutation.fetching}>
+              Save
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -635,25 +605,23 @@ function RemoveOIDCIntegrationModal(props: {
   const { oidcIntegrationId } = props;
 
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={classes.modal}>
-      <div className={classes.container}>
-        <Heading>Remove OpenID Connect Integration</Heading>
+    <Dialog open={props.isOpen} onOpenChange={props.close}>
+      <DialogContent className={classes.modal}>
+        <DialogHeader>
+          <DialogTitle>Remove OpenID Connect Integration</DialogTitle>
+        </DialogHeader>
         {mutation.data?.deleteOIDCIntegration.ok ? (
           <>
             <p>The OIDC integration has been removed successfully.</p>
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
-                Close
-              </LegacyButton>
+            <div className="text-right">
+              <Button onClick={props.close}>Close</Button>
             </div>
           </>
         ) : oidcIntegrationId === null ? (
           <>
             <p>This organization does not have an OIDC integration.</p>
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
-                Close
-              </LegacyButton>
+            <div className="text-right">
+              <Button onClick={props.close}>Close</Button>
             </div>
           </>
         ) : (
@@ -667,26 +635,24 @@ function RemoveOIDCIntegrationModal(props: {
             </Tag>
             <p>Do you really want to proceed?</p>
 
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
+            <div className="space-x-2 text-right">
+              <Button variant="outline" onClick={props.close}>
                 Close
-              </LegacyButton>
-              <LegacyButton
-                size="large"
-                block
-                danger
+              </Button>
+              <Button
+                variant="destructive"
                 disabled={mutation.fetching}
                 onClick={async () => {
                   await mutate({ input: { oidcIntegrationId } });
                 }}
               >
                 Delete
-              </LegacyButton>
+              </Button>
             </div>
           </>
         )}
-      </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }
 
