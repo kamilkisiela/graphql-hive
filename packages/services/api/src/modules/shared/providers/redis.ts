@@ -8,20 +8,7 @@ export type { RedisInstance as Redis };
 
 export type RedisConfig = Required<Pick<RedisOptions, 'host' | 'port' | 'password'>>;
 
-export const REDIS_CONFIG = new InjectionToken<RedisConfig>('REDIS_CONFIG');
 export const REDIS_INSTANCE = new InjectionToken<RedisInstance>('REDIS_INSTANCE');
-
-export const RedisProvider: FactoryProvider<RedisInstance> = {
-  provide: REDIS_INSTANCE,
-  useFactory(config: RedisConfig, mainLogger: Logger) {
-    const logger = mainLogger.child({
-      source: 'Redis',
-    });
-    const redis = createRedisClient('default', config, logger);
-    return redis;
-  },
-  deps: [REDIS_CONFIG, Logger],
-};
 
 export function createRedisClient(label: string, config: RedisConfig, logger: Logger) {
   const redis = new Redis({

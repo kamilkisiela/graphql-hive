@@ -29,6 +29,12 @@
       "@hive/api/src/modules/schema/providers/artifact-storage-reader": [
         "./packages/services/api/src/modules/schema/providers/artifact-storage-reader.ts"
       ],
+      "@hive/api/src/modules/shared/providers/redis": [
+        "./packages/services/api/src/modules/shared/providers/redis.ts"
+      ],
+      "@hive/api/src/modules/shared/providers/pub-sub": [
+        "./packages/services/api/src/modules/shared/providers/pub-sub.ts"
+      ],
 
       "@hive/service-common": ["./packages/services/service-common/src/index.ts"],
       "@hive/cdn-script/artifact-handler": [

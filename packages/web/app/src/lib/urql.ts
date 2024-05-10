@@ -11,19 +11,17 @@ import { networkStatusExchange } from './urql-exchanges/state';
 
 const noKey = (): null => null;
 
-const SERVER_BASE_PATH = env.graphqlPublicEndpoint;
-
 const isSome = <T>(value: T | null | undefined): value is T => value != null;
 
 const sseClient = createSSEClient({
-  url: SERVER_BASE_PATH + '/stream',
+  url: env.graphqlPublicSubscriptionEndpoint,
   credentials: 'include',
 });
 
 const usePersistedOperations = env.graphql.persistedOperations;
 
 export const urqlClient = createClient({
-  url: SERVER_BASE_PATH,
+  url: env.graphqlPublicEndpoint,
   fetchOptions: {
     headers: {
       'graphql-client-name': 'Hive App',

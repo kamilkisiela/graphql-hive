@@ -42,6 +42,7 @@ const BaseSchema = protectedObject({
   ENVIRONMENT: zod.string(),
   APP_BASE_URL: zod.string().url(),
   GRAPHQL_PUBLIC_ENDPOINT: zod.string().url(),
+  GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT: zod.string().url(),
   GRAPHQL_PUBLIC_ORIGIN: zod.string().url(),
   GA_TRACKING_ID: emptyString(zod.string().optional()),
   DOCS_URL: emptyString(zod.string().url().optional()),
@@ -144,6 +145,7 @@ function buildConfig() {
   return {
     appBaseUrl: base.APP_BASE_URL.replace(/\/$/, ''),
     graphqlPublicEndpoint: base.GRAPHQL_PUBLIC_ENDPOINT,
+    graphqlPublicSubscriptionEndpoint: base.GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT,
     graphqlPublicOrigin: base.GRAPHQL_PUBLIC_ORIGIN,
     docsUrl: base.DOCS_URL,
     stripePublicKey: base.STRIPE_PUBLIC_KEY ?? null,

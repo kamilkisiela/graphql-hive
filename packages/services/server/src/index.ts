@@ -158,13 +158,11 @@ export async function main() {
     tracing ? [tracing.instrumentSlonik()] : [],
   );
 
+  const redis = createRedisClient('Redis', env.redis, server.log.child({ source: 'Redis' }));
+
   const pubSub = createPubSub({
     eventTarget: createRedisEventTarget({
-      publishClient: createRedisClient(
-        'publisher',
-        env.redis,
-        server.log.child({ source: 'RedisPublish' }),
-      ),
+      publishClient: redis,
       subscribeClient: createRedisClient(
         'subscriber',
         env.redis,
@@ -329,11 +327,7 @@ export async function main() {
       },
       logger,
       storage,
-      redis: {
-        host: env.redis.host,
-        port: env.redis.port,
-        password: env.redis.password,
-      },
+      redis,
       githubApp: env.github,
       clickHouse: {
         protocol: env.clickhouse.protocol,
