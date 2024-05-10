@@ -13,10 +13,10 @@ import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import 'reflect-metadata';
 import { hostname } from 'os';
 import { createPubSub } from 'graphql-yoga';
-import { Redis } from 'ioredis';
-import { HivePubSub } from 'packages/services/api/src/modules/shared/providers/pub-sub';
 import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
+import { HivePubSub } from '@hive/api/src/modules/shared/providers/pub-sub';
+import { createRedisClient } from '@hive/api/src/modules/shared/providers/redis';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
@@ -158,33 +158,18 @@ export async function main() {
     tracing ? [tracing.instrumentSlonik()] : [],
   );
 
-  // TODO: graceful shutdown, error handlers etc.
   const pubSub = createPubSub({
     eventTarget: createRedisEventTarget({
-      publishClient: new Redis({
-        host: env.redis.host,
-        port: env.redis.port,
-        password: env.redis.password,
-        maxRetriesPerRequest: null,
-        db: 0,
-        enableReadyCheck: false,
-        reconnectOnError(error) {
-          server.log.warn('Redis reconnectOnError (error=%s)', error);
-          return 1;
-        },
-      }),
-      subscribeClient: new Redis({
-        host: env.redis.host,
-        port: env.redis.port,
-        password: env.redis.password,
-        maxRetriesPerRequest: null,
-        db: 0,
-        enableReadyCheck: false,
-        reconnectOnError(error) {
-          server.log.warn('Redis reconnectOnError (error=%s)', error);
-          return 1;
-        },
-      }),
+      publishClient: createRedisClient(
+        'publisher',
+        env.redis,
+        server.log.child({ source: 'RedisPublish' }),
+      ),
+      subscribeClient: createRedisClient(
+        'subscriber',
+        env.redis,
+        server.log.child({ source: 'RedisSubscribe' }),
+      ),
     }),
   }) as HivePubSub;
 

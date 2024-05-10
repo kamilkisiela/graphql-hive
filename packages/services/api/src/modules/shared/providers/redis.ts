@@ -17,43 +17,48 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
     const logger = mainLogger.child({
       source: 'Redis',
     });
-    const redis = new Redis({
-      host: config.host,
-      port: config.port,
-      password: config.password,
-      retryStrategy(times) {
-        return Math.min(times * 500, 2000);
-      },
-      reconnectOnError(error) {
-        logger.warn('Redis reconnectOnError (error=%s)', error);
-        return 1;
-      },
-      db: 0,
-      maxRetriesPerRequest: null,
-      enableReadyCheck: false,
-    });
-
-    redis.on('error', err => {
-      logger.error('Redis connection error (error=%s)', err);
-    });
-
-    redis.on('connect', () => {
-      logger.debug('Redis connection established');
-    });
-
-    redis.on('ready', () => {
-      logger.info('Redis connection ready');
-    });
-
-    redis.on('close', () => {
-      logger.info('Redis connection closed');
-    });
-
-    redis.on('reconnecting', (timeToReconnect?: number) => {
-      logger.info('Redis reconnecting in %s', timeToReconnect);
-    });
-
+    const redis = createRedisClient('default', config, logger);
     return redis;
   },
   deps: [REDIS_CONFIG, Logger],
 };
+
+export function createRedisClient(label: string, config: RedisConfig, logger: Logger) {
+  const redis = new Redis({
+    host: config.host,
+    port: config.port,
+    password: config.password,
+    retryStrategy(times) {
+      return Math.min(times * 500, 2000);
+    },
+    reconnectOnError(error) {
+      logger.warn('Redis reconnectOnError (error=%s)', error);
+      return 1;
+    },
+    db: 0,
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+  });
+
+  redis.on('error', err => {
+    logger.error('Redis connection error (error=%s,label=%s)', err, label);
+  });
+
+  redis.on('connect', () => {
+    logger.debug('Redis connection established (label=%s)', label);
+  });
+
+  redis.on('ready', () => {
+    logger.info('Redis connection ready (label=%s)', label);
+  });
+
+  redis.on('close', () => {
+    logger.info('Redis connection closed (label=%s)', label);
+  });
+
+  redis.on('reconnecting', (timeToReconnect?: number) => {
+    logger.info('Redis reconnecting in %s (label=%s)', timeToReconnect, label);
+  });
+
+  return redis;
+}
