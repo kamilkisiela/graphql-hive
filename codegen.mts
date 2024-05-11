@@ -2,8 +2,6 @@ import { defineConfig } from '@eddeee888/gcg-typescript-resolver-files';
 import { type CodegenConfig } from '@graphql-codegen/cli';
 import { addTypenameSelectionDocumentTransform } from '@graphql-codegen/client-preset';
 
-const serverPresetConfig = defineConfig();
-
 const config: CodegenConfig = {
   schema: './packages/services/api/src/modules/*/module.graphql.ts',
   emitLegacyCommonJSImports: true,
@@ -18,7 +16,7 @@ const config: CodegenConfig = {
       typeDefsFilePath: false,
       resolverMainFileMode: 'modules',
       resolverTypesPath: './__generated__/types.next.ts',
-      whitelistedModules: ['usage-estimation'],
+      whitelistedModules: ['usage-estimation', 'admin'],
       scalarsOverrides: {
         DateTime: { type: 'string' },
         Date: { type: 'string' },
@@ -90,7 +88,7 @@ const config: CodegenConfig = {
           AlertWebhookChannel: 'AlertChannelMapper',
           Alert: '../shared/entities#Alert as AlertMapper',
           AdminQuery: '{}',
-          AdminStats: '../shared/mappers#AdminStats as AdminStatsMapper',
+          AdminStats: '../modules/admin/module.graphql.mappers#AdminStatsMapper',
           AdminGeneralStats: '../shared/mappers#AdminStats as AdminGeneralStatsMapper',
           AdminOrganizationStats:
             '../shared/entities#AdminOrganizationStats as AdminOrganizationStatsMapper',
@@ -143,6 +141,15 @@ const config: CodegenConfig = {
     // API
     './packages/services/api/src/modules': {
       preset: 'graphql-modules',
+      plugins: [
+        {
+          add: {
+            content: "import type { StripeTypes } from '@hive/stripe-billing';",
+          },
+        },
+        'typescript',
+        'typescript-resolvers',
+      ],
       presetConfig: {
         baseTypesPath: '../__generated__/types.ts',
         filename: '__generated__/types.ts',
@@ -219,7 +226,7 @@ const config: CodegenConfig = {
           AlertWebhookChannel: 'AlertChannelMapper',
           Alert: '../shared/entities#Alert as AlertMapper',
           AdminQuery: '{}',
-          AdminStats: '../shared/mappers#AdminStats as AdminStatsMapper',
+          AdminStats: '../modules/admin/module.graphql.mappers#AdminStatsMapper',
           AdminGeneralStats: '../shared/mappers#AdminStats as AdminGeneralStatsMapper',
           AdminOrganizationStats:
             '../shared/entities#AdminOrganizationStats as AdminOrganizationStatsMapper',
