@@ -6,6 +6,7 @@ import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button } from '@/components/ui/button';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QueryError } from '@/components/ui/query-error';
 import { Accordion } from '@/components/v2/accordion';
 import { noSchema, noSchemaVersion } from '@/components/v2/empty-list';
@@ -15,6 +16,9 @@ import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/gql/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { Link, useRouter } from '@tanstack/react-router';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 type CompositeSchema = Extract<
   DocumentType<typeof SchemaView_SchemaFragment>,
@@ -90,9 +94,8 @@ function Schemas({
 
   const filteredSchemas = schemas.filter(isCompositeSchema).filter(schema => {
     if (filterService && 'service' in schema && schema.service) {
-      return schema.service.toLowerCase().includes(filterService.toLowerCase());
+      return schema.service.toLowerCase() === filterService.toLowerCase();
     }
-
     return true;
   });
 
@@ -199,8 +202,11 @@ function SchemaView(props: {
   }, 500);
   const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     event => {
+      console.log('event', event.target.value);
       debouncedFilter(event.target.value);
+      setFilterService(event.target.value);
       setTerm(event.target.value);
+      setOpen(false);
     },
     [debouncedFilter, setTerm],
   );
@@ -233,19 +239,57 @@ function SchemaView(props: {
   const canMarkAsValid = project.registryModel === RegistryModel.Legacy;
   const showExtra = canManage;
 
+  const [open, setOpen] = useState<boolean>(false);
+  const schemas = useFragment(SchemaView_SchemaFragment, target.latestSchemaVersion?.schemas.nodes);
+  const compositeSchemas = schemas?.filter(isCompositeSchema) as CompositeSchema[];
+
   return (
     <>
       {showExtra ? (
         <div className="mb-5 flex flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             {isDistributed && (
-              <Input
-                placeholder="Find service"
-                value={term}
-                onChange={handleChange}
-                onClear={reset}
-                size="small"
-              />
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-[400px] justify-between">
+                    {filterService
+                      ? compositeSchemas?.find(schema => schema.service === filterService)?.service
+                      : 'Filter schemas'}
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] truncate p-0">
+                  <Command>
+                    <CommandInput
+                      closeFn={reset}
+                      className="w-[400px]"
+                      placeholder="Search schema"
+                      value={term}
+                      onValueChange={setTerm}
+                    />
+                    <CommandEmpty>No schema found.</CommandEmpty>
+                    <CommandGroup>
+                      {compositeSchemas?.map(schema => (
+                        <CommandItem
+                          key={schema.service}
+                          value={schema.service as string}
+                          onSelect={currentValue => {
+                            handleChange({ target: { value: currentValue } } as any);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 size-4',
+                              term === schema.id ? 'opacity-100' : 'opacity-0',
+                            )}
+                          />
+                          {schema.service}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             )}
             {canMarkAsValid ? (
               <>

@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
-import { Search } from 'lucide-react';
+import { Search, XIcon } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { type DialogProps } from '@radix-ui/react-dialog';
+import { Button } from './button';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -36,11 +37,15 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   );
 };
 
+type CommandInputProps = {
+  closeFn?: () => void;
+} & React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>;
+
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
+  CommandInputProps
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+  <div className="flex items-center border-b pl-3" cmdk-input-wrapper="">
     <Search className="mr-2 size-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       ref={ref}
@@ -50,6 +55,18 @@ const CommandInput = React.forwardRef<
       )}
       {...props}
     />
+    {props.closeFn && (
+      <Button
+        type="reset"
+        variant="link"
+        className="text-muted-foreground hover:text-foreground"
+        onClick={() => {
+          props.closeFn?.();
+        }}
+      >
+        <XIcon width={16} height={16} />
+      </Button>
+    )}
   </div>
 ));
 
