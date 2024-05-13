@@ -12,7 +12,16 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "plugins": [
+      {
+        "name": "@0no-co/graphqlsp",
+        "schema": "../../../schema.graphql",
+        "disableTypegen": true,
+        "templateIsCallExpression": true,
+        "template": "graphql"
+      }
+    ]
   },
   "include": ["src"]
 }
