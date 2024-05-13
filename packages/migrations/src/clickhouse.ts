@@ -165,6 +165,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/007-james-bond-aggregates-hourly-and-minutely'),
     import('./clickhouse-actions/008-daily-operations-log'),
     import('./clickhouse-actions/009-ttl-1-year'),
+    import('./clickhouse-actions/010-app-deployment-operations'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
