@@ -6,11 +6,8 @@ const meta: Meta<typeof Button> = {
     component: Button,
     decorators: [
         (Story: any) => (
-            <div className='flex flex-row w-full'>
-                <div className="flex flex-row w-full p-2 bg-white h-screen items-center">
-                    <Story />
-                </div>
-                <div className="flex flex-row w-full p-2 bg-black h-screen items-center">
+            <div className='flex flex-row w-full bg-black'>
+                <div className="flex flex-row w-full p-2 h-screen items-center">
                     <Story />
                 </div>
             </div>
@@ -19,7 +16,7 @@ const meta: Meta<typeof Button> = {
     argTypes: {
         variant: {
             control: { type: 'select' },
-            options: ['default', 'primary', 'secondary', 'destructive', 'link'],
+            options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
         },
         size: {
             control: { type: 'select' },
@@ -43,10 +40,17 @@ export const Default: Story = {
     },
 };
 
-export const Primary: Story = {
+export const Destructive: Story = {
     args: {
-        variant: 'primary',
-        children: 'Primary Button',
+        variant: 'destructive',
+        children: 'Destructive Button',
+    },
+};
+
+export const Outline: Story = {
+    args: {
+        variant: 'outline',
+        children: 'Outline Button',
     },
 };
 
@@ -57,10 +61,10 @@ export const Secondary: Story = {
     },
 };
 
-export const Destructive: Story = {
+export const Ghost: Story = {
     args: {
-        variant: 'destructive',
-        children: 'Destructive Button',
+        variant: 'ghost',
+        children: 'Ghost Button',
     },
 };
 
@@ -68,28 +72,6 @@ export const Link: Story = {
     args: {
         variant: 'link',
         children: 'Link Button',
-    },
-};
-
-// Sizes
-export const SizeDefault: Story = {
-    args: {
-        size: 'default',
-        children: 'Default Size',
-    },
-};
-
-export const SizeSmall: Story = {
-    args: {
-        size: 'sm',
-        children: 'Small Size',
-    },
-};
-
-export const SizeLarge: Story = {
-    args: {
-        size: 'lg',
-        children: 'Large Size',
     },
 };
 
