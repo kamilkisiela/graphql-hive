@@ -361,22 +361,21 @@ export interface Storage {
     valid: boolean;
   } | null>;
 
-  getLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | never>;
+  getLatestValidVersion(_: { target: string }): Promise<SchemaVersion | never>;
 
-  getMaybeLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
+  getMaybeLatestValidVersion(_: { target: string }): Promise<SchemaVersion | null | never>;
 
   getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;
 
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
   /** Find the version before a schema version */
-  getVersionBeforeVersionId(
-    _: TargetSelector & {
-      beforeVersionId: string;
-      beforeVersionCreatedAt: string;
-      onlyComposable: boolean;
-    },
-  ): Promise<SchemaVersion | null>;
+  getVersionBeforeVersionId(_: {
+    target: string;
+    beforeVersionId: string;
+    beforeVersionCreatedAt: string;
+    onlyComposable: boolean;
+  }): Promise<SchemaVersion | null>;
 
   /**
    * Find a specific schema version via it's action id.

@@ -1067,8 +1067,6 @@ export class SchemaManager {
     ]);
 
     const schemaVersion = await this.storage.getVersionBeforeVersionId({
-      organization: args.organization,
-      project: args.project,
       target: args.target,
       beforeVersionId: args.beforeVersionId,
       beforeVersionCreatedAt: args.beforeVersionCreatedAt,
@@ -1096,8 +1094,6 @@ export class SchemaManager {
     beforeVersionCreatedAt: string;
   }) {
     const schemaVersion = await this.storage.getVersionBeforeVersionId({
-      organization: args.organization,
-      project: args.project,
       target: args.target,
       beforeVersionId: args.beforeVersionId,
       beforeVersionCreatedAt: args.beforeVersionCreatedAt,
