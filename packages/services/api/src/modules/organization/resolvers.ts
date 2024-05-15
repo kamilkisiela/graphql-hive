@@ -85,21 +85,23 @@ export const resolvers: OrganizationModule.Resolvers = {
       // This is the organization that got stored as an cookie
       // We make sure it actually exists before directing to it.
       if (previouslyVisitedOrganizationId) {
-        const orgId = await injector.get(IdTranslator).translateOrganizationId({
+        const orgId = await injector.get(IdTranslator).translateOrganizationIdSafe({
           organization: previouslyVisitedOrganizationId,
         });
 
-        const org = await organizationManager.getOrganization({
-          organization: orgId,
-        });
+        if (orgId) {
+          const org = await organizationManager.getOrganization({
+            organization: orgId,
+          });
 
-        if (org) {
-          return {
-            selector: {
-              organization: org.cleanId,
-            },
-            organization: org,
-          };
+          if (org) {
+            return {
+              selector: {
+                organization: org.cleanId,
+              },
+              organization: org,
+            };
+          }
         }
       }
 
