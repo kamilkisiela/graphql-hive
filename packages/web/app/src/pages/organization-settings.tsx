@@ -119,10 +119,10 @@ function Integrations(props: { organizationId: string }) {
             </Button>
           ) : (
             <Button variant="secondary" asChild>
-              <Link href={`/api/slack/connect/${props.organizationId}`}>
+              <a href={`/api/slack/connect/${props.organizationId}`}>
                 <SlackIcon className="mr-2" />
                 Connect Slack
-              </Link>
+              </a>
             </Button>
           )}
           <Tag>Alerts and notifications</Tag>
@@ -148,17 +148,15 @@ function Integrations(props: { organizationId: string }) {
                   Disconnect GitHub
                 </Button>
                 <Button variant="link" asChild>
-                  <Link href={`/api/github/connect/${props.organizationId}`}>
-                    Adjust permissions
-                  </Link>
+                  <a href={`/api/github/connect/${props.organizationId}`}>Adjust permissions</a>
                 </Button>
               </>
             ) : (
               <Button variant="secondary" asChild>
-                <Link href={`/api/github/connect/${props.organizationId}`}>
+                <a href={`/api/github/connect/${props.organizationId}`}>
                   <GitHubIcon className="mr-2" />
                   Connect GitHub
-                </Link>
+                </a>
               </Button>
             )}
             <Tag>Allow Hive to communicate with GitHub</Tag>

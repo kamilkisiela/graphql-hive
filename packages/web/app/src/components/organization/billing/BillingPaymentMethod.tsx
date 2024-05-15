@@ -118,6 +118,7 @@ export const BillingPaymentMethodForm = ({
       />
       <Section.Subtitle>
         All payments and subscriptions are processed securely by{' '}
+        {/* TODO(router) check if it actually redirects to Stripe */}
         <Link variant="primary" href="https://stripe.com" target="_blank" rel="noreferrer">
           Stripe
         </Link>

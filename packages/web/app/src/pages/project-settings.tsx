@@ -93,11 +93,11 @@ function GitHubIntegration(props: {
         <CardTitle>Use project's name in GitHub Check</CardTitle>
         <CardDescription>
           Prevents GitHub Check name collisions when running{' '}
-          <Link href={docksLink}>
+          <a href={docksLink}>
             <span className="mx-1 text-orange-700 hover:underline hover:underline-offset-4">
               $ hive schema:check --github
             </span>
-          </Link>
+          </a>
           for more than one project.
         </CardDescription>
       </CardHeader>

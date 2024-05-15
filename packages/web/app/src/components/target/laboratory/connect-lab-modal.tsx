@@ -42,13 +42,13 @@ export const ConnectLabModal = (props: {
         To authenticate, use the following HTTP headers, with a token that has `target:read` scope:
       </span>
       <Tag>
-        X-Hive-Key:{' '}
+        X-Hive-Key: {/* TODO(router) turn into <a/> as it's not pointing to docs */}
         <Link variant="secondary" target="_blank" rel="noreferrer" href={docsUrl}>
           YOUR_TOKEN_HERE
         </Link>
       </Tag>
       <p className="text-sm text-gray-500">
-        Read the{' '}
+        Read the {/* TODO(router) turn into <a/> as it's not pointing to docs */}
         <Link variant="primary" target="_blank" rel="noreferrer" href={docsUrl}>
           Managing Tokens
         </Link>{' '}

@@ -145,6 +145,7 @@ function SchemaCoordinateView(props: {
             <AlertDescription>
               This page currently only shows the information for Query and Mutation operations. We
               are currently evaluating what kind of insights are useful for subscriptions.{' '}
+              {/* TODO(router) turn into <a/> as it's not pointing to docs */}
               <LegacyLink
                 variant="primary"
                 href="https://github.com/kamilkisiela/graphql-hive/issues/3290"

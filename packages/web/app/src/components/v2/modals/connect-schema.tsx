@@ -95,7 +95,7 @@ export const ConnectSchemaModal = (props: {
       {query.data?.target && (
         <>
           <p className="text-sm text-gray-500">
-            Hive leverages the{' '}
+            Hive leverages the {/* TODO(router) turn into <a/> as it's not pointing to cf */}
             <Link
               variant="primary"
               className="font-bold underline"

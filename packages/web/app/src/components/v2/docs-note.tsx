@@ -39,11 +39,11 @@ export const DocsLink = ({
 
   return (
     <Button variant="link" className={cn('p-0 text-orange-500', className)} asChild>
-      <Link href={fullUrl} target="_blank" rel="noreferrer">
+      <a href={fullUrl} target="_blank" rel="noreferrer">
         {icon ?? <Book className="mr-2 size-4" />}
         {children}
         <ExternalLinkIcon className="inline pl-1" />
-      </Link>
+      </a>
     </Button>
   );
 };
@@ -69,7 +69,7 @@ export const ProductUpdatesLink = ({
 
   return (
     <Button variant="link" className={cn('p-0 text-blue-500', className)} asChild>
-      <RouterLink
+      <a
         href={fullUrl}
         target={isExternal ? '_blank' : undefined}
         rel="noreferrer"
@@ -78,7 +78,7 @@ export const ProductUpdatesLink = ({
         {icon ?? <Megaphone className="mr-2 size-4" />}
         {children}
         {isExternal ? <ExternalLinkIcon className="inline pl-1" /> : null}
-      </RouterLink>
+      </a>
     </Button>
   );
 };

@@ -403,9 +403,9 @@ function SchemaChangeApproval(props: {
           approved by {approvalName} in this schema check on {approvalDate}.
         </>
       ) : (
-        <Link href={schemaCheckPath} className="text-orange-500 hover:underline">
+        <a href={schemaCheckPath} className="text-orange-500 hover:underline">
           approved by {approvalName} on {approvalDate}.
-        </Link>
+        </a>
       )}
     </div>
   );

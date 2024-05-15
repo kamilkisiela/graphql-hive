@@ -1,12 +1,12 @@
 import { ReactElement } from 'react';
 import clsx from 'clsx';
 import { HiveLogo } from '@/components/v2/icon';
-import { Link as NextLink } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 
 export const HiveLink = ({ className }: { className?: string }): ReactElement => {
   return (
-    <NextLink href="/" className={clsx('inline-flex items-center', className)}>
+    <Link href="/" className={clsx('inline-flex items-center', className)}>
       <HiveLogo />
-    </NextLink>
+    </Link>
   );
 };
