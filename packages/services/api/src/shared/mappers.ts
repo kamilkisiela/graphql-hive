@@ -5,7 +5,11 @@ import type {
   SchemaCheckApprovalMetadata,
   SchemaVersion as SchemaVersionEntity,
 } from '@hive/storage';
-import type { ClientStatsValues, OperationStatsValues, SchemaError } from '../__generated__/types';
+import type {
+  ClientStatsValues,
+  OperationStatsValues,
+  SchemaError,
+} from '../__generated__/types.next';
 import type { SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import type { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import type { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
@@ -340,14 +344,6 @@ export type TargetsEstimationFilter = TargetsEstimationDateFilter &
         organization: string;
       }
   );
-
-export type AdminStats = {
-  period: {
-    from: string;
-    to: string;
-  };
-  resolution: number;
-};
 
 export type SchemaCoordinateUsageTypeMapper =
   | {

@@ -1,6 +1,6 @@
 import { createModule } from 'graphql-modules';
 import { UsageEstimationProvider } from './providers/usage-estimation.provider';
-import { resolvers } from './resolvers';
+import { resolvers } from './resolvers.generated';
 import typeDefs from './module.graphql';
 
 export const usageEstimationModule = createModule({
