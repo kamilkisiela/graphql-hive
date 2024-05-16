@@ -51,8 +51,8 @@ importers:
   .:
     devDependencies:
       '@0no-co/graphqlsp':
-        specifier: 1.12.2
-        version: 1.12.2(encoding@0.1.13)(graphql@16.8.1)(typescript@5.4.5)
+        specifier: 1.12.3
+        version: 1.12.3(graphql@16.8.1)(typescript@5.4.5)
       '@actions/core':
         specifier: 1.10.1
         version: 1.10.1
@@ -2040,8 +2040,8 @@ packages:
       graphql:
         optional: true
 
-  '@0no-co/graphqlsp@1.12.2':
-    resolution: {integrity: sha512-bUYuwoHuvlTIZZpt2l0furjcNMpd80T5JB4YzmOdcv+wlndHpRWeFwgnGH7qgyy986oGKxgomS0oBXjxmEMtYg==}
+  '@0no-co/graphqlsp@1.12.3':
+    resolution: {integrity: sha512-U0hV/FmFgm2perV+mrXKe/7Z5F4/9rmOziHJYYQgKLwzUVuN5LQG0qs3cLBGxAqoosG0HfTi2cQkgMKY1CMbYQ==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
@@ -4013,10 +4013,10 @@ packages:
       react: ^16 || ^17 || ^18
       react-dom: ^16 || ^17 || ^18
 
-  '@gql.tada/internal@0.3.3':
-    resolution: {integrity: sha512-lBOiN0c/Fx5eY5KGwkzB5+6asUv9IAoD6f5rZjN8r9h4hvSk4V5Kuuu6EfKixF6h5/o/xDRgA/BU3355udnK3g==}
+  '@gql.tada/internal@1.0.0':
+    resolution: {integrity: sha512-B55aIYyZn5ewdgMqoJciPAwF5DKYX6HBabTU+ap/dpNH3EgJrLomc8Y8w+MCxCyOx+dXL9OduT6eWnVr7J7Eyg==}
     peerDependencies:
-      graphql: ^16.8.1
+      graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
 
   '@graphiql/react@0.18.0-alpha.0':
@@ -17692,14 +17692,11 @@ snapshots:
     optionalDependencies:
       graphql: 16.8.1
 
-  '@0no-co/graphqlsp@1.12.2(encoding@0.1.13)(graphql@16.8.1)(typescript@5.4.5)':
+  '@0no-co/graphqlsp@1.12.3(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
-      '@gql.tada/internal': 0.3.3(graphql@16.8.1)(typescript@5.4.5)
+      '@gql.tada/internal': 1.0.0(graphql@16.8.1)(typescript@5.4.5)
       graphql: 16.8.1
-      node-fetch: 2.6.12(encoding@0.1.13)
       typescript: 5.4.5
-    transitivePeerDependencies:
-      - encoding
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
@@ -20192,7 +20189,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@gql.tada/internal@0.3.3(graphql@16.8.1)(typescript@5.4.5)':
+  '@gql.tada/internal@1.0.0(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
       '@0no-co/graphql.web': 1.0.7(graphql@16.8.1)
       graphql: 16.8.1
