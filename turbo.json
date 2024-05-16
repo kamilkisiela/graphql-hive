@@ -6,7 +6,6 @@
     "pnpm-lock.yaml",
     "tsconfig.json",
     "scripts/patch-manifests.js",
-    "scripts/banner.js",
     "scripts/runify.ts",
     "scripts/templates/runify-next.ts",
     "patches/*"

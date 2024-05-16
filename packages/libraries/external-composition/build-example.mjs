@@ -18,10 +18,6 @@ await tsup({
   skipNodeModulesBundle: false,
   noExternal: Object.keys(pkg.peerDependencies).concat(Object.keys(pkg.devDependencies)),
   banner: {
-    js: `
-      // Adds missing require function (reason: node_modules are not transpiled)
-      import { createRequire as _createRequire } from 'module';
-      const require = _createRequire(import.meta.url);        
-    `,
+    js: "const require = (await import('node:module')).createRequire(import.meta.url);const __filename = (await import('node:url')).fileURLToPath(import.meta.url);const __dirname = (await import('node:path')).dirname(__filename);",
   },
 });
