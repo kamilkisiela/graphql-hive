@@ -1,9 +1,32 @@
-import { useFormik } from 'formik';
+import { FunctionComponentElement } from 'react';
+import { BlocksIcon, BoxIcon, FoldVerticalIcon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { useMutation } from 'urql';
-import * as Yup from 'yup';
-import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Slot } from '@radix-ui/react-slot';
 import { useRouter } from '@tanstack/react-router';
 
 export const CreateProjectMutation = graphql(`
@@ -34,107 +57,161 @@ export const CreateProjectMutation = graphql(`
   }
 `);
 
+const formSchema = z.object({
+  name: z.string().min(1, {
+    message: 'Project name is required',
+  }),
+  type: z.nativeEnum(ProjectType, {
+    message: 'Project type is required',
+  }),
+});
+
+function ProjectTypeCard(props: {
+  title: string;
+  description: string;
+  type: ProjectType;
+  icon: FunctionComponentElement<{ className: string }>;
+}) {
+  return (
+    <FormItem>
+      <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
+        <FormControl>
+          <RadioGroupItem value={props.type} className="sr-only" />
+        </FormControl>
+        <div className="border-muted hover:border-accent hover:bg-accent flex items-center gap-4 rounded-md border-2 p-4">
+          <Slot className="size-8 text-gray-400">{props.icon}</Slot>
+          <div>
+            <span className="text-sm font-medium">{props.title}</span>
+            <p className="text-sm text-gray-400">{props.description}</p>
+          </div>
+        </div>
+      </FormLabel>
+    </FormItem>
+  );
+}
+
 export const CreateProjectModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organizationId: string;
 }) => {
   const { isOpen, toggleModalOpen } = props;
-  const [mutation, mutate] = useMutation(CreateProjectMutation);
+  const [_, mutate] = useMutation(CreateProjectMutation);
   const router = useRouter();
+  const { toast } = useToast();
 
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    setFieldValue,
-    touched,
-  } = useFormik({
-    initialValues: {
+  const form = useForm<z.infer<typeof formSchema>>({
+    mode: 'onChange',
+    resolver: zodResolver(formSchema),
+    defaultValues: {
       name: '',
-      type: '' as ProjectType,
-    },
-    validationSchema: Yup.object().shape({
-      name: Yup.string().required('Project name is required'),
-      type: Yup.mixed().oneOf(Object.values(ProjectType)).required('Project type is required'),
-    }),
-    async onSubmit(values) {
-      const { data } = await mutate({
-        input: {
-          organization: props.organizationId,
-          ...values,
-        },
-      });
-      if (data?.createProject.ok) {
-        toggleModalOpen();
-        void router.navigate({
-          to: '/$organizationId/$projectId',
-          params: {
-            organizationId: props.organizationId,
-            projectId: data.createProject.ok.createdProject.cleanId,
-          },
-        });
-      }
+      type: ProjectType.Single,
     },
   });
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { data, error } = await mutate({
+      input: {
+        organization: props.organizationId,
+        ...values,
+      },
+    });
+    if (data?.createProject.ok) {
+      toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId/$projectId',
+        params: {
+          organizationId: props.organizationId,
+          projectId: data.createProject.ok.createdProject.cleanId,
+        },
+      });
+    } else if (data?.createProject.error?.inputErrors.name) {
+      form.setError('name', {
+        message: data?.createProject.error?.inputErrors.name,
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to create project',
+        description: error?.message || data?.createProject.error?.message,
+      });
+    }
+  }
+
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-        <Heading className="text-center">Create a project</Heading>
-        <p className="text-sm text-gray-500">
-          A project is built on top of <b>Targets</b>, which are just your environments. We will
-          also create a default stacks named <b>production</b>, <b>staging</b> and{' '}
-          <b>development</b> for you (don't worry, you can change it later).
-        </p>
-
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="name">
-            Give a name for your project
-          </label>
-          <Input
-            placeholder="Project name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            disabled={isSubmitting}
-            isInvalid={touched.name && !!errors.name}
-            className="grow"
-          />
-          {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
-          {mutation.data?.createProject.error?.inputErrors.name && (
-            <div className="text-sm text-red-500">
-              {mutation.data?.createProject.error.inputErrors.name}
+    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+      <DialogContent className="absolute w-[600px] max-w-none">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <DialogHeader>
+              <DialogTitle>Create a project</DialogTitle>
+              <DialogDescription>
+                A Hive <b>project</b> represents a <b>GraphQL API</b> running a GraphQL schema.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-8">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Name of your project</FormLabel>
+                      <FormControl>
+                        <Input placeholder="My GraphQL API" autoComplete="off" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="pt-2"
+                      >
+                        <ProjectTypeCard
+                          type={ProjectType.Single}
+                          title="Single"
+                          description="Monolithic GraphQL schema developed as a standalone"
+                          icon={<BoxIcon />}
+                        />
+                        <ProjectTypeCard
+                          type={ProjectType.Federation}
+                          title="Federation"
+                          description="Project developed according to Apollo Federation specification"
+                          icon={<BlocksIcon />}
+                        />
+                        <ProjectTypeCard
+                          type={ProjectType.Stitching}
+                          title="Stitching"
+                          description="Project that stitches together multiple GraphQL APIs"
+                          icon={<FoldVerticalIcon />}
+                        />
+                      </RadioGroup>
+                    </FormItem>
+                  );
+                }}
+              />
             </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="type">
-            Choose project type
-          </label>
-          <ProjectTypes value={values.type} onValueChange={type => setFieldValue('type', type)} />
-          {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
-        </div>
-
-        {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
-        {mutation.data?.createProject.error && (
-          <div className="text-sm text-red-500">{mutation.data.createProject.error.message}</div>
-        )}
-
-        <div className="flex gap-2">
-          <Button type="button" size="large" block onClick={toggleModalOpen}>
-            Cancel
-          </Button>
-          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
-            Create Project
-          </Button>
-        </div>
-      </form>
-    </Modal>
+            <DialogFooter>
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={form.formState.isSubmitting || !form.formState.isValid}
+              >
+                {form.formState.isSubmitting ? 'Submitting...' : 'Create Project'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
