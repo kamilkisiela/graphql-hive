@@ -45,7 +45,6 @@ jobs:
         with:
           actor: publish-rust
           codegen: false
-          cacheNext: false
           cacheTurbo: false
 
       - name: Prepare MacOS

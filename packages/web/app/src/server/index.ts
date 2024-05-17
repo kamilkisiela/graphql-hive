@@ -71,6 +71,7 @@ async function main() {
     return res
       .status(200)
       .header('content-type', 'text/javascript')
+      .header('cache-control', 'no-cache')
       .send(`window.__ENV = ${JSON.stringify(publicEnvVars)};`);
   });
 
@@ -85,7 +86,9 @@ async function main() {
     }
 
     // If in production mode, return the static index.html.
-    return reply.sendFile('index.html');
+    return reply.sendFile('index.html', {
+      cacheControl: false,
+    });
   });
 
   await server.listen({ port: env.port, host: '::' });

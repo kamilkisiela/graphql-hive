@@ -20,7 +20,6 @@ jobs:
         with:
           codegen: false
           actor: apollo-router-updater
-          cacheNext: false
           cacheTurbo: false
 
       - name: Check for updates

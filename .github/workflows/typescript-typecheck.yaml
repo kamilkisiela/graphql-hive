@@ -15,7 +15,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: typescript-typecheck
-          cacheNext: false
           cacheTurbo: false
 
       - name: get cpu count
