@@ -79,7 +79,7 @@ function ProjectTypeCard(props: {
           <RadioGroupItem value={props.type} className="sr-only" />
         </FormControl>
         <div className="border-muted hover:border-accent hover:bg-accent flex items-center gap-4 rounded-md border-2 p-4">
-          <Slot className="h-8 w-8 text-gray-400">{props.icon}</Slot>
+          <Slot className="size-8 text-gray-400">{props.icon}</Slot>
           <div>
             <span className="text-sm font-medium">{props.title}</span>
             <p className="text-sm text-gray-400">{props.description}</p>
