@@ -230,7 +230,7 @@ export function UserMenu(props: {
                 </a>
               </DropdownMenuItem>
               {me.isAdmin === true && (
-                <Link href="/manage">
+                <Link to="/manage">
                   <DropdownMenuItem>
                     <TrendingUpIcon className="mr-2 size-4" />
                     Manage Instance
@@ -238,7 +238,7 @@ export function UserMenu(props: {
                 </Link>
               )}
               {env.nodeEnv === 'development' && (
-                <Link href="/dev">
+                <Link to="/dev">
                   <DropdownMenuItem>
                     <GraphQLIcon className="mr-2 size-4" />
                     Dev GraphiQL

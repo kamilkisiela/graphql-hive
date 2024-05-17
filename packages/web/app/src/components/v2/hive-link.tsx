@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router';
 
 export const HiveLink = ({ className }: { className?: string }): ReactElement => {
   return (
-    <Link href="/" className={clsx('inline-flex items-center', className)}>
+    <Link to="/" className={clsx('inline-flex items-center', className)}>
       <HiveLogo />
     </Link>
   );

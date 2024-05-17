@@ -43,12 +43,19 @@ export const ConnectLabModal = (props: {
       </span>
       <Tag>
         X-Hive-Key:
-        <Link as="a" variant="secondary" target="_blank" rel="noreferrer" href={docsUrl}>
+        <Link
+          as="a"
+          variant="secondary"
+          target="_blank"
+          className="underline underline-offset-2"
+          rel="noreferrer"
+          href={docsUrl}
+        >
           YOUR_TOKEN_HERE
         </Link>
       </Tag>
       <p className="text-sm text-gray-500">
-        Read the
+        Read the{' '}
         <Link as="a" variant="primary" target="_blank" rel="noreferrer" href={docsUrl}>
           Managing Tokens
         </Link>{' '}

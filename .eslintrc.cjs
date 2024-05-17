@@ -192,9 +192,6 @@ module.exports = {
     {
       files: ['packages/web/app/**'],
       settings: {
-        next: {
-          rootDir: 'packages/web/app',
-        },
         tailwindcss: {
           config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
