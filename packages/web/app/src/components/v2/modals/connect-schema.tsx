@@ -95,8 +95,9 @@ export const ConnectSchemaModal = (props: {
       {query.data?.target && (
         <>
           <p className="text-sm text-gray-500">
-            Hive leverages the {/* TODO(router) turn into <a/> as it's not pointing to cf */}
+            Hive leverages the
             <Link
+              as="a"
               variant="primary"
               className="font-bold underline"
               href="https://www.cloudflare.com/network"

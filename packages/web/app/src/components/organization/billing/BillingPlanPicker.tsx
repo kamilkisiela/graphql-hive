@@ -45,7 +45,7 @@ const planCollection: {
       'Change your plan at any time',
       'Improved pricing as you scale',
       '12 months of usage data retention',
-      <span className="gap-1">
+      <span key="enterprise" className="gap-1">
         GraphQL/APIs support and guidance
         <br />
         from{' '}

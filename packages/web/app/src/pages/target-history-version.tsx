@@ -282,7 +282,7 @@ function DefaultSchemaVersionView(props: {
         <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
           <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
             {availableViews.map(item => (
-              <Tooltip>
+              <Tooltip key={item.value}>
                 <TooltipTrigger>
                   <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
                     {item.icon}
@@ -452,7 +452,7 @@ function ContractVersionView(props: {
         <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
           <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
             {availableViews.map(item => (
-              <Tooltip>
+              <Tooltip key={item.value}>
                 <TooltipTrigger>
                   <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
                     {item.icon}

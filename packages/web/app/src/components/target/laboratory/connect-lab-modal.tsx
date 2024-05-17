@@ -42,14 +42,14 @@ export const ConnectLabModal = (props: {
         To authenticate, use the following HTTP headers, with a token that has `target:read` scope:
       </span>
       <Tag>
-        X-Hive-Key: {/* TODO(router) turn into <a/> as it's not pointing to docs */}
-        <Link variant="secondary" target="_blank" rel="noreferrer" href={docsUrl}>
+        X-Hive-Key:
+        <Link as="a" variant="secondary" target="_blank" rel="noreferrer" href={docsUrl}>
           YOUR_TOKEN_HERE
         </Link>
       </Tag>
       <p className="text-sm text-gray-500">
-        Read the {/* TODO(router) turn into <a/> as it's not pointing to docs */}
-        <Link variant="primary" target="_blank" rel="noreferrer" href={docsUrl}>
+        Read the
+        <Link as="a" variant="primary" target="_blank" rel="noreferrer" href={docsUrl}>
           Managing Tokens
         </Link>{' '}
         chapter in our documentation to create a Registry Access Token.

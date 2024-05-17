@@ -7,6 +7,7 @@ import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
+import { RenderIfStripeAvailable } from '@/components/organization/stripe';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Button } from '@/components/ui/button';
 import { Meta } from '@/components/ui/meta';
@@ -84,18 +85,6 @@ const SubscriptionPageQuery = graphql(`
 `);
 
 function SubscriptionPageContent(props: { organizationId: string }) {
-  const router = useRouter();
-
-  if (!getIsStripeEnabled()) {
-    void router.navigate({
-      to: '/$organizationId',
-      params: {
-        organizationId: props.organizationId,
-      },
-    });
-    return null;
-  }
-
   const [query] = useQuery({
     query: SubscriptionPageQuery,
     variables: {
@@ -294,7 +283,9 @@ export function OrganizationSubscriptionPage(props: { organizationId: string }):
   return (
     <>
       <Meta title="Subscription & Usage" />
-      <SubscriptionPageContent organizationId={props.organizationId} />
+      <RenderIfStripeAvailable organizationId={props.organizationId}>
+        <SubscriptionPageContent organizationId={props.organizationId} />
+      </RenderIfStripeAvailable>
     </>
   );
 }

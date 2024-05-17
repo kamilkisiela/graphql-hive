@@ -127,10 +127,6 @@ function SimilarRoleScopes<T>(props: {
   definitions: readonly Scope<T>[];
   scopes: readonly T[];
 }) {
-  if (props.scopes.length === 0) {
-    return null;
-  }
-
   const groupedScopes = useRef<
     {
       name: string;
@@ -140,6 +136,10 @@ function SimilarRoleScopes<T>(props: {
       hasBothOptions: boolean;
     }[]
   >();
+
+  if (props.scopes.length === 0) {
+    return null;
+  }
 
   if (!groupedScopes.current) {
     groupedScopes.current = [];

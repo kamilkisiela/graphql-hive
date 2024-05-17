@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { ReactElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import {
@@ -7,6 +7,7 @@ import {
 } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
+import { RenderIfStripeAvailable } from '@/components/organization/stripe';
 import { Button } from '@/components/ui/button';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -446,21 +447,6 @@ const ManageSubscriptionPageQuery = graphql(`
 `);
 
 function ManageSubscriptionPageContent(props: { organizationId: string }) {
-  const router = useRouter();
-
-  /**
-   * If Stripe is not enabled we redirect the user to the organization.
-   */
-  if (!getIsStripeEnabled()) {
-    void router.navigate({
-      to: '/$organizationId',
-      params: {
-        organizationId: props.organizationId,
-      },
-    });
-    return null;
-  }
-
   const [query] = useQuery({
     query: ManageSubscriptionPageQuery,
     variables: {
@@ -538,7 +524,9 @@ export function OrganizationSubscriptionManagePage(props: {
   return (
     <>
       <Meta title="Manage Subscription" />
-      <ManageSubscriptionPageContent organizationId={props.organizationId} />
+      <RenderIfStripeAvailable organizationId={props.organizationId}>
+        <ManageSubscriptionPageContent organizationId={props.organizationId} />
+      </RenderIfStripeAvailable>
     </>
   );
 }

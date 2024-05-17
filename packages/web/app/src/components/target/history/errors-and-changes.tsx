@@ -258,9 +258,9 @@ function ChangeItem(props: {
                               <PopoverContent side="right">
                                 <div className="flex flex-col gap-y-2 text-sm">
                                   View live usage on
-                                  {metadata.settings.targets.map(target =>
+                                  {metadata.settings.targets.map((target, i) =>
                                     target.target ? (
-                                      <p>
+                                      <p key={i}>
                                         <Link
                                           className="text-orange-500 hover:text-orange-500"
                                           to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"

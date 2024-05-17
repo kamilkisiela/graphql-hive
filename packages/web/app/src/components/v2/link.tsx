@@ -16,14 +16,28 @@ const linkVariants = cva('font-medium transition-colors', {
   },
 });
 
-type LinkProps<TTo extends string> = LinkOptions<RegisteredRouter, '/', TTo> &
-  VariantProps<typeof linkVariants> &
-  PropsWithChildren<Pick<ComponentProps<'a'>, 'href' | 'className' | 'target' | 'ref' | 'rel'>>;
+type RouterLinkProps<TTo extends string> = LinkOptions<RegisteredRouter, '/', TTo> & {
+  as?: never;
+} & PropsWithChildren<Pick<ComponentProps<'a'>, 'className' | 'target' | 'ref' | 'rel'>>;
+
+type LinkProps<TTo extends string> = VariantProps<typeof linkVariants> &
+  (
+    | RouterLinkProps<TTo>
+    | ({
+        as: 'a';
+      } & PropsWithChildren<
+        Pick<ComponentProps<'a'>, 'href' | 'className' | 'target' | 'ref' | 'rel'>
+      >)
+  );
 
 export const Link = <TTo extends string = '.'>({
   className,
   variant = 'primary',
   ...props
 }: LinkProps<TTo>) => {
+  if (props.as === 'a') {
+    return <a className={cn(linkVariants({ variant, className }))} {...props} />;
+  }
+
   return <RouterLink className={cn(linkVariants({ variant, className }))} {...props} />;
 };

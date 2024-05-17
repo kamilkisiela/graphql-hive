@@ -87,6 +87,7 @@ function ListPage(props: {
     <>
       {edges?.map(({ node: version }) => (
         <div
+          key={version.id}
           className={cn(
             'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
             versionId === version.id && 'bg-gray-800/40',
