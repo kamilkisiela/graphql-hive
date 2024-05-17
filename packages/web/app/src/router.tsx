@@ -1,5 +1,5 @@
 import { lazy, useCallback, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import Session from 'supertokens-auth-react/recipe/session';
@@ -98,7 +98,7 @@ function RootComponent() {
   }, []);
 
   return (
-    <>
+    <HelmetProvider>
       {env.analytics.googleAnalyticsTrackingId && (
         <Helmet>
           <script
@@ -127,7 +127,7 @@ function RootComponent() {
       <ToastContainer hideProgressBar />
       {/* eslint-disable-next-line no-process-env */}
       {process.env.NODE_ENV === 'development' && <LazyTanStackRouterDevtools />}
-    </>
+    </HelmetProvider>
   );
 }
 

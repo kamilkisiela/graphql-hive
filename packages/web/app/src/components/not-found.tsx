@@ -1,5 +1,5 @@
 import ghost from '../../public/images/figures/ghost.svg?url';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { captureMessage } from '@sentry/react';
 import { useRouter } from '@tanstack/react-router';

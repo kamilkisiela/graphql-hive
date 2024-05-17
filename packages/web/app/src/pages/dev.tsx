@@ -2,7 +2,7 @@ import { GraphiQL } from 'graphiql';
 import { HiveLogo } from '@/components/v2/icon';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import 'graphiql/graphiql.css';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { env } from '@/env/frontend';
 
 export function DevPage() {

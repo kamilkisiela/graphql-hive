@@ -35,7 +35,7 @@ import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import { cx } from 'class-variance-authority';
 import clsx from 'clsx';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import { Meta } from '@/components/ui/meta';
 import { QueryError } from '@/components/ui/query-error';

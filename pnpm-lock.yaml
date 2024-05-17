@@ -1747,14 +1747,14 @@ importers:
         specifier: 3.4.0
         version: 3.4.0
       '@tanstack/react-router':
-        specifier: 1.31.1
-        version: 1.31.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.32.13
+        version: 1.32.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table':
         specifier: 8.0.0-beta.8
         version: 8.0.0-beta.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/router-devtools':
-        specifier: 1.31.1
-        version: 1.31.1(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.32.13
+        version: 1.32.13(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/editor':
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.6.0(monaco-editor@0.48.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/node@20.12.12)(encoding@0.1.13)(graphql@16.8.1)(monaco-editor@0.48.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1776,9 +1776,6 @@ importers:
       '@types/react-dom':
         specifier: 18.3.0
         version: 18.3.0
-      '@types/react-helmet':
-        specifier: 6.1.11
-        version: 6.1.11
       '@types/react-highlight-words':
         specifier: 0.16.7
         version: 0.16.7
@@ -1887,9 +1884,9 @@ importers:
       react-dom:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
-      react-helmet:
-        specifier: 6.1.0
-        version: 6.1.0(react@18.3.1)
+      react-helmet-async:
+        specifier: 2.0.5
+        version: 2.0.5(react@18.3.1)
       react-highlight-words:
         specifier: 0.20.0
         version: 0.20.0(react@18.3.1)
@@ -7429,12 +7426,12 @@ packages:
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
     engines: {node: '>=14.16'}
 
-  '@tanstack/history@1.28.9':
-    resolution: {integrity: sha512-WgTFJhHaZnGZPyt0H11xFhGGDj1MtA1mrUmdAjB/nhVpmsAYXsSB5O+hkF9N66u7MjbNb405wTb9diBsztvI5w==}
+  '@tanstack/history@1.31.16':
+    resolution: {integrity: sha512-rahAZXlR879P7dngDH7BZwGYiODA9D5Hqo6nUHn9GAURcqZU5IW0ZiT54dPtV5EPES7muZZmknReYueDHs7FFQ==}
     engines: {node: '>=12'}
 
-  '@tanstack/react-router@1.31.1':
-    resolution: {integrity: sha512-FZ7wYCL4UXkkT+yB703RcrnD6WO9dqphnEDWoPQIkN3f4Zk28nZPHRew3dcpK8n9o33sZJbCW24PVAdbjmpdEQ==}
+  '@tanstack/react-router@1.32.13':
+    resolution: {integrity: sha512-J6tiMRsFt91kkczEiuzHidePcPU62GuWGc2gSb9eqRKV17+TRofE4AJ1kM111F5wgDiPTsx4RwFVPU68+JVfAQ==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16.8'
@@ -7453,8 +7450,8 @@ packages:
       react: '>=16'
       react-dom: '>=16'
 
-  '@tanstack/router-devtools@1.31.1':
-    resolution: {integrity: sha512-vtxzLzPOHx0/5SXEXOHB4CSSUaMHnEOE1IyBTPxNBDizhGGImCxw8C74FoVzDSFQ2ED+4t6sPSLUA0m9FnnTWA==}
+  '@tanstack/router-devtools@1.32.13':
+    resolution: {integrity: sha512-QBycfyMq3F8NWuFuWLUNek5uLH0VYLzwBmczEJnpcQXZqaVxT7t5eV4TlBR1EosuVazwDnq7Zu+AaigUqljfYg==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16.8'
@@ -7909,9 +7906,6 @@ packages:
 
   '@types/react-dom@18.3.0':
     resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
-
-  '@types/react-helmet@6.1.11':
-    resolution: {integrity: sha512-0QcdGLddTERotCXo3VFlUSWO3ztraw8nZ6e3zJSgG7apwV5xt+pJUS8ewPBqT4NYB1optGLprNQzFleIY84u/g==}
 
   '@types/react-highlight-words@0.16.7':
     resolution: {integrity: sha512-+upXTIaRd3rGvh1aDQSs9z5X+sV3UM6Jrmjk03GN2GXl4v/+iOJKQj2LZHo6Vp2IoTvMdtxgME26feqo12xXLg==}
@@ -10052,9 +10046,6 @@ packages:
 
   es-iterator-helpers@1.0.15:
     resolution: {integrity: sha512-GhoY8uYqd6iwUl2kgjTm4CZAf6oo5mHK7BPqx3rKgx893YSsy0LGHV6gfqqQvZt/8xM8xeOnfXBCfqclMKkJ5g==}
-
-  es-module-lexer@1.4.1:
-    resolution: {integrity: sha512-cXLGjP0c4T3flZJKQSuziYoq7MlT+rnvfZjfp7h+I7K9BNX54kP9nyWvdbwjQ4u1iWbOL4u96fgeZLToQlZC7w==}
 
   es-module-lexer@1.5.2:
     resolution: {integrity: sha512-l60ETUTmLqbVbVHv1J4/qj+M8nq7AwMzEcg3kmJDt9dCNrTk+yHcYFf/Kw75pMDwd9mPcIGCG5LcS20SxYRzFA==}
@@ -14706,10 +14697,13 @@ packages:
   react-fast-compare@3.2.0:
     resolution: {integrity: sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==}
 
-  react-helmet@6.1.0:
-    resolution: {integrity: sha512-4uMzEY9nlDlgxr61NL3XbKRy1hEkXmKNXhjbAIOVw5vcFrsdYbH2FEwcNyWvWinl103nXgzYNlns9ca+8kFiWw==}
+  react-fast-compare@3.2.2:
+    resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
+
+  react-helmet-async@2.0.5:
+    resolution: {integrity: sha512-rYUYHeus+i27MvFE+Jaa4WsyBKGkL6qVgbJvSBoX8mbsWoABJXdEO0bZyi0F6i+4f0NuIb8AvqPMj3iXFHkMwg==}
     peerDependencies:
-      react: '>=16.3.0'
+      react: ^16.6.0 || ^17.0.0 || ^18.0.0
 
   react-highlight-words@0.20.0:
     resolution: {integrity: sha512-asCxy+jCehDVhusNmCBoxDf2mm1AJ//D+EzDx1m5K7EqsMBIHdZ5G4LdwbSEXqZq1Ros0G0UySWmAtntSph7XA==}
@@ -14788,11 +14782,6 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-
-  react-side-effect@2.1.2:
-    resolution: {integrity: sha512-PVjOcvVOyIILrYoyGEpDN3vmYNLdy1CajSFNt4TDsVQC5KpTijDvWVoR+/7Rz2xT978D8/ZtFceXxzsPwZEDvw==}
-    peerDependencies:
-      react: ^16.3.0 || ^17.0.0 || ^18.0.0
 
   react-string-replace@1.1.1:
     resolution: {integrity: sha512-26TUbLzLfHQ5jO5N7y3Mx88eeKo0Ml0UjCQuX4BMfOd/JX+enQqlKpL1CZnmjeBRvQE8TR+ds9j1rqx9CxhKHQ==}
@@ -15369,6 +15358,9 @@ packages:
   shallow-clone@3.0.1:
     resolution: {integrity: sha512-/6KqX+GVUdqPuPPd2LxDDxzX6CAbjJehAAOKlNpqqUpAqPM6HeL8f+o3a+JsyGjn2lv0WY8UsTgUJjU9Ok55NA==}
     engines: {node: '>=8'}
+
+  shallowequal@1.1.0:
+    resolution: {integrity: sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==}
 
   shebang-command@1.2.0:
     resolution: {integrity: sha512-EV3L1+UQWGor21OmnvojK36mhg+TyIKDh3iFBKBohr5xeXIhNBcx8oWdgkTEEQ+BEFFYdLRuqMfd5L84N1V5Vg==}
@@ -21206,8 +21198,8 @@ snapshots:
 
   '@jridgewell/source-map@0.3.5':
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.3
-      '@jridgewell/trace-mapping': 0.3.20
+      '@jridgewell/gen-mapping': 0.3.5
+      '@jridgewell/trace-mapping': 0.3.25
 
   '@jridgewell/sourcemap-codec@1.4.15': {}
 
@@ -25032,11 +25024,11 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tanstack/history@1.28.9': {}
+  '@tanstack/history@1.31.16': {}
 
-  '@tanstack/react-router@1.31.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-router@1.32.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/history': 1.28.9
+      '@tanstack/history': 1.31.16
       '@tanstack/react-store': 0.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -25056,9 +25048,9 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@tanstack/router-devtools@1.31.1(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/router-devtools@1.32.13(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/react-router': 1.31.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-router': 1.32.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx: 2.1.1
       date-fns: 2.30.0
       goober: 2.1.14(csstype@3.1.1)
@@ -25599,10 +25591,6 @@ snapshots:
   '@types/range-parser@1.2.4': {}
 
   '@types/react-dom@18.3.0':
-    dependencies:
-      '@types/react': 18.3.2
-
-  '@types/react-helmet@6.1.11':
     dependencies:
       '@types/react': 18.3.2
 
@@ -28174,8 +28162,6 @@ snapshots:
       internal-slot: 1.0.6
       iterator.prototype: 1.1.2
       safe-array-concat: 1.0.1
-
-  es-module-lexer@1.4.1: {}
 
   es-module-lexer@1.5.2: {}
 
@@ -34269,13 +34255,14 @@ snapshots:
 
   react-fast-compare@3.2.0: {}
 
-  react-helmet@6.1.0(react@18.3.1):
+  react-fast-compare@3.2.2: {}
+
+  react-helmet-async@2.0.5(react@18.3.1):
     dependencies:
-      object-assign: 4.1.1
-      prop-types: 15.8.1
+      invariant: 2.2.4
       react: 18.3.1
-      react-fast-compare: 3.2.0
-      react-side-effect: 2.1.2(react@18.3.1)
+      react-fast-compare: 3.2.2
+      shallowequal: 1.1.0
 
   react-highlight-words@0.20.0(react@18.3.1):
     dependencies:
@@ -34362,10 +34349,6 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@types/react'
-
-  react-side-effect@2.1.2(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   react-string-replace@1.1.1: {}
 
@@ -35108,6 +35091,8 @@ snapshots:
     dependencies:
       kind-of: 6.0.3
 
+  shallowequal@1.1.0: {}
+
   shebang-command@1.2.0:
     dependencies:
       shebang-regex: 1.0.0
@@ -35807,7 +35792,7 @@ snapshots:
 
   terser-webpack-plugin@5.3.9(@swc/core@1.5.7(@swc/helpers@0.5.5))(esbuild@0.19.11)(webpack@5.89.0(@swc/core@1.5.7(@swc/helpers@0.5.5))(esbuild@0.19.11)):
     dependencies:
-      '@jridgewell/trace-mapping': 0.3.20
+      '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.1
@@ -36776,7 +36761,7 @@ snapshots:
       browserslist: 4.23.0
       chrome-trace-event: 1.0.3
       enhanced-resolve: 5.15.0
-      es-module-lexer: 1.4.1
+      es-module-lexer: 1.5.2
       eslint-scope: 5.1.1
       events: 3.3.0
       glob-to-regexp: 0.4.1
