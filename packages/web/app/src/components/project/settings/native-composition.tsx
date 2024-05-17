@@ -14,7 +14,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { ProductUpdatesLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { NativeFederationCompatibilityStatus } from '@/gql/graphql';
-import { Link } from '@tanstack/react-router';
 
 const NativeCompositionSettings_OrganizationFragment = graphql(`
   fragment NativeCompositionSettings_OrganizationFragment on Organization {

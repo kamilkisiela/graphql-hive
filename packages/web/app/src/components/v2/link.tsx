@@ -33,11 +33,20 @@ type LinkProps<TTo extends string> = VariantProps<typeof linkVariants> &
 export const Link = <TTo extends string = '.'>({
   className,
   variant = 'primary',
+  children,
   ...props
 }: LinkProps<TTo>) => {
   if (props.as === 'a') {
-    return <a className={cn(linkVariants({ variant, className }))} {...props} />;
+    return (
+      <a className={cn(linkVariants({ variant, className }))} {...props}>
+        {children}
+      </a>
+    );
   }
 
-  return <RouterLink className={cn(linkVariants({ variant, className }))} {...props} />;
+  return (
+    <RouterLink className={cn(linkVariants({ variant, className }))} {...props}>
+      {children}
+    </RouterLink>
+  );
 };

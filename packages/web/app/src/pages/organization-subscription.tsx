@@ -18,10 +18,9 @@ import { Heading } from '@/components/v2/heading';
 import Stat from '@/components/v2/stat';
 import { graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
-import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { formatNumber } from '@/lib/hooks';
 import { useChartStyles } from '@/utils';
-import { Link, useRouter } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',

@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { getDocsUrl, getProductUpdatesUrl } from '@/lib/docs-url';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
-import { Link as RouterLink } from '@tanstack/react-router';
-import { Link } from './link';
 
 export const DocsNote = ({ children, warn }: { warn?: boolean; children: React.ReactNode }) => {
   return (

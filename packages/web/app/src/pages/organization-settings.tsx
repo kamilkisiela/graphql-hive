@@ -32,7 +32,7 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useToggle } from '@/lib/hooks';
-import { Link, useRouter } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
   query Integrations_CheckIntegrationsQuery($selector: OrganizationSelectorInput!) {
