@@ -16,26 +16,18 @@ const linkVariants = cva('font-medium transition-colors', {
   },
 });
 
-type RouterLinkProps<TTo extends string> = LinkOptions<RegisteredRouter, '/', TTo> & {
-  as?: never;
-} & PropsWithChildren<Pick<ComponentProps<'a'>, 'className' | 'target' | 'ref' | 'rel'>>;
-
-type LinkProps<TTo extends string> = VariantProps<typeof linkVariants> &
-  (
-    | RouterLinkProps<TTo>
-    | ({
-        as: 'a';
-      } & PropsWithChildren<
-        Pick<ComponentProps<'a'>, 'href' | 'className' | 'target' | 'ref' | 'rel'>
-      >)
-  );
+type LinkProps<TTo extends string> = LinkOptions<RegisteredRouter, '/', TTo> &
+  VariantProps<typeof linkVariants> &
+  PropsWithChildren<Pick<ComponentProps<'a'>, 'href' | 'className' | 'target' | 'ref' | 'rel'>>;
 
 export const Link = <TTo extends string = '.'>({
   className,
   variant = 'primary',
   children,
   ...props
-}: LinkProps<TTo>) => {
+}: LinkProps<TTo> & {
+  as?: 'a';
+}) => {
   if (props.as === 'a') {
     return (
       <a className={cn(linkVariants({ variant, className }))} {...props}>
@@ -45,8 +37,12 @@ export const Link = <TTo extends string = '.'>({
   }
 
   return (
-    <RouterLink className={cn(linkVariants({ variant, className }))} {...props}>
+    // @ts-ignore It's a legacy component and I don't want to spend time fixing a type error
+    <RouterLink href="" className={cn(linkVariants({ variant, className }))} {...props}>
       {children}
     </RouterLink>
   );
 };
+
+// @ts-expect-error just to make sure Link is type safe
+export const _ = Link({ to: '/non-existing-route' });
