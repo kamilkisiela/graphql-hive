@@ -1,4 +1,3 @@
-import NextLink from 'next/link';
 import { LifeBuoyIcon } from 'lucide-react';
 import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
 import {
@@ -31,6 +30,7 @@ import { AuthProvider } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import { Link } from '@tanstack/react-router';
 import { GetStartedProgress } from '../get-started/trigger';
 import { MemberRoleMigrationStickyNote } from '../organization/members/migration';
 import { UserSettingsModal } from '../user/settings';
@@ -163,25 +163,25 @@ export function UserMenu(props: {
                   ) : null}
                   <DropdownMenuSeparator />
                   {organizations.nodes.map(org => (
-                    <NextLink
-                      href={{
-                        pathname: '/[organizationId]',
-                        query: { organizationId: org.cleanId },
+                    <Link
+                      to="/$organizationId"
+                      params={{
+                        organizationId: org.cleanId,
                       }}
                       key={org.cleanId}
                     >
                       <DropdownMenuItem active={currentOrganization?.cleanId === org.cleanId}>
                         {org.name}
                       </DropdownMenuItem>
-                    </NextLink>
+                    </Link>
                   ))}
                   <DropdownMenuSeparator />
-                  <NextLink href="/org/new">
+                  <Link to="/org/new">
                     <DropdownMenuItem>
                       Create organization
                       <PlusIcon className="ml-2 size-4" />
                     </DropdownMenuItem>
-                  </NextLink>
+                  </Link>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuItem asChild>
@@ -211,17 +211,17 @@ export function UserMenu(props: {
                 </a>
               </DropdownMenuItem>
               {currentOrganization && env.zendeskSupport ? (
-                <NextLink
-                  href={{
-                    pathname: '/[organizationId]/view/support',
-                    query: { organizationId: currentOrganization.cleanId },
+                <Link
+                  to="/$organizationId/view/support"
+                  params={{
+                    organizationId: currentOrganization.cleanId,
                   }}
                 >
                   <DropdownMenuItem>
                     <LifeBuoyIcon className="mr-2 size-4" />
                     Support
                   </DropdownMenuItem>
-                </NextLink>
+                </Link>
               ) : null}
               <DropdownMenuItem asChild>
                 <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
@@ -230,20 +230,20 @@ export function UserMenu(props: {
                 </a>
               </DropdownMenuItem>
               {me.isAdmin === true && (
-                <NextLink href="/manage">
+                <Link to="/manage">
                   <DropdownMenuItem>
                     <TrendingUpIcon className="mr-2 size-4" />
                     Manage Instance
                   </DropdownMenuItem>
-                </NextLink>
+                </Link>
               )}
               {env.nodeEnv === 'development' && (
-                <NextLink href="/dev">
+                <Link to="/dev">
                   <DropdownMenuItem>
                     <GraphQLIcon className="mr-2 size-4" />
                     Dev GraphiQL
                   </DropdownMenuItem>
-                </NextLink>
+                </Link>
               )}
               <DropdownMenuSeparator />
               {canLeaveOrganization ? (

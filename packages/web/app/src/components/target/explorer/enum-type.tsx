@@ -60,13 +60,23 @@ export function GraphQLEnumTypeComponent(props: {
                 styleDeprecated={props.styleDeprecated}
                 deprecationReason={value.deprecationReason}
               >
-                <LinkToCoordinatePage coordinate={`${ttype.name}.${value.name}`}>
+                <LinkToCoordinatePage
+                  organizationId={props.organizationCleanId}
+                  projectId={props.projectCleanId}
+                  targetId={props.targetCleanId}
+                  coordinate={`${ttype.name}.${value.name}`}
+                >
                   {value.name}
                 </LinkToCoordinatePage>
               </DeprecationNote>
             </div>
             {value.supergraphMetadata ? (
-              <SupergraphMetadataList supergraphMetadata={value.supergraphMetadata} />
+              <SupergraphMetadataList
+                targetId={props.targetCleanId}
+                projectId={props.projectCleanId}
+                organizationId={props.organizationCleanId}
+                supergraphMetadata={value.supergraphMetadata}
+              />
             ) : null}
             {typeof props.totalRequests === 'number' ? (
               <SchemaExplorerUsageStats

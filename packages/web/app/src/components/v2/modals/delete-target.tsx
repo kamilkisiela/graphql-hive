@@ -1,9 +1,9 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { TrashIcon } from '@radix-ui/react-icons';
+import { useRouter } from '@tanstack/react-router';
 
 export const DeleteTargetMutation = graphql(`
   mutation deleteTarget($selector: TargetSelectorInput!) {
@@ -35,7 +35,7 @@ export const DeleteTargetModal = ({
   targetId: string;
 }): ReactElement => {
   const [, mutate] = useMutation(DeleteTargetMutation);
-  const { replace } = useRouter();
+  const router = useRouter();
 
   return (
     <Modal
@@ -65,7 +65,13 @@ export const DeleteTargetModal = ({
               },
             });
             toggleModalOpen();
-            void replace(`/${organizationId}/${projectId}`);
+            void router.navigate({
+              to: '/$organizationId/$projectId',
+              params: {
+                organizationId,
+                projectId,
+              },
+            });
           }}
         >
           Delete

@@ -1,3 +1,6 @@
+/**
+ * List of environment variables that are allowed to be exposed to the frontend.
+ */
 export const ALLOWED_ENVIRONMENT_VARIABLES = [
   'NODE_ENV',
   'ENVIRONMENT',

@@ -17,7 +17,22 @@ export class IdTranslator {
   }
 
   @cache<OrganizationSelector>(selector => selector.organization)
-  translateOrganizationId(selector: OrganizationSelector) {
+  async translateOrganizationId(selector: OrganizationSelector) {
+    this.logger.debug(
+      'Translating Organization Clean ID (selector=%o)',
+      filterSelector('organization', selector),
+    );
+    const organizationId = await this.storage.getOrganizationId(selector);
+
+    if (!organizationId) {
+      throw new Error('Organization not found');
+    }
+
+    return organizationId;
+  }
+
+  @cache<OrganizationSelector>(selector => selector.organization)
+  translateOrganizationIdSafe(selector: OrganizationSelector) {
     this.logger.debug(
       'Translating Organization Clean ID (selector=%o)',
       filterSelector('organization', selector),

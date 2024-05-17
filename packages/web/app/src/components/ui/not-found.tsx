@@ -1,7 +1,6 @@
-import Image from 'next/image';
+import ghost from '../../../public/images/figures/ghost.svg?url';
 import { Card, Heading } from '@/components/v2/index';
 import { cn } from '@/lib/utils';
-import ghost from '../../../public/images/figures/ghost.svg';
 
 export const NotFound = ({
   title,
@@ -17,7 +16,7 @@ export const NotFound = ({
       className={cn('flex grow cursor-default flex-col items-center gap-y-2', className)}
       data-cy="empty-list"
     >
-      <Image src={ghost} alt="Ghost illustration" width="200" height="200" className="drag-none" />
+      <img src={ghost} alt="Ghost illustration" width="200" height="200" className="drag-none" />
       <Heading className="text-center">{title}</Heading>
       <span className="text-center text-sm font-medium text-gray-500">{description}</span>
     </Card>

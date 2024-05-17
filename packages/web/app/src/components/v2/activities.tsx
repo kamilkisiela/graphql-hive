@@ -3,7 +3,6 @@ import { useQuery } from 'urql';
 import { Link, TimeAgo } from '@/components/v2';
 import { EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
 import { DocumentType, graphql, useFragment } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
 import { Subtitle, Title } from '../ui/page';
 
 const Activities_OrganizationActivitiesQuery = graphql(`
@@ -279,35 +278,30 @@ export const getActivity = (
     project && organization ? (
       <Link
         variant="primary"
-        href={{
-          pathname: '/[organizationId]/[projectId]',
-          query: {
-            organizationId: organization.cleanId,
-            projectId: project.cleanId,
-          },
+        to="/$organizationId/$projectId"
+        params={{
+          organizationId: organization.cleanId,
+          projectId: project.cleanId,
         }}
       >
         {project.name}
       </Link>
     ) : null;
 
-  const targetHref =
-    target && project && organization
-      ? {
-          pathname: '/[organizationId]/[projectId]/[targetId]',
-          query: {
-            organizationId: organization.cleanId,
-            projectId: project.cleanId,
-            targetId: target.cleanId,
-          },
-        }
-      : '#';
-
-  const targetLink = target ? (
-    <Link variant="primary" href={targetHref}>
-      {target.name}
-    </Link>
-  ) : null;
+  const targetLink =
+    target && project && organization ? (
+      <Link
+        variant="primary"
+        to="/$organizationId/$projectId/$targetId"
+        params={{
+          organizationId: organization.cleanId,
+          projectId: project.cleanId,
+          targetId: target.cleanId,
+        }}
+      >
+        {target.name}
+      </Link>
+    ) : null;
 
   switch (type) {
     /* Organization */
@@ -433,9 +427,21 @@ export const getActivity = (
         content: (
           <>
             {userDisplayName} changed{' '}
-            <Link variant="primary" href={targetHref}>
-              {activity.value}
-            </Link>{' '}
+            {organization && project && target ? (
+              <Link
+                variant="primary"
+                to="/$organizationId/$projectId/$targetId"
+                params={{
+                  organizationId: organization.cleanId,
+                  projectId: project.cleanId,
+                  targetId: target.cleanId,
+                }}
+              >
+                {activity.value}
+              </Link>
+            ) : (
+              activity.value
+            )}{' '}
             target name in {projectLink} project
           </>
         ),
@@ -456,13 +462,12 @@ export const getActivity = (
   }
 };
 
-export const Activities = (): ReactElement => {
-  const router = useRouteSelector();
+export const Activities = (props: { organizationId: string }): ReactElement => {
   const [organizationActivitiesQuery] = useQuery({
     query: Activities_OrganizationActivitiesQuery,
     variables: {
       selector: {
-        organization: router.organizationId,
+        organization: props.organizationId,
         limit: 5,
       },
     },

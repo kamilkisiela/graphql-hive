@@ -898,11 +898,15 @@ export async function createStorage(
     },
     async getOrganizationId({ organization }) {
       // Based on clean_id, resolve id
-      const result = await pool.one<Pick<organizations, 'id'>>(
+      const result = await pool.maybeOne<Pick<organizations, 'id'>>(
         sql`/* getOrganizationId */
           SELECT id FROM organizations WHERE clean_id = ${organization} LIMIT 1
         `,
       );
+
+      if (!result) {
+        return null;
+      }
 
       return result.id;
     },

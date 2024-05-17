@@ -42,8 +42,7 @@
     },
     "@hive/app#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"],
-      "cache": false
+      "outputs": ["dist/**"]
     },
     "@hive/docs#build": {
       "dependsOn": ["^build"],

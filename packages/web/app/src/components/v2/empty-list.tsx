@@ -1,8 +1,7 @@
 import { ReactElement } from 'react';
-import Image from 'next/image';
+import magnifier from '../../../public/images/figures/magnifier.svg?url';
 import { Card, DocsLink, Heading } from '@/components/v2/index';
 import { cn } from '@/lib/utils';
-import magnifier from '../../../public/images/figures/magnifier.svg';
 
 export const EmptyList = ({
   title,
@@ -20,7 +19,7 @@ export const EmptyList = ({
       className={cn('flex grow cursor-default flex-col items-center gap-y-2', className)}
       data-cy="empty-list"
     >
-      <Image
+      <img
         src={magnifier}
         alt="Magnifier illustration"
         width="200"

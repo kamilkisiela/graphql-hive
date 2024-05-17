@@ -1,18 +1,19 @@
 import { ReactElement } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
 import cookies from 'js-cookie';
 import { LogOutIcon } from 'lucide-react';
 import { CombinedError } from 'urql';
 import { Button } from '@/components/ui/button';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
+import { Link, useRouter } from '@tanstack/react-router';
 
 export function QueryError({
   error,
   showError,
+  organizationId,
 }: {
   error: CombinedError;
   showError?: boolean;
+  organizationId: string | null;
 }): ReactElement {
   const router = useRouter();
   const requestId =
@@ -26,14 +27,16 @@ export function QueryError({
   const isNetworkError = !!error.networkError;
   const isExpectedError = !isNetworkError && !containsUnexpectedError;
   const shouldShowError = typeof showError === 'boolean' ? showError : isExpectedError;
-  const organizationId =
-    typeof router.query.organizationId === 'string' ? router.query.organizationId : null;
 
   return (
     <div className="flex size-full items-center justify-center">
       <Button
         variant="outline"
-        onClick={() => router.push('/logout')}
+        onClick={() =>
+          router.navigate({
+            to: '/logout',
+          })
+        }
         className="absolute right-6 top-6"
       >
         <LogOutIcon className="mr-2 size-4" /> Sign out
@@ -52,12 +55,7 @@ export function QueryError({
                   If you wish to track it later or share more details with us,{' '}
                   {organizationId ? (
                     <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
-                      <Link
-                        href={{
-                          pathname: '/[organizationId]/view/support',
-                          query: { organizationId },
-                        }}
-                      >
+                      <Link to="/$organizationId/view/support" params={{ organizationId }}>
                         you can use the support
                       </Link>
                     </Button>

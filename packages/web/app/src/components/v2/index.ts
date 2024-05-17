@@ -33,7 +33,6 @@ export { Table, TBody, THead, TFoot, Th, Td, Tr } from '@/components/v2/table';
 export { Tabs } from '@/components/v2/tabs';
 export { Tag } from '@/components/v2/tag';
 export { TimeAgo } from '@/components/v2/time-ago';
-export { MetaTitle as MetaTitle } from '@/components/v2/title';
 export { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 export { Tooltip } from '@/components/v2/tooltip';
 export { DocsNote, DocsLink } from '@/components/v2/docs-note';

@@ -1,33 +1,27 @@
-import { forwardRef, ReactNode } from 'react';
-import NextLink, { LinkProps } from 'next/link';
+import { forwardRef, HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
+import { Slot } from '@radix-ui/react-slot';
 
-type CardProps = (
-  | {
-      as?: never;
-      href?: never;
-    }
-  | ({
-      as: typeof NextLink;
-    } & LinkProps)
-) & {
-  children?: ReactNode;
-  className?: string;
-};
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  asChild?: boolean;
+}
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ children, className, as, ...props }, forwardedRef) => {
-    const TagToUse = as || 'div';
+const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ children, className, asChild = false, ...props }, forwardedRef) => {
+    const Comp = asChild ? Slot : 'div';
 
     return (
-      <TagToUse
-        // @ts-expect-error TODO: figure out what's wrong with ref here
+      <Comp
         ref={forwardedRef}
         className={cn('rounded-md border border-gray-800 p-5', className)}
         {...props}
       >
         {children}
-      </TagToUse>
+      </Comp>
     );
   },
 );
+
+Card.displayName = 'Card';
+
+export { Card };

@@ -48,13 +48,7 @@ export function deployApp({
       imagePullSecret: docker.secret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
-      startupProbe: {
-        endpoint: '/api/health',
-        initialDelaySeconds: 60,
-        failureThreshold: 10,
-        periodSeconds: 30,
-        timeoutSeconds: 15,
-      },
+      startupProbe: '/api/health',
       availabilityOnEveryNode: true,
       env: {
         ...environment.envVars,
@@ -75,6 +69,7 @@ export function deployApp({
         AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
         AUTH_ORGANIZATION_OIDC: '1',
         MEMBER_ROLES_DEADLINE: appEnv.MEMBER_ROLES_DEADLINE,
+        PORT: '3000',
       },
       port: 3000,
     },

@@ -26,9 +26,9 @@ import {
   useFormattedDuration,
   useFormattedNumber,
   useFormattedThroughput,
-  useRouteSelector,
 } from '@/lib/hooks';
 import { useChartStyles } from '@/utils';
+import { useRouter } from '@tanstack/react-router';
 import { OperationsFallback } from './Fallback';
 import { resolutionToMilliseconds } from './utils';
 
@@ -421,8 +421,11 @@ function getLevelOption() {
 
 function ClientsStats(props: {
   operationStats: FragmentType<typeof ClientsStats_OperationsStatsFragment> | null;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const router = useRouteSelector();
+  const router = useRouter();
   const styles = useChartStyles();
   const operationStats = useFragment(ClientsStats_OperationsStatsFragment, props.operationStats);
   const sortedClients = useMemo(() => {
@@ -555,12 +558,12 @@ function ClientsStats(props: {
           return;
         }
 
-        void router.push({
-          pathname: '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
-          query: {
-            organizationId: router.organizationId,
-            projectId: router.projectId,
-            targetId: router.targetId,
+        void router.navigate({
+          to: '/$organizationId/$projectId/$targetId/insights/client/$name',
+          params: {
+            organizationId: props.organizationId,
+            projectId: props.projectId,
+            targetId: props.targetId,
             name: ev.value,
           },
         });
@@ -1120,7 +1123,12 @@ export function OperationsStats({
       </OperationsFallback>
       <div>
         <OperationsFallback state={state} refetch={refetch}>
-          <ClientsStats operationStats={operationsStats ?? null} />
+          <ClientsStats
+            operationStats={operationsStats ?? null}
+            organizationId={organization}
+            projectId={project}
+            targetId={target}
+          />
         </OperationsFallback>
       </div>
       <div>

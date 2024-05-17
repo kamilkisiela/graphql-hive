@@ -1,5 +1,4 @@
 import { ReactElement, ReactNode } from 'react';
-import NextLink from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
@@ -14,8 +13,9 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
+import { Link, useRouter } from '@tanstack/react-router';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 
@@ -69,11 +69,12 @@ export function OrganizationLayout({
   page?: Page;
   className?: string;
   me: FragmentType<typeof OrganizationLayout_MeFragment> | null;
+  organizationId: string;
   currentOrganization: FragmentType<typeof OrganizationLayout_CurrentOrganizationFragment> | null;
   organizations: FragmentType<typeof OrganizationLayout_OrganizationConnectionFragment> | null;
   children: ReactNode;
 }): ReactElement | null {
-  const router = useRouteSelector();
+  const router = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
   const currentOrganization = useFragment(
@@ -85,6 +86,7 @@ export function OrganizationLayout({
     member: currentOrganization?.me ?? null,
     scope: OrganizationAccessScope.Read,
     redirect: true,
+    organizationId: props.organizationId,
   });
 
   useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
@@ -107,8 +109,11 @@ export function OrganizationLayout({
               <Select
                 defaultValue={currentOrganization.cleanId}
                 onValueChange={id => {
-                  router.visitOrganization({
-                    organizationId: id,
+                  void router.navigate({
+                    to: '/$organizationId',
+                    params: {
+                      organizationId: id,
+                    },
                   });
                 }}
               >
@@ -144,85 +149,64 @@ export function OrganizationLayout({
             <Tabs value={page}>
               <Tabs.List>
                 <Tabs.Trigger value={Page.Overview} asChild>
-                  <NextLink
-                    href={{
-                      pathname: '/[organizationId]',
-                      query: { organizationId: currentOrganization.cleanId },
-                    }}
+                  <Link
+                    to="/$organizationId"
+                    params={{ organizationId: currentOrganization.cleanId }}
                   >
                     Overview
-                  </NextLink>
+                  </Link>
                 </Tabs.Trigger>
                 {canAccessOrganization(OrganizationAccessScope.Members, meInCurrentOrg) && (
                   <Tabs.Trigger value={Page.Members} asChild>
-                    <NextLink
-                      href={{
-                        pathname: `/[organizationId]/view/${Page.Members}`,
-                        query: {
-                          organizationId: currentOrganization.cleanId,
-                        },
-                      }}
+                    <Link
+                      to="/$organizationId/view/members"
+                      params={{ organizationId: currentOrganization.cleanId }}
+                      search={{ page: 'list' }}
                     >
                       Members
-                    </NextLink>
+                    </Link>
                   </Tabs.Trigger>
                 )}
                 {canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                   <>
                     <Tabs.Trigger value={Page.Policy} asChild>
-                      <NextLink
-                        href={{
-                          pathname: `/[organizationId]/view/${Page.Policy}`,
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                          },
-                        }}
+                      <Link
+                        to="/$organizationId/view/policy"
+                        params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Policy
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Settings} asChild>
-                      <NextLink
-                        href={{
-                          pathname: `/[organizationId]/view/${Page.Settings}`,
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                          },
-                        }}
+                      <Link
+                        to="/$organizationId/view/settings"
+                        params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Settings
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                   </>
                 )}
                 {canAccessOrganization(OrganizationAccessScope.Read, meInCurrentOrg) &&
                   env.zendeskSupport && (
                     <Tabs.Trigger value={Page.Support} asChild>
-                      <NextLink
-                        href={{
-                          pathname: `/[organizationId]/view/${Page.Support}`,
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                          },
-                        }}
+                      <Link
+                        to="/$organizationId/view/support"
+                        params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Support
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                   )}
                 {getIsStripeEnabled() &&
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                     <Tabs.Trigger value={Page.Subscription} asChild>
-                      <NextLink
-                        href={{
-                          pathname: `/[organizationId]/view/${Page.Subscription}`,
-                          query: {
-                            organizationId: currentOrganization.cleanId,
-                          },
-                        }}
+                      <Link
+                        to="/$organizationId/view/subscription"
+                        params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Subscription
-                      </NextLink>
+                      </Link>
                     </Tabs.Trigger>
                   )}
               </Tabs.List>
@@ -240,7 +224,11 @@ export function OrganizationLayout({
                 <PlusIcon size={16} className="mr-2" />
                 New project
               </Button>
-              <CreateProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+              <CreateProjectModal
+                organizationId={props.organizationId}
+                isOpen={isModalOpen}
+                toggleModalOpen={toggleModalOpen}
+              />
             </>
           ) : null}
         </div>

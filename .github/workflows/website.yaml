@@ -24,7 +24,6 @@ jobs:
         with:
           codegen: false
           actor: website
-          cacheNext: false
           cacheTurbo: false
 
       - uses: the-guild-org/shared-config/website-cf@main

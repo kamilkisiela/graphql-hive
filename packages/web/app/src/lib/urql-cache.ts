@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
@@ -16,13 +15,10 @@ import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-o
 import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
 import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
 import { graphql } from '@/gql';
+import { CollectionsQuery } from '@/pages/target-laboratory';
+import { TokensDocument, type DeleteTokensDocument } from '@/pages/target-settings';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
-import { CollectionsQuery } from '../../pages/[organizationId]/[projectId]/[targetId]/laboratory';
-import {
-  TokensDocument,
-  type DeleteTokensDocument,
-} from '../../pages/[organizationId]/[projectId]/[targetId]/settings';
 
 const TargetsDocument = graphql(`
   query targets($selector: ProjectSelectorInput!) {

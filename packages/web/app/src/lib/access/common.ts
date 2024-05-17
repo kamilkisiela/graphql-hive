@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
-import { Router, useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@tanstack/react-router';
 
 export interface Scope<T> {
   name: string;
@@ -121,27 +121,19 @@ export function useRedirect({
   redirectTo,
 }: {
   canAccess: boolean;
-  redirectTo?: (router: Router) =>
-    | {
-        route: string;
-        as: string;
-      }
-    | undefined;
+  redirectTo?: (router: ReturnType<typeof useRouter>) => void;
   entity?: any;
 }) {
-  const router = useRouteSelector();
+  const router = useRouter();
   const redirectRef = React.useRef(false);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!redirectTo) {
       return;
     }
 
     if (!canAccess && entity && !redirectRef.current) {
       redirectRef.current = true;
-      const route = redirectTo(router);
-      if (route) {
-        void router.push(route.route, route.as);
-      }
+      redirectTo(router);
     }
   }, [router, canAccess, redirectRef, redirectTo]);
 }

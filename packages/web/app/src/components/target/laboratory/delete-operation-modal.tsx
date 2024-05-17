@@ -2,7 +2,7 @@ import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useNotifications, useRouteSelector } from '@/lib/hooks';
+import { useNotifications } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 const DeleteOperationMutation = graphql(`
@@ -39,14 +39,14 @@ const DeleteOperationMutation = graphql(`
 
 export type DeleteOperationMutationType = typeof DeleteOperationMutation;
 
-export function DeleteOperationModal({
-  close,
-  operationId,
-}: {
+export function DeleteOperationModal(props: {
   close: () => void;
   operationId: string;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement {
-  const route = useRouteSelector();
+  const { close, operationId } = props;
   const [, mutate] = useMutation(DeleteOperationMutation);
   const notify = useNotifications();
 
@@ -69,9 +69,9 @@ export function DeleteOperationModal({
             const { error } = await mutate({
               id: operationId,
               selector: {
-                target: route.targetId,
-                organization: route.organizationId,
-                project: route.projectId,
+                target: props.targetId,
+                organization: props.organizationId,
+                project: props.projectId,
               },
             });
 

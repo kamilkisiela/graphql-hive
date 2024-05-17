@@ -1,7 +1,23 @@
-import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import zod from 'zod';
-import * as Sentry from '@sentry/nextjs';
-import { getAllEnv } from './read';
+import * as Sentry from '@sentry/node';
+import { ALLOWED_ENVIRONMENT_VARIABLES } from './frontend-public-variables';
+
+/**
+ * Get public environment variables that are allowed to be exposed to the frontend as a key-value object.
+ */
+export function getPublicEnvVars() {
+  const envObject: Record<string, unknown> = {};
+  // eslint-disable-next-line no-process-env
+  const processEnv = process.env;
+
+  for (const key in processEnv) {
+    if ((ALLOWED_ENVIRONMENT_VARIABLES as readonly string[]).includes(key)) {
+      envObject[key] = processEnv[key];
+    }
+  }
+
+  return envObject;
+}
 
 // Weird hacky way of getting the Sentry.Integrations object
 // When the nextjs config is loaded by Next CLI Sentry has `Integrations` property.
@@ -20,9 +36,20 @@ const emptyString = <T extends zod.ZodType>(input: T) => {
   }, input);
 };
 
+const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
+
+const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
+  if (typeof input === 'number') return input;
+  if (isNumberString(input)) return Number(input);
+};
+
+const NumberFromString = (min = 1) =>
+  zod.preprocess(numberFromNumberOrNumberString, zod.number().min(min));
+
 const BaseSchema = zod.object({
-  NODE_ENV: zod.string(),
+  NODE_ENV: zod.string().default('development'),
   ENVIRONMENT: zod.string(),
+  PORT: emptyString(NumberFromString().optional()),
   APP_BASE_URL: zod.string().url(),
   GRAPHQL_PUBLIC_ENDPOINT: zod.string().url(),
   GRAPHQL_PUBLIC_ORIGIN: zod.string().url(),
@@ -88,7 +115,24 @@ const MigrationsSchema = zod.object({
   ),
 });
 
-const processEnv = getAllEnv();
+const LogModel = zod.object({
+  LOG_LEVEL: emptyString(
+    zod
+      .union([
+        zod.literal('trace'),
+        zod.literal('debug'),
+        zod.literal('info'),
+        zod.literal('warn'),
+        zod.literal('error'),
+        zod.literal('fatal'),
+        zod.literal('silent'),
+      ])
+      .optional(),
+  ),
+});
+
+// eslint-disable-next-line no-process-env
+const processEnv = process.env;
 
 function buildConfig() {
   const configs = {
@@ -97,6 +141,7 @@ function buildConfig() {
     sentry: SentryConfigSchema.safeParse(processEnv),
     authGithub: AuthGitHubConfigSchema.safeParse(processEnv),
     authGoogle: AuthGoogleConfigSchema.safeParse(processEnv),
+    log: LogModel.safeParse(processEnv),
     authOkta: AuthOktaConfigSchema.safeParse(processEnv),
     authOktaMultiTenant: AuthOktaMultiTenantSchema.safeParse(processEnv),
     migrations: MigrationsSchema.safeParse(processEnv),
@@ -131,14 +176,19 @@ function buildConfig() {
   const authOkta = extractConfig(configs.authOkta);
   const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
   const migrations = extractConfig(configs.migrations);
+  const log = extractConfig(configs.log);
 
   const config = {
+    port: base.PORT ?? 3000,
     release: base.RELEASE ?? 'local',
     nodeEnv: base.NODE_ENV,
     environment: base.ENVIRONMENT,
     appBaseUrl: base.APP_BASE_URL.replace(/\/$/, ''),
     graphqlPublicEndpoint: base.GRAPHQL_PUBLIC_ENDPOINT,
     graphqlPublicOrigin: base.GRAPHQL_PUBLIC_ORIGIN,
+    log: {
+      level: log.LOG_LEVEL ?? 'info',
+    },
     slack:
       integrationSlack.INTEGRATION_SLACK === '1'
         ? {
@@ -179,8 +229,7 @@ function buildConfig() {
   return config;
 }
 
-const isNextBuilding = processEnv['NEXT_PHASE'] === PHASE_PRODUCTION_BUILD;
-export const env = !isNextBuilding ? buildConfig() : noop();
+export const env = buildConfig();
 
 // TODO: I don't like this here, but it seems like it makes most sense here :)
 Sentry.init({
@@ -199,22 +248,3 @@ Sentry.init({
     }),
   ],
 });
-
-/**
- * Next.js is so kind and tries to pre-render our page without the environment information being available... :)
- * Non of our pages can actually be pre-rendered without first running the backend as it requires the runtime environment variables.
- * So we just return a noop. :)
- */
-function noop(): any {
-  return new Proxy(new String(''), {
-    get(obj, prop) {
-      if (prop === Symbol.toPrimitive) {
-        return () => undefined;
-      }
-      if (prop in String.prototype) {
-        return obj[prop as any];
-      }
-      return noop();
-    },
-  });
-}

@@ -1,11 +1,10 @@
 import { ReactElement } from 'react';
-import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
+import { useRouter } from '@tanstack/react-router';
 
 export const CreateTarget_CreateTargetMutation = graphql(`
   mutation CreateTarget_CreateTarget($input: CreateTargetInput!) {
@@ -31,16 +30,15 @@ export const CreateTarget_CreateTargetMutation = graphql(`
   }
 `);
 
-export const CreateTargetModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
+export const CreateTargetModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
 }): ReactElement => {
+  const { isOpen, toggleModalOpen } = props;
   const [mutation, mutate] = useMutation(CreateTarget_CreateTargetMutation);
-  const { push } = useRouter();
-  const router = useRouteSelector();
+  const router = useRouter();
 
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
@@ -49,7 +47,7 @@ export const CreateTargetModal = ({
         name: Yup.string().required('Target name is required'),
       }),
       async onSubmit(values) {
-        const { projectId, organizationId } = router;
+        const { projectId, organizationId } = props;
         const { data } = await mutate({
           input: {
             project: projectId,
@@ -60,7 +58,14 @@ export const CreateTargetModal = ({
         if (data?.createTarget.ok) {
           toggleModalOpen();
           const targetId = data.createTarget.ok.createdTarget.cleanId;
-          void push(`/${organizationId}/${projectId}/${targetId}`);
+          void router.navigate({
+            to: '/$organizationId/$projectId/$targetId',
+            params: {
+              organizationId,
+              projectId,
+              targetId,
+            },
+          });
         }
       },
     });

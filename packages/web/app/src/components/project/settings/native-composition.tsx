@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import Link from 'next/link';
 import { FlaskConicalIcon, HeartCrackIcon, PartyPopperIcon, RefreshCcwIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
@@ -195,12 +194,12 @@ export function NativeCompositionSettings(props: {
                 NativeFederationCompatibilityStatus.Compatible ? (
                   <>
                     Subgraphs of this project are composed and validated correctly by our{' '}
-                    <Link
+                    <a
                       className="text-muted-foreground font-semibold underline-offset-4 hover:underline"
                       href="https://github.com/the-guild-org/federation"
                     >
                       Open Source composition library
-                    </Link>{' '}
+                    </a>{' '}
                     for Apollo Federation.
                   </>
                 ) : null}
@@ -208,12 +207,12 @@ export function NativeCompositionSettings(props: {
                 NativeFederationCompatibilityStatus.Incompatible ? (
                   <>
                     Our{' '}
-                    <Link
+                    <a
                       className="text-muted-foreground font-semibold underline-offset-4 hover:underline"
                       href="https://github.com/the-guild-org/federation"
                     >
                       Open Source composition library
-                    </Link>{' '}
+                    </a>{' '}
                     is not yet compatible with subgraphs of your project. We're working on it!
                     <br />
                     Please reach out to us to explore solutions for addressing this issue.
@@ -224,12 +223,12 @@ export function NativeCompositionSettings(props: {
                   <>
                     Your project appears to lack any subgraphs at the moment, making it impossible
                     for us to assess compatibility with our{' '}
-                    <Link
+                    <a
                       className="text-muted-foreground font-semibold underline-offset-4 hover:underline"
                       href="https://github.com/the-guild-org/federation"
                     >
                       Open Source composition library
-                    </Link>
+                    </a>
                     .
                   </>
                 ) : null}
@@ -259,9 +258,9 @@ export function NativeCompositionSettings(props: {
           </Button>
           <div>
             <Button variant="link" className="text-orange-500" asChild>
-              <Link href="https://github.com/the-guild-org/federation?tab=readme-ov-file#compatibility">
+              <a href="https://github.com/the-guild-org/federation?tab=readme-ov-file#compatibility">
                 Learn more about risks and compatibility with Apollo Composition
-              </Link>
+              </a>
             </Button>
           </div>
         </div>

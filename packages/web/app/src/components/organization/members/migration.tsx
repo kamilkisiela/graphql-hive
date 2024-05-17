@@ -1,6 +1,4 @@
 import { useCallback, useRef, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { differenceInCalendarDays } from 'date-fns';
 import { InfoIcon, LightbulbIcon, PartyPopperIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -42,6 +40,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { Scope, scopes } from '@/lib/access/common';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useRouter } from '@tanstack/react-router';
 import { PermissionsSpace } from '../Permissions';
 import { RoleSelector } from './common';
 import { authProviderToIconAndTextMap } from './list';
@@ -79,7 +78,11 @@ export function MemberRoleMigrationStickyNote(props: {
       : 0;
   }
 
-  const isMembersView = router.route.startsWith('/[organizationId]/view/members');
+  const isMembersView =
+    // @ts-expect-error - it's missing the `search` property, but it's fine, it works correctly
+    router.matchRoute({
+      to: '/$organizationId/view/members',
+    }) !== false;
 
   if (
     // Only admins can perform migration
@@ -103,12 +106,12 @@ export function MemberRoleMigrationStickyNote(props: {
         {daysLeft.current} {daysLeft.current > 1 ? 'days' : 'day'} left to{' '}
         <Link
           className="underline underline-offset-4"
-          href={{
-            pathname: '/[organizationId]/view/members',
-            query: {
-              organizationId: organization.cleanId,
-              page: 'migration',
-            },
+          to="/$organizationId/view/members"
+          params={{
+            organizationId: organization.cleanId,
+          }}
+          search={{
+            page: 'migration',
           }}
         >
           assign roles
@@ -124,10 +127,6 @@ function SimilarRoleScopes<T>(props: {
   definitions: readonly Scope<T>[];
   scopes: readonly T[];
 }) {
-  if (props.scopes.length === 0) {
-    return null;
-  }
-
   const groupedScopes = useRef<
     {
       name: string;
@@ -137,6 +136,10 @@ function SimilarRoleScopes<T>(props: {
       hasBothOptions: boolean;
     }[]
   >();
+
+  if (props.scopes.length === 0) {
+    return null;
+  }
 
   if (!groupedScopes.current) {
     groupedScopes.current = [];

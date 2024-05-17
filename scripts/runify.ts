@@ -9,6 +9,8 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const requireShim = fs.readFileSync(normalize(join(__dirname, './banner.js')), 'utf-8');
 
+const [, , entryPoint] = process.argv;
+
 interface BuildOptions {
   external?: string[];
   next?: {
@@ -35,7 +37,7 @@ async function runify(packagePath: string) {
   } else {
     await compile(
       cwd,
-      'src/index.ts',
+      entryPoint ?? 'src/index.ts',
       buildOptions,
       Object.keys(pkg.dependencies ?? {}).concat(Object.keys(pkg.devDependencies ?? {})),
       pkg.type === 'module',
@@ -137,7 +139,7 @@ async function compile(
     clean: true,
     shims: true,
     skipNodeModulesBundle: false,
-    noExternal: dependencies,
+    // noExternal: dependencies,
     external: buildOptions.external,
     banner: {
       js: requireShim,

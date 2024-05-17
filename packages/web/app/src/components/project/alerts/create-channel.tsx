@@ -5,7 +5,6 @@ import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select, Tag } from '@/components/v2';
 import { graphql } from '@/gql';
 import { AlertChannelType } from '@/gql/graphql';
-import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateChannel_AddAlertChannelMutation = graphql(`
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
@@ -33,11 +32,14 @@ export const CreateChannel_AddAlertChannelMutation = graphql(`
 export const CreateChannelModal = ({
   isOpen,
   toggleModalOpen,
+  organizationId,
+  projectId,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
 }): ReactElement => {
-  const router = useRouteSelector();
   const [mutation, mutate] = useMutation(CreateChannel_AddAlertChannelMutation);
   const { errors, values, touched, handleChange, handleBlur, handleSubmit, isSubmitting } =
     useFormik({
@@ -64,8 +66,8 @@ export const CreateChannelModal = ({
       async onSubmit(values) {
         const { data, error } = await mutate({
           input: {
-            organization: router.organizationId,
-            project: router.projectId,
+            organization: organizationId,
+            project: projectId,
             name: values.name,
             type: values.type,
             slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,

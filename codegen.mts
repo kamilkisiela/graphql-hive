@@ -145,11 +145,9 @@ const config: CodegenConfig = {
     },
     './packages/web/app/src/gql/': {
       documents: [
-        './packages/web/app/src/(components|lib)/**/*.ts(x)?',
-        './packages/web/app/pages/v2/**/*.ts(x)?',
-        './packages/web/app/pages/**/*.ts(x)?',
+        './packages/web/app/src/(components|lib|pages)/**/*.ts(x)?',
         './packages/web/app/src/graphql',
-        '!./packages/web/app/pages/api/github/setup-callback.ts',
+        '!./packages/web/app/src/server/**/*.ts',
       ],
       preset: 'client',
       config: {

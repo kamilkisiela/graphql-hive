@@ -1,11 +1,10 @@
 import { ReactElement, useMemo } from 'react';
 import { useFormik } from 'formik';
-import { useCollections } from 'packages/web/app/pages/[organizationId]/[projectId]/[targetId]/laboratory';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
+import { useCollections } from '../../../pages/target-laboratory';
 
 const UpdateOperationNameMutation = graphql(`
   mutation UpdateOperation(
@@ -32,10 +31,16 @@ const UpdateOperationNameMutation = graphql(`
 export const EditOperationModal = (props: {
   operationId: string;
   close: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement => {
-  const router = useRouteSelector();
   const [updateOperationNameState, mutate] = useMutation(UpdateOperationNameMutation);
-  const { collections } = useCollections();
+  const { collections } = useCollections({
+    organizationId: props.organizationId,
+    projectId: props.projectId,
+    targetId: props.targetId,
+  });
 
   const [collection, operation] = useMemo(() => {
     for (const collection of collections) {
@@ -61,9 +66,9 @@ export const EditOperationModal = (props: {
       async onSubmit(values) {
         const response = await mutate({
           selector: {
-            target: router.targetId,
-            organization: router.organizationId,
-            project: router.projectId,
+            target: props.targetId,
+            organization: props.organizationId,
+            project: props.projectId,
           },
           input: {
             collectionId: values.collectionId,

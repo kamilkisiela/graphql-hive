@@ -130,8 +130,10 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               'Unlimited seats, projects and organizations',
               'Unlimited schema pushes & checks',
               'Full access to all features (including SSO)',
-              <Tooltip content={OPERATIONS_EXPLAINER}>Limit of 1M operations per month</Tooltip>,
-              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
+              <Tooltip key="t1" content={OPERATIONS_EXPLAINER}>
+                Limit of 1M operations per month
+              </Tooltip>,
+              <Tooltip key="t2" content={USAGE_DATA_RETENTION_EXPLAINER}>
                 7 days of usage data retention
               </Tooltip>,
             ]}
@@ -146,10 +148,12 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
             }
             linkText="Get started"
             features={[
-              <Tooltip content={OPERATIONS_EXPLAINER}>+ $10 per 1M operations</Tooltip>,
+              <Tooltip key="t1" content={OPERATIONS_EXPLAINER}>
+                + $10 per 1M operations
+              </Tooltip>,
               'Adjust your plan at any time',
-              <strong>Everything in Hobby plan, and:</strong>,
-              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
+              <strong key="s1">Everything in Hobby plan, and:</strong>,
+              <Tooltip key="t2" content={USAGE_DATA_RETENTION_EXPLAINER}>
                 90 days of usage data retention
               </Tooltip>,
             ]}
@@ -173,13 +177,15 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               (window as any).$crisp?.push(['do', 'chat:open']);
             }}
             features={[
-              <Tooltip content={OPERATIONS_EXPLAINER}>Custom limit of operations</Tooltip>,
+              <Tooltip key="t1" content={OPERATIONS_EXPLAINER}>
+                Custom limit of operations
+              </Tooltip>,
               'Change your plan at any time',
               'Improved pricing as you scale',
-              <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
+              <Tooltip key="t2" content={USAGE_DATA_RETENTION_EXPLAINER}>
                 12 months of usage data retention
               </Tooltip>,
-              <span className="gap-1">
+              <span key="s1" className="gap-1">
                 GraphQL / APIs support and guidance from{' '}
                 <a
                   href="https://the-guild.dev"

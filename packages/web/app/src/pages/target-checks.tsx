@@ -1,0 +1,410 @@
+import { useState } from 'react';
+import { useQuery } from 'urql';
+import { Page, TargetLayout } from '@/components/layouts/target';
+import { Label } from '@/components/ui/label';
+import { Meta } from '@/components/ui/meta';
+import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/v2/badge';
+import { Button as LegacyButton } from '@/components/v2/button';
+import { DocsLink } from '@/components/v2/docs-note';
+import { EmptyList } from '@/components/v2/empty-list';
+import { TimeAgo } from '@/components/v2/time-ago';
+import { graphql } from '@/gql';
+import { cn } from '@/lib/utils';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import { Outlet, Link as RouterLink, useParams, useRouter } from '@tanstack/react-router';
+
+const SchemaChecks_NavigationQuery = graphql(`
+  query SchemaChecks_NavigationQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $after: String
+    $filters: SchemaChecksFilter
+  ) {
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      schemaChecks(first: 20, after: $after, filters: $filters) {
+        edges {
+          node {
+            __typename
+            id
+            createdAt
+            serviceName
+            meta {
+              commit
+              author
+            }
+            breakingSchemaChanges {
+              total
+            }
+            safeSchemaChanges {
+              total
+            }
+            githubRepository
+          }
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          endCursor
+        }
+      }
+    }
+  }
+`);
+
+interface SchemaCheckFilters {
+  showOnlyFailed?: boolean;
+  showOnlyChanged?: boolean;
+}
+
+const Navigation = (props: {
+  after: string | null;
+  isLastPage: boolean;
+  onLoadMore: (cursor: string) => void;
+  filters?: SchemaCheckFilters;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+  schemaCheckId?: string;
+}) => {
+  const [query] = useQuery({
+    query: SchemaChecks_NavigationQuery,
+    variables: {
+      organizationId: props.organizationId,
+      projectId: props.projectId,
+      targetId: props.targetId,
+      after: props.after,
+      filters: {
+        changed: props.filters?.showOnlyChanged ?? false,
+        failed: props.filters?.showOnlyFailed ?? false,
+      },
+    },
+  });
+
+  return (
+    <>
+      {query.fetching || !query.data?.target?.schemaChecks ? null : (
+        <>
+          {query.data.target.schemaChecks.edges.map(edge => (
+            <div
+              key={edge.node.id}
+              className={cn(
+                'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
+                edge.node.id === props.schemaCheckId ? 'bg-gray-800/40' : null,
+              )}
+            >
+              <RouterLink
+                key={edge.node.id}
+                to="/$organizationId/$projectId/$targetId/checks/$schemaCheckId"
+                params={{
+                  organizationId: props.organizationId,
+                  projectId: props.projectId,
+                  targetId: props.targetId,
+                  schemaCheckId: edge.node.id,
+                }}
+                search={{
+                  filter_changed: props.filters?.showOnlyChanged,
+                  filter_failed: props.filters?.showOnlyFailed,
+                }}
+              >
+                <h3 className="truncate text-sm font-semibold">
+                  {edge.node.meta?.commit ?? edge.node.id}
+                </h3>
+                {edge.node.meta?.author ? (
+                  <div className="truncate text-xs font-medium text-gray-500">
+                    <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
+                  </div>
+                ) : null}
+                <div className="mb-1.5 mt-2.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+                  <div
+                    className={cn(
+                      edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
+                    )}
+                  >
+                    <Badge color={edge.node.__typename === 'FailedSchemaCheck' ? 'red' : 'green'} />{' '}
+                    <TimeAgo date={edge.node.createdAt} />
+                  </div>
+
+                  {edge.node.serviceName ? (
+                    <div className="ml-auto mr-0 w-1/2 truncate text-right font-bold">
+                      {edge.node.serviceName}
+                    </div>
+                  ) : null}
+                </div>
+              </RouterLink>
+              {edge.node.githubRepository && edge.node.meta ? (
+                <a
+                  className="-ml-px text-xs font-medium text-gray-500 hover:text-gray-400"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://github.com/${edge.node.githubRepository}/commit/${edge.node.meta.commit}`}
+                >
+                  <ExternalLinkIcon className="inline" /> associated with Git commit
+                </a>
+              ) : null}
+            </div>
+          ))}
+          {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
+            <LegacyButton
+              variant="link"
+              onClick={() => {
+                props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
+              }}
+            >
+              Load more
+            </LegacyButton>
+          )}
+        </>
+      )}
+    </>
+  );
+};
+
+const ChecksPageQuery = graphql(`
+  query ChecksPageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $filters: SchemaChecksFilter
+  ) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_CurrentOrganizationFragment
+        rateLimit {
+          retentionInDays
+        }
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_CurrentProjectFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      schemaChecks(first: 1) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+      filteredSchemaChecks: schemaChecks(first: 1, filters: $filters) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+    }
+    me {
+      ...TargetLayout_MeFragment
+    }
+    ...TargetLayout_IsCDNEnabledFragment
+  }
+`);
+
+function ChecksPageContent(props: { organizationId: string; projectId: string; targetId: string }) {
+  const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
+    null,
+  ]);
+
+  const router = useRouter();
+  const { schemaCheckId } = useParams({
+    strict: false /* allows to read the $schemaCheckId param of its child route */,
+  }) as { schemaCheckId?: string };
+  const search = router.latestLocation.search as {
+    filter_changed?: string;
+    filter_failed?: string;
+  };
+  const showOnlyChanged = search?.filter_changed === 'true';
+  const showOnlyFailed = search?.filter_failed === 'true';
+
+  const [filters, setFilters] = useState<SchemaCheckFilters>({
+    showOnlyChanged: showOnlyChanged ?? false,
+    showOnlyFailed: showOnlyFailed ?? false,
+  });
+
+  const [query] = useQuery({
+    query: ChecksPageQuery,
+    variables: {
+      organizationId: props.organizationId,
+      projectId: props.projectId,
+      targetId: props.targetId,
+      filters: {
+        changed: filters.showOnlyChanged ?? false,
+        failed: filters.showOnlyFailed ?? false,
+      },
+    },
+  });
+
+  if (query.error) {
+    return <QueryError organizationId={props.organizationId} error={query.error} />;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
+  const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
+  const hasActiveSchemaCheck = !!schemaCheckId;
+
+  const handleShowOnlyFilterChange = () => {
+    const updatedFilters = !filters.showOnlyChanged;
+
+    void router.navigate({
+      search: {
+        ...search,
+        filter_changed: updatedFilters,
+      },
+    });
+    setFilters(filters => ({
+      ...filters,
+      showOnlyChanged: !filters.showOnlyChanged,
+    }));
+  };
+
+  const handleShowOnlyFilterFailed = () => {
+    const updatedFilters = !filters.showOnlyFailed;
+
+    void router.navigate({
+      search: {
+        ...search,
+        filter_failed: updatedFilters,
+      },
+    });
+
+    setFilters(filters => ({
+      ...filters,
+      showOnlyFailed: !filters.showOnlyFailed,
+    }));
+  };
+
+  return (
+    <>
+      <TargetLayout
+        organizationId={props.organizationId}
+        projectId={props.projectId}
+        targetId={props.targetId}
+        page={Page.Checks}
+        className="h-full"
+        currentOrganization={currentOrganization ?? null}
+        currentProject={currentProject ?? null}
+        me={me ?? null}
+        organizations={organizationConnection ?? null}
+        isCDNEnabled={isCDNEnabled ?? null}
+      >
+        <div
+          className={cn(
+            'flex h-full w-full',
+            hasSchemaChecks || hasActiveSchemaCheck ? 'flex-row gap-x-6' : '',
+          )}
+        >
+          <div>
+            <div className="py-6">
+              <Title>Schema Checks</Title>
+              <Subtitle>Recently checked schemas.</Subtitle>
+            </div>
+            {query.fetching || query.stale ? null : hasSchemaChecks ? (
+              <div className="flex flex-col gap-5">
+                <div>
+                  <div className="flex h-9 flex-row items-center justify-between">
+                    <Label
+                      htmlFor="filter-toggle-has-changes"
+                      className="text-sm font-normal text-gray-100"
+                    >
+                      Show only changed schemas
+                    </Label>
+                    <Switch
+                      checked={filters.showOnlyChanged ?? false}
+                      onCheckedChange={handleShowOnlyFilterChange}
+                      id="filter-toggle-has-changes"
+                    />
+                  </div>
+                  <div className="flex h-9 flex-row items-center justify-between">
+                    <Label
+                      htmlFor="filter-toggle-status-failed"
+                      className="text-sm font-normal text-gray-100"
+                    >
+                      Show only failed checks
+                    </Label>
+                    <Switch
+                      checked={filters.showOnlyFailed ?? false}
+                      onCheckedChange={handleShowOnlyFilterFailed}
+                      id="filter-toggle-status-failed"
+                    />
+                  </div>
+                </div>
+                {hasFilteredSchemaChecks ? (
+                  <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                    {paginationVariables.map((cursor, index) => (
+                      <Navigation
+                        organizationId={props.organizationId}
+                        projectId={props.projectId}
+                        targetId={props.targetId}
+                        schemaCheckId={schemaCheckId}
+                        after={cursor}
+                        isLastPage={index + 1 === paginationVariables.length}
+                        onLoadMore={cursor =>
+                          setPaginationVariables(cursors => [...cursors, cursor])
+                        }
+                        key={cursor ?? 'first'}
+                        filters={filters}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="cursor-default text-sm">
+                    No schema checks found with the current filters
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div className="cursor-default text-sm">
+                  {hasActiveSchemaCheck ? 'List is empty' : 'Your schema check list is empty'}
+                </div>
+                <DocsLink href="/features/schema-registry#check-a-schema">
+                  {hasActiveSchemaCheck
+                    ? 'Check you first schema'
+                    : 'Learn how to check your first schema with Hive CLI'}
+                </DocsLink>
+              </div>
+            )}
+          </div>
+          {hasActiveSchemaCheck ? (
+            schemaCheckId ? (
+              <Outlet />
+            ) : null
+          ) : hasSchemaChecks ? (
+            <EmptyList
+              className="border-0 pt-6"
+              title="Select a schema check"
+              description="A list of your schema checks is available on the left."
+            />
+          ) : null}
+        </div>
+      </TargetLayout>
+    </>
+  );
+}
+
+export function TargetChecksPage(props: {
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
+  return (
+    <>
+      <Meta title="Schema Checks" />
+      <ChecksPageContent {...props} />
+    </>
+  );
+}

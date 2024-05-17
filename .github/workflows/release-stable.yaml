@@ -28,7 +28,6 @@ jobs:
         with:
           codegen: false # no need to run because release script will run it anyway
           actor: release-stable
-          cacheNext: false
           cacheTurbo: true
 
       - name: prepare npm credentials

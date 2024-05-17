@@ -1,4 +1,3 @@
-import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import zod from 'zod';
 import type { AllowedEnvironmentVariables } from './frontend-public-variables';
 import { getAllEnv } from './read';
@@ -38,7 +37,7 @@ const enabledOrDisabled = emptyString(zod.union([zod.literal('1'), zod.literal('
 // todo: reuse backend schema
 
 const BaseSchema = protectedObject({
-  NODE_ENV: zod.string(),
+  NODE_ENV: zod.string().default('development'),
   ENVIRONMENT: zod.string(),
   APP_BASE_URL: zod.string().url(),
   GRAPHQL_PUBLIC_ENDPOINT: zod.string().url(),
@@ -176,24 +175,4 @@ function buildConfig() {
   } as const;
 }
 
-const isNextBuilding = envValues['NEXT_PHASE'] === PHASE_PRODUCTION_BUILD;
-export const env = !isNextBuilding ? buildConfig() : noop();
-
-/**
- * Next.js is so kind and tries to pre-render our page without the environment information being available... :)
- * Non of our pages can actually be pre-rendered without first running the backend as it requires the runtime environment variables.
- * So we just return a noop. :)
- */
-function noop(): ReturnType<typeof buildConfig> {
-  return new Proxy(new String(''), {
-    get(obj, prop) {
-      if (prop === Symbol.toPrimitive) {
-        return () => undefined;
-      }
-      if (prop in String.prototype) {
-        return obj[prop as any];
-      }
-      return noop();
-    },
-  }) as any;
-}
+export const env = buildConfig();

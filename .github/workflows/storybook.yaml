@@ -28,7 +28,6 @@ jobs:
         with:
           codegen: true
           actor: storybook
-          cacheNext: true
           cacheTurbo: true
 
       - uses: the-guild-org/shared-config/website-cf@main

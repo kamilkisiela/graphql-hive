@@ -30,9 +30,6 @@ npm-debug.log*
 .env.test.local
 .env.production.local
 
-# next-env-runtime
-public/__ENV.js
-
 # vercel
 .vercel
 

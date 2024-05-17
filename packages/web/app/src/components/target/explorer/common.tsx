@@ -1,14 +1,14 @@
 import React, { ReactElement, ReactNode, useMemo } from 'react';
-import NextLink from 'next/link';
 import { clsx } from 'clsx';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PulseIcon, UsersIcon } from '@/components/v2/icon';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { formatNumber, toDecimal, useRouteSelector } from '@/lib/hooks';
+import { formatNumber, toDecimal } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
+import { Link as NextLink, useRouter } from '@tanstack/react-router';
 import { useArgumentListToggle } from './provider';
 import { SupergraphMetadataList } from './super-graph-metadata';
 
@@ -118,16 +118,13 @@ export function SchemaExplorerUsageStats(props: {
                             <td className="px-2 pl-0 text-left">
                               <NextLink
                                 className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                                href={{
-                                  pathname:
-                                    '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                                  query: {
-                                    organizationId: props.organizationCleanId,
-                                    projectId: props.projectCleanId,
-                                    targetId: props.targetCleanId,
-                                    operationName: `${op.hash.substring(0, 4)}_${op.name}`,
-                                    operationHash: op.hash,
-                                  },
+                                to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                                params={{
+                                  organizationId: props.organizationCleanId,
+                                  projectId: props.projectCleanId,
+                                  targetId: props.targetCleanId,
+                                  operationName: `${op.hash.substring(0, 4)}_${op.name}`,
+                                  operationHash: op.hash,
                                 }}
                               >
                                 {op.hash.substring(0, 4)}_{op.name}
@@ -166,15 +163,12 @@ export function SchemaExplorerUsageStats(props: {
                       <li key={clientName} className="font-bold">
                         <NextLink
                           className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                          href={{
-                            pathname:
-                              '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
-                            query: {
-                              organizationId: props.organizationCleanId,
-                              projectId: props.projectCleanId,
-                              targetId: props.targetCleanId,
-                              name: clientName,
-                            },
+                          to="/$organizationId/$projectId/$targetId/insights/client/$name"
+                          params={{
+                            organizationId: props.organizationCleanId,
+                            projectId: props.projectCleanId,
+                            targetId: props.targetCleanId,
+                            name: clientName,
                           }}
                         >
                           {clientName}
@@ -299,7 +293,12 @@ export function GraphQLTypeCard(props: {
           <div className="flex flex-row items-center gap-2">
             <div className="font-normal text-gray-500">{props.kind}</div>
             <div className="font-semibold">
-              <GraphQLTypeAsLink type={props.name} />
+              <GraphQLTypeAsLink
+                organizationId={props.organizationCleanId}
+                projectId={props.projectCleanId}
+                targetId={props.targetCleanId}
+                type={props.name}
+              />
             </div>
             {props.description ? <Description description={props.description} /> : null}
           </div>
@@ -309,7 +308,13 @@ export function GraphQLTypeCard(props: {
             <div className="mr-2">implements</div>
             <div className="flex flex-row gap-2">
               {props.implements.map(t => (
-                <GraphQLTypeAsLink key={t} type={t} />
+                <GraphQLTypeAsLink
+                  organizationId={props.organizationCleanId}
+                  projectId={props.projectCleanId}
+                  targetId={props.targetCleanId}
+                  key={t}
+                  type={t}
+                />
               ))}
             </div>
           </div>
@@ -324,7 +329,12 @@ export function GraphQLTypeCard(props: {
           />
         ) : null}
         {supergraphMetadata ? (
-          <SupergraphMetadataList supergraphMetadata={supergraphMetadata} />
+          <SupergraphMetadataList
+            targetId={props.targetCleanId}
+            projectId={props.projectCleanId}
+            organizationId={props.organizationCleanId}
+            supergraphMetadata={supergraphMetadata}
+          />
         ) : null}
       </div>
       <div>{props.children}</div>
@@ -336,6 +346,9 @@ function GraphQLArguments(props: {
   parentCoordinate: string;
   args: FragmentType<typeof GraphQLArguments_ArgumentFragment>[];
   styleDeprecated: boolean;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const args = useFragment(GraphQLArguments_ArgumentFragment, props.args);
   const [isCollapsedGlobally] = useArgumentListToggle();
@@ -360,10 +373,22 @@ function GraphQLArguments(props: {
                   styleDeprecated={props.styleDeprecated}
                   deprecationReason={arg.deprecationReason}
                 >
-                  <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
+                  <LinkToCoordinatePage
+                    organizationId={props.organizationCleanId}
+                    projectId={props.projectCleanId}
+                    targetId={props.targetCleanId}
+                    coordinate={coordinate}
+                  >
+                    {arg.name}
+                  </LinkToCoordinatePage>
                 </DeprecationNote>
                 {': '}
-                <GraphQLTypeAsLink type={arg.type} />
+                <GraphQLTypeAsLink
+                  organizationId={props.organizationCleanId}
+                  projectId={props.projectCleanId}
+                  targetId={props.targetCleanId}
+                  type={arg.type}
+                />
                 {arg.description ? <Description description={arg.description} /> : null}
               </div>
             );
@@ -386,10 +411,22 @@ function GraphQLArguments(props: {
                 styleDeprecated={props.styleDeprecated}
                 deprecationReason={arg.deprecationReason}
               >
-                <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
+                <LinkToCoordinatePage
+                  organizationId={props.organizationCleanId}
+                  projectId={props.projectCleanId}
+                  targetId={props.targetCleanId}
+                  coordinate={coordinate}
+                >
+                  {arg.name}
+                </LinkToCoordinatePage>
               </DeprecationNote>
               {': '}
-              <GraphQLTypeAsLink type={arg.type} />
+              <GraphQLTypeAsLink
+                organizationId={props.organizationCleanId}
+                projectId={props.projectCleanId}
+                targetId={props.targetCleanId}
+                type={arg.type}
+              />
             </span>
           );
         })}
@@ -498,24 +535,44 @@ export function GraphQLFields(props: {
                   styleDeprecated={props.styleDeprecated}
                   deprecationReason={field.deprecationReason}
                 >
-                  <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
+                  <LinkToCoordinatePage
+                    organizationId={props.organizationCleanId}
+                    projectId={props.projectCleanId}
+                    targetId={props.targetCleanId}
+                    coordinate={coordinate}
+                    className="font-semibold"
+                  >
                     {field.name}
                   </LinkToCoordinatePage>
                 </DeprecationNote>
                 {field.args.length > 0 ? (
                   <GraphQLArguments
+                    organizationCleanId={props.organizationCleanId}
+                    projectCleanId={props.projectCleanId}
+                    targetCleanId={props.targetCleanId}
                     styleDeprecated={props.styleDeprecated}
                     parentCoordinate={coordinate}
                     args={field.args}
                   />
                 ) : null}
                 <span className="mr-1">:</span>
-                <GraphQLTypeAsLink className="font-semibold text-gray-400" type={field.type} />
+                <GraphQLTypeAsLink
+                  organizationId={props.organizationCleanId}
+                  projectId={props.projectCleanId}
+                  targetId={props.targetCleanId}
+                  className="font-semibold text-gray-400"
+                  type={field.type}
+                />
               </div>
               <div className="flex flex-row items-center">
                 {field.supergraphMetadata ? (
                   <div className="ml-1">
-                    <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
+                    <SupergraphMetadataList
+                      targetId={props.targetCleanId}
+                      projectId={props.projectCleanId}
+                      organizationId={props.organizationCleanId}
+                      supergraphMetadata={field.supergraphMetadata}
+                    />
                   </div>
                 ) : null}
                 {typeof totalRequests === 'number' ? (
@@ -567,12 +624,24 @@ export function GraphQLInputFields(props: {
                 styleDeprecated={props.styleDeprecated}
                 deprecationReason={field.deprecationReason}
               >
-                <LinkToCoordinatePage coordinate={coordinate} className="font-semibold text-white">
+                <LinkToCoordinatePage
+                  organizationId={props.organizationCleanId}
+                  projectId={props.projectCleanId}
+                  targetId={props.targetCleanId}
+                  coordinate={coordinate}
+                  className="font-semibold text-white"
+                >
                   {field.name}
                 </LinkToCoordinatePage>
               </DeprecationNote>
               <span className="mr-1">:</span>
-              <GraphQLTypeAsLink className="font-semibold" type={field.type} />
+              <GraphQLTypeAsLink
+                organizationId={props.organizationCleanId}
+                projectId={props.projectCleanId}
+                targetId={props.targetCleanId}
+                className="font-semibold"
+                type={field.type}
+              />
             </div>
             {typeof props.totalRequests === 'number' ? (
               <SchemaExplorerUsageStats
@@ -590,8 +659,14 @@ export function GraphQLInputFields(props: {
   );
 }
 
-function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactElement {
-  const router = useRouteSelector();
+function GraphQLTypeAsLink(props: {
+  type: string;
+  className?: string;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}): ReactElement {
+  const router = useRouter();
   const typename = props.type.replace(/[[\]!]+/g, '');
 
   return (
@@ -604,16 +679,14 @@ function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactEl
           <p>
             <NextLink
               className="text-sm font-normal hover:underline hover:underline-offset-2"
-              href={{
-                pathname: '/[organizationId]/[projectId]/[targetId]/explorer/[typename]',
-                query: {
-                  organizationId: router.organizationId,
-                  projectId: router.projectId,
-                  targetId: router.targetId,
-                  typename,
-                  ...(router.query.period ? { period: router.query.period } : {}),
-                },
+              to="/$organizationId/$projectId/$targetId/explorer/$typename"
+              params={{
+                organizationId: props.organizationId,
+                projectId: props.projectId,
+                targetId: props.targetId,
+                typename,
               }}
+              search={router.latestLocation.search}
             >
               Visit in <span className="font-bold">Explorer</span>
             </NextLink>
@@ -622,17 +695,14 @@ function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactEl
           <p>
             <NextLink
               className="text-sm font-normal hover:underline hover:underline-offset-2"
-              href={{
-                pathname:
-                  '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[typename]',
-                query: {
-                  organizationId: router.organizationId,
-                  projectId: router.projectId,
-                  targetId: router.targetId,
-                  typename,
-                  ...(router.query.period ? { period: router.query.period } : {}),
-                },
+              to="/$organizationId/$projectId/$targetId/insights/schema-coordinate/$coordinate"
+              params={{
+                organizationId: props.organizationId,
+                projectId: props.projectId,
+                targetId: props.targetId,
+                coordinate: typename,
               }}
+              search={router.latestLocation.search}
             >
               Visit in <span className="font-bold">Insights</span>
             </NextLink>
@@ -650,26 +720,26 @@ export const LinkToCoordinatePage = React.forwardRef<
   {
     coordinate: string;
     children: ReactNode;
+    organizationId: string;
+    projectId: string;
+    targetId: string;
     className?: string;
   }
 >((props, ref) => {
-  const router = useRouteSelector();
+  const router = useRouter();
 
   return (
     <NextLink
       ref={ref}
       className={cn('hover:underline hover:underline-offset-2', props.className)}
-      href={{
-        pathname:
-          '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
-        query: {
-          organizationId: router.organizationId,
-          projectId: router.projectId,
-          targetId: router.targetId,
-          coordinate: props.coordinate,
-          ...(router.query.period ? { period: router.query.period } : {}),
-        },
+      to="/$organizationId/$projectId/$targetId/insights/schema-coordinate/$coordinate"
+      params={{
+        organizationId: props.organizationId,
+        projectId: props.projectId,
+        targetId: props.targetId,
+        coordinate: props.coordinate,
       }}
+      search={router.latestLocation.search}
     >
       {props.children}
     </NextLink>

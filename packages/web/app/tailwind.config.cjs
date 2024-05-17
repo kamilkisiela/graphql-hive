@@ -5,7 +5,7 @@ const { default: flattenColorPalette } = require('tailwindcss/lib/util/flattenCo
 
 module.exports = {
   darkMode: 'class',
-  content: ['./{pages,src,components}/**/*.ts{,x}'],
+  content: ['./index.html', './src/**/*.ts{,x}'],
   important: true,
   theme: {
     container: {

@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { clsx } from 'clsx';
-import { sanitize } from 'dompurify';
+import dompurify from 'dompurify';
 import snarkdown from 'snarkdown';
 
 export function Markdown({
@@ -13,7 +13,7 @@ export function Markdown({
   return (
     <div
       className={clsx('hive-markdown', className)}
-      dangerouslySetInnerHTML={{ __html: sanitize(snarkdown(content)) }}
+      dangerouslySetInnerHTML={{ __html: dompurify.sanitize(snarkdown(content)) }}
     />
   );
 }

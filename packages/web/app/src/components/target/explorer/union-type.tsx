@@ -57,7 +57,12 @@ export function GraphQLUnionTypeComponent(props: {
               />
             ) : null}
             {member.supergraphMetadata ? (
-              <SupergraphMetadataList supergraphMetadata={member.supergraphMetadata} />
+              <SupergraphMetadataList
+                targetId={props.targetCleanId}
+                projectId={props.projectCleanId}
+                organizationId={props.organizationCleanId}
+                supergraphMetadata={member.supergraphMetadata}
+              />
             ) : null}
           </GraphQLTypeCardListItem>
         ))}

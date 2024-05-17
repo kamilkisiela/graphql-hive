@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import Link from 'next/link';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { CheckIcon } from 'lucide-react';
@@ -27,8 +26,8 @@ import { Heading } from '@/components/v2';
 import { PulseIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
-import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
+import { Link } from '@tanstack/react-router';
 
 export function labelize(message: string) {
   // Turn " into '
@@ -112,6 +111,10 @@ export function ChangesBlock(
   props: {
     title: string | React.ReactElement;
     criticality: CriticalityLevel;
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    schemaCheckId: string;
     conditionBreakingChangeMetadata?: FragmentType<
       typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
     > | null;
@@ -134,6 +137,10 @@ export function ChangesBlock(
       <div className="list-inside list-disc space-y-2 text-sm leading-relaxed">
         {changes.map((change, key) => (
           <ChangeItem
+            organizationId={props.organizationId}
+            projectId={props.projectId}
+            targetId={props.targetId}
+            schemaCheckId={props.schemaCheckId}
             key={key}
             change={change}
             conditionBreakingChangeMetadata={props.conditionBreakingChangeMetadata ?? null}
@@ -162,8 +169,11 @@ function ChangeItem(props: {
   conditionBreakingChangeMetadata: FragmentType<
     typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
   > | null;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+  schemaCheckId: string;
 }) {
-  const router = useRouteSelector();
   const change = isChangesBlock_SchemaChangeWithUsageFragment(props.change)
     ? useFragment(ChangesBlock_SchemaChangeWithUsageFragment, props.change)
     : useFragment(ChangesBlock_SchemaChangeFragment, props.change);
@@ -215,7 +225,15 @@ function ChangeItem(props: {
           </div>
         </AccordionTrigger>
         <AccordionContent className="pb-8 pt-4">
-          {change.approval && <SchemaChangeApproval approval={change.approval} />}
+          {change.approval && (
+            <SchemaChangeApproval
+              organizationId={props.organizationId}
+              projectId={props.projectId}
+              targetId={props.targetId}
+              schemaCheckId={props.schemaCheckId}
+              approval={change.approval}
+            />
+          )}
           {'usageStatistics' in change && change.usageStatistics && metadata ? (
             <div>
               <div className="flex space-x-4">
@@ -240,21 +258,18 @@ function ChangeItem(props: {
                               <PopoverContent side="right">
                                 <div className="flex flex-col gap-y-2 text-sm">
                                   View live usage on
-                                  {metadata.settings.targets.map(target =>
+                                  {metadata.settings.targets.map((target, i) =>
                                     target.target ? (
-                                      <p>
+                                      <p key={i}>
                                         <Link
                                           className="text-orange-500 hover:text-orange-500"
-                                          href={{
-                                            pathname:
-                                              '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                                            query: {
-                                              organizationId: router.organizationId,
-                                              projectId: router.projectId,
-                                              targetId: target.target.cleanId,
-                                              operationName: `${hash.substring(0, 4)}_${name}`,
-                                              operationHash: hash,
-                                            },
+                                          to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                                          params={{
+                                            organizationId: props.organizationId,
+                                            projectId: props.projectId,
+                                            targetId: target.target.cleanId,
+                                            operationName: `${hash.substring(0, 4)}_${name}`,
+                                            operationHash: hash,
                                           }}
                                           target="_blank"
                                         >
@@ -315,15 +330,12 @@ function ChangeItem(props: {
                           <Link
                             key={index}
                             className="text-orange-500 hover:text-orange-500 "
-                            href={{
-                              pathname:
-                                '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
-                              query: {
-                                organizationId: router.organizationId,
-                                projectId: router.projectId,
-                                targetId: target.target.cleanId,
-                                coordinate: change.path?.join('.'),
-                              },
+                            to="/$organizationId/$projectId/$targetId/insights/schema-coordinate/$coordinate"
+                            params={{
+                              organizationId: props.organizationId,
+                              projectId: props.projectId,
+                              targetId: target.target.cleanId,
+                              coordinate: change.path!.join('.'),
                             }}
                             target="_blank"
                           >
@@ -368,29 +380,32 @@ function ApprovedByBadge(props: {
 
 function SchemaChangeApproval(props: {
   approval: FragmentType<typeof ChangesBlock_SchemaChangeApprovalFragment>;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+  schemaCheckId: string;
 }) {
   const approval = useFragment(ChangesBlock_SchemaChangeApprovalFragment, props.approval);
   const approvalName = approval.approvedBy?.displayName ?? '<unknown>';
   const approvalDate = format(new Date(approval.approvedAt), 'do MMMM yyyy');
-  const route = useRouteSelector();
   const schemaCheckPath =
     '/' +
-    [route.organizationId, route.projectId, route.targetId, 'checks', approval.schemaCheckId].join(
+    [props.organizationId, props.projectId, props.targetId, 'checks', approval.schemaCheckId].join(
       '/',
     );
 
   return (
     <div className="mb-3">
       This breaking change was manually{' '}
-      {approval.schemaCheckId === route.schemaCheckId ? (
+      {approval.schemaCheckId === props.schemaCheckId ? (
         <>
           {' '}
           approved by {approvalName} in this schema check on {approvalDate}.
         </>
       ) : (
-        <Link href={schemaCheckPath} className="text-orange-500 hover:underline">
+        <a href={schemaCheckPath} className="text-orange-500 hover:underline">
           approved by {approvalName} on {approvalDate}.
-        </Link>
+        </a>
       )}
     </div>
   );

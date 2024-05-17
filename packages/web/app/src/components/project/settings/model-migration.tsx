@@ -3,8 +3,9 @@ import { useMutation } from 'urql';
 import { Button, Card, Heading, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { RegistryModel } from '@/gql/graphql';
-import { useNotifications, useRouteSelector } from '@/lib/hooks';
+import { useNotifications } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { useRouter } from '@tanstack/react-router';
 
 const divider = <div className="mt-4 border-b border-gray-900" />;
 
@@ -138,7 +139,7 @@ export function ModelMigrationSettings(props: {
   const isStitching = project.type === 'STITCHING';
   const isComposite = isStitching || project.type === 'FEDERATION';
   const notify = useNotifications();
-  const router = useRouteSelector();
+  const router = useRouter();
 
   const [{ fetching }, upgradeMutation] = useMutation(
     ModelMigrationSettings_upgradeProjectRegistryModelMutation,
@@ -191,9 +192,9 @@ export function ModelMigrationSettings(props: {
             variant="secondary"
             size="large"
             onClick={() => {
-              void router.push({
-                href: '/[organizationId]/view/support',
-                query: { organizationId: props.organizationId },
+              void router.navigate({
+                to: '/$organizationId/view/support',
+                params: { organizationId: props.organizationId },
               });
             }}
           >
@@ -329,9 +330,9 @@ export function ModelMigrationSettings(props: {
               <Button
                 variant="link"
                 onClick={() => {
-                  void router.push({
-                    href: '/[organizationId]/view/support',
-                    query: { organizationId: props.organizationId },
+                  void router.navigate({
+                    to: '/$organizationId/view/support',
+                    params: { organizationId: props.organizationId },
                   });
                 }}
               >

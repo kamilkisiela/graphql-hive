@@ -107,6 +107,8 @@ module.exports = {
               'packages/services/storage/tools/*.js',
               'packages/services/**',
               'packages/migrations/**',
+              // We bundle it all anyway, so there are no node_modules
+              'packages/web/app/**',
               '**/*.spec.ts',
               '**/*.test.ts',
             ],
@@ -190,9 +192,6 @@ module.exports = {
     {
       files: ['packages/web/app/**'],
       settings: {
-        next: {
-          rootDir: 'packages/web/app',
-        },
         tailwindcss: {
           config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
@@ -201,7 +200,7 @@ module.exports = {
     },
     // {
     //   files: ['packages/web/app/**'],
-    //   excludedFiles: ['packages/web/app/pages/**'],
+    //   excludedFiles: ['packages/web/app/src/pages/**'],
     //   rules: {
     //     'import/no-unused-modules': ['error', { unusedExports: true }],
     //   },

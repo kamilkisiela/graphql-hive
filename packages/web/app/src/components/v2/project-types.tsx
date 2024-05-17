@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import Image, { ImageProps } from 'next/image';
 import clsx from 'clsx';
 import { Radio, RadioGroup } from '@/components/v2';
 import { ProjectType } from '@/gql/graphql';
@@ -11,7 +10,7 @@ import stitching from '../../../public/images/figures/stitching.svg';
 const PROJECTS: {
   title: 'REGULAR' | 'DISTRIBUTED';
   type: ProjectType;
-  image: ImageProps['src'];
+  image: string;
   description: string;
 }[] = [
   {
@@ -43,7 +42,7 @@ export const ProjectTypes = (
         const capitalizedType = type[0] + type.slice(1).toLowerCase();
         return (
           <Radio key={type} value={type} className="flex border-transparent bg-gray-800">
-            <Image
+            <img
               src={image}
               alt={`${capitalizedType} project illustration`}
               className="drag-none rounded-sm bg-black"
