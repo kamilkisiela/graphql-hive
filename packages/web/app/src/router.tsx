@@ -101,13 +101,7 @@ function RootComponent() {
     <HelmetProvider>
       {env.analytics.googleAnalyticsTrackingId && (
         <Helmet>
-          <script
-            key="gtag-script"
-            async
-            src={`https://www.googletagmanager.com/gtag/js?id=${env.analytics.googleAnalyticsTrackingId}`}
-            type="text/javascript"
-          />
-          <script id="gtag-init" key="gtag-init" async type="text/javascript">{`
+          <script id="gtag-init" key="gtag-init" type="text/javascript">{`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
@@ -115,6 +109,12 @@ function RootComponent() {
               page_path: window.location.pathname,
             });
           `}</script>
+          <script
+            key="gtag-script"
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${env.analytics.googleAnalyticsTrackingId}`}
+            type="text/javascript"
+          />
         </Helmet>
       )}
       <SuperTokensWrapper>
