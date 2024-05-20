@@ -80,6 +80,7 @@ export const TargetLayout = ({
   const [isModalOpen, toggleModalOpen] = useToggle();
   const [query] = useQuery({
     query: TargetLayoutQuery,
+    requestPolicy: 'cache-first',
   });
 
   const { organizationId: orgId, projectId } = props;

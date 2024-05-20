@@ -65,6 +65,7 @@ export function ProjectLayout({
   const [isModalOpen, toggleModalOpen] = useToggle();
   const [query] = useQuery({
     query: ProjectLayoutQuery,
+    requestPolicy: 'cache-first',
   });
 
   const me = query.data?.me;
