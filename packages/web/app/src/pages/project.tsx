@@ -225,6 +225,7 @@ const ProjectsPageContent = (props: { organizationId: string; projectId: string 
       chartResolution: days, // 14 days = 14 data points
       period: period.current,
     },
+    requestPolicy: 'cache-and-network',
   });
 
   const targetConnection = query.data?.targets;

@@ -266,6 +266,7 @@ function OrganizationPageContent(props: { organizationId: string }) {
       chartResolution: days, // 14 days = 14 data points
       period: period.current,
     },
+    requestPolicy: 'cache-and-network',
   });
 
   const currentOrganization = query.data?.organization?.organization;

@@ -194,6 +194,7 @@ const UpdateOrganizationNameMutation = graphql(`
 
 const SettingsPageRenderer_OrganizationFragment = graphql(`
   fragment SettingsPageRenderer_OrganizationFragment on Organization {
+    id
     name
     me {
       ...CanAccessOrganization_MemberFragment

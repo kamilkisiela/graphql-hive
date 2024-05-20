@@ -61,6 +61,7 @@ function SchemaBlock({ schema, scrollToMe }: { schema: CompositeSchema; scrollTo
 
 const Schemas_ProjectFragment = graphql(`
   fragment Schemas_ProjectFragment on Project {
+    id
     type
   }
 `);
@@ -128,6 +129,7 @@ function Schemas({
 
 const SchemaView_OrganizationFragment = graphql(`
   fragment SchemaView_OrganizationFragment on Organization {
+    id
     cleanId
     me {
       ...CanAccessTarget_MemberFragment
@@ -137,6 +139,7 @@ const SchemaView_OrganizationFragment = graphql(`
 
 const SchemaView_ProjectFragment = graphql(`
   fragment SchemaView_ProjectFragment on Project {
+    id
     cleanId
     type
     registryModel

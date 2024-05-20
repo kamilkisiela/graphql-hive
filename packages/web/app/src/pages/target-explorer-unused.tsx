@@ -289,29 +289,18 @@ function UnusedSchemaExplorer(props: {
 
 const TargetExplorerUnusedSchemaPageQuery = graphql(`
   query TargetExplorerUnusedSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_CurrentOrganizationFragment
+        id
         rateLimit {
           retentionInDays
         }
         cleanId
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_CurrentProjectFragment
-      cleanId
-    }
     hasCollectedOperations(
       selector: { organization: $organizationId, project: $projectId, target: $targetId }
     )
-    me {
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 

@@ -196,9 +196,6 @@ const ChecksPageQuery = graphql(`
         }
       }
     }
-    me {
-      ...TargetLayout_MeFragment
-    }
   }
 `);
 

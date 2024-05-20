@@ -1041,7 +1041,6 @@ const TargetSettingsPageQuery = graphql(`
       id
       cleanId
       type
-      ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id

@@ -32,6 +32,8 @@ const numberFormatter = Intl.NumberFormat('en-US');
 
 const SubscriptionPage_OrganizationFragment = graphql(`
   fragment SubscriptionPage_OrganizationFragment on Organization {
+    id
+    cleanId
     me {
       ...CanAccessOrganization_MemberFragment
     }

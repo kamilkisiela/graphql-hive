@@ -101,9 +101,6 @@ const TargetExplorerPageQuery = graphql(`
     $targetId: ID!
     $period: DateRangeInput!
   ) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
         id

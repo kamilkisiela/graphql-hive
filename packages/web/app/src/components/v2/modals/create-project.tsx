@@ -35,10 +35,12 @@ export const CreateProjectMutation = graphql(`
       ok {
         createdProject {
           id
+          name
           cleanId
         }
         createdTargets {
           id
+          name
           cleanId
         }
         updatedOrganization {

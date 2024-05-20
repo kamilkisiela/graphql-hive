@@ -182,6 +182,7 @@ const ProjectAlertsPageQuery = graphql(`
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
+      id
       targets {
         nodes {
           ...CreateAlertModal_TargetFragment

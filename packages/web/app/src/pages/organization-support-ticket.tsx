@@ -271,6 +271,7 @@ function SupportTicket(props: {
 
 const SupportTicket_OrganizationFragment = graphql(`
   fragment SupportTicket_OrganizationFragment on Organization {
+    id
     cleanId
     name
     me {
