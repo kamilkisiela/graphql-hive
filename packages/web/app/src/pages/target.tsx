@@ -1,9 +1,17 @@
 import { ChangeEventHandler, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -11,14 +19,11 @@ import { QueryError } from '@/components/ui/query-error';
 import { Accordion } from '@/components/v2/accordion';
 import { noSchema, noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLBlock, GraphQLHighlight } from '@/components/v2/graphql-block';
-import { Input } from '@/components/v2/input';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/gql/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
-import { Link, useRouter } from '@tanstack/react-router';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
+import { Link, useRouter } from '@tanstack/react-router';
 
 type CompositeSchema = Extract<
   DocumentType<typeof SchemaView_SchemaFragment>,
