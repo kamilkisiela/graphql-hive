@@ -125,6 +125,7 @@ module.exports = {
         ...rulesToExtends,
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
         'prefer-destructuring': 'off',
+        'prefer-const': 'off',
         '@typescript-eslint/no-unnecessary-type-assertion': 'off',
 
         // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
