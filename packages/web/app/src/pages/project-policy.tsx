@@ -20,12 +20,10 @@ const ProjectPolicyPageQuery = graphql(`
           id
           ...CanAccessProject_MemberFragment
         }
-        ...ProjectLayout_CurrentOrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
       id
-      ...ProjectLayout_CurrentProjectFragment
       registryModel
       schemaPolicy {
         id
@@ -43,13 +41,6 @@ const ProjectPolicyPageQuery = graphql(`
         }
       }
     }
-    organizations {
-      ...ProjectLayout_OrganizationConnectionFragment
-    }
-    me {
-      id
-      ...ProjectLayout_MeFragment
-    }
   }
 `);
 
@@ -65,7 +56,6 @@ const UpdateSchemaPolicyForProject = graphql(`
       ok {
         project {
           id
-          ...ProjectLayout_CurrentProjectFragment
           schemaPolicy {
             id
             updatedAt
@@ -89,10 +79,8 @@ function ProjectPolicyContent(props: { organizationId: string; projectId: string
   });
   const { toast } = useToast();
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
 
   const hasAccess = useProjectAccess({
     scope: ProjectAccessScope.Settings,
@@ -112,10 +100,6 @@ function ProjectPolicyContent(props: { organizationId: string; projectId: string
     <ProjectLayout
       organizationId={props.organizationId}
       projectId={props.projectId}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
       page={Page.Policy}
       className="flex flex-col gap-y-10"
     >

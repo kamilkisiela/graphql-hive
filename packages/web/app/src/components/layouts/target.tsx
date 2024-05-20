@@ -33,9 +33,9 @@ const TargetLayout_CurrentOrganizationFragment = graphql(`
       ...CanAccessTarget_MemberFragment
     }
     # ...UserMenu_CurrentOrganizationFragment
-    projects {
-      ...ProjectLayout_ProjectConnectionFragment
-    }
+    # projects {
+    #   ...ProjectLayout_ProjectConnectionFragment
+    # }
   }
 `);
 

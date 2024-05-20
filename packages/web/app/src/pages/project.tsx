@@ -227,10 +227,6 @@ const ProjectsPageContent = (props: { organizationId: string; projectId: string 
     },
   });
 
-  const me = query.data?.me;
-  const currentOrganization = query.data?.organization?.organization;
-  const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
   const targetConnection = query.data?.targets;
   const targets = targetConnection?.nodes;
 
@@ -257,10 +253,6 @@ const ProjectsPageContent = (props: { organizationId: string; projectId: string 
       organizationId={props.organizationId}
       projectId={props.projectId}
       className="flex justify-between gap-12"
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
     >
       <div className="grow">
         <div className="py-6">
@@ -338,17 +330,6 @@ const ProjectOverviewPageQuery = graphql(`
     $chartResolution: Int!
     $period: DateRangeInput!
   ) {
-    organization(selector: { organization: $organizationId }) {
-      organization {
-        ...ProjectLayout_CurrentOrganizationFragment
-      }
-    }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...ProjectLayout_CurrentProjectFragment
-    }
-    organizations {
-      ...ProjectLayout_OrganizationConnectionFragment
-    }
     targets(selector: { organization: $organizationId, project: $projectId }) {
       total
       nodes {
@@ -362,10 +343,6 @@ const ProjectOverviewPageQuery = graphql(`
         }
         schemaVersionsCount(period: $period)
       }
-    }
-    me {
-      id
-      ...ProjectLayout_MeFragment
     }
   }
 `);
