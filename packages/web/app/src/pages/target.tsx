@@ -16,6 +16,7 @@ import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QueryError } from '@/components/ui/query-error';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion } from '@/components/v2/accordion';
 import { noSchema, noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLBlock, GraphQLHighlight } from '@/components/v2/graphql-block';
@@ -47,7 +48,7 @@ function SchemaBlock({ schema, scrollToMe }: { schema: CompositeSchema; scrollTo
       ref.current.scrollIntoView({ behavior: 'smooth' });
       scrolled.current = true;
     }
-  }, [ref.current, scrolled.current]);
+  }, [scrollToMe]);
 
   return (
     <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
@@ -77,11 +78,15 @@ const Schemas_ProjectFragment = graphql(`
 
 function Schemas({
   filterService,
+  openItems,
+  setOpenItems,
   ...props
 }: {
   project: FragmentType<typeof Schemas_ProjectFragment>;
   schemas: FragmentType<typeof SchemaView_SchemaFragment>[];
   filterService?: string;
+  openItems: string[];
+  setOpenItems: (items: string[]) => void;
 }): ReactElement {
   const project = useFragment(Schemas_ProjectFragment, props.project);
   const schemas = useFragment(SchemaView_SchemaFragment, props.schemas);
@@ -106,12 +111,16 @@ function Schemas({
 
   // Display format should be defined based on the length of `schemas`, and not `filteredSchemas`.
   // Otherwise, the accordion will be displayed by default but the list (disabled accordion) when filtering.
-  const displayFormat = schemas.length > 7 ? 'dynamic' : 'static';
+  const displayFormat = schemas.length > 1 ? 'dynamic' : 'static';
 
   return (
     <div className="flex flex-col gap-8">
       {displayFormat === 'dynamic' ? (
-        <Accordion type="multiple">
+        <Accordion
+          type="multiple"
+          value={openItems}
+          onValueChange={(items: string[]) => setOpenItems(items)}
+        >
           {filteredSchemas.map(schema => (
             <SchemaBlock
               key={schema.id}
@@ -121,7 +130,12 @@ function Schemas({
           ))}
         </Accordion>
       ) : (
-        <Accordion type="multiple" value={filteredSchemas.map(s => s.id)} disabled>
+        <Accordion
+          type="multiple"
+          value={openItems}
+          disabled
+          onValueChange={(items: string[]) => setOpenItems(items)}
+        >
           {filteredSchemas.map(schema => (
             <SchemaBlock
               key={schema.id}
@@ -202,20 +216,23 @@ function SchemaView(props: {
   const target = useFragment(SchemaView_TargetFragment, props.target);
   const [filterService, setFilterService] = useState(props.highlightedService ?? '');
   const [term, setTerm] = useState(props.highlightedService ?? '');
+  const [openItems, setOpenItems] = useState<string[]>([]);
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
   const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     event => {
-      console.log('event', event.target.value);
-      debouncedFilter(event.target.value);
-      setFilterService(event.target.value);
-      setTerm(event.target.value);
+      const value = event.target.value;
+      debouncedFilter(value);
+      setFilterService(value);
+      setTerm(value);
       setOpen(false);
+      setOpenItems(prevItems => [...new Set([...prevItems, value])]);
     },
     [debouncedFilter, setTerm],
   );
   const reset = useCallback(() => {
+    setOpenItems([]);
     setFilterService('');
     setTerm('');
   }, [setFilterService]);
@@ -274,23 +291,36 @@ function SchemaView(props: {
                     />
                     <CommandEmpty>No schema found.</CommandEmpty>
                     <CommandGroup>
-                      {compositeSchemas?.map(schema => (
-                        <CommandItem
-                          key={schema.service}
-                          value={schema.service as string}
-                          onSelect={currentValue => {
-                            handleChange({ target: { value: currentValue } } as any);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              'mr-2 size-4',
-                              term === schema.id ? 'opacity-100' : 'opacity-0',
-                            )}
-                          />
-                          {schema.service}
-                        </CommandItem>
-                      ))}
+                      <ScrollArea className="relative h-80 w-full">
+                        <div className="p-4">
+                          {compositeSchemas?.map(schema => (
+                            <CommandItem
+                              key={schema.service}
+                              value={schema.service as string}
+                              onSelect={currentValue => {
+                                const selectedSchema = compositeSchemas.find(
+                                  s => s.service === currentValue,
+                                );
+                                if (selectedSchema) {
+                                  setOpenItems(prevItems => [
+                                    ...new Set([...prevItems, selectedSchema.id]),
+                                  ]);
+                                  handleChange({ target: { value: currentValue } } as any);
+                                }
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 size-4',
+                                  term === schema.id ? 'opacity-100' : 'opacity-0',
+                                )}
+                              />
+                              {schema.service}
+                            </CommandItem>
+                          ))}
+                        </div>
+                      </ScrollArea>
                     </CommandGroup>
                   </Command>
                 </PopoverContent>
@@ -313,6 +343,9 @@ function SchemaView(props: {
         project={project}
         filterService={filterService}
         schemas={target.latestSchemaVersion?.schemas.nodes ?? []}
+        openItems={openItems}
+        setOpenItems={setOpenItems}
+        key={filterService}
       />
     </>
   );
