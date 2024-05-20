@@ -157,30 +157,12 @@ function ListPage(props: {
 
 const TargetHistoryPageQuery = graphql(`
   query TargetHistoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
-    organization(selector: { organization: $organizationId }) {
-      organization {
-        id
-        ...TargetLayout_CurrentOrganizationFragment
-      }
-    }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      id
-      ...TargetLayout_CurrentProjectFragment
-    }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       latestSchemaVersion {
         id
       }
     }
-    me {
-      id
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
@@ -199,12 +181,7 @@ function HistoryPageContent(props: {
     },
   });
   const [pageVariables, setPageVariables] = useState([{ first: 10, after: null as string | null }]);
-  const me = query.data?.me;
-  const currentOrganization = query.data?.organization?.organization;
-  const currentProject = query.data?.project;
   const currentTarget = query.data?.target;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
   const hasVersions = !!currentTarget?.latestSchemaVersion?.id;
 
   const { versionId } = useParams({
@@ -236,11 +213,6 @@ function HistoryPageContent(props: {
       targetId={props.targetId}
       page={Page.History}
       className="h-full"
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
-      isCDNEnabled={isCDNEnabled ?? null}
     >
       {hasVersions ? (
         <div className="flex size-full flex-row gap-x-6">

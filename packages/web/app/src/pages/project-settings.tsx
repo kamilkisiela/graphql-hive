@@ -218,19 +218,10 @@ const ProjectSettingsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         ...ProjectSettingsPage_OrganizationFragment
-        ...ProjectLayout_CurrentOrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...ProjectLayout_CurrentProjectFragment
       ...ProjectSettingsPage_ProjectFragment
-    }
-    organizations {
-      ...ProjectLayout_OrganizationConnectionFragment
-    }
-    me {
-      id
-      ...ProjectLayout_MeFragment
     }
     isGitHubIntegrationFeatureEnabled
   }
@@ -248,10 +239,8 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
     requestPolicy: 'cache-and-network',
   });
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
 
   const organization = useFragment(ProjectSettingsPage_OrganizationFragment, currentOrganization);
   const project = useFragment(ProjectSettingsPage_ProjectFragment, currentProject);
@@ -316,10 +305,6 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
     <ProjectLayout
       organizationId={props.organizationId}
       projectId={props.projectId}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
       page={Page.Settings}
       className="flex flex-col gap-y-10"
     >

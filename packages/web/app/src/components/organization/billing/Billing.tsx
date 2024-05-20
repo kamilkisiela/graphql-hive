@@ -4,6 +4,8 @@ import { PlanSummary } from './PlanSummary';
 
 const BillingView_OrganizationFragment = graphql(`
   fragment BillingView_OrganizationFragment on Organization {
+    id
+    cleanId
     plan
     rateLimit {
       retentionInDays

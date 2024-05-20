@@ -18,7 +18,6 @@ const OrganizationPolicyPageQuery = graphql(`
     organization(selector: $selector) {
       organization {
         id
-        ...OrganizationLayout_CurrentOrganizationFragment
         me {
           ...CanAccessOrganization_MemberFragment
         }
@@ -35,12 +34,6 @@ const OrganizationPolicyPageQuery = graphql(`
           ...PolicySettings_SchemaPolicyFragment
         }
       }
-    }
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      ...OrganizationLayout_MeFragment
     }
   }
 `);
@@ -62,7 +55,6 @@ const UpdateSchemaPolicyForOrganization = graphql(`
       ok {
         organization {
           id
-          ...OrganizationLayout_CurrentOrganizationFragment
           schemaPolicy {
             id
             updatedAt
@@ -87,9 +79,7 @@ function PolicyPageContent(props: { organizationId: string }) {
   const [mutation, mutate] = useMutation(UpdateSchemaPolicyForOrganization);
   const { toast } = useToast();
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
 
   const hasAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
@@ -97,10 +87,6 @@ function PolicyPageContent(props: { organizationId: string }) {
     redirect: true,
     organizationId: props.organizationId,
   });
-
-  if (!hasAccess) {
-    return null;
-  }
 
   const legacyProjects = currentOrganization?.projects.nodes.filter(
     p => p.registryModel === RegistryModel.Legacy,
@@ -115,9 +101,6 @@ function PolicyPageContent(props: { organizationId: string }) {
       page={Page.Policy}
       organizationId={props.organizationId}
       className="flex flex-col gap-y-10"
-      currentOrganization={currentOrganization ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
     >
       <div>
         <div className="py-6">
@@ -127,7 +110,7 @@ function PolicyPageContent(props: { organizationId: string }) {
             schema.
           </Subtitle>
         </div>
-        {currentOrganization ? (
+        {hasAccess && currentOrganization ? (
           <Card>
             <CardHeader>
               <CardTitle>Rules</CardTitle>

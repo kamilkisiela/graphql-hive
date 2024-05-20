@@ -180,6 +180,7 @@ const UpdateOrganizationNameMutation = graphql(`
           }
           organization {
             id
+            cleanId
             name
           }
         }
@@ -193,6 +194,7 @@ const UpdateOrganizationNameMutation = graphql(`
 
 const SettingsPageRenderer_OrganizationFragment = graphql(`
   fragment SettingsPageRenderer_OrganizationFragment on Organization {
+    id
     name
     me {
       ...CanAccessOrganization_MemberFragment
@@ -424,15 +426,8 @@ const OrganizationSettingsPageQuery = graphql(`
   query OrganizationSettingsPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        ...OrganizationLayout_CurrentOrganizationFragment
         ...SettingsPageRenderer_OrganizationFragment
       }
-    }
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      ...OrganizationLayout_MeFragment
     }
   }
 `);
@@ -451,18 +446,13 @@ function SettingsPageContent(props: { organizationId: string }) {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
 
   return (
     <OrganizationLayout
       page={Page.Settings}
       organizationId={props.organizationId}
       className="flex flex-col gap-y-10"
-      currentOrganization={currentOrganization ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
     >
       {currentOrganization ? (
         <SettingsPageRenderer

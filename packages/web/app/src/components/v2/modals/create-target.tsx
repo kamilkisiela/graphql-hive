@@ -18,6 +18,7 @@ export const CreateTarget_CreateTargetMutation = graphql(`
         createdTarget {
           id
           cleanId
+          name
         }
       }
       error {

@@ -32,6 +32,8 @@ const numberFormatter = Intl.NumberFormat('en-US');
 
 const SubscriptionPage_OrganizationFragment = graphql(`
   fragment SubscriptionPage_OrganizationFragment on Organization {
+    id
+    cleanId
     me {
       ...CanAccessOrganization_MemberFragment
     }
@@ -65,17 +67,10 @@ const SubscriptionPageQuery = graphql(`
     organization(selector: $selector) {
       organization {
         cleanId
-        ...OrganizationLayout_CurrentOrganizationFragment
         ...SubscriptionPage_OrganizationFragment
       }
     }
     ...SubscriptionPage_QueryFragment
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      ...OrganizationLayout_MeFragment
-    }
     monthlyUsage(selector: $selector) {
       date
       total
@@ -93,9 +88,7 @@ function SubscriptionPageContent(props: { organizationId: string }) {
     },
   });
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
 
   const organization = useFragment(SubscriptionPage_OrganizationFragment, currentOrganization);
   const queryForBilling = useFragment(SubscriptionPage_QueryFragment, query.data);
@@ -121,7 +114,7 @@ function SubscriptionPageContent(props: { organizationId: string }) {
     return null;
   }
 
-  if (!currentOrganization || !me || !organizationConnection || !organization || !queryForBilling) {
+  if (!currentOrganization || !organization || !queryForBilling) {
     return null;
   }
 
@@ -138,9 +131,6 @@ function SubscriptionPageContent(props: { organizationId: string }) {
       page={Page.Subscription}
       organizationId={props.organizationId}
       className="flex flex-col gap-y-10"
-      currentOrganization={currentOrganization}
-      organizations={organizationConnection}
-      me={me}
     >
       <div className="grow">
         <div className="flex flex-row items-center justify-between py-6">

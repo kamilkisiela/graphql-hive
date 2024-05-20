@@ -171,19 +171,13 @@ const ChecksPageQuery = graphql(`
     $targetId: ID!
     $filters: SchemaChecksFilter
   ) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_CurrentOrganizationFragment
+        id
         rateLimit {
           retentionInDays
         }
       }
-    }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
@@ -202,10 +196,6 @@ const ChecksPageQuery = graphql(`
         }
       }
     }
-    me {
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
@@ -247,11 +237,6 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
-  const currentOrganization = query.data?.organization?.organization;
-  const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
   const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
@@ -295,11 +280,6 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
         targetId={props.targetId}
         page={Page.Checks}
         className="h-full"
-        currentOrganization={currentOrganization ?? null}
-        currentProject={currentProject ?? null}
-        me={me ?? null}
-        organizations={organizationConnection ?? null}
-        isCDNEnabled={isCDNEnabled ?? null}
       >
         <div
           className={cn(

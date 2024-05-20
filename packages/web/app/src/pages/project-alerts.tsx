@@ -178,12 +178,11 @@ const ProjectAlertsPageQuery = graphql(`
   query ProjectAlertsPageQuery($organizationId: ID!, $projectId: ID!) {
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...ProjectLayout_CurrentOrganizationFragment
         ...ProjectAlertsPage_OrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...ProjectLayout_CurrentProjectFragment
+      id
       targets {
         nodes {
           ...CreateAlertModal_TargetFragment
@@ -196,13 +195,6 @@ const ProjectAlertsPageQuery = graphql(`
         ...ChannelsTable_AlertChannelFragment
         ...CreateAlertModal_AlertChannelFragment
       }
-    }
-    organizations {
-      ...ProjectLayout_OrganizationConnectionFragment
-    }
-    me {
-      id
-      ...ProjectLayout_MeFragment
     }
   }
 `);
@@ -217,10 +209,8 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
     requestPolicy: 'cache-and-network',
   });
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
   const organizationForAlerts = useFragment(
     ProjectAlertsPage_OrganizationFragment,
     currentOrganization,
@@ -246,10 +236,6 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
     <ProjectLayout
       projectId={props.projectId}
       organizationId={props.organizationId}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
       page={Page.Alerts}
       className="flex flex-col gap-y-10"
     >

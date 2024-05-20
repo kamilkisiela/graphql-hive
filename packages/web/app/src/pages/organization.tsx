@@ -223,7 +223,6 @@ const OrganizationProjectsPageQuery = graphql(`
   ) {
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...OrganizationLayout_CurrentOrganizationFragment
         id
         cleanId
       }
@@ -241,12 +240,6 @@ const OrganizationProjectsPageQuery = graphql(`
         }
         schemaVersionsCount(period: $period)
       }
-    }
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      ...OrganizationLayout_MeFragment
     }
   }
 `);
@@ -273,11 +266,10 @@ function OrganizationPageContent(props: { organizationId: string }) {
       chartResolution: days, // 14 days = 14 data points
       period: period.current,
     },
+    requestPolicy: 'cache-and-network',
   });
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
   const projects = query.data?.projects;
 
   const highestNumberOfRequests = useMemo(() => {
@@ -305,9 +297,6 @@ function OrganizationPageContent(props: { organizationId: string }) {
       page={Page.Overview}
       organizationId={props.organizationId}
       className="flex justify-between gap-12"
-      currentOrganization={currentOrganization ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
     >
       <>
         <div className="grow">

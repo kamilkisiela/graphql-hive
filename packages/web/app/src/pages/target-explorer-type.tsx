@@ -129,21 +129,15 @@ const TargetExplorerTypenamePageQuery = graphql(`
     $period: DateRangeInput!
     $typename: String!
   ) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_CurrentOrganizationFragment
+        id
+        name
         cleanId
         rateLimit {
           retentionInDays
         }
       }
-    }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_CurrentProjectFragment
-      cleanId
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
@@ -169,10 +163,6 @@ const TargetExplorerTypenamePageQuery = graphql(`
     ) {
       totalRequests
     }
-    me {
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
@@ -208,11 +198,7 @@ function TypeExplorerPageContent(props: {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
-  const currentProject = query.data?.project;
   const currentTarget = query.data?.target;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
   const type = currentTarget?.latestSchemaVersion?.explorer?.type;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
 
@@ -222,11 +208,6 @@ function TypeExplorerPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Explorer}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
-      isCDNEnabled={isCDNEnabled ?? null}
     >
       <div className="flex flex-row items-center justify-between py-6">
         <div>

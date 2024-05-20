@@ -8,6 +8,7 @@ const NumericFormatter = Intl.NumberFormat('en', { notation: 'standard' });
 
 const OrganizationUsageEstimationView_OrganizationFragment = graphql(`
   fragment OrganizationUsageEstimationView_OrganizationFragment on Organization {
+    id
     cleanId
     rateLimit {
       operations

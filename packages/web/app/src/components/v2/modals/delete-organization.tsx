@@ -21,6 +21,7 @@ export const DeleteOrganizationDocument = graphql(`
 
 const DeleteOrganizationModal_OrganizationFragment = graphql(`
   fragment DeleteOrganizationModal_OrganizationFragment on Organization {
+    id
     cleanId
   }
 `);

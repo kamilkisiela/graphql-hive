@@ -72,6 +72,7 @@ type Member = NonNullable<
 
 const TransferOrganizationOwnershipModal_OrganizationFragment = graphql(`
   fragment TransferOrganizationOwnershipModal_OrganizationFragment on Organization {
+    id
     cleanId
   }
 `);

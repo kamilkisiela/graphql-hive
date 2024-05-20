@@ -822,20 +822,14 @@ function Save(props: {
 
 const TargetLaboratoryPageQuery = graphql(`
   query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_CurrentOrganizationFragment
+        id
         me {
           id
           ...CanAccessTarget_MemberFragment
         }
       }
-    }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
@@ -845,11 +839,6 @@ const TargetLaboratoryPageQuery = graphql(`
         sdl
       }
     }
-    me {
-      id
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
     ...Laboratory_IsCDNEnabledFragment
   }
 `);
@@ -870,11 +859,7 @@ function LaboratoryPageContent(props: {
   const router = useRouter();
   const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
 
   const operationCollectionsPlugin = useOperationCollectionsPlugin({
     canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
@@ -959,11 +944,6 @@ function LaboratoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Laboratory}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
-      isCDNEnabled={isCDNEnabled ?? null}
     >
       <div className="flex py-6">
         <div className="flex-1">

@@ -1,17 +1,18 @@
 import { ReactElement, ReactNode } from 'react';
 import { LinkIcon } from 'lucide-react';
+import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
 import { HiveLink, Tabs } from '@/components/v2';
 import { ConnectSchemaModal } from '@/components/v2/modals';
-import { FragmentType, graphql, useFragment } from '@/gql';
+import { graphql } from '@/gql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { cn } from '@/lib/utils';
-import { Link, useRouter } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { ProjectMigrationToast } from '../project/migration-toast';
+import { TargetSelector } from './target-selector';
 
 export enum Page {
   Schema = 'schema',
@@ -23,64 +24,40 @@ export enum Page {
   Settings = 'settings',
 }
 
-const TargetLayout_CurrentOrganizationFragment = graphql(`
-  fragment TargetLayout_CurrentOrganizationFragment on Organization {
-    id
-    name
-    cleanId
+const TargetLayoutQuery = graphql(`
+  query TargetLayoutQuery {
     me {
       id
-      ...CanAccessTarget_MemberFragment
+      ...UserMenu_MeFragment
     }
-    ...UserMenu_CurrentOrganizationFragment
-    projects {
-      ...ProjectLayout_ProjectConnectionFragment
+    organizations {
+      nodes {
+        id
+        cleanId
+        name
+        me {
+          id
+          ...CanAccessTarget_MemberFragment
+        }
+        projects {
+          nodes {
+            id
+            cleanId
+            name
+            registryModel
+            targets {
+              nodes {
+                id
+                cleanId
+                name
+              }
+            }
+          }
+        }
+      }
+      ...TargetSelector_OrganizationConnectionFragment
+      ...UserMenu_OrganizationConnectionFragment
     }
-  }
-`);
-
-const TargetLayout_MeFragment = graphql(`
-  fragment TargetLayout_MeFragment on User {
-    id
-    ...UserMenu_MeFragment
-  }
-`);
-
-const TargetLayout_OrganizationConnectionFragment = graphql(`
-  fragment TargetLayout_OrganizationConnectionFragment on OrganizationConnection {
-    nodes {
-      id
-      cleanId
-      name
-    }
-    ...UserMenu_OrganizationConnectionFragment
-  }
-`);
-
-const TargetLayout_CurrentProjectFragment = graphql(`
-  fragment TargetLayout_CurrentProjectFragment on Project {
-    id
-    cleanId
-    name
-    registryModel
-    targets {
-      ...TargetLayout_TargetConnectionFragment
-    }
-  }
-`);
-
-const TargetLayout_TargetConnectionFragment = graphql(`
-  fragment TargetLayout_TargetConnectionFragment on TargetConnection {
-    total
-    nodes {
-      cleanId
-      name
-    }
-  }
-`);
-
-const TargetLayout_IsCDNEnabledFragment = graphql(`
-  fragment TargetLayout_IsCDNEnabledFragment on Query {
     isCDNEnabled
   }
 `);
@@ -99,35 +76,24 @@ export const TargetLayout = ({
   className?: string;
   children: ReactNode;
   connect?: ReactNode;
-  me: FragmentType<typeof TargetLayout_MeFragment> | null;
-  currentOrganization: FragmentType<typeof TargetLayout_CurrentOrganizationFragment> | null;
-  currentProject: FragmentType<typeof TargetLayout_CurrentProjectFragment> | null;
-  organizations: FragmentType<typeof TargetLayout_OrganizationConnectionFragment> | null;
-  isCDNEnabled: FragmentType<typeof TargetLayout_IsCDNEnabledFragment> | null;
 }): ReactElement | null => {
-  const router = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
+  const [query] = useQuery({
+    query: TargetLayoutQuery,
+    requestPolicy: 'cache-first',
+  });
 
   const { organizationId: orgId, projectId } = props;
 
-  const currentOrganization = useFragment(
-    TargetLayout_CurrentOrganizationFragment,
-    props.currentOrganization,
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organizations.nodes.find(
+    node => node.cleanId === props.organizationId,
   );
-  const currentProject = useFragment(TargetLayout_CurrentProjectFragment, props.currentProject);
-
-  const me = useFragment(TargetLayout_MeFragment, props.me);
-  const organizationConnection = useFragment(
-    TargetLayout_OrganizationConnectionFragment,
-    props.organizations,
+  const currentProject = currentOrganization?.projects.nodes.find(
+    node => node.cleanId === props.projectId,
   );
-  const targetConnection = useFragment(
-    TargetLayout_TargetConnectionFragment,
-    currentProject?.targets,
-  );
-  const targets = targetConnection?.nodes;
-  const currentTarget = targets?.find(target => target.cleanId === props.targetId);
-  const isCDNEnabled = useFragment(TargetLayout_IsCDNEnabledFragment, props.isCDNEnabled);
+  const currentTarget = currentProject?.targets.nodes.find(node => node.cleanId === props.targetId);
+  const isCDNEnabled = query.data?.isCDNEnabled === true;
 
   useTargetAccess({
     scope: TargetAccessScope.Read,
@@ -155,71 +121,18 @@ export const TargetLayout = ({
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
-            {currentOrganization ? (
-              <Link
-                to="/$organizationId"
-                params={{
-                  organizationId: currentOrganization.cleanId,
-                }}
-                className="max-w-[200px] shrink-0 truncate font-medium"
-              >
-                {currentOrganization.name}
-              </Link>
-            ) : (
-              <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
-            )}
-            <div className="italic text-gray-500">/</div>
-            {currentOrganization && currentProject ? (
-              <Link
-                to="/$organizationId/$projectId"
-                params={{
-                  organizationId: currentOrganization.cleanId,
-                  projectId: currentProject.cleanId,
-                }}
-                className="max-w-[200px] shrink-0 truncate font-medium"
-              >
-                {currentProject.name}
-              </Link>
-            ) : (
-              <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
-            )}
-            <div className="italic text-gray-500">/</div>
-            {targets?.length && currentOrganization && currentProject && currentTarget ? (
-              <>
-                <Select
-                  defaultValue={currentTarget.cleanId}
-                  onValueChange={id => {
-                    void router.navigate({
-                      to: '/$organizationId/$projectId/$targetId',
-                      params: {
-                        organizationId: currentOrganization.cleanId,
-                        projectId: currentProject.cleanId,
-                        targetId: id,
-                      },
-                    });
-                  }}
-                >
-                  <SelectTrigger variant="default">
-                    <div className="font-medium">{currentTarget.name}</div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {targets.map(target => (
-                      <SelectItem key={target.cleanId} value={target.cleanId}>
-                        {target.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </>
-            ) : (
-              <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
-            )}
+            <TargetSelector
+              organizations={query.data?.organizations ?? null}
+              currentOrganizationCleanId={props.organizationId}
+              currentProjectCleanId={props.projectId}
+              currentTargetCleanId={props.targetId}
+            />
           </div>
           <div>
             <UserMenu
               me={me ?? null}
-              currentOrganization={currentOrganization ?? null}
-              organizations={organizationConnection ?? null}
+              currentOrganizationCleanId={props.organizationId}
+              organizations={query.data?.organizations ?? null}
             />
           </div>
         </div>
@@ -240,9 +153,9 @@ export const TargetLayout = ({
                       <Link
                         to="/$organizationId/$projectId/$targetId"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
                         }}
                       >
                         Schema
@@ -252,9 +165,9 @@ export const TargetLayout = ({
                       <Link
                         to="/$organizationId/$projectId/$targetId/checks"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
                         }}
                       >
                         Checks
@@ -264,9 +177,9 @@ export const TargetLayout = ({
                       <Link
                         to="/$organizationId/$projectId/$targetId/explorer"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
                         }}
                       >
                         Explorer
@@ -288,9 +201,9 @@ export const TargetLayout = ({
                       <Link
                         to="/$organizationId/$projectId/$targetId/insights"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
                         }}
                       >
                         Insights
@@ -300,9 +213,9 @@ export const TargetLayout = ({
                       <Link
                         to="/$organizationId/$projectId/$targetId/laboratory"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
                         }}
                       >
                         Laboratory
@@ -315,9 +228,9 @@ export const TargetLayout = ({
                     <Link
                       to="/$organizationId/$projectId/$targetId/settings"
                       params={{
-                        organizationId: currentOrganization.cleanId,
-                        projectId: currentProject.cleanId,
-                        targetId: currentTarget.cleanId,
+                        organizationId: props.organizationId,
+                        projectId: props.projectId,
+                        targetId: props.targetId,
                       }}
                     >
                       Settings
@@ -336,7 +249,7 @@ export const TargetLayout = ({
           {currentTarget ? (
             connect != null ? (
               connect
-            ) : isCDNEnabled?.isCDNEnabled ? (
+            ) : isCDNEnabled ? (
               <>
                 <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
                   <LinkIcon size={16} className="mr-2" />

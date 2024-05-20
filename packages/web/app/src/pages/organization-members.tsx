@@ -121,16 +121,8 @@ const OrganizationMembersPageQuery = graphql(`
   query OrganizationMembersPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        ...OrganizationLayout_CurrentOrganizationFragment
         ...OrganizationMembersPage_OrganizationFragment
       }
-    }
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      id
-      ...OrganizationLayout_MeFragment
     }
   }
 `);
@@ -153,18 +145,13 @@ function OrganizationMembersPageContent(props: {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
 
   return (
     <OrganizationLayout
       organizationId={props.organizationId}
       page={Page.Members}
       className="flex flex-col gap-y-10"
-      currentOrganization={currentOrganization ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
     >
       {currentOrganization ? (
         <PageContent
