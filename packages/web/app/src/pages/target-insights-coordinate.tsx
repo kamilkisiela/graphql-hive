@@ -386,34 +386,18 @@ function SchemaCoordinateView(props: {
 
 const TargetSchemaCoordinatePageQuery = graphql(`
   query TargetSchemaCoordinatePageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_CurrentOrganizationFragment
+        id
         cleanId
         rateLimit {
           retentionInDays
         }
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_CurrentProjectFragment
-      id
-      cleanId
-    }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
-      id
-      cleanId
-    }
     hasCollectedOperations(
       selector: { organization: $organizationId, project: $projectId, target: $targetId }
     )
-    me {
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
@@ -436,12 +420,7 @@ function TargetSchemaCoordinatePageContent(props: {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const currentProject = query.data?.project;
-  const currentTarget = query.data?.target;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
   const hasCollectedOperations = query.data?.hasCollectedOperations === true;
 
   return (
@@ -450,13 +429,8 @@ function TargetSchemaCoordinatePageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Insights}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
-      isCDNEnabled={isCDNEnabled ?? null}
     >
-      {currentOrganization && currentProject && currentTarget ? (
+      {currentOrganization ? (
         hasCollectedOperations ? (
           <SchemaCoordinateView
             coordinate={props.coordinate}

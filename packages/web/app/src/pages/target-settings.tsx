@@ -1027,14 +1027,10 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
 
 const TargetSettingsPageQuery = graphql(`
   query TargetSettingsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
         id
         cleanId
-        ...TargetLayout_CurrentOrganizationFragment
         ...TargetSettingsPage_OrganizationFragment
         me {
           ...CDNAccessTokens_MeFragment
@@ -1054,10 +1050,6 @@ const TargetSettingsPageQuery = graphql(`
       graphqlEndpointUrl
       ...TargetSettingsPage_TargetFragment
     }
-    me {
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
@@ -1075,12 +1067,9 @@ function TargetSettingsContent(props: {
     },
   });
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
   const currentTarget = query.data?.target;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
   const organizationForSettings = useFragment(
     TargetSettingsPage_OrganizationFragment,
     currentOrganization,
@@ -1103,11 +1092,6 @@ function TargetSettingsContent(props: {
       projectId={props.projectId}
       organizationId={props.organizationId}
       page={Page.Settings}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
-      isCDNEnabled={isCDNEnabled ?? null}
     >
       <div className="py-6">
         <Title>Settings</Title>

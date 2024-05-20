@@ -268,26 +268,17 @@ function SchemaView(props: {
 
 const TargetSchemaPageQuery = graphql(`
   query TargetSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organizations {
-      ...TargetLayout_OrganizationConnectionFragment
-    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_CurrentOrganizationFragment
         ...SchemaView_OrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_CurrentProjectFragment
       ...SchemaView_ProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       ...SchemaView_TargetFragment
     }
-    me {
-      ...TargetLayout_MeFragment
-    }
-    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
@@ -306,12 +297,9 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
-  const organizationConnection = query.data?.organizations;
   const target = query.data?.target;
-  const isCDNEnabled = query.data;
 
   // TODO(router) check if it works
   const serviceNameFromHash = router.latestLocation.hash?.replace('service-', '') ?? null;
@@ -322,11 +310,6 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
       projectId={props.projectId}
       organizationId={props.organizationId}
       page={Page.Schema}
-      currentOrganization={currentOrganization ?? null}
-      currentProject={currentProject ?? null}
-      me={me ?? null}
-      organizations={organizationConnection ?? null}
-      isCDNEnabled={isCDNEnabled ?? null}
     >
       <div className="flex flex-row items-center justify-between py-6">
         <div>
