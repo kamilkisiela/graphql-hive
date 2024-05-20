@@ -12,7 +12,7 @@ type JoinValue = {
   readonly values: ReadonlyArray<SqlValue | string>;
 };
 
-type RawValue = {
+export type RawValue = {
   readonly kind: 'raw';
   readonly sql: string;
 };

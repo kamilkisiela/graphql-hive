@@ -126,7 +126,7 @@ function SchemaCoordinateView(props: {
         </div>
         <div className="flex justify-end gap-x-2">
           <DateRangePicker
-            validUnits={['y', 'M', 'w', 'd']}
+            validUnits={['y', 'M', 'w', 'd', 'h']}
             selectedRange={dateRangeController.selectedPreset.range}
             startDate={dateRangeController.startDate}
             align="end"
