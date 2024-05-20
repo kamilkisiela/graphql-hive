@@ -5,7 +5,7 @@ import { UserMenu } from '@/components/ui/user-menu';
 import { HiveLink, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateTargetModal } from '@/components/v2/modals';
-import { graphql, useFragment } from '@/gql';
+import { graphql } from '@/gql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
