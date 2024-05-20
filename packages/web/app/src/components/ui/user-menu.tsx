@@ -37,27 +37,19 @@ import { UserSettingsModal } from '../user/settings';
 import { Changelog } from './changelog/changelog';
 import { latestChangelog } from './changelog/generated-changelog';
 
-export const UserMenu_CurrentOrganizationFragment = graphql(`
-  fragment UserMenu_CurrentOrganizationFragment on Organization {
-    id
-    cleanId
-    name
-    getStarted {
-      ...GetStartedWizard_GetStartedProgress
-    }
-    me {
-      ...UserMenu_MemberFragment
-    }
-    ...MemberRoleMigrationStickyNote_OrganizationFragment
-  }
-`);
-
 export const UserMenu_OrganizationConnectionFragment = graphql(`
   fragment UserMenu_OrganizationConnectionFragment on OrganizationConnection {
     nodes {
       id
       cleanId
       name
+      me {
+        ...UserMenu_MemberFragment
+      }
+      getStarted {
+        ...GetStartedWizard_GetStartedProgress
+      }
+      ...MemberRoleMigrationStickyNote_OrganizationFragment
     }
   }
 `);
@@ -66,7 +58,6 @@ export const UserMenu_MeFragment = graphql(`
   fragment UserMenu_MeFragment on User {
     id
     email
-    fullName
     displayName
     provider
     isAdmin
@@ -74,7 +65,7 @@ export const UserMenu_MeFragment = graphql(`
   }
 `);
 
-const UserMenu_MemberFragment = graphql(`
+export const UserMenu_MemberFragment = graphql(`
   fragment UserMenu_MemberFragment on Member {
     canLeaveOrganization
   }
@@ -82,19 +73,21 @@ const UserMenu_MemberFragment = graphql(`
 
 export function UserMenu(props: {
   me: FragmentType<typeof UserMenu_MeFragment> | null;
-  currentOrganization: FragmentType<typeof UserMenu_CurrentOrganizationFragment> | null;
   organizations: FragmentType<typeof UserMenu_OrganizationConnectionFragment> | null;
+  currentOrganizationCleanId: string;
 }) {
   const docsUrl = getDocsUrl();
   const me = useFragment(UserMenu_MeFragment, props.me);
-  const currentOrganization = useFragment(
-    UserMenu_CurrentOrganizationFragment,
-    props.currentOrganization,
-  );
-  const meInOrg = useFragment(UserMenu_MemberFragment, currentOrganization?.me);
-  const organizations = useFragment(UserMenu_OrganizationConnectionFragment, props.organizations);
+  const organizations = useFragment(
+    UserMenu_OrganizationConnectionFragment,
+    props.organizations,
+  )?.nodes;
   const [isUserSettingsModalOpen, toggleUserSettingsModalOpen] = useToggle();
   const [isLeaveOrganizationModalOpen, toggleLeaveOrganizationModalOpen] = useToggle();
+  const currentOrganization = organizations?.find(
+    org => org.cleanId === props.currentOrganizationCleanId,
+  );
+  const meInOrg = useFragment(UserMenu_MemberFragment, currentOrganization?.me);
 
   const canLeaveOrganization = !!currentOrganization && meInOrg?.canLeaveOrganization === true;
 
@@ -158,11 +151,11 @@ export function UserMenu(props: {
                   </DropdownMenuSubTrigger>
                 ) : null}
                 <DropdownMenuSubContent className="max-w-[300px]">
-                  {organizations.nodes.length ? (
+                  {organizations.length ? (
                     <DropdownMenuLabel>Organizations</DropdownMenuLabel>
                   ) : null}
                   <DropdownMenuSeparator />
-                  {organizations.nodes.map(org => (
+                  {organizations.map(org => (
                     <Link
                       to="/$organizationId"
                       params={{

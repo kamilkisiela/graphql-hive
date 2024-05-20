@@ -32,7 +32,7 @@ const TargetLayout_CurrentOrganizationFragment = graphql(`
       id
       ...CanAccessTarget_MemberFragment
     }
-    ...UserMenu_CurrentOrganizationFragment
+    # ...UserMenu_CurrentOrganizationFragment
     projects {
       ...ProjectLayout_ProjectConnectionFragment
     }

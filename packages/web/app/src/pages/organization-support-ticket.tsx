@@ -284,18 +284,11 @@ const SupportTicketPageQuery = graphql(`
   query SupportTicketPageQuery($selector: OrganizationSelectorInput!, $ticketId: ID!) {
     organization(selector: $selector) {
       organization {
-        ...OrganizationLayout_CurrentOrganizationFragment
         ...SupportTicket_OrganizationFragment
         supportTicket(id: $ticketId) {
           ...SupportTicket_SupportTicketFragment
         }
       }
-    }
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      ...OrganizationLayout_MeFragment
     }
   }
 `);
@@ -321,9 +314,7 @@ function SupportTicketPageContent(props: { ticketId: string; organizationId: str
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
   const ticket = query.data?.organization?.organization.supportTicket;
 
   return (
@@ -331,9 +322,6 @@ function SupportTicketPageContent(props: { ticketId: string; organizationId: str
       page={Page.Support}
       organizationId={props.organizationId}
       className="flex flex-col gap-y-10"
-      currentOrganization={currentOrganization ?? null}
-      organizations={organizationConnection ?? null}
-      me={me ?? null}
     >
       {currentOrganization ? (
         ticket ? (

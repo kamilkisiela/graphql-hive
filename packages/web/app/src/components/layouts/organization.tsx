@@ -1,12 +1,12 @@
 import { ReactElement, ReactNode } from 'react';
+import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
 import { HiveLink, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
 import { env } from '@/env/frontend';
-import { FragmentType, graphql, useFragment } from '@/gql';
+import { graphql, useFragment } from '@/gql';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -15,9 +15,11 @@ import {
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
-import { Link, useRouter } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
+import { QueryError } from '../ui/query-error';
+import { OrganizationSelector } from './organization-selectors';
 
 export enum Page {
   Overview = 'overview',
@@ -28,35 +30,31 @@ export enum Page {
   Subscription = 'subscription',
 }
 
-const OrganizationLayout_CurrentOrganizationFragment = graphql(`
-  fragment OrganizationLayout_CurrentOrganizationFragment on Organization {
+export const OrganizationLayout_OrganizationFragment = graphql(`
+  fragment OrganizationLayout_OrganizationFragment on Organization {
     id
-    name
     cleanId
     me {
       ...CanAccessOrganization_MemberFragment
     }
     ...ProPlanBilling_OrganizationFragment
     ...RateLimitWarn_OrganizationFragment
-    ...UserMenu_CurrentOrganizationFragment
   }
 `);
 
-const OrganizationLayout_MeFragment = graphql(`
-  fragment OrganizationLayout_MeFragment on User {
-    id
-    ...UserMenu_MeFragment
-  }
-`);
-
-const OrganizationLayout_OrganizationConnectionFragment = graphql(`
-  fragment OrganizationLayout_OrganizationConnectionFragment on OrganizationConnection {
-    nodes {
+const OrganizationLayoutQuery = graphql(`
+  query OrganizationLayoutQuery {
+    me {
       id
-      cleanId
-      name
+      ...UserMenu_MeFragment
     }
-    ...UserMenu_OrganizationConnectionFragment
+    organizations {
+      ...OrganizationSelector_OrganizationConnectionFragment
+      ...UserMenu_OrganizationConnectionFragment
+      nodes {
+        ...OrganizationLayout_OrganizationFragment
+      }
+    }
   }
 `);
 
@@ -68,19 +66,20 @@ export function OrganizationLayout({
 }: {
   page?: Page;
   className?: string;
-  me: FragmentType<typeof OrganizationLayout_MeFragment> | null;
   organizationId: string;
-  currentOrganization: FragmentType<typeof OrganizationLayout_CurrentOrganizationFragment> | null;
-  organizations: FragmentType<typeof OrganizationLayout_OrganizationConnectionFragment> | null;
   children: ReactNode;
 }): ReactElement | null {
-  const router = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
+  const [query] = useQuery({
+    query: OrganizationLayoutQuery,
+    requestPolicy: 'cache-first',
+  });
 
-  const currentOrganization = useFragment(
-    OrganizationLayout_CurrentOrganizationFragment,
-    props.currentOrganization,
+  const organizations = useFragment(
+    OrganizationLayout_OrganizationFragment,
+    query.data?.organizations.nodes,
   );
+  const currentOrganization = organizations?.find(org => org.cleanId === props.organizationId);
 
   useOrganizationAccess({
     member: currentOrganization?.me ?? null,
@@ -92,12 +91,10 @@ export function OrganizationLayout({
   useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
 
   const meInCurrentOrg = currentOrganization?.me;
-  const me = useFragment(OrganizationLayout_MeFragment, props.me);
-  const organizationConnection = useFragment(
-    OrganizationLayout_OrganizationConnectionFragment,
-    props.organizations,
-  );
-  const organizations = organizationConnection?.nodes;
+
+  if (query.error) {
+    return <QueryError error={query.error} organizationId={props.organizationId} />;
+  }
 
   return (
     <>
@@ -105,40 +102,16 @@ export function OrganizationLayout({
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
-            {currentOrganization && organizations ? (
-              <Select
-                defaultValue={currentOrganization.cleanId}
-                onValueChange={id => {
-                  void router.navigate({
-                    to: '/$organizationId',
-                    params: {
-                      organizationId: id,
-                    },
-                  });
-                }}
-              >
-                <SelectTrigger variant="default">
-                  <div className="font-medium" data-cy="organization-picker-current">
-                    {currentOrganization.name}
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  {organizations.map(org => (
-                    <SelectItem key={org.cleanId} value={org.cleanId}>
-                      {org.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <div className="h-5 w-48 animate-pulse rounded-full bg-gray-800" />
-            )}
+            <OrganizationSelector
+              currentOrganizationCleanId={props.organizationId}
+              organizations={query.data?.organizations ?? null}
+            />
           </div>
           <div>
             <UserMenu
-              me={me ?? null}
-              currentOrganization={currentOrganization ?? null}
-              organizations={organizationConnection ?? null}
+              me={query.data?.me ?? null}
+              currentOrganizationCleanId={props.organizationId}
+              organizations={query.data?.organizations ?? null}
             />
           </div>
         </div>

@@ -27,7 +27,7 @@ const ProjectLayout_CurrentOrganizationFragment = graphql(`
     me {
       ...CanAccessProject_MemberFragment
     }
-    ...UserMenu_CurrentOrganizationFragment
+    # ...UserMenu_CurrentOrganizationFragment
     projects {
       ...ProjectLayout_ProjectConnectionFragment
     }

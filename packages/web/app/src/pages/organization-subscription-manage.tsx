@@ -429,18 +429,11 @@ const ManageSubscriptionPageQuery = graphql(`
     organization(selector: $selector) {
       organization {
         cleanId
-        ...OrganizationLayout_CurrentOrganizationFragment
         ...ManageSubscriptionInner_OrganizationFragment
       }
     }
     billingPlans {
       ...ManageSubscriptionInner_BillingPlansFragment
-    }
-    organizations {
-      ...OrganizationLayout_OrganizationConnectionFragment
-    }
-    me {
-      ...OrganizationLayout_MeFragment
     }
   }
 `);
@@ -455,16 +448,14 @@ function ManageSubscriptionPageContent(props: { organizationId: string }) {
     },
   });
 
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const organizationConnection = query.data?.organizations;
   const billingPlans = query.data?.billingPlans;
 
   const organization = useFragment(
     ManageSubscriptionInner_OrganizationFragment,
     currentOrganization,
   );
-  const canAccess = useOrganizationAccess({
+  useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me ?? null,
     redirect: true,
@@ -475,22 +466,11 @@ function ManageSubscriptionPageContent(props: { organizationId: string }) {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  if (!currentOrganization || !me || !organizationConnection || !organization || !billingPlans) {
-    return null;
-  }
-
-  if (!canAccess) {
-    return null;
-  }
-
   return (
     <OrganizationLayout
       page={Page.Subscription}
       organizationId={props.organizationId}
       className="flex flex-col gap-y-10"
-      currentOrganization={currentOrganization}
-      organizations={organizationConnection}
-      me={me}
     >
       <div className="grow">
         <div className="flex flex-row items-center justify-between py-6">
@@ -498,19 +478,23 @@ function ManageSubscriptionPageContent(props: { organizationId: string }) {
             <Title>Manage subscription</Title>
             <Subtitle>Manage your current plan and invoices.</Subtitle>
           </div>
-          <div>
-            <Button asChild>
-              <Link
-                to="/$organizationId/view/subscription"
-                params={{ organizationId: currentOrganization.cleanId }}
-              >
-                Subscription usage
-              </Link>
-            </Button>
-          </div>
+          {currentOrganization ? (
+            <div>
+              <Button asChild>
+                <Link
+                  to="/$organizationId/view/subscription"
+                  params={{ organizationId: currentOrganization.cleanId }}
+                >
+                  Subscription usage
+                </Link>
+              </Button>
+            </div>
+          ) : null}
         </div>
         <div>
-          <Inner organization={currentOrganization} billingPlans={billingPlans} />
+          {currentOrganization && billingPlans ? (
+            <Inner organization={currentOrganization} billingPlans={billingPlans} />
+          ) : null}
         </div>
       </div>
     </OrganizationLayout>
