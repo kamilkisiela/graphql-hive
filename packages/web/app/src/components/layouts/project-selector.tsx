@@ -83,46 +83,4 @@ export function ProjectSelector(props: {
       )}
     </>
   );
-
-  // {currentOrganization ? (
-  //   <Link
-  //     to="/$organizationId"
-  //     params={{ organizationId: currentOrganization.cleanId }}
-  //     className="max-w-[200px] shrink-0 truncate font-medium"
-  //   >
-  //     {currentOrganization.name}
-  //   </Link>
-  // ) : (
-  //   <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
-  // )}
-  // {projects?.length && currentProject ? (
-  //   <>
-  //     <div className="italic text-gray-500">/</div>
-  //     <Select
-  //       defaultValue={currentProject.cleanId}
-  //       onValueChange={id => {
-  //         void router.navigate({
-  //           to: '/$organizationId/$projectId',
-  //           params: {
-  //             organizationId: props.organizationId,
-  //             projectId: id,
-  //           },
-  //         });
-  //       }}
-  //     >
-  //       <SelectTrigger variant="default">
-  //         <div className="font-medium">{currentProject.name}</div>
-  //       </SelectTrigger>
-  //       <SelectContent>
-  //         {projects.map(project => (
-  //           <SelectItem key={project.cleanId} value={project.cleanId}>
-  //             {project.name}
-  //           </SelectItem>
-  //         ))}
-  //       </SelectContent>
-  //     </Select>
-  //   </>
-  // ) : (
-  //   <div className="h-5 w-48 animate-pulse rounded-full bg-gray-800" />
-  // )}
 }
