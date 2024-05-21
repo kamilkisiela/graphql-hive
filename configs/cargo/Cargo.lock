@@ -149,14 +149,15 @@ dependencies = [
 
 [[package]]
 name = "apollo-federation"
-version = "0.0.11"
+version = "1.47.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9fc457f3e836a60ea3d4e1a25a8b42c5c62ddf13a2131c194d94f752c7a1475"
+checksum = "30e361172eeae9d111ff7814a3db6b4d344739eff2db178e70d53ce174dfa255"
 dependencies = [
  "apollo-compiler",
  "derive_more",
  "indexmap 2.2.5",
  "lazy_static",
+ "multimap 0.10.0",
  "petgraph",
  "serde_json_bytes",
  "strum 0.26.2",
@@ -179,9 +180,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.46.0"
+version = "1.47.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6c79fc453260ad367afc3ec1ab32bdc85a0b1e5a6907dff69d1d928a686f632"
+checksum = "77db51ba2f2956dd8045b1fbc56b628188e42bf75b93e1c1895eac173a1e8f79"
 dependencies = [
  "access-json",
  "anyhow",
@@ -3135,6 +3136,15 @@ name = "multimap"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e1a5d38b9b352dbd913288736af36af41c48d61b1a8cd34bcecd727561b7d511"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "multimap"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "defc4c55412d89136f966bbb339008b474350e5e6e78d2714439c386b3137a03"
 dependencies = [
  "serde",
 ]
