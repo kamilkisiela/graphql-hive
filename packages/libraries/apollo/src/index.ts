@@ -1,4 +1,4 @@
-import type { DocumentNode } from 'graphql';
+import { GraphQLError, type DocumentNode } from 'graphql';
 import type { ApolloServerPlugin, HTTPGraphQLRequest } from '@apollo/server';
 import {
   autoDisposeSymbol,
@@ -160,7 +160,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
   void hive.info();
 
   return {
-    requestDidStart(context) {
+    async requestDidStart(context) {
       // `overallCachePolicy` does not exist in v0
       const isLegacyV0 = !('overallCachePolicy' in context);
       // `context` does not exist in v4, it is `contextValue` instead
@@ -181,6 +181,54 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
         ),
         variableValues: context.request.variables,
       };
+
+      let persistedDocumentError: GraphQLError | null = null;
+
+      if (hive.persistedDocuments) {
+        if (
+          context.request.http?.body &&
+          typeof context.request.http.body === 'object' &&
+          'documentId' in context.request.http.body &&
+          typeof context.request.http.body.documentId === 'string'
+        ) {
+          const document = await hive.persistedDocuments.resolve(
+            context.request.http.body.documentId,
+          );
+
+          if (document) {
+            context.request.query = document;
+          } else {
+            context.request.query = '{__typename}';
+            persistedDocumentError = new GraphQLError('Persisted document not found.', {
+              extensions: {
+                code: 'PERSISTED_DOCUMENT_NOT_FOUND',
+                http: {
+                  status: 400,
+                },
+              },
+            });
+          }
+        } else if (
+          false ===
+          (await hive.persistedDocuments.allowArbitraryDocuments({
+            headers: {
+              get(name: string) {
+                return context.request.http?.headers?.get(name) ?? null;
+              },
+            },
+          }))
+        ) {
+          context.request.query = '{__typename}';
+          persistedDocumentError = new GraphQLError('No persisted document provided.', {
+            extensions: {
+              code: 'PERSISTED_DOCUMENT_REQUIRED',
+              http: {
+                status: 400,
+              },
+            },
+          });
+        }
+      }
 
       if (isLegacyV0) {
         return {
@@ -246,6 +294,11 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
               didFailValidation = true;
             }
           };
+        },
+        didResolveOperation() {
+          if (persistedDocumentError) {
+            throw persistedDocumentError;
+          }
         },
         async willSendResponse(ctx) {
           if (didFailValidation) {

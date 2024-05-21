@@ -1,11 +1,4 @@
-import {
-  DocumentNode,
-  ExecutionArgs,
-  GraphQLSchema,
-  Kind,
-  parse,
-  type GraphQLError,
-} from 'graphql';
+import { DocumentNode, ExecutionArgs, GraphQLError, GraphQLSchema, Kind, parse } from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
 import {
@@ -17,6 +10,7 @@ import {
   isAsyncIterable,
   isHiveClient,
 } from '@graphql-hive/core';
+import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 
 export { atLeastOnceSampler, createSchemaFetcher, createServicesFetcher } from '@graphql-hive/core';
 
@@ -170,6 +164,54 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
           console.error(err);
         }
       }
+    },
+    onPluginInit({ addPlugin }) {
+      const { persistedDocuments } = hive;
+      if (!persistedDocuments) {
+        return;
+      }
+      addPlugin(
+        usePersistedOperations({
+          extractPersistedOperationId(body, request) {
+            if ('documentId' in body && typeof body.documentId === 'string') {
+              return body.documentId;
+            }
+
+            let documentId: string | undefined = request.url.split('/graphql/')[1];
+
+            if (documentId) {
+              return documentId;
+            }
+
+            return null;
+          },
+          getPersistedOperation(key) {
+            return persistedDocuments.resolve(key);
+          },
+          allowArbitraryOperations(request) {
+            return persistedDocuments.allowArbitraryDocuments({
+              headers: request.headers,
+            });
+          },
+          customErrors: {
+            keyNotFound() {
+              return new GraphQLError('Persisted document not found.', {
+                extensions: { code: 'PERSISTED_DOCUMENT_NOT_FOUND' },
+              });
+            },
+            notFound() {
+              return new GraphQLError('Persisted document not found.', {
+                extensions: { code: 'PERSISTED_DOCUMENT_NOT_FOUND' },
+              });
+            },
+            persistedQueryOnly() {
+              return new GraphQLError('No persisted document provided.', {
+                extensions: { code: 'PERSISTED_DOCUMENT_REQUIRED' },
+              });
+            },
+          },
+        }),
+      );
     },
   };
 }
