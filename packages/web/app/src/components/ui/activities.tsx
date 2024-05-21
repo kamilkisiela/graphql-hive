@@ -1,9 +1,10 @@
 import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
-import { Link, TimeAgo } from '@/components/v2';
 import { EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
 import { DocumentType, graphql, useFragment } from '@/gql';
-import { Subtitle, Title } from '../ui/page';
+import { Link } from './link';
+import { Subtitle, Title } from './page';
+import { TimeAgo } from './time-ago';
 
 const Activities_OrganizationActivitiesQuery = graphql(`
   query Activities_OrganizationActivitiesQuery($selector: OrganizationActivitiesSelector!) {

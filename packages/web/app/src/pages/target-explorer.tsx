@@ -15,10 +15,10 @@ import {
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { noSchemaVersion, noValidSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { noSchemaVersion, noValidSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { Link } from '@tanstack/react-router';
 
