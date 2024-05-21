@@ -642,7 +642,7 @@ export class OrganizationManager {
 
     const { code } = await this.storage.createOrganizationTransferRequest({
       organization: organization.id,
-      user: member.id,
+      user: member.user.id,
     });
 
     await this.emails.schedule({
@@ -985,7 +985,7 @@ export class OrganizationManager {
     };
   }
 
-  async assignMemberRole(input: { organizationId: string; memberId: string; roleId: string }) {
+  async assignMemberRole(input: { organizationId: string; userId: string; roleId: string }) {
     await this.authManager.ensureOrganizationAccess({
       organization: input.organizationId,
       scope: OrganizationAccessScope.MEMBERS,
@@ -994,7 +994,7 @@ export class OrganizationManager {
     // Ensure selected member is part of the organization
     const member = await this.storage.getOrganizationMember({
       organization: input.organizationId,
-      user: input.memberId,
+      user: input.userId,
     });
 
     if (!member) {
@@ -1073,7 +1073,7 @@ export class OrganizationManager {
     // Assign the role to the member
     await this.storage.assignOrganizationMemberRole({
       organizationId: input.organizationId,
-      userId: input.memberId,
+      userId: input.userId,
       roleId: input.roleId,
     });
 
@@ -1084,7 +1084,7 @@ export class OrganizationManager {
       ok: {
         updatedMember: await this.getOrganizationMember({
           organization: input.organizationId,
-          user: input.memberId,
+          user: input.userId,
         }),
         previousMemberRole: member.role,
       },

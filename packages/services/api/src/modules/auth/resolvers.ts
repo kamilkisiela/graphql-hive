@@ -80,19 +80,19 @@ export const resolvers: AuthModule.Resolvers & {
   Member: {
     organizationAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberOrganizationScopes({
-        user: member.id,
+        user: member.user.id,
         organization: member.organization,
       });
     },
     projectAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberProjectScopes({
-        user: member.id,
+        user: member.user.id,
         organization: member.organization,
       });
     },
     targetAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberTargetScopes({
-        user: member.id,
+        user: member.user.id,
         organization: member.organization,
       });
     },
