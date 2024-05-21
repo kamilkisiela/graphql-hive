@@ -69,7 +69,7 @@ const ProjectCard = (props: {
   const schemaVersionsInDateRange = useFormattedNumber(totalNumberOfVersions);
 
   return (
-    <Card className="h-full self-start bg-gray-900/50 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50">
+    <Card className="h-full self-start bg-gray-900/50 p-5 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50">
       <Link
         to="/$organizationId/$projectId"
         params={{
