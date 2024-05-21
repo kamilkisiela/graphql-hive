@@ -678,11 +678,11 @@ importers:
         specifier: 6.1.1
         version: 6.1.1
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sentry/types':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@slack/web-api':
         specifier: 7.0.4
         version: 7.0.4
@@ -810,8 +810,8 @@ importers:
         specifier: 3.4.0
         version: 3.4.0
       undici:
-        specifier: 6.16.1
-        version: 6.16.1
+        specifier: 6.18.0
+        version: 6.18.0
       vitest:
         specifier: 1.6.0
         version: 1.6.0(@types/node@20.12.12)(less@4.2.0)(terser@5.20.0)
@@ -867,8 +867,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -948,8 +948,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sentry/tracing':
         specifier: 7.114.0
         version: 7.114.0
@@ -993,8 +993,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -1041,8 +1041,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@theguild/federation-composition':
         specifier: 0.11.1
         version: 0.11.1(graphql@16.8.1)
@@ -1105,7 +1105,7 @@ importers:
         version: 6.3.1(@envelop/core@5.0.1)(graphql@16.8.1)
       '@envelop/sentry':
         specifier: 7.1.1
-        version: 7.1.1(@envelop/core@5.0.1)(@sentry/node@7.114.0)(graphql@16.8.1)
+        version: 7.1.1(@envelop/core@5.0.1)(@sentry/node@7.116.0)(graphql@16.8.1)
       '@envelop/types':
         specifier: 5.0.0
         version: 5.0.0
@@ -1155,8 +1155,8 @@ importers:
         specifier: 7.114.0
         version: 7.114.0
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@swc/core':
         specifier: 1.5.7
         version: 1.5.7(@swc/helpers@0.5.5)
@@ -1252,14 +1252,14 @@ importers:
         specifier: 1.24.1
         version: 1.24.1
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sentry/types':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sentry/utils':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       fastify:
         specifier: 4.27.0
         version: 4.27.0
@@ -1291,11 +1291,11 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sentry/types':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@tgriesser/schemats':
         specifier: 9.0.1
         version: 9.0.1
@@ -1351,8 +1351,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -1390,8 +1390,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1441,8 +1441,8 @@ importers:
         specifier: workspace:*
         version: link:../usage-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sinclair/typebox':
         specifier: 0.32.30
         version: 0.32.30
@@ -1492,8 +1492,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1528,8 +1528,8 @@ importers:
         specifier: workspace:*
         version: link:../usage-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       agentkeepalive:
         specifier: 4.5.0
         version: 4.5.0
@@ -1567,8 +1567,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1639,8 +1639,8 @@ importers:
         specifier: workspace:*
         version: link:../../services/server
       '@hookform/resolvers':
-        specifier: 3.4.0
-        version: 3.4.0(react-hook-form@7.51.4(react@18.3.1))
+        specifier: 3.4.2
+        version: 3.4.2(react-hook-form@7.51.4(react@18.3.1))
       '@monaco-editor/react':
         specifier: 4.6.0
         version: 4.6.0(monaco-editor@0.48.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1714,14 +1714,14 @@ importers:
         specifier: 3.0.6
         version: 3.0.6
       '@sentry/node':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@sentry/react':
-        specifier: 7.114.0
-        version: 7.114.0(react@18.3.1)
+        specifier: 7.116.0
+        version: 7.116.0(react@18.3.1)
       '@sentry/types':
-        specifier: 7.114.0
-        version: 7.114.0
+        specifier: 7.116.0
+        version: 7.116.0
       '@storybook/addon-essentials':
         specifier: 8.1.1
         version: 8.1.1(@types/react-dom@18.3.0)(@types/react@18.3.2)(encoding@0.1.13)(prettier@3.2.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1742,19 +1742,19 @@ importers:
         version: 8.1.1(encoding@0.1.13)(prettier@3.2.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@2.78.0)(typescript@5.4.5)(vite@5.2.11(@types/node@20.12.12)(less@4.2.0)(terser@5.20.0))
       '@stripe/react-stripe-js':
         specifier: 2.7.1
-        version: 2.7.1(@stripe/stripe-js@3.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 2.7.1(@stripe/stripe-js@3.4.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stripe/stripe-js':
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.4.1
+        version: 3.4.1
       '@tanstack/react-router':
-        specifier: 1.32.13
-        version: 1.32.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.33.6
+        version: 1.33.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table':
         specifier: 8.0.0-beta.8
         version: 8.0.0-beta.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/router-devtools':
-        specifier: 1.32.13
-        version: 1.32.13(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.33.6
+        version: 1.33.6(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/editor':
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.6.0(monaco-editor@0.48.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/node@20.12.12)(encoding@0.1.13)(graphql@16.8.1)(monaco-editor@0.48.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1816,8 +1816,8 @@ importers:
         specifier: 3.6.0
         version: 3.6.0
       dompurify:
-        specifier: 3.1.3
-        version: 3.1.3
+        specifier: 3.1.4
+        version: 3.1.4
       echarts:
         specifier: 5.5.0
         version: 5.5.0
@@ -3991,7 +3991,6 @@ packages:
 
   '@fastify/vite@6.0.6':
     resolution: {integrity: sha512-FsWJC92murm5tjeTezTTvMLyZido/ZWy0wYWpVkh/bDe1gAUAabYLB7Vp8hokXGsRE/mOpqYVsRDAKENY2qPUQ==}
-    bundledDependencies: []
 
   '@floating-ui/core@1.2.6':
     resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
@@ -4669,8 +4668,8 @@ packages:
       react: ^16 || ^17 || ^18
       react-dom: ^16 || ^17 || ^18
 
-  '@hookform/resolvers@3.4.0':
-    resolution: {integrity: sha512-+oAqK3okmoEDnvUkJ3N/mvNMeeMv5Apgy1jkoRmlaaAF4vBgcJs9tHvtXU7VE4DvPosvAUUkPOaNFunzt1dbgA==}
+  '@hookform/resolvers@3.4.2':
+    resolution: {integrity: sha512-1m9uAVIO8wVf7VCDAGsuGA0t6Z3m6jVGAN50HkV9vYLl0yixKK/Z1lr01vaRvYCkIKGoy1noVRxMzQYb4y/j1Q==}
     peerDependencies:
       react-hook-form: ^7.0.0
 
@@ -6673,20 +6672,24 @@ packages:
   '@rushstack/eslint-patch@1.6.1':
     resolution: {integrity: sha512-UY+FGM/2jjMkzQLn8pxcHGMaVLh9aEitG3zY2CiY7XHdLiz3bZOwa6oDxNqEMv7zZkV+cj5DOdz0cQ1BP5Hjgw==}
 
-  '@sentry-internal/feedback@7.114.0':
-    resolution: {integrity: sha512-kUiLRUDZuh10QE9JbSVVLgqxFoD9eDPOzT0MmzlPuas8JlTmJuV4FtSANNcqctd5mBuLt2ebNXH0MhRMwyae4A==}
+  '@sentry-internal/feedback@7.116.0':
+    resolution: {integrity: sha512-tmfO+RTCrhIWMs3yg8X0axhbjWRZLsldSfoXBgfjNCk/XwkYiVGp7WnYVbb+IO+01mHCsis9uaYOBggLgFRB5Q==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/replay-canvas@7.114.0':
-    resolution: {integrity: sha512-6rTiqmKi/FYtesdM2TM2U+rh6BytdPjLP65KTUodtxohJ+r/3m+termj2o4BhIYPE1YYOZNmbZfwebkuQPmWeg==}
+  '@sentry-internal/replay-canvas@7.116.0':
+    resolution: {integrity: sha512-Sy0ydY7A97JY/IFTIj8U25kHqR5rL9oBk3HFE5EK9Phw56irVhHzEwLWae0jlFeCQEWoBYqpPgO5vXsaYzrWvw==}
     engines: {node: '>=12'}
 
   '@sentry-internal/tracing@7.114.0':
     resolution: {integrity: sha512-dOuvfJN7G+3YqLlUY4HIjyWHaRP8vbOgF+OsE5w2l7ZEn1rMAaUbPntAR8AF9GBA6j2zWNoSo8e7GjbJxVofSg==}
     engines: {node: '>=8'}
 
-  '@sentry/browser@7.114.0':
-    resolution: {integrity: sha512-ijJ0vOEY6U9JJADVYGkUbLrAbpGSQgA4zV+KW3tcsBLX9M1jaWq4BV1PWHdzDPPDhy4OgfOjIfaMb5BSPn1U+g==}
+  '@sentry-internal/tracing@7.116.0':
+    resolution: {integrity: sha512-y5ppEmoOlfr77c/HqsEXR72092qmGYS4QE5gSz5UZFn9CiinEwGfEorcg2xIrrCuU7Ry/ZU2VLz9q3xd04drRA==}
+    engines: {node: '>=8'}
+
+  '@sentry/browser@7.116.0':
+    resolution: {integrity: sha512-2aosATT5qE+QLKgTmyF9t5Emsluy1MBczYNuPmLhDxGNfB+MA86S8u7Hb0CpxdwjS0nt14gmbiOtJHoeAF3uTw==}
     engines: {node: '>=8'}
 
   '@sentry/cli-darwin@2.31.2':
@@ -6743,6 +6746,10 @@ packages:
     resolution: {integrity: sha512-YnanVlmulkjgZiVZ9BfY9k6I082n+C+LbZo52MTvx3FY6RE5iyiPMpaOh67oXEZRWcYQEGm+bKruRxLVP6RlbA==}
     engines: {node: '>=8'}
 
+  '@sentry/core@7.116.0':
+    resolution: {integrity: sha512-J6Wmjjx+o7RwST0weTU1KaKUAlzbc8MGkJV1rcHM9xjNTWTva+nrcCM3vFBagnk2Gm/zhwv3h0PvWEqVyp3U1Q==}
+    engines: {node: '>=8'}
+
   '@sentry/integrations@7.112.2':
     resolution: {integrity: sha512-ioC2yyU6DqtLkdmWnm87oNvdn2+9oKctJeA4t+jkS6JaJ10DcezjCwiLscX4rhB9aWJV3IWF7Op0O6K3w0t2Hg==}
     engines: {node: '>=8'}
@@ -6751,18 +6758,22 @@ packages:
     resolution: {integrity: sha512-BJIBWXGKeIH0ifd7goxOS29fBA8BkEgVVCahs6xIOXBjX1IRS6PmX0zYx/GP23nQTfhJiubv2XPzoYOlZZmDxg==}
     engines: {node: '>=8'}
 
-  '@sentry/node@7.114.0':
-    resolution: {integrity: sha512-cqvi+OHV1Hj64mIGHoZtLgwrh1BG6ntcRjDLlVNMqml5rdTRD3TvG21579FtlqHlwZpbpF7K5xkwl8e5KL2hGw==}
+  '@sentry/integrations@7.116.0':
+    resolution: {integrity: sha512-UZb60gaF+7veh1Yv79RiGvgGYOnU6xA97H+hI6tKgc1uT20YpItO4X56Vhp0lvyEyUGFZzBRRH1jpMDPNGPkqw==}
     engines: {node: '>=8'}
 
-  '@sentry/react@7.114.0':
-    resolution: {integrity: sha512-zVPtvSy00Al25Z21f5GNzo3rd/TKS+iOX9wQwLrUZAxyf9RwBxKATLVJNJPkf8dQml6Qx+lfr0BHIlVcr1a1SQ==}
+  '@sentry/node@7.116.0':
+    resolution: {integrity: sha512-HB/4TrJWbnu6swNzkid+MlwzLwY/D/klGt3R0aatgrgWPo2jJm6bSl4LUT39Cr2eg5I1gsREQtXE2mAlC6gm8w==}
+    engines: {node: '>=8'}
+
+  '@sentry/react@7.116.0':
+    resolution: {integrity: sha512-b7sYSIewK/h3dGzm7Rx6tBUzA6w7zw6m5rVIO3fWCy7T3xEUDggUaqklrFVHXUYx2yjzEgTFPg/Dd2NrSzua4w==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
 
-  '@sentry/replay@7.114.0':
-    resolution: {integrity: sha512-UvEajoLIX9n2poeW3R4Ybz7D0FgCGXoFr/x/33rdUEMIdTypknxjJWxg6fJngIduzwrlrvWpvP8QiZXczYQy2Q==}
+  '@sentry/replay@7.116.0':
+    resolution: {integrity: sha512-OrpDtV54pmwZuKp3g7PDiJg6ruRMJKOCzK08TF7IPsKrr4x4UQn56rzMOiABVuTjuS8lNfAWDar6c6vxXFz5KA==}
     engines: {node: '>=12'}
 
   '@sentry/tracing@7.114.0':
@@ -6777,12 +6788,20 @@ packages:
     resolution: {integrity: sha512-tsqkkyL3eJtptmPtT0m9W/bPLkU7ILY7nvwpi1hahA5jrM7ppoU0IMaQWAgTD+U3rzFH40IdXNBFb8Gnqcva4w==}
     engines: {node: '>=8'}
 
+  '@sentry/types@7.116.0':
+    resolution: {integrity: sha512-QCCvG5QuQrwgKzV11lolNQPP2k67Q6HHD9vllZ/C4dkxkjoIym8Gy+1OgAN3wjsR0f/kG9o5iZyglgNpUVRapQ==}
+    engines: {node: '>=8'}
+
   '@sentry/utils@7.112.2':
     resolution: {integrity: sha512-OjLh0hx0t1EcL4ZIjf+4svlmmP+tHUDGcr5qpFWH78tjmkPW4+cqPuZCZfHSuWcDdeiaXi8TnYoVRqDcJKK/eQ==}
     engines: {node: '>=8'}
 
   '@sentry/utils@7.114.0':
     resolution: {integrity: sha512-319N90McVpupQ6vws4+tfCy/03AdtsU0MurIE4+W5cubHME08HtiEWlfacvAxX+yuKFhvdsO4K4BB/dj54ideg==}
+    engines: {node: '>=8'}
+
+  '@sentry/utils@7.116.0':
+    resolution: {integrity: sha512-Vn9fcvwTq91wJvCd7WTMWozimqMi+dEZ3ie3EICELC2diONcN16ADFdzn65CQQbYwmUzRjN9EjDN2k41pKZWhQ==}
     engines: {node: '>=8'}
 
   '@shikijs/core@1.2.0':
@@ -7241,8 +7260,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@stripe/stripe-js@3.4.0':
-    resolution: {integrity: sha512-a2kUP7OrsV0SSIk3UxWa+cnrW+PPIyuCbWIBH8vxfHIqmyeQN/d0lsplZJ2h7MlLsU/sB3EyhNBkhLLT+zHwKw==}
+  '@stripe/stripe-js@3.4.1':
+    resolution: {integrity: sha512-6vFTA7+MzoQyhZDn/D3wWZrUE8M8OSUFJE2Y3O1okfBWr4eCLvMeSoZuYN2xb1KJ3J0bBw96YfKxY75M/H0JZw==}
     engines: {node: '>=12.16'}
 
   '@swc/core-darwin-arm64@1.5.7':
@@ -7335,8 +7354,8 @@ packages:
     resolution: {integrity: sha512-rahAZXlR879P7dngDH7BZwGYiODA9D5Hqo6nUHn9GAURcqZU5IW0ZiT54dPtV5EPES7muZZmknReYueDHs7FFQ==}
     engines: {node: '>=12'}
 
-  '@tanstack/react-router@1.32.13':
-    resolution: {integrity: sha512-J6tiMRsFt91kkczEiuzHidePcPU62GuWGc2gSb9eqRKV17+TRofE4AJ1kM111F5wgDiPTsx4RwFVPU68+JVfAQ==}
+  '@tanstack/react-router@1.33.6':
+    resolution: {integrity: sha512-69AhTpFWImQQOkEXL8nh3rcD066r2RybjfzVy0okG9O04jZXb1Wzcbwp+lNgt6h5Eqb25v/iaGhfiCkdQOQk5Q==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16.8'
@@ -7361,8 +7380,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@tanstack/router-devtools@1.32.13':
-    resolution: {integrity: sha512-QBycfyMq3F8NWuFuWLUNek5uLH0VYLzwBmczEJnpcQXZqaVxT7t5eV4TlBR1EosuVazwDnq7Zu+AaigUqljfYg==}
+  '@tanstack/router-devtools@1.33.6':
+    resolution: {integrity: sha512-lFcxGU0DFyup/htAZPCh57dITOvlsKw3nwP0FTwN9i3x6CbklXCHlk4FX4gjAr36iBbDxZNBgeR52nwLhlr6yQ==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16.8'
@@ -8292,14 +8311,17 @@ packages:
   are-we-there-yet@2.0.0:
     resolution: {integrity: sha512-Ci/qENmwHnsYo9xKIcUJN5LeDKdJ6R1Z1j9V/J5wyq8nh/mYPEpIKJbBZXtZjG04HiK7zV/p6Vs9952MrMeUIw==}
     engines: {node: '>=10'}
+    deprecated: This package is no longer supported.
 
   are-we-there-yet@3.0.1:
     resolution: {integrity: sha512-QZW4EDmGwlYur0Yyf/b2uGucHQMa8aFUP7eu9ddR73vvhFyt4V0Vl3QHPcTNJ8l6qYOBdxgXdnBXQrHilfRQBg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This package is no longer supported.
 
   are-we-there-yet@4.0.2:
     resolution: {integrity: sha512-ncSWAawFhKMJDTdoAeOV+jyW1VCMj5QIAwULIBV0SSR7B/RLPPEQiknKcg/RIIZlUQrxELpsxMiTUoAQ4sIUyg==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    deprecated: This package is no longer supported.
 
   arg@1.0.0:
     resolution: {integrity: sha512-Wk7TEzl1KqvTGs/uyhmHO/3XLd3t1UeU4IstvPXVzGPM522cTjqjNZ99esCkcL52sjqjo8e8CTBcWhkxvGzoAw==}
@@ -9806,8 +9828,8 @@ packages:
   dompurify@3.0.3:
     resolution: {integrity: sha512-axQ9zieHLnAnHh0sfAamKYiqXMJAVwu+LM/alQ7WDagoWessyWvMSFyW65CqF3owufNu8HBcE4cM2Vflu7YWcQ==}
 
-  dompurify@3.1.3:
-    resolution: {integrity: sha512-5sOWYSNPaxz6o2MUPvtyxTTqR4D3L77pr5rUQoWgD5ROQtVIZQgJkXbo1DLlK3vj11YGw5+LnF4SYti4gZmwng==}
+  dompurify@3.1.4:
+    resolution: {integrity: sha512-2gnshi6OshmuKil8rMZuQCGiUF3cUxHY3NGDzUAdUx/NPEe5DVnO8BDoAQouvgwnx0R/+a6jUn36Z0FSdq8vww==}
 
   domutils@2.8.0:
     resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
@@ -10720,14 +10742,17 @@ packages:
   gauge@3.0.2:
     resolution: {integrity: sha512-+5J6MS/5XksCuXq++uFRsnUd7Ovu1XenbeuIuNRJxYWjgQbPuFhT14lAvsWfqfAmnwluf1OwMjz39HjfLPci0Q==}
     engines: {node: '>=10'}
+    deprecated: This package is no longer supported.
 
   gauge@4.0.4:
     resolution: {integrity: sha512-f9m+BEN5jkg6a0fZjleidjN51VE1X+mPFQ2DJ0uv1V39oCLCbsGe6yjbBnp7eK7z/+GAon99a3nHuqbuuthyPg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This package is no longer supported.
 
   gauge@5.0.1:
     resolution: {integrity: sha512-CmykPMJGuNan/3S4kZOpvvPYSNqSHANiWnh9XcMU2pSjtBfF0XzZ2p1bFAxTbnFxyBuPxQYHhzwaoOmUdqzvxQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    deprecated: This package is no longer supported.
 
   gaxios@6.4.0:
     resolution: {integrity: sha512-apAloYrY4dlBGlhauDAYSZveafb5U6+L9titing1wox6BvWM0TSXBp603zTrLpyLMGkrcFgohnUN150dFN/zOA==}
@@ -13458,14 +13483,17 @@ packages:
 
   npmlog@5.0.1:
     resolution: {integrity: sha512-AqZtDUWOMKs1G/8lwylVjrdYgqA4d9nu8hc+0gzRxlDb1I10+FHBGMXs6aiQHFdCUUlqH99MUMuLfzWDNDtfxw==}
+    deprecated: This package is no longer supported.
 
   npmlog@6.0.2:
     resolution: {integrity: sha512-/vBvz5Jfr9dT/aFWd0FIRf+T/Q2WBsLENygUaFUqstqsycmZAP/t5BvFJTK0viFmSUxiUKTUplWy5vt+rvKIxg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    deprecated: This package is no longer supported.
 
   npmlog@7.0.1:
     resolution: {integrity: sha512-uJ0YFk/mCQpLBt+bxN88AKd+gyqZvZDbtiNxk6Waqcj2aPRyfVx8ITawkyQynxUagInjdYT1+qj4NfA5KJJUxg==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    deprecated: This package is no longer supported.
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
@@ -14763,10 +14791,12 @@ packages:
   read-package-json@6.0.3:
     resolution: {integrity: sha512-4QbpReW4kxFgeBQ0vPAqh2y8sXEB3D4t3jsXbJKIhBiF80KT6XRo45reqwtftju5J6ru1ax06A2Gb/wM1qCOEQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    deprecated: This package is no longer supported. Please use @npmcli/package-json instead.
 
   read-package-json@7.0.0:
     resolution: {integrity: sha512-uL4Z10OKV4p6vbdvIXB+OzhInYtIozl/VxUBPgNkBuUi2DeRonnuspmaVAMcrkmfjKGNmRndyQAbE7/AmzGwFg==}
     engines: {node: ^16.14.0 || >=18.0.0}
+    deprecated: This package is no longer supported. Please use @npmcli/package-json instead.
 
   read-pkg-up@7.0.1:
     resolution: {integrity: sha512-zK0TB7Xd6JpCLmlLmufqykGE+/TlOePD6qKClNW7hHDKFh/J7/7gCWGR7joEQEW1bKq3a3yUZSObOoWLFQ4ohg==}
@@ -16261,8 +16291,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  undici@6.16.1:
-    resolution: {integrity: sha512-NeNiTT7ixpeiL1qOIU/xTVpHpVP0svmI6PwoCKaMGaI5AsHOaRdwqU/f7Fi9eyU4u03nd5U/BC8wmRMnS9nqoA==}
+  undici@6.18.0:
+    resolution: {integrity: sha512-nT8jjv/fE9Et1ilR6QoW8ingRTY2Pp4l2RUrdzV5Yz35RJDrtPc1DXvuNqcpsJSGIRHFdt3YKKktTzJA6r0fTA==}
     engines: {node: '>=18.17'}
 
   unherit@3.0.1:
@@ -19250,10 +19280,10 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.2
 
-  '@envelop/sentry@7.1.1(@envelop/core@5.0.1)(@sentry/node@7.114.0)(graphql@16.8.1)':
+  '@envelop/sentry@7.1.1(@envelop/core@5.0.1)(@sentry/node@7.116.0)(graphql@16.8.1)':
     dependencies:
       '@envelop/core': 5.0.1
-      '@sentry/node': 7.114.0
+      '@sentry/node': 7.116.0
       graphql: 16.8.1
       tslib: 2.6.2
 
@@ -20928,7 +20958,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@hookform/resolvers@3.4.0(react-hook-form@7.51.4(react@18.3.1))':
+  '@hookform/resolvers@3.4.2(react-hook-form@7.51.4(react@18.3.1))':
     dependencies:
       react-hook-form: 7.51.4(react@18.3.1)
 
@@ -23608,18 +23638,18 @@ snapshots:
 
   '@rushstack/eslint-patch@1.6.1': {}
 
-  '@sentry-internal/feedback@7.114.0':
+  '@sentry-internal/feedback@7.116.0':
     dependencies:
-      '@sentry/core': 7.114.0
-      '@sentry/types': 7.114.0
-      '@sentry/utils': 7.114.0
+      '@sentry/core': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
 
-  '@sentry-internal/replay-canvas@7.114.0':
+  '@sentry-internal/replay-canvas@7.116.0':
     dependencies:
-      '@sentry/core': 7.114.0
-      '@sentry/replay': 7.114.0
-      '@sentry/types': 7.114.0
-      '@sentry/utils': 7.114.0
+      '@sentry/core': 7.116.0
+      '@sentry/replay': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
 
   '@sentry-internal/tracing@7.114.0':
     dependencies:
@@ -23627,16 +23657,22 @@ snapshots:
       '@sentry/types': 7.114.0
       '@sentry/utils': 7.114.0
 
-  '@sentry/browser@7.114.0':
+  '@sentry-internal/tracing@7.116.0':
     dependencies:
-      '@sentry-internal/feedback': 7.114.0
-      '@sentry-internal/replay-canvas': 7.114.0
-      '@sentry-internal/tracing': 7.114.0
-      '@sentry/core': 7.114.0
-      '@sentry/integrations': 7.114.0
-      '@sentry/replay': 7.114.0
-      '@sentry/types': 7.114.0
-      '@sentry/utils': 7.114.0
+      '@sentry/core': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
+
+  '@sentry/browser@7.116.0':
+    dependencies:
+      '@sentry-internal/feedback': 7.116.0
+      '@sentry-internal/replay-canvas': 7.116.0
+      '@sentry-internal/tracing': 7.116.0
+      '@sentry/core': 7.116.0
+      '@sentry/integrations': 7.116.0
+      '@sentry/replay': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
 
   '@sentry/cli-darwin@2.31.2':
     optional: true
@@ -23688,6 +23724,11 @@ snapshots:
       '@sentry/types': 7.114.0
       '@sentry/utils': 7.114.0
 
+  '@sentry/core@7.116.0':
+    dependencies:
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
+
   '@sentry/integrations@7.112.2':
     dependencies:
       '@sentry/core': 7.112.2
@@ -23702,29 +23743,36 @@ snapshots:
       '@sentry/utils': 7.114.0
       localforage: 1.10.0
 
-  '@sentry/node@7.114.0':
+  '@sentry/integrations@7.116.0':
     dependencies:
-      '@sentry-internal/tracing': 7.114.0
-      '@sentry/core': 7.114.0
-      '@sentry/integrations': 7.114.0
-      '@sentry/types': 7.114.0
-      '@sentry/utils': 7.114.0
+      '@sentry/core': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
+      localforage: 1.10.0
 
-  '@sentry/react@7.114.0(react@18.3.1)':
+  '@sentry/node@7.116.0':
     dependencies:
-      '@sentry/browser': 7.114.0
-      '@sentry/core': 7.114.0
-      '@sentry/types': 7.114.0
-      '@sentry/utils': 7.114.0
+      '@sentry-internal/tracing': 7.116.0
+      '@sentry/core': 7.116.0
+      '@sentry/integrations': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
+
+  '@sentry/react@7.116.0(react@18.3.1)':
+    dependencies:
+      '@sentry/browser': 7.116.0
+      '@sentry/core': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
 
-  '@sentry/replay@7.114.0':
+  '@sentry/replay@7.116.0':
     dependencies:
-      '@sentry-internal/tracing': 7.114.0
-      '@sentry/core': 7.114.0
-      '@sentry/types': 7.114.0
-      '@sentry/utils': 7.114.0
+      '@sentry-internal/tracing': 7.116.0
+      '@sentry/core': 7.116.0
+      '@sentry/types': 7.116.0
+      '@sentry/utils': 7.116.0
 
   '@sentry/tracing@7.114.0':
     dependencies:
@@ -23734,6 +23782,8 @@ snapshots:
 
   '@sentry/types@7.114.0': {}
 
+  '@sentry/types@7.116.0': {}
+
   '@sentry/utils@7.112.2':
     dependencies:
       '@sentry/types': 7.112.2
@@ -23741,6 +23791,10 @@ snapshots:
   '@sentry/utils@7.114.0':
     dependencies:
       '@sentry/types': 7.114.0
+
+  '@sentry/utils@7.116.0':
+    dependencies:
+      '@sentry/types': 7.116.0
 
   '@shikijs/core@1.2.0': {}
 
@@ -24758,14 +24812,14 @@ snapshots:
       '@types/express': 4.17.14
       file-system-cache: 2.3.0
 
-  '@stripe/react-stripe-js@2.7.1(@stripe/stripe-js@3.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@stripe/react-stripe-js@2.7.1(@stripe/stripe-js@3.4.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@stripe/stripe-js': 3.4.0
+      '@stripe/stripe-js': 3.4.1
       prop-types: 15.8.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@stripe/stripe-js@3.4.0': {}
+  '@stripe/stripe-js@3.4.1': {}
 
   '@swc/core-darwin-arm64@1.5.7':
     optional: true
@@ -24835,7 +24889,7 @@ snapshots:
 
   '@tanstack/history@1.31.16': {}
 
-  '@tanstack/react-router@1.32.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/react-router@1.33.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@tanstack/history': 1.31.16
       '@tanstack/react-store': 0.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -24863,9 +24917,9 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@tanstack/router-devtools@1.32.13(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@tanstack/router-devtools@1.33.6(csstype@3.1.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@tanstack/react-router': 1.32.13(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-router': 1.33.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx: 2.1.1
       date-fns: 2.30.0
       goober: 2.1.14(csstype@3.1.1)
@@ -27771,7 +27825,7 @@ snapshots:
 
   dompurify@3.0.3: {}
 
-  dompurify@3.1.3: {}
+  dompurify@3.1.4: {}
 
   domutils@2.8.0:
     dependencies:
@@ -36003,7 +36057,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici@6.16.1: {}
+  undici@6.18.0: {}
 
   unherit@3.0.1: {}
 
