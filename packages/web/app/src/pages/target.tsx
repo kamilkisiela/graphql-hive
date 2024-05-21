@@ -220,6 +220,7 @@ function SchemaView(props: {
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
+  const router = useRouter();
   const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     event => {
       const value = event.target.value;
@@ -228,14 +229,40 @@ function SchemaView(props: {
       setTerm(value);
       setOpen(false);
       setOpenItems(prevItems => [...new Set([...prevItems, value])]);
+      router.navigate({
+        to: '/$organizationId/$projectId/$targetId',
+        params: {
+          organizationId: organization.cleanId,
+          projectId: project.cleanId,
+          targetId: target.cleanId,
+        },
+        search: { service: value },
+      });
     },
-    [debouncedFilter, setTerm],
+    [
+      debouncedFilter,
+      setTerm,
+      router.navigate,
+      organization.cleanId,
+      project.cleanId,
+      target.cleanId,
+    ],
   );
+
   const reset = useCallback(() => {
     setOpenItems([]);
     setFilterService('');
     setTerm('');
-  }, [setFilterService]);
+    router.navigate({
+      to: '/$organizationId/$projectId/$targetId',
+      params: {
+        organizationId: organization.cleanId,
+        projectId: project.cleanId,
+        targetId: target.cleanId,
+      },
+      search: {},
+    });
+  }, [router.navigate, organization.cleanId, project.cleanId, target.cleanId, setFilterService]);
 
   const isDistributed =
     project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
@@ -264,6 +291,46 @@ function SchemaView(props: {
   const [open, setOpen] = useState<boolean>(false);
   const schemas = useFragment(SchemaView_SchemaFragment, target.latestSchemaVersion?.schemas.nodes);
   const compositeSchemas = schemas?.filter(isCompositeSchema) as CompositeSchema[];
+
+  const searchParams = router.latestLocation.search;
+  const serviceParam = new URLSearchParams(searchParams).get('service');
+  useEffect(() => {
+    if (!serviceParam) {
+      router.navigate({
+        to: '/$organizationId/$projectId/$targetId',
+        params: {
+          organizationId: organization.cleanId,
+          projectId: project.cleanId,
+          targetId: target.cleanId,
+        },
+        search: { service: filterService },
+      });
+    } else {
+      if (compositeSchemas.length) {
+        const firstService = compositeSchemas
+          .map(schema => schema.service)
+          .find(service => {
+            return service === serviceParam;
+          });
+        if (firstService) {
+          setFilterService(firstService);
+          setTerm(firstService);
+          setOpenItems(prevItems => [...new Set([...prevItems, firstService])]);
+          debouncedFilter(firstService);
+          setOpen(false);
+          router.navigate({
+            to: '/$organizationId/$projectId/$targetId',
+            params: {
+              organizationId: organization.cleanId,
+              projectId: project.cleanId,
+              targetId: target.cleanId,
+            },
+            search: { service: firstService },
+          });
+        }
+      }
+    }
+  }, [filterService]);
 
   return (
     <>
