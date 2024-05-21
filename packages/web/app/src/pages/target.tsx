@@ -1,19 +1,29 @@
 import { ChangeEventHandler, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QueryError } from '@/components/ui/query-error';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion } from '@/components/v2/accordion';
 import { noSchema, noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLBlock, GraphQLHighlight } from '@/components/v2/graphql-block';
-import { Input } from '@/components/v2/input';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/gql/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
+import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
 
 type CompositeSchema = Extract<
@@ -38,7 +48,7 @@ function SchemaBlock({ schema, scrollToMe }: { schema: CompositeSchema; scrollTo
       ref.current.scrollIntoView({ behavior: 'smooth' });
       scrolled.current = true;
     }
-  }, [ref.current, scrolled.current]);
+  }, [scrollToMe]);
 
   return (
     <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
@@ -68,11 +78,15 @@ const Schemas_ProjectFragment = graphql(`
 
 function Schemas({
   filterService,
+  openItems,
+  setOpenItems,
   ...props
 }: {
   project: FragmentType<typeof Schemas_ProjectFragment>;
   schemas: FragmentType<typeof SchemaView_SchemaFragment>[];
   filterService?: string;
+  openItems: string[];
+  setOpenItems: (items: string[]) => void;
 }): ReactElement {
   const project = useFragment(Schemas_ProjectFragment, props.project);
   const schemas = useFragment(SchemaView_SchemaFragment, props.schemas);
@@ -90,20 +104,23 @@ function Schemas({
 
   const filteredSchemas = schemas.filter(isCompositeSchema).filter(schema => {
     if (filterService && 'service' in schema && schema.service) {
-      return schema.service.toLowerCase().includes(filterService.toLowerCase());
+      return schema.service.toLowerCase() === filterService.toLowerCase();
     }
-
     return true;
   });
 
   // Display format should be defined based on the length of `schemas`, and not `filteredSchemas`.
   // Otherwise, the accordion will be displayed by default but the list (disabled accordion) when filtering.
-  const displayFormat = schemas.length > 7 ? 'dynamic' : 'static';
+  const displayFormat = schemas.length > 1 ? 'dynamic' : 'static';
 
   return (
     <div className="flex flex-col gap-8">
       {displayFormat === 'dynamic' ? (
-        <Accordion type="multiple">
+        <Accordion
+          type="multiple"
+          value={openItems}
+          onValueChange={(items: string[]) => setOpenItems(items)}
+        >
           {filteredSchemas.map(schema => (
             <SchemaBlock
               key={schema.id}
@@ -113,7 +130,12 @@ function Schemas({
           ))}
         </Accordion>
       ) : (
-        <Accordion type="multiple" value={filteredSchemas.map(s => s.id)} disabled>
+        <Accordion
+          type="multiple"
+          value={openItems}
+          disabled
+          onValueChange={(items: string[]) => setOpenItems(items)}
+        >
           {filteredSchemas.map(schema => (
             <SchemaBlock
               key={schema.id}
@@ -194,17 +216,23 @@ function SchemaView(props: {
   const target = useFragment(SchemaView_TargetFragment, props.target);
   const [filterService, setFilterService] = useState(props.highlightedService ?? '');
   const [term, setTerm] = useState(props.highlightedService ?? '');
+  const [openItems, setOpenItems] = useState<string[]>([]);
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
   const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
     event => {
-      debouncedFilter(event.target.value);
-      setTerm(event.target.value);
+      const value = event.target.value;
+      debouncedFilter(value);
+      setFilterService(value);
+      setTerm(value);
+      setOpen(false);
+      setOpenItems(prevItems => [...new Set([...prevItems, value])]);
     },
     [debouncedFilter, setTerm],
   );
   const reset = useCallback(() => {
+    setOpenItems([]);
     setFilterService('');
     setTerm('');
   }, [setFilterService]);
@@ -233,19 +261,70 @@ function SchemaView(props: {
   const canMarkAsValid = project.registryModel === RegistryModel.Legacy;
   const showExtra = canManage;
 
+  const [open, setOpen] = useState<boolean>(false);
+  const schemas = useFragment(SchemaView_SchemaFragment, target.latestSchemaVersion?.schemas.nodes);
+  const compositeSchemas = schemas?.filter(isCompositeSchema) as CompositeSchema[];
+
   return (
     <>
       {showExtra ? (
         <div className="mb-5 flex flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             {isDistributed && (
-              <Input
-                placeholder="Find service"
-                value={term}
-                onChange={handleChange}
-                onClear={reset}
-                size="small"
-              />
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-[400px] justify-between">
+                    {filterService
+                      ? compositeSchemas?.find(schema => schema.service === filterService)?.service
+                      : 'Filter schema'}
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] truncate p-0">
+                  <Command>
+                    <CommandInput
+                      closeFn={reset}
+                      className="w-[400px]"
+                      placeholder="Search schema"
+                      value={term}
+                      onValueChange={setTerm}
+                    />
+                    <CommandEmpty>No schema found.</CommandEmpty>
+                    <CommandGroup>
+                      <ScrollArea className="relative h-80 w-full">
+                        <div className="p-4">
+                          {compositeSchemas?.map(schema => (
+                            <CommandItem
+                              key={schema.service}
+                              value={schema.service as string}
+                              onSelect={currentValue => {
+                                const selectedSchema = compositeSchemas.find(
+                                  s => s.service === currentValue,
+                                );
+                                if (selectedSchema) {
+                                  setOpenItems(prevItems => [
+                                    ...new Set([...prevItems, selectedSchema.id]),
+                                  ]);
+                                  handleChange({ target: { value: currentValue } } as any);
+                                }
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <Check
+                                className={cn(
+                                  'mr-2 size-4',
+                                  term === schema.id ? 'opacity-100' : 'opacity-0',
+                                )}
+                              />
+                              {schema.service}
+                            </CommandItem>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             )}
             {canMarkAsValid ? (
               <>
@@ -264,6 +343,9 @@ function SchemaView(props: {
         project={project}
         filterService={filterService}
         schemas={target.latestSchemaVersion?.schemas.nodes ?? []}
+        openItems={openItems}
+        setOpenItems={setOpenItems}
+        key={filterService}
       />
     </>
   );
