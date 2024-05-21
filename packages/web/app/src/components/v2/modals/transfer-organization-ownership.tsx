@@ -34,6 +34,7 @@ const TransferOrganizationOwnership_Members = graphql(`
         name
         members {
           nodes {
+            temporaryFixId
             isOwner
             ...MemberFields
             user {
@@ -53,6 +54,7 @@ const TransferOrganizationOwnership_Members = graphql(`
 const MemberFields = graphql(`
   fragment MemberFields on Member {
     id
+    temporaryFixId
     user {
       id
       fullName

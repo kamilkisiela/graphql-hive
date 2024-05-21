@@ -19,6 +19,7 @@ const OrganizationPolicyPageQuery = graphql(`
       organization {
         id
         me {
+          temporaryFixId
           ...CanAccessOrganization_MemberFragment
         }
         projects {

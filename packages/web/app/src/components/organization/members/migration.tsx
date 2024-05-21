@@ -363,6 +363,7 @@ const OrganizationMemberRolesMigrationGroup_Migrate = graphql(`
           members {
             nodes {
               id
+              temporaryFixId
               organizationAccessScopes
               projectAccessScopes
               targetAccessScopes

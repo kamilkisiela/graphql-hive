@@ -169,6 +169,7 @@ const AdminStatsQuery = graphql(`
             name
             owner {
               id
+              temporaryFixId
               user {
                 id
                 email
@@ -177,6 +178,7 @@ const AdminStatsQuery = graphql(`
             members {
               nodes {
                 id
+                temporaryFixId
                 user {
                   id
                   email

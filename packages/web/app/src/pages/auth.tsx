@@ -74,7 +74,6 @@ function useOidcProviderId() {
 }
 
 function SupertokensRoutingComponent() {
-  console.log('SupertokensRoutingComponent');
   const routingComponent = getRoutingComponent([
     ThirdPartyEmailPasswordPreBuiltUI,
     EmailVerificationPreBuiltUI,
@@ -97,7 +96,6 @@ const isOkta = () =>
  * Route for showing the SuperTokens login page.
  */
 export function AuthPage() {
-  console.log('AuthPage');
   const [error, setError] = useState<string | null>(null);
   const oidcProvider = useOidcProviderId();
 

@@ -33,6 +33,7 @@ const ProjectLayoutQuery = graphql(`
         name
         me {
           id
+          temporaryFixId
           ...CanAccessProject_MemberFragment
         }
         projects {

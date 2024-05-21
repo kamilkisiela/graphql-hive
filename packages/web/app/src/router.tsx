@@ -61,7 +61,6 @@ import { TargetLaboratoryPage } from './pages/target-laboratory';
 import { TargetSettingsPage } from './pages/target-settings';
 
 if (globalThis.window) {
-  console.log('Initializing SuperTokens');
   SuperTokens.init(frontendConfig());
   if (env.sentry) {
     init({

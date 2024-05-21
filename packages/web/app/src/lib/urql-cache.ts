@@ -9,6 +9,7 @@ import type { CreateOperationMutationType } from '@/components/target/laboratory
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
+import type { CreateOrganizationMutation } from '@/components/v2/modals/create-organization';
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
@@ -66,6 +67,14 @@ const deleteAlerts: TypedDocumentNodeUpdateResolver<
       id: deleteAlerts.ok.updatedProject.id,
     });
   }
+};
+
+const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizationMutation> = (
+  _data,
+  _args,
+  cache,
+) => {
+  cache.invalidate('Query', 'organizations');
 };
 
 const deleteOrganization: TypedDocumentNodeUpdateResolver<typeof DeleteOrganizationDocument> = (
@@ -334,6 +343,7 @@ const createOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
 
 // UpdateResolver
 export const Mutation = {
+  createOrganization,
   deleteOrganization,
   createProject,
   deleteProject,

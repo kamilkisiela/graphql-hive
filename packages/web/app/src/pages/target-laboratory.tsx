@@ -827,6 +827,7 @@ const TargetLaboratoryPageQuery = graphql(`
         id
         me {
           id
+          temporaryFixId
           ...CanAccessTarget_MemberFragment
         }
       }

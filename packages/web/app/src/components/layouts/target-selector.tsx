@@ -49,14 +49,6 @@ export function TargetSelector(props: {
   const targets = currentProject?.targets.nodes;
   const currentTarget = targets?.find(node => node.cleanId === props.currentTargetCleanId);
 
-  console.log({
-    organizations,
-    props,
-    currentOrganization,
-    currentProject,
-    currentTarget,
-  });
-
   return (
     <>
       {currentOrganization ? (
