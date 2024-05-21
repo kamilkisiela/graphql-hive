@@ -7,7 +7,6 @@ import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
-import { UUID } from '@/types';
 import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
 
 const Combobox = HeadlessCombobox as any;
@@ -120,7 +119,7 @@ export const TransferOrganizationOwnershipModal = ({
   } = useFormik({
     enableReinitialize: true,
     initialValues: {
-      newOwner: '' as UUID,
+      newOwner: '',
       confirmation: '',
     },
     validationSchema: Yup.object().shape({

@@ -1,4 +1,4 @@
-import { createHash, type UUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { DocumentNode, GraphQLError, parse, print, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
@@ -13,9 +13,6 @@ import type {
   TargetAccessScope,
 } from '../__generated__/types';
 import { parseGraphQLSource, sortDocumentNode } from './schema';
-
-export type CompoundId = `${UUID}:${UUID}`;
-export { UUID };
 
 export const NameModel = z
   .string()
@@ -309,7 +306,7 @@ export interface Token {
 }
 
 export interface User {
-  id: UUID;
+  id: string;
   email: string;
   fullName: string;
   displayName: string;
@@ -322,7 +319,7 @@ export interface User {
 }
 
 export interface Member {
-  id: CompoundId;
+  id: string;
   isOwner: boolean;
   user: User;
   organization: string;

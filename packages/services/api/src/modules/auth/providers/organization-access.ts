@@ -1,4 +1,3 @@
-import type { UUID } from 'node:crypto';
 import DataLoader from 'dataloader';
 import { forwardRef, Inject, Injectable, Scope } from 'graphql-modules';
 import { Token } from '../../../shared/entities';
@@ -13,17 +12,17 @@ import type { TargetAccessScope } from './target-access';
 export { OrganizationAccessScope } from './scopes';
 
 export interface OrganizationOwnershipSelector {
-  user: UUID;
+  user: string;
   organization: string;
 }
 
 export interface OrganizationUserScopesSelector {
-  user: UUID;
+  user: string;
   organization: string;
 }
 
 export interface OrganizationUserAccessSelector {
-  user: UUID;
+  user: string;
   organization: string;
   scope: OrganizationAccessScope;
 }

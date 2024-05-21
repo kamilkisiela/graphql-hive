@@ -44,7 +44,7 @@ export default gql`
   }
 
   type User {
-    id: UUID!
+    id: ID!
     email: String!
     fullName: String!
     displayName: String!

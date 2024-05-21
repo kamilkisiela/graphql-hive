@@ -721,7 +721,7 @@ export function initSeed() {
                 async assignMemberRole(
                   input: {
                     roleId: string;
-                    userId: UUID;
+                    userId: string;
                   },
                   options: { useMemberToken?: boolean } = {
                     useMemberToken: false,

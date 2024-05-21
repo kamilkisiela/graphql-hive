@@ -1,4 +1,3 @@
-import type { UUID } from 'node:crypto';
 import {
   DatabasePool,
   DatabaseTransactionConnection,
@@ -29,7 +28,6 @@ import type {
 import { context, SpanKind, SpanStatusCode, trace } from '@hive/service-common';
 import { batch } from '@theguild/buddy';
 import {
-  CompoundId,
   createSDLHash,
   OrganizationMemberRoleModel,
   ProjectType,
@@ -203,7 +201,7 @@ export async function createStorage(
     },
   ): User {
     return {
-      id: user.id as UUID,
+      id: user.id,
       email: user.email,
       superTokensUserId: user.supertoken_user_id,
       provider: resolveAuthProviderOfUser(user),
@@ -237,7 +235,7 @@ export async function createStorage(
       },
   ): Member {
     return {
-      id: user.id as CompoundId, // here
+      id: user.id,
       isOwner: user.is_owner,
       user: transformUser(user),
       // This allows us to have a fallback for users that don't have a role, remove this once we all users have a role
@@ -575,7 +573,7 @@ export async function createStorage(
         provider,
       });
     },
-    async getOrganization(userId: UUID, connection: Connection) {
+    async getOrganization(userId: string, connection: Connection) {
       const org = await connection.maybeOne<Slonik<organizations>>(
         sql`/* getOrganization */ SELECT * FROM organizations WHERE user_id = ${userId} AND type = ${'PERSONAL'} LIMIT 1`,
       );
@@ -675,7 +673,7 @@ export async function createStorage(
     async addOrganizationMemberViaOIDCIntegrationId(
       args: {
         oidcIntegrationId: string;
-        userId: UUID;
+        userId: string;
       },
       connection: Connection,
     ) {
@@ -5114,7 +5112,7 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
   type: string;
   meta: Record<string, SerializableValue>;
   approvalMetadata: null | {
-    userId: UUID;
+    userId: string;
     date: string;
     schemaCheckId: string;
   };

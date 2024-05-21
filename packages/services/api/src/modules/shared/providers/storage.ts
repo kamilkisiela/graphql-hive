@@ -1,4 +1,3 @@
-import type { UUID } from 'node:crypto';
 import { Injectable } from 'graphql-modules';
 import type { DatabasePool } from 'slonik';
 import type { PolicyConfigurationObject } from '@hive/policy';
@@ -95,11 +94,11 @@ export interface Storage {
     installationId: string;
   }): Promise<Organization | null>;
   getOrganization(_: OrganizationSelector): Promise<Organization | never>;
-  getMyOrganization(_: { user: UUID }): Promise<Organization | null>;
-  getOrganizations(_: { user: UUID }): Promise<readonly Organization[] | never>;
+  getMyOrganization(_: { user: string }): Promise<Organization | null>;
+  getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
     _: Pick<Organization, 'cleanId' | 'name'> & {
-      user: UUID;
+      user: string;
       adminScopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       viewerScopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       reservedNames: string[];
@@ -114,7 +113,7 @@ export interface Storage {
   >;
 
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: UUID },
+    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
   ): Promise<Organization | never>;
 
   updateOrganizationPlan(
@@ -135,7 +134,7 @@ export interface Storage {
 
   createOrganizationTransferRequest(
     _: OrganizationSelector & {
-      user: UUID;
+      user: string;
     },
   ): Promise<{
     code: string;
@@ -144,7 +143,7 @@ export interface Storage {
   getOrganizationTransferRequest(
     _: OrganizationSelector & {
       code: string;
-      user: UUID;
+      user: string;
     },
   ): Promise<{
     code: string;
@@ -153,7 +152,7 @@ export interface Storage {
   answerOrganizationTransferRequest(
     _: OrganizationSelector & {
       code: string;
-      user: UUID;
+      user: string;
       accept: boolean;
     },
   ): Promise<void>;
@@ -167,34 +166,34 @@ export interface Storage {
 
   getOrganizationOwner(_: OrganizationSelector): Promise<Member | never>;
 
-  getOrganizationMember(_: OrganizationSelector & { user: UUID }): Promise<Member | null>;
+  getOrganizationMember(_: OrganizationSelector & { user: string }): Promise<Member | null>;
 
   getOrganizationMemberAccessPairs(
-    _: readonly (OrganizationSelector & { user: UUID })[],
+    _: readonly (OrganizationSelector & { user: string })[],
   ): Promise<
     ReadonlyArray<ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>>
   >;
 
   hasOrganizationMemberPairs(
-    _: readonly (OrganizationSelector & { user: UUID })[],
+    _: readonly (OrganizationSelector & { user: string })[],
   ): Promise<readonly boolean[]>;
 
   hasOrganizationProjectMemberPairs(
-    _: readonly (ProjectSelector & { user: UUID })[],
+    _: readonly (ProjectSelector & { user: string })[],
   ): Promise<readonly boolean[]>;
 
   addOrganizationMemberViaInvitationCode(
     _: OrganizationSelector & {
       code: string;
-      user: UUID;
+      user: string;
     },
   ): Promise<void>;
 
-  deleteOrganizationMember(_: OrganizationSelector & { user: UUID }): Promise<void>;
+  deleteOrganizationMember(_: OrganizationSelector & { user: string }): Promise<void>;
 
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {
-      user: UUID;
+      user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     },
   ): Promise<void>;
@@ -231,7 +230,7 @@ export interface Storage {
   assignOrganizationMemberRole(_: {
     organizationId: string;
     roleId: string;
-    userId: UUID;
+    userId: string;
   }): Promise<void>;
   /**
    * Remove it after all users have been migrated to the new role system.
@@ -264,7 +263,7 @@ export interface Storage {
   >;
 
   updateProjectName(
-    _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: UUID },
+    _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
 
   updateNativeSchemaComposition(
@@ -301,7 +300,7 @@ export interface Storage {
   createTarget(_: Pick<Target, 'cleanId' | 'name'> & ProjectSelector): Promise<Target | never>;
 
   updateTargetName(
-    _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: UUID },
+    _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
 
   updateTargetGraphQLEndpointUrl(_: {
@@ -502,7 +501,7 @@ export interface Storage {
 
   createActivity(
     _: {
-      user: UUID;
+      user: string;
       type: string;
       meta: object;
     } & OrganizationSelector &
@@ -789,7 +788,7 @@ export interface Storage {
     /** We inject this here as a dirty way to avoid chicken egg issues :) */
     contracts: Contracts;
     schemaCheckId: string;
-    userId: UUID;
+    userId: string;
     comment: string | null | undefined;
   }): Promise<SchemaCheck | null>;
 
@@ -806,12 +805,15 @@ export interface Storage {
   /**
    * Get an user that belongs to a specific organization by id.
    */
-  getOrganizationUser(_: { organizationId: string; userId: UUID }): Promise<User | null>;
+  getOrganizationUser(_: { organizationId: string; userId: string }): Promise<User | null>;
 
   // Zendesk
-  setZendeskUserId(_: { userId: UUID; zendeskId: string }): Promise<void>;
+  setZendeskUserId(_: { userId: string; zendeskId: string }): Promise<void>;
   setZendeskOrganizationId(_: { organizationId: string; zendeskId: string }): Promise<void>;
-  setZendeskOrganizationUserConnection(_: { userId: UUID; organizationId: string }): Promise<void>;
+  setZendeskOrganizationUserConnection(_: {
+    userId: string;
+    organizationId: string;
+  }): Promise<void>;
 }
 
 @Injectable()

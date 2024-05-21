@@ -1,7 +1,5 @@
-import type { UUID } from 'node:crypto';
-
 interface User {
-  id: UUID;
+  id: string;
   superTokensUserId: string | null;
 }
 
@@ -12,7 +10,7 @@ interface BaseActivity {
 }
 
 interface UserSelector {
-  user: UUID;
+  user: string;
 }
 
 interface OrganizationSelector {

@@ -1,4 +1,3 @@
-import type { UUID } from 'node:crypto';
 import Dataloader from 'dataloader';
 import { Injectable, Scope } from 'graphql-modules';
 import { AccessError } from '../../../shared/errors';
@@ -9,14 +8,14 @@ import { ProjectAccessScope } from './scopes';
 export { ProjectAccessScope } from './scopes';
 
 export interface ProjectUserAccessSelector {
-  user: UUID;
+  user: string;
   organization: string;
   project: string;
   scope: ProjectAccessScope;
 }
 
 export interface ProjectUserScopesSelector {
-  user: UUID;
+  user: string;
   organization: string;
 }
 

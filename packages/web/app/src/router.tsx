@@ -59,7 +59,6 @@ import { TargetInsightsCoordinatePage } from './pages/target-insights-coordinate
 import { TargetInsightsOperationPage } from './pages/target-insights-operation';
 import { TargetLaboratoryPage } from './pages/target-laboratory';
 import { TargetSettingsPage } from './pages/target-settings';
-import { UUID } from './types';
 
 if (globalThis.window) {
   SuperTokens.init(frontendConfig());
@@ -80,7 +79,7 @@ const LazyTanStackRouterDevtools = lazy(() =>
   })),
 );
 
-function identifyOnSentry(userId: UUID, email: string): void {
+function identifyOnSentry(userId: string, email: string): void {
   configureScope(scope => {
     scope.setUser({ id: userId, email });
   });
