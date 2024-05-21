@@ -1,3 +1,4 @@
+import { parseArgs } from 'node:util';
 import { defineConfig } from 'tsup';
 import {
   commonWatchList,
@@ -6,7 +7,13 @@ import {
   watchEntryPlugin,
 } from './utils';
 
+const entryPoints = parseArgs({
+  allowPositionals: true,
+  strict: false,
+}).positionals;
+
 export default defineConfig({
+  entryPoints: entryPoints.length ? entryPoints : ['src/index.ts'],
   splitting: false,
   sourcemap: true,
   clean: true,
