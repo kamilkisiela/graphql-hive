@@ -276,7 +276,7 @@ function SchemaView(props: {
                   <Button variant="outline" role="combobox" className="w-[400px] justify-between">
                     {filterService
                       ? compositeSchemas?.find(schema => schema.service === filterService)?.service
-                      : 'Filter schemas'}
+                      : 'Filter schema'}
                     <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
