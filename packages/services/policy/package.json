@@ -12,7 +12,7 @@
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "3.20.1",
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.114.0",
+    "@sentry/node": "7.116.0",
     "@sentry/tracing": "7.114.0",
     "@trpc/server": "10.45.2",
     "ajv": "8.13.0",
