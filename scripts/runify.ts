@@ -2,6 +2,7 @@
 // The idea here is to compile a node service to a single file (not in case of next) and make it executable.
 import { join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import fs from 'fs-extra';
 import { build as tsup } from 'tsup';
 
@@ -9,7 +10,10 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const requireShim = fs.readFileSync(normalize(join(__dirname, './banner.js')), 'utf-8');
 
-const [, , entryPoint] = process.argv;
+const entryPoints = parseArgs({
+  allowPositionals: true,
+  strict: false,
+}).positionals;
 
 interface BuildOptions {
   external?: string[];
@@ -37,7 +41,7 @@ async function runify(packagePath: string) {
   } else {
     await compile(
       cwd,
-      entryPoint ?? 'src/index.ts',
+      entryPoints?.length ? entryPoints : 'src/index.ts',
       buildOptions,
       Object.keys(pkg.dependencies ?? {}).concat(Object.keys(pkg.devDependencies ?? {})),
       pkg.type === 'module',
@@ -122,7 +126,7 @@ async function buildWithNext(cwd: string, additionalRequire: string | null) {
 
 async function compile(
   cwd: string,
-  entryPoint: string,
+  entryPoint: string | string[],
   buildOptions: BuildOptions,
   dependencies: string[],
   useEsm = false,
@@ -130,7 +134,9 @@ async function compile(
   const out = normalize(join(cwd, 'dist'));
 
   await tsup({
-    entryPoints: [normalize(join(cwd, entryPoint))],
+    entryPoints: (Array.isArray(entryPoint) ? entryPoint : [entryPoint]).map(entryPoint =>
+      normalize(join(cwd, entryPoint)),
+    ),
     outDir: out,
     target: 'node21',
     format: [useEsm ? 'esm' : 'cjs'],
