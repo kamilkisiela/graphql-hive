@@ -13,6 +13,7 @@ const ChangePermissionsModal_OrganizationFragment = graphql(`
 
 export const ChangePermissionsModal_MemberFragment = graphql(`
   fragment ChangePermissionsModal_MemberFragment on Member {
+    temporaryFixId
     ...UsePermissionManager_MemberFragment
   }
 `);

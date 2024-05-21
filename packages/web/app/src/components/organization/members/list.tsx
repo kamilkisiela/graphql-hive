@@ -36,6 +36,7 @@ const OrganizationMemberRoleSwitcher_AssignRoleMutation = graphql(`
       ok {
         updatedMember {
           id
+          temporaryFixId
           user {
             id
             displayName
@@ -65,6 +66,7 @@ const OrganizationMemberRoleSwitcher_OrganizationFragment = graphql(`
     cleanId
     me {
       id
+      temporaryFixId
       isAdmin
       organizationAccessScopes
       projectAccessScopes
@@ -72,6 +74,7 @@ const OrganizationMemberRoleSwitcher_OrganizationFragment = graphql(`
     }
     owner {
       id
+      temporaryFixId
     }
     memberRoles {
       id
@@ -95,6 +98,7 @@ const OrganizationMemberRoleSwitcher_OrganizationFragment = graphql(`
 const OrganizationMemberRoleSwitcher_MemberFragment = graphql(`
   fragment OrganizationMemberRoleSwitcher_MemberFragment on Member {
     id
+    temporaryFixId
     organizationAccessScopes
     projectAccessScopes
     targetAccessScopes
@@ -317,6 +321,7 @@ const OrganizationMemberRow_DeleteMember = graphql(`
 const OrganizationMemberRow_MemberFragment = graphql(`
   fragment OrganizationMemberRow_MemberFragment on Member {
     id
+    temporaryFixId
     user {
       id
       provider

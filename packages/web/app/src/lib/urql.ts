@@ -35,6 +35,10 @@ export const urqlClient = createClient({
         Mutation,
       },
       keys: {
+        // Member.id is not globally unique, it's really User.id
+        // In order to avoid conflicts or cache issues, let's use Member.temporaryFixId.
+        // This is a temporary solution until we have a better way to handle this.
+        Member: ({ temporaryFixId }) => `Member:${temporaryFixId}`,
         RequestsOverTime: noKey,
         FailuresOverTime: noKey,
         DurationOverTime: noKey,

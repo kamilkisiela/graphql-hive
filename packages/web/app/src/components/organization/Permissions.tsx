@@ -264,6 +264,7 @@ const UsePermissionManager_OrganizationFragment = graphql(`
 const UsePermissionManager_MemberFragment = graphql(`
   fragment UsePermissionManager_MemberFragment on Member {
     id
+    temporaryFixId
     targetAccessScopes
     projectAccessScopes
     organizationAccessScopes

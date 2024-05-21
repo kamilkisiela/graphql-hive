@@ -78,9 +78,14 @@ module.exports = {
     },
     {
       files: ['packages/web/app/**/*.graphql'],
-      plugins: ['@graphql-eslint'],
+      plugins: ['@graphql-eslint', 'hive'],
       rules: {
         '@graphql-eslint/require-id-when-available': 'error',
+        // Require temporaryFixId field when available.
+        // We need it to be able to cache Member objects in the frontend properly.
+        // Member.id is not unique, so we need to use Member.temporaryFixId instead.
+        // Once we have a better solution, we can remove this rule.
+        'hive/graphql-require-selection': ['error'],
       },
     },
     {
