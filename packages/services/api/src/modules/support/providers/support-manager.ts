@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, type UUID } from 'node:crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
 import { Organization, SupportTicketPriority, SupportTicketStatus } from '../../../shared/entities';
@@ -191,7 +191,7 @@ export class SupportManager {
       args.userId + ':' + args.organizationId,
   )
   private async ensureZendeskUserId(input: {
-    userId: string;
+    userId: UUID;
     organizationId: string;
   }): Promise<string> {
     const organizationZendeskId = await this.ensureZendeskOrganizationId(input.organizationId);

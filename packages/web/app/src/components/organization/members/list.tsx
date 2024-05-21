@@ -36,7 +36,6 @@ const OrganizationMemberRoleSwitcher_AssignRoleMutation = graphql(`
       ok {
         updatedMember {
           id
-          temporaryFixId
           user {
             id
             displayName
@@ -66,7 +65,6 @@ const OrganizationMemberRoleSwitcher_OrganizationFragment = graphql(`
     cleanId
     me {
       id
-      temporaryFixId
       isAdmin
       organizationAccessScopes
       projectAccessScopes
@@ -74,7 +72,6 @@ const OrganizationMemberRoleSwitcher_OrganizationFragment = graphql(`
     }
     owner {
       id
-      temporaryFixId
     }
     memberRoles {
       id
@@ -98,10 +95,12 @@ const OrganizationMemberRoleSwitcher_OrganizationFragment = graphql(`
 const OrganizationMemberRoleSwitcher_MemberFragment = graphql(`
   fragment OrganizationMemberRoleSwitcher_MemberFragment on Member {
     id
-    temporaryFixId
     organizationAccessScopes
     projectAccessScopes
     targetAccessScopes
+    user {
+      id
+    }
     ...ChangePermissionsModal_MemberFragment
   }
 `);
@@ -131,7 +130,7 @@ function OrganizationMemberRoleSwitcher(props: {
   const [isPermissionsModalOpen, togglePermissionsModalOpen] = useToggle(false);
   const memberRole = roles.find(role => role.id === props.memberRoleId);
 
-  if (!memberRole && !member) {
+  if (!memberRole || !member) {
     console.error('No role or member provided to OrganizationMemberRoleSwitcher');
     return null;
   }
@@ -150,7 +149,7 @@ function OrganizationMemberRoleSwitcher(props: {
               input: {
                 organization: organization.cleanId,
                 role: role.id,
-                member: props.memberId,
+                user: member.user.id,
               },
             });
 
@@ -321,7 +320,6 @@ const OrganizationMemberRow_DeleteMember = graphql(`
 const OrganizationMemberRow_MemberFragment = graphql(`
   fragment OrganizationMemberRow_MemberFragment on Member {
     id
-    temporaryFixId
     user {
       id
       provider

@@ -1,4 +1,8 @@
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@app/gql/graphql';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from 'testkit/gql/graphql';
 import {
   answerOrganizationTransferRequest,
   getOrganizationTransferRequest,
@@ -32,7 +36,7 @@ test.concurrent('owner should be able to request the ownership transfer to a mem
   const transferRequestResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -49,7 +53,7 @@ test.concurrent('non-owner should not be able to request the ownership transfer'
   const errors = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: orgMembers.find(u => u.user.email === ownerEmail)!.id,
+      user: orgMembers.find(u => u.user.email === ownerEmail)!.user.id,
     },
     memberToken,
   ).then(r => r.expectGraphQLErrors());
@@ -68,7 +72,7 @@ test.concurrent(
     const transferRequestResult = await requestOrganizationTransfer(
       {
         organization: organization.cleanId,
-        user: member.id,
+        user: member.user.id,
       },
       memberToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -85,7 +89,7 @@ test.concurrent('non-member should not be able to access the transfer request', 
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -119,7 +123,7 @@ test.concurrent('non-recipient should not be able to access the transfer request
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -148,7 +152,7 @@ test.concurrent('recipient should be able to access the transfer request', async
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -178,7 +182,7 @@ test.concurrent('recipient should be able to answer the ownership transfer', asy
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -210,7 +214,7 @@ test.concurrent('non-member should not be able to answer the ownership transfer'
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -241,7 +245,7 @@ test.concurrent('owner should not be able to answer the ownership transfer', asy
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -272,7 +276,7 @@ test.concurrent('non-member should not be able to answer the ownership transfer'
   const requestTransferResult = await requestOrganizationTransfer(
     {
       organization: organization.cleanId,
-      user: member.id,
+      user: member.user.id,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -306,7 +310,7 @@ test.concurrent(
     const requestTransferResult = await requestOrganizationTransfer(
       {
         organization: organization.cleanId,
-        user: member.id,
+        user: member.user.id,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -355,7 +359,7 @@ test.concurrent(
     const requestTransferResult = await requestOrganizationTransfer(
       {
         organization: organization.cleanId,
-        user: member.id,
+        user: member.user.id,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());

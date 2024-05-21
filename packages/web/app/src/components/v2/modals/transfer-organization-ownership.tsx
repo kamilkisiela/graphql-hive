@@ -7,6 +7,7 @@ import { Button, Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
+import { UUID } from '@/types';
 import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
 
 const Combobox = HeadlessCombobox as any;
@@ -34,7 +35,7 @@ const TransferOrganizationOwnership_Members = graphql(`
         name
         members {
           nodes {
-            temporaryFixId
+            id
             isOwner
             ...MemberFields
             user {
@@ -54,7 +55,6 @@ const TransferOrganizationOwnership_Members = graphql(`
 const MemberFields = graphql(`
   fragment MemberFields on Member {
     id
-    temporaryFixId
     user {
       id
       fullName
@@ -120,7 +120,7 @@ export const TransferOrganizationOwnershipModal = ({
   } = useFormik({
     enableReinitialize: true,
     initialValues: {
-      newOwner: '',
+      newOwner: '' as UUID,
       confirmation: '',
     },
     validationSchema: Yup.object().shape({
@@ -159,7 +159,7 @@ export const TransferOrganizationOwnershipModal = ({
   const onSelect = useCallback(
     (member: Member) => {
       setSelected(member);
-      void setFieldValue('newOwner', member.id, true);
+      void setFieldValue('newOwner', member.user.id, true);
     },
     [setSelected, setFieldValue],
   );

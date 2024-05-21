@@ -1,4 +1,4 @@
-import Dataloader from 'dataloader';
+import type { UUID } from 'node:crypto';
 import DataLoader from 'dataloader';
 import { forwardRef, Inject, Injectable, Scope } from 'graphql-modules';
 import { Token } from '../../../shared/entities';
@@ -13,17 +13,17 @@ import type { TargetAccessScope } from './target-access';
 export { OrganizationAccessScope } from './scopes';
 
 export interface OrganizationOwnershipSelector {
-  user: string;
+  user: UUID;
   organization: string;
 }
 
 export interface OrganizationUserScopesSelector {
-  user: string;
+  user: UUID;
   organization: string;
 }
 
 export interface OrganizationUserAccessSelector {
-  user: string;
+  user: UUID;
   organization: string;
   scope: OrganizationAccessScope;
 }
@@ -45,8 +45,8 @@ export function isOrganizationScope(scope: any): scope is OrganizationAccessScop
 })
 export class OrganizationAccess {
   private logger: Logger;
-  private userAccess: Dataloader<OrganizationUserAccessSelector, boolean, string>;
-  private tokenAccess: Dataloader<OrganizationTokenAccessSelector, boolean, string>;
+  private userAccess: DataLoader<OrganizationUserAccessSelector, boolean, string>;
+  private tokenAccess: DataLoader<OrganizationTokenAccessSelector, boolean, string>;
   private allScopes: DataLoader<
     OrganizationUserScopesSelector,
     ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>,
@@ -74,7 +74,7 @@ export class OrganizationAccess {
     this.logger = logger.child({
       source: 'OrganizationAccess',
     });
-    this.userAccess = new Dataloader(
+    this.userAccess = new DataLoader(
       async selectors => {
         const scopes = await this.scopes.loadMany(selectors);
 
@@ -104,7 +104,7 @@ export class OrganizationAccess {
         },
       },
     );
-    this.tokenAccess = new Dataloader(
+    this.tokenAccess = new DataLoader(
       selectors =>
         Promise.all(
           selectors.map(async selector => {
@@ -128,7 +128,7 @@ export class OrganizationAccess {
         },
       },
     );
-    this.allScopes = new Dataloader(
+    this.allScopes = new DataLoader(
       async selectors => {
         const scopesPerSelector = await this.storage.getOrganizationMemberAccessPairs(selectors);
 
@@ -144,7 +144,7 @@ export class OrganizationAccess {
         },
       },
     );
-    this.scopes = new Dataloader(
+    this.scopes = new DataLoader(
       async selectors => {
         const scopesPerSelector = await this.allScopes.loadMany(selectors);
 
@@ -174,7 +174,7 @@ export class OrganizationAccess {
       },
     );
 
-    this.ownership = new Dataloader(
+    this.ownership = new DataLoader(
       async selectors => {
         const ownerPerSelector = await Promise.all(
           selectors.map(selector => this.storage.getOrganizationOwnerId(selector)),
@@ -192,7 +192,7 @@ export class OrganizationAccess {
       },
     );
 
-    this.tokenInfo = new Dataloader(
+    this.tokenInfo = new DataLoader(
       selectors => Promise.all(selectors.map(selector => this.tokenStorage.getToken(selector))),
       {
         cacheKeyFn(selector) {

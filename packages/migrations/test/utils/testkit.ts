@@ -18,6 +18,7 @@ config({
 });
 
 import { env } from '../../src/environment';
+import type { UUID } from 'node:crypto';
 
 export async function initMigrationTestingEnvironment() {
   const pgp = pgpFactory();
@@ -58,7 +59,9 @@ export async function initMigrationTestingEnvironment() {
           email: string;
         }
       }) {
-        return await slonik.one<DbTypes.users>(
+        return await slonik.one<Omit<DbTypes.users, 'id'> & {
+          id: UUID
+        }>(
           sql`INSERT INTO users (email, display_name, full_name, supertoken_user_id) VALUES (${user.email}, ${user.name} , ${user.name}, ${superTokenUserIdCounter++}) RETURNING *;`,
         );
       },

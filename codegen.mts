@@ -41,6 +41,7 @@ const config: CodegenConfig = {
           Date: 'string',
           SafeInt: 'number',
           ID: 'string',
+          UUID: '../shared/mappers#UUID as UUIDMapper',
         },
         mappers: {
           SchemaChange: '../shared/mappers#SchemaChange as SchemaChangeMapper',
@@ -156,6 +157,7 @@ const config: CodegenConfig = {
           Date: 'string',
           SafeInt: 'number',
           JSONSchemaObject: 'json-schema-typed#JSONSchema',
+          UUID: '../types#UUID',
         },
       },
       presetConfig: {
@@ -194,6 +196,14 @@ const config: CodegenConfig = {
       documents: ['./integration-tests/(testkit|tests)/**/*.ts'],
       preset: 'client',
       plugins: [],
+      config: {
+        scalars: {
+          DateTime: 'string',
+          Date: 'string',
+          SafeInt: 'number',
+          UUID: 'node:crypto#UUID',
+        },
+      },
     },
     './schema.graphql': {
       plugins: ['schema-ast'],

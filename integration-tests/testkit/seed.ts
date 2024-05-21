@@ -1,3 +1,4 @@
+import type { UUID } from 'node:crypto';
 import { humanId } from 'human-id';
 import { createPool, sql } from 'slonik';
 import {
@@ -7,7 +8,7 @@ import {
   RegistryModel,
   SchemaPolicyInput,
   TargetAccessScope,
-} from '@app/gql/graphql';
+} from 'testkit/gql/graphql';
 import { authenticate, userEmail } from './auth';
 import {
   CreateCollectionMutation,
@@ -720,7 +721,7 @@ export function initSeed() {
                 async assignMemberRole(
                   input: {
                     roleId: string;
-                    memberId: string;
+                    userId: UUID;
                   },
                   options: { useMemberToken?: boolean } = {
                     useMemberToken: false,
@@ -729,7 +730,7 @@ export function initSeed() {
                   const memberRoleAssignmentResult = await assignMemberRole(
                     {
                       organization: organization.cleanId,
-                      member: input.memberId,
+                      user: input.userId,
                       role: input.roleId,
                     },
                     options.useMemberToken ? memberToken : ownerToken,

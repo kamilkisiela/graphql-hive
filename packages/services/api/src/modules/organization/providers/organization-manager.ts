@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import type { UUID } from 'node:crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import { Organization, OrganizationMemberRole } from '../../../shared/entities';
@@ -110,13 +111,7 @@ export class OrganizationManager {
     return this.storage.getOrganizations({ user: user.id });
   }
 
-  async canLeaveOrganization({
-    organizationId,
-    userId,
-  }: {
-    organizationId: string;
-    userId: string;
-  }) {
+  async canLeaveOrganization({ organizationId, userId }: { organizationId: string; userId: UUID }) {
     const member = await this.storage.getOrganizationMember({
       organization: organizationId,
       user: userId,
@@ -247,7 +242,7 @@ export class OrganizationManager {
     return this.storage.countOrganizationMembers(selector);
   }
 
-  async getOrganizationMember(selector: OrganizationSelector & { user: string }) {
+  async getOrganizationMember(selector: OrganizationSelector & { user: UUID }) {
     const member = await this.storage.getOrganizationMember(selector);
 
     if (!member) {
@@ -273,7 +268,7 @@ export class OrganizationManager {
   async createOrganization(input: {
     name: string;
     user: {
-      id: string;
+      id: UUID;
       superTokensUserId: string | null;
       oidcIntegrationId: string | null;
     };
@@ -611,7 +606,7 @@ export class OrganizationManager {
 
   async requestOwnershipTransfer(
     selector: {
-      user: string;
+      user: UUID;
     } & OrganizationSelector,
   ) {
     const currentUser = await this.authManager.getCurrentUser();
@@ -719,7 +714,7 @@ export class OrganizationManager {
 
   async deleteMember(
     selector: {
-      user: string;
+      user: UUID;
     } & OrganizationSelector,
   ): Promise<Organization> {
     this.logger.info('Deleting a member from an organization (selector=%o)', selector);
@@ -793,7 +788,7 @@ export class OrganizationManager {
 
   async updateMemberAccess(
     input: {
-      user: string;
+      user: UUID;
       organizationScopes: readonly OrganizationAccessScope[];
       projectScopes: readonly ProjectAccessScope[];
       targetScopes: readonly TargetAccessScope[];
@@ -985,7 +980,7 @@ export class OrganizationManager {
     };
   }
 
-  async assignMemberRole(input: { organizationId: string; memberId: string; roleId: string }) {
+  async assignMemberRole(input: { organizationId: string; memberId: UUID; roleId: string }) {
     await this.authManager.ensureOrganizationAccess({
       organization: input.organizationId,
       scope: OrganizationAccessScope.MEMBERS,

@@ -1,4 +1,4 @@
-import { ProjectType, RegistryModel } from '@app/gql/graphql';
+import { ProjectType, RegistryModel } from 'testkit/gql/graphql';
 import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';

@@ -2,15 +2,15 @@ import { formatISO } from 'date-fns/formatISO';
 import { subHours } from 'date-fns/subHours';
 import { buildASTSchema, parse, print } from 'graphql';
 import { createLogger } from 'graphql-yoga';
-import { execute } from 'testkit/graphql';
-import { getServiceHost } from 'testkit/utils';
-import { graphql } from '@app/gql';
+import { graphql } from 'testkit/gql';
 import {
   OrganizationAccessScope,
   ProjectAccessScope,
   ProjectType,
   TargetAccessScope,
-} from '@app/gql/graphql';
+} from 'testkit/gql/graphql';
+import { execute } from 'testkit/graphql';
+import { getServiceHost } from 'testkit/utils';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
 import { createHive } from '../../../../packages/libraries/core/src';

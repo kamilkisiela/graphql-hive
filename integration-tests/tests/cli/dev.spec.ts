@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { createCLI } from '../../testkit/cli';
 import { initSeed } from '../../testkit/seed';
 

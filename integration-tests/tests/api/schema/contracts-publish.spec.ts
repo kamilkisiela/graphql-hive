@@ -1,4 +1,4 @@
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { GetObjectCommand, NoSuchKey, S3Client } from '@aws-sdk/client-s3';
 import { graphql } from '../../../testkit/gql';
 import { execute } from '../../../testkit/graphql';

@@ -23,7 +23,6 @@ const OrganizationTransferPage_GetRequest = graphql(`
         name
         owner {
           id
-          temporaryFixId
           user {
             id
             displayName

@@ -145,12 +145,12 @@ export default gql`
 
   input OrganizationMemberInput {
     organization: ID!
-    user: ID!
+    user: UUID!
   }
 
   input OrganizationMemberAccessInput {
     organization: ID!
-    user: ID!
+    user: UUID!
     organizationScopes: [OrganizationAccessScope!]!
     projectScopes: [ProjectAccessScope!]!
     targetScopes: [TargetAccessScope!]!
@@ -158,7 +158,7 @@ export default gql`
 
   input RequestOrganizationTransferInput {
     organization: ID!
-    user: ID!
+    user: UUID!
   }
 
   input CreateOrganizationInput {
@@ -404,7 +404,7 @@ export default gql`
 
   input AssignMemberRoleInput {
     organization: ID!
-    member: ID!
+    user: UUID!
     role: ID!
   }
 
@@ -444,7 +444,7 @@ export default gql`
   input AssignMemberRoleMigrationInput {
     organization: ID!
     role: ID!
-    members: [ID!]!
+    members: [UUID!]!
   }
 
   input CreateMemberRoleMigrationInput {
@@ -454,7 +454,7 @@ export default gql`
     organizationScopes: [OrganizationAccessScope!]!
     projectScopes: [ProjectAccessScope!]!
     targetScopes: [TargetAccessScope!]!
-    members: [ID!]!
+    members: [UUID!]!
   }
 
   type MigrateUnassignedMembersResult {

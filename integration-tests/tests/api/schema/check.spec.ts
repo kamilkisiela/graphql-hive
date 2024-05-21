@@ -1,4 +1,4 @@
-import { ProjectType, RuleInstanceSeverityLevel, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, RuleInstanceSeverityLevel, TargetAccessScope } from 'testkit/gql/graphql';
 import { graphql } from '../../../testkit/gql';
 import { execute } from '../../../testkit/graphql';
 import { initSeed } from '../../../testkit/seed';

@@ -173,6 +173,9 @@ export function joinOrganization(code: string, authToken: string) {
               cleanId
               me {
                 id
+                user {
+                  id
+                }
                 organizationAccessScopes
                 projectAccessScopes
                 targetAccessScopes

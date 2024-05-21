@@ -6,6 +6,7 @@ export default gql`
   scalar JSON
   scalar JSONSchemaObject
   scalar SafeInt
+  scalar UUID
 
   type Query {
     noop: Boolean

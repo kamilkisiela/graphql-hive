@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:services",
-    "test:integration": "vitest"
+    "test:integration": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@apollo/gateway": "2.7.8",

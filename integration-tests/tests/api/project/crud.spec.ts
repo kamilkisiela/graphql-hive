@@ -1,4 +1,4 @@
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { renameProject } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 

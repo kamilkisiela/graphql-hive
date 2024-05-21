@@ -264,7 +264,9 @@ const UsePermissionManager_OrganizationFragment = graphql(`
 const UsePermissionManager_MemberFragment = graphql(`
   fragment UsePermissionManager_MemberFragment on Member {
     id
-    temporaryFixId
+    user {
+      id
+    }
     targetAccessScopes
     projectAccessScopes
     organizationAccessScopes
@@ -312,7 +314,7 @@ export function usePermissionsManager({
       const result = await mutate({
         input: {
           organization: organization.cleanId,
-          user: member.id,
+          user: member.user.id,
           targetScopes,
           projectScopes,
           organizationScopes,

@@ -1,4 +1,4 @@
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { normalizeCliOutput } from '../../../scripts/serializers/cli-output';
 import { createCLI } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';

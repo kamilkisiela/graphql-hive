@@ -448,7 +448,7 @@ export const resolvers: OrganizationModule.Resolvers = {
 
       return injector.get(OrganizationManager).assignMemberRole({
         organizationId,
-        memberId: input.member,
+        memberId: input.user,
         roleId: input.role,
       });
     },

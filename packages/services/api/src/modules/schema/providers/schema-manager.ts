@@ -1,3 +1,4 @@
+import type { UUID } from 'node:crypto';
 import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
@@ -999,7 +1000,7 @@ export class SchemaManager {
     } as const;
   }
 
-  async getApprovedByUser(args: { organizationId: string; userId: string | null }) {
+  async getApprovedByUser(args: { organizationId: string; userId: UUID | null }) {
     if (args.userId == null) {
       return null;
     }

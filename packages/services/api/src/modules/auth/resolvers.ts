@@ -78,9 +78,6 @@ export const resolvers: AuthModule.Resolvers & {
     TOKENS_WRITE: TargetAccessScope.TOKENS_WRITE,
   },
   Member: {
-    temporaryFixId(member) {
-      return `${member.organization}:${member.id}`;
-    },
     organizationAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberOrganizationScopes({
         user: member.id,

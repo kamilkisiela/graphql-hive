@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { initSeed } from '../../../testkit/seed';
 
 describe('Document Collections', () => {

@@ -1,4 +1,4 @@
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { normalizeCliOutput } from '../../../scripts/serializers/cli-output';
 import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';

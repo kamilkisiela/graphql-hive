@@ -39,6 +39,7 @@ import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { Scope, scopes } from '@/lib/access/common';
+import { UUID } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from '@tanstack/react-router';
 import { PermissionsSpace } from '../Permissions';
@@ -324,7 +325,10 @@ function SimilarRoles(props: {
 
 const migrationFormSchema = z.intersection(
   z.object({
-    members: z.array(z.string()).min(1),
+    members: z
+      .array(z.string())
+      .min(1)
+      .transform(members => members as UUID[]),
   }),
   z.union([
     roleFormSchema,
@@ -363,7 +367,9 @@ const OrganizationMemberRolesMigrationGroup_Migrate = graphql(`
           members {
             nodes {
               id
-              temporaryFixId
+              user {
+                id
+              }
               organizationAccessScopes
               projectAccessScopes
               targetAccessScopes
@@ -413,7 +419,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
     mode: 'onChange',
     resolver: zodResolver(migrationFormSchema),
     defaultValues: {
-      members: memberGroup.members.map(m => m.id),
+      members: memberGroup.members.map(m => m.user.id),
       roleId: '',
       name: '',
       description: '',

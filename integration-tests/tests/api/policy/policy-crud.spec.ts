@@ -1,4 +1,4 @@
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { execute } from '../../../testkit/graphql';
 import {
   DESCRIPTION_RULE,

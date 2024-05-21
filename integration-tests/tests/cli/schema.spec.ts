@@ -1,6 +1,6 @@
 /* eslint-disable no-process-env */
 import { createHash } from 'node:crypto';
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { createCLI, schemaCheck, schemaPublish } from '../../testkit/cli';
 import { initSeed } from '../../testkit/seed';
 

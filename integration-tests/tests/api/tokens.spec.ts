@@ -1,5 +1,5 @@
 import { readTokenInfo, waitFor } from 'testkit/flow';
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { initSeed } from '../../testkit/seed';
 
 test.concurrent('deleting a token should clear the cache', async () => {

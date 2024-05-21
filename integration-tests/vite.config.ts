@@ -4,8 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     alias: {
-      '@app/gql/graphql': new URL('./testkit/gql/graphql.ts', import.meta.url).pathname,
-      '@app/gql': new URL('./testkit/gql/index.ts', import.meta.url).pathname,
+      'testkit/gql/graphql': new URL('./testkit/gql/graphql.ts', import.meta.url).pathname,
+      'testkit/gql': new URL('./testkit/gql/index.ts', import.meta.url).pathname,
       '@hive/service-common': new URL(
         '../packages/services/service-common/src/index.ts',
         import.meta.url,

@@ -1,5 +1,5 @@
 /** These mirror DB models from  */
-import crypto from 'node:crypto';
+import crypto, { type UUID } from 'node:crypto';
 import stableJSONStringify from 'fast-json-stable-stringify';
 import { SerializableValue } from 'slonik';
 import { z } from 'zod';
@@ -810,7 +810,10 @@ function createSchemaChangeId(change: { type: string; meta: Record<string, unkno
 }
 
 const ApprovalMetadataModel = z.object({
-  userId: z.string(),
+  userId: z
+    .string()
+    .uuid()
+    .transform(val => val as UUID),
   schemaCheckId: z.string(),
   date: z.string(),
 });
@@ -951,7 +954,10 @@ const SchemaCheckSharedChangesFields = {
 
 const ManuallyApprovedSchemaCheckFields = {
   isManuallyApproved: z.literal(true),
-  manualApprovalUserId: z.string().nullable(),
+  manualApprovalUserId: z
+    .string()
+    .nullable()
+    .transform(val => val as UUID | null),
   manualApprovalComment: z.string().nullable(),
 };
 

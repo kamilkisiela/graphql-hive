@@ -1,4 +1,8 @@
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@app/gql/graphql';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from 'testkit/gql/graphql';
 import { history } from '../../../testkit/emails';
 import { initSeed } from '../../../testkit/seed';
 
@@ -56,7 +60,7 @@ test.concurrent(
     });
     await assignMemberRole({
       roleId: membersManagerRole.id,
-      memberId: member.id,
+      userId: member.user.id,
     });
 
     await expect(
@@ -91,7 +95,7 @@ test.concurrent(
     });
     await assignMemberRole({
       roleId: membersManagerRole.id,
-      memberId: member.id,
+      userId: member.user.id,
     });
 
     const adminRoleId = organization.memberRoles.find(r => r.name === 'Admin')?.id;
@@ -104,7 +108,7 @@ test.concurrent(
       assignMemberRole(
         {
           roleId: adminRoleId,
-          memberId: viewerRoleMember.id,
+          userId: viewerRoleMember.user.id,
         },
         {
           useMemberToken: true,
@@ -166,11 +170,11 @@ test.concurrent('cannot downgrade a member when assigning a new role', async () 
   });
   await assignMemberRole({
     roleId: managerRole.id,
-    memberId: member.id,
+    userId: member.user.id,
   });
   await assignMemberRole({
     roleId: originalRole.id,
-    memberId: viewerRoleMember.id,
+    userId: viewerRoleMember.user.id,
   });
 
   // non-admin member cannot downgrade another member
@@ -178,7 +182,7 @@ test.concurrent('cannot downgrade a member when assigning a new role', async () 
     assignMemberRole(
       {
         roleId: roleWithLessAccess.id,
-        memberId: viewerRoleMember.id,
+        userId: viewerRoleMember.user.id,
       },
       {
         useMemberToken: true,
@@ -188,7 +192,7 @@ test.concurrent('cannot downgrade a member when assigning a new role', async () 
   // admin can downgrade another member
   await assignMemberRole({
     roleId: roleWithLessAccess.id,
-    memberId: viewerRoleMember.id,
+    userId: viewerRoleMember.user.id,
   });
 });
 
@@ -219,11 +223,11 @@ test.concurrent('cannot downgrade a member when modifying a role', async () => {
   });
   await assignMemberRole({
     roleId: managerRole.id,
-    memberId: member.id,
+    userId: member.user.id,
   });
   await assignMemberRole({
     roleId: roleToBeUpdated.id,
-    memberId: viewerRoleMember.id,
+    userId: viewerRoleMember.user.id,
   });
 
   // non-admin member cannot downgrade another member
@@ -267,11 +271,11 @@ test.concurrent('cannot delete a role with members', async () => {
   });
   await assignMemberRole({
     roleId: membersManagerRole.id,
-    memberId: member.id,
+    userId: member.user.id,
   });
   await assignMemberRole({
     roleId: readOnlyRole.id,
-    memberId: viewerRoleMember.id,
+    userId: viewerRoleMember.user.id,
   });
 
   // delete the role as the owner
@@ -316,7 +320,7 @@ test.concurrent('cannot invite a member with more access than the inviter', asyn
   // give the inviting member a role with enough access to invite other members
   await assignMemberRole({
     roleId: membersManagerRole.id,
-    memberId: invitingMember.id,
+    userId: invitingMember.user.id,
   });
 
   const inviteEmail = seed.generateEmail();
