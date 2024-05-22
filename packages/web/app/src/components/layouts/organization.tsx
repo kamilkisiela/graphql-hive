@@ -19,6 +19,7 @@ import { Link } from '@tanstack/react-router';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 import { QueryError } from '../ui/query-error';
+import { OrganizationCMDK } from './organization-cmdk';
 import { OrganizationSelector } from './organization-selectors';
 
 export enum Page {
@@ -37,6 +38,11 @@ export const OrganizationLayout_OrganizationFragment = graphql(`
     me {
       ...CanAccessOrganization_MemberFragment
     }
+    projects {
+      nodes {
+        ...OrganizationCMDK_ProjectFragment
+      }
+    }
     ...ProPlanBilling_OrganizationFragment
     ...RateLimitWarn_OrganizationFragment
   }
@@ -53,6 +59,7 @@ const OrganizationLayoutQuery = graphql(`
       ...UserMenu_OrganizationConnectionFragment
       nodes {
         ...OrganizationLayout_OrganizationFragment
+        ...OrganizationCMDK_OrganizationFragment
       }
     }
   }
@@ -116,6 +123,12 @@ export function OrganizationLayout({
           </div>
         </div>
       </header>
+      <OrganizationCMDK
+        organizationId={props.organizationId}
+        projects={currentOrganization?.projects.nodes ?? null}
+        organizations={query.data?.organizations.nodes ?? []}
+        openCreateProjectModal={toggleModalOpen}
+      />
       <div className="relative border-b border-gray-800">
         <div className="container flex items-center justify-between">
           {currentOrganization && meInCurrentOrg ? (
