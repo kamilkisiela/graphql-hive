@@ -304,7 +304,6 @@ const TargetSchemaPageQuery = graphql(`
 `);
 
 function TargetSchemaPage(props: { organizationId: string; projectId: string; targetId: string }) {
-  const router = useRouter();
   const [query] = useQuery({
     query: TargetSchemaPageQuery,
     variables: {
