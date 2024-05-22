@@ -217,6 +217,7 @@ function SchemaView(props: {
   const [filterService, setFilterService] = useState(props.highlightedService ?? '');
   const [term, setTerm] = useState(props.highlightedService ?? '');
   const [openItems, setOpenItems] = useState<string[]>([]);
+  const router = useRouter();
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
@@ -228,6 +229,10 @@ function SchemaView(props: {
       setTerm(value);
       setOpen(false);
       setOpenItems(prevItems => [...new Set([...prevItems, value])]);
+      void router.navigate({
+        to: '/$organizationId/$projectId/$targetId',
+        search: { service: value },
+      });
     },
     [debouncedFilter, setTerm],
   );
@@ -235,6 +240,9 @@ function SchemaView(props: {
     setOpenItems([]);
     setFilterService('');
     setTerm('');
+    void router.navigate({
+      to: '/$organizationId/$projectId/$targetId',
+    });
   }, [setFilterService]);
 
   const isDistributed =
@@ -264,6 +272,17 @@ function SchemaView(props: {
   const [open, setOpen] = useState<boolean>(false);
   const schemas = useFragment(SchemaView_SchemaFragment, target.latestSchemaVersion?.schemas.nodes);
   const compositeSchemas = schemas?.filter(isCompositeSchema) as CompositeSchema[];
+
+  const [showExtraParam] = useState(router.latestLocation.search?.service);
+  const serviceIdFromParam = compositeSchemas?.find(
+    schema => schema.service === showExtraParam,
+  )?.id;
+  useEffect(() => {
+    if (showExtraParam && serviceIdFromParam) {
+      handleChange({ target: { value: showExtraParam } } as any);
+      setOpenItems(prevItems => [...new Set([...prevItems, serviceIdFromParam])]);
+    }
+  }, [showExtraParam]);
 
   return (
     <>
