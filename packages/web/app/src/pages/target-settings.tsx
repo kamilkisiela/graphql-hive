@@ -1033,7 +1033,6 @@ const TargetSettingsPageQuery = graphql(`
         cleanId
         ...TargetSettingsPage_OrganizationFragment
         me {
-          temporaryFixId
           ...CDNAccessTokens_MeFragment
         }
       }

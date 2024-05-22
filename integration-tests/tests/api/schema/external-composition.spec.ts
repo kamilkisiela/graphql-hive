@@ -1,4 +1,4 @@
-import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { history, serviceName, servicePort } from '../../../testkit/external-composition';
 import { enableExternalSchemaComposition } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';

@@ -3,7 +3,7 @@ import {
   ProjectAccessScope,
   ProjectType,
   TargetAccessScope,
-} from '@app/gql/graphql';
+} from 'testkit/gql/graphql';
 import * as emails from '../../../testkit/emails';
 import { updateOrgRateLimit, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';

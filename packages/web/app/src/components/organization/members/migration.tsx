@@ -324,7 +324,7 @@ function SimilarRoles(props: {
 
 const migrationFormSchema = z.intersection(
   z.object({
-    members: z.array(z.string()).min(1),
+    users: z.array(z.string()).min(1),
   }),
   z.union([
     roleFormSchema,
@@ -363,7 +363,9 @@ const OrganizationMemberRolesMigrationGroup_Migrate = graphql(`
           members {
             nodes {
               id
-              temporaryFixId
+              user {
+                id
+              }
               organizationAccessScopes
               projectAccessScopes
               targetAccessScopes
@@ -413,7 +415,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
     mode: 'onChange',
     resolver: zodResolver(migrationFormSchema),
     defaultValues: {
-      members: memberGroup.members.map(m => m.id),
+      users: memberGroup.members.map(m => m.user.id),
       roleId: '',
       name: '',
       description: '',
@@ -458,7 +460,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
                 assignRole: {
                   organization: props.organizationCleanId,
                   role: data.roleId,
-                  members: data.members,
+                  users: data.users,
                 },
               }
             : {
@@ -476,7 +478,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
                   targetScopes: data.targetScopes.filter((s): s is TargetAccessScope =>
                     Object.values(TargetAccessScope).includes(s as TargetAccessScope),
                   ),
-                  members: data.members,
+                  users: data.users,
                 },
               },
       });

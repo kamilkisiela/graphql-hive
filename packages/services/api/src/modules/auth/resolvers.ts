@@ -78,24 +78,21 @@ export const resolvers: AuthModule.Resolvers & {
     TOKENS_WRITE: TargetAccessScope.TOKENS_WRITE,
   },
   Member: {
-    temporaryFixId(member) {
-      return `${member.organization}:${member.id}`;
-    },
     organizationAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberOrganizationScopes({
-        user: member.id,
+        user: member.user.id,
         organization: member.organization,
       });
     },
     projectAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberProjectScopes({
-        user: member.id,
+        user: member.user.id,
         organization: member.organization,
       });
     },
     targetAccessScopes(member, _, { injector }) {
       return injector.get(AuthManager).getMemberTargetScopes({
-        user: member.id,
+        user: member.user.id,
         organization: member.organization,
       });
     },

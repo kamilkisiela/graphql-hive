@@ -7,7 +7,6 @@ export { TargetAccessScope };
 export const CanAccessTarget_MemberFragment = graphql(`
   fragment CanAccessTarget_MemberFragment on Member {
     id
-    temporaryFixId
     targetAccessScopes
   }
 `);

@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { parse, print } from 'graphql';
 import { enableExternalSchemaComposition } from 'testkit/flow';
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { initSeed } from 'testkit/seed';
-import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createStorage } from '@hive/storage';
 import { sortSDL } from '@theguild/federation-composition';
@@ -131,7 +131,7 @@ test.concurrent(
 test.concurrent(
   'the changes and schema sdl is persisted in the database when the super schema schema is composable',
   async ({ expect }) => {
-    let storage: Awaited<ReturnType<typeof createStorage>>;
+    let storage: Awaited<ReturnType<typeof createStorage>> | undefined = undefined;
 
     try {
       storage = await createStorage(connectionString(), 1);
@@ -228,7 +228,7 @@ test.concurrent(
 test.concurrent(
   'composition error is persisted in the database when the super schema schema is not composable',
   async ({ expect }) => {
-    let storage: Awaited<ReturnType<typeof createStorage>>;
+    let storage: Awaited<ReturnType<typeof createStorage>> | undefined = undefined;
 
     try {
       storage = await createStorage(connectionString(), 1);

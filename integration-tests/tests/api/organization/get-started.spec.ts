@@ -3,7 +3,7 @@ import {
   ProjectAccessScope,
   ProjectType,
   TargetAccessScope,
-} from '@app/gql/graphql';
+} from 'testkit/gql/graphql';
 import { waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 

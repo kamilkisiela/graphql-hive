@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { createPool, sql } from 'slonik';
 import { graphql } from 'testkit/gql';
-import { execute } from 'testkit/graphql';
 /* eslint-disable no-process-env */
-import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
+import { execute } from 'testkit/graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createStorage } from '@hive/storage';
 import {
@@ -690,6 +690,10 @@ describe('schema publishing changes are persisted', () => {
       const changes = await storage.getSchemaChangesForVersion({
         versionId: latestVersion.id,
       });
+
+      if (!Array.isArray(changes)) {
+        throw new Error('Expected changes to be an array');
+      }
 
       expect(changes[0]['meta']).toEqual(args.equalsObject['meta']);
       expect(changes[0]['type']).toEqual(args.equalsObject['type']);
@@ -2778,6 +2782,7 @@ test('Target.schemaVersion: result is read from the database', async () => {
     const latestVersion = await storage.getLatestVersion({
       target: target.id,
       project: project.id,
+      organization: organization.id,
     });
 
     const result = await execute({

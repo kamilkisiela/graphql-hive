@@ -1,4 +1,4 @@
-import { RuleInstanceSeverityLevel, SchemaPolicyInput } from '@app/gql/graphql';
+import { RuleInstanceSeverityLevel, SchemaPolicyInput } from 'testkit/gql/graphql';
 import { graphql } from './gql';
 
 export const TargetCalculatedPolicy = graphql(`

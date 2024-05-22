@@ -1,4 +1,4 @@
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { initSeed } from '../../../testkit/seed';
 
 test.concurrent(

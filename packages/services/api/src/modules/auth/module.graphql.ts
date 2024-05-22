@@ -59,7 +59,6 @@ export default gql`
 
   type Member {
     id: ID!
-    temporaryFixId: ID!
     user: User!
     isOwner: Boolean!
     organizationAccessScopes: [OrganizationAccessScope!]!

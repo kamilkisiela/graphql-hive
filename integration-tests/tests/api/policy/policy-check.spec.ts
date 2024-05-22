@@ -1,6 +1,6 @@
 import stripAnsi from 'strip-ansi';
+import { ProjectType, RuleInstanceSeverityLevel, SchemaPolicyInput } from 'testkit/gql/graphql';
 import { prepareProject } from 'testkit/registry-models';
-import { ProjectType, RuleInstanceSeverityLevel, SchemaPolicyInput } from '@app/gql/graphql';
 import { createCLI } from '../../../testkit/cli';
 
 export const createPolicy = (level: RuleInstanceSeverityLevel): SchemaPolicyInput => ({

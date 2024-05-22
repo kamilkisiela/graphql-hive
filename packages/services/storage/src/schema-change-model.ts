@@ -810,7 +810,7 @@ function createSchemaChangeId(change: { type: string; meta: Record<string, unkno
 }
 
 const ApprovalMetadataModel = z.object({
-  userId: z.string(),
+  userId: z.string().uuid(),
   schemaCheckId: z.string(),
   date: z.string(),
 });

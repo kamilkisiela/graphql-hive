@@ -1,7 +1,7 @@
+import { graphql } from 'testkit/gql';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { execute } from 'testkit/graphql';
 import { initSeed } from 'testkit/seed';
-import { graphql } from '@app/gql';
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 
 const CreateContractMutation = graphql(`
   mutation CreateContractMutation($input: CreateContractInput!) {

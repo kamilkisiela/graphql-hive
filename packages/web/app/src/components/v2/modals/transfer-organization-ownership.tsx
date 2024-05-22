@@ -34,7 +34,7 @@ const TransferOrganizationOwnership_Members = graphql(`
         name
         members {
           nodes {
-            temporaryFixId
+            id
             isOwner
             ...MemberFields
             user {
@@ -54,7 +54,6 @@ const TransferOrganizationOwnership_Members = graphql(`
 const MemberFields = graphql(`
   fragment MemberFields on Member {
     id
-    temporaryFixId
     user {
       id
       fullName
@@ -159,7 +158,7 @@ export const TransferOrganizationOwnershipModal = ({
   const onSelect = useCallback(
     (member: Member) => {
       setSelected(member);
-      void setFieldValue('newOwner', member.id, true);
+      void setFieldValue('newOwner', member.user.id, true);
     },
     [setSelected, setFieldValue],
   );

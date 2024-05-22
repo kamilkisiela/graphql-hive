@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
+import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { ApolloGateway } from '@apollo/gateway';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import {
   DeleteObjectsCommand,
   GetObjectCommand,

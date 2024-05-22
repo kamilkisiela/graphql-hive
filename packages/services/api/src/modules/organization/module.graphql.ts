@@ -404,7 +404,7 @@ export default gql`
 
   input AssignMemberRoleInput {
     organization: ID!
-    member: ID!
+    user: ID!
     role: ID!
   }
 
@@ -444,7 +444,7 @@ export default gql`
   input AssignMemberRoleMigrationInput {
     organization: ID!
     role: ID!
-    members: [ID!]!
+    users: [ID!]!
   }
 
   input CreateMemberRoleMigrationInput {
@@ -454,7 +454,7 @@ export default gql`
     organizationScopes: [OrganizationAccessScope!]!
     projectScopes: [ProjectAccessScope!]!
     targetScopes: [TargetAccessScope!]!
-    members: [ID!]!
+    users: [ID!]!
   }
 
   type MigrateUnassignedMembersResult {

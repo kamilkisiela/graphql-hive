@@ -1,4 +1,4 @@
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { graphql } from '../../../testkit/gql';
 import { execute } from '../../../testkit/graphql';
 import { initSeed } from '../../../testkit/seed';
@@ -32,7 +32,7 @@ describe('Policy Access', () => {
         const { member, memberToken, assignMemberRole } = await inviteAndJoinMember();
         await assignMemberRole({
           roleId: adminRole.id,
-          memberId: member.id,
+          userId: member.user.id,
         });
 
         const result = await execute({
@@ -100,7 +100,7 @@ describe('Policy Access', () => {
         const { member, memberToken, assignMemberRole } = await inviteAndJoinMember();
         await assignMemberRole({
           roleId: adminRole.id,
-          memberId: member.id,
+          userId: member.user.id,
         });
 
         const result = await execute({
@@ -166,7 +166,7 @@ describe('Policy Access', () => {
         const { member, memberToken, assignMemberRole } = await inviteAndJoinMember();
         await assignMemberRole({
           roleId: adminRole.id,
-          memberId: member.id,
+          userId: member.user.id,
         });
 
         const result = await execute({

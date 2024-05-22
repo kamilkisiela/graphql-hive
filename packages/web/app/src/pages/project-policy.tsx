@@ -18,7 +18,6 @@ const ProjectPolicyPageQuery = graphql(`
         id
         me {
           id
-          temporaryFixId
           ...CanAccessProject_MemberFragment
         }
       }

@@ -448,7 +448,7 @@ export const resolvers: OrganizationModule.Resolvers = {
 
       return injector.get(OrganizationManager).assignMemberRole({
         organizationId,
-        memberId: input.member,
+        userId: input.user,
         roleId: input.role,
       });
     },
@@ -591,7 +591,7 @@ export const resolvers: OrganizationModule.Resolvers = {
     async canLeaveOrganization(member, _, { injector }) {
       const { result } = await injector.get(OrganizationManager).canLeaveOrganization({
         organizationId: member.organization,
-        userId: member.id,
+        userId: member.user.id,
       });
 
       return result;

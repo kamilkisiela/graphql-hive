@@ -194,6 +194,13 @@ const config: CodegenConfig = {
       documents: ['./integration-tests/(testkit|tests)/**/*.ts'],
       preset: 'client',
       plugins: [],
+      config: {
+        scalars: {
+          DateTime: 'string',
+          Date: 'string',
+          SafeInt: 'number',
+        },
+      },
     },
     './schema.graphql': {
       plugins: ['schema-ast'],

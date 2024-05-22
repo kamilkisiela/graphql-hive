@@ -1,6 +1,6 @@
 import { formatISO } from 'date-fns/formatISO';
 import { subHours } from 'date-fns/subHours';
-import { ProjectType } from '@app/gql/graphql';
+import { ProjectType } from 'testkit/gql/graphql';
 import { waitFor } from '../../testkit/flow';
 import { initSeed } from '../../testkit/seed';
 
