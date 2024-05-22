@@ -273,7 +273,11 @@ function SchemaView(props: {
   const schemas = useFragment(SchemaView_SchemaFragment, target.latestSchemaVersion?.schemas.nodes);
   const compositeSchemas = schemas?.filter(isCompositeSchema) as CompositeSchema[];
 
-  const [showExtraParam] = useState(router.latestLocation.search?.service);
+  const [showExtraParam, setShowExtraParam] = useState<string>('');
+  const serviceParams = router.latestLocation.search?.service;
+  if (serviceParams) {
+    setShowExtraParam(serviceParams);
+  }
   const serviceIdFromParam = compositeSchemas?.find(
     schema => schema.service === showExtraParam,
   )?.id;
