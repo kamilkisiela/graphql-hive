@@ -45,7 +45,7 @@ export function UserSettingsModal({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement {
-  const [meQuery] = useQuery({ query: UserSettings_MeQuery });
+  const [meQuery] = useQuery({ query: UserSettings_MeQuery, pause: !isOpen });
   const [mutation, mutate] = useMutation(UpdateMeMutation);
   const { toast } = useToast();
 
