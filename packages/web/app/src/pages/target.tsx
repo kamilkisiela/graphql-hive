@@ -1,7 +1,6 @@
-import { ChangeEventHandler, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { ReactElement, useState } from 'react';
+import { ChevronsUpDown, XIcon } from 'lucide-react';
 import { useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button } from '@/components/ui/button';
@@ -18,18 +17,24 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { QueryError } from '@/components/ui/query-error';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion } from '@/components/v2/accordion';
-import { noSchema, noSchemaVersion } from '@/components/v2/empty-list';
+import { EmptyList, noSchema, noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLBlock, GraphQLHighlight } from '@/components/v2/graphql-block';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/gql/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
-import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
 
 type CompositeSchema = Extract<
   DocumentType<typeof SchemaView_SchemaFragment>,
   {
-    __typename?: 'CompositeSchema';
+    __typename: 'CompositeSchema';
+  }
+>;
+
+type SingleSchema = Extract<
+  DocumentType<typeof SchemaView_SchemaFragment>,
+  {
+    __typename: 'SingleSchema';
   }
 >;
 
@@ -39,21 +44,11 @@ function isCompositeSchema(
   return schema.__typename === 'CompositeSchema';
 }
 
-function SchemaBlock({ schema, scrollToMe }: { schema: CompositeSchema; scrollToMe: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const scrolled = useRef(false);
-
-  useEffect(() => {
-    if (scrollToMe && ref.current && scrolled.current === false) {
-      ref.current.scrollIntoView({ behavior: 'smooth' });
-      scrolled.current = true;
-    }
-  }, [scrollToMe]);
-
+function SchemaBlock({ schema }: { schema: CompositeSchema }) {
   return (
     <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
       <Accordion.Header>
-        <div ref={ref}>
+        <div>
           <div className="text-base" id={schema.service ? `service-${schema.service}` : undefined}>
             {schema.service ?? 'SDL'}
           </div>
@@ -69,83 +64,47 @@ function SchemaBlock({ schema, scrollToMe }: { schema: CompositeSchema; scrollTo
   );
 }
 
-const Schemas_ProjectFragment = graphql(`
-  fragment Schemas_ProjectFragment on Project {
-    id
-    type
-  }
-`);
-
-function Schemas({
-  filterService,
-  openItems,
-  setOpenItems,
-  ...props
-}: {
-  project: FragmentType<typeof Schemas_ProjectFragment>;
-  schemas: FragmentType<typeof SchemaView_SchemaFragment>[];
-  filterService?: string;
-  openItems: string[];
-  setOpenItems: (items: string[]) => void;
-}): ReactElement {
-  const project = useFragment(Schemas_ProjectFragment, props.project);
-  const schemas = useFragment(SchemaView_SchemaFragment, props.schemas);
-
-  if (project.type === ProjectType.Single) {
-    const [schema] = schemas;
+function Schemas(props: { schemas?: readonly CompositeSchema[]; schema?: SingleSchema }) {
+  if (props.schema) {
     return (
       <GraphQLBlock
         className="mb-6"
-        sdl={schema.source}
-        url={'url' in schema && typeof schema.url === 'string' ? schema.url : ''}
+        sdl={props.schema.source}
+        url={'url' in props.schema && typeof props.schema.url === 'string' ? props.schema.url : ''}
       />
     );
   }
 
-  const filteredSchemas = schemas.filter(isCompositeSchema).filter(schema => {
-    if (filterService && 'service' in schema && schema.service) {
-      return schema.service.toLowerCase() === filterService.toLowerCase();
-    }
-    return true;
-  });
+  if (!props.schemas) {
+    console.error('No schema or schemas props provided');
+    return null;
+  }
 
-  // Display format should be defined based on the length of `schemas`, and not `filteredSchemas`.
-  // Otherwise, the accordion will be displayed by default but the list (disabled accordion) when filtering.
-  const displayFormat = schemas.length > 1 ? 'dynamic' : 'static';
+  if (props.schemas.length > 1) {
+    return (
+      <Accordion className="space-y-4" type="single">
+        {props.schemas.map(schema => (
+          <SchemaBlock key={schema.id} schema={schema} />
+        ))}
+      </Accordion>
+    );
+  }
+
+  const schema = props.schemas[0];
+
+  if (!schema) {
+    return (
+      <EmptyList
+        title="Service not found"
+        description="You can publish the missing service with Hive CLI"
+      />
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-8">
-      {displayFormat === 'dynamic' ? (
-        <Accordion
-          type="multiple"
-          value={openItems}
-          onValueChange={(items: string[]) => setOpenItems(items)}
-        >
-          {filteredSchemas.map(schema => (
-            <SchemaBlock
-              key={schema.id}
-              schema={schema}
-              scrollToMe={filterService?.toLowerCase() === schema.service?.toLowerCase()}
-            />
-          ))}
-        </Accordion>
-      ) : (
-        <Accordion
-          type="multiple"
-          value={openItems}
-          disabled
-          onValueChange={(items: string[]) => setOpenItems(items)}
-        >
-          {filteredSchemas.map(schema => (
-            <SchemaBlock
-              key={schema.id}
-              schema={schema}
-              scrollToMe={filterService?.toLowerCase() === schema.service?.toLowerCase()}
-            />
-          ))}
-        </Accordion>
-      )}
-    </div>
+    <Accordion type="single" disabled value={schema.id}>
+      <SchemaBlock key={schema.id} schema={schema} />
+    </Accordion>
   );
 }
 
@@ -165,25 +124,21 @@ const SchemaView_ProjectFragment = graphql(`
     cleanId
     type
     registryModel
-    ...Schemas_ProjectFragment
   }
 `);
 
 const SchemaView_SchemaFragment = graphql(`
   fragment SchemaView_SchemaFragment on Schema {
+    __typename
     ... on SingleSchema {
       id
-      author
       source
-      commit
     }
     ... on CompositeSchema {
       id
-      author
       source
       service
       url
-      commit
     }
   }
 `);
@@ -209,41 +164,23 @@ function SchemaView(props: {
   organization: FragmentType<typeof SchemaView_OrganizationFragment>;
   project: FragmentType<typeof SchemaView_ProjectFragment>;
   target: FragmentType<typeof SchemaView_TargetFragment>;
-  highlightedService: string | null;
 }): ReactElement | null {
   const organization = useFragment(SchemaView_OrganizationFragment, props.organization);
   const project = useFragment(SchemaView_ProjectFragment, props.project);
   const target = useFragment(SchemaView_TargetFragment, props.target);
-  const [filterService, setFilterService] = useState(props.highlightedService ?? '');
-  const [term, setTerm] = useState(props.highlightedService ?? '');
-  const [openItems, setOpenItems] = useState<string[]>([]);
   const router = useRouter();
-  const debouncedFilter = useDebouncedCallback((value: string) => {
-    setFilterService(value);
-  }, 500);
-  const handleChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
-    event => {
-      const value = event.target.value;
-      debouncedFilter(value);
-      setFilterService(value);
-      setTerm(value);
-      setOpen(false);
-      setOpenItems(prevItems => [...new Set([...prevItems, value])]);
-      void router.navigate({
-        to: '/$organizationId/$projectId/$targetId',
-        search: { service: value },
-      });
-    },
-    [debouncedFilter, setTerm],
-  );
-  const reset = useCallback(() => {
-    setOpenItems([]);
-    setFilterService('');
-    setTerm('');
+  const selectedServiceName =
+    'service' in router.latestLocation.search &&
+    typeof router.latestLocation.search.service === 'string'
+      ? router.latestLocation.search.service
+      : null;
+
+  const [open, setOpen] = useState(false);
+  const reset = () => {
     void router.navigate({
-      to: '/$organizationId/$projectId/$targetId',
+      search: {},
     });
-  }, [setFilterService]);
+  };
 
   const isDistributed =
     project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
@@ -266,110 +203,86 @@ function SchemaView(props: {
     return noSchema;
   }
 
-  const canMarkAsValid = project.registryModel === RegistryModel.Legacy;
-  const showExtra = canManage;
+  const canMarkAsValid = project.registryModel === RegistryModel.Legacy && canManage;
 
-  const [open, setOpen] = useState<boolean>(false);
   const schemas = useFragment(SchemaView_SchemaFragment, target.latestSchemaVersion?.schemas.nodes);
   const compositeSchemas = schemas?.filter(isCompositeSchema) as CompositeSchema[];
-
-  const [showExtraParam, setShowExtraParam] = useState<string>('');
-  const serviceParams = router.latestLocation.search?.service;
-  if (serviceParams) {
-    setShowExtraParam(serviceParams);
-  }
-  const serviceIdFromParam = compositeSchemas?.find(
-    schema => schema.service === showExtraParam,
-  )?.id;
-  useEffect(() => {
-    if (showExtraParam && serviceIdFromParam) {
-      handleChange({ target: { value: showExtraParam } } as any);
-      setOpenItems(prevItems => [...new Set([...prevItems, serviceIdFromParam])]);
-    }
-  }, [showExtraParam]);
+  const singleSchema = schemas?.filter(schema => !isCompositeSchema(schema))[0] as
+    | SingleSchema
+    | undefined;
+  const schemasToDisplay = selectedServiceName
+    ? compositeSchemas.filter(schema => schema.service === selectedServiceName)
+    : compositeSchemas;
 
   return (
     <>
-      {showExtra ? (
-        <div className="mb-5 flex flex-row items-center justify-between">
-          <div className="flex flex-row items-center gap-4">
-            {isDistributed && (
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" className="w-[400px] justify-between">
-                    {filterService
-                      ? compositeSchemas?.find(schema => schema.service === filterService)?.service
-                      : 'Filter schema'}
-                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[400px] truncate p-0">
-                  <Command>
-                    <CommandInput
-                      closeFn={reset}
-                      className="w-[400px]"
-                      placeholder="Search schema"
-                      value={term}
-                      onValueChange={setTerm}
-                    />
-                    <CommandEmpty>No schema found.</CommandEmpty>
-                    <CommandGroup>
-                      <ScrollArea className="relative h-80 w-full">
-                        <div className="p-4">
-                          {compositeSchemas?.map(schema => (
-                            <CommandItem
-                              key={schema.service}
-                              value={schema.service as string}
-                              onSelect={currentValue => {
-                                const selectedSchema = compositeSchemas.find(
-                                  s => s.service === currentValue,
-                                );
-                                if (selectedSchema) {
-                                  setOpenItems(prevItems => [
-                                    ...new Set([...prevItems, selectedSchema.id]),
-                                  ]);
-                                  handleChange({ target: { value: currentValue } } as any);
-                                }
-                              }}
-                              className="cursor-pointer"
-                            >
-                              <Check
-                                className={cn(
-                                  'mr-2 size-4',
-                                  term === schema.id ? 'opacity-100' : 'opacity-0',
-                                )}
-                              />
-                              {schema.service}
-                            </CommandItem>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            )}
-            {canMarkAsValid ? (
-              <>
-                <MarkAsValid
-                  organizationId={organization.cleanId}
-                  projectId={project.cleanId}
-                  targetId={target.cleanId}
-                  version={latestSchemaVersion}
-                />{' '}
-              </>
-            ) : null}
-          </div>
+      <div className="mb-5 flex flex-row items-center justify-between">
+        <div className="flex flex-row items-center gap-x-4">
+          {isDistributed && schemas && schemas.length > 1 && (
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-[400px] justify-between"
+                  aria-expanded={open}
+                >
+                  {selectedServiceName ?? 'Select service'}
+                  <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              {selectedServiceName ? (
+                <Button variant="outline" onClick={reset}>
+                  <XIcon width={16} height={16} />
+                </Button>
+              ) : null}
+              <PopoverContent className="w-[400px] truncate p-0">
+                <Command>
+                  <CommandInput
+                    closeFn={reset}
+                    className="w-[400px]"
+                    placeholder="Search service..."
+                  />
+                  <CommandEmpty>No results.</CommandEmpty>
+                  <CommandGroup>
+                    <ScrollArea className="relative h-80 w-full">
+                      {compositeSchemas?.map(schema => (
+                        <CommandItem
+                          key={schema.service}
+                          value={schema.service as string}
+                          onSelect={serviceName => {
+                            setOpen(false);
+                            void router.navigate({
+                              search: { service: serviceName },
+                            });
+                          }}
+                          className="cursor-pointer truncate"
+                        >
+                          <div>
+                            <div>{schema.service}</div>
+                            <div className="text-muted-foreground text-xs">{schema.url}</div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </ScrollArea>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          )}
+          {canMarkAsValid ? (
+            <>
+              <MarkAsValid
+                organizationId={organization.cleanId}
+                projectId={project.cleanId}
+                targetId={target.cleanId}
+                version={latestSchemaVersion}
+              />{' '}
+            </>
+          ) : null}
         </div>
-      ) : null}
-      <Schemas
-        project={project}
-        filterService={filterService}
-        schemas={target.latestSchemaVersion?.schemas.nodes ?? []}
-        openItems={openItems}
-        setOpenItems={setOpenItems}
-        key={filterService}
-      />
+      </div>
+      {isDistributed ? <Schemas schemas={schemasToDisplay} /> : <Schemas schema={singleSchema} />}
     </>
   );
 }
@@ -391,7 +304,6 @@ const TargetSchemaPageQuery = graphql(`
 `);
 
 function TargetSchemaPage(props: { organizationId: string; projectId: string; targetId: string }) {
-  const router = useRouter();
   const [query] = useQuery({
     query: TargetSchemaPageQuery,
     variables: {
@@ -408,9 +320,6 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
   const target = query.data?.target;
-
-  // TODO(router) check if it works
-  const serviceNameFromHash = router.latestLocation.hash?.replace('service-', '') ?? null;
 
   return (
     <TargetLayout
@@ -454,12 +363,7 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
       </div>
       <div>
         {query.fetching ? null : currentOrganization && currentProject && target ? (
-          <SchemaView
-            organization={currentOrganization}
-            project={currentProject}
-            target={target}
-            highlightedService={serviceNameFromHash}
-          />
+          <SchemaView organization={currentOrganization} project={currentProject} target={target} />
         ) : null}
       </div>
     </TargetLayout>
