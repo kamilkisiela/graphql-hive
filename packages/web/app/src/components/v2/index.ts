@@ -13,7 +13,6 @@ export { DiffEditor } from '@/components/v2/diff-editor';
 export { EmptyList, noSchema } from '@/components/v2/empty-list';
 export { GraphQLBlock } from '@/components/v2/graphql-block';
 export { Heading } from '@/components/v2/heading';
-export { HiveLink } from '@/components/v2/hive-link';
 export { Input } from '@/components/v2/input';
 export { Link } from '@/components/v2/link';
 export { Modal } from '@/components/v2/modal';
