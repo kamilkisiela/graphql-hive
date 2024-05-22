@@ -259,10 +259,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           )
         : {},
     ],
-    /*
-    graphiql: request =>
-      isNonProductionEnvironment ? { endpoint: request.headers.get('x-use-proxy') ?? request.url } : false,
-    */
+    graphiql: !options.isProduction,
   });
 
   return async (req, reply) => {
