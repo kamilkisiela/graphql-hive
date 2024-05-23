@@ -1097,8 +1097,8 @@ function TargetSettingsContent(props: {
   projectId: string;
   targetId: string;
   page?: SubPage;
-  onPageChange(page: SubPage): void;
 }) {
+  const router = useRouter();
   const [query] = useQuery({
     query: TargetSettingsPageQuery,
     variables: {
@@ -1149,7 +1149,13 @@ function TargetSettingsContent(props: {
                 <Button
                   key={subPage.key}
                   variant="ghost"
-                  onClick={() => props.onPageChange(subPage.key)}
+                  onClick={() => {
+                    void router.navigate({
+                      search: {
+                        page: subPage.key,
+                      },
+                    });
+                  }}
                   className={cn(
                     props.page === subPage.key
                       ? 'bg-muted hover:bg-muted'
@@ -1162,11 +1168,11 @@ function TargetSettingsContent(props: {
               );
             })}
           </NavLayout>
-          <PageLayoutContent mainTitlePage={props.page === 'general' ? 'General' : undefined}>
+          <PageLayoutContent>
             {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
-              <>
+              <div className="space-y-12">
                 {props.page === 'general' ? (
-                  <div className="flex flex-col gap-10">
+                  <>
                     <TargetName
                       targetName={currentTarget.name}
                       targetId={currentTarget.cleanId}
@@ -1186,53 +1192,43 @@ function TargetSettingsContent(props: {
                         organizationId={currentOrganization.cleanId}
                       />
                     )}
-                  </div>
+                  </>
                 ) : null}
                 {props.page === 'cdn' && canAccessTokens ? (
-                  <div className="flex flex-col gap-4">
-                    <CDNAccessTokens
-                      me={organizationForSettings.me}
-                      organizationId={props.organizationId}
-                      projectId={props.projectId}
-                      targetId={props.targetId}
-                    />
-                  </div>
+                  <CDNAccessTokens
+                    me={organizationForSettings.me}
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
                 {props.page === 'registry-token' && canAccessTokens ? (
-                  <div className="flex flex-col gap-4">
-                    <RegistryAccessTokens
-                      me={organizationForSettings.me}
-                      organizationId={props.organizationId}
-                      projectId={props.projectId}
-                      targetId={props.targetId}
-                    />
-                  </div>
+                  <RegistryAccessTokens
+                    me={organizationForSettings.me}
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
                 {props.page === 'breaking-changes' ? (
-                  <div className="flex flex-col gap-4">
-                    <ConditionalBreakingChanges
-                      organizationId={props.organizationId}
-                      projectId={props.projectId}
-                      targetId={props.targetId}
-                    />
-                  </div>
+                  <ConditionalBreakingChanges
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
                 {props.page === 'base-schema' ? (
-                  <div className="flex flex-col gap-4">
-                    <ExtendBaseSchema
-                      baseSchema={targetForSettings?.baseSchema ?? ''}
-                      organizationId={props.organizationId}
-                      projectId={props.projectId}
-                      targetId={props.targetId}
-                    />
-                  </div>
+                  <ExtendBaseSchema
+                    baseSchema={targetForSettings?.baseSchema ?? ''}
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
                 {props.page === 'schema-contracts' ? (
-                  <div className="flex flex-col gap-4">
-                    <SchemaContracts organizationId="" projectId="" targetId="" />
-                  </div>
+                  <SchemaContracts organizationId="" projectId="" targetId="" />
                 ) : null}
-              </>
+              </div>
             ) : null}
           </PageLayoutContent>
         </PageLayout>
@@ -1246,7 +1242,6 @@ export function TargetSettingsPage(props: {
   projectId: string;
   targetId: string;
   page?: SubPage;
-  onPageChange(page: SubPage): void;
 }) {
   return (
     <>
@@ -1256,7 +1251,6 @@ export function TargetSettingsPage(props: {
         projectId={props.projectId}
         targetId={props.targetId}
         page={props.page}
-        onPageChange={props.onPageChange}
       />
     </>
   );

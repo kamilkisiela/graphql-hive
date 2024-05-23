@@ -405,14 +405,7 @@ const targetSettingsRoute = createRoute({
   },
   component: function TargetSettingsRoute() {
     const { organizationId, projectId, targetId } = targetSettingsRoute.useParams();
-    const navigate = useNavigate({ from: targetSettingsRoute.fullPath });
     const { page } = targetSettingsRoute.useSearch();
-    const onPageChange = useCallback(
-      (newPage: z.infer<typeof TargetSettingRouteSearch>['page']) => {
-        void navigate({ search: { page: newPage } });
-      },
-      [navigate],
-    );
 
     return (
       <TargetSettingsPage
@@ -420,7 +413,6 @@ const targetSettingsRoute = createRoute({
         projectId={projectId}
         targetId={targetId}
         page={page}
-        onPageChange={onPageChange}
       />
     );
   },
