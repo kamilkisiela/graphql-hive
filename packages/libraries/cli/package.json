@@ -18,7 +18,7 @@
     "node": ">=16.0.0"
   },
   "bin": {
-    "hive": "./bin/run.cjs"
+    "hive": "./bin/run"
   },
   "main": "dist/index.js",
   "files": [
@@ -41,7 +41,7 @@
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check --service posts examples/stitching.posts.graphql",
     "schema:publish:federation": "pnpm start schema:publish --service reviews --url reviews.com/graphql examples/federation.reviews.graphql",
-    "start": "./bin/dev.cjs",
+    "start": "./bin/dev",
     "version": "oclif readme && git add README.md"
   },
   "dependencies": {
