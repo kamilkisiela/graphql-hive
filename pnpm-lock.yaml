@@ -2034,6 +2034,9 @@ importers:
 
   rules:
     devDependencies:
+      '@types/minimatch':
+        specifier: 5.1.2
+        version: 5.1.2
       minimatch:
         specifier: 9.0.4
         version: 9.0.4

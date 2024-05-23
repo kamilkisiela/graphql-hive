@@ -5,6 +5,7 @@
   "private": true,
   "main": "index.cjs",
   "devDependencies": {
+    "@types/minimatch": "5.1.2",
     "minimatch": "9.0.4"
   }
 }
