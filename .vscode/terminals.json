@@ -9,6 +9,13 @@
       "command": ""
     },
     {
+      "name": "codegen",
+      "description": "Run GraphQL codegen",
+      "open": true,
+      "cwd": "./",
+      "command": "pnpm graphql:generate --watch"
+    },
+    {
       "name": "server:dev",
       "description": "Run server",
       "focus": true,
