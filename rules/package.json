@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "type": "commonjs",
   "private": true,
-  "main": "index.cjs"
+  "main": "index.cjs",
+  "devDependencies": {
+    "minimatch": "9.0.4"
+  }
 }
