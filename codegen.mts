@@ -14,6 +14,7 @@ const config: CodegenConfig = {
         },
       },
       typeDefsFilePath: false,
+      resolverGeneration: 'minimal',
       resolverMainFileMode: 'modules',
       resolverTypesPath: './__generated__/types.next.ts',
       whitelistedModules: ['usage-estimation', 'admin'],
