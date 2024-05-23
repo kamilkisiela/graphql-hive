@@ -10,7 +10,7 @@ import {
   type DefinitionNode,
   type OperationDefinitionNode,
 } from 'graphql';
-import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
+import { createYoga, Plugin, useErrorHandler, useExecutionCancellation } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import { isGraphQLError } from '@envelop/core';
 import { useGenericAuth } from '@envelop/generic-auth';
@@ -258,6 +258,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             options.tracing.traceProvider(),
           )
         : {},
+      useExecutionCancellation(),
     ],
     graphiql: !options.isProduction,
   });
