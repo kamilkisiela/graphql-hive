@@ -1,0 +1,25 @@
+diff --git a/lib/module-loader.js b/lib/module-loader.js
+index 6162032e60f1e44ecfa19525ee07eecee1186208..58cfe558d025fc29e2e837b4435a3847b6e30585 100644
+--- a/lib/module-loader.js
++++ b/lib/module-loader.js
+@@ -156,6 +156,20 @@ async function resolvePath(config, modulePath) {
+     let filePath;
+     try {
+         filePath = require.resolve(modulePath);
++        try {
++            // We wrap it with try/catch and fallback to custom path if it fails to make it compatible with Hive.
++            // Due to some weird behavior in tsup/esbuild, it fails to resolve the path to the module.
++            filePath = require.resolve(modulePath);
++          } catch (error) {
++            const customPath = process.env.OCLIF_CLI_CUSTOM_PATH;
++            if (typeof customPath !== "string") {
++              throw error;
++            }
++            modulePath = modulePath.replace('/src/', '/dist/').replace('\\src\\', '\\dist\\');
++            filePath = require.resolve(
++              path.resolve(customPath, modulePath) + ".js"
++            );
++          }
+         isESM = isPathModule(filePath);
+     }
+     catch {
