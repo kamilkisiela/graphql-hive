@@ -43,15 +43,15 @@ const config: CodegenConfig = {
           ID: 'string',
         },
         mappers: {
-          SchemaChange: '../shared/mappers#SchemaChange as SchemaChangeMapper',
+          SchemaChange: '../modules/schema/module.graphql.mappers#SchemaChangeMapper',
           SchemaChangeApproval:
-            '../shared/mappers#SchemaChangeApproval as SchemaChangeApprovalMapper',
+            '../modules/schema/module.graphql.mappers#SchemaChangeApprovalMapper',
           SchemaChangeConnection:
-            '../shared/mappers#SchemaChangeConnection as SchemaChangeConnectionMapper',
+            '../modules/schema/module.graphql.mappers#SchemaChangeConnectionMapper',
           SchemaErrorConnection:
-            '../shared/mappers#SchemaErrorConnection as SchemaErrorConnectionMapper',
+            '../modules/schema/module.graphql.mappers#SchemaErrorConnectionMapper',
           SchemaWarningConnection:
-            '../shared/mappers#SchemaWarningConnection as SchemaWarningConnectionMapper',
+            '../modules/schema/module.graphql.mappers#SchemaWarningConnectionMapper',
           OrganizationConnection:
             '../shared/mappers#OrganizationConnection as OrganizationConnectionMapper',
           UserConnection: '../shared/mappers#UserConnection as UserConnectionMapper',
