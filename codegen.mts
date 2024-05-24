@@ -200,6 +200,9 @@ const config: CodegenConfig = {
           ContractVersion: '../modules/schema/module.graphql.mappers#ContractVersionMapper',
           BreakingChangeMetadataTarget:
             '../modules/schema/module.graphql.mappers#BreakingChangeMetadataTargetMapper',
+          AppDeployment: '../modules/app-deployments/module.graphql.mappers#AppDeploymentMapper',
+          AppDeploymentStatus:
+            '../modules/app-deployments/module.graphql.mappers#AppDeploymentStatusMapper',
         },
       },
     },

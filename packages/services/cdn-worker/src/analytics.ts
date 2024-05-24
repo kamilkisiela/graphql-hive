@@ -19,6 +19,10 @@ type Event =
         | 'sdl.graphqls';
     }
   | {
+      type: 'app-deployment-operation';
+      version: 'v1';
+    }
+  | {
       type: 'key-validation';
       value:
         | {
@@ -52,7 +56,12 @@ type Event =
     }
   | {
       type: 'r2';
-      action: 'HEAD artifact' | 'GET cdn-legacy-keys' | 'GET cdn-access-token';
+      action:
+        | 'HEAD artifact'
+        | 'GET cdn-legacy-keys'
+        | 'GET cdn-access-token'
+        | 'HEAD persistedOperation'
+        | 'HEAD appDeploymentIsEnabled';
       statusCode: number;
     }
   | {

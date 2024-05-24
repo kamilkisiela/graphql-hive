@@ -56,6 +56,7 @@
     "lru-cache": "7.18.3",
     "ms": "2.1.3",
     "object-hash": "3.0.0",
+    "p-queue": "8.0.1",
     "param-case": "3.0.4",
     "prom-client": "15.1.2",
     "redlock": "5.0.0-beta.2",
