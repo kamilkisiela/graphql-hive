@@ -6,6 +6,7 @@ import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
+import { createIsAppDeploymentActive } from './is-app-deployment-active';
 import { createIsKeyValid } from './key-validation';
 import { createResponse } from './tracked-response';
 
@@ -89,14 +90,12 @@ const handler: ExportedHandler<Env> = {
     const handleArtifactRequest = createArtifactRequestHandler({
       isKeyValid,
       analytics,
-      async getArtifactAction(targetId, contractName, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(
-          targetId,
-          contractName,
-          artifactType,
-          eTag,
-        );
-      },
+      artifactStorageReader,
+      isAppDeploymentActive: createIsAppDeploymentActive({
+        artifactStorageReader,
+        getCache: () => caches.open('artifacts-auth'),
+        waitUntil: p => ctx.waitUntil(p),
+      }),
     });
 
     const router = itty
