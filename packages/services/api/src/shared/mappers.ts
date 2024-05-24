@@ -2,10 +2,9 @@ import type { DocumentNode, GraphQLSchema, Kind } from 'graphql';
 import type {
   SchemaChangeType,
   SchemaCheck,
-  SchemaCheckApprovalMetadata,
   SchemaVersion as SchemaVersionEntity,
 } from '@hive/storage';
-import type { ClientStatsValues, OperationStatsValues, SchemaError } from '../__generated__/types';
+import type { ClientStatsValues, OperationStatsValues } from '../__generated__/types';
 import type { SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import type { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import type { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
@@ -250,11 +249,6 @@ export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{
   };
 }>;
 
-export type SchemaChangeConnection = ReadonlyArray<SchemaChangeType>;
-export type SchemaChange = SchemaChangeType;
-export type SchemaChangeApproval = SchemaCheckApprovalMetadata;
-export type SchemaErrorConnection = readonly SchemaError[];
-export type SchemaWarningConnection = readonly SchemaCheckWarning[];
 export type UserConnection = readonly User[];
 export type MemberConnection = readonly Member[];
 export type ActivityConnection = readonly ActivityObject[];
