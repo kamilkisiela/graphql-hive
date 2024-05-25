@@ -1,6 +1,5 @@
 import type { SchemaChangeType } from '@hive/storage';
 import type { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
-import type { DeletedCompositeSchema as DeletedCompositeSchemaEntity } from './entities';
 
 export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
 
@@ -23,5 +22,3 @@ export type SchemaCompareResult = {
     } | null;
   };
 };
-
-export type DeletedCompositeSchema = DeletedCompositeSchemaEntity;
