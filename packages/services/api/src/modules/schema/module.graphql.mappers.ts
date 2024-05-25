@@ -76,12 +76,12 @@ export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
     };
   }>
 >;
-type WithGraphQLParentInfo<T> = T & {
+export type WithGraphQLParentInfo<T> = T & {
   parent: {
     coordinate: string;
   };
 };
-type SchemaCoordinateUsageForUnusedExplorer = {
+export type SchemaCoordinateUsageForUnusedExplorer = {
   isUsed: false;
   usedCoordinates: Set<string>;
   period: DateRange;
@@ -89,7 +89,7 @@ type SchemaCoordinateUsageForUnusedExplorer = {
   project: string;
   target: string;
 };
-type WithSchemaCoordinatesUsage<T> = T & {
+export type WithSchemaCoordinatesUsage<T> = T & {
   usage: // explorer
   () =>
     | PromiseOrValue<{
