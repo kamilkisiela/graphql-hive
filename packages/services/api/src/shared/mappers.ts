@@ -1,37 +1,10 @@
-import type { DocumentNode, GraphQLSchema, Kind } from 'graphql';
-import type {
-  SchemaChangeType,
-  SchemaCheck,
-  SchemaVersion as SchemaVersionEntity,
-} from '@hive/storage';
-import type { ClientStatsValues, OperationStatsValues } from '../__generated__/types';
-import type { SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
-import type { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
+import type { SchemaChangeType } from '@hive/storage';
 import type { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
 import type {
-  ActivityObject,
-  DateRange,
   DeletedCompositeSchema as DeletedCompositeSchemaEntity,
   DocumentCollection,
   DocumentCollectionOperation,
-  Member,
-  Organization,
-  OrganizationMemberRole,
-  Project,
-  PushedCompositeSchema as PushedCompositeSchemaEntity,
-  SingleSchema as SingleSchemaEntity,
-  Target,
-  Token,
-  User,
 } from './entities';
-import type { PromiseOrValue } from './helpers';
-
-export type { Contract } from '../modules/schema/providers/contracts';
-
-export type BreakingChangeMetadataTarget = {
-  name: string;
-  id: string;
-};
 
 export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
 
