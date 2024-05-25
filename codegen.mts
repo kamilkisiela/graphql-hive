@@ -8,15 +8,7 @@ const config: CodegenConfig = {
     // API
     './packages/services/api/src/modules': {
       preset: 'graphql-modules',
-      plugins: [
-        {
-          add: {
-            content: "import type { StripeTypes } from '@hive/stripe-billing';",
-          },
-        },
-        'typescript',
-        'typescript-resolvers',
-      ],
+      plugins: ['typescript', 'typescript-resolvers'],
       presetConfig: {
         baseTypesPath: '../__generated__/types.ts',
         filename: '__generated__/types.ts',
