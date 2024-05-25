@@ -1,10 +1,6 @@
 import type { SchemaChangeType } from '@hive/storage';
 import type { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
-import type {
-  DeletedCompositeSchema as DeletedCompositeSchemaEntity,
-  DocumentCollection,
-  DocumentCollectionOperation,
-} from './entities';
+import type { DeletedCompositeSchema as DeletedCompositeSchemaEntity } from './entities';
 
 export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
 
@@ -29,6 +25,3 @@ export type SchemaCompareResult = {
 };
 
 export type DeletedCompositeSchema = DeletedCompositeSchemaEntity;
-
-export type DocumentCollectionConnection = ReadonlyArray<DocumentCollection>;
-export type DocumentCollectionOperationsConnection = ReadonlyArray<DocumentCollectionOperation>;
