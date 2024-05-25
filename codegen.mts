@@ -70,13 +70,6 @@ const config: CodegenConfig = {
           ClientStats: '../modules/operations/module.graphql.mappers#ClientStatsMapper',
           OperationsStats: '../modules/operations/module.graphql.mappers#OperationsStatsMapper',
           DurationValues: '../modules/operations/module.graphql.mappers#DurationValuesMapper',
-          // TODO: check if delete?
-          SchemaComparePayload:
-            '../shared/mappers#SchemaComparePayload as SchemaComparePayloadMapper',
-          // TODO: check if delete?
-          SchemaCompareResult: '../shared/mappers#SchemaCompareResult as SchemaCompareResultMapper',
-          // TODO: check if delete?
-          SchemaCompareError: '../shared/mappers#SchemaCompareError as SchemaCompareErrorMapper',
           SchemaVersionConnection:
             '../modules/schema/module.graphql.mappers#SchemaVersionConnectionMapper',
           SchemaVersion: '../modules/schema/module.graphql.mappers#SchemaVersionMapper',
