@@ -30,20 +30,5 @@ export type SchemaCompareResult = {
 
 export type DeletedCompositeSchema = DeletedCompositeSchemaEntity;
 
-export type TargetsEstimationDateFilter = {
-  startTime: Date;
-  endTime: Date;
-};
-
-export type TargetsEstimationFilter = TargetsEstimationDateFilter &
-  (
-    | {
-        target: string;
-      }
-    | {
-        organization: string;
-      }
-  );
-
 export type DocumentCollectionConnection = ReadonlyArray<DocumentCollection>;
 export type DocumentCollectionOperationsConnection = ReadonlyArray<DocumentCollectionOperation>;
