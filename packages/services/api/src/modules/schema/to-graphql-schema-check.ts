@@ -1,6 +1,9 @@
+import type {
+  FailedSchemaCheckMapper,
+  SuccessfulSchemaCheckMapper,
+} from './module.graphql.mappers';
 import lodash from 'lodash';
 import { SchemaCheck } from '@hive/storage';
-import type { FailedSchemaCheckMapper, SuccessfulSchemaCheckMapper } from '../../shared/mappers';
 
 const { curry } = lodash;
 /**
