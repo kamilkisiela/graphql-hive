@@ -31,8 +31,8 @@ export interface SchemaVersionMapper extends SchemaVersion {
   organization: string;
 }
 export type SingleSchemaMapper = SingleSchema;
-export type CompositeSchemaMapper = PushedCompositeSchema; // eddeee888 renamed from PushedCompositeSchema
-export type SchemaMapper = SingleSchemaMapper | CompositeSchemaMapper; // TODO: check if union is wired up correctly by Server Preset
+export type CompositeSchemaMapper = PushedCompositeSchema;
+export type SchemaMapper = SingleSchemaMapper | CompositeSchemaMapper; // TODO: eddeee888 to check if union is wired up correctly by Server Preset
 export type SchemaExplorerMapper = {
   schema: GraphQLSchema;
   usage: {
