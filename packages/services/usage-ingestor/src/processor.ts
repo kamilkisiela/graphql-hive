@@ -44,7 +44,6 @@ type NormalizeFunction = (arg: RawOperationMapRecord) => {
 };
 
 const DAY_IN_MS = 86_400_000;
-const RETENTION_FALLBACK = 365;
 
 export function createProcessor(config: { logger: ServiceLogger }) {
   const { logger } = config;
@@ -172,7 +171,7 @@ export function createProcessor(config: { logger: ServiceLogger }) {
               body: normalized.body,
               operation_kind: normalized.type,
               coordinates: normalized.coordinates,
-              expires_at: group.operation.expiresAt || timestamp + RETENTION_FALLBACK * DAY_IN_MS,
+              expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
               timestamp,
             }),
           );
@@ -232,7 +231,7 @@ function processSingleOperation(
 
   return {
     timestamp,
-    expiresAt: operation.expiresAt || timestamp + RETENTION_FALLBACK * DAY_IN_MS,
+    expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
     organization,
     execution,
@@ -285,7 +284,7 @@ function processSubscriptionOperation(
 
   return {
     timestamp,
-    expiresAt: operation.expiresAt || timestamp + RETENTION_FALLBACK * DAY_IN_MS,
+    expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
     organization,
     metadata,
