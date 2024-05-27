@@ -10,9 +10,6 @@ const MigrationsTableModel = z.object({
   ),
 });
 
-// eslint-disable-next-line no-process-env
-const isGraphQLHiveCloud = process.env.CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD === '1';
-
 interface QueryResponse<T> {
   data: readonly T[];
   rows: number;
@@ -29,6 +26,7 @@ export type Action = (
 
 export async function migrateClickHouse(
   isClickHouseMigrator: boolean,
+  isHiveCloud: boolean,
   clickhouse: {
     protocol: string;
     host: string;
@@ -45,9 +43,10 @@ export async function migrateClickHouse(
   const endpoint = `${clickhouse.protocol}://${clickhouse.host}:${clickhouse.port}`;
 
   console.log('Migrating ClickHouse');
-  console.log('Endpoint:', endpoint);
-  console.log('Username:', clickhouse.username);
-  console.log('Password:', clickhouse.password.length);
+  console.log('Endpoint:          ', endpoint);
+  console.log('Username:          ', clickhouse.username);
+  console.log('Password:          ', clickhouse.password.length);
+  console.log('isGraphQLHiveCloud:', isHiveCloud);
 
   // Warm up ClickHouse instance.
   // This is needed because ClickHouse takes a while to start up
@@ -67,7 +66,9 @@ export async function migrateClickHouse(
     username: clickhouse.username,
     password: clickhouse.password,
     retry: {
-      calculateDelay({ attemptCount }) {
+      calculateDelay({ attemptCount, error }) {
+        console.log('Error:', error);
+        console.log('ClickHouse is not ready, retrying', attemptCount);
         if (attemptCount > 10) {
           // Stop retrying after 10 attempts
           return 0;
@@ -78,6 +79,8 @@ export async function migrateClickHouse(
       },
     },
   });
+
+  console.log('ClickHouse is ready');
 
   function exec(query: string, settings?: Record<string, string>) {
     return got
@@ -146,6 +149,8 @@ export async function migrateClickHouse(
     SELECT id FROM default.migrations ORDER BY id DESC
   `);
 
+  console.log('Migrations fetched');
+
   const completedActions = new Set(
     MigrationsTableModel.parse(JSON.parse(migrationsResponse.body)).data.map(({ id }) => id),
   );
@@ -159,6 +164,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/006-monthly-operations-log'),
     import('./clickhouse-actions/007-james-bond-aggregates-hourly-and-minutely'),
     import('./clickhouse-actions/008-daily-operations-log'),
+    import('./clickhouse-actions/009-ttl-1-year'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
@@ -176,7 +182,7 @@ export async function migrateClickHouse(
           await exec(query, settings);
         },
         query,
-        isGraphQLHiveCloud,
+        isHiveCloud,
       );
     } catch (error) {
       console.error(error);
