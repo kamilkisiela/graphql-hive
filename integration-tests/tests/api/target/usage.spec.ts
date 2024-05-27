@@ -1286,7 +1286,7 @@ test.concurrent('ignore operations with syntax errors', async () => {
 
 test.concurrent('ensure correct data', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, organization } = await createOrg();
   const { target, createToken } = await createProject(ProjectType.Single);
   const writeToken = await createToken({
     targetScopes: [
@@ -1375,7 +1375,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(operationCollectionRow.expires_at),
       parseClickHouseDate(operationCollectionRow.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // operations
   const operationsResult = await clickHouseQuery<{
@@ -1418,7 +1418,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(operationWithClient.expires_at),
       parseClickHouseDate(operationWithClient.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   const operationWithoutClient = operationsResult.data.find(o => o.client_name.length === 0)!;
   expect(operationWithoutClient).toBeDefined();
@@ -1433,7 +1433,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(operationWithoutClient.expires_at),
       parseClickHouseDate(operationWithoutClient.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // operations_hourly
   const operationsHourlyResult = await clickHouseQuery<{
@@ -1501,7 +1501,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(dailyAgg.expires_at),
       parseClickHouseDate(dailyAgg.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // coordinates_daily
   const coordinatesDailyResult = await clickHouseQuery<{
@@ -1536,7 +1536,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(rootCoordinate.expires_at),
       parseClickHouseDate(rootCoordinate.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   const fieldCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query.ping')!;
   expect(fieldCoordinate).toBeDefined();
@@ -1548,7 +1548,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(fieldCoordinate.expires_at),
       parseClickHouseDate(fieldCoordinate.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // clients_daily
   const clientsDailyResult = await clickHouseQuery<{
@@ -1586,7 +1586,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(dailyAggOfKnownClient.expires_at),
       parseClickHouseDate(dailyAggOfKnownClient.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 
   const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
   expect(dailyAggOfUnknownClient).toBeDefined();
@@ -1599,7 +1599,7 @@ test.concurrent('ensure correct data', async () => {
       parseClickHouseDate(dailyAggOfUnknownClient.expires_at),
       parseClickHouseDate(dailyAggOfUnknownClient.timestamp),
     ),
-  ).toBe(30);
+  ).toBe(organization.rateLimit.retentionInDays);
 });
 
 test.concurrent('ensure correct data when data retention period is non-default', async () => {

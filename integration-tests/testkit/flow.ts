@@ -58,6 +58,9 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
                   name
                   locked
                 }
+                rateLimit {
+                  retentionInDays
+                }
               }
             }
           }
