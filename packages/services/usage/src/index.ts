@@ -171,8 +171,10 @@ async function main() {
           return;
         }
 
-        const retentionInfo =
-          (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
+        // HOTFIX: Keep all data for 365 days, while we figure out how to handle retention correctly.
+        const retentionInfo = 365;
+        // const retentionInfo =
+        //   (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
 
         const stopTimer = collectDuration.startTimer();
         try {
