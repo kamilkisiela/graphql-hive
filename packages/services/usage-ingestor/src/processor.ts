@@ -285,7 +285,7 @@ function processSubscriptionOperation(
 
   return {
     timestamp,
-    expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
+    expiresAt: operation.expiresAt || timestamp + RETENTION_FALLBACK * DAY_IN_MS,
     target,
     organization,
     metadata,
