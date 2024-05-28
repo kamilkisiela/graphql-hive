@@ -40,7 +40,9 @@ export type CachedRateLimitInfo = {
   retentionInDays: number;
 };
 
-const DEFAULT_RETENTION_IN_DAYS = 30;
+// It should be equal or higher than the highest possible retention value (enterprise),
+// to prevent applying lower retention value then expected.
+const RETENTION_IN_DAYS_FALLBACK = 365;
 
 export type Limiter = ReturnType<typeof createRateLimiter>;
 
@@ -206,22 +208,23 @@ export function createRateLimiter(config: {
     }
   });
 
+  function getOrganizationFromCache(targetId: string) {
+    const orgId = targetIdToOrgLookup.get(targetId);
+    return orgId ? cachedResult.get(orgId) : undefined;
+  }
+
   return {
     logger,
     async readiness() {
       return initialized && (await (await postgres$).isReady());
     },
     getRetention(targetId: string) {
-      const orgId = targetIdToOrgLookup.get(targetId);
-
-      if (!orgId) {
-        return DEFAULT_RETENTION_IN_DAYS;
-      }
-
-      const orgData = cachedResult.get(orgId);
+      const orgData = getOrganizationFromCache(targetId);
 
       if (!orgData) {
-        return DEFAULT_RETENTION_IN_DAYS;
+        // This is a safety measure to prevent setting the retention to a lower value then expected,
+        // in case of an organization data not being available yet in the cache.
+        return RETENTION_IN_DAYS_FALLBACK;
       }
 
       return orgData.retentionInDays;
