@@ -212,8 +212,8 @@ importers:
         specifier: 3.116.1
         version: 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.12)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/random':
-        specifier: 4.16.1
-        version: 4.16.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.12)(typescript@5.4.5))(typescript@5.4.5)
+        specifier: 4.16.2
+        version: 4.16.2(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.12)(typescript@5.4.5))(typescript@5.4.5)
       js-yaml:
         specifier: 4.1.0
         version: 4.1.0
@@ -5891,8 +5891,8 @@ packages:
   '@pulumi/query@0.3.0':
     resolution: {integrity: sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==}
 
-  '@pulumi/random@4.16.1':
-    resolution: {integrity: sha512-WbjxA7rqOqJkDT4mEltQkJ97GGjCLHJ6e/8r/HRdpoJ4xapfqgAVdt4/dgVtHBsxngglNkauL2uOy/h4Jh1Arg==}
+  '@pulumi/random@4.16.2':
+    resolution: {integrity: sha512-jBYLrb2Bfh5WbmhyqTHVGYIOkckRQefDgBgvwdMF6i0NzboOizmjEj6MdN5RyibVMtWN3b7Y0kwKeE8uPIq3qQ==}
 
   '@radix-ui/number@1.0.1':
     resolution: {integrity: sha512-T5gIdVO2mmPW3NNhjNgEP3cqMXjXL9UbO0BzWcXfvdBs+BohbQxvd/K5hSVKmn9/lbTdsQVKbUcP5WLCwvUbBg==}
@@ -22435,7 +22435,7 @@ snapshots:
 
   '@pulumi/query@0.3.0': {}
 
-  '@pulumi/random@4.16.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.12)(typescript@5.4.5))(typescript@5.4.5)':
+  '@pulumi/random@4.16.2(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.12)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
       '@pulumi/pulumi': 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.12)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
