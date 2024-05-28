@@ -40,7 +40,7 @@ export type CachedRateLimitInfo = {
   retentionInDays: number;
 };
 
-const DEFAULT_RETENTION = 30; // days
+const DEFAULT_RETENTION_IN_DAYS = 30;
 
 export type Limiter = ReturnType<typeof createRateLimiter>;
 
@@ -82,7 +82,7 @@ export function createRateLimiter(config: {
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
-  const targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
+  let targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
   let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
   const fetchAndCalculateUsageInformation = traceInline('Calculate Rate Limit', {}, async () => {
@@ -114,9 +114,13 @@ export function createRateLimiter(config: {
       `Fetched total of ${Object.keys(operations).length} targets with usage information`,
     );
 
+    const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
     const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
     for (const record of records) {
+      for (const target of record.targets) {
+        newTargetIdToOrgLookup.set(target, record.organization);
+      }
       if (!newCachedResult.has(record.organization)) {
         newCachedResult.set(record.organization, {
           orgName: record.org_name,
@@ -193,6 +197,7 @@ export function createRateLimiter(config: {
     });
 
     cachedResult = newCachedResult;
+    targetIdToOrgLookup = newTargetIdToOrgLookup;
 
     const scheduledEmails = emails.drain();
     if (scheduledEmails.length > 0) {
@@ -210,13 +215,13 @@ export function createRateLimiter(config: {
       const orgId = targetIdToOrgLookup.get(targetId);
 
       if (!orgId) {
-        return DEFAULT_RETENTION;
+        return DEFAULT_RETENTION_IN_DAYS;
       }
 
       const orgData = cachedResult.get(orgId);
 
       if (!orgData) {
-        return DEFAULT_RETENTION;
+        return DEFAULT_RETENTION_IN_DAYS;
       }
 
       return orgData.retentionInDays;
