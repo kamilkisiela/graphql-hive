@@ -69,7 +69,7 @@
     "@manypkg/get-packages": "2.2.1",
     "@next/eslint-plugin-next": "14.2.3",
     "@parcel/watcher": "2.4.1",
-    "@sentry/cli": "2.31.2",
+    "@sentry/cli": "2.32.1",
     "@swc/core": "1.5.7",
     "@theguild/eslint-config": "0.11.9",
     "@theguild/prettier-config": "2.0.6",
