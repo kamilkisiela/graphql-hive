@@ -129,7 +129,7 @@
     "tailwindcss-radix": "3.0.3",
     "tslib": "2.6.2",
     "urql": "4.1.0",
-    "use-debounce": "10.0.0",
+    "use-debounce": "10.0.1",
     "valtio": "1.13.2",
     "vite": "5.2.12",
     "vite-tsconfig-paths": "4.3.2",

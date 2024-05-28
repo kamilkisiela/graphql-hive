@@ -1950,8 +1950,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0(@urql/core@5.0.3(graphql@16.8.1))(react@18.3.1)
       use-debounce:
-        specifier: 10.0.0
-        version: 10.0.0(react@18.3.1)
+        specifier: 10.0.1
+        version: 10.0.1(react@18.3.1)
       valtio:
         specifier: 1.13.2
         version: 1.13.2(@types/react@18.3.3)(react@18.3.1)
@@ -16080,8 +16080,8 @@ packages:
       '@types/react':
         optional: true
 
-  use-debounce@10.0.0:
-    resolution: {integrity: sha512-XRjvlvCB46bah9IBXVnq/ACP2lxqXyZj0D9hj4K5OzNroMDpTEBg8Anuh1/UfRTRs7pLhQ+RiNxxwZu9+MVl1A==}
+  use-debounce@10.0.1:
+    resolution: {integrity: sha512-0uUXjOfm44e6z4LZ/woZvkM8FwV1wiuoB6xnrrOmeAEjRDDzTLQNRFtYHvqUsJdrz1X37j0rVGIVp144GLHGKg==}
     engines: {node: '>= 16.0.0'}
     peerDependencies:
       react: '>=16.8.0'
@@ -35313,7 +35313,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.3
 
-  use-debounce@10.0.0(react@18.3.1):
+  use-debounce@10.0.1(react@18.3.1):
     dependencies:
       react: 18.3.1
 
