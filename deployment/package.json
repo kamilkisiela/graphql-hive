@@ -9,7 +9,7 @@
     "@lbrlabs/pulumi-grafana": "0.1.0",
     "@manypkg/get-packages": "2.2.1",
     "@pulumi/cloudflare": "4.16.0",
-    "@pulumi/kubernetes": "4.11.0",
+    "@pulumi/kubernetes": "4.12.0",
     "@pulumi/kubernetesx": "0.1.6",
     "@pulumi/pulumi": "3.116.1",
     "@pulumi/random": "4.16.1",
