@@ -1,3 +1,4 @@
+import type { SchemaVersionMapper as SchemaVersion } from '../module.graphql.mappers';
 import { print } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import { CriticalityLevel } from '@graphql-inspector/core';
@@ -8,7 +9,6 @@ import {
 } from '@theguild/federation-composition';
 import { ProjectType } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
-import type { SchemaVersion } from '../../../shared/mappers';
 import { parseGraphQLSource } from '../../../shared/schema';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
