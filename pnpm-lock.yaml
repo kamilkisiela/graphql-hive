@@ -607,8 +607,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       pg-promise:
-        specifier: 11.6.0
-        version: 11.6.0
+        specifier: 11.7.8
+        version: 11.7.8
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -1320,8 +1320,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       pg-promise:
-        specifier: 11.6.0
-        version: 11.6.0
+        specifier: 11.7.8
+        version: 11.7.8
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -13587,9 +13587,9 @@ packages:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
 
-  pg-minify@1.6.3:
-    resolution: {integrity: sha512-NoSsPqXxbkD8RIe+peQCqiea4QzXgosdTKY8p7PsbbGsh2F8TifDj/vJxfuR8qJwNYrijdSs7uf0tAe6WOyCsQ==}
-    engines: {node: '>=12.0.0'}
+  pg-minify@1.6.4:
+    resolution: {integrity: sha512-cf6hBt1YqzqPX0OznXKSv4U7e4o7eUU4zp2zQsbJ+4OCNNr7EnnAVWkIz4k0dv6UN4ouS1ZL4WlXxCrZHHl69g==}
+    engines: {node: '>=14.0.0'}
 
   pg-numeric@1.0.2:
     resolution: {integrity: sha512-BM/Thnrw5jm2kKLE5uJkXqqExRUY/toLHda65XgFTBTFYZyopbKjBe29Ii3RbkvlsMoFwD+tHeGaCjjv0gHlyw==}
@@ -13600,8 +13600,8 @@ packages:
     peerDependencies:
       pg: '>=8.0'
 
-  pg-promise@11.6.0:
-    resolution: {integrity: sha512-NDRPMfkv3ia89suWlJ4iGvP6X5YFrLJ2+9AIVISeBFFZ29Eb4FNXX9JaVb1p1OrpQkE2yT7igmXPL7UYQhk+6A==}
+  pg-promise@11.7.8:
+    resolution: {integrity: sha512-s5pcLp8QLIFNhnEsxaqBtDh7LsOG3hjJbVOVpYlWPqg/g1LIixGMtbNgbxW1HkTSY5rKT9tyE0J+dw2X7bD3rQ==}
     engines: {node: '>=14.0'}
 
   pg-protocol@1.6.1:
@@ -32535,7 +32535,7 @@ snapshots:
 
   pg-int8@1.0.1: {}
 
-  pg-minify@1.6.3: {}
+  pg-minify@1.6.4: {}
 
   pg-numeric@1.0.2: {}
 
@@ -32543,11 +32543,11 @@ snapshots:
     dependencies:
       pg: 8.11.5
 
-  pg-promise@11.6.0:
+  pg-promise@11.7.8:
     dependencies:
       assert-options: 0.8.1
       pg: 8.11.5
-      pg-minify: 1.6.3
+      pg-minify: 1.6.4
       spex: 3.3.0
     transitivePeerDependencies:
       - pg-native
