@@ -103,7 +103,7 @@
     "monaco-themes": "0.4.4",
     "pino": "9.1.0",
     "pino-http": "9.0.0",
-    "pino-pretty": "11.0.0",
+    "pino-pretty": "11.1.0",
     "react": "18.3.1",
     "react-day-picker": "8.10.1",
     "react-dom": "18.3.1",
