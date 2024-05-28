@@ -7,11 +7,8 @@ const config: CodegenConfig = {
   emitLegacyCommonJSImports: true,
   generates: {
     // API
-    './packages/services/api/src': {
-      hooks: {
-        afterOneFileWrite: ['prettier --write'],
-      },
-      ...defineConfig({
+    './packages/services/api/src': defineConfig(
+      {
         typeDefsFilePath: false,
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
@@ -61,8 +58,13 @@ const config: CodegenConfig = {
             SupportTicketStatus: '../shared/entities#SupportTicketStatus',
           },
         },
-      }),
-    },
+      },
+      {
+        hooks: {
+          afterOneFileWrite: ['prettier --write'],
+        },
+      },
+    ),
     './packages/services/api/src/modules': {
       preset: 'graphql-modules',
       plugins: ['typescript', 'typescript-resolvers'],
