@@ -1,3 +1,4 @@
+import { defineConfig } from '@eddeee888/gcg-typescript-resolver-files';
 import { type CodegenConfig } from '@graphql-codegen/cli';
 import { addTypenameSelectionDocumentTransform } from '@graphql-codegen/client-preset';
 
@@ -6,6 +7,62 @@ const config: CodegenConfig = {
   emitLegacyCommonJSImports: true,
   generates: {
     // API
+    './packages/services/api/src': {
+      hooks: {
+        afterOneFileWrite: ['prettier --write'],
+      },
+      ...defineConfig({
+        typeDefsFilePath: false,
+        resolverGeneration: 'minimal',
+        resolverMainFileMode: 'modules',
+        resolverTypesPath: './__generated__/types.next.ts',
+        blacklistedModules: [
+          'activity',
+          'admin',
+          'alerts',
+          'auth',
+          'billing',
+          'cdn',
+          'collection',
+          'feedback',
+          'integrations',
+          'lab',
+          'oidc-integrations',
+          'operations',
+          'organization',
+          'policy',
+          'project',
+          'rate-limit',
+          'schema',
+          'shared',
+          'support',
+          'target',
+          'token',
+        ],
+        scalarsOverrides: {
+          DateTime: { type: 'string' },
+          Date: { type: 'string' },
+          SafeInt: { type: 'number' },
+          ID: { type: 'string' },
+        },
+        typesPluginsConfig: {
+          immutableTypes: true,
+          namingConvention: 'change-case-all#pascalCase', // TODO: This is triggering a warning about type name not working 100% of the time. eddeee888 to fix in Server Preset by using `meta` field.
+          contextType: 'GraphQLModules.ModuleContext',
+          enumValues: {
+            ProjectType: '../shared/entities#ProjectType',
+            NativeFederationCompatibilityStatus:
+              '../shared/entities#NativeFederationCompatibilityStatus',
+            TargetAccessScope: '../modules/auth/providers/target-access#TargetAccessScope',
+            ProjectAccessScope: '../modules/auth/providers/project-access#ProjectAccessScope',
+            OrganizationAccessScope:
+              '../modules/auth/providers/organization-access#OrganizationAccessScope',
+            SupportTicketPriority: '../shared/entities#SupportTicketPriority',
+            SupportTicketStatus: '../shared/entities#SupportTicketStatus',
+          },
+        },
+      }),
+    },
     './packages/services/api/src/modules': {
       preset: 'graphql-modules',
       plugins: ['typescript', 'typescript-resolvers'],
