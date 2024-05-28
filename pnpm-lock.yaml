@@ -902,8 +902,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       sendmail:
         specifier: 1.6.1
         version: 1.6.1
@@ -971,8 +971,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1010,8 +1010,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1079,8 +1079,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1190,8 +1190,8 @@ importers:
         specifier: 5.4.1
         version: 5.4.1
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       prom-client:
         specifier: 15.1.2
         version: 15.1.2
@@ -1368,8 +1368,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1413,8 +1413,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1467,8 +1467,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1503,8 +1503,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1548,8 +1548,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1590,8 +1590,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1872,8 +1872,8 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
       pino-pretty:
-        specifier: 11.0.0
-        version: 11.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -10309,8 +10309,8 @@ packages:
   fast-content-type-parse@1.1.0:
     resolution: {integrity: sha512-fBHHqSTFLVnR61C+gltJuE5GkVQMV0S2nqUO8TJ+5Z3qAKG8vAx4FKai1s5jq/inV1+sREynIWSuQ6HgoSXpDQ==}
 
-  fast-copy@3.0.0:
-    resolution: {integrity: sha512-4HzS+9pQ5Yxtv13Lhs1Z1unMXamBdn5nA4bEi1abYpDNSpSp7ODYQ1KPMF6nTatfEzgH6/zPvXKU1zvHiUjWlA==}
+  fast-copy@3.0.2:
+    resolution: {integrity: sha512-dl0O9Vhju8IrcLndv2eU4ldt1ftXMqqfgN4H1cpmGV7P6jeB9FwpN9a2c8DPGE1Ys88rNUJVYDHq73CGAGOPfQ==}
 
   fast-decode-uri-component@1.0.1:
     resolution: {integrity: sha512-WKgKWg5eUxvRZGwW8FvfbaH7AXSh2cL+3j5fMGzUMCxWBJ3dV3a7Wz8y2f/uQ0e3B6WmodD3oS54jTQ9HVTIIg==}
@@ -13702,17 +13702,14 @@ packages:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
 
-  pino-abstract-transport@1.1.0:
-    resolution: {integrity: sha512-lsleG3/2a/JIWUtf9Q5gUNErBqwIu1tUKTT3dUzaf5DySw9ra1wcqKjJjLX1VTY64Wk1eEOYsVGSaGfCK85ekA==}
-
   pino-abstract-transport@1.2.0:
     resolution: {integrity: sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==}
 
   pino-http@9.0.0:
     resolution: {integrity: sha512-Q9QDNEz0vQmbJtMFjOVr2c9yL92vHudjmr3s3m6J1hbw3DBGFZJm3TIj9TWyynZ4GEsEA9SOtni4heRUr6lNOg==}
 
-  pino-pretty@11.0.0:
-    resolution: {integrity: sha512-YFJZqw59mHIY72wBnBs7XhLGG6qpJMa4pEQTRgEPEbjIYbng2LXEZZF1DoyDg9CfejEy8uZCyzpcBXXG0oOCwQ==}
+  pino-pretty@11.1.0:
+    resolution: {integrity: sha512-PjBzFL7IMSl1YkS9cSVWC+4gONmW0Fi+fvUzy74zK6RJHk4RkfW+e22NydRrGEtBRa5n6/oPNLPqjUeQrzqcLQ==}
     hasBin: true
 
   pino-std-serializers@6.2.2:
@@ -28288,7 +28285,7 @@ snapshots:
 
   fast-content-type-parse@1.1.0: {}
 
-  fast-copy@3.0.0: {}
+  fast-copy@3.0.2: {}
 
   fast-decode-uri-component@1.0.1: {}
 
@@ -32712,11 +32709,6 @@ snapshots:
 
   pify@4.0.1: {}
 
-  pino-abstract-transport@1.1.0:
-    dependencies:
-      readable-stream: 4.4.0
-      split2: 4.1.0
-
   pino-abstract-transport@1.2.0:
     dependencies:
       readable-stream: 4.4.0
@@ -32729,21 +32721,21 @@ snapshots:
       pino-std-serializers: 6.2.2
       process-warning: 3.0.0
 
-  pino-pretty@11.0.0:
+  pino-pretty@11.1.0:
     dependencies:
       colorette: 2.0.20
       dateformat: 4.6.3
-      fast-copy: 3.0.0
+      fast-copy: 3.0.2
       fast-safe-stringify: 2.1.1
       help-me: 5.0.0
       joycon: 3.1.1
       minimist: 1.2.8
       on-exit-leak-free: 2.1.0
-      pino-abstract-transport: 1.1.0
+      pino-abstract-transport: 1.2.0
       pump: 3.0.0
       readable-stream: 4.4.0
       secure-json-parse: 2.7.0
-      sonic-boom: 3.7.0
+      sonic-boom: 4.0.1
       strip-json-comments: 3.1.1
 
   pino-std-serializers@6.2.2: {}
