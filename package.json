@@ -94,7 +94,7 @@
     "rimraf": "4.4.1",
     "ts-node": "10.9.2",
     "tsup": "8.0.2",
-    "tsx": "4.10.5",
+    "tsx": "4.11.0",
     "turbo": "1.13.3",
     "typescript": "5.4.5",
     "vite-tsconfig-paths": "4.3.2",
