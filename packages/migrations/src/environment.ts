@@ -31,6 +31,9 @@ const EnvironmentModel = zod.object({
   RELEASE: emptyString(zod.string().optional()),
   MIGRATOR: emptyString(zod.string().optional()),
   CLICKHOUSE_MIGRATOR: emptyString(zod.string().optional()),
+  CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD: zod
+    .union([zod.literal('1'), zod.literal('0')])
+    .optional(),
 });
 
 const PostgresModel = zod.object({
@@ -110,4 +113,5 @@ export const env = {
       : null,
   isMigrator: base.MIGRATOR === 'up',
   isClickHouseMigrator: base.CLICKHOUSE_MIGRATOR === 'up',
+  isHiveCloud: base.CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD === '1',
 } as const;
