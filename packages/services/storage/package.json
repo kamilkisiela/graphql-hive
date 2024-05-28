@@ -28,7 +28,7 @@
     "fast-json-stable-stringify": "2.1.0",
     "got": "14.2.1",
     "param-case": "3.0.4",
-    "pg-promise": "11.6.0",
+    "pg-promise": "11.7.8",
     "slonik": "30.4.4",
     "slonik-interceptor-query-logging": "45.4.1",
     "slonik-utilities": "1.9.4",
