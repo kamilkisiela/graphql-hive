@@ -40,7 +40,7 @@ export type CachedRateLimitInfo = {
   retentionInDays: number;
 };
 
-const DEFAULT_RETENTION = 30; // days
+const DEFAULT_RETENTION_IN_DAYS = 30;
 
 export type Limiter = ReturnType<typeof createRateLimiter>;
 
@@ -215,13 +215,13 @@ export function createRateLimiter(config: {
       const orgId = targetIdToOrgLookup.get(targetId);
 
       if (!orgId) {
-        return DEFAULT_RETENTION;
+        return DEFAULT_RETENTION_IN_DAYS;
       }
 
       const orgData = cachedResult.get(orgId);
 
       if (!orgData) {
-        return DEFAULT_RETENTION;
+        return DEFAULT_RETENTION_IN_DAYS;
       }
 
       return orgData.retentionInDays;
