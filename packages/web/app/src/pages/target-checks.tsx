@@ -150,7 +150,7 @@ const Navigation = (props: {
           ))}
           {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
             <Button
-              variant="link"
+              variant="orangeLink"
               onClick={() => {
                 props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
               }}
