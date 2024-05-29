@@ -47,8 +47,8 @@ importers:
   .:
     devDependencies:
       '@0no-co/graphqlsp':
-        specifier: 1.12.3
-        version: 1.12.3(graphql@16.8.1)(typescript@5.4.5)
+        specifier: 1.12.5
+        version: 1.12.5(graphql@16.8.1)(typescript@5.4.5)
       '@actions/core':
         specifier: 1.10.1
         version: 1.10.1
@@ -2060,8 +2060,8 @@ packages:
       graphql:
         optional: true
 
-  '@0no-co/graphqlsp@1.12.3':
-    resolution: {integrity: sha512-U0hV/FmFgm2perV+mrXKe/7Z5F4/9rmOziHJYYQgKLwzUVuN5LQG0qs3cLBGxAqoosG0HfTi2cQkgMKY1CMbYQ==}
+  '@0no-co/graphqlsp@1.12.5':
+    resolution: {integrity: sha512-YS9s8sf3XLaVdBt33u1mbUdfUSLiarQW1SFd3ITh2CLWz1nVnVTN0oCrpepuFHUJ7rt+b6Gk14sgjP4ONdeZfQ==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
@@ -16605,7 +16605,7 @@ snapshots:
     optionalDependencies:
       graphql: 16.8.1
 
-  '@0no-co/graphqlsp@1.12.3(graphql@16.8.1)(typescript@5.4.5)':
+  '@0no-co/graphqlsp@1.12.5(graphql@16.8.1)(typescript@5.4.5)':
     dependencies:
       '@gql.tada/internal': 1.0.0(graphql@16.8.1)(typescript@5.4.5)
       graphql: 16.8.1
