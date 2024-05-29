@@ -115,7 +115,7 @@ export function OrganizationTransferPage(props: { organizationId: string; code: 
                   <p className={classes.description}>Not found</p>
 
                   <div className={classes.actions}>
-                    <Button size="large" variant="secondary" onClick={goBack}>
+                    <Button size="lg" variant="secondary" onClick={goBack}>
                       Back to Hive
                     </Button>
                   </div>
