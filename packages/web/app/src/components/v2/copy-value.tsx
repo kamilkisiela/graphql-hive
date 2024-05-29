@@ -37,6 +37,8 @@ export const CopyValue = ({
       readOnly
       suffix={
         <Button
+          size='icon'
+          variant='link'
           className="p-0 focus:ring-transparent"
           onClick={handleClick}
           title={isCopied ? 'Copied!' : 'Copy to clipboard'}
