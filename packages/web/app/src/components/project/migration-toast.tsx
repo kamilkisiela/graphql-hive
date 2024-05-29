@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 export function ProjectMigrationToast({ projectId, orgId }: { projectId: string; orgId: string }) {
   const router = useRouter();
   const handleOnClick = () => {
-    router.navigate({
+    void router.navigate({
       to: `/${orgId}/${projectId}/view/settings`,
     });
   };

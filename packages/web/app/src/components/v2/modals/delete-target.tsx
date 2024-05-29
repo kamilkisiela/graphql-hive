@@ -56,7 +56,7 @@ export const DeleteTargetModal = ({
         <Button
           className="w-full justify-center"
           size="lg"
-          variant={'destructive'}
+          variant="destructive"
           onClick={async () => {
             await mutate({
               selector: {
