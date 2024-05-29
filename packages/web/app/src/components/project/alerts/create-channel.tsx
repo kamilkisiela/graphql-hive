@@ -2,7 +2,8 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input, Modal, Select, Tag } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Heading, Input, Modal, Select, Tag } from '@/components/v2';
 import { graphql } from '@/gql';
 import { AlertChannelType } from '@/gql/graphql';
 
@@ -192,10 +193,21 @@ export const CreateChannelModal = ({
         )}
 
         <div className="flex w-full gap-2">
-          <Button type="button" size="large" block onClick={toggleModalOpen}>
+          <Button
+            type="button"
+            size="lg"
+            className="w-full justify-center"
+            onClick={toggleModalOpen}
+          >
             Cancel
           </Button>
-          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full justify-center"
+            variant="primary"
+            disabled={isSubmitting}
+          >
             Create Channel
           </Button>
         </div>

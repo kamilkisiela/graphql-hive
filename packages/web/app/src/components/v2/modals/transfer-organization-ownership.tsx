@@ -3,7 +3,8 @@ import clsx from 'clsx';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input, Modal } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Heading, Input, Modal } from '@/components/v2';
 import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
@@ -295,13 +296,13 @@ export const TransferOrganizationOwnershipModal = ({
       </ul>
 
       <div className="flex w-full gap-2">
-        <Button type="button" size="large" block onClick={toggleModalOpen}>
+        <Button type="button" className="w-full justify-center" size="lg" onClick={toggleModalOpen}>
           Cancel
         </Button>
         <Button
-          size="large"
-          block
-          variant="primary"
+          size="lg"
+          className="w-full justify-center"
+          variant="default"
           disabled={isSubmitting || !isValid || !touched.confirmation || !touched.newOwner}
           onClick={() => handleSubmit()}
         >

@@ -3,7 +3,6 @@ export { Activities } from '@/components/ui/activities';
 export { Autocomplete } from '@/components/v2/autocomplete';
 export { Avatar } from '@/components/v2/avatar';
 export { Badge } from '@/components/v2/badge';
-export { Button } from '@/components/v2/button';
 export { Callout } from '@/components/v2/callout';
 export { Card } from '@/components/v2/card';
 export { Checkbox } from '@/components/v2/checkbox';

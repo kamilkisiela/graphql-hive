@@ -1,6 +1,7 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
-import { Button, Heading, Modal } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
@@ -49,13 +50,13 @@ export const DeleteTargetModal = ({
         Are you sure you wish to delete this target? This action is irreversible!
       </p>
       <div className="flex w-full gap-2">
-        <Button type="button" size="large" block onClick={toggleModalOpen}>
+        <Button className="w-full justify-center" type="button" size="lg" onClick={toggleModalOpen}>
           Cancel
         </Button>
         <Button
-          size="large"
-          block
-          danger
+          className="w-full justify-center"
+          size="lg"
+          variant={'destructive'}
           onClick={async () => {
             await mutate({
               selector: {

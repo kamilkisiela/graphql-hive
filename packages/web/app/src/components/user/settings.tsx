@@ -2,8 +2,9 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input, Modal } from '@/components/v2';
+import { Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
+import { Button } from '../ui/button';
 import { useToast } from '../ui/use-toast';
 
 const UserSettings_MeQuery = graphql(`
@@ -137,7 +138,13 @@ export function UserSettingsModal({
           <span className="text-red-500">{mutation.data.updateMe.error.message}</span>
         )}
 
-        <Button type="submit" variant="primary" size="large" block disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          className="w-full justify-center"
+          disabled={isSubmitting}
+        >
           Save Changes
         </Button>
       </form>

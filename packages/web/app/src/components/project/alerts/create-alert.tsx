@@ -2,7 +2,8 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Modal, Select } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Heading, Modal, Select } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AlertType } from '@/gql/graphql';
 
@@ -157,10 +158,21 @@ export const CreateAlertModal = (props: {
         {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 
         <div className="flex w-full gap-2">
-          <Button type="button" size="large" block onClick={toggleModalOpen}>
+          <Button
+            type="button"
+            size="lg"
+            className="w-full justify-center"
+            onClick={toggleModalOpen}
+          >
             Cancel
           </Button>
-          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full justify-center"
+            variant="primary"
+            disabled={isSubmitting}
+          >
             Create Alert
           </Button>
         </div>

@@ -7,11 +7,11 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Badge } from '@/components/v2/badge';
-import { Button } from '@/components/v2/button';
 import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { Link, Outlet, useParams, useRouter } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
 
 const HistoryPage_VersionsPageQuery = graphql(`
   query HistoryPage_VersionsPageQuery(

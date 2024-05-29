@@ -10,11 +10,11 @@ import { QueryError } from '@/components/ui/query-error';
 import { Switch } from '@/components/ui/switch';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Badge } from '@/components/v2/badge';
-import { Button as LegacyButton } from '@/components/v2/button';
 import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { Outlet, Link as RouterLink, useParams, useRouter } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
@@ -149,14 +149,14 @@ const Navigation = (props: {
             </div>
           ))}
           {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
-            <LegacyButton
+            <Button
               variant="link"
               onClick={() => {
                 props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
               }}
             >
               Load more
-            </LegacyButton>
+            </Button>
           )}
         </>
       )}

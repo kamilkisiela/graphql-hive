@@ -2,7 +2,8 @@ import { ReactElement, useMemo } from 'react';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input, Modal } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useCollections } from '../../../pages/target-laboratory';
 
@@ -115,8 +116,8 @@ export const EditOperationModal = (props: {
           <div className="flex w-full gap-2">
             <Button
               type="button"
-              size="large"
-              block
+              size="lg"
+              className="w-full justify-center"
               onClick={() => {
                 close();
               }}
@@ -125,8 +126,8 @@ export const EditOperationModal = (props: {
             </Button>
             <Button
               type="submit"
-              size="large"
-              block
+              size="lg"
+              className="w-full justify-center"
               variant="primary"
               disabled={isSubmitting || !isValid}
               data-cy="confirm"
