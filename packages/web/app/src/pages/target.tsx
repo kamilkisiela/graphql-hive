@@ -11,7 +11,7 @@ import {
   CommandInput,
   CommandItem,
 } from '@/components/ui/command';
-import { noSchema, noSchemaVersion, EmptyList } from '@/components/ui/empty-list';
+import { EmptyList, noSchema, noSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -171,7 +171,7 @@ function SchemaView(props: {
   const router = useRouter();
   const selectedServiceName =
     'service' in router.latestLocation.search &&
-      typeof router.latestLocation.search.service === 'string'
+    typeof router.latestLocation.search.service === 'string'
       ? router.latestLocation.search.service
       : null;
 
