@@ -809,8 +809,8 @@ importers:
         specifier: 3.4.0
         version: 3.4.0
       undici:
-        specifier: 6.18.1
-        version: 6.18.1
+        specifier: 6.18.2
+        version: 6.18.2
       vitest:
         specifier: 1.6.0
         version: 1.6.0(@types/node@20.12.12)(less@4.2.0)(terser@5.20.0)
@@ -15889,8 +15889,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  undici@6.18.1:
-    resolution: {integrity: sha512-/0BWqR8rJNRysS5lqVmfc7eeOErcOP4tZpATVjJOojjHZ71gSYVAtFhEmadcIjwMIUehh5NFyKGsXCnXIajtbA==}
+  undici@6.18.2:
+    resolution: {integrity: sha512-o/MQLTwRm9IVhOqhZ0NQ9oXax1ygPjw6Vs+Vq/4QRjbOAC3B1GCHy7TYxxbExKlb7bzDRzt9vBWU6BDz0RFfYg==}
     engines: {node: '>=18.17'}
 
   unherit@3.0.1:
@@ -35066,7 +35066,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici@6.18.1: {}
+  undici@6.18.2: {}
 
   unherit@3.0.1: {}
 
