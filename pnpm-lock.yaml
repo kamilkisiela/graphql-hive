@@ -207,10 +207,10 @@ importers:
         version: 4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))
+        version: 0.1.6(@pulumi/kubernetes@4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))
       '@pulumi/pulumi':
-        specifier: 3.116.1
-        version: 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
+        specifier: 3.117.0
+        version: 3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
       '@pulumi/random':
         specifier: 4.16.2
         version: 4.16.2(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
@@ -5827,8 +5827,8 @@ packages:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
 
-  '@pulumi/pulumi@3.116.1':
-    resolution: {integrity: sha512-Haweoa0O94MG+czV7+lcYJKunRCBxSz8VoHY23JWoCASWSc3i7/h4U8ejZB88GnrrRRQSihnKVCuz4Mb5Ngm+A==}
+  '@pulumi/pulumi@3.117.0':
+    resolution: {integrity: sha512-pF4KF5FpSwckB/Xy0ZlCH6FGHiNUkmC9c4ATW2pjfp2oa0uyEQ+5nQjj/6osX5wWI2Wn+Qsf+9c9ZaZwrwyhnw==}
     engines: {node: '>=18'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -20903,7 +20903,7 @@ snapshots:
 
   '@lbrlabs/pulumi-grafana@0.1.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -21220,7 +21220,7 @@ snapshots:
       promise-all-reject-late: 1.0.1
       promise-call-limit: 3.0.1
       read-package-json-fast: 3.0.2
-      semver: 7.6.0
+      semver: 7.6.2
       ssri: 10.0.5
       treeverse: 3.0.0
       walk-up-path: 3.0.1
@@ -21994,7 +21994,7 @@ snapshots:
       '@opentelemetry/api': 1.8.0
       '@opentelemetry/api-metrics': 0.32.0
       require-in-the-middle: 5.2.0
-      semver: 7.6.0
+      semver: 7.6.2
       shimmer: 1.2.1
     transitivePeerDependencies:
       - supports-color
@@ -22175,7 +22175,7 @@ snapshots:
       '@opentelemetry/propagator-b3': 1.24.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/propagator-jaeger': 1.24.1(@opentelemetry/api@1.8.0)
       '@opentelemetry/sdk-trace-base': 1.24.1(@opentelemetry/api@1.8.0)
-      semver: 7.6.0
+      semver: 7.6.2
 
   '@opentelemetry/semantic-conventions@1.24.0': {}
 
@@ -22303,7 +22303,7 @@ snapshots:
 
   '@pulumi/cloudflare@4.16.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -22312,7 +22312,7 @@ snapshots:
 
   '@pulumi/kubernetes@4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
       glob: 10.3.12
@@ -22326,12 +22326,12 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))':
+  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))(@pulumi/pulumi@3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5))':
     dependencies:
       '@pulumi/kubernetes': 4.12.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
-      '@pulumi/pulumi': 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
 
-  '@pulumi/pulumi@3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)':
+  '@pulumi/pulumi@3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
       '@grpc/grpc-js': 1.10.1
       '@logdna/tail-file': 2.2.0
@@ -22359,7 +22359,7 @@ snapshots:
       picomatch: 3.0.1
       pkg-dir: 7.0.0
       require-from-string: 2.0.2
-      semver: 7.6.0
+      semver: 7.6.2
       source-map-support: 0.5.21
       tmp: 0.2.3
       upath: 1.2.0
@@ -22374,7 +22374,7 @@ snapshots:
 
   '@pulumi/random@4.16.2(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)':
     dependencies:
-      '@pulumi/pulumi': 3.116.1(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
+      '@pulumi/pulumi': 3.117.0(ts-node@10.9.2(@swc/core@1.5.7(@swc/helpers@0.5.5))(@types/node@20.12.13)(typescript@5.4.5))(typescript@5.4.5)
     transitivePeerDependencies:
       - bluebird
       - supports-color
