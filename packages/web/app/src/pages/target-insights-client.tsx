@@ -280,6 +280,14 @@ function ClientView(props: {
                               operationName: operation.name,
                               operationHash: operation.operationHash ?? '_',
                             }}
+                            search={searchParams => {
+                              if ('from' in searchParams && 'to' in searchParams) {
+                                return {
+                                  from: searchParams.from,
+                                  to: searchParams.to,
+                                };
+                              }
+                            }}
                           >
                             {operation.name}
                           </Link>
