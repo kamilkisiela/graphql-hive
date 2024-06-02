@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@graphql-tools/utils": "^10.0.0",
-    "@whatwg-node/fetch": "0.9.17",
+    "@whatwg-node/fetch": "0.9.18",
     "async-retry": "1.3.3",
     "lodash.sortby": "4.7.0",
     "tiny-lru": "8.0.2"
