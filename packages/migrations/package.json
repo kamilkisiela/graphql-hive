@@ -28,7 +28,7 @@
     "dotenv": "16.4.5",
     "got": "14.2.1",
     "p-limit": "4.0.0",
-    "pg-promise": "11.7.8",
+    "pg-promise": "11.8.0",
     "slonik": "30.4.4",
     "ts-node": "10.9.2",
     "tslib": "2.6.2",
