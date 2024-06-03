@@ -224,6 +224,13 @@ export function createRateLimiter(config: {
       if (!orgData) {
         // This is a safety measure to prevent setting the retention to a lower value then expected,
         // in case of an organization data not being available yet in the cache.
+        const error = new Error(
+          `Failed to resolve/find retention information for targetId=${targetId}`,
+        );
+        Sentry.captureException(error, {
+          level: 'error',
+        });
+        logger.error(error);
         return RETENTION_IN_DAYS_FALLBACK;
       }
 
@@ -234,9 +241,13 @@ export function createRateLimiter(config: {
         input.entityType === 'organization' ? input.id : targetIdToOrgLookup.get(input.id);
 
       if (!orgId) {
-        logger.warn(
-          `Failed to resolve/find rate limit information for entityId=${input.id} (type=${input.entityType})`,
+        const error = new Error(
+          `Failed to resolve/find rate limit information for entityId=${input.id} type=${input.entityType}`,
         );
+        Sentry.captureException(error, {
+          level: 'error',
+        });
+        logger.error(error);
 
         return UNKNOWN_RATE_LIMIT_OBJ;
       }
