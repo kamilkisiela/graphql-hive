@@ -72,7 +72,7 @@
     "graphql": "16.8.1",
     "oclif": "4.11.0",
     "rimraf": "4.4.1",
-    "tsx": "4.11.0"
+    "tsx": "4.11.2"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
