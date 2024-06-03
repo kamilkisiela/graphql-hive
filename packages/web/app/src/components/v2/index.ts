@@ -11,7 +11,6 @@ export { DataWrapper } from '@/components/v2/data-wrapper';
 export { DiffEditor } from '@/components/v2/diff-editor';
 export { EmptyList, noSchema } from '@/components/ui/empty-list';
 export { GraphQLBlock } from '@/components/v2/graphql-block';
-export { Heading } from '@/components/v2/heading';
 export { Input } from '@/components/v2/input';
 export { Link } from '@/components/ui/link';
 export { Modal } from '@/components/v2/modal';

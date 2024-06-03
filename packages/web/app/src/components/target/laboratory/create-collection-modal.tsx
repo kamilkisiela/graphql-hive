@@ -3,7 +3,8 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
-import { Heading, Input, Modal } from '@/components/v2';
+import { Heading } from '@/components/ui/heading';
+import { Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 
 const CollectionQuery = graphql(`

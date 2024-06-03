@@ -1,6 +1,7 @@
 import ghost from '../../../public/images/figures/ghost.svg?url';
-import { Card, Heading } from '@/components/v2/index';
+import { Card } from '@/components/v2/index';
 import { cn } from '@/lib/utils';
+import { Heading } from './heading';
 
 export const NotFound = ({
   title,

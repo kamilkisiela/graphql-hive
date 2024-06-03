@@ -9,11 +9,11 @@ import { BillingPlanPicker } from '@/components/organization/billing/BillingPlan
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { RenderIfStripeAvailable } from '@/components/organization/stripe';
 import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Card } from '@/components/v2/card';
-import { Heading } from '@/components/v2/heading';
 import { Input } from '@/components/v2/input';
 import { Slider } from '@/components/v2/slider';
 import Stat from '@/components/v2/stat';

@@ -1,7 +1,8 @@
 import { type ReactElement } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
+import { Heading } from '@/components/ui/heading';
+import { CopyValue, Link, Modal, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { getDocsUrl } from '@/lib/docs-url';
 
