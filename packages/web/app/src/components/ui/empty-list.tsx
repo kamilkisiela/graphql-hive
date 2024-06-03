@@ -1,7 +1,8 @@
 import { ReactElement } from 'react';
 import magnifier from '../../../public/images/figures/magnifier.svg?url';
-import { Card, DocsLink, Heading } from '@/components/v2/index';
 import { cn } from '@/lib/utils';
+import { Card, CardHeader } from './card';
+import { DocsLink } from './docs-note';
 
 export const EmptyList = ({
   title,
@@ -26,7 +27,7 @@ export const EmptyList = ({
         height="200"
         className="drag-none"
       />
-      <Heading className="text-center">{title}</Heading>
+      <CardHeader className="text-center">{title}</CardHeader>
       <span className="text-center text-sm font-medium text-gray-500">{description}</span>
       {docsUrl && <DocsLink href={docsUrl}>Read about it in the documentation</DocsLink>}
     </Card>

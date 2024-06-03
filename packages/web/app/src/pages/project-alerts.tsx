@@ -23,10 +23,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { DocsLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useToggle } from '@/lib/hooks';

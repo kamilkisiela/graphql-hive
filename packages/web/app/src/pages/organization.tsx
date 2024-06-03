@@ -6,13 +6,13 @@ import { Globe, History } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
+import { Activities } from '@/components/ui/activities';
+import { Card } from '@/components/ui/card';
+import { EmptyList } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Activities } from '@/components/v2/activities';
-import { Card } from '@/components/v2/card';
-import { EmptyList } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { subDays } from '@/lib/date-time';
@@ -69,10 +69,7 @@ const ProjectCard = (props: {
   const schemaVersionsInDateRange = useFormattedNumber(totalNumberOfVersions);
 
   return (
-    <Card
-      className="h-full self-start bg-gray-900/50 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50"
-      asChild
-    >
+    <Card className="h-full self-start bg-gray-900/50 p-5 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50">
       <Link
         to="/$organizationId/$projectId"
         params={{

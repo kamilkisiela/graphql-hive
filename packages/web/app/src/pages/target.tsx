@@ -11,13 +11,13 @@ import {
   CommandInput,
   CommandItem,
 } from '@/components/ui/command';
+import { EmptyList, noSchema, noSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QueryError } from '@/components/ui/query-error';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion } from '@/components/v2/accordion';
-import { EmptyList, noSchema, noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLBlock, GraphQLHighlight } from '@/components/v2/graphql-block';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/gql/graphql';
