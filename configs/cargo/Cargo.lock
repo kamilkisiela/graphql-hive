@@ -149,9 +149,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-federation"
-version = "1.47.0"
+version = "1.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30e361172eeae9d111ff7814a3db6b4d344739eff2db178e70d53ce174dfa255"
+checksum = "76a66546238f4c09d7263ae4fd5f2b592c0e75b11a55ef14efcf0128536b0f3b"
 dependencies = [
  "apollo-compiler",
  "derive_more",
@@ -180,9 +180,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.47.0"
+version = "1.48.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77db51ba2f2956dd8045b1fbc56b628188e42bf75b93e1c1895eac173a1e8f79"
+checksum = "e255d23d5f766062f5e51b5d0242c76cd59bbd6e6517331d1815ebc38596b6bb"
 dependencies = [
  "access-json",
  "anyhow",
@@ -933,6 +933,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bstr"
+version = "1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05efc5cfd9110c8416e471df0e96702d58690178e206e61b7173706673c93706"
+dependencies = [
+ "memchr",
+ "serde",
+]
+
+[[package]]
 name = "buildstructor"
 version = "0.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -967,9 +977,9 @@ checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
 name = "bytes"
-version = "1.5.0"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
+checksum = "514de17de45fdb8dc022b1a7975556c53c86f9f0aa5f534b98977b171857c2c9"
 
 [[package]]
 name = "bytes-utils"
@@ -2124,6 +2134,19 @@ name = "gimli"
 version = "0.27.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c80984affa11d98d1b88b66ac8853f143217b399d3c74116778ff8fdb4ed2e"
+
+[[package]]
+name = "globset"
+version = "0.4.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "759c97c1e17c55525b57192c06a267cda0ac5210b222d6b82189a2338fa1c13d"
+dependencies = [
+ "aho-corasick",
+ "bstr",
+ "fnv",
+ "log",
+ "regex",
+]
 
 [[package]]
 name = "graphql-hive-router"
@@ -4321,9 +4344,9 @@ dependencies = [
 
 [[package]]
 name = "router-bridge"
-version = "0.5.21+v2.7.5"
+version = "0.5.25+v2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2142445fe3fe2aae7a3c3c5083d1211a448a0dabb489a14dd90d427cf6c0b13"
+checksum = "9ecf6c55973979655b1aa34bbc0e62766f937c1f95c4eb3fa07d16f50cb4d63c"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -4408,6 +4431,7 @@ version = "8.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8cb0a25bfbb2d4b4402179c2cf030387d9990857ce08a32592c6238db9fa8665"
 dependencies = [
+ "globset",
  "sha2",
  "walkdir",
 ]
