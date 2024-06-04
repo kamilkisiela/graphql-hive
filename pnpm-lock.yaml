@@ -956,8 +956,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       ajv:
-        specifier: 8.14.0
-        version: 8.14.0
+        specifier: 8.15.0
+        version: 8.15.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1452,8 +1452,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       ajv:
-        specifier: 8.14.0
-        version: 8.14.0
+        specifier: 8.15.0
+        version: 8.15.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -8277,8 +8277,8 @@ packages:
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
-  ajv@8.14.0:
-    resolution: {integrity: sha512-oYs1UUtO97ZO2lJ4bwnWeQW8/zvOIQLGKcvPTsWmvc2SYgBb+upuNS5NxoLaMU4h8Ju3Nbj6Cq8mD2LQoqVKFA==}
+  ajv@8.15.0:
+    resolution: {integrity: sha512-15BTtQUOsSrmHCy+B4VnAiJAJxJ8IFgu6fcjFQF3jQYZ78nLSQthlFg4ehp+NLIyfvFgOlxNsjKIEhydtFPVHQ==}
 
   ansi-colors@4.1.3:
     resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
@@ -19469,8 +19469,8 @@ snapshots:
 
   '@fastify/ajv-compiler@3.5.0':
     dependencies:
-      ajv: 8.14.0
-      ajv-formats: 2.1.1(ajv@8.14.0)
+      ajv: 8.15.0
+      ajv-formats: 2.1.1(ajv@8.15.0)
       fast-uri: 2.3.0
 
   '@fastify/cors@9.0.1':
@@ -25658,9 +25658,9 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ajv-formats@2.1.1(ajv@8.14.0):
+  ajv-formats@2.1.1(ajv@8.15.0):
     optionalDependencies:
-      ajv: 8.14.0
+      ajv: 8.15.0
 
   ajv-keywords@3.5.2(ajv@6.12.6):
     dependencies:
@@ -25673,12 +25673,12 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  ajv@8.14.0:
+  ajv@8.15.0:
     dependencies:
       fast-deep-equal: 3.1.3
+      fast-uri: 2.3.0
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
-      uri-js: 4.4.1
 
   ansi-colors@4.1.3: {}
 
@@ -28309,8 +28309,8 @@ snapshots:
   fast-json-stringify@5.12.0:
     dependencies:
       '@fastify/merge-json-schemas': 0.1.1
-      ajv: 8.14.0
-      ajv-formats: 2.1.1(ajv@8.14.0)
+      ajv: 8.15.0
+      ajv-formats: 2.1.1(ajv@8.15.0)
       fast-deep-equal: 3.1.3
       fast-uri: 2.3.0
       json-schema-ref-resolver: 1.0.1
