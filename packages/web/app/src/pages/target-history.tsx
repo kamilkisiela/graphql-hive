@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useState } from 'react';
 import { useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { noSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -11,7 +12,6 @@ import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { Link, Outlet, useParams, useRouter } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
 
 const HistoryPage_VersionsPageQuery = graphql(`
   query HistoryPage_VersionsPageQuery(

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';
 import { Label } from '@/components/ui/label';
@@ -14,7 +15,6 @@ import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { Outlet, Link as RouterLink, useParams, useRouter } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
