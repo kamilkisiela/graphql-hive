@@ -1,7 +1,8 @@
 import { ReactElement, useMemo, useState } from 'react';
 import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
-import { CopyValue, DocsLink, Heading, Link, Modal, RadixSelect, Tag } from '@/components/v2';
+import { Heading } from '@/components/ui/heading';
+import { CopyValue, DocsLink, Link, Modal, RadixSelect, Tag } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';

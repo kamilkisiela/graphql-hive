@@ -2,8 +2,8 @@ import { ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { SchemaEditor, SchemaEditorProps } from '@/components/schema-editor';
 import { Card } from '@/components/v2/card';
-import { Heading } from '@/components/v2/heading';
 import { usePrettify } from '@/lib/hooks';
+import { Heading } from '../ui/heading';
 
 export function GraphQLHighlight({
   code,

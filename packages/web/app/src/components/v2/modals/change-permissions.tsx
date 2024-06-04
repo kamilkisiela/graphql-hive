@@ -1,8 +1,9 @@
 import { ReactElement } from 'react';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/heading';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heading, Modal } from '@/components/v2';
+import { Modal } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { scopes } from '@/lib/access/common';
 

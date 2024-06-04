@@ -3,7 +3,8 @@ import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
-import { Heading, Modal, Select } from '@/components/v2';
+import { Heading } from '@/components/ui/heading';
+import { Modal, Select } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AlertType } from '@/gql/graphql';
 

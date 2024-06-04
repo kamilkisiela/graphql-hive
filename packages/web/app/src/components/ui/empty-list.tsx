@@ -1,8 +1,9 @@
 import { ReactElement } from 'react';
 import magnifier from '../../../public/images/figures/magnifier.svg?url';
 import { cn } from '@/lib/utils';
-import { Card, CardHeader } from './card';
+import { Card } from './card';
 import { DocsLink } from './docs-note';
+import { Heading } from './heading';
 
 export const EmptyList = ({
   title,
@@ -17,7 +18,7 @@ export const EmptyList = ({
 }): ReactElement => {
   return (
     <Card
-      className={cn('flex grow cursor-default flex-col items-center gap-y-2', className)}
+      className={cn('flex grow cursor-default flex-col items-center gap-y-2 py-4', className)}
       data-cy="empty-list"
     >
       <img
@@ -27,7 +28,7 @@ export const EmptyList = ({
         height="200"
         className="drag-none"
       />
-      <CardHeader className="text-center">{title}</CardHeader>
+      <Heading className="text-center">{title}</Heading>
       <span className="text-center text-sm font-medium text-gray-500">{description}</span>
       {docsUrl && <DocsLink href={docsUrl}>Read about it in the documentation</DocsLink>}
     </Card>

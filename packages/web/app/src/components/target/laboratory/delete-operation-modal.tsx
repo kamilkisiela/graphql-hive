@@ -1,7 +1,8 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button } from '@/components/ui/button';
-import { Heading, Modal } from '@/components/v2';
+import { Heading } from '@/components/ui/heading';
+import { Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';

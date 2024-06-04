@@ -25,6 +25,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Heading } from '@/components/ui/heading';
 import { Input } from '@/components/ui/input';
 import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -38,7 +39,7 @@ import {
 } from '@/components/ui/table';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsLink, Heading } from '@/components/v2';
+import { DocsLink } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { cn } from '@/lib/utils';
 import { InfoCircledIcon } from '@radix-ui/react-icons';

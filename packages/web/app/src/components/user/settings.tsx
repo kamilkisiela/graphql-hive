@@ -2,9 +2,10 @@ import { ReactElement } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Heading, Input, Modal } from '@/components/v2';
+import { Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { Button } from '../ui/button';
+import { Heading } from '../ui/heading';
 import { useToast } from '../ui/use-toast';
 
 const UserSettings_MeQuery = graphql(`

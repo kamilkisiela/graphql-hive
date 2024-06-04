@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';
+import { Heading } from '@/components/ui/heading';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -21,7 +22,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DiffEditor } from '@/components/v2/diff-editor';
-import { Heading } from '@/components/v2/heading';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { Spinner } from '@/components/v2/spinner';
 import { FragmentType, graphql, useFragment } from '@/gql';
