@@ -8,7 +8,7 @@ if (!document.body.className.includes('dark')) {
 const preview = {
   parameters: {
     backgrounds: {
-      default: 'dark',
+      default: 'black',
     },
     actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {

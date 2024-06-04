@@ -383,16 +383,36 @@ const targetIndexRoute = createRoute({
   },
 });
 
+const TargetSettingRouteSearch = z.object({
+  page: z
+    .enum([
+      'general',
+      'cdn',
+      'registry-token',
+      'breaking-changes',
+      'base-schema',
+      'schema-contracts',
+    ])
+    .default('general')
+    .optional(),
+});
+
 const targetSettingsRoute = createRoute({
   getParentRoute: () => targetRoute,
   path: 'settings',
+  validateSearch(search) {
+    return TargetSettingRouteSearch.parse(search);
+  },
   component: function TargetSettingsRoute() {
     const { organizationId, projectId, targetId } = targetSettingsRoute.useParams();
+    const { page } = targetSettingsRoute.useSearch();
+
     return (
       <TargetSettingsPage
         organizationId={organizationId}
         projectId={projectId}
         targetId={targetId}
+        page={page}
       />
     );
   },

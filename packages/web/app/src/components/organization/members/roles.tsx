@@ -15,7 +15,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { CardDescription, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +39,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -894,21 +894,16 @@ export function OrganizationMemberRoles(props: {
           </AlertDialogContent>
         ) : null}
       </AlertDialog>
-      <div className="space-y-6">
-        <div className="flex flex-row items-center justify-between">
-          <div className="space-y-2">
-            <CardTitle>List of roles</CardTitle>
-            <CardDescription>
-              Manage the roles that can be assigned to members of this organization.
-            </CardDescription>
-          </div>
-          <div>
-            <OrganizationMemberRoleCreateButton
-              me={organization.me}
-              organizationCleanId={organization.cleanId}
-            />
-          </div>
-        </div>
+      <SubPageLayout>
+        <SubPageLayoutHeader
+          title="List of roles"
+          description="Manage the roles that can be assigned to members of this organization."
+        >
+          <OrganizationMemberRoleCreateButton
+            me={organization.me}
+            organizationCleanId={organization.cleanId}
+          />
+        </SubPageLayoutHeader>
         <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
           <thead>
             <tr>
@@ -930,7 +925,7 @@ export function OrganizationMemberRoles(props: {
             ))}
           </tbody>
         </table>
-      </div>
+      </SubPageLayout>
     </>
   );
 }

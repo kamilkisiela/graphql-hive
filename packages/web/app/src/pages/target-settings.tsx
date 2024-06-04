@@ -9,18 +9,17 @@ import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
 import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
-import { Subtitle, Title } from '@/components/ui/page';
+import {
+  NavLayout,
+  PageLayout,
+  PageLayoutContent,
+  SubPageLayout,
+  SubPageLayoutHeader,
+} from '@/components/ui/page-content-layout';
 import { QueryError } from '@/components/ui/query-error';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
@@ -36,6 +35,7 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useToggle } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -137,67 +137,69 @@ function RegistryAccessTokens(props: {
   const canManage = canAccessTarget(TargetAccessScope.TokensWrite, me);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Registry Access Tokens</CardTitle>
-        <CardDescription>
-          Registry Access Tokens are used to access to Hive Registry and perform actions on your
-          targets/projects. In most cases, this token is used from the Hive CLI.
-        </CardDescription>
-        <CardDescription>
-          <DocsLink
-            href="/management/targets#registry-access-tokens"
-            className="text-gray-500 hover:text-gray-300"
-          >
-            Learn more about Registry Access Tokens
-          </DocsLink>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {canManage && (
-          <div className="my-3.5 flex justify-between">
-            <Button onClick={toggleModalOpen}>Create new registry token</Button>
-            {checked.length === 0 ? null : (
-              <Button variant="destructive" disabled={deleting} onClick={deleteTokens}>
-                Delete ({checked.length || null})
-              </Button>
-            )}
-          </div>
-        )}
-        <Table>
-          <TBody>
-            {tokens?.map(token => (
-              <Tr key={token.id}>
-                <Td width="1">
-                  <Checkbox
-                    onCheckedChange={isChecked =>
-                      setChecked(
-                        isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id),
-                      )
-                    }
-                    checked={checked.includes(token.id)}
-                    disabled={!canManage}
-                  />
-                </Td>
-                <Td>{token.alias}</Td>
-                <Td>{token.name}</Td>
-                <Td align="right">
-                  {token.lastUsedAt ? (
-                    <>
-                      last used <TimeAgo date={token.lastUsedAt} />
-                    </>
-                  ) : (
-                    'not used yet'
-                  )}
-                </Td>
-                <Td align="right">
-                  created <TimeAgo date={token.date} />
-                </Td>
-              </Tr>
-            ))}
-          </TBody>
-        </Table>
-      </CardContent>
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="Registry Access Tokens"
+        description={
+          <>
+            <CardDescription>
+              Registry Access Tokens are used to access to Hive Registry and perform actions on your
+              targets/projects. In most cases, this token is used from the Hive CLI.
+            </CardDescription>
+            <CardDescription>
+              <DocsLink
+                href="/management/targets#registry-access-tokens"
+                className="text-gray-500 hover:text-gray-300"
+              >
+                Learn more about Registry Access Tokens
+              </DocsLink>
+            </CardDescription>
+          </>
+        }
+      />
+      {canManage && (
+        <div className="my-3.5 flex justify-between">
+          <Button onClick={toggleModalOpen}>Create new registry token</Button>
+          {checked.length === 0 ? null : (
+            <Button variant="destructive" disabled={deleting} onClick={deleteTokens}>
+              Delete ({checked.length || null})
+            </Button>
+          )}
+        </div>
+      )}
+      <Table>
+        <TBody>
+          {tokens?.map(token => (
+            <Tr key={token.id}>
+              <Td width="1">
+                <Checkbox
+                  onCheckedChange={isChecked =>
+                    setChecked(
+                      isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id),
+                    )
+                  }
+                  checked={checked.includes(token.id)}
+                  disabled={!canManage}
+                />
+              </Td>
+              <Td>{token.alias}</Td>
+              <Td>{token.name}</Td>
+              <Td align="right">
+                {token.lastUsedAt ? (
+                  <>
+                    last used <TimeAgo date={token.lastUsedAt} />
+                  </>
+                ) : (
+                  'not used yet'
+                )}
+              </Td>
+              <Td align="right">
+                created <TimeAgo date={token.date} />
+              </Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
       {isModalOpen && (
         <CreateAccessTokenModal
           organizationId={props.organizationId}
@@ -207,7 +209,7 @@ function RegistryAccessTokens(props: {
           toggleModalOpen={toggleModalOpen}
         />
       )}
-    </Card>
+    </SubPageLayout>
   );
 }
 
@@ -240,40 +242,42 @@ const ExtendBaseSchema = (props: {
   const isUnsaved = baseSchema?.trim() !== props.baseSchema?.trim();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Extend Your Schema</CardTitle>
-        <CardDescription>
-          Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
-          published schemas, before being checked and validated.
-        </CardDescription>
-        <CardDescription>
-          <DocsLink
-            href="/management/targets#schema-extensions"
-            className="text-gray-500 hover:text-gray-300"
-          >
-            You can find more details and examples in the documentation
-          </DocsLink>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <SchemaEditor
-          theme="vs-dark"
-          options={{ readOnly: mutation.fetching }}
-          value={baseSchema}
-          height={300}
-          onChange={value => setBaseSchema(value ?? '')}
-        />
-        {mutation.data?.updateBaseSchema.error && (
-          <div className="text-red-500">{mutation.data.updateBaseSchema.error.message}</div>
-        )}
-        {mutation.error && (
-          <div className="text-red-500">
-            {mutation.error?.graphQLErrors[0]?.message ?? mutation.error.message}
-          </div>
-        )}
-      </CardContent>
-      <CardFooter className="flex items-center gap-x-3">
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="Extend Your Schema"
+        description={
+          <>
+            <CardDescription>
+              Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
+              published schemas, before being checked and validated.
+            </CardDescription>
+            <CardDescription>
+              <DocsLink
+                href="/management/targets#schema-extensions"
+                className="text-gray-500 hover:text-gray-300"
+              >
+                You can find more details and examples in the documentation
+              </DocsLink>
+            </CardDescription>
+          </>
+        }
+      />
+      <SchemaEditor
+        theme="vs-dark"
+        options={{ readOnly: mutation.fetching }}
+        value={baseSchema}
+        height={300}
+        onChange={value => setBaseSchema(value ?? '')}
+      />
+      {mutation.data?.updateBaseSchema.error && (
+        <div className="text-red-500">{mutation.data.updateBaseSchema.error.message}</div>
+      )}
+      {mutation.error && (
+        <div className="text-red-500">
+          {mutation.error?.graphQLErrors[0]?.message ?? mutation.error.message}
+        </div>
+      )}
+      <div className="flex items-center gap-x-3">
         <Button
           className="px-5"
           disabled={mutation.fetching}
@@ -313,8 +317,8 @@ const ExtendBaseSchema = (props: {
           Reset
         </Button>
         {isUnsaved && <span className="text-sm text-green-500">Unsaved changes!</span>}
-      </CardFooter>
-    </Card>
+      </div>
+    </SubPageLayout>
   );
 };
 
@@ -532,46 +536,47 @@ const ConditionalBreakingChanges = (props: {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-x-5">
-            <div>Conditional Breaking Changes</div>
-            {targetSettings.fetching ? (
-              <Spinner />
-            ) : (
-              <Switch
-                className="shrink-0"
-                checked={isEnabled}
-                onCheckedChange={async enabled => {
-                  await setValidation({
-                    input: {
-                      target: props.targetId,
-                      project: props.projectId,
-                      organization: props.organizationId,
-                      enabled,
-                    },
-                  });
-                }}
-                disabled={targetValidation.fetching}
-              />
-            )}
-          </CardTitle>
-          <CardDescription>
-            Conditional Breaking Changes can change the behavior of schema checks, based on real
-            traffic data sent to Hive.
-          </CardDescription>
-          <CardDescription>
-            <DocsLink
-              href="/management/targets#conditional-breaking-changes"
-              className="text-gray-500 hover:text-gray-300"
-            >
-              Learn more
-            </DocsLink>
-          </CardDescription>
-        </CardHeader>
-        <CardContent
-          className={clsx('text-gray-300', !isEnabled && 'pointer-events-none opacity-25')}
+      <SubPageLayout>
+        <SubPageLayoutHeader
+          title="Conditional Breaking Changes"
+          description={
+            <>
+              <CardDescription>
+                Conditional Breaking Changes can change the behavior of schema checks, based on real
+                traffic data sent to Hive.
+              </CardDescription>
+              <CardDescription>
+                <DocsLink
+                  href="/management/targets#conditional-breaking-changes"
+                  className="text-gray-500 hover:text-gray-300"
+                >
+                  Learn more
+                </DocsLink>
+              </CardDescription>
+            </>
+          }
         >
+          {targetSettings.fetching ? (
+            <Spinner />
+          ) : (
+            <Switch
+              className="shrink-0"
+              checked={isEnabled}
+              onCheckedChange={async enabled => {
+                await setValidation({
+                  input: {
+                    target: props.targetId, // targetId is the target we are updating
+                    project: props.projectId,
+                    organization: props.organizationId,
+                    enabled,
+                  },
+                });
+              }}
+              disabled={targetValidation.fetching}
+            />
+          )}
+        </SubPageLayoutHeader>
+        <div className={clsx('text-gray-300', !isEnabled && 'pointer-events-none opacity-25')}>
           <div>
             A schema change is considered as breaking only if it affects more than
             <Input
@@ -686,7 +691,7 @@ const ConditionalBreakingChanges = (props: {
           {touched.targets && errors.targets && (
             <div className="text-red-500">{errors.targets}</div>
           )}
-          <div className="mt-5 space-y-2 rounded border-l-2 border-l-gray-800 bg-gray-600/10 py-2 pl-5 text-gray-400">
+          <div className="mb-3 mt-5 space-y-2 rounded border-l-2 border-l-gray-800 bg-gray-600/10 py-2 pl-5 text-gray-400">
             <div>
               <div className="font-semibold">Example settings</div>
               <div className="text-sm">Removal of a field is considered breaking if</div>
@@ -705,8 +710,6 @@ const ConditionalBreakingChanges = (props: {
               - the field was requested by more than 10% of all GraphQL operations in recent 30 days
             </div>
           </div>
-        </CardContent>
-        <CardFooter>
           <Button type="submit" disabled={isSubmitting}>
             Save
           </Button>
@@ -715,8 +718,8 @@ const ConditionalBreakingChanges = (props: {
               {mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
             </span>
           )}
-        </CardFooter>
-      </Card>
+        </div>
+      </SubPageLayout>
     </form>
   );
 };
@@ -764,6 +767,9 @@ function TargetName(props: {
                 projectId: props.projectId,
                 targetId: newTargetId,
               },
+              search: {
+                page: subPages[0].key,
+              },
             });
           } else if (result.error || result.data?.updateTargetName.error?.message) {
             toast({
@@ -776,53 +782,55 @@ function TargetName(props: {
     });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Target Name</CardTitle>
-        <CardDescription>
-          Changing the name of your target will also change the slug of your target URL, and will
-          invalidate any existing links to your target.
-        </CardDescription>
-        <CardDescription>
-          <DocsLink
-            href="/management/targets#rename-a-target"
-            className="text-gray-500 hover:text-gray-300"
-          >
-            You can read more about it in the documentation
-          </DocsLink>
-        </CardDescription>
-      </CardHeader>
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="Target Name"
+        description={
+          <>
+            <CardDescription>
+              Changing the name of your target will also change the slug of your target URL, and
+              will invalidate any existing links to your target.
+            </CardDescription>
+            <CardDescription>
+              <DocsLink
+                href="/management/targets#rename-a-target"
+                className="text-gray-500 hover:text-gray-300"
+              >
+                You can read more about it in the documentation
+              </DocsLink>
+            </CardDescription>
+          </>
+        }
+      />
       <form onSubmit={handleSubmit}>
-        <CardContent>
-          <div className="flex flex-row items-center gap-x-2">
-            <Input
-              placeholder="Target name"
-              name="name"
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              isInvalid={touched.name && !!errors.name}
-              className="w-96"
-            />
-            <Button type="submit" disabled={isSubmitting}>
-              Save
-            </Button>
-          </div>
+        <div className="flex flex-row items-center gap-x-2">
+          <Input
+            placeholder="Target name"
+            name="name"
+            value={values.name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            isInvalid={touched.name && !!errors.name}
+            className="w-96"
+          />
+          <Button type="submit" disabled={isSubmitting}>
+            Save
+          </Button>
+        </div>
 
-          {touched.name && (errors.name || mutation.error) && (
-            <div className="mt-2 text-red-500">
-              {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
-            </div>
-          )}
-          {mutation.data?.updateTargetName.error?.inputErrors?.name && (
-            <div className="mt-2 text-red-500">
-              {mutation.data.updateTargetName.error.inputErrors.name}
-            </div>
-          )}
-        </CardContent>
+        {touched.name && (errors.name || mutation.error) && (
+          <div className="mt-2 text-red-500">
+            {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
+          </div>
+        )}
+        {mutation.data?.updateTargetName.error?.inputErrors?.name && (
+          <div className="mt-2 text-red-500">
+            {mutation.data.updateTargetName.error.inputErrors.name}
+          </div>
+        )}
       </form>
-    </Card>
+    </SubPageLayout>
   );
 }
 
@@ -891,56 +899,58 @@ function GraphQLEndpointUrl(props: {
     });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>GraphQL Endpoint URL</CardTitle>
-        <CardDescription>
-          The endpoint url will be used for querying the target from the{' '}
-          <Link
-            to="/$organizationId/$projectId/$targetId/laboratory"
-            params={{
-              organizationId: props.organizationId,
-              projectId: props.projectId,
-              targetId: props.targetId,
-            }}
-          >
-            Hive Laboratory
-          </Link>
-          .
-        </CardDescription>
-      </CardHeader>
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="GraphQL Endpoint URL"
+        description={
+          <>
+            <CardDescription>
+              The endpoint url will be used for querying the target from the{' '}
+              <Link
+                to="/$organizationId/$projectId/$targetId/laboratory"
+                params={{
+                  organizationId: props.organizationId,
+                  projectId: props.projectId,
+                  targetId: props.targetId,
+                }}
+              >
+                Hive Laboratory
+              </Link>
+              .
+            </CardDescription>
+          </>
+        }
+      />
       <form onSubmit={handleSubmit}>
-        <CardContent>
-          <div className="flex flex-row items-center gap-x-2">
-            <Input
-              placeholder="Endpoint Url"
-              name="graphqlEndpointUrl"
-              value={values.graphqlEndpointUrl}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
-              className="w-96"
-            />
-            <Button type="submit" disabled={isSubmitting}>
-              Save
-            </Button>
+        <div className="flex flex-row items-center gap-x-2">
+          <Input
+            placeholder="Endpoint Url"
+            name="graphqlEndpointUrl"
+            value={values.graphqlEndpointUrl}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
+            className="w-96"
+          />
+          <Button type="submit" disabled={isSubmitting}>
+            Save
+          </Button>
+        </div>
+        {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
+          <div className="mt-2 text-red-500">
+            {errors.graphqlEndpointUrl ??
+              mutation.error?.graphQLErrors[0]?.message ??
+              mutation.error?.message}
           </div>
-          {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
-            <div className="mt-2 text-red-500">
-              {errors.graphqlEndpointUrl ??
-                mutation.error?.graphQLErrors[0]?.message ??
-                mutation.error?.message}
-            </div>
-          )}
-          {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
-            <div className="mt-2 text-red-500">
-              {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
-            </div>
-          )}
-        </CardContent>
+        )}
+        {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
+          <div className="mt-2 text-red-500">
+            {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
+          </div>
+        )}
       </form>
-    </Card>
+    </SubPageLayout>
   );
 }
 
@@ -991,29 +1001,30 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
   const [isModalOpen, toggleModalOpen] = useToggle();
 
   return (
-    <>
-      <Card className="mb-10">
-        <CardHeader>
-          <CardTitle>Delete Target</CardTitle>
-          <CardDescription>
-            Deleting an project also delete all schemas and data associated with it.
-          </CardDescription>
-          <CardDescription>
-            <DocsLink
-              href="/management/targets#delete-a-target"
-              className="text-gray-500 hover:text-gray-300"
-            >
-              <strong>This action is not reversible!</strong> You can find more information about
-              this process in the documentation
-            </DocsLink>
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button variant="destructive" onClick={toggleModalOpen}>
-            Delete Target
-          </Button>
-        </CardFooter>
-      </Card>
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="Delete Target"
+        description={
+          <>
+            <CardDescription>
+              Deleting an project also delete all schemas and data associated with it.
+            </CardDescription>
+            <CardDescription>
+              <DocsLink
+                href="/management/targets#delete-a-target"
+                className="text-gray-500 hover:text-gray-300"
+              >
+                <strong>This action is not reversible!</strong> You can find more information about
+                this process in the documentation
+              </DocsLink>
+            </CardDescription>
+          </>
+        }
+      />
+      <Button variant="destructive" onClick={toggleModalOpen}>
+        Delete Target
+      </Button>
+
       <DeleteTargetModal
         organizationId={props.organizationId}
         projectId={props.projectId}
@@ -1021,7 +1032,7 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
         isOpen={isModalOpen}
         toggleModalOpen={toggleModalOpen}
       />
-    </>
+    </SubPageLayout>
   );
 }
 
@@ -1052,11 +1063,42 @@ const TargetSettingsPageQuery = graphql(`
   }
 `);
 
+const subPages = [
+  {
+    key: 'general',
+    title: 'General',
+  },
+  {
+    key: 'cdn',
+    title: 'CDN Tokens',
+  },
+  {
+    key: 'registry-token',
+    title: 'Registry Tokens',
+  },
+  {
+    key: 'breaking-changes',
+    title: 'Breaking Changes',
+  },
+  {
+    key: 'base-schema',
+    title: 'Base Schema',
+  },
+  {
+    key: 'schema-contracts',
+    title: 'Schema Contracts',
+  },
+] as const;
+
+type SubPage = (typeof subPages)[number]['key'];
+
 function TargetSettingsContent(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
+  page?: SubPage;
 }) {
+  const router = useRouter();
   const [query] = useQuery({
     query: TargetSettingsPageQuery,
     variables: {
@@ -1073,6 +1115,7 @@ function TargetSettingsContent(props: {
     TargetSettingsPage_OrganizationFragment,
     currentOrganization,
   );
+
   const targetForSettings = useFragment(TargetSettingsPage_TargetFragment, currentTarget);
 
   const canAccessTokens = canAccessTarget(
@@ -1092,66 +1135,103 @@ function TargetSettingsContent(props: {
       organizationId={props.organizationId}
       page={Page.Settings}
     >
-      <div className="py-6">
-        <Title>Settings</Title>
-        <Subtitle>Manage your target settings.</Subtitle>
-      </div>
       {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
-        <div className="flex flex-col gap-y-4">
-          <TargetName
-            targetName={currentTarget.name}
-            targetId={currentTarget.cleanId}
-            projectId={currentProject.cleanId}
-            organizationId={currentOrganization.cleanId}
-          />
-          <GraphQLEndpointUrl
-            targetId={currentTarget.cleanId}
-            projectId={currentProject.cleanId}
-            organizationId={currentOrganization.cleanId}
-            graphqlEndpointUrl={currentTarget.graphqlEndpointUrl ?? null}
-          />
-          {canAccessTokens && (
-            <RegistryAccessTokens
-              targetId={currentTarget.cleanId}
-              projectId={currentProject.cleanId}
-              organizationId={currentOrganization.cleanId}
-              me={organizationForSettings.me}
-            />
-          )}
-          {canAccessTokens && (
-            <CDNAccessTokens
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
-              me={organizationForSettings.me}
-            />
-          )}
-          {currentProject.type === ProjectType.Federation && (
-            <SchemaContracts
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
-            />
-          )}
-          <ConditionalBreakingChanges
-            targetId={currentTarget.cleanId}
-            projectId={currentProject.cleanId}
-            organizationId={currentOrganization.cleanId}
-          />
-          <ExtendBaseSchema
-            targetId={currentTarget.cleanId}
-            projectId={currentProject.cleanId}
-            organizationId={currentOrganization.cleanId}
-            baseSchema={targetForSettings?.baseSchema ?? ''}
-          />
-          {canDelete && (
-            <TargetDelete
-              targetId={currentTarget.cleanId}
-              projectId={currentProject.cleanId}
-              organizationId={currentOrganization.cleanId}
-            />
-          )}
-        </div>
+        <PageLayout>
+          <NavLayout>
+            {subPages.map(subPage => {
+              if (
+                subPage.key === 'schema-contracts' &&
+                currentProject.type !== ProjectType.Federation
+              ) {
+                return null;
+              }
+              return (
+                <Button
+                  key={subPage.key}
+                  variant="ghost"
+                  onClick={() => {
+                    void router.navigate({
+                      search: {
+                        page: subPage.key,
+                      },
+                    });
+                  }}
+                  className={cn(
+                    props.page === subPage.key
+                      ? 'bg-muted hover:bg-muted'
+                      : 'hover:bg-transparent hover:underline',
+                    'w-full justify-start text-left',
+                  )}
+                >
+                  {subPage.title}
+                </Button>
+              );
+            })}
+          </NavLayout>
+          <PageLayoutContent>
+            {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
+              <div className="space-y-12">
+                {props.page === 'general' ? (
+                  <>
+                    <TargetName
+                      targetName={currentTarget.name}
+                      targetId={currentTarget.cleanId}
+                      projectId={currentProject.cleanId}
+                      organizationId={currentOrganization.cleanId}
+                    />
+                    <GraphQLEndpointUrl
+                      targetId={currentTarget.cleanId}
+                      projectId={currentProject.cleanId}
+                      organizationId={currentOrganization.cleanId}
+                      graphqlEndpointUrl={currentTarget.graphqlEndpointUrl ?? null}
+                    />
+                    {canDelete && (
+                      <TargetDelete
+                        targetId={currentTarget.cleanId}
+                        projectId={currentProject.cleanId}
+                        organizationId={currentOrganization.cleanId}
+                      />
+                    )}
+                  </>
+                ) : null}
+                {props.page === 'cdn' && canAccessTokens ? (
+                  <CDNAccessTokens
+                    me={organizationForSettings.me}
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
+                ) : null}
+                {props.page === 'registry-token' && canAccessTokens ? (
+                  <RegistryAccessTokens
+                    me={organizationForSettings.me}
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
+                ) : null}
+                {props.page === 'breaking-changes' ? (
+                  <ConditionalBreakingChanges
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
+                ) : null}
+                {props.page === 'base-schema' ? (
+                  <ExtendBaseSchema
+                    baseSchema={targetForSettings?.baseSchema ?? ''}
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
+                ) : null}
+                {props.page === 'schema-contracts' ? (
+                  <SchemaContracts organizationId="" projectId="" targetId="" />
+                ) : null}
+              </div>
+            ) : null}
+          </PageLayoutContent>
+        </PageLayout>
       ) : null}
     </TargetLayout>
   );
@@ -1161,11 +1241,17 @@ export function TargetSettingsPage(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
+  page?: SubPage;
 }) {
   return (
     <>
       <Meta title="Settings" />
-      <TargetSettingsContent {...props} />
+      <TargetSettingsContent
+        organizationId={props.organizationId}
+        projectId={props.projectId}
+        targetId={props.targetId}
+        page={props.page}
+      />
     </>
   );
 }

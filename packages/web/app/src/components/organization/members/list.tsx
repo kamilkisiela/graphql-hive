@@ -14,13 +14,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { CardDescription, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { ChangePermissionsModal } from '@/components/v2/modals';
@@ -526,21 +526,16 @@ export function OrganizationMembers(props: {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-row items-center justify-between">
-        <div className="space-y-2">
-          <CardTitle>List of organization members</CardTitle>
-          <CardDescription>
-            Manage the members of your organization and their permissions.
-          </CardDescription>
-        </div>
-        <div>
-          <MemberInvitationButton
-            refetchInvitations={props.refetchMembers}
-            organization={organization}
-          />
-        </div>
-      </div>
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="List of organization members"
+        description="Manage the members of your organization and their permissions."
+      >
+        <MemberInvitationButton
+          refetchInvitations={props.refetchMembers}
+          organization={organization}
+        />
+      </SubPageLayoutHeader>
       <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
         <thead>
           <tr>
@@ -589,6 +584,6 @@ export function OrganizationMembers(props: {
           ))}
         </tbody>
       </table>
-    </div>
+    </SubPageLayout>
   );
 }
