@@ -7,7 +7,7 @@ networks:
 
 services:
   db:
-    image: postgres:14.11-alpine
+    image: postgres:14.12-alpine
     environment:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   broker:
-    image: redpandadata/redpanda:v23.3.15
+    image: redpandadata/redpanda:v23.3.16
     container_name: broker
     hostname: broker
     networks:
@@ -139,7 +139,7 @@ services:
       myminio/artifacts; exit 0"
 
   s3_reverse_proxy:
-    image: caddy:2.7.6-alpine
+    image: caddy:2.8.4-alpine
     depends_on:
       s3:
         condition: service_healthy

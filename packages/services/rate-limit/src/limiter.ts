@@ -40,7 +40,9 @@ export type CachedRateLimitInfo = {
   retentionInDays: number;
 };
 
-const DEFAULT_RETENTION = 30; // days
+// It should be equal or higher than the highest possible retention value (enterprise),
+// to prevent applying lower retention value then expected.
+const RETENTION_IN_DAYS_FALLBACK = 365;
 
 export type Limiter = ReturnType<typeof createRateLimiter>;
 
@@ -82,7 +84,7 @@ export function createRateLimiter(config: {
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
-  const targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
+  let targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
   let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
   const fetchAndCalculateUsageInformation = traceInline('Calculate Rate Limit', {}, async () => {
@@ -114,9 +116,13 @@ export function createRateLimiter(config: {
       `Fetched total of ${Object.keys(operations).length} targets with usage information`,
     );
 
+    const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
     const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
     for (const record of records) {
+      for (const target of record.targets) {
+        newTargetIdToOrgLookup.set(target, record.organization);
+      }
       if (!newCachedResult.has(record.organization)) {
         newCachedResult.set(record.organization, {
           orgName: record.org_name,
@@ -193,6 +199,7 @@ export function createRateLimiter(config: {
     });
 
     cachedResult = newCachedResult;
+    targetIdToOrgLookup = newTargetIdToOrgLookup;
 
     const scheduledEmails = emails.drain();
     if (scheduledEmails.length > 0) {
@@ -201,22 +208,30 @@ export function createRateLimiter(config: {
     }
   });
 
+  function getOrganizationFromCache(targetId: string) {
+    const orgId = targetIdToOrgLookup.get(targetId);
+    return orgId ? cachedResult.get(orgId) : undefined;
+  }
+
   return {
     logger,
     async readiness() {
       return initialized && (await (await postgres$).isReady());
     },
     getRetention(targetId: string) {
-      const orgId = targetIdToOrgLookup.get(targetId);
-
-      if (!orgId) {
-        return DEFAULT_RETENTION;
-      }
-
-      const orgData = cachedResult.get(orgId);
+      const orgData = getOrganizationFromCache(targetId);
 
       if (!orgData) {
-        return DEFAULT_RETENTION;
+        // This is a safety measure to prevent setting the retention to a lower value then expected,
+        // in case of an organization data not being available yet in the cache.
+        const error = new Error(
+          `Failed to resolve/find retention information for targetId=${targetId}`,
+        );
+        Sentry.captureException(error, {
+          level: 'error',
+        });
+        logger.error(error);
+        return RETENTION_IN_DAYS_FALLBACK;
       }
 
       return orgData.retentionInDays;
@@ -226,9 +241,13 @@ export function createRateLimiter(config: {
         input.entityType === 'organization' ? input.id : targetIdToOrgLookup.get(input.id);
 
       if (!orgId) {
-        logger.warn(
-          `Failed to resolve/find rate limit information for entityId=${input.id} (type=${input.entityType})`,
+        const error = new Error(
+          `Failed to resolve/find rate limit information for entityId=${input.id} type=${input.entityType}`,
         );
+        Sentry.captureException(error, {
+          level: 'error',
+        });
+        logger.error(error);
 
         return UNKNOWN_RATE_LIMIT_OBJ;
       }

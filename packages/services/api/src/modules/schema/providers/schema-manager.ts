@@ -1,3 +1,4 @@
+import type { SchemaVersionMapper as SchemaVersion } from '../module.graphql.mappers';
 import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
@@ -20,7 +21,6 @@ import {
 } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, cache, stringifySelector } from '../../../shared/helpers';
-import { SchemaVersion } from '../../../shared/mappers';
 import { parseGraphQLSource } from '../../../shared/schema';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';

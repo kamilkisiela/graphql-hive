@@ -9,9 +9,9 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@apollo/gateway": "2.7.8",
+    "@apollo/gateway": "2.8.0",
     "@apollo/server": "4.10.4",
-    "@aws-sdk/client-s3": "3.577.0",
+    "@aws-sdk/client-s3": "3.588.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/apollo": "workspace:*",
     "@graphql-hive/core": "workspace:*",

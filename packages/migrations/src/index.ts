@@ -18,7 +18,7 @@ console.log('Running the UP migrations');
 try {
   await runPGMigrations({ slonik });
   if (env.clickhouse) {
-    await migrateClickHouse(env.isClickHouseMigrator, env.clickhouse);
+    await migrateClickHouse(env.isClickHouseMigrator, env.isHiveCloud, env.clickhouse);
   }
   process.exit(0);
 } catch (error) {

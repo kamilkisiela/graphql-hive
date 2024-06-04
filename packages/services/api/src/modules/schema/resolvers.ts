@@ -1,4 +1,17 @@
 import { createHash } from 'node:crypto';
+import type {
+  GraphQLEnumTypeMapper,
+  GraphQLInputObjectTypeMapper,
+  GraphQLInterfaceTypeMapper,
+  GraphQLNamedTypeMapper,
+  GraphQLObjectTypeMapper,
+  GraphQLScalarTypeMapper,
+  GraphQLUnionTypeMapper,
+  SchemaCoordinateUsageForUnusedExplorer,
+  SchemaCoordinateUsageMapper,
+  WithGraphQLParentInfo,
+  WithSchemaCoordinatesUsage,
+} from './module.graphql.mappers';
 import stringify from 'fast-json-stable-stringify';
 import {
   ConstDirectiveNode,
@@ -25,19 +38,6 @@ import { CriticalityLevel } from '@graphql-inspector/core';
 import type * as Types from '../../__generated__/types';
 import { type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
-import type {
-  GraphQLEnumTypeMapper,
-  GraphQLInputObjectTypeMapper,
-  GraphQLInterfaceTypeMapper,
-  GraphQLNamedTypeMapper,
-  GraphQLObjectTypeMapper,
-  GraphQLScalarTypeMapper,
-  GraphQLUnionTypeMapper,
-  SchemaCoordinateUsageForUnusedExplorer,
-  SchemaCoordinateUsageTypeMapper,
-  WithGraphQLParentInfo,
-  WithSchemaCoordinatesUsage,
-} from '../../shared/mappers';
 import { buildASTSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
@@ -82,7 +82,7 @@ function usage(
         }>
       >,
   _: unknown,
-): Promise<SchemaCoordinateUsageTypeMapper> | SchemaCoordinateUsageTypeMapper {
+): Promise<SchemaCoordinateUsageMapper> | SchemaCoordinateUsageMapper {
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
 

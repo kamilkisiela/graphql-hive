@@ -9,12 +9,12 @@ import { CreateOperationModal } from '@/components/target/laboratory/create-oper
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
 import { Button } from '@/components/ui/button';
+import { DocsLink } from '@/components/ui/docs-note';
+import { Link } from '@/components/ui/link';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Accordion } from '@/components/v2/accordion';
-import { DocsLink } from '@/components/v2/docs-note';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
-import { Link } from '@/components/v2/link';
 import { Spinner } from '@/components/v2/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';

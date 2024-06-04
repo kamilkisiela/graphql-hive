@@ -9,11 +9,11 @@ import { OperationsStats } from '@/components/target/insights/Stats';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker, presetLast1Day } from '@/components/ui/date-range-picker';
+import { EmptyList } from '@/components/ui/empty-list';
+import { Link } from '@/components/ui/link';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { EmptyList } from '@/components/v2/empty-list';
-import { Link } from '@/components/v2/link';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 

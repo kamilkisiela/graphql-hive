@@ -51,15 +51,15 @@
     "tiny-lru": "8.0.2"
   },
   "devDependencies": {
-    "@graphql-tools/schema": "10.0.3",
+    "@graphql-tools/schema": "10.0.4",
     "@graphql-yoga/plugin-defer-stream": "3.3.1",
     "@graphql-yoga/plugin-disable-introspection": "2.3.1",
     "@graphql-yoga/plugin-graphql-sse": "3.3.1",
     "@graphql-yoga/plugin-response-cache": "3.5.1",
-    "@whatwg-node/fetch": "0.9.17",
+    "@whatwg-node/fetch": "0.9.18",
     "graphql-ws": "5.16.0",
     "graphql-yoga": "5.3.1",
-    "nock": "14.0.0-beta.6",
+    "nock": "14.0.0-beta.7",
     "vitest": "1.6.0",
     "ws": "8.17.0"
   },

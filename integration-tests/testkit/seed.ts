@@ -1,4 +1,3 @@
-import type { UUID } from 'node:crypto';
 import { humanId } from 'human-id';
 import { createPool, sql } from 'slonik';
 import {
@@ -101,6 +100,15 @@ export function initSeed() {
                   [name]: enabled,
                 })}
                 WHERE id = ${organization.id}
+              `);
+
+              await pool.end();
+            },
+            async setDataRetention(days: number) {
+              const pool = await createConnectionPool();
+
+              await pool.query(sql`
+                UPDATE organizations SET limit_retention_days = ${days} WHERE id = ${organization.id}
               `);
 
               await pool.end();

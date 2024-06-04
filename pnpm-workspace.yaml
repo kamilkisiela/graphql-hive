@@ -7,3 +7,4 @@ packages:
   - integration-tests
   - deployment
   - scripts
+  - rules

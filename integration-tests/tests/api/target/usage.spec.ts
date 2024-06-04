@@ -1,4 +1,6 @@
+import { differenceInHours } from 'date-fns/differenceInHours';
 import { formatISO } from 'date-fns/formatISO';
+import { parse as parseDate } from 'date-fns/parse';
 import { subHours } from 'date-fns/subHours';
 import { buildASTSchema, parse, print } from 'graphql';
 import { createLogger } from 'graphql-yoga';
@@ -11,6 +13,7 @@ import {
 } from 'testkit/gql/graphql';
 import { execute } from 'testkit/graphql';
 import { getServiceHost } from 'testkit/utils';
+import { UTCDate } from '@date-fns/utc';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
 import { createHive } from '../../../../packages/libraries/core/src';
@@ -18,6 +21,17 @@ import { clickHouseQuery } from '../../../testkit/clickhouse';
 import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 import { CollectedOperation } from '../../../testkit/usage';
+
+// We don't use differenceInDays from date-fns as it calculates the difference in days
+// based on daylight savings time, which is not what we want here.
+function differenceInDays(dateLeft: Date, dateRight: Date): number {
+  // https://github.com/date-fns/date-fns/blob/ddb34e0833f55020d90a1e6ccb682df3265337d6/src/differenceInDays/index.ts#L17-L18
+  return Math.trunc(differenceInHours(dateLeft, dateRight) / 24) | 0;
+}
+
+function parseClickHouseDate(date: string) {
+  return parseDate(date, 'yyyy-MM-dd HH:mm:ss', new UTCDate());
+}
 
 function ensureNumber(value: number | string): number {
   if (typeof value === 'number') {
@@ -1272,7 +1286,7 @@ test.concurrent('ignore operations with syntax errors', async () => {
 
 test.concurrent('ensure correct data', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, organization } = await createOrg();
   const { target, createToken } = await createProject(ProjectType.Single);
   const writeToken = await createToken({
     targetScopes: [
@@ -1283,6 +1297,9 @@ test.concurrent('ensure correct data', async () => {
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
   });
+
+  // Organization was created, but the rate limiter may be not aware of it yet.
+  await waitFor(6_000); // so the data retention is propagated to the rate-limiter
 
   await writeToken.collectLegacyOperations([
     {
@@ -1334,10 +1351,12 @@ test.concurrent('ensure correct data', async () => {
       body,
       operation_kind,
       sum(total) as total,
-      coordinates
+      coordinates,
+      timestamp,
+      expires_at
     FROM operation_collection
     WHERE target = '${target.id}'
-    GROUP BY target, hash, coordinates, name, body, operation_kind
+    GROUP BY target, hash, coordinates, name, body, operation_kind, timestamp, expires_at
   `);
 
   expect(operationCollectionResult.data).toHaveLength(1);
@@ -1351,6 +1370,12 @@ test.concurrent('ensure correct data', async () => {
   expect(operationCollectionRow.name).toBe('ping');
   expect(operationCollectionRow.target).toBe(target.id);
   expect(ensureNumber(operationCollectionRow.total)).toEqual(2);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(operationCollectionRow.expires_at),
+      parseClickHouseDate(operationCollectionRow.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // operations
   const operationsResult = await clickHouseQuery<{
@@ -1388,6 +1413,12 @@ test.concurrent('ensure correct data', async () => {
   expect(ensureNumber(operationWithClient.errors)).toEqual(0);
   expect(operationWithClient.hash).toHaveLength(32);
   expect(operationWithClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(operationWithClient.expires_at),
+      parseClickHouseDate(operationWithClient.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   const operationWithoutClient = operationsResult.data.find(o => o.client_name.length === 0)!;
   expect(operationWithoutClient).toBeDefined();
@@ -1397,6 +1428,12 @@ test.concurrent('ensure correct data', async () => {
   expect(ensureNumber(operationWithoutClient.errors)).toEqual(0);
   expect(operationWithoutClient.hash).toHaveLength(32);
   expect(operationWithoutClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(operationWithoutClient.expires_at),
+      parseClickHouseDate(operationWithoutClient.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // operations_hourly
   const operationsHourlyResult = await clickHouseQuery<{
@@ -1434,16 +1471,20 @@ test.concurrent('ensure correct data', async () => {
     total_ok: string;
     total: string;
     quantiles: [number];
+    timestamp: string;
+    expires_at: string;
   }>(`
     SELECT
       target,
       sum(total) as total,
       sum(total_ok) as total_ok,
       hash,
-      quantilesMerge(0.99)(duration_quantiles) as quantiles
+      quantilesMerge(0.99)(duration_quantiles) as quantiles,
+      timestamp,
+      expires_at
     FROM operations_daily 
     WHERE target = '${target.id}'
-    GROUP BY target, hash
+    GROUP BY target, hash, timestamp, expires_at
   `);
 
   expect(operationsDailyResult.data).toHaveLength(1);
@@ -1455,6 +1496,12 @@ test.concurrent('ensure correct data', async () => {
   expect(ensureNumber(dailyAgg.total_ok)).toEqual(2);
   expect(dailyAgg.hash).toHaveLength(32);
   expect(dailyAgg.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(dailyAgg.expires_at),
+      parseClickHouseDate(dailyAgg.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // coordinates_daily
   const coordinatesDailyResult = await clickHouseQuery<{
@@ -1462,15 +1509,19 @@ test.concurrent('ensure correct data', async () => {
     hash: string;
     total: string;
     coordinate: string;
+    timestamp: string;
+    expires_at: string;
   }>(`
     SELECT
       target,
       sum(total) as total,
       hash,
-      coordinate
+      coordinate,
+      timestamp,
+      expires_at
     FROM coordinates_daily 
     WHERE target = '${target.id}'
-    GROUP BY target, hash, coordinate
+    GROUP BY target, hash, coordinate, timestamp, expires_at
   `);
 
   expect(coordinatesDailyResult.data).toHaveLength(2);
@@ -1480,12 +1531,24 @@ test.concurrent('ensure correct data', async () => {
   expect(ensureNumber(rootCoordinate.total)).toEqual(2);
   expect(rootCoordinate.hash).toHaveLength(32);
   expect(rootCoordinate.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(rootCoordinate.expires_at),
+      parseClickHouseDate(rootCoordinate.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   const fieldCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query.ping')!;
   expect(fieldCoordinate).toBeDefined();
   expect(ensureNumber(fieldCoordinate.total)).toEqual(2);
   expect(fieldCoordinate.hash).toHaveLength(32);
   expect(fieldCoordinate.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(fieldCoordinate.expires_at),
+      parseClickHouseDate(fieldCoordinate.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   // clients_daily
   const clientsDailyResult = await clickHouseQuery<{
@@ -1494,16 +1557,20 @@ test.concurrent('ensure correct data', async () => {
     client_name: string;
     client_version: string;
     total: string;
+    timestamp: string;
+    expires_at: string;
   }>(`
     SELECT
       target,
       sum(total) as total,
       hash,
       client_name,
-      client_version
+      client_version,
+      timestamp,
+      expires_at
     FROM clients_daily
     WHERE target = '${target.id}'
-    GROUP BY target, hash, client_name, client_version
+    GROUP BY target, hash, client_name, client_version, timestamp, expires_at
   `);
 
   expect(clientsDailyResult.data).toHaveLength(2);
@@ -1514,6 +1581,12 @@ test.concurrent('ensure correct data', async () => {
   expect(dailyAggOfKnownClient.client_version).toBe('test-version');
   expect(dailyAggOfKnownClient.hash).toHaveLength(32);
   expect(dailyAggOfKnownClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(dailyAggOfKnownClient.expires_at),
+      parseClickHouseDate(dailyAggOfKnownClient.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
 
   const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
   expect(dailyAggOfUnknownClient).toBeDefined();
@@ -1521,6 +1594,331 @@ test.concurrent('ensure correct data', async () => {
   expect(dailyAggOfUnknownClient.client_version).toHaveLength(0);
   expect(dailyAggOfUnknownClient.hash).toHaveLength(32);
   expect(dailyAggOfUnknownClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(dailyAggOfUnknownClient.expires_at),
+      parseClickHouseDate(dailyAggOfUnknownClient.timestamp),
+    ),
+  ).toBe(organization.rateLimit.retentionInDays);
+});
+
+test.concurrent('ensure correct data when data retention period is non-default', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setDataRetention } = await createOrg();
+  const { target, createToken } = await createProject(ProjectType.Single);
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
+
+  const dataRetentionInDays = 60;
+  await setDataRetention(dataRetentionInDays);
+  await waitFor(6_000); // so the data retention is propagated to the rate-limiter
+
+  await writeToken.collectLegacyOperations([
+    {
+      operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
+      operationName: 'ping',
+      fields: ['Query', 'Query.ping'],
+      execution: {
+        ok: true,
+        duration: 200_000_000,
+        errorsTotal: 0,
+      },
+    },
+    {
+      operation: 'query ping { ping }',
+      operationName: 'ping',
+      fields: ['Query', 'Query.ping'],
+      execution: {
+        ok: true,
+        duration: 200_000_000,
+        errorsTotal: 0,
+      },
+      metadata: {
+        client: {
+          name: 'test-name',
+          version: 'test-version',
+        },
+      },
+    },
+  ]);
+
+  await waitFor(5000);
+
+  // operation_collection
+  const operationCollectionResult = await clickHouseQuery<{
+    target: string;
+    hash: string;
+    name: string;
+    body: string;
+    operation_kind: string;
+    coordinates: string[];
+    total: string;
+    timestamp: string;
+    expires_at: string;
+  }>(`
+    SELECT
+      target,
+      hash,
+      name,
+      body,
+      operation_kind,
+      sum(total) as total,
+      coordinates,
+      timestamp,
+      expires_at
+    FROM operation_collection
+    WHERE target = '${target.id}'
+    GROUP BY target, hash, coordinates, name, body, operation_kind, timestamp, expires_at
+  `);
+
+  expect(operationCollectionResult.data).toHaveLength(1);
+
+  const operationCollectionRow = operationCollectionResult.data[0];
+  expect(operationCollectionRow.body).toEqual('query ping{ping}');
+  expect(operationCollectionRow.coordinates).toHaveLength(2);
+  expect(operationCollectionRow.coordinates).toContainEqual('Query.ping');
+  expect(operationCollectionRow.coordinates).toContainEqual('Query');
+  expect(operationCollectionRow.hash).toHaveLength(32);
+  expect(operationCollectionRow.name).toBe('ping');
+  expect(operationCollectionRow.target).toBe(target.id);
+  expect(ensureNumber(operationCollectionRow.total)).toEqual(2);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(operationCollectionRow.expires_at),
+      parseClickHouseDate(operationCollectionRow.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  // operations
+  const operationsResult = await clickHouseQuery<{
+    target: string;
+    timestamp: string;
+    expires_at: string;
+    hash: string;
+    ok: boolean;
+    errors: number;
+    duration: number;
+    client_name: string;
+    client_version: string;
+  }>(`
+    SELECT
+      target,
+      timestamp,
+      expires_at,
+      hash,
+      ok,
+      errors,
+      duration,
+      client_name,
+      client_version
+    FROM operations
+    WHERE target = '${target.id}'
+  `);
+
+  expect(operationsResult.data).toHaveLength(2);
+
+  const operationWithClient = operationsResult.data.find(o => o.client_name.length > 0)!;
+  expect(operationWithClient).toBeDefined();
+  expect(operationWithClient.client_name).toEqual('test-name');
+  expect(operationWithClient.client_version).toEqual('test-version');
+  expect(ensureNumber(operationWithClient.duration)).toEqual(200_000_000);
+  expect(ensureNumber(operationWithClient.errors)).toEqual(0);
+  expect(operationWithClient.hash).toHaveLength(32);
+  expect(operationWithClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(operationWithClient.expires_at),
+      parseClickHouseDate(operationWithClient.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  const operationWithoutClient = operationsResult.data.find(o => o.client_name.length === 0)!;
+  expect(operationWithoutClient).toBeDefined();
+  expect(operationWithoutClient.client_name).toHaveLength(0);
+  expect(operationWithoutClient.client_version).toHaveLength(0);
+  expect(ensureNumber(operationWithoutClient.duration)).toEqual(200_000_000);
+  expect(ensureNumber(operationWithoutClient.errors)).toEqual(0);
+  expect(operationWithoutClient.hash).toHaveLength(32);
+  expect(operationWithoutClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(operationWithoutClient.expires_at),
+      parseClickHouseDate(operationWithoutClient.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  // operations_hourly
+  const operationsHourlyResult = await clickHouseQuery<{
+    target: string;
+    hash: string;
+    total_ok: string;
+    total: string;
+    quantiles: [number];
+  }>(`
+    SELECT
+      target,
+      sum(total) as total,
+      sum(total_ok) as total_ok,
+      hash,
+      quantilesMerge(0.99)(duration_quantiles) as quantiles
+    FROM operations_hourly
+    WHERE target = '${target.id}'
+    GROUP BY target, hash
+  `);
+
+  expect(operationsHourlyResult.data).toHaveLength(1);
+
+  const hourlyAgg = operationsHourlyResult.data[0];
+  expect(hourlyAgg).toBeDefined();
+  expect(ensureNumber(hourlyAgg.quantiles[0])).toEqual(200_000_000);
+  expect(ensureNumber(hourlyAgg.total)).toEqual(2);
+  expect(ensureNumber(hourlyAgg.total_ok)).toEqual(2);
+  expect(hourlyAgg.hash).toHaveLength(32);
+  expect(hourlyAgg.target).toEqual(target.id);
+
+  // operations_daily
+  const operationsDailyResult = await clickHouseQuery<{
+    target: string;
+    timestamp: string;
+    expires_at: string;
+    hash: string;
+    total_ok: string;
+    total: string;
+    quantiles: [number];
+  }>(`
+    SELECT
+      target,
+      timestamp,
+      expires_at,
+      sum(total) as total,
+      sum(total_ok) as total_ok,
+      hash,
+      quantilesMerge(0.99)(duration_quantiles) as quantiles
+    FROM operations_daily 
+    WHERE target = '${target.id}'
+    GROUP BY target, hash, timestamp, expires_at
+  `);
+
+  expect(operationsDailyResult.data).toHaveLength(1);
+
+  const dailyAgg = operationsDailyResult.data[0];
+  expect(dailyAgg).toBeDefined();
+  expect(ensureNumber(dailyAgg.quantiles[0])).toEqual(200_000_000);
+  expect(ensureNumber(dailyAgg.total)).toEqual(2);
+  expect(ensureNumber(dailyAgg.total_ok)).toEqual(2);
+  expect(dailyAgg.hash).toHaveLength(32);
+  expect(dailyAgg.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(dailyAgg.expires_at),
+      parseClickHouseDate(dailyAgg.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  // coordinates_daily
+  const coordinatesDailyResult = await clickHouseQuery<{
+    target: string;
+    hash: string;
+    total: string;
+    coordinate: string;
+    timestamp: string;
+    expires_at: string;
+  }>(`
+    SELECT
+      target,
+      sum(total) as total,
+      hash,
+      coordinate,
+      timestamp,
+      expires_at
+    FROM coordinates_daily 
+    WHERE target = '${target.id}'
+    GROUP BY target, hash, coordinate, timestamp, expires_at
+  `);
+
+  expect(coordinatesDailyResult.data).toHaveLength(2);
+
+  const rootCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query')!;
+  expect(rootCoordinate).toBeDefined();
+  expect(ensureNumber(rootCoordinate.total)).toEqual(2);
+  expect(rootCoordinate.hash).toHaveLength(32);
+  expect(rootCoordinate.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(rootCoordinate.expires_at),
+      parseClickHouseDate(rootCoordinate.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  const fieldCoordinate = coordinatesDailyResult.data.find(c => c.coordinate === 'Query.ping')!;
+  expect(fieldCoordinate).toBeDefined();
+  expect(ensureNumber(fieldCoordinate.total)).toEqual(2);
+  expect(fieldCoordinate.hash).toHaveLength(32);
+  expect(fieldCoordinate.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(fieldCoordinate.expires_at),
+      parseClickHouseDate(fieldCoordinate.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  // clients_daily
+  const clientsDailyResult = await clickHouseQuery<{
+    target: string;
+    hash: string;
+    client_name: string;
+    client_version: string;
+    total: string;
+    timestamp: string;
+    expires_at: string;
+  }>(`
+    SELECT
+      target,
+      sum(total) as total,
+      hash,
+      client_name,
+      client_version,
+      timestamp,
+      expires_at
+    FROM clients_daily
+    WHERE target = '${target.id}'
+    GROUP BY target, hash, client_name, client_version, timestamp, expires_at
+  `);
+
+  expect(clientsDailyResult.data).toHaveLength(2);
+
+  const dailyAggOfKnownClient = clientsDailyResult.data.find(c => c.client_name === 'test-name')!;
+  expect(dailyAggOfKnownClient).toBeDefined();
+  expect(ensureNumber(dailyAggOfKnownClient.total)).toEqual(1);
+  expect(dailyAggOfKnownClient.client_version).toBe('test-version');
+  expect(dailyAggOfKnownClient.hash).toHaveLength(32);
+  expect(dailyAggOfKnownClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(dailyAggOfKnownClient.expires_at),
+      parseClickHouseDate(dailyAggOfKnownClient.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
+
+  const dailyAggOfUnknownClient = clientsDailyResult.data.find(c => c.client_name !== 'test-name')!;
+  expect(dailyAggOfUnknownClient).toBeDefined();
+  expect(ensureNumber(dailyAggOfUnknownClient.total)).toEqual(1);
+  expect(dailyAggOfUnknownClient.client_version).toHaveLength(0);
+  expect(dailyAggOfUnknownClient.hash).toHaveLength(32);
+  expect(dailyAggOfUnknownClient.target).toEqual(target.id);
+  expect(
+    differenceInDays(
+      parseClickHouseDate(dailyAggOfUnknownClient.expires_at),
+      parseClickHouseDate(dailyAggOfUnknownClient.timestamp),
+    ),
+  ).toBe(dataRetentionInDays);
 });
 
 const SubscriptionSchemaCheckQuery = graphql(/* GraphQL */ `

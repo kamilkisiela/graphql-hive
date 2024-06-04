@@ -40,7 +40,7 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 - [`hive config:reset`](#hive-configreset)
 - [`hive config:set KEY VALUE`](#hive-configset-key-value)
 - [`hive dev`](#hive-dev)
-- [`hive help [COMMANDS]`](#hive-help-commands)
+- [`hive help [COMMAND]`](#hive-help-command)
 - [`hive introspect LOCATION`](#hive-introspect-location)
 - [`hive operations:check FILE`](#hive-operationscheck-file)
 - [`hive schema:check FILE`](#hive-schemacheck-file)
@@ -71,7 +71,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/artifact/fetch.js)_
+[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/artifact/fetch.js)_
 
 ## `hive config:delete KEY`
 
@@ -89,7 +89,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/config/delete.js)_
+[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -107,7 +107,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/config/get.js)_
+[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -122,7 +122,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/config/reset.js)_
+[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -141,44 +141,49 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/config/set.js)_
+[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/set.js)_
 
 ## `hive dev`
 
-develop and compose Supergraph with service substitution (only available for Federation projects)
+Develop and compose Supergraph with service substitution
 
 ```
 USAGE
-  $ hive dev (--url <value> --service <value>) [--registry.endpoint <value>] [--registry.accessToken
-    <value>] [--schema <value> ] [--watch] [--watchInterval <value>] [--write <value>]
+  $ hive dev (--url <value> --service <value>) [--registry.endpoint <value>] [--registry <value>]
+    [--registry.accessToken <value>] [--token <value>] [--schema <value> ] [--watch] [--watchInterval <value>] [--write
+    <value>]
 
 FLAGS
+  --registry=<value>              registry address
   --registry.accessToken=<value>  registry access token
   --registry.endpoint=<value>     registry endpoint
   --schema=<filepath>...          Service sdl. If not provided, will be introspected from the service
   --service=<string>...           (required) Service name
+  --token=<value>                 api token
   --url=<address>...              (required) Service url
   --watch                         Watch mode
   --watchInterval=<value>         [default: 1000] Watch interval in milliseconds
   --write=<value>                 [default: supergraph.graphql] Where to save the supergraph schema file
 
 DESCRIPTION
-  develop and compose Supergraph with service substitution (only available for Federation projects)
+  Develop and compose Supergraph with service substitution
+  Only available for Federation projects.
+  Work in Progress: Please note that this command is still under development and may undergo changes in future releases
 ```
 
 _See code:
-[dist/commands/dev.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/dev.js)_
+[dist/commands/dev.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/dev.js)_
 
-## `hive help [COMMANDS]`
+## `hive help [COMMAND]`
 
 Display help for hive.
 
 ```
 USAGE
-  $ hive help [COMMANDS] [-n]
+  $ hive help [COMMAND...] [-n]
 
 ARGUMENTS
-  COMMANDS  Command to show help for.
+  COMMAND...  Command to show help for.
 
 FLAGS
   -n, --nested-commands  Include all nested commands in the output.
@@ -188,7 +193,7 @@ DESCRIPTION
 ```
 
 _See code:
-[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
+[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.22/src/commands/help.ts)_
 
 ## `hive introspect LOCATION`
 
@@ -210,7 +215,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/introspect.js)_
+[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/introspect.js)_
 
 ## `hive operations:check FILE`
 
@@ -260,7 +265,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/operations/check.js)_
+[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/operations/check.js)_
 
 ## `hive schema:check FILE`
 
@@ -294,7 +299,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/schema/check.js)_
+[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/check.js)_
 
 ## `hive schema:delete SERVICE`
 
@@ -321,7 +326,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/schema/delete.js)_
+[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/delete.js)_
 
 ## `hive schema:fetch ACTIONID`
 
@@ -349,7 +354,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/schema/fetch.js)_
+[dist/commands/schema/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/fetch.js)_
 
 ## `hive schema:publish FILE`
 
@@ -387,7 +392,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/schema/publish.js)_
+[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -395,13 +400,13 @@ update the hive CLI
 
 ```
 USAGE
-  $ hive update [CHANNEL] [-a] [-v <value> | -i] [--force]
+  $ hive update [CHANNEL] [-a] [--force] [-i | -v <value>]
 
 FLAGS
-  -a, --available        Install a specific version.
+  -a, --available        See available versions.
   -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
   -v, --version=<value>  Install a specific version.
-  --force                Force a re-download of the requested version.
+      --force            Force a re-download of the requested version.
 
 DESCRIPTION
   update the hive CLI
@@ -425,7 +430,7 @@ EXAMPLES
 ```
 
 _See code:
-[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.2.4/src/commands/update.ts)_
+[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.2.13/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -447,7 +452,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.34.1/dist/commands/whoami.js)_
+[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 

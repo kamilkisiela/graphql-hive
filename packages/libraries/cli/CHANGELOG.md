@@ -1,48 +1,89 @@
 # @graphql-hive/cli
 
+## 0.38.2
+
+### Patch Changes
+
+- [#4814](https://github.com/kamilkisiela/graphql-hive/pull/4814)
+  [`15a8c54`](https://github.com/kamilkisiela/graphql-hive/commit/15a8c548dbdf71b825a804d59b88b4a2e7dbf765)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - No changes
+
+## 0.38.1
+
+### Patch Changes
+
+- [#4812](https://github.com/kamilkisiela/graphql-hive/pull/4812)
+  [`8497c2e`](https://github.com/kamilkisiela/graphql-hive/commit/8497c2e3f57359816059839f58ba6f4cfdad210f)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - No changes
+
+## 0.38.0
+
+### Minor Changes
+
+- [#4807](https://github.com/kamilkisiela/graphql-hive/pull/4807)
+  [`44b80b2`](https://github.com/kamilkisiela/graphql-hive/commit/44b80b27ab9f0eef85f6454e34e079e98ee0f2bd)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Upgrade to Oclif v3
+
 ## 0.37.0
 
 ### Minor Changes
 
-- [#4494](https://github.com/kamilkisiela/graphql-hive/pull/4494) [`c5eeac5`](https://github.com/kamilkisiela/graphql-hive/commit/c5eeac5ccef9e2dcc3c8bb33deec0fb95af9552e) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - 🚨 BREAKING CHANGE 🚨 Requires now Node v16+
+- [#4494](https://github.com/kamilkisiela/graphql-hive/pull/4494)
+  [`c5eeac5`](https://github.com/kamilkisiela/graphql-hive/commit/c5eeac5ccef9e2dcc3c8bb33deec0fb95af9552e)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - 🚨 BREAKING CHANGE 🚨 Requires now Node
+  v16+
 
 ### Patch Changes
 
-- Updated dependencies [[`06d465e`](https://github.com/kamilkisiela/graphql-hive/commit/06d465e882b569b6d0dbd5b271d2d98aafaec0b1), [`c5eeac5`](https://github.com/kamilkisiela/graphql-hive/commit/c5eeac5ccef9e2dcc3c8bb33deec0fb95af9552e)]:
+- Updated dependencies
+  [[`06d465e`](https://github.com/kamilkisiela/graphql-hive/commit/06d465e882b569b6d0dbd5b271d2d98aafaec0b1),
+  [`c5eeac5`](https://github.com/kamilkisiela/graphql-hive/commit/c5eeac5ccef9e2dcc3c8bb33deec0fb95af9552e)]:
   - @graphql-hive/core@0.3.0
 
 ## 0.36.0
 
 ### Minor Changes
 
-- [#4519](https://github.com/kamilkisiela/graphql-hive/pull/4519) [`08d8706`](https://github.com/kamilkisiela/graphql-hive/commit/08d87069541543d81a4ca59c7dd2091fce357790) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - No longer show dangerous changes
+- [#4519](https://github.com/kamilkisiela/graphql-hive/pull/4519)
+  [`08d8706`](https://github.com/kamilkisiela/graphql-hive/commit/08d87069541543d81a4ca59c7dd2091fce357790)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - No longer show dangerous changes
 
 ## 0.35.0
 
 ### Minor Changes
 
-- [#4383](https://github.com/kamilkisiela/graphql-hive/pull/4383) [`ff480e9`](https://github.com/kamilkisiela/graphql-hive/commit/ff480e917337b3dd0c7eb3a51254ca2bac8bddcd) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Introducing `hive dev` command - compose local subgraphs with subgraphs from the registry.
+- [#4383](https://github.com/kamilkisiela/graphql-hive/pull/4383)
+  [`ff480e9`](https://github.com/kamilkisiela/graphql-hive/commit/ff480e917337b3dd0c7eb3a51254ca2bac8bddcd)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Introducing `hive dev` command -
+  compose local subgraphs with subgraphs from the registry.
 
 ## 0.34.1
 
 ### Patch Changes
 
-- [#4328](https://github.com/kamilkisiela/graphql-hive/pull/4328) [`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188) Thanks [@Hebilicious](https://github.com/Hebilicious)! - Use node specifier for crypto import
+- [#4328](https://github.com/kamilkisiela/graphql-hive/pull/4328)
+  [`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188)
+  Thanks [@Hebilicious](https://github.com/Hebilicious)! - Use node specifier for crypto import
 
-- Updated dependencies [[`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188)]:
+- Updated dependencies
+  [[`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188)]:
   - @graphql-hive/core@0.2.4
 
 ## 0.34.0
 
 ### Minor Changes
 
-- [#3504](https://github.com/kamilkisiela/graphql-hive/pull/3504) [`cd12710`](https://github.com/kamilkisiela/graphql-hive/commit/cd1271088a321545fe8884658fd2c19649c3a4f6) Thanks [@beerose](https://github.com/beerose)! - Show which breaking changes are safe on usage
+- [#3504](https://github.com/kamilkisiela/graphql-hive/pull/3504)
+  [`cd12710`](https://github.com/kamilkisiela/graphql-hive/commit/cd1271088a321545fe8884658fd2c19649c3a4f6)
+  Thanks [@beerose](https://github.com/beerose)! - Show which breaking changes are safe on usage
 
 ## 0.33.1
 
 ### Patch Changes
 
-- [#3862](https://github.com/kamilkisiela/graphql-hive/pull/3862) [`02f5274`](https://github.com/kamilkisiela/graphql-hive/commit/02f52748508dfe70eb8ec500a442bfc5aecba34e) Thanks [@kongMina](https://github.com/kongMina)! - Separated schema check changes in CLI output
+- [#3862](https://github.com/kamilkisiela/graphql-hive/pull/3862)
+  [`02f5274`](https://github.com/kamilkisiela/graphql-hive/commit/02f52748508dfe70eb8ec500a442bfc5aecba34e)
+  Thanks [@kongMina](https://github.com/kongMina)! - Separated schema check changes in CLI output
 
 ## 0.33.0
 

@@ -18,12 +18,12 @@
     "graphql": "^16.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20240512.0",
+    "@cloudflare/workers-types": "4.20240603.0",
     "@types/service-worker-mock": "2.0.4",
     "@whatwg-node/server": "0.9.34",
     "bcryptjs": "2.4.3",
     "dotenv": "16.4.5",
-    "esbuild": "0.21.3",
+    "esbuild": "0.21.4",
     "fastify": "4.27.0",
     "graphql": "16.8.1",
     "itty-router": "4.2.2",

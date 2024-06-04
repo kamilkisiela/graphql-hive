@@ -174,6 +174,15 @@ async function main() {
         const retentionInfo =
           (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
 
+        if (typeof retentionInfo !== 'number') {
+          req.log.error(
+            'Failed to get retention info (token=%s, target=%s, organization=%s)',
+            maskedToken,
+            tokenInfo.target,
+            tokenInfo.organization,
+          );
+        }
+
         const stopTimer = collectDuration.startTimer();
         try {
           if (readiness() === false) {
