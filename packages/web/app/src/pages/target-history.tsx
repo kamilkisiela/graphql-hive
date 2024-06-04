@@ -1,13 +1,13 @@
 import { ReactElement, useEffect, useState } from 'react';
 import { useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { noSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Badge } from '@/components/v2/badge';
-import { Button } from '@/components/v2/button';
 import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';

@@ -1,6 +1,7 @@
 import { ReactElement, useCallback } from 'react';
 import { useMutation } from 'urql';
-import { Button, Tooltip } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 
 const UpdateSchemaVersionStatusMutation = graphql(`

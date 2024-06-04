@@ -1,7 +1,8 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
-import { Button, Input } from '@/components/v2';
+import { Input } from '@/components/v2';
 import { CheckIcon, CopyIcon } from '@/components/v2/icon';
 import { useClipboard } from '@/lib/hooks';
+import { Button } from '../ui/button';
 
 export const CopyValue = ({
   value,
@@ -36,6 +37,8 @@ export const CopyValue = ({
       readOnly
       suffix={
         <Button
+          size="icon"
+          variant="link"
           className="p-0 focus:ring-transparent"
           onClick={handleClick}
           title={isCopied ? 'Copied!' : 'Copy to clipboard'}

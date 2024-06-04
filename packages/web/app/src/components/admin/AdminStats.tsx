@@ -11,7 +11,6 @@ import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import {
-  Button,
   DataWrapper,
   Sortable,
   Stat,
@@ -38,6 +37,7 @@ import {
   SortingState,
   useTableInstance,
 } from '@tanstack/react-table';
+import { Button } from '../ui/button';
 
 interface Organization {
   name: ReactElement;

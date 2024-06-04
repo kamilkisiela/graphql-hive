@@ -1,15 +1,7 @@
 import { ReactElement, useMemo, useState } from 'react';
 import { useQuery } from 'urql';
-import {
-  Button,
-  CopyValue,
-  DocsLink,
-  Heading,
-  Link,
-  Modal,
-  RadixSelect,
-  Tag,
-} from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { CopyValue, DocsLink, Heading, Link, Modal, RadixSelect, Tag } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
@@ -209,7 +201,7 @@ export const ConnectSchemaModal = (props: {
       <Button
         type="button"
         variant="secondary"
-        size="large"
+        size="lg"
         onClick={toggleModalOpen}
         className="self-end"
       >

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';
 import { Label } from '@/components/ui/label';
@@ -10,7 +11,6 @@ import { QueryError } from '@/components/ui/query-error';
 import { Switch } from '@/components/ui/switch';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Badge } from '@/components/v2/badge';
-import { Button as LegacyButton } from '@/components/v2/button';
 import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
@@ -149,14 +149,14 @@ const Navigation = (props: {
             </div>
           ))}
           {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
-            <LegacyButton
-              variant="link"
+            <Button
+              variant="orangeLink"
               onClick={() => {
                 props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
               }}
             >
               Load more
-            </LegacyButton>
+            </Button>
           )}
         </>
       )}

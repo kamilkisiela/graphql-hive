@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useMutation, useQuery } from 'urql';
+import { Button } from '@/components/ui/button';
 import { Meta } from '@/components/ui/meta';
-import { Button } from '@/components/v2/button';
 import { DataWrapper } from '@/components/v2/data-wrapper';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
@@ -115,7 +115,7 @@ export function OrganizationTransferPage(props: { organizationId: string; code: 
                   <p className={classes.description}>Not found</p>
 
                   <div className={classes.actions}>
-                    <Button size="large" variant="secondary" onClick={goBack}>
+                    <Button size="lg" variant="secondary" onClick={goBack}>
                       Back to Hive
                     </Button>
                   </div>
@@ -131,14 +131,19 @@ export function OrganizationTransferPage(props: { organizationId: string; code: 
 
                   <div className={classes.actions}>
                     <Button
-                      size="large"
-                      variant="primary"
+                      size="lg"
+                      variant="default"
                       onClick={accept}
                       disabled={mutation.fetching}
                     >
                       Accept
                     </Button>
-                    <Button size="large" danger onClick={reject} disabled={mutation.fetching}>
+                    <Button
+                      size="lg"
+                      variant="destructive"
+                      onClick={reject}
+                      disabled={mutation.fetching}
+                    >
                       Reject
                     </Button>
                   </div>
