@@ -2,7 +2,8 @@ import { ReactElement, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input, Modal } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 
 const CollectionQuery = graphql(`
@@ -237,13 +238,18 @@ export function CreateCollectionModal(props: {
           {error && <div className="text-sm text-red-500">{error.message}</div>}
 
           <div className="flex w-full gap-2">
-            <Button type="button" size="large" block onClick={toggleModalOpen}>
+            <Button
+              type="button"
+              size="lg"
+              className="w-full justify-center"
+              onClick={toggleModalOpen}
+            >
               Cancel
             </Button>
             <Button
               type="submit"
-              size="large"
-              block
+              size="lg"
+              className="w-full justify-center"
               variant="primary"
               disabled={isSubmitting}
               data-cy="confirm"

@@ -1,6 +1,7 @@
 import { ReactElement, ReactNode, useCallback } from 'react';
 import { useMutation } from 'urql';
-import { Button, Card, Heading, Tooltip } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Card, Heading, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { RegistryModel } from '@/gql/graphql';
 import { useNotifications } from '@/lib/hooks';
@@ -185,12 +186,12 @@ export function ModelMigrationSettings(props: {
           </p>
         </div>
         <div className="flex shrink-0 gap-4">
-          <Button variant="primary" size="large" disabled={fetching} onClick={upgrade}>
+          <Button variant="primary" size="lg" disabled={fetching} onClick={upgrade}>
             Upgrade my project
           </Button>
           <Button
             variant="secondary"
-            size="large"
+            size="lg"
             onClick={() => {
               void router.navigate({
                 to: '/$organizationId/view/support',

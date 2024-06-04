@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode } from 'react';
 import { AlertCircleIcon } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/v2';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export function OperationsFallback({
@@ -36,7 +36,7 @@ export function OperationsFallback({
       ) : null}
       {state === 'error' ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Button danger onClick={refetch}>
+          <Button variant="destructive" onClick={refetch}>
             Failed to load data. Click to retry.
           </Button>
         </div>

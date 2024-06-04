@@ -6,7 +6,7 @@ import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Checkbox, Input, Button as LegacyButton, Spinner } from '@/components/v2';
+import { Checkbox, Input, Spinner } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/gql/graphql';
 import { useFormattedNumber, useToggle } from '@/lib/hooks';
@@ -133,16 +133,16 @@ function OperationsFilter({
             }}
           />
           <div className="flex w-full items-center gap-2">
-            <LegacyButton variant="link" onClick={selectAll}>
+            <Button variant="link" onClick={selectAll}>
               All
-            </LegacyButton>
-            <LegacyButton variant="link" onClick={selectNone}>
+            </Button>
+            <Button variant="link" onClick={selectNone}>
               None
-            </LegacyButton>
-            <LegacyButton className="ml-auto" onClick={selectAll}>
+            </Button>
+            <Button className="ml-auto" onClick={selectAll}>
               Reset
-            </LegacyButton>
-            <LegacyButton
+            </Button>
+            <Button
               variant="primary"
               disabled={selectedItems.length === 0}
               onClick={() => {
@@ -151,7 +151,7 @@ function OperationsFilter({
               }}
             >
               Save
-            </LegacyButton>
+            </Button>
           </div>
           <div className="grow pl-1">
             <AutoSizer>
@@ -480,16 +480,16 @@ function ClientsFilter({
             }}
           />
           <div className="flex w-full items-center gap-2">
-            <LegacyButton variant="link" onClick={selectAll}>
+            <Button variant="link" onClick={selectAll}>
               All
-            </LegacyButton>
-            <LegacyButton variant="link" onClick={selectNone}>
+            </Button>
+            <Button variant="link" onClick={selectNone}>
               None
-            </LegacyButton>
-            <LegacyButton className="ml-auto" onClick={selectAll}>
+            </Button>
+            <Button className="ml-auto" onClick={selectAll}>
               Reset
-            </LegacyButton>
-            <LegacyButton
+            </Button>
+            <Button
               variant="primary"
               disabled={selectedItems.length === 0}
               onClick={() => {
@@ -498,7 +498,7 @@ function ClientsFilter({
               }}
             >
               Save
-            </LegacyButton>
+            </Button>
           </div>
           <div className="grow pl-1">
             <AutoSizer>

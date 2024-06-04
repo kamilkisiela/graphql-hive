@@ -3,7 +3,8 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
-import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Accordion, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { RegistryAccessScope } from '@/lib/access/common';
@@ -159,12 +160,7 @@ function ModalContent(props: {
             need to create a new one.
           </Tag>
           <div className="grow" />
-          <Button
-            variant="primary"
-            size="large"
-            className="ml-auto"
-            onClick={props.toggleModalOpen}
-          >
+          <Button variant="primary" size="lg" className="ml-auto" onClick={props.toggleModalOpen}>
             Ok, got it!
           </Button>
         </div>
@@ -228,13 +224,18 @@ function ModalContent(props: {
             {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
 
             <div className="flex w-full gap-2">
-              <Button type="button" size="large" block onClick={props.toggleModalOpen}>
+              <Button
+                type="button"
+                size="lg"
+                className="w-full justify-center"
+                onClick={props.toggleModalOpen}
+              >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                size="large"
-                block
+                size="lg"
+                className="w-full justify-center"
                 variant="primary"
                 disabled={isSubmitting || noPermissionsSelected}
               >

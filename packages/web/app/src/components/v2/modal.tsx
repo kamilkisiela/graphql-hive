@@ -1,6 +1,5 @@
 import { createContext, ReactElement, ReactNode, useState } from 'react';
 import clsx from 'clsx';
-import { Button } from '@/components/v2';
 import { XIcon } from '@/components/v2/icon';
 import {
   Close,
@@ -15,6 +14,7 @@ import {
   Trigger,
 } from '@radix-ui/react-dialog';
 import { Provider as TooltipProvider } from '@radix-ui/react-tooltip';
+import { Button } from '../ui/button';
 
 const widthBySize = {
   sm: clsx('w-[450px]'),
@@ -68,7 +68,11 @@ const Modal = ({
                 {children}
 
                 <Close asChild>
-                  <Button className="absolute right-5 top-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-5 top-5 text-gray-500 hover:border-gray-500 hover:text-orange-500"
+                  >
                     <XIcon />
                   </Button>
                 </Close>

@@ -1,6 +1,13 @@
-import { Button } from '@/components/v2';
+import { useRouter } from '@tanstack/react-router';
+import { Button } from '../ui/button';
 
 export function ProjectMigrationToast({ projectId, orgId }: { projectId: string; orgId: string }) {
+  const router = useRouter();
+  const handleOnClick = () => {
+    void router.navigate({
+      to: `/${orgId}/${projectId}/view/settings`,
+    });
+  };
   return (
     <div className="fixed bottom-6 right-24 z-10 flex flex-row justify-center gap-6 rounded-md bg-gray-900 p-4">
       <div>
@@ -15,10 +22,9 @@ export function ProjectMigrationToast({ projectId, orgId }: { projectId: string;
         </p>
       </div>
       <Button
-        as="a"
-        href={`/${orgId}/${projectId}/view/settings`}
+        onClick={handleOnClick}
         variant="link"
-        size="small"
+        size="sm"
         className="mr-2 self-center text-sm font-medium text-gray-300"
       >
         Migrate
