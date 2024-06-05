@@ -154,7 +154,7 @@ export function SupergraphMetadataList(props: {
             }
             contentProps={{ className: 'z-10' }}
           >
-            <span className="flex cursor-pointer items-center pl-1 text-xs font-bold text-white ">
+            <span className="flex cursor-pointer items-center pl-1 text-xs font-bold text-white">
               + {allItems.length - previewItems.length} more
             </span>
           </Tooltip>

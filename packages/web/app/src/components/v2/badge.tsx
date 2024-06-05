@@ -12,13 +12,7 @@ export const Badge = ({
   return (
     <span
       className={clsx(
-        `
-        inline-block
-        rounded-full
-        border-[3px] p-[3px]
-        align-middle
-        text-xs font-bold leading-none text-white
-        `,
+        `inline-block rounded-full border-[3px] p-[3px] align-middle text-xs font-bold leading-none text-white`,
         {
           red: 'border-red-900 bg-red-500',
           yellow: 'border-yellow-900 bg-yellow-500',

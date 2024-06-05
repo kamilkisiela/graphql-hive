@@ -111,7 +111,7 @@ function Task({
           <Circle className="size-5 text-orange-500" />
         )}
         <div className="w-0 flex-1">
-          <p className="font-medium	leading-5 text-white">{title}</p>
+          <p className="font-medium leading-5 text-white">{title}</p>
           <p className="text-muted-foreground mt-1 text-sm">{description}</p>
         </div>
       </div>

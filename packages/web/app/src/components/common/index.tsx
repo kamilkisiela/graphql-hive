@@ -5,13 +5,7 @@ export function Label({ className, children, ...props }: ComponentProps<'span'>)
   return (
     <span
       className={cn(
-        `
-  inline-block
-  rounded bg-yellow-50
-  px-2
-  py-1 text-xs
-  font-medium tracking-widest
-  text-yellow-600 dark:bg-white/10 dark:text-yellow-300`,
+        `inline-block rounded bg-yellow-50 px-2 py-1 text-xs font-medium tracking-widest text-yellow-600 dark:bg-white/10 dark:text-yellow-300`,
         className,
       )}
       {...props}

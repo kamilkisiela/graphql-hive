@@ -50,17 +50,7 @@ const Modal = ({
               <Content
                 ref={ref => setState(ref)}
                 className={clsx(
-                  `
-            hive-modal
-            relative
-            left-1/2
-            top-1/2
-            max-h-[95%]
-            max-w-[95%]
-            overflow-auto
-            rounded-md
-            bg-black
-            p-7`,
+                  `hive-modal relative left-1/2 top-1/2 max-h-[95%] max-w-[95%] overflow-auto rounded-md bg-black p-7`,
                   className,
                   widthBySize[size],
                 )}
