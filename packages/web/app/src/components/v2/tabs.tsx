@@ -11,18 +11,7 @@ import {
 } from '@radix-ui/react-tabs';
 
 const List = ({ children, className, ...props }: TabsListProps): ReactElement => (
-  <TabsList
-    className={clsx(
-      `
-      relative
-      flex
-      items-center
-      text-gray-700
-    `,
-      className,
-    )}
-    {...props}
-  >
+  <TabsList className={clsx('relative flex items-center text-gray-700', className)} {...props}>
     {children}
   </TabsList>
 );
@@ -35,15 +24,7 @@ const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorde
         '!appearance-none', // unset button styles in Safari
         'text-sm font-medium text-white transition',
         hasBorder
-          ? `
-            radix-state-active:border-b-orange-500
-            cursor-pointer
-            border-b-2
-            border-b-transparent
-            px-4
-            py-3
-            hover:border-b-orange-900
-          `
+          ? 'radix-state-active:border-b-orange-500 cursor-pointer border-b-2 border-b-transparent px-4 py-3 hover:border-b-orange-900'
           : null,
       )}
       {...props}

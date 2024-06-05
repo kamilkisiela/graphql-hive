@@ -31,18 +31,7 @@ export const Input = forwardRef<
       <div
         ref={forwardedRef}
         className={clsx(
-          `
-        relative
-        flex
-        items-center
-        gap-4
-        rounded-sm
-        border
-        border-gray-700
-        bg-gray-800
-        text-sm
-        font-medium
-        focus-within:ring`,
+          'relative flex items-center gap-4 rounded-sm border border-gray-700 bg-gray-800 text-sm font-medium focus-within:ring',
           isInvalid ? 'text-red-500 caret-white ring-red-500' : 'text-white',
           {
             large: 'h-[50px] px-4 py-[18px]',

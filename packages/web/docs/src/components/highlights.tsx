@@ -6,7 +6,7 @@ export function HighlightTextLink(props: { href: string; children: ReactNode }) 
   return (
     <Link
       href={props.href}
-      className="text-yellow-500 underline underline-offset-2 transition hover:text-yellow-500/75 "
+      className="text-yellow-500 underline underline-offset-2 transition hover:text-yellow-500/75"
     >
       {props.children}
     </Link>

@@ -542,23 +542,7 @@ export const Activities = (props: { organizationId: string }): ReactElement => {
 };
 
 const ActivityContainer = (props: { children: ReactNode }) => (
-  <li
-    className="
-    flex
-    cursor-default
-    items-center
-    gap-2.5
-    border-b
-    border-gray-800
-    py-5
-    text-xs
-    text-gray-500
-    first:pt-0
-    last:border-b-0
-    last:pb-0
-    first-of-type:mt-0
-  "
-  >
+  <li className="flex cursor-default items-center gap-2.5 border-b border-gray-800 py-5 text-xs text-gray-500 first:pt-0 last:border-b-0 last:pb-0 first-of-type:mt-0">
     {props.children}
   </li>
 );

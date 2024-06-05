@@ -11,16 +11,7 @@ export const DropdownMenuTrigger = React.forwardRef<
     <DropdownMenuPrimitive.Trigger
       {...props}
       className={clsx(
-        `
-        flex
-        cursor-pointer
-        items-center
-        gap-4
-        rounded-md
-        px-2
-        py-2.5
-        transition
-      `,
+        'flex cursor-pointer items-center gap-4 rounded-md px-2 py-2.5 transition',
         className,
       )}
       ref={forwardedRef}
@@ -40,20 +31,7 @@ export const DropdownMenuContent = React.forwardRef<
         {...props}
         ref={forwardedRef}
         className={clsx(
-          `
-          flex
-          flex-col
-          gap-1
-          rounded-md
-          bg-black
-          p-[13px]
-          text-sm
-          font-normal
-          text-gray-300
-          shadow-lg
-          shadow-black
-          ring-1 ring-gray-900
-        `,
+          'flex flex-col gap-1 rounded-md bg-black p-[13px] text-sm font-normal text-gray-300 shadow-lg shadow-black ring-1 ring-gray-900',
           className,
         )}
       >
@@ -72,21 +50,7 @@ export const DropdownMenuSubTrigger = React.forwardRef<
     <DropdownMenuPrimitive.SubTrigger
       {...props}
       className={clsx(
-        `
-        radix-state-open:bg-gray-800/50
-        flex
-        cursor-pointer
-        items-center
-        gap-4
-        rounded-md
-        px-2
-        py-2.5
-        transition
-        hover:bg-gray-800/50
-        hover:text-white
-        focus:bg-gray-800/50
-        focus:text-white
-    `,
+        'radix-state-open:bg-gray-800/50 flex cursor-pointer items-center gap-4 rounded-md px-2 py-2.5 transition hover:bg-gray-800/50 hover:text-white focus:bg-gray-800/50 focus:text-white',
         className,
       )}
       ref={forwardedRef}
@@ -105,20 +69,7 @@ export const DropdownMenuSubContent = React.forwardRef<
         {...props}
         ref={forwardedRef}
         className={clsx(
-          `
-          flex
-          flex-col
-          gap-1
-          rounded-md
-          bg-black
-          p-[13px]
-          text-sm
-          font-normal
-          text-gray-300
-          shadow-lg
-          shadow-black
-          ring-1 ring-gray-900
-        `,
+          'flex flex-col gap-1 rounded-md bg-black p-[13px] text-sm font-normal text-gray-300 shadow-lg shadow-black ring-1 ring-gray-900',
           className,
         )}
       >
@@ -140,19 +91,7 @@ export const DropdownMenuItem = React.forwardRef<
       {...props}
       ref={forwardedRef}
       className={clsx(
-        `
-        flex
-        cursor-pointer
-        items-center
-        gap-4
-        rounded-md
-        px-2
-        py-2.5
-        transition
-        hover:bg-gray-800/50
-        hover:text-white
-        focus:bg-gray-800/50
-        focus:text-white`,
+        'flex cursor-pointer items-center gap-4 rounded-md px-2 py-2.5 transition hover:bg-gray-800/50 hover:text-white focus:bg-gray-800/50 focus:text-white',
         className,
       )}
     >
@@ -169,14 +108,7 @@ export const DropdownMenuSeparator = React.forwardRef<
     <DropdownMenuPrimitive.Separator
       {...props}
       ref={forwardedRef}
-      className={clsx(
-        `
-        my-2
-        h-px
-        bg-gray-800/50
-      `,
-        className,
-      )}
+      className={clsx('my-2 h-px bg-gray-800/50', className)}
     />
   );
 });
