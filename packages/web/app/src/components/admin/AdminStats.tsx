@@ -29,13 +29,14 @@ import { theme } from '@/lib/charts';
 import { useChartStyles } from '@/utils';
 import { ChevronUpIcon } from '@radix-ui/react-icons';
 import {
-  createTable,
+  createColumnHelper,
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   PaginationState,
   SortingState,
-  useTableInstance,
+  useReactTable,
 } from '@tanstack/react-table';
 import { Button } from '../ui/button';
 
@@ -49,8 +50,6 @@ interface Organization {
   persistedOperations: number;
   operations: any;
 }
-
-const table = createTable().setRowType<Organization>();
 
 function formatNumber(value: number) {
   return Intl.NumberFormat().format(value);
@@ -228,35 +227,37 @@ function filterStats(
   return true;
 }
 
+const columnHelper = createColumnHelper<Organization>();
+
 const columns = [
-  table.createDataColumn('name', {
+  columnHelper.accessor('name', {
     header: 'Organization',
     enableSorting: false,
   }),
-  table.createDataColumn('members', {
+  columnHelper.accessor('members', {
     header: 'Members',
   }),
-  table.createDataColumn('users', {
+  columnHelper.accessor('users', {
     header: 'Users',
     meta: { align: 'right' },
   }),
-  table.createDataColumn('projects', {
+  columnHelper.accessor('projects', {
     header: 'Projects',
     meta: { align: 'right' },
   }),
-  table.createDataColumn('targets', {
+  columnHelper.accessor('targets', {
     header: 'Targets',
     meta: { align: 'right' },
   }),
-  table.createDataColumn('versions', {
+  columnHelper.accessor('versions', {
     header: 'Schema pushes',
     meta: { align: 'right' },
   }),
-  table.createDataColumn('persistedOperations', {
+  columnHelper.accessor('persistedOperations', {
     header: 'Persisted Ops',
     meta: { align: 'right' },
   }),
-  table.createDataColumn('operations', {
+  columnHelper.accessor('operations', {
     header: 'Collected Ops',
     meta: { align: 'right' },
   }),
@@ -269,7 +270,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
     pageSize: 20,
   });
 
-  const tableInstance = useTableInstance(table, {
+  const tableInstance = useReactTable({
     data,
     columns,
     state: { sorting, pagination },
@@ -299,7 +300,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
               const align =
                 (header.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left';
               const canSort = header.column.getCanSort();
-              const name = header.renderHeader();
+              const name = flexRender(header.column.columnDef.header, header.getContext());
               return (
                 <Th key={header.id} align={align}>
                   {canSort ? (
@@ -332,7 +333,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
                       ? formatNumber(cell.getValue() as number)
                       : isReact
                         ? (cell.getValue() as ReactNode)
-                        : cell.renderCell()}
+                        : flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Td>
                 );
               })}
