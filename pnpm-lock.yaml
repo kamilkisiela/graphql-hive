@@ -152,8 +152,8 @@ importers:
         specifier: 15.2.5
         version: 15.2.5
       pg:
-        specifier: 8.11.5
-        version: 8.11.5
+        specifier: 8.12.0
+        version: 8.12.0
       prettier:
         specifier: 3.3.0
         version: 3.3.0
@@ -13743,6 +13743,15 @@ packages:
 
   pg@8.11.5:
     resolution: {integrity: sha512-jqgNHSKL5cbDjFlHyYsCXmQDrfIX/3RsNwYqpd4N0Kt8niLuNoRNH+aazv6cOd43gPh9Y4DjQCtb+X0MH0Hvnw==}
+    engines: {node: '>= 8.0.0'}
+    peerDependencies:
+      pg-native: '>=3.0.1'
+    peerDependenciesMeta:
+      pg-native:
+        optional: true
+
+  pg@8.12.0:
+    resolution: {integrity: sha512-A+LHUSnwnxrnL/tZ+OLfqR1SxLN3c/pgDztZ47Rpbsd4jUytsTtwQo/TLPRzPJMp/1pbhYVhH9cuSZLAajNfjQ==}
     engines: {node: '>= 8.0.0'}
     peerDependencies:
       pg-native: '>=3.0.1'
@@ -32764,6 +32773,10 @@ snapshots:
     dependencies:
       pg: 8.11.5
 
+  pg-pool@3.6.2(pg@8.12.0):
+    dependencies:
+      pg: 8.12.0
+
   pg-promise@11.8.0:
     dependencies:
       assert-options: 0.8.1
@@ -32797,6 +32810,16 @@ snapshots:
     dependencies:
       pg-connection-string: 2.6.4
       pg-pool: 3.6.2(pg@8.11.5)
+      pg-protocol: 1.6.1
+      pg-types: 2.2.0
+      pgpass: 1.0.5
+    optionalDependencies:
+      pg-cloudflare: 1.1.1
+
+  pg@8.12.0:
+    dependencies:
+      pg-connection-string: 2.6.4
+      pg-pool: 3.6.2(pg@8.12.0)
       pg-protocol: 1.6.1
       pg-types: 2.2.0
       pgpass: 1.0.5
