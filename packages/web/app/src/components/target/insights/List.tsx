@@ -13,14 +13,15 @@ import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hook
 import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Link } from '@tanstack/react-router';
 import {
-  createTable,
+  createColumnHelper,
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   OnChangeFn,
   PaginationState,
   SortingState,
-  useTableInstance,
+  useReactTable,
 } from '@tanstack/react-table';
 import { OperationsFallback } from './Fallback';
 
@@ -107,58 +108,54 @@ function OperationRow({
   );
 }
 
-const table = createTable()
-  .setTableMetaType<{
-    align: 'left' | 'center' | 'right';
-  }>()
-  .setRowType<Operation>();
+const columnHelper = createColumnHelper<Operation>();
 
 const columns = [
-  table.createDataColumn('name', {
+  columnHelper.accessor('name', {
     header: 'Operations',
     enableSorting: false,
     meta: {
       align: 'left',
     },
   }),
-  table.createDataColumn('kind', {
+  columnHelper.accessor('kind', {
     header: 'Kind',
     enableSorting: false,
     meta: {
       align: 'center',
     },
   }),
-  table.createDataColumn('p90', {
+  columnHelper.accessor('p90', {
     header: 'p90',
     meta: {
       align: 'center',
     },
   }),
-  table.createDataColumn('p95', {
+  columnHelper.accessor('p95', {
     header: 'p95',
     meta: {
       align: 'center',
     },
   }),
-  table.createDataColumn('p99', {
+  columnHelper.accessor('p99', {
     header: 'p99',
     meta: {
       align: 'center',
     },
   }),
-  table.createDataColumn('failureRate', {
+  columnHelper.accessor('failureRate', {
     header: 'Failure Rate',
     meta: {
       align: 'center',
     },
   }),
-  table.createDataColumn('requests', {
+  columnHelper.accessor('requests', {
     header: 'Requests',
     meta: {
       align: 'center',
     },
   }),
-  table.createDataColumn('percentage', {
+  columnHelper.accessor('percentage', {
     header: 'Traffic',
     meta: {
       align: 'right',
@@ -194,7 +191,7 @@ function OperationsTable({
   setClientFilter: (filter: string) => void;
   selectedPeriod: { from: string; to: string } | null;
 }): ReactElement {
-  const tableInstance = useTableInstance(table, {
+  const tableInstance = useReactTable({
     columns,
     data: operations,
     state: {
@@ -234,7 +231,7 @@ function OperationsTable({
               const canSort = header.column.getCanSort();
               const align: 'center' | 'left' | 'right' =
                 (header.column.columnDef.meta as any)?.align || 'left';
-              const name = header.renderHeader();
+              const name = flexRender(header.column.columnDef.header, header.getContext());
               return (
                 <Th key={header.id} className="text-sm font-semibold" align={align}>
                   {canSort ? (
