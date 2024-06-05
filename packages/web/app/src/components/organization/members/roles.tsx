@@ -647,7 +647,7 @@ function OrganizationMemberRoleRow(props: {
   return (
     <tr>
       <td className="py-3 text-sm font-medium">
-        <div className="flex flex-row items-center ">
+        <div className="flex flex-row items-center">
           <div>{role.name}</div>
           {role.locked ? (
             <div className="ml-2">

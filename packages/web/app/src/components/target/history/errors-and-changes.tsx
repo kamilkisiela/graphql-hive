@@ -329,7 +329,7 @@ function ChangeItem(props: {
                         ) : (
                           <Link
                             key={index}
-                            className="text-orange-500 hover:text-orange-500 "
+                            className="text-orange-500 hover:text-orange-500"
                             to="/$organizationId/$projectId/$targetId/insights/schema-coordinate/$coordinate"
                             params={{
                               organizationId: props.organizationId,
