@@ -566,6 +566,14 @@ function ClientsStats(props: {
             targetId: props.targetId,
             name: ev.value,
           },
+          search(searchParams) {
+            if ('from' in searchParams && 'to' in searchParams) {
+              return {
+                from: searchParams.from,
+                to: searchParams.to,
+              };
+            }
+          },
         });
       }
     },
