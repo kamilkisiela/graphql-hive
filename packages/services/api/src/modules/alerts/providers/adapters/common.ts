@@ -8,6 +8,15 @@ import type {
   Target,
 } from '../../../../shared/entities';
 
+interface NotificationIntegrations {
+  slack: {
+    token: string | null | undefined;
+  };
+  teams?: {
+    webhookUrl: string;
+  };
+}
+
 export interface SchemaChangeNotificationInput {
   event: {
     organization: Pick<Organization, 'id' | 'cleanId' | 'name'>;
@@ -25,11 +34,7 @@ export interface SchemaChangeNotificationInput {
   };
   alert: Alert;
   channel: AlertChannel;
-  integrations: {
-    slack: {
-      token: string;
-    };
-  };
+  integrations: NotificationIntegrations;
 }
 
 export interface ChannelConfirmationInput {
@@ -39,11 +44,7 @@ export interface ChannelConfirmationInput {
     project: Pick<Project, 'id' | 'cleanId' | 'name'>;
   };
   channel: AlertChannel;
-  integrations: {
-    slack: {
-      token: string;
-    };
-  };
+  integrations: NotificationIntegrations;
 }
 
 export interface CommunicationAdapter {
@@ -59,9 +60,13 @@ export function quotesTransformer(msg: string, symbols = '**') {
   const findSingleQuotes = /'([^']+)'/gim;
   const findDoubleQuotes = /"([^"]+)"/gim;
 
-  function transformm(_: string, value: string) {
+  function transform(_: string, value: string) {
     return `${symbols}${value}${symbols}`;
   }
 
-  return msg.replace(findSingleQuotes, transformm).replace(findDoubleQuotes, transformm);
+  return msg.replace(findSingleQuotes, transform).replace(findDoubleQuotes, transform);
 }
+
+export const createMDLink = ({ text, url }: { text: string; url: string }) => {
+  return `[${text}](${url})`;
+};

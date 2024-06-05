@@ -140,3 +140,5 @@ deployment/utils/vector.types.ts
 deployment/utils/contour.types.ts
 
 schema.graphql
+
+docker/docker-compose.override.yml
