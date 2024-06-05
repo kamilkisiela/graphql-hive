@@ -1638,8 +1638,8 @@ importers:
         specifier: workspace:*
         version: link:../../services/server
       '@hookform/resolvers':
-        specifier: 3.4.2
-        version: 3.4.2(react-hook-form@7.51.5(react@18.3.1))
+        specifier: 3.5.0
+        version: 3.5.0(react-hook-form@7.51.5(react@18.3.1))
       '@monaco-editor/react':
         specifier: 4.6.0
         version: 4.6.0(monaco-editor@0.49.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4717,8 +4717,8 @@ packages:
       react: ^18
       react-dom: ^18
 
-  '@hookform/resolvers@3.4.2':
-    resolution: {integrity: sha512-1m9uAVIO8wVf7VCDAGsuGA0t6Z3m6jVGAN50HkV9vYLl0yixKK/Z1lr01vaRvYCkIKGoy1noVRxMzQYb4y/j1Q==}
+  '@hookform/resolvers@3.5.0':
+    resolution: {integrity: sha512-bgL8iT0/F+2Q7wB7vYSFu3H1c70C3yI2f9evVw0Td3yf6Fa9eBp6nw5L8mzVJV01EGN1Ky+FhlzGSIoZBOeHDA==}
     peerDependencies:
       react-hook-form: ^7.0.0
 
@@ -20870,7 +20870,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@hookform/resolvers@3.4.2(react-hook-form@7.51.5(react@18.3.1))':
+  '@hookform/resolvers@3.5.0(react-hook-form@7.51.5(react@18.3.1))':
     dependencies:
       react-hook-form: 7.51.5(react@18.3.1)
 
