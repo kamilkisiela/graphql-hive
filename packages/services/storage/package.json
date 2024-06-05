@@ -32,7 +32,7 @@
     "slonik": "30.4.4",
     "slonik-interceptor-query-logging": "45.5.0",
     "slonik-utilities": "1.9.4",
-    "tslib": "2.6.2",
+    "tslib": "2.6.3",
     "typescript": "5.4.5",
     "zod": "3.23.8"
   },
