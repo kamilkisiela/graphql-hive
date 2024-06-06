@@ -215,11 +215,12 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                       errors,
                     },
                     // TODO: operationHash is ready to accept hashes of persisted operations
-                    client:
+                    client: pickClientInfoProperties(
                       typeof args.contextValue !== 'undefined' &&
-                      typeof options.clientInfo !== 'undefined'
+                        typeof options.clientInfo !== 'undefined'
                         ? options.clientInfo(args.contextValue)
                         : createDefaultClientInfo()(args.contextValue),
+                    ),
                   },
                 };
               }),
@@ -499,5 +500,15 @@ function createDefaultClientInfo(
     }
 
     return null;
+  };
+}
+
+function pickClientInfoProperties(info: null | undefined | ClientInfo): null | ClientInfo {
+  if (!info) {
+    return null;
+  }
+  return {
+    name: info.name,
+    version: info.version,
   };
 }
