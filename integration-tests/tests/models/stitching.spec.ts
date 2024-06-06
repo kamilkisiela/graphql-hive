@@ -269,7 +269,7 @@ describe('publish', () => {
       expect(output).toEqual(expect.stringContaining('v Published initial schema.'));
       expect(output).toEqual(
         expect.stringContaining(
-          'i Available at http://localhost:8080/$organization/$project/production',
+          'i Available at http://localhost:8080/$organization/$project/$target',
         ),
       );
 
@@ -294,7 +294,7 @@ describe('publish', () => {
       expect(output).toEqual(expect.stringContaining(`v Schema published`));
       expect(output).toEqual(
         expect.stringContaining(
-          `i Available at http://localhost:8080/$organization/$project/production/history/$version`,
+          `i Available at http://localhost:8080/$organization/$project/$target/history/$version`,
         ),
       );
     });

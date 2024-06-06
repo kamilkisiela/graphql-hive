@@ -15,12 +15,27 @@ export default gql`
     ): UpdateTargetValidationSettingsResult!
     setTargetValidation(input: SetTargetValidationInput!): Target!
     """
-    "
     Updates the target's explorer endpoint url.
     """
     updateTargetGraphQLEndpointUrl(
       input: UpdateTargetGraphQLEndpointUrlInput!
     ): UpdateTargetGraphQLEndpointUrlResult!
+    """
+    Overwrites project's schema composition library.
+    Works only for Federation projects with native composition enabled.
+    This mutation is temporary and will be removed once no longer needed.
+    It's part of a feature flag called "forceLegacyCompositionInTargets".
+    """
+    experimental__updateTargetSchemaComposition(
+      input: Experimental__UpdateTargetSchemaCompositionInput!
+    ): Target!
+  }
+
+  input Experimental__UpdateTargetSchemaCompositionInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    nativeComposition: Boolean!
   }
 
   input UpdateTargetGraphQLEndpointUrlInput {
@@ -148,6 +163,7 @@ export default gql`
     """
     graphqlEndpointUrl: String
     validationSettings: TargetValidationSettings!
+    experimental_forcedLegacySchemaComposition: Boolean!
   }
 
   type TargetValidationSettings {

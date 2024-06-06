@@ -10,6 +10,7 @@ import type {
   DeleteMemberRoleInput,
   DeleteTokensInput,
   EnableExternalSchemaCompositionInput,
+  Experimental__UpdateTargetSchemaCompositionInput,
   InviteToOrganizationByEmailInput,
   OperationsStatsSelectorInput,
   OrganizationSelectorInput,
@@ -1324,6 +1325,27 @@ export async function enableExternalSchemaComposition(
               secret
             }
           }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    token,
+  });
+}
+
+export async function updateTargetSchemaComposition(
+  input: Experimental__UpdateTargetSchemaCompositionInput,
+  token: string,
+) {
+  return execute({
+    document: graphql(`
+      mutation experimental__updateTargetSchemaComposition(
+        $input: Experimental__UpdateTargetSchemaCompositionInput!
+      ) {
+        experimental__updateTargetSchemaComposition(input: $input) {
+          id
         }
       }
     `),

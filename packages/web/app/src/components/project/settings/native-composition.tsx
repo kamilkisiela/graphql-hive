@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { FlaskConicalIcon, HeartCrackIcon, PartyPopperIcon, RefreshCcwIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,9 +12,84 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ProductUpdatesLink } from '@/components/ui/docs-note';
+import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { NativeFederationCompatibilityStatus } from '@/gql/graphql';
+import { cn } from '@/lib/utils';
+
+const IncrementalNativeCompositionSwitch_TargetFragment = graphql(`
+  fragment IncrementalNativeCompositionSwitch_TargetFragment on Target {
+    id
+    cleanId
+    name
+    experimental_forcedLegacySchemaComposition
+  }
+`);
+
+const IncrementalNativeCompositionSwitch_Mutation = graphql(`
+  mutation IncrementalNativeCompositionSwitch_Mutation(
+    $input: Experimental__UpdateTargetSchemaCompositionInput!
+  ) {
+    experimental__updateTargetSchemaComposition(input: $input) {
+      ...IncrementalNativeCompositionSwitch_TargetFragment
+    }
+  }
+`);
+
+const IncrementalNativeCompositionSwitch = (props: {
+  organizationCleanId: string;
+  projectCleanId: string;
+  target: FragmentType<typeof IncrementalNativeCompositionSwitch_TargetFragment>;
+}) => {
+  const target = useFragment(IncrementalNativeCompositionSwitch_TargetFragment, props.target);
+  const [mutation, mutate] = useMutation(IncrementalNativeCompositionSwitch_Mutation);
+
+  return (
+    <div
+      className={cn(
+        'flex flex-row items-center gap-x-10 rounded border-[1px] border-gray-800 bg-gray-800/50 p-4',
+        mutation.fetching && 'animate-pulse',
+      )}
+    >
+      <div>
+        <div className="text-sm font-semibold">{target.name}</div>
+        <div className="min-w-32 text-xs">
+          {target.experimental_forcedLegacySchemaComposition ? 'Legacy' : 'Native'} composition
+        </div>
+      </div>
+      <div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Switch
+                disabled={mutation.fetching}
+                onCheckedChange={nativeComposition => {
+                  mutate({
+                    input: {
+                      organization: props.organizationCleanId,
+                      project: props.projectCleanId,
+                      target: target.cleanId,
+                      nativeComposition,
+                    },
+                  });
+                }}
+                checked={!target.experimental_forcedLegacySchemaComposition}
+              />
+            </TooltipTrigger>
+            <TooltipContent sideOffset={2}>
+              <span className="font-semibold">
+                {target.experimental_forcedLegacySchemaComposition ? 'Enable' : 'Disable'}
+              </span>{' '}
+              native composition for the target
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    </div>
+  );
+};
 
 const NativeCompositionSettings_OrganizationFragment = graphql(`
   fragment NativeCompositionSettings_OrganizationFragment on Organization {
@@ -27,8 +103,15 @@ const NativeCompositionSettings_ProjectFragment = graphql(`
     id
     cleanId
     isNativeFederationEnabled
+    experimental_nativeCompositionPerTarget
     externalSchemaComposition {
       endpoint
+    }
+    targets {
+      nodes {
+        id
+        ...IncrementalNativeCompositionSwitch_TargetFragment
+      }
     }
   }
 `);
@@ -38,6 +121,7 @@ const NativeCompositionSettings_ProjectQuery = graphql(`
     project(selector: $selector) {
       id
       nativeFederationCompatibility
+      experimental_nativeCompositionPerTarget
     }
   }
 `);
@@ -74,6 +158,7 @@ export function NativeCompositionSettings(props: {
         project: project.cleanId,
       },
     },
+    pause: project.isNativeFederationEnabled,
   });
 
   const [mutationState, mutate] = useMutation(
@@ -129,6 +214,14 @@ export function NativeCompositionSettings(props: {
     [mutate, toast, organization.cleanId, project.cleanId],
   );
 
+  let display: 'error' | 'compatibility' | 'enabled' = 'compatibility';
+
+  if (projectQuery.error) {
+    display = 'error';
+  } else if (project.isNativeFederationEnabled) {
+    display = 'enabled';
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -136,15 +229,46 @@ export function NativeCompositionSettings(props: {
           <a id="native-composition">Native Federation v2 Composition</a>
         </CardTitle>
         <CardDescription>Native Apollo Federation v2 support for your project.</CardDescription>
-        {project.isNativeFederationEnabled ? null : (
+
+        {display !== 'enabled' ? (
           <CardDescription>
             <ProductUpdatesLink href="2023-10-10-native-federation-2">
               Read the announcement!
             </ProductUpdatesLink>
           </CardDescription>
-        )}
+        ) : null}
       </CardHeader>
-      {projectQuery.error ? (
+
+      {display === 'enabled' && project.experimental_nativeCompositionPerTarget === true ? (
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <div className="flex flex-row items-center gap-x-2">
+                <div className="font-semibold">Incremental migration</div>
+                <Badge variant="outline">experimental</Badge>
+              </div>
+              <div className="text-muted-foreground text-sm">
+                Your project is using the experimental incremental migration feature. <br />
+                Migrate targets one by one to the native schema composition.
+              </div>
+            </div>
+            <div>
+              <div className="flex flex-row gap-4">
+                {project.targets.nodes.map(target => (
+                  <IncrementalNativeCompositionSwitch
+                    organizationCleanId={organization.cleanId}
+                    projectCleanId={project.cleanId}
+                    key={target.id}
+                    target={target}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      ) : null}
+
+      {display === 'error' ? (
         <CardContent>
           <div className="flex flex-row items-center gap-x-4">
             <div>
@@ -157,7 +281,9 @@ export function NativeCompositionSettings(props: {
             </div>
           </div>
         </CardContent>
-      ) : project.isNativeFederationEnabled || !projectQuery.data?.project ? null : (
+      ) : null}
+
+      {display === 'compatibility' && projectQuery.data?.project ? (
         <CardContent>
           <div className="flex flex-row items-center gap-x-4">
             <div>
@@ -236,7 +362,7 @@ export function NativeCompositionSettings(props: {
             </div>
           </div>
         </CardContent>
-      )}
+      ) : null}
 
       <CardFooter>
         <div className="flex flex-row items-center gap-x-2">

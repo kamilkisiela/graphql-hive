@@ -173,7 +173,22 @@ export interface Organization {
   };
   getStarted: OrganizationGetStarted;
   featureFlags: {
+    /**
+     * @deprecated This feature flag is now a default for newly created organizations and projects.
+     */
     compareToPreviousComposableVersion: boolean;
+    /**
+     * Forces selected targets to use @apollo/federation library
+     * when native composition is enabled for a project.
+     * This is a temporary solution, requested by one of Hive users.
+     *
+     * Before enabling native composition on a project, set a feature flag with a list of ids of all targets.
+     * We do it this way to allow new targets to use native composition by default and gradually migrate existing ones.
+     * The other way around would mean that we would have additional complexity and hard time moving away from this feature flag.
+     *
+     * @deprecated This feature flag should be removed once no longer needed.
+     */
+    forceLegacyCompositionInTargets: string[];
   };
   zendeskId: string | null;
 }

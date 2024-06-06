@@ -8,8 +8,8 @@ export function normalizeCliOutput(value: string) {
         // eslint-disable-next-line no-control-regex
         .replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '')
         .replace(
-          /http:\/\/localhost:8080\/[$]*\w+\/[$]*\w+\/production/i,
-          'http://localhost:8080/$organization/$project/production',
+          /http:\/\/localhost:8080\/[$]*\w+\/[$]*\w+\/[$]*\w+/i,
+          'http://localhost:8080/$organization/$project/$target',
         )
         .replace(/history\/[$]*\w+-\w+-\w+-\w+-\w+/i, 'history/$version')
         .trim(),

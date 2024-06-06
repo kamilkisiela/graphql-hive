@@ -54,7 +54,7 @@ test.concurrent('cannot set a scope on a token if user has no access to that sco
     targetScopes: [TargetAccessScope.RegistryWrite],
     projectScopes: [],
     organizationScopes: [],
-    targetId: target.cleanId,
+    target,
     actorToken: memberToken,
   });
 

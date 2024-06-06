@@ -814,6 +814,16 @@ export interface Storage {
     userId: string;
     organizationId: string;
   }): Promise<void>;
+
+  /**
+   * @deprecated It's a temporary method to force legacy composition in targets, when native composition is enabled for a project.
+   */
+  updateTargetSchemaComposition(_: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    nativeComposition: boolean;
+  }): Promise<Target>;
 }
 
 @Injectable()

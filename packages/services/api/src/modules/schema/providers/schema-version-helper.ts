@@ -68,6 +68,7 @@ export class SchemaVersionHelper {
         native: this.schemaManager.checkProjectNativeFederationSupport({
           project,
           organization,
+          targetId: schemaVersion.target,
         }),
         contracts: null,
       },

@@ -89,6 +89,7 @@ export class SingleLegacyModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator: this.orchestrator,
+      targetId: selector.target,
       project,
       organization,
       schemas,
@@ -101,6 +102,7 @@ export class SingleLegacyModel {
       version: latestVersion,
       organization,
       project,
+      targetId: selector.target,
     });
 
     const diffCheck = await this.checks.diff({
@@ -198,6 +200,7 @@ export class SingleLegacyModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator: this.orchestrator,
+      targetId: target.id,
       project,
       organization,
       baseSchema,
@@ -217,6 +220,7 @@ export class SingleLegacyModel {
       version: latestVersion,
       organization,
       project,
+      targetId: target.id,
     });
 
     const [diffCheck, metadataCheck] = await Promise.all([

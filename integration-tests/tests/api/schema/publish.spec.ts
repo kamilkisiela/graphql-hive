@@ -576,7 +576,7 @@ describe.each`
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       projectScopes: [],
       organizationScopes: [],
-      targetId: target2.cleanId,
+      target: target2,
     });
     const publishResult2 = await writeTokenResult2
       .publishSchema({
