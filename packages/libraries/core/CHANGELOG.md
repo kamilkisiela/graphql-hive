@@ -1,18 +1,36 @@
 # @graphql-hive/core
 
+## 0.3.1
+
+### Patch Changes
+
+- [#4932](https://github.com/kamilkisiela/graphql-hive/pull/4932)
+  [`cbc8364`](https://github.com/kamilkisiela/graphql-hive/commit/cbc836488b4acfb618fd877005ecf0126f1706b6)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Prevent failing usage reporting when returning an
+  object with additional properties aside from `name` and `version` from the client info
+  object/factory function.
+
 ## 0.3.0
 
 ### Minor Changes
 
-- [#4573](https://github.com/kamilkisiela/graphql-hive/pull/4573) [`06d465e`](https://github.com/kamilkisiela/graphql-hive/commit/06d465e882b569b6d0dbd5b271d2d98aafaec0b1) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Moved most of @graphql-hive/client code here
+- [#4573](https://github.com/kamilkisiela/graphql-hive/pull/4573)
+  [`06d465e`](https://github.com/kamilkisiela/graphql-hive/commit/06d465e882b569b6d0dbd5b271d2d98aafaec0b1)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Moved most of @graphql-hive/client code
+  here
 
-- [#4494](https://github.com/kamilkisiela/graphql-hive/pull/4494) [`c5eeac5`](https://github.com/kamilkisiela/graphql-hive/commit/c5eeac5ccef9e2dcc3c8bb33deec0fb95af9552e) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - 🚨 BREAKING CHANGE 🚨 Requires now Node v16+
+- [#4494](https://github.com/kamilkisiela/graphql-hive/pull/4494)
+  [`c5eeac5`](https://github.com/kamilkisiela/graphql-hive/commit/c5eeac5ccef9e2dcc3c8bb33deec0fb95af9552e)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - 🚨 BREAKING CHANGE 🚨 Requires now Node
+  v16+
 
 ## 0.2.4
 
 ### Patch Changes
 
-- [#4328](https://github.com/kamilkisiela/graphql-hive/pull/4328) [`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188) Thanks [@Hebilicious](https://github.com/Hebilicious)! - Use node specifier for crypto import
+- [#4328](https://github.com/kamilkisiela/graphql-hive/pull/4328)
+  [`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188)
+  Thanks [@Hebilicious](https://github.com/Hebilicious)! - Use node specifier for crypto import
 
 ## 0.2.3
 
