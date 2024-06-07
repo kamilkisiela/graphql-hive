@@ -1,4 +1,9 @@
 import { createConnection } from '../../../shared/schema';
-import type { TokenConnectionResolvers } from './../../../__generated__/types.next';
+import type { ResolversTypes, TokenConnectionResolvers } from './../../../__generated__/types.next';
 
-export const TokenConnection: TokenConnectionResolvers = createConnection();
+const connection = createConnection<ResolversTypes['Token']>();
+
+export const TokenConnection: TokenConnectionResolvers = {
+  nodes: connection.nodes,
+  total: connection.total,
+};
