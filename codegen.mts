@@ -30,7 +30,6 @@ const config: CodegenConfig = {
           'policy',
           'project',
           'schema',
-          'shared',
           'support',
           'target',
         ],
