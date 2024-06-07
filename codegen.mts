@@ -29,7 +29,6 @@ const config: CodegenConfig = {
           'organization',
           'policy',
           'project',
-          'rate-limit',
           'schema',
           'shared',
           'support',
