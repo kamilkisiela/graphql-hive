@@ -34,7 +34,6 @@ const config: CodegenConfig = {
           'shared',
           'support',
           'target',
-          'token',
         ],
         scalarsOverrides: {
           DateTime: { type: 'string' },
