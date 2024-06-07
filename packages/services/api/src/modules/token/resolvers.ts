@@ -1,30 +1,12 @@
 import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
-import { AuthManager } from '../auth/providers/auth-manager';
-import { OrganizationManager } from '../organization/providers/organization-manager';
-import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { TargetManager } from '../target/providers/target-manager';
 import type { TokenModule } from './__generated__/types';
 import { TokenManager } from './providers/token-manager';
 
 const TokenNameModel = z.string().min(2).max(50);
 
 export const resolvers: TokenModule.Resolvers = {
-  Query: {
-    async tokenInfo(_, __, { injector }) {
-      try {
-        injector.get(AuthManager).ensureApiToken();
-      } catch (error) {
-        return {
-          __typename: 'TokenNotFoundError',
-          message: (error as Error).message,
-        };
-      }
-
-      return injector.get(TokenManager).getCurrentToken();
-    },
-  },
   Mutation: {
     async createToken(_, { input }, { injector }) {
       const CreateTokenInputModel = z.object({
@@ -97,41 +79,6 @@ export const resolvers: TokenModule.Resolvers = {
     },
     alias(token) {
       return token.tokenAlias;
-    },
-  },
-  TokenInfo: {
-    __isTypeOf(token) {
-      return 'token' in token;
-    },
-    token(token) {
-      return token;
-    },
-    organization(token, _, { injector }) {
-      return injector.get(OrganizationManager).getOrganization({
-        organization: token.organization,
-      });
-    },
-    project(token, _, { injector }) {
-      return injector.get(ProjectManager).getProject({
-        organization: token.organization,
-        project: token.project,
-      });
-    },
-    target(token, _, { injector }) {
-      return injector.get(TargetManager).getTarget({
-        organization: token.organization,
-        project: token.project,
-        target: token.target,
-      });
-    },
-    hasOrganizationScope(token, { scope }) {
-      return token.scopes.includes(scope);
-    },
-    hasProjectScope(token, { scope }) {
-      return token.scopes.includes(scope);
-    },
-    hasTargetScope(token, { scope }) {
-      return token.scopes.includes(scope);
     },
   },
   Target: {
