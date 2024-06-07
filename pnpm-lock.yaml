@@ -58,6 +58,9 @@ importers:
       '@changesets/cli':
         specifier: 2.27.5
         version: 2.27.5
+      '@eddeee888/gcg-typescript-resolver-files':
+        specifier: 0.9.2
+        version: 0.9.2(encoding@0.1.13)(graphql@16.8.1)
       '@graphql-codegen/add':
         specifier: 5.0.2
         version: 5.0.2(graphql@16.8.1)
@@ -3374,6 +3377,14 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
+  '@eddeee888/gcg-server-config@0.2.1':
+    resolution: {integrity: sha512-mrx0/Um1FNLjmvqAUg1+pitDtaAoGE8FS59Msc0YnKbhPNgm9bl3CJG6AQRmCvr5Ks8PE5RLMlXytx1ns7VM5Q==}
+
+  '@eddeee888/gcg-typescript-resolver-files@0.9.2':
+    resolution: {integrity: sha512-opp5Na7FLwTQxKQ9Wu9FGcLxL628XJObq+3F+ymVx3BhIFwvwj793OJ4iiG1tOBjca/hPrRktHB6x57gwpTKkw==}
+    peerDependencies:
+      graphql: ^15.0.0 || ^16.0.0
+
   '@emotion/babel-plugin@11.10.5':
     resolution: {integrity: sha512-xE7/hyLHJac7D2Ve9dKroBBZqBT7WuPQmWcq7HSGb84sUuP4mlOWoB8dvVfD9yk5DHkU1m6RW7xSoDtnQHNQeA==}
     peerDependencies:
@@ -4027,6 +4038,7 @@ packages:
 
   '@fastify/vite@6.0.6':
     resolution: {integrity: sha512-FsWJC92murm5tjeTezTTvMLyZido/ZWy0wYWpVkh/bDe1gAUAabYLB7Vp8hokXGsRE/mOpqYVsRDAKENY2qPUQ==}
+    bundledDependencies: []
 
   '@floating-ui/core@1.2.6':
     resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
@@ -7564,6 +7576,9 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
 
+  '@ts-morph/common@0.23.0':
+    resolution: {integrity: sha512-m7Lllj9n/S6sOkCkRftpM7L24uvmfXQFedlW/4hENcuJH1HHm9u5EgxZb9uVjQSCGrbBWBkOGgcTxNg36r6ywA==}
+
   '@tsconfig/node10@1.0.9':
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
 
@@ -9043,6 +9058,9 @@ packages:
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
+
+  code-block-writer@13.0.1:
+    resolution: {integrity: sha512-c5or4P6erEA69TxaxTNcHUNcIn+oyxSRTOWV+pSYF+z4epXqNvwvJ70XPGjPNgue83oAFAPBRQYwpAJ/Hpe/Sg==}
 
   codemirror-graphql@2.0.9-alpha.0:
     resolution: {integrity: sha512-52UDU1rHCLkju/4tQQXkG/3fmYH+leeKPV9DaRERRQK+/HIbfSxeunslKSCL5qjaQa18heZCI4J0lKl5IAXx5Q==}
@@ -13562,6 +13580,9 @@ packages:
   password-prompt@1.1.3:
     resolution: {integrity: sha512-HkrjG2aJlvF0t2BMH0e2LB/EHf3Lcq3fNMzy4GYHcQblAvOl+QQji1Lx7WRBMqpVK8p+KR7bCg7oqAMXtdgqyw==}
 
+  path-browserify@1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
+
   path-case@3.0.4:
     resolution: {integrity: sha512-qO4qCFjXqVTrcbPt/hQfhTQ+VhFsqNKOPtytgNKkKxSoEp3XPUQ8ObFuePylOIok5gjn69ry8XiULxCwot3Wfg==}
 
@@ -15753,6 +15774,9 @@ packages:
   ts-log@2.2.5:
     resolution: {integrity: sha512-PGcnJoTBnVGy6yYNFxWVNkdcAuAMstvutN9MgDJIV6L0oG8fB+ZNNy1T+wJzah8RPGor1mZuPQkVfXNDpy9eHA==}
 
+  ts-morph@22.0.0:
+    resolution: {integrity: sha512-M9MqFGZREyeb5fTl6gNHKZLqBQA0TjA1lea+CR48R8EBTDuWrNqW6ccC5QvjNR4s6wDumD3LTCjOFSp9iwlzaw==}
+
   ts-node@10.9.2:
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
     hasBin: true
@@ -17092,7 +17116,7 @@ snapshots:
       '@aws-sdk/client-sso-oidc': 3.590.0
       '@aws-sdk/client-sts': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)
       '@aws-sdk/core': 3.588.0
-      '@aws-sdk/credential-provider-node': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0(@aws-sdk/client-sso-oidc@3.590.0))
+      '@aws-sdk/credential-provider-node': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0)
       '@aws-sdk/middleware-bucket-endpoint': 3.587.0
       '@aws-sdk/middleware-expect-continue': 3.577.0
       '@aws-sdk/middleware-flexible-checksums': 3.587.0
@@ -17199,7 +17223,7 @@ snapshots:
       '@aws-crypto/sha256-js': 3.0.0
       '@aws-sdk/client-sts': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)
       '@aws-sdk/core': 3.588.0
-      '@aws-sdk/credential-provider-node': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0(@aws-sdk/client-sso-oidc@3.590.0))
+      '@aws-sdk/credential-provider-node': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0)
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17375,7 +17399,7 @@ snapshots:
       '@aws-crypto/sha256-js': 3.0.0
       '@aws-sdk/client-sso-oidc': 3.590.0
       '@aws-sdk/core': 3.588.0
-      '@aws-sdk/credential-provider-node': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0(@aws-sdk/client-sso-oidc@3.590.0))
+      '@aws-sdk/credential-provider-node': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0)
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17490,7 +17514,7 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
-  '@aws-sdk/credential-provider-ini@3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0(@aws-sdk/client-sso-oidc@3.590.0))':
+  '@aws-sdk/credential-provider-ini@3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0)':
     dependencies:
       '@aws-sdk/client-sts': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)
       '@aws-sdk/credential-provider-env': 3.587.0
@@ -17527,11 +17551,11 @@ snapshots:
       - '@aws-sdk/client-sts'
       - aws-crt
 
-  '@aws-sdk/credential-provider-node@3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0(@aws-sdk/client-sso-oidc@3.590.0))':
+  '@aws-sdk/credential-provider-node@3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0)':
     dependencies:
       '@aws-sdk/credential-provider-env': 3.587.0
       '@aws-sdk/credential-provider-http': 3.587.0
-      '@aws-sdk/credential-provider-ini': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0(@aws-sdk/client-sso-oidc@3.590.0))
+      '@aws-sdk/credential-provider-ini': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)(@aws-sdk/client-sts@3.590.0)
       '@aws-sdk/credential-provider-process': 3.587.0
       '@aws-sdk/credential-provider-sso': 3.590.0(@aws-sdk/client-sso-oidc@3.590.0)
       '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.590.0)
@@ -19035,6 +19059,32 @@ snapshots:
   '@date-fns/utc@1.2.0': {}
 
   '@discoveryjs/json-ext@0.5.7': {}
+
+  '@eddeee888/gcg-server-config@0.2.1(encoding@0.1.13)(graphql@16.8.1)':
+    dependencies:
+      '@graphql-codegen/typescript': 4.0.7(encoding@0.1.13)(graphql@16.8.1)
+      '@graphql-codegen/typescript-resolvers': 4.1.0(encoding@0.1.13)(graphql@16.8.1)
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - encoding
+      - graphql
+      - supports-color
+
+  '@eddeee888/gcg-typescript-resolver-files@0.9.2(encoding@0.1.13)(graphql@16.8.1)':
+    dependencies:
+      '@eddeee888/gcg-server-config': 0.2.1(encoding@0.1.13)(graphql@16.8.1)
+      '@graphql-codegen/add': 5.0.2(graphql@16.8.1)
+      '@graphql-codegen/plugin-helpers': 5.0.4(graphql@16.8.1)
+      '@graphql-codegen/typescript': 4.0.7(encoding@0.1.13)(graphql@16.8.1)
+      '@graphql-codegen/typescript-resolvers': 4.1.0(encoding@0.1.13)(graphql@16.8.1)
+      '@graphql-tools/utils': 10.2.1(graphql@16.8.1)
+      graphql: 16.8.1
+      micromatch: 4.0.5
+      ts-morph: 22.0.0
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   '@emotion/babel-plugin@11.10.5(@babel/core@7.24.5)':
     dependencies:
@@ -24816,6 +24866,13 @@ snapshots:
 
   '@trysound/sax@0.2.0': {}
 
+  '@ts-morph/common@0.23.0':
+    dependencies:
+      fast-glob: 3.3.2
+      minimatch: 9.0.4
+      mkdirp: 3.0.1
+      path-browserify: 1.0.1
+
   '@tsconfig/node10@1.0.9': {}
 
   '@tsconfig/node12@1.0.11': {}
@@ -26568,6 +26625,8 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
       - '@types/react'
+
+  code-block-writer@13.0.1: {}
 
   codemirror-graphql@2.0.9-alpha.0(@codemirror/language@6.0.0)(codemirror@5.65.9)(graphql@16.8.1):
     dependencies:
@@ -32530,6 +32589,8 @@ snapshots:
       ansi-escapes: 4.3.2
       cross-spawn: 7.0.3
 
+  path-browserify@1.0.1: {}
+
   path-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
@@ -34947,6 +35008,11 @@ snapshots:
   ts-interface-checker@0.1.13: {}
 
   ts-log@2.2.5: {}
+
+  ts-morph@22.0.0:
+    dependencies:
+      '@ts-morph/common': 0.23.0
+      code-block-writer: 13.0.1
 
   ts-node@10.9.2(@swc/core@1.5.25(@swc/helpers@0.5.5))(@types/node@20.14.2)(typescript@5.4.5):
     dependencies:
