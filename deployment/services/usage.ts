@@ -58,6 +58,7 @@ export function deployUsage({
         KAFKA_TOPIC: kafka.config.topic,
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
+        RATE_LIMIT_CACHE_UPDATE_INTERVAL_MS: '60000',
       },
       exposesMetrics: true,
       port: 4000,

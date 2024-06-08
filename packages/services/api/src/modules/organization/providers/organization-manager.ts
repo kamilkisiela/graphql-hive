@@ -10,6 +10,7 @@ import { OrganizationAccessScope } from '../../auth/providers/organization-acces
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { BillingProvider } from '../../billing/providers/billing.provider';
+import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
 import { Emails, mjml } from '../../shared/providers/emails';
 import { Logger } from '../../shared/providers/logger';
 import type { OrganizationSelector } from '../../shared/providers/storage';
@@ -63,6 +64,7 @@ export class OrganizationManager {
     private tokenStorage: TokenStorage,
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
+    private rateLimitProvider: RateLimitProvider,
     private emails: Emails,
     @Inject(WEB_APP_URL) private appBaseUrl: string,
   ) {
@@ -385,12 +387,16 @@ export class OrganizationManager {
     });
 
     if (this.billingProvider.enabled) {
-      await this.billingProvider.syncOrganization({
-        organizationId: organization.id,
-        reserved: {
-          operations: Math.floor(input.monthlyRateLimit.operations / 1_000_000),
-        },
+      const billingRecord = await this.billingProvider.getOrganizationBillingParticipant({
+        organization: organization.id,
       });
+
+      if (billingRecord) {
+        await this.billingProvider.syncOrganization(
+          billingRecord,
+          Math.floor(input.monthlyRateLimit.operations / 1_000_000),
+        );
+      }
     }
 
     return result;

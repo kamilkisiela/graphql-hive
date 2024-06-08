@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { DocumentNode, GraphQLError, parse, print, SourceLocation } from 'graphql';
+import { billing_provider } from 'packages/services/storage/src/db';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
@@ -190,7 +191,8 @@ export interface OrganizationInvitation {
 export interface OrganizationBilling {
   organizationId: string;
   externalBillingReference: string;
-  billingEmailAddress?: string | null;
+  billingDayOfMonth?: number | null;
+  provider: billing_provider;
 }
 
 export interface OIDCIntegration {

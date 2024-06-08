@@ -135,7 +135,7 @@ export const env = {
     prometheus.PROMETHEUS_METRICS === '1'
       ? {
           labels: {
-            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'rate-limit',
+            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'usage-estimator',
           },
         }
       : null,

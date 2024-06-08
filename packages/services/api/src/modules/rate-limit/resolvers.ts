@@ -10,10 +10,7 @@ export const resolvers: RateLimitModule.Resolvers = {
 
       try {
         const operationsRateLimit = await injector.get(RateLimitProvider).checkRateLimit({
-          entityType: 'organization',
-          id: org.id,
-          type: 'operations-reporting',
-          token: null,
+          organizationId: org.id,
         });
 
         logger.debug('Fetched rate-limit info:', { orgId: org.id, operationsRateLimit });

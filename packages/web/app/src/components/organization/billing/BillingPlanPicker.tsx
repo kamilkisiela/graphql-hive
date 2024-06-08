@@ -119,7 +119,10 @@ const BillingPlanPicker_PlanFragment = graphql(`
     planType
     id
     name
-    basePrice
+    basePrice {
+      id
+      amount
+    }
   }
 `);
 
@@ -149,7 +152,7 @@ export function BillingPlanPicker({
           <Plan
             key={plan.id}
             name={plan.name}
-            price={billingPlanLookUpMap[plan.planType] ?? plan.basePrice ?? 'Contact Us'}
+            price={billingPlanLookUpMap[plan.planType] ?? plan.basePrice?.amount ?? 'Contact Us'}
             isActive={activePlan === plan.planType}
             features={planCollection[plan.planType].features}
             description={planCollection[plan.planType].description}

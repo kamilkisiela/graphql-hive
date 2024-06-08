@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from 'react';
-import { Stat, Table, TBody, Td, TFoot, Th, THead, Tr } from '@/components/v2';
+import { Link, Stat, Table, TBody, Td, TFoot, Th, THead, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import { CurrencyFormatter } from './helpers';
@@ -7,8 +7,14 @@ import { CurrencyFormatter } from './helpers';
 const PriceEstimationTable_PlanFragment = graphql(`
   fragment PriceEstimationTable_PlanFragment on BillingPlan {
     includedOperationsLimit
-    pricePerOperationsUnit
-    basePrice
+    pricePerOperationsUnit {
+      id
+      amount
+    }
+    basePrice {
+      id
+      amount
+    }
     planType
   }
 `);
@@ -23,8 +29,8 @@ function PriceEstimationTable(props: {
     0,
     props.operationsRateLimit - includedOperationsInMillions,
   );
-  const operationsTotal = (plan.pricePerOperationsUnit ?? 0) * additionalOperations;
-  const total = (plan.basePrice ?? 0) + operationsTotal;
+  const operationsTotal = (plan.pricePerOperationsUnit?.amount ?? 0) * additionalOperations;
+  const total = (plan.basePrice?.amount ?? 0) + operationsTotal;
 
   return (
     <Table>
@@ -40,8 +46,8 @@ function PriceEstimationTable(props: {
             Base price <span className="text-gray-500">(unlimited seats)</span>
           </Td>
           <Td align="right" />
-          <Td align="right">{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
-          <Td align="right">{CurrencyFormatter.format(plan.basePrice ?? 0)}</Td>
+          <Td align="right">{CurrencyFormatter.format(plan.basePrice?.amount ?? 0)}</Td>
+          <Td align="right">{CurrencyFormatter.format(plan.basePrice?.amount ?? 0)}</Td>
         </Tr>
         {includedOperationsInMillions > 0 && (
           <Tr>
@@ -57,7 +63,9 @@ function PriceEstimationTable(props: {
           <Tr>
             <Td>Operations</Td>
             <Td align="right">{additionalOperations}M</Td>
-            <Td align="right">{CurrencyFormatter.format(plan.pricePerOperationsUnit ?? 0)}</Td>
+            <Td align="right">
+              {CurrencyFormatter.format(plan.pricePerOperationsUnit?.amount ?? 0)}
+            </Td>
             <Td align="right">{CurrencyFormatter.format(operationsTotal)}</Td>
           </Tr>
         )}
@@ -88,6 +96,7 @@ export function PlanSummary({
   children: ReactNode;
 }): ReactElement {
   const plan = useFragment(PlanSummary_PlanFragment, props.plan);
+
   if (plan.planType === BillingPlanType.Enterprise) {
     return (
       <Stat>
@@ -96,6 +105,10 @@ export function PlanSummary({
         <Stat.HelpText>
           Enterprise plan is for organizations that needs to ship and ingest large amount of data,
           and needs ongoing support around GraphQL APIs.
+          <br />
+          <Link variant="primary" className="mt-2" href="mailto:contact@the-guild.dev">
+            Contact us through email for a price quote.
+          </Link>
         </Stat.HelpText>
       </Stat>
     );
@@ -113,14 +126,13 @@ export function PlanSummary({
 
         <Stat>
           <Stat.Label>Operations Limit</Stat.Label>
-          <Stat.HelpText>up to</Stat.HelpText>
           <Stat.Number>{operationsRateLimit}M</Stat.Number>
           <Stat.HelpText>per month</Stat.HelpText>
         </Stat>
         <Stat className="mb-8">
           <Stat.Label>Retention</Stat.Label>
-          <Stat.HelpText>usage reports</Stat.HelpText>
           <Stat.Number>{plan.retentionInDays} days</Stat.Number>
+          <Stat.HelpText>(operations)</Stat.HelpText>
         </Stat>
       </div>
       <PriceEstimationTable plan={plan} operationsRateLimit={operationsRateLimit} />

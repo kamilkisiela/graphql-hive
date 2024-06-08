@@ -54,9 +54,11 @@ test('rate limit approaching and reached for organization', async () => {
   };
 
   // Collect operations and check for warning
-  const collectResult = await collectOperations(new Array(10).fill(op));
-  expect(collectResult.status).toEqual(200);
-
+  const collectResult1 = await collectOperations(new Array(10).fill(op));
+  expect(collectResult1.status).toEqual(200);
+  await waitFor(5000);
+  const collectResult2 = await collectOperations(new Array(1).fill(op));
+  expect(collectResult2.status).toEqual(200);
   await waitFor(5000);
 
   let sent = await emails.history();
@@ -71,7 +73,7 @@ test('rate limit approaching and reached for organization', async () => {
   const collectMoreResult = await collectOperations([op, op]);
   expect(collectMoreResult.status).toEqual(200);
 
-  await waitFor(7000);
+  await waitFor(5000);
 
   sent = await emails.history();
 
@@ -84,7 +86,8 @@ test('rate limit approaching and reached for organization', async () => {
 
   // Make sure we don't send the same email again
   const collectEvenMoreResult = await collectOperations([op, op]);
-  expect(collectEvenMoreResult.status).toEqual(200);
+  // At this point, we are already rate-limited
+  expect(collectEvenMoreResult.status).toEqual(429);
 
   await waitFor(5000);
 

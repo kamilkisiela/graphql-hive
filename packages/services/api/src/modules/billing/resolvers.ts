@@ -1,54 +1,37 @@
 import { GraphQLError } from 'graphql';
-import { TRPCClientError } from '@trpc/client';
-import { BillingPlanType } from '../../__generated__/types';
+import { BillingPlanType, BillingProvider as BillingProviderType } from '../../__generated__/types';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../auth/providers/organization-access';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { BillingModule } from './__generated__/types';
+import { USAGE_DEFAULT_LIMITATIONS } from './config';
 import { BillingProvider } from './providers/billing.provider';
-
-const USAGE_DEFAULT_LIMITATIONS: Record<
-  'HOBBY' | 'PRO' | 'ENTERPRISE',
-  { operations: number; retention: number }
-> = {
-  HOBBY: {
-    operations: 1_000_000,
-    retention: 7,
-  },
-  PRO: {
-    operations: 0,
-    retention: 90,
-  },
-  ENTERPRISE: {
-    operations: 0, // unlimited
-    retention: 365,
-  },
-};
 
 export const resolvers: BillingModule.Resolvers = {
   BillingInvoice: {
-    id: i => (i && 'id' in i ? i.id : 'upcoming'),
-    amount: i => parseFloat((i.total / 100).toFixed(2)),
-    pdfLink: i => i.invoice_pdf || null,
-    date: i => new Date(i.created * 1000).toISOString(),
-    periodStart: i => new Date(i.period_start * 1000).toISOString(),
-    periodEnd: i => new Date(i.period_end * 1000).toISOString(),
-    status: i =>
-      i.status ? (i.status.toUpperCase() as BillingModule.BillingInvoiceStatus) : 'DRAFT',
+    id: i => (i.id === null ? 'upcoming' : i.id),
+    amount: i => parseFloat((i.amount / 100).toFixed(2)),
+    pdfLink: i => i.pdfUrl || null,
+    date: i => i.date.toISOString(),
+    periodStart: i => i.periodStart.toISOString(),
+    periodEnd: i => i.periodEnd.toISOString(),
+    status: i => i.status,
   },
   Organization: {
     plan: org => (org.billingPlan || 'HOBBY') as BillingPlanType,
     billingConfiguration: async (org, _args, { injector }) => {
       if (org.billingPlan === 'ENTERPRISE') {
         return {
+          provider: null,
           hasActiveSubscription: true,
           canUpdateSubscription: false,
           hasPaymentIssues: false,
           paymentMethod: null,
           billingAddress: null,
           invoices: null,
-          upcomingInvoice: null,
+          nextPayment: null,
+          trialEnd: null,
         };
       }
 
@@ -58,83 +41,77 @@ export const resolvers: BillingModule.Resolvers = {
 
       if (!billingRecord) {
         return {
+          provider: null,
           hasActiveSubscription: false,
           canUpdateSubscription: true,
           hasPaymentIssues: false,
-          paymentMethod: null,
-          billingAddress: null,
           invoices: null,
-          upcomingInvoice: null,
+          nextPayment: null,
+          trialEnd: null,
         };
       }
 
       // This is a special case where customer is on Pro and doesn't have a record for external billing.
       // This happens when the customer is paying through an external system and not through Stripe.
-      if (org.billingPlan === 'PRO' && billingRecord.externalBillingReference === 'wire') {
+      if (
+        org.billingPlan === 'PRO' &&
+        (billingRecord.provider === 'WIRE' || billingRecord.externalBillingReference === 'wire')
+      ) {
         return {
+          provider: 'WIRE',
           hasActiveSubscription: true,
           canUpdateSubscription: false,
           hasPaymentIssues: false,
-          paymentMethod: null,
-          billingAddress: null,
           invoices: null,
-          upcomingInvoice: null,
+          nextPayment: null,
+          trialEnd: null,
         };
       }
 
-      const subscriptionInfo = await injector.get(BillingProvider).getActiveSubscription({
-        organizationId: billingRecord.organizationId,
-      });
+      const subscriptionInfo = await injector
+        .get(BillingProvider)
+        .getActiveSubscription(billingRecord);
 
+      // In case we have a customer record but no subscription, we can assume that the customer is on a free plan.
       if (!subscriptionInfo) {
         return {
+          provider: billingRecord.provider as BillingProviderType,
           hasActiveSubscription: false,
           canUpdateSubscription: true,
           hasPaymentIssues: false,
-          paymentMethod: null,
-          billingAddress: null,
           invoices: null,
-          upcomingInvoice: null,
+          nextPayment: null,
+          trialEnd: null,
         };
       }
 
-      const [invoices, upcomingInvoice] = await Promise.all([
-        injector.get(BillingProvider).invoices({
-          organizationId: billingRecord.organizationId,
-        }),
-        injector.get(BillingProvider).upcomingInvoice({
-          organizationId: billingRecord.organizationId,
-        }),
+      const [billingInfo, hasPaymentIssues, invoices, nextPayment] = await Promise.all([
+        injector.get(BillingProvider).billingInfo(billingRecord),
+        injector.get(BillingProvider).hasPaymentIssues(billingRecord),
+        injector.get(BillingProvider).invoices(billingRecord),
+        injector.get(BillingProvider).upcomingPayment(billingRecord),
       ]);
 
-      const hasPaymentIssues = invoices?.some(
-        i => i.charge !== null && typeof i.charge === 'object' && i.charge?.failure_code !== null,
-      );
-
       return {
-        hasActiveSubscription: subscriptionInfo.subscription !== null,
-        canUpdateSubscription: subscriptionInfo.subscription !== null,
+        provider: billingRecord.provider as BillingProviderType,
+        hasActiveSubscription: subscriptionInfo !== null,
+        canUpdateSubscription: subscriptionInfo !== null,
         hasPaymentIssues,
-        paymentMethod: subscriptionInfo.paymentMethod?.card || null,
-        billingAddress: subscriptionInfo.paymentMethod?.billing_details || null,
         invoices,
-        upcomingInvoice,
+        nextPayment,
+        taxId: billingInfo?.taxId || null,
+        trialEnd: subscriptionInfo?.trialEnd ? (new Date(subscriptionInfo.trialEnd) as any) : null,
+        legalName: billingInfo?.legalName || null,
+        billingEmail: billingInfo?.billingEmail || null,
+        paymentMethod: billingInfo?.paymentMethod
+          ? {
+              methodType: billingInfo.paymentMethod.type,
+              brand: billingInfo.paymentMethod.brand,
+              identifier: billingInfo.paymentMethod.last4,
+            }
+          : null,
       };
     },
-  },
-  BillingPaymentMethod: {
-    brand: bpm => bpm.brand,
-    last4: bpm => bpm.last4,
-    expMonth: bpm => bpm.exp_month,
-    expYear: bpm => bpm.exp_year,
-  },
-  BillingDetails: {
-    city: bd => bd.address?.city || null,
-    country: bd => bd.address?.country || null,
-    line1: bd => bd.address?.line1 || null,
-    line2: bd => bd.address?.line2 || null,
-    postalCode: bd => bd.address?.postal_code ?? null,
-    state: bd => bd.address?.state || null,
   },
   Query: {
     billingPlans: async (root, args, { injector }) => {
@@ -148,23 +125,35 @@ export const resolvers: BillingModule.Resolvers = {
         {
           id: 'HOBBY',
           planType: 'HOBBY',
-          basePrice: 0,
+          basePrice: {
+            id: 'HOBBY_BASE',
+            amount: 0,
+          },
           name: 'Hobby',
           description: 'Free for non-commercial use, startups, side-projects and just experiments.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.HOBBY.operations,
           rateLimit: 'MONTHLY_LIMITED',
-          pricePerOperationsUnit: 0,
+          pricePerOperationsUnit: {
+            id: 'HOBBY_OPERATIONS',
+            amount: 0,
+          },
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.HOBBY.retention,
         },
         {
           id: 'PRO',
           planType: 'PRO',
-          basePrice: availablePrices.basePrice.unit_amount! / 100,
+          basePrice: {
+            id: availablePrices.basePrice.identifier,
+            amount: availablePrices.basePrice.amount / 100,
+          },
           name: 'Pro',
           description:
             'For production-ready applications that requires long retention, high ingestion capacity.',
           includedOperationsLimit: USAGE_DEFAULT_LIMITATIONS.PRO.operations,
-          pricePerOperationsUnit: availablePrices.operationsPrice.tiers![1].unit_amount! / 100,
+          pricePerOperationsUnit: {
+            id: availablePrices.pricePerMillionOperations.identifier,
+            amount: availablePrices.pricePerMillionOperations.amount / 100,
+          },
           retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
           rateLimit: 'MONTHLY_QUOTA',
         },
@@ -182,7 +171,7 @@ export const resolvers: BillingModule.Resolvers = {
     },
   },
   Mutation: {
-    generateStripePortalLink: async (_, args, { injector }) => {
+    generatePaymentMethodUpdateToken: async (_, args, { injector }) => {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId({
         organization: args.selector.organization,
       });
@@ -193,7 +182,68 @@ export const resolvers: BillingModule.Resolvers = {
         OrganizationAccessScope.SETTINGS,
       );
 
-      return injector.get(BillingProvider).generateStripePortalLink(organization.id);
+      const billingRecord = await injector
+        .get(BillingProvider)
+        .getOrganizationBillingParticipant({ organization: organization.id });
+
+      if (!billingRecord) {
+        throw new Error('Organization does not have billing record');
+      }
+
+      return await injector.get(BillingProvider).generatePaymentMethodUpdateToken(billingRecord);
+    },
+    updateBillingDetails: async (_, args, { injector }) => {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
+        organization: args.input.selector.organization,
+      });
+      const organization = await injector.get(OrganizationManager).getOrganization(
+        {
+          organization: organizationId,
+        },
+        OrganizationAccessScope.SETTINGS,
+      );
+
+      const billingRecord = await injector
+        .get(BillingProvider)
+        .getOrganizationBillingParticipant({ organization: organization.id });
+
+      if (!billingRecord) {
+        throw new Error('Organization does not have billing record');
+      }
+
+      await injector.get(BillingProvider).updateBillingDetails(billingRecord, {
+        legalName: args.input.legalName ?? null,
+        taxId: args.input.taxId ?? null,
+        billingEmail: args.input.billingEmail ?? null,
+      });
+
+      return organization;
+    },
+    generateSubscriptionManagementLink: async (_, args, { injector }) => {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
+        organization: args.selector.organization,
+      });
+      const organization = await injector.get(OrganizationManager).getOrganization(
+        {
+          organization: organizationId,
+        },
+        OrganizationAccessScope.SETTINGS,
+      );
+      const billingRecord = await injector
+        .get(BillingProvider)
+        .getOrganizationBillingParticipant({ organization: organization.id });
+
+      if (!billingRecord) {
+        throw new Error('Organization does not have billing record');
+      }
+
+      const record = await injector.get(BillingProvider).subscriptionManagementUrl(billingRecord);
+
+      if (!record) {
+        throw new Error('Failed to get subscription management URL');
+      }
+
+      return record;
     },
     updateOrgRateLimit: async (_, args, { injector }) => {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId({
@@ -221,11 +271,13 @@ export const resolvers: BillingModule.Resolvers = {
         organization: organizationId,
       });
 
-      if (organization.billingPlan === 'PRO') {
+      const billingRecord = await injector
+        .get(BillingProvider)
+        .getOrganizationBillingParticipant({ organization: organization.id });
+
+      if (organization.billingPlan === 'PRO' && billingRecord) {
         // Configure user to use Stripe payments, create billing participant record for the org
-        await injector.get(BillingProvider).downgradeToHobby({
-          organizationId,
-        });
+        await injector.get(BillingProvider).downgradeToHobby(billingRecord);
 
         // Upgrade the actual org plan to HOBBY
         organization = await injector
@@ -248,62 +300,6 @@ export const resolvers: BillingModule.Resolvers = {
         };
       }
       throw new GraphQLError(`Unable to downgrade from Pro from your current plan`);
-    },
-    upgradeToPro: async (root, args, { injector }) => {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
-        organization: args.input.organization.organization,
-      });
-      await injector.get(AuthManager).ensureOrganizationAccess({
-        organization: organizationId,
-        scope: OrganizationAccessScope.SETTINGS,
-      });
-
-      let organization = await injector.get(OrganizationManager).getOrganization({
-        organization: organizationId,
-      });
-
-      if (organization.billingPlan === 'HOBBY') {
-        // Configure user to use Stripe payments, create billing participant record for the org
-        try {
-          await injector.get(BillingProvider).upgradeToPro({
-            organizationId,
-            couponCode: args.input.couponCode,
-            paymentMethodId: args.input.paymentMethodId,
-            reserved: {
-              operations: Math.floor(args.input.monthlyLimits.operations / 1_000_000),
-            },
-          });
-        } catch (e) {
-          if (e instanceof TRPCClientError) {
-            throw new GraphQLError(`Falied to upgrade: ${e.message}`);
-          }
-
-          throw e;
-        }
-
-        // Upgrade the actual org plan to PRO
-        organization = await injector
-          .get(OrganizationManager)
-          .updatePlan({ plan: 'PRO', organization: organizationId });
-
-        // Upgrade the limits
-        organization = await injector.get(OrganizationManager).updateRateLimits({
-          organization: organizationId,
-          monthlyRateLimit: {
-            retentionInDays: USAGE_DEFAULT_LIMITATIONS.PRO.retention,
-            operations:
-              args.input.monthlyLimits.operations || USAGE_DEFAULT_LIMITATIONS.PRO.operations,
-          },
-        });
-
-        return {
-          previousPlan: 'HOBBY',
-          newPlan: 'PRO',
-          organization,
-        };
-      }
-
-      throw new GraphQLError(`Unable to upgrade to Pro from your current plan`);
     },
   },
 };

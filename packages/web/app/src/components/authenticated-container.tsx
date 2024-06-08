@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { SessionAuth } from 'supertokens-auth-react/recipe/session';
-import { HiveStripeWrapper } from '@/lib/billing/stripe';
+import { HivePaddleProvider } from '@/lib/billing/paddle';
 
 /**
  * Utility for wrapping a component with an authenticated container that has the default application layout.
@@ -10,10 +10,9 @@ export const authenticated =
   (props: TProps) => {
     return (
       <SessionAuth>
-        <HiveStripeWrapper>
-          {/* <Header /> */}
+        <HivePaddleProvider>
           <Component {...props} />
-        </HiveStripeWrapper>
+        </HivePaddleProvider>
       </SessionAuth>
     );
   };

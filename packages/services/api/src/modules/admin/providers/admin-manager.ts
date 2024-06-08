@@ -79,7 +79,7 @@ export class AdminManager {
     const user = await this.authManager.getCurrentUser();
 
     if (user.isAdmin) {
-      const pairs = await this.storage.adminGetOrganizationsTargetPairs();
+      const pairs = await this.storage.getOrganizationsTargetPairs();
       const operations = await this.operationsReader.adminCountOperationsPerTarget({
         period,
       });

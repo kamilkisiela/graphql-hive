@@ -1,12 +1,12 @@
-import { endOfMonth, startOfMonth } from 'date-fns';
+import { addMonths, endOfDay, format, setDate, startOfDay, subMonths } from 'date-fns';
 import type { ServiceLogger } from '@hive/service-common';
-import { traceInline } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage, Interceptor } from '@hive/storage';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import * as Sentry from '@sentry/node';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import type { RateLimitInput } from './api';
+import { createOrganizationConfigStore, DEFAULT_RETENTION } from './config-store';
 import { createEmailScheduler } from './emails';
+import { createOrganizationIdStore } from './id-store';
 import { rateLimitOperationsEventOrg } from './metrics';
 
 export type RateLimitCheckResponse = {
@@ -20,7 +20,13 @@ export type RateLimitCheckResponse = {
    * This is a number between 0-1 (or higher in case of non-limited orgs)
    */
   usagePercentage: number;
+  /**
+   * The quota of the org.
+   */
   quota: number;
+  /**
+   * The current usage of the org.
+   */
   current: number;
 };
 
@@ -32,29 +38,21 @@ const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
 };
 
 export type CachedRateLimitInfo = {
-  orgName: string;
-  orgEmail: string;
-  orgPlan: string;
-  orgCleanId: string;
   operations: RateLimitCheckResponse;
   retentionInDays: number;
 };
 
-// It should be equal or higher than the highest possible retention value (enterprise),
-// to prevent applying lower retention value then expected.
-const RETENTION_IN_DAYS_FALLBACK = 365;
-
 export type Limiter = ReturnType<typeof createRateLimiter>;
 
-type OrganizationId = string;
-type TargetId = string;
+type RateLimitWindow = {
+  start: Date;
+  end: Date;
+};
 
 export function createRateLimiter(config: {
   logger: ServiceLogger;
-  rateLimitConfig: {
-    interval: number;
-  };
-  rateEstimator: {
+  cacheTtl: number;
+  usageEstimator: {
     endpoint: string;
   };
   emails?: {
@@ -65,184 +63,72 @@ export function createRateLimiter(config: {
     additionalInterceptors?: Interceptor[];
   };
 }) {
-  const rateEstimator = createTRPCProxyClient<UsageEstimatorApi>({
+  const usageEstimator = createTRPCProxyClient<UsageEstimatorApi>({
     links: [
       httpLink({
-        url: `${config.rateEstimator.endpoint}/trpc`,
+        url: `${config.usageEstimator.endpoint}/trpc`,
         fetch,
       }),
     ],
   });
   const emails = createEmailScheduler(config.emails);
-
   const { logger } = config;
   const postgres$ = createPostgreSQLStorage(
     config.storage.connectionString,
     1,
     config.storage.additionalInterceptors,
   );
-  let initialized = false;
-  let intervalHandle: ReturnType<typeof setInterval> | null = null;
-
-  let targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
-  let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
-
-  const fetchAndCalculateUsageInformation = traceInline('Calculate Rate Limit', {}, async () => {
-    const now = new Date();
-    const window = {
-      startTime: startOfMonth(now),
-      endTime: endOfMonth(now),
-    };
-    const windowAsString = {
-      startTime: startOfMonth(now).toUTCString(),
-      endTime: endOfMonth(now).toUTCString(),
-    };
-    config.logger.info(
-      `Calculating rate-limit information based on window: ${windowAsString.startTime} -> ${windowAsString.endTime}`,
-    );
-    const storage = await postgres$;
-
-    const [records, operations] = await Promise.all([
-      storage.getGetOrganizationsAndTargetsWithLimitInfo(),
-      rateEstimator.estimateOperationsForAllTargets.query(windowAsString),
-    ]);
-
-    const totalTargets = records.reduce((acc, record) => acc + record.targets.length, 0);
-
-    logger.debug(
-      `Fetched total of ${Object.keys(records).length} organizations (with ${totalTargets} targets) from the DB`,
-    );
-    logger.debug(
-      `Fetched total of ${Object.keys(operations).length} targets with usage information`,
-    );
-
-    const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
-    const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
-
-    for (const record of records) {
-      for (const target of record.targets) {
-        newTargetIdToOrgLookup.set(target, record.organization);
-      }
-      if (!newCachedResult.has(record.organization)) {
-        newCachedResult.set(record.organization, {
-          orgName: record.org_name,
-          orgEmail: record.owner_email,
-          orgPlan: record.org_plan_name,
-          orgCleanId: record.org_clean_id,
-          operations: {
-            current: 0,
-            quota: record.limit_operations_monthly,
-            limited: false,
-            usagePercentage: 0,
-          },
-          retentionInDays: record.limit_retention_days,
-        });
-      }
-
-      const orgRecord = newCachedResult.get(record.organization)!;
-
-      for (const target of record.targets) {
-        orgRecord.operations.current += operations[target] || 0;
-      }
-    }
-
-    newCachedResult.forEach((orgRecord, orgId) => {
-      const orgName = orgRecord.orgName;
-      // We do not really limit Enterprise customers, but we still want to track their usage.
-      const noLimits = orgRecord.orgPlan === 'ENTERPRISE' || orgRecord.operations.quota === 0;
-      orgRecord.operations.limited = noLimits
-        ? false
-        : orgRecord.operations.current > orgRecord.operations.quota;
-      orgRecord.operations.usagePercentage =
-        orgRecord.operations.current / orgRecord.operations.quota;
-
-      if (orgRecord.operations.usagePercentage >= 1) {
-        rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
-        logger.info(
-          `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`,
-        );
-
-        emails.limitExceeded({
-          organization: {
-            id: orgId,
-            cleanId: orgRecord.orgCleanId,
-            name: orgName,
-            email: orgRecord.orgEmail,
-          },
-          period: {
-            start: window.startTime.getTime(),
-            end: window.endTime.getTime(),
-          },
-          usage: {
-            quota: orgRecord.operations.quota,
-            current: orgRecord.operations.current,
-          },
-        });
-      } else if (orgRecord.operations.usagePercentage >= 0.9) {
-        emails.limitWarning({
-          organization: {
-            id: orgId,
-            cleanId: orgRecord.orgCleanId,
-            name: orgName,
-            email: orgRecord.orgEmail,
-          },
-          period: {
-            start: window.startTime.getTime(),
-            end: window.endTime.getTime(),
-          },
-          usage: {
-            quota: orgRecord.operations.quota,
-            current: orgRecord.operations.current,
-          },
-        });
-      }
-    });
-
-    cachedResult = newCachedResult;
-    targetIdToOrgLookup = newTargetIdToOrgLookup;
-
-    const scheduledEmails = emails.drain();
-    if (scheduledEmails.length > 0) {
-      await Promise.all(scheduledEmails);
-      logger.info(`Scheduled ${scheduledEmails.length} emails`);
-    }
+  const orgConfigStore = createOrganizationConfigStore({
+    postgres$,
+    cache: {
+      max: 1000,
+      ttl: config.cacheTtl,
+    },
   });
-
-  function getOrganizationFromCache(targetId: string) {
-    const orgId = targetIdToOrgLookup.get(targetId);
-    return orgId ? cachedResult.get(orgId) : undefined;
-  }
+  const idStore = createOrganizationIdStore({
+    postgres$,
+    logger,
+    refreshIntervalMs: config.cacheTtl,
+  });
 
   return {
     logger,
     async readiness() {
-      return initialized && (await (await postgres$).isReady());
+      return await (await postgres$).isReady();
     },
-    getRetention(targetId: string) {
-      const orgData = getOrganizationFromCache(targetId);
+    async getRetention(organizationId: string) {
+      config.logger.info(`Checking retention for orgId: ${organizationId}`);
+      const orgConfig = await orgConfigStore.get(organizationId);
 
-      if (!orgData) {
+      if (!orgConfig) {
         // This is a safety measure to prevent setting the retention to a lower value then expected,
         // in case of an organization data not being available yet in the cache.
         const error = new Error(
-          `Failed to resolve/find retention information for targetId=${targetId}`,
+          `Failed to resolve/find retention information for organizationId=${organizationId}`,
         );
         Sentry.captureException(error, {
           level: 'error',
         });
         logger.error(error);
-        return RETENTION_IN_DAYS_FALLBACK;
+        return DEFAULT_RETENTION;
       }
 
-      return orgData.retentionInDays;
+      return orgConfig.retentionInDays;
     },
-    checkLimit(input: RateLimitInput): RateLimitCheckResponse {
-      const orgId =
-        input.entityType === 'organization' ? input.id : targetIdToOrgLookup.get(input.id);
+    targetIdToOrgId(targetId: string) {
+      return idStore.lookup(targetId);
+    },
+    async invalidateCache() {
+      await idStore.reset();
+    },
+    async checkLimit(organizationId: string): Promise<RateLimitCheckResponse> {
+      config.logger.info(`Checking rate limit for orgId: ${organizationId}`);
+      const orgConfig = await orgConfigStore.get(organizationId);
+      config.logger.info(`Rate limit for orgId ${organizationId}, org config: %o`, orgConfig);
 
-      if (!orgId) {
+      if (!orgConfig) {
         const error = new Error(
-          `Failed to resolve/find rate limit information for entityId=${input.id} type=${input.entityType}`,
+          `Failed to resolve/find rate limit information for organizationId=${organizationId}`,
         );
         Sentry.captureException(error, {
           level: 'error',
@@ -252,50 +138,114 @@ export function createRateLimiter(config: {
         return UNKNOWN_RATE_LIMIT_OBJ;
       }
 
-      const orgData = cachedResult.get(orgId);
+      const window = buildRateLimitWindow(orgConfig.billingCycleDay);
 
-      if (!orgData) {
-        return UNKNOWN_RATE_LIMIT_OBJ;
-      }
+      try {
+        const actualUsage = await usageEstimator.estimateOperationsForOrganization.query({
+          organizationId,
+          start: format(window.start, 'yyyyMMdd'),
+          end: format(window.end, 'yyyyMMdd'),
+        });
+        const noLimits = orgConfig.plan === 'ENTERPRISE' || orgConfig.limit === 0;
+        const isLimited = noLimits ? false : actualUsage > orgConfig.limit;
+        const usagePercentage = actualUsage / orgConfig.limit;
 
-      if (input.type === 'operations-reporting') {
-        return orgData.operations;
-      }
-      return UNKNOWN_RATE_LIMIT_OBJ;
-    },
-    async start() {
-      logger.info(
-        `Rate Limiter starting, will update rate-limit information every ${config.rateLimitConfig.interval}ms`,
-      );
-      await fetchAndCalculateUsageInformation().catch(e => {
-        logger.error(e, `Failed to fetch rate-limit info from usage-estimator, error: `);
-      });
+        const rateLimitData: CachedRateLimitInfo = {
+          operations: {
+            current: actualUsage,
+            quota: orgConfig.limit,
+            limited: isLimited,
+            usagePercentage,
+          },
+          retentionInDays: orgConfig.retentionInDays,
+        };
 
-      initialized = true;
+        config.logger.debug(
+          `Rate limit check for orgId: ${organizationId} resolved: %o`,
+          rateLimitData,
+        );
 
-      const pollFn = traceInline('Rate Limit Background Refresh', {}, async () => {
-        logger.info(`Interval triggered, updating interval rate-limit cache...`);
+        if (usagePercentage >= 1) {
+          rateLimitOperationsEventOrg
+            .labels({ orgId: organizationId, orgName: orgConfig.name })
+            .inc();
+          logger.info(
+            `Organization "${orgConfig.name}"/"${organizationId}" is now being rate-limited for operations (${actualUsage}/${orgConfig.limit})`,
+          );
 
-        try {
-          await fetchAndCalculateUsageInformation();
-        } catch (error) {
-          logger.error(error, `Failed to update rate-limit cache`);
-          Sentry.captureException(error, {
-            level: 'error',
+          emails.limitExceeded({
+            organization: {
+              id: organizationId,
+              cleanId: orgConfig.cleanId,
+              name: orgConfig.name,
+              email: orgConfig.ownerEmail,
+            },
+            period: {
+              start: window.start.getTime(),
+              end: window.end.getTime(),
+            },
+            usage: {
+              quota: orgConfig.limit,
+              current: actualUsage,
+            },
+          });
+        } else if (usagePercentage >= 0.9) {
+          logger.info(
+            `Organization "${orgConfig.name}"/"${organizationId}" almost being rate-limited for operations (${actualUsage}/${orgConfig.limit})`,
+          );
+
+          emails.limitWarning({
+            organization: {
+              id: organizationId,
+              cleanId: orgConfig.cleanId,
+              name: orgConfig.name,
+              email: orgConfig.ownerEmail,
+            },
+            period: {
+              start: window.start.getTime(),
+              end: window.end.getTime(),
+            },
+            usage: {
+              quota: orgConfig.limit,
+              current: actualUsage,
+            },
           });
         }
-      });
 
-      intervalHandle = setInterval(pollFn, config.rateLimitConfig.interval);
+        return rateLimitData.operations;
+      } catch (e) {
+        return UNKNOWN_RATE_LIMIT_OBJ;
+      }
+    },
+    async start() {
+      await idStore.start();
+      logger.info(`Rate-limit service starting...`);
     },
     async stop() {
-      initialized = false; // to make readiness check == false
-      if (intervalHandle) {
-        clearInterval(intervalHandle);
-        intervalHandle = null;
-      }
+      logger.info('Stopping service...');
+      idStore.stop();
       await (await postgres$).destroy();
-      logger.info('Rate Limiter stopped');
+      logger.info('Rate-limit service stopped');
     },
+  };
+}
+
+export function buildRateLimitWindow(billingCycleDay: number): RateLimitWindow {
+  const now = new Date();
+  const currentMonthCycleDate = setDate(now, billingCycleDay);
+  const range =
+    currentMonthCycleDate > now
+      ? {
+          start: startOfDay(subMonths(currentMonthCycleDate, 1)),
+          end: endOfDay(currentMonthCycleDate),
+        }
+      : {
+          start: startOfDay(currentMonthCycleDate),
+          end: endOfDay(addMonths(currentMonthCycleDate, 1)),
+        };
+
+  return {
+    start: range.start,
+    end: range.end,
   };
 }

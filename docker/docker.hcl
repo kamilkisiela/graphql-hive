@@ -233,6 +233,27 @@ target "stripe-billing" {
   ]
 }
 
+target "paddle-billing" {
+  inherits = ["service-base", get_target()]
+  contexts = {
+    dist = "${PWD}/packages/services/paddle-billing/dist"
+    shared = "${PWD}/docker/shared"
+  }
+  args = {
+    SERVICE_DIR_NAME = "@hive/paddle-billing"
+    IMAGE_TITLE = "graphql-hive/paddle-billing"
+    IMAGE_DESCRIPTION = "The paddle billing service of the GraphQL Hive project."
+    PORT = "3010"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
+  }
+  tags = [
+    local_image_tag("paddle-billing"),
+    stable_image_tag("paddle-billing"),
+    image_tag("paddle-billing", COMMIT_SHA),
+    image_tag("paddle-billing", BRANCH_NAME)
+  ]
+}
+
 target "tokens" {
   inherits = ["service-base", get_target()]
   contexts = {
@@ -427,6 +448,7 @@ group "build" {
     "usage",
     "webhooks",
     "server",
+    "paddle-billing",
     "stripe-billing",
     "composition-federation-2",
     "app"

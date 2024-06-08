@@ -561,25 +561,21 @@ export interface Storage {
     }>
   >;
 
-  adminGetOrganizationsTargetPairs(): Promise<
+  getOrganizationsTargetPairs(): Promise<
     ReadonlyArray<{
       organization: string;
       target: string;
     }>
   >;
 
-  getGetOrganizationsAndTargetsWithLimitInfo(): Promise<
-    ReadonlyArray<{
-      organization: string;
-      org_name: string;
-      org_clean_id: string;
-      org_plan_name: string;
-      owner_email: string;
-      targets: string[];
-      limit_operations_monthly: number;
-      limit_retention_days: number;
-    }>
-  >;
+  getOrganizationsRateLimitInfo(_orgId: string): Promise<{
+    org_name: string;
+    org_clean_id: string;
+    org_plan_name: string;
+    owner_email: string;
+    limit_operations_monthly: number;
+    limit_retention_days: number;
+  }>;
 
   getBillingParticipants(): Promise<ReadonlyArray<OrganizationBilling>>;
 

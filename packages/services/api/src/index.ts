@@ -33,6 +33,7 @@ export {
   reservedOrganizationNames,
 } from './modules/organization/providers/organization-config';
 export { CryptoProvider } from './modules/shared/providers/crypto';
+export { PaddleBillingProvider } from './modules/billing/providers/paddle-billing.provider';
 export {
   OrganizationAccessScope,
   ProjectAccessScope,

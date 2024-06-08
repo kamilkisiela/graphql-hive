@@ -61,18 +61,17 @@ export function createEstimator(config: {
     },
     async estimateCollectedOperationsForOrganization(input: {
       organizationId: string;
-      month: number;
-      year: number;
+      start: string; // YYYYMMDD
+      end: string; // YYYYMMDD
     }) {
-      const startOfMonth = `${input.year}-${String(input.month).padStart(2, '0')}-01`;
       return await clickhouse.query<{
         total: string;
       }>({
         query: sql`
           SELECT 
             sum(total) as total
-          FROM monthly_overview
-          PREWHERE organization = ${input.organizationId} AND date=${startOfMonth}
+          FROM daily_overview
+          PREWHERE organization = ${input.organizationId} AND toYYYYMMDD(date) BETWEEN ${input.start} AND ${input.end}
           GROUP BY organization
         `,
         queryId: 'usage_estimator_count_operations',

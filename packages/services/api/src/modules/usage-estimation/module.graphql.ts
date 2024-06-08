@@ -6,12 +6,12 @@ export default gql`
   }
 
   input UsageEstimationInput {
-    year: Int!
-    month: Int!
     organization: String!
   }
 
   type UsageEstimation {
     operations: SafeInt!
+    periodStart: Date!
+    periodEnd: Date!
   }
 `;

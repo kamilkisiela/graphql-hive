@@ -50,8 +50,6 @@ export class UsageEstimationProvider {
       return null;
     }
 
-    const result = await this.usageEstimator.estimateOperationsForOrganization.query(input);
-
-    return result.totalOperations;
+    return await this.usageEstimator.estimateOperationsForOrganization.query(input);
   }
 }

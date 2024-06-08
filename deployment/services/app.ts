@@ -2,14 +2,15 @@ import * as pulumi from '@pulumi/pulumi';
 import { Observability } from '../services/observability';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
-import { StripeBilling } from './billing';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
+import { PaddleBillingService } from './paddle-billing';
 import { Sentry } from './sentry';
 import { SlackApp } from './slack-app';
+import { StripeBilling, StripeBillingService } from './stripe-billing';
 import { Zendesk } from './zendesk';
 
 export type App = ReturnType<typeof deployApp>;
@@ -34,7 +35,10 @@ export function deployApp({
   zendesk: Zendesk;
   github: GitHubApp;
   slackApp: SlackApp;
-  billing: StripeBilling;
+  billing: {
+    stripe: StripeBillingService;
+    paddle: PaddleBillingService;
+  };
   sentry: Sentry;
 }) {
   const appConfig = new pulumi.Config('app');
@@ -70,6 +74,7 @@ export function deployApp({
         AUTH_ORGANIZATION_OIDC: '1',
         MEMBER_ROLES_DEADLINE: appEnv.MEMBER_ROLES_DEADLINE,
         PORT: '3000',
+        PADDLE_ENVIRONMENT: environment.isProduction ? 'production' : 'sandbox',
       },
       port: 3000,
     },
@@ -77,7 +82,7 @@ export function deployApp({
   )
     .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
     .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')
-    .withSecret('STRIPE_PUBLIC_KEY', billing.secret, 'stripePublicKey')
+    .withSecret('PADDLE_CLIENT_SIDE_TOKEN', billing.paddle.secret, 'paddleClientSideToken')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

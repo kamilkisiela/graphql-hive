@@ -2,7 +2,6 @@ import * as pulumi from '@pulumi/pulumi';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
-import { StripeBillingService } from './billing';
 import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
@@ -11,6 +10,7 @@ import { Emails } from './emails';
 import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { Observability } from './observability';
+import { PaddleBillingService } from './paddle-billing';
 import { SchemaPolicy } from './policy';
 import { Postgres } from './postgres';
 import { RateLimitService } from './rate-limit';
@@ -18,6 +18,7 @@ import { Redis } from './redis';
 import { S3 } from './s3';
 import { Schema } from './schema';
 import { Sentry } from './sentry';
+import { StripeBillingService } from './stripe-billing';
 import { Supertokens } from './supertokens';
 import { Tokens } from './tokens';
 import { Usage } from './usage';
@@ -74,7 +75,10 @@ export function deployGraphQL({
   usageEstimator: UsageEstimator;
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
-  billing: StripeBillingService;
+  billing: {
+    stripe: StripeBillingService;
+    paddle: PaddleBillingService;
+  };
   emails: Emails;
   supertokens: Supertokens;
   zendesk: Zendesk;
@@ -117,7 +121,8 @@ export function deployGraphQL({
           ...apiEnv,
           SENTRY: sentry.enabled ? '1' : '0',
           REQUEST_LOGGING: '0', // disabled
-          BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
+          STRIPE_BILLING_ENDPOINT: serviceLocalEndpoint(billing.stripe.service),
+          PADDLE_BILLING_ENDPOINT: serviceLocalEndpoint(billing.paddle.service),
           TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
           WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
           SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),

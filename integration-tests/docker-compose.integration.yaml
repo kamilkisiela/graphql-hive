@@ -140,7 +140,7 @@ services:
     environment:
       NODE_ENV: production
       LOG_LEVEL: debug
-      LIMIT_CACHE_UPDATE_INTERVAL_MS: '${LIMIT_CACHE_UPDATE_INTERVAL_MS}'
+      LIMIT_CACHE_UPDATE_INTERVAL_MS: '5000'
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'
@@ -230,6 +230,7 @@ services:
     environment:
       RATE_LIMIT_ENDPOINT: '${RATE_LIMIT_ENDPOINT}'
       LOG_LEVEL: debug
+      RATE_LIMIT_CACHE_UPDATE_INTERVAL_MS: '5000'
     depends_on:
       broker:
         condition: service_started # Redpand is ready when it starts

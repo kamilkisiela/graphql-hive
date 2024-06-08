@@ -1,3 +1,4 @@
+import { endOfMonth, startOfMonth } from 'date-fns';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
@@ -39,7 +40,7 @@ export class RateLimitProvider {
       : null;
   }
 
-  async checkRateLimit(input: RateLimitApiInput['checkRateLimit']) {
+  async checkRateLimit(input: RateLimitApiInput['checkRateLimitForOrganization']) {
     if (this.rateLimit === null) {
       this.logger.warn(
         `Unable to check rate-limit for input: %o , service information is not available`,
@@ -49,12 +50,43 @@ export class RateLimitProvider {
       return {
         usagePercentage: 0,
         limited: false,
+        quota: 0,
+        current: 0,
       };
     }
 
-    this.logger.debug(`Checking rate limit for target id="${input.id}", type=${input.type}`);
+    this.logger.debug(`Checking rate limit for org id="${input.organizationId}"...`);
 
-    return await this.rateLimit.checkRateLimit.query(input);
+    return await this.rateLimit.checkRateLimitForOrganization.query(input);
+  }
+
+  async getWindow(dayOfMonth: number): Promise<{
+    start: Date;
+    end: Date;
+  }> {
+    if (this.rateLimit === null) {
+      return {
+        start: startOfMonth(new Date()),
+        end: endOfMonth(new Date()),
+      };
+    }
+
+    const window = await this.rateLimit.calculateWindow.query({
+      cycleDay: dayOfMonth,
+    });
+
+    return {
+      start: new Date(window.start),
+      end: new Date(window.end),
+    };
+  }
+
+  async onNewTargetCreated() {
+    if (this.rateLimit === null) {
+      return;
+    }
+
+    await this.rateLimit.invalidateCache.mutate();
   }
 
   async getRetention(input: RateLimitApiInput['getRetention']) {

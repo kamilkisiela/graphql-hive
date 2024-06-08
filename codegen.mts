@@ -144,10 +144,8 @@ const config: CodegenConfig = {
           AdminGeneralStats: '../modules/admin/module.graphql.mappers#AdminGeneralStatsMapper',
           AdminOrganizationStats:
             '../modules/admin/module.graphql.mappers#AdminOrganizationStatsMapper',
-          BillingPaymentMethod:
-            '../modules/billing/module.graphql.mappers#BillingPaymentMethodMapper',
-          BillingDetails: '../modules/billing/module.graphql.mappers#BillingDetailsMapper',
-          BillingInvoice: '../modules/billing/module.graphql.mappers#BillingInvoiceMapper',
+          BillingInvoice:
+            '../modules/billing/providers/base-provider#BillingInvoice as BillingInvoiceMapper',
           OrganizationGetStarted:
             '../modules/organization/module.graphql.mappers#OrganizationGetStartedMapper',
           SchemaExplorer: '../modules/schema/module.graphql.mappers#SchemaExplorerMapper',

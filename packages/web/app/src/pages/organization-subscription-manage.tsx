@@ -1,11 +1,13 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
-import {
-  BillingPaymentMethodForm,
-  ManagePaymentMethod,
-} from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
+import { BillingSettings } from '@/components/organization/billing/BillingSettings';
+import {
+  PaddleCheckout_OrgInfo,
+  PaddleCheckout_UserInfo,
+  PaddleCheckoutForm,
+} from '@/components/organization/billing/PaddleCheckout';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { RenderIfStripeAvailable } from '@/components/organization/stripe';
 import { Button } from '@/components/ui/button';
@@ -13,15 +15,12 @@ import { Heading } from '@/components/ui/heading';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { Card } from '@/components/v2/card';
-import { Input } from '@/components/v2/input';
-import { Slider } from '@/components/v2/slider';
-import Stat from '@/components/v2/stat';
+import { Card, Link, Slider, Stat } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { Link } from '@tanstack/react-router';
+import { getPaddleClientConfig } from '@/lib/billing/paddle-public-key';
+import { useRouter } from '@tanstack/react-router';
 
 const ManageSubscriptionInner_OrganizationFragment = graphql(`
   fragment ManageSubscriptionInner_OrganizationFragment on Organization {
@@ -30,11 +29,9 @@ const ManageSubscriptionInner_OrganizationFragment = graphql(`
       ...CanAccessOrganization_MemberFragment
     }
     billingConfiguration {
+      provider
       hasPaymentIssues
       canUpdateSubscription
-      paymentMethod {
-        __typename
-      }
     }
     plan
     rateLimit {
@@ -46,9 +43,11 @@ const ManageSubscriptionInner_OrganizationFragment = graphql(`
 
 const ManageSubscriptionInner_BillingPlansFragment = graphql(`
   fragment ManageSubscriptionInner_BillingPlansFragment on BillingPlan {
-    ...BillingPlanPicker_PlanFragment
+    id
     planType
     retentionInDays
+    ...BillingPlanPicker_PlanFragment
+    ...PaddleCheckout_BillingPlansDetails
     ...PlanSummary_PlanFragment
   }
 `);
@@ -59,11 +58,16 @@ const BillingsPlanQuery = graphql(`
       id
       planType
       name
-      basePrice
+      basePrice {
+        id
+        amount
+      }
       description
       includedOperationsLimit
-      pricePerOperationsUnit
-      rateLimit
+      pricePerOperationsUnit {
+        id
+        amount
+      }
       retentionInDays
     }
   }
@@ -72,30 +76,6 @@ const BillingsPlanQuery = graphql(`
 const BillingDowngradeMutation = graphql(`
   mutation ManageSubscription_DowngradeToHobby($organization: ID!) {
     downgradeToHobby(input: { organization: { organization: $organization } }) {
-      previousPlan
-      newPlan
-      organization {
-        ...ManageSubscriptionInner_OrganizationFragment
-      }
-    }
-  }
-`);
-
-const BillingUpgradeToProMutation = graphql(`
-  mutation ManageSubscription_UpgradeToPro(
-    $organization: ID!
-    $paymentMethodId: String
-    $couponCode: String
-    $monthlyLimits: RateLimitInput!
-  ) {
-    upgradeToPro(
-      input: {
-        paymentMethodId: $paymentMethodId
-        couponCode: $couponCode
-        organization: { organization: $organization }
-        monthlyLimits: $monthlyLimits
-      }
-    ) {
       previousPlan
       newPlan
       organization {
@@ -114,6 +94,8 @@ const UpdateOrgRateLimitMutation = graphql(`
 `);
 
 function Inner(props: {
+  orgInfo: FragmentType<typeof PaddleCheckout_OrgInfo>;
+  me: FragmentType<typeof PaddleCheckout_UserInfo>;
   organization: FragmentType<typeof ManageSubscriptionInner_OrganizationFragment>;
   billingPlans: Array<FragmentType<typeof ManageSubscriptionInner_BillingPlansFragment>>;
 }): ReactElement | null {
@@ -121,8 +103,6 @@ function Inner(props: {
     ManageSubscriptionInner_OrganizationFragment,
     props.organization,
   );
-  const stripe = useStripe();
-  const elements = useElements();
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -132,12 +112,6 @@ function Inner(props: {
 
   const [query] = useQuery({ query: BillingsPlanQuery });
 
-  const [paymentDetailsValid, setPaymentDetailsValid] = useState(
-    !!organization.billingConfiguration?.paymentMethod,
-  );
-  const [upgradeToProMutationState, upgradeToProMutation] = useMutation(
-    BillingUpgradeToProMutation,
-  );
   const [downgradeToHobbyMutationState, downgradeToHobbyMutation] =
     useMutation(BillingDowngradeMutation);
   const [updateOrgRateLimitMutationState, updateOrgRateLimitMutation] = useMutation(
@@ -161,7 +135,6 @@ function Inner(props: {
     },
     [setPlan, planSummaryRef],
   );
-  const [couponCode, setCouponCode] = useState('');
   const [operationsRateLimit, setOperationsRateLimit] = useState(
     Math.floor((organization.rateLimit.operations || 1_000_000) / 1_000_000),
   );
@@ -174,14 +147,13 @@ function Inner(props: {
   );
 
   const isFetching =
-    updateOrgRateLimitMutationState.fetching ||
-    downgradeToHobbyMutationState.fetching ||
-    upgradeToProMutationState.fetching;
+    updateOrgRateLimitMutationState.fetching || downgradeToHobbyMutationState.fetching;
 
   const billingPlans = useFragment(
     ManageSubscriptionInner_BillingPlansFragment,
     props.billingPlans,
   );
+  const proPlan = billingPlans.find(v => v.planType === BillingPlanType.Pro)!;
 
   useEffect(() => {
     if (query.data?.billingPlans?.length) {
@@ -196,54 +168,6 @@ function Inner(props: {
       }
     }
   }, [organization.plan, organization.rateLimit.operations, plan, query.data?.billingPlans]);
-
-  const upgrade = useCallback(async () => {
-    if (isFetching) {
-      return;
-    }
-
-    let paymentMethodId: string | null = null;
-
-    if (organization.billingConfiguration.paymentMethod === null) {
-      if (stripe === null || elements === null) {
-        // TODO: what to do here?
-        return;
-      }
-      const card = elements.getElement(CardElement);
-
-      if (card === null) {
-        // TODO: what to do here?
-        return;
-      }
-      const { paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
-        card,
-      });
-
-      if (paymentMethod === undefined) {
-        // TODO: what to do here?
-        return;
-      }
-      paymentMethodId = paymentMethod.id;
-    }
-
-    await upgradeToProMutation({
-      organization: organization.cleanId,
-      monthlyLimits: {
-        operations: operationsRateLimit * 1_000_000,
-      },
-      paymentMethodId,
-      couponCode: couponCode.trim() === '' ? null : couponCode.trim(),
-    });
-  }, [
-    organization,
-    stripe,
-    elements,
-    upgradeToProMutation,
-    isFetching,
-    operationsRateLimit,
-    couponCode,
-  ]);
 
   const downgrade = useCallback(async () => {
     if (isFetching) {
@@ -272,65 +196,7 @@ function Inner(props: {
     return null;
   }
 
-  const renderActions = () => {
-    if (plan === organization.plan) {
-      return null;
-    }
-
-    if (plan === 'ENTERPRISE') {
-      return (
-        <Button type="button" asChild className="mt-2">
-          <a href="emailto:contact@graphql-hive.com">Contact Us</a>
-        </Button>
-      );
-    }
-
-    if (plan === 'PRO') {
-      return (
-        <>
-          <div className="my-8 flex flex-row gap-6">
-            <BillingPaymentMethodForm
-              className="w-1/2"
-              onValidationChange={setPaymentDetailsValid}
-            />
-            <div className="w-1/2">
-              {plan === BillingPlanType.Pro && plan !== organization.plan ? (
-                <div>
-                  <Heading className="mb-3">Discount</Heading>
-                  <Input
-                    className="w-full"
-                    size="medium"
-                    value={couponCode ?? ''}
-                    disabled={isFetching}
-                    onChange={e => setCouponCode(e.target.value)}
-                    placeholder="Code"
-                  />
-                </div>
-              ) : null}
-            </div>
-          </div>
-          <Button type="button" onClick={upgrade} disabled={!paymentDetailsValid || isFetching}>
-            Upgrade to Pro
-          </Button>
-        </>
-      );
-    }
-
-    if (plan === 'HOBBY') {
-      return (
-        <Button type="button" onClick={downgrade} disabled={isFetching}>
-          Downgrade to Hobby
-        </Button>
-      );
-    }
-
-    return null;
-  };
-
-  const error =
-    upgradeToProMutationState.error ||
-    downgradeToHobbyMutationState.error ||
-    updateOrgRateLimitMutationState.error;
+  const error = downgradeToHobbyMutationState.error || updateOrgRateLimitMutationState.error;
 
   // TODO: this is also not safe as billingPlans might be an empty list.
   const selectedPlan = billingPlans.find(v => v.planType === plan) ?? billingPlans[0];
@@ -365,61 +231,86 @@ function Inner(props: {
                 )}
               </PlanSummary>
             </div>
-
-            {plan === BillingPlanType.Pro &&
-              organization.billingConfiguration.canUpdateSubscription && (
-                <>
-                  <div className="my-8 w-1/2">
-                    <Heading>Define your reserved volume</Heading>
-                    <p className="text-sm text-gray-500">
-                      Pro plan requires to defined quota of reported operations.
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Pick a volume a little higher than you think you'll need to avoid being rate
-                      limited.
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Don't worry, you can always adjust it later.
-                    </p>
-                    <div className="mt-5 pl-2.5">
-                      <Slider
-                        min={1}
-                        max={300}
-                        disabled={isFetching}
-                        value={[operationsRateLimit]}
-                        onValueChange={onOperationsRateLimitChange}
-                      />
-                      <div className="flex justify-between">
-                        <span>1M</span>
-                        <span>100M</span>
-                        <span>200M</span>
-                        <span>300M</span>
-                      </div>
-                    </div>
-                  </div>
-                  {plan === organization.plan ? (
-                    <div>
-                      <Button
-                        type="button"
-                        onClick={updateLimits}
-                        disabled={
-                          isFetching ||
-                          organization.rateLimit.operations === operationsRateLimit * 1_000_000
-                        }
-                      >
-                        Update Limits
-                      </Button>
-                      <ManagePaymentMethod organization={organization} plan={plan} />
-                    </div>
-                  ) : null}
-                </>
-              )}
-
-            {error && <QueryError organizationId={organization.cleanId} showError error={error} />}
-            <div>{renderActions()}</div>
+            {error && <QueryError organizationId={organization.id} showError error={error} />}
           </div>
         </div>
+        {plan === 'HOBBY' && organization.plan !== plan ? (
+          <ButtonV2 type="button" variant="primary" onClick={downgrade} disabled={isFetching}>
+            Downgrade to Hobby
+          </ButtonV2>
+        ) : null}
       </Card>
+
+      {plan === BillingPlanType.Pro && organization.billingConfiguration.canUpdateSubscription && (
+        <Card>
+          <Heading className="mb-2">Reserved Volume</Heading>
+          <div className="w-1/2">
+            <p className="text-sm text-gray-500">
+              Your plan requires a defined quota of reported GraphQL operations.
+            </p>
+            <p className="text-sm text-gray-500">
+              Pick a volume a little higher than you think you'll need to avoid being rate limited.
+              You can change your volume at any time.
+            </p>
+            <div className="mt-5 pl-2.5">
+              <Slider
+                min={1}
+                max={300}
+                disabled={isFetching}
+                value={[operationsRateLimit]}
+                onValueChange={onOperationsRateLimitChange}
+              />
+              <div className="flex justify-between">
+                <span>1M</span>
+                <span>100M</span>
+                <span>200M</span>
+                <span>300M</span>
+              </div>
+            </div>
+            <div className="py-4 text-sm text-gray-500">
+              Need more than 300M operations/month?{' '}
+              <Link variant="primary" href={`/${organization.cleanId}/view/support`}>
+                contact our support team for a dedicated price quote
+              </Link>
+              .
+            </div>
+            {plan === organization.plan ? (
+              <div>
+                <ButtonV2
+                  type="button"
+                  variant="primary"
+                  onClick={updateLimits}
+                  disabled={
+                    isFetching ||
+                    organization.rateLimit.operations === operationsRateLimit * 1_000_000
+                  }
+                >
+                  Update Subscription
+                </ButtonV2>
+              </div>
+            ) : null}
+          </div>
+        </Card>
+      )}
+      {plan === 'PRO' && organization.plan !== plan ? (
+        <Card>
+          <Heading>Payment Method</Heading>
+          <PaddleCheckoutForm
+            orgInfo={props.orgInfo}
+            me={props.me}
+            operationsInMillions={operationsRateLimit}
+            planPrices={proPlan}
+          />
+        </Card>
+      ) : null}
+      {plan === organization.plan &&
+      organization.plan === 'PRO' &&
+      organization.billingConfiguration.canUpdateSubscription ? (
+        <Card>
+          <Heading className="mb-2">Billing Settings</Heading>
+          <BillingSettings organization={organization} />
+        </Card>
+      ) : null}
     </div>
   );
 }
@@ -428,17 +319,37 @@ const ManageSubscriptionPageQuery = graphql(`
   query ManageSubscriptionPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
+        id
         cleanId
         ...ManageSubscriptionInner_OrganizationFragment
+        ...PaddleCheckout_OrgInfo
       }
     }
     billingPlans {
       ...ManageSubscriptionInner_BillingPlansFragment
     }
+    me {
+      ...PaddleCheckout_UserInfo
+    }
   }
 `);
 
 function ManageSubscriptionPageContent(props: { organizationId: string }) {
+  const router = useRouter();
+
+  /**
+   * If Paddle is not enabled we redirect the user to the organization.
+   */
+  if (!getPaddleClientConfig()) {
+    void router.navigate({
+      to: '/$organizationId',
+      params: {
+        organizationId: props.organizationId,
+      },
+    });
+    return null;
+  }
+
   const [query] = useQuery({
     query: ManageSubscriptionPageQuery,
     variables: {
@@ -492,9 +403,12 @@ function ManageSubscriptionPageContent(props: { organizationId: string }) {
           ) : null}
         </div>
         <div>
-          {currentOrganization && billingPlans ? (
-            <Inner organization={currentOrganization} billingPlans={billingPlans} />
-          ) : null}
+          <Inner
+            organization={currentOrganization}
+            billingPlans={billingPlans}
+            me={me}
+            orgInfo={currentOrganization}
+          />
         </div>
       </div>
     </OrganizationLayout>

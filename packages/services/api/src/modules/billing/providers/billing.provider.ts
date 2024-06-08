@@ -1,12 +1,18 @@
-import { Inject, Injectable, Scope } from 'graphql-modules';
-import type { StripeBillingApi, StripeBillingApiInput } from '@hive/stripe-billing';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { Injectable, Scope } from 'graphql-modules';
 import { OrganizationSelector } from '../../../__generated__/types';
 import { OrganizationBilling } from '../../../shared/entities';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
-import type { BillingConfig } from './tokens';
-import { BILLING_CONFIG } from './tokens';
+import {
+  BillingInfo,
+  BillingInfoUpdateInput,
+  BillingInvoice,
+  FuturePayment,
+  Subscription,
+  type BillingPrices,
+} from './base-provider';
+import { PaddleBillingProvider } from './paddle-billing.provider';
+import { StripeBillingProvider } from './stripe-billing.provider';
 
 @Injectable({
   global: true,
@@ -14,108 +20,201 @@ import { BILLING_CONFIG } from './tokens';
 })
 export class BillingProvider {
   private logger: Logger;
-  private billingService;
-
-  enabled = false;
 
   constructor(
     logger: Logger,
     private storage: Storage,
-    @Inject(BILLING_CONFIG) billingConfig: BillingConfig,
+    private paddle: PaddleBillingProvider,
+    private stripe: StripeBillingProvider,
   ) {
     this.logger = logger.child({ source: 'BillingProvider' });
-    this.billingService = billingConfig.endpoint
-      ? createTRPCProxyClient<StripeBillingApi>({
-          links: [httpLink({ url: `${billingConfig.endpoint}/trpc`, fetch })],
-        })
-      : null;
-
-    if (billingConfig.endpoint) {
-      this.enabled = true;
-    }
   }
 
-  upgradeToPro(input: StripeBillingApiInput['createSubscriptionForOrganization']) {
-    this.logger.debug('Upgrading to PRO (input=%o)', input);
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
-    }
-
-    return this.billingService.createSubscriptionForOrganization.mutate(input);
+  get enabled() {
+    return this.paddle.enabled;
   }
 
-  syncOrganization(input: StripeBillingApiInput['syncOrganizationToStripe']) {
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
-    }
+  getAvailablePrices(): Promise<BillingPrices> {
+    this.logger.debug('Fetching available prices from default provider');
 
-    return this.billingService.syncOrganizationToStripe.mutate(input);
-  }
-
-  async getAvailablePrices() {
-    this.logger.debug('Getting available prices');
-    if (!this.billingService) {
-      return null;
-    }
-
-    return await this.billingService.availablePrices.query();
+    return this.paddle.getAvailablePrices();
   }
 
   async getOrganizationBillingParticipant(
     selector: OrganizationSelector,
   ): Promise<OrganizationBilling | null> {
-    this.logger.debug('Fetching organization billing (selector=%o)', selector);
+    this.logger.debug('Fetching organization billing record (selector=%o)', selector);
 
     return this.storage.getOrganizationBilling({
       organization: selector.organization,
     });
   }
 
-  getActiveSubscription(input: StripeBillingApiInput['activeSubscription']) {
-    this.logger.debug('Fetching active subscription (input=%o)', input);
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
+  async generatePaymentMethodUpdateToken(billingRecord: OrganizationBilling) {
+    if (billingRecord.provider === 'PADDLE') {
+      return await this.paddle.generatePaymentMethodUpdateToken(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
     }
 
-    return this.billingService.activeSubscription.query(input);
+    throw new Error('Unsupported billing provider');
   }
 
-  invoices(input: StripeBillingApiInput['invoices']) {
-    this.logger.debug('Fetching invoices (input=%o)', input);
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
+  async downgradeToHobby(billingRecord: OrganizationBilling) {
+    this.logger.debug('Downgrading to Hobby (billingRecord=%o)', billingRecord);
+
+    if (billingRecord.provider === 'PADDLE') {
+      return await this.paddle.cancelActiveSubscription(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
     }
 
-    return this.billingService.invoices.query(input);
+    if (billingRecord.provider === 'STRIPE') {
+      return await this.stripe.cancelActiveSubscription(billingRecord.externalBillingReference);
+    }
+
+    throw new Error('Unsupported billing provider, failed to downgrade.');
   }
 
-  upcomingInvoice(input: StripeBillingApiInput['upcomingInvoice']) {
-    this.logger.debug('Fetching upcoming invoices (input=%o)', input);
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
+  async syncOrganization(billingRecord: OrganizationBilling, operationsLimitInMillions: number) {
+    this.logger.debug(
+      `Billing sync organization (orgId="${billingRecord.organizationId}"), new limit: ${operationsLimitInMillions} millions`,
+    );
+
+    if (billingRecord.provider === 'PADDLE') {
+      return await this.paddle.syncOperationsLimit(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+        operationsLimitInMillions,
+      );
     }
 
-    return this.billingService.upcomingInvoice.query(input);
+    if (billingRecord.provider === 'STRIPE') {
+      return await this.stripe.syncOperationsLimit(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+        operationsLimitInMillions,
+      );
+    }
   }
 
-  async downgradeToHobby(input: StripeBillingApiInput['cancelSubscriptionForOrganization']) {
-    this.logger.debug('Downgrading to Hobby (input=%o)', input);
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
+  async getActiveSubscription(billingRecord: OrganizationBilling): Promise<Subscription | null> {
+    if (billingRecord.provider === 'PADDLE') {
+      return this.paddle.getActiveSubscription(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
     }
 
-    return await this.billingService.cancelSubscriptionForOrganization.mutate(input);
+    if (billingRecord.provider === 'STRIPE') {
+      return this.stripe.getActiveSubscription(billingRecord.externalBillingReference);
+    }
+
+    return null;
   }
 
-  async generateStripePortalLink(orgId: string) {
-    this.logger.debug('Generating Stripe portal link for id:' + orgId);
-
-    if (!this.billingService) {
-      throw new Error(`Billing service is not configured!`);
+  async updateBillingDetails(billingRecord: OrganizationBilling, input: BillingInfoUpdateInput) {
+    if (billingRecord.provider === 'PADDLE') {
+      return await this.paddle.updateBillingDetails(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+        input,
+      );
     }
 
-    return await this.billingService.generateStripePortalLink.mutate({
-      organizationId: orgId,
-    });
+    throw new Error('Unsupported billing provider');
+  }
+
+  async billingInfo(billingRecord: OrganizationBilling): Promise<
+    BillingInfo & {
+      renewalDay: number | null;
+    }
+  > {
+    if (billingRecord.provider === 'PADDLE') {
+      return {
+        renewalDay: billingRecord.billingDayOfMonth || null,
+        ...(await this.paddle.billingInfo(
+          billingRecord.externalBillingReference,
+          billingRecord.organizationId,
+        )),
+      };
+    }
+
+    if (billingRecord.provider === 'STRIPE') {
+      return {
+        ...(await this.stripe.billingInfo(billingRecord.externalBillingReference)),
+        renewalDay: 1,
+      };
+    }
+
+    return {
+      taxId: null,
+      legalName: null,
+      billingEmail: null,
+      renewalDay: null,
+      paymentMethod: null,
+    };
+  }
+
+  async hasPaymentIssues(billingRecord: OrganizationBilling): Promise<boolean> {
+    if (billingRecord.provider === 'PADDLE') {
+      return this.paddle.hasPaymentIssues(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
+    }
+
+    if (billingRecord.provider === 'STRIPE') {
+      return this.stripe.hasPaymentIssues(billingRecord.externalBillingReference);
+    }
+
+    return false;
+  }
+
+  async invoices(billingRecord: OrganizationBilling): Promise<BillingInvoice[]> {
+    if (billingRecord.provider === 'PADDLE') {
+      return this.paddle.invoices(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
+    }
+
+    if (billingRecord.provider === 'STRIPE') {
+      return this.stripe.invoices(billingRecord.externalBillingReference);
+    }
+
+    return [];
+  }
+
+  async upcomingPayment(billingRecord: OrganizationBilling): Promise<FuturePayment | null> {
+    if (billingRecord.provider === 'PADDLE') {
+      return this.paddle.upcomingPayment(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
+    }
+
+    if (billingRecord.provider === 'STRIPE') {
+      return this.stripe.upcomingPayment(billingRecord.externalBillingReference);
+    }
+
+    return null;
+  }
+
+  async subscriptionManagementUrl(billingRecord: OrganizationBilling): Promise<string | null> {
+    if (billingRecord.provider === 'PADDLE') {
+      return this.paddle.subscriptionManagementUrl(
+        billingRecord.externalBillingReference,
+        billingRecord.organizationId,
+      );
+    }
+
+    if (billingRecord.provider === 'STRIPE') {
+      return this.stripe.subscriptionManagementUrl(billingRecord.externalBillingReference);
+    }
+
+    throw new Error('Unsupported billing provider');
   }
 }

@@ -21,10 +21,21 @@ export const usageEstimation: NonNullable<QueryResolvers['usageEstimation']> = a
     scope: OrganizationAccessScope.SETTINGS,
   });
 
+  const billingRecord = await injector
+    .get(BillingProvider)
+    .getOrganizationBillingParticipant({ organization: organizationId });
+  const organizationBillingCycleDay = billingRecord
+    ? await injector
+        .get(BillingProvider)
+        .billingInfo(billingRecord)
+        .then(r => r.renewalDay ?? 1)
+    : 1;
+
+  const window = await injector.get(RateLimitProvider).getWindow(organizationBillingCycleDay);
   const result = await injector.get(UsageEstimationProvider).estimateOperationsForOrganization({
     organizationId: organizationId,
-    month: args.input.month,
-    year: args.input.year,
+    start: format(window.start, 'yyyyMMdd'),
+    end: format(window.end, 'yyyyMMdd'),
   });
 
   if (!result && result !== 0) {
@@ -33,5 +44,7 @@ export const usageEstimation: NonNullable<QueryResolvers['usageEstimation']> = a
 
   return {
     operations: result,
+    periodStart: format(window.start, 'yyyy-MM-dd'),
+    periodEnd: format(window.end, 'yyyy-MM-dd'),
   };
 };

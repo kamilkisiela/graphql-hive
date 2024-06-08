@@ -31,6 +31,7 @@ const Modal = ({
   children,
   className,
   size = 'sm',
+  hideCloseButton,
 }: {
   children: ReactNode;
   trigger?: ReactElement;
@@ -38,6 +39,7 @@ const Modal = ({
   size?: 'sm' | 'md' | 'lg';
   onOpenChange?: (isOpen: boolean) => void;
   className?: string;
+  hideCloseButton?: boolean;
 }): ReactElement => {
   const [state, setState] = useState<HTMLDivElement | null>(null);
   return (
@@ -57,15 +59,17 @@ const Modal = ({
               >
                 {children}
 
-                <Close asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-5 top-5 text-gray-500 hover:border-gray-500 hover:text-orange-500"
-                  >
-                    <XIcon />
-                  </Button>
-                </Close>
+                {hideCloseButton ? null : (
+                  <Close asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-5 top-5 text-gray-500 hover:border-gray-500 hover:text-orange-500"
+                    >
+                      <XIcon />
+                    </Button>
+                  </Close>
+                )}
               </Content>
             </TooltipProvider>
           </Overlay>

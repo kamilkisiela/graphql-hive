@@ -35,7 +35,8 @@ const EnvironmentModel = zod.object({
   TOKENS_ENDPOINT: zod.string().url(),
   USAGE_ESTIMATOR_ENDPOINT: emptyString(zod.string().url().optional()),
   USAGE_ESTIMATOR_RETENTION_PURGE_INTERVAL_MINUTES: emptyString(NumberFromString.optional()),
-  BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
+  STRIPE_BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
+  PADDLE_BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
   EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
   WEBHOOKS_ENDPOINT: zod.string().url(),
   SCHEMA_ENDPOINT: zod.string().url(),
@@ -329,7 +330,10 @@ export const env = {
           dateRetentionPurgeIntervalMinutes: 5,
         }
       : null,
-    billing: base.BILLING_ENDPOINT ? { endpoint: base.BILLING_ENDPOINT } : null,
+    billing: {
+      stripeEndpoint: base.STRIPE_BILLING_ENDPOINT ? base.STRIPE_BILLING_ENDPOINT : null,
+      paddleEndpoint: base.PADDLE_BILLING_ENDPOINT ? base.PADDLE_BILLING_ENDPOINT : null,
+    },
     emails: base.EMAILS_ENDPOINT ? { endpoint: base.EMAILS_ENDPOINT } : null,
     webhooks: { endpoint: base.WEBHOOKS_ENDPOINT },
     schema: { endpoint: base.SCHEMA_ENDPOINT },

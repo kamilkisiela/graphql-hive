@@ -19,6 +19,7 @@
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
     "@hive/cdn-script": "workspace:*",
     "@hive/emails": "workspace:*",
+    "@hive/paddle-billing": "workspace:*",
     "@hive/schema": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",

@@ -77,7 +77,7 @@ export type { Interceptor };
 export { ConnectionError } from 'slonik';
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
-export type { tokens, schema_policy_resource } from './db/types';
+export type { tokens, schema_policy_resource, billing_provider } from './db/types';
 
 type Connection = DatabasePool | DatabaseTransactionConnection;
 
@@ -481,7 +481,8 @@ export async function createStorage(
     return {
       organizationId: orgBilling.organization_id,
       externalBillingReference: orgBilling.external_billing_reference_id,
-      billingEmailAddress: orgBilling.billing_email_address,
+      provider: orgBilling.provider,
+      billingDayOfMonth: orgBilling.payment_day_of_month,
     };
   }
 
@@ -3050,14 +3051,14 @@ export async function createStorage(
 
       return result.rows.map(row => transformAlert(row, organization));
     },
-    async adminGetOrganizationsTargetPairs() {
+    async getOrganizationsTargetPairs() {
       const results = await pool.query<
         Slonik<{
           organization: string;
           target: string;
         }>
       >(
-        sql`/* adminGetOrganizationsTargetPairs */
+        sql`/* getOrganizationsTargetPairs */
           SELECT
             o.id as organization,
             t.id as target
@@ -3068,18 +3069,17 @@ export async function createStorage(
       );
       return results.rows;
     },
-    async getGetOrganizationsAndTargetsWithLimitInfo() {
+    async getOrganizationsRateLimitInfo(orgId: string) {
       const results = await pool.query<{
         organization: string;
         org_name: string;
         org_clean_id: string;
         org_plan_name: string;
         owner_email: string;
-        targets: string[];
         limit_operations_monthly: number;
         limit_retention_days: number;
       }>(
-        sql`/* getGetOrganizationsAndTargetsWithLimitInfo */
+        sql`/* getOrganizationsRateLimitInfo */
           SELECT
             o.id as organization,
             o.clean_id as org_clean_id,
@@ -3087,7 +3087,6 @@ export async function createStorage(
             o.limit_operations_monthly,
             o.limit_retention_days,
             o.plan_name as org_plan_name,
-            array_agg(DISTINCT t.id) as targets,
             split_part(
               string_agg(
                 DISTINCT u.email, ','
@@ -3097,12 +3096,12 @@ export async function createStorage(
             ) AS owner_email
           FROM organizations AS o
           LEFT JOIN projects AS p ON (p.org_id = o.id)
-          LEFT JOIN targets as t ON (t.project_id = p.id)
           LEFT JOIN users AS u ON (u.id = o.user_id)
+          WHERE o.id = ${orgId}
           GROUP BY o.id
         `,
       );
-      return results.rows;
+      return results.rows[0];
     },
     async adminGetStats(period: { from: Date; to: Date }) {
       // count schema versions by organization
@@ -3266,17 +3265,18 @@ export async function createStorage(
       );
     },
     async createOrganizationBilling({
-      billingEmailAddress,
       organizationId,
       externalBillingReference,
+      provider,
+      billingDayOfMonth,
     }) {
       return transformOrganizationBilling(
         await pool.one<Slonik<organizations_billing>>(
           sql`/* createOrganizationBilling */
             INSERT INTO organizations_billing
-              ("organization_id", "external_billing_reference_id", "billing_email_address")
+              ("organization_id", "external_billing_reference_id", "provider", "payment_day_of_month")
             VALUES
-              (${organizationId}, ${externalBillingReference}, ${billingEmailAddress || null})
+              (${organizationId}, ${externalBillingReference}, ${provider}, ${billingDayOfMonth || null})
             RETURNING *
           `,
         ),

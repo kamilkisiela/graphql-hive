@@ -5,6 +5,11 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { Scale } from '../common';
 
 const NumericFormatter = Intl.NumberFormat('en', { notation: 'standard' });
+const DateFormatter = Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
 
 const OrganizationUsageEstimationView_OrganizationFragment = graphql(`
   fragment OrganizationUsageEstimationView_OrganizationFragment on Organization {
@@ -20,6 +25,8 @@ const Usage_UsageEstimationQuery = graphql(`
   query Usage_UsageEstimationQuery($input: UsageEstimationInput!) {
     usageEstimation(input: $input) {
       operations
+      periodStart
+      periodEnd
     }
   }
 `);
@@ -37,8 +44,6 @@ export function OrganizationUsageEstimationView(props: {
     variables: {
       input: {
         organization: organization.cleanId,
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
       },
     },
   });
@@ -47,30 +52,40 @@ export function OrganizationUsageEstimationView(props: {
     <div className="right-4 top-7">
       <DataWrapper query={query} organizationId={organization.cleanId}>
         {result => (
-          <Table>
-            <THead>
-              <Th>Feature</Th>
-              <Th align="right">Used</Th>
-              <Th align="right">Limit</Th>
-            </THead>
-            <TBody>
-              <Tr>
-                <Td>Operations</Td>
-                <Td align="right">
-                  {NumericFormatter.format(result.data.usageEstimation.operations)}
-                </Td>
-                <Td align="right">{NumericFormatter.format(organization.rateLimit.operations)}</Td>
-                <Td>
-                  <Scale
-                    value={result.data.usageEstimation.operations}
-                    size={10}
-                    max={organization.rateLimit.operations}
-                    className="justify-end"
-                  />
-                </Td>
-              </Tr>
-            </TBody>
-          </Table>
+          <>
+            <p className="text-sm text-gray-500">
+              {DateFormatter.format(new Date(result.data.usageEstimation.periodStart))} —{' '}
+              {DateFormatter.format(new Date(result.data.usageEstimation.periodEnd))}
+            </p>
+            <div className="mt-4">
+              <Table>
+                <THead>
+                  <Th>Feature</Th>
+                  <Th align="right">Used</Th>
+                  <Th align="right">Limit</Th>
+                </THead>
+                <TBody>
+                  <Tr>
+                    <Td>Operations</Td>
+                    <Td align="right">
+                      {NumericFormatter.format(result.data.usageEstimation.operations)}
+                    </Td>
+                    <Td align="right">
+                      {NumericFormatter.format(organization.rateLimit.operations)}
+                    </Td>
+                    <Td>
+                      <Scale
+                        value={result.data.usageEstimation.operations}
+                        size={10}
+                        max={organization.rateLimit.operations}
+                        className="justify-end"
+                      />
+                    </Td>
+                  </Tr>
+                </TBody>
+              </Table>
+            </div>
+          </>
         )}
       </DataWrapper>
     </div>

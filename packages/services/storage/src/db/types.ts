@@ -9,6 +9,7 @@
 
 export type alert_channel_type = 'SLACK' | 'WEBHOOK';
 export type alert_type = 'SCHEMA_CHANGE_NOTIFICATIONS';
+export type billing_provider = 'PADDLE' | 'STRIPE' | 'WIRE';
 export type schema_policy_resource = 'ORGANIZATION' | 'PROJECT';
 export type user_role = 'ADMIN' | 'MEMBER';
 
@@ -197,9 +198,10 @@ export interface organizations {
 }
 
 export interface organizations_billing {
-  billing_email_address: string | null;
   external_billing_reference_id: string;
   organization_id: string;
+  payment_day_of_month: number;
+  provider: billing_provider;
 }
 
 export interface projects {
