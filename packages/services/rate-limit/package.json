@@ -19,7 +19,7 @@
     "@trpc/server": "10.45.2",
     "date-fns": "3.6.0",
     "dotenv": "16.4.5",
-    "got": "14.2.1",
+    "got": "14.4.1",
     "pino-pretty": "11.1.0",
     "reflect-metadata": "0.2.2",
     "tslib": "2.6.3",
