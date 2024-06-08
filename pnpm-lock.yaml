@@ -137,8 +137,8 @@ importers:
         specifier: file:rules
         version: link:rules
       eslint-plugin-tailwindcss:
-        specifier: 3.17.0
-        version: 3.17.0(tailwindcss@3.4.4(ts-node@10.9.2(@swc/core@1.5.25(@swc/helpers@0.5.5))(@types/node@20.14.2)(typescript@5.4.5)))
+        specifier: 3.17.3
+        version: 3.17.3(tailwindcss@3.4.4(ts-node@10.9.2(@swc/core@1.5.25(@swc/helpers@0.5.5))(@types/node@20.14.2)(typescript@5.4.5)))
       fs-extra:
         specifier: 11.2.0
         version: 11.2.0
@@ -10257,9 +10257,9 @@ packages:
     peerDependencies:
       eslint: ^8.0.0 || ^9.0.0
 
-  eslint-plugin-tailwindcss@3.17.0:
-    resolution: {integrity: sha512-Ofl7tNh57a3W8BKHstKZSkD2gSCEkw54ycwZ958IK9zUR8TiNYdp8b0WGoLWLeyOAbeF1VPVJFBnlkJeIM2kVg==}
-    engines: {node: '>=14.0.0'}
+  eslint-plugin-tailwindcss@3.17.3:
+    resolution: {integrity: sha512-DVMVVUFQ+lPraRSuUk2I41XMnusXT6b3WaQZYlUHduULnERaqe9sNfmpRY1IyxlzmKoQxSbZ8IHRhl9ePo8PeA==}
+    engines: {node: '>=18.12.0'}
     peerDependencies:
       tailwindcss: ^3.4.0
 
@@ -28227,7 +28227,7 @@ snapshots:
     dependencies:
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
 
-  eslint-plugin-tailwindcss@3.17.0(tailwindcss@3.4.4(ts-node@10.9.2(@swc/core@1.5.25(@swc/helpers@0.5.5))(@types/node@20.14.2)(typescript@5.4.5))):
+  eslint-plugin-tailwindcss@3.17.3(tailwindcss@3.4.4(ts-node@10.9.2(@swc/core@1.5.25(@swc/helpers@0.5.5))(@types/node@20.14.2)(typescript@5.4.5))):
     dependencies:
       fast-glob: 3.3.2
       postcss: 8.4.38
