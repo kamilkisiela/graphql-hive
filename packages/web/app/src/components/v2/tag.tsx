@@ -5,6 +5,7 @@ const colors = {
   green: 'bg-green-500/10 text-green-500',
   yellow: 'bg-yellow-500/10 text-yellow-500',
   gray: 'bg-gray-500/10 text-gray-500',
+  orange: 'bg-orange-500/10 text-orange-500',
 } as const;
 
 export function Tag({
@@ -12,7 +13,7 @@ export function Tag({
   color = 'gray',
   className,
 }: {
-  color?: 'green' | 'yellow' | 'gray';
+  color?: keyof typeof colors;
   className?: string;
   children: ReactNode;
 }): ReactElement {

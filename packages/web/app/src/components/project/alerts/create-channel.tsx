@@ -62,7 +62,7 @@ export const CreateChannelModal = ({
         endpoint: Yup.string()
           .url()
           .when('type', ([type], schema) =>
-            type === AlertChannelType.Webhook ? schema.required('Must enter endpoint') : schema,
+            isWebhookLike ? schema.required('Must enter endpoint') : schema,
           ),
       }),
       async onSubmit(values) {
@@ -73,8 +73,7 @@ export const CreateChannelModal = ({
             name: values.name,
             type: values.type,
             slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
-            webhook:
-              values.type === AlertChannelType.Webhook ? { endpoint: values.endpoint } : null,
+            webhook: isWebhookLike ? { endpoint: values.endpoint } : null,
           },
         });
         if (error) {
@@ -88,6 +87,9 @@ export const CreateChannelModal = ({
         }
       },
     });
+  const isWebhookLike = [AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(
+    values.type,
+  );
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
