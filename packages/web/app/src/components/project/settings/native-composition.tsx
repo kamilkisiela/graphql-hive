@@ -66,7 +66,7 @@ const IncrementalNativeCompositionSwitch = (props: {
               <Switch
                 disabled={mutation.fetching}
                 onCheckedChange={nativeComposition => {
-                  mutate({
+                  void mutate({
                     input: {
                       organization: props.organizationCleanId,
                       project: props.projectCleanId,

@@ -166,7 +166,7 @@ const ExternalCompositionForm = ({
   });
 
   function onSubmit(values: FormValues) {
-    enable({
+    void enable({
       input: {
         project: project.cleanId,
         organization: organization.cleanId,
