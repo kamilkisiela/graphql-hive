@@ -222,24 +222,24 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         signature: options.signature,
         isNonProductionEnvironment: options.isProduction === false,
       }),
-      useGraphQlJit(
-        {},
-        {
-          enableIf(args) {
-            if (hasFastifyRequest(args.contextValue)) {
-              // Enable JIT only for Hive App
-              const name = args.contextValue.req.headers['graphql-client-name'] as string;
+      // useGraphQlJit(
+      //   {},
+      //   {
+      //     enableIf(args) {
+      //       if (hasFastifyRequest(args.contextValue)) {
+      //         // Enable JIT only for Hive App
+      //         const name = args.contextValue.req.headers['graphql-client-name'] as string;
 
-              return name === 'Hive App';
-            }
+      //         return name === 'Hive App';
+      //       }
 
-            return false;
-          },
-          onError(r) {
-            options.logger.error(r);
-          },
-        },
-      ),
+      //       return false;
+      //     },
+      //     onError(r) {
+      //       options.logger.error(r);
+      //     },
+      //   },
+      // ),
       options.tracing
         ? useOpenTelemetry(
             {

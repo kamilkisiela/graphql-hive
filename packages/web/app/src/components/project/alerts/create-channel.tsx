@@ -132,12 +132,13 @@ export const CreateChannelModal = ({
             options={[
               { value: AlertChannelType.Slack, name: 'Slack' },
               { value: AlertChannelType.Webhook, name: 'Webhook' },
+              { value: AlertChannelType.MsteamsWebhook, name: 'MS Teams Webhook' },
             ]}
           />
           {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
 
-        {values.type === AlertChannelType.Webhook && (
+        {[AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(values.type) && (
           <div className="flex flex-col gap-4">
             <label className="text-sm font-semibold" htmlFor="endpoint">
               Endpoint
@@ -160,7 +161,13 @@ export const CreateChannelModal = ({
                 {mutation.data.addAlertChannel.error.inputErrors.webhookEndpoint}
               </div>
             )}
-            <p className="text-sm text-gray-500">Hive will send alerts to your endpoint.</p>
+            {values.endpoint ? (
+              <p className="text-sm text-gray-500">Hive will send alerts to your endpoint.</p>
+            ) : (
+              <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet">
+                Follow this guide to set up an incoming webhook connector in MS Teams
+              </a>
+            )}
           </div>
         )}
 
