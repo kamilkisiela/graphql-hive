@@ -124,6 +124,7 @@ module.exports = {
         '@typescript-eslint/no-floating-promises': 'error',
         ...rulesToExtends,
         'no-lonely-if': 'off',
+        'object-shorthand': 'off',
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
         'prefer-destructuring': 'off',
         'prefer-const': 'off',

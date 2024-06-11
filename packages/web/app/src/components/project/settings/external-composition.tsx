@@ -182,7 +182,7 @@ const ExternalCompositionForm = ({
         if (endpoint) {
           form.reset(
             {
-              endpoint: endpoint,
+              endpoint,
               secret: '',
             },
             {
