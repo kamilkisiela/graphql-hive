@@ -64,6 +64,7 @@ module.exports = {
     {
       // Setup GraphQL Parser
       files: '*.{graphql,gql}',
+      excludedFiles: ['integration-tests/fixtures/init-invalid-schema.graphql'],
       parser: '@graphql-eslint/eslint-plugin',
       plugins: ['@graphql-eslint'],
       parserOptions: {
@@ -73,7 +74,7 @@ module.exports = {
     },
     {
       // Setup processor for operations/fragments definitions on code-files
-      files: ['packages/web/app/**/*.tsx', 'packages/web/app/**/*.ts'],
+      files: ['packages/web/app/**/*.{ts,tsx}'],
       processor: '@graphql-eslint/graphql',
     },
     {
@@ -84,7 +85,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/**/*.ts', 'packages/**/*.tsx', 'cypress/**/*.ts', 'cypress/**/*.tsx'],
+      files: ['{packages,cypress,integration-tests}/**/*.{ts,tsx}'],
       reportUnusedDisableDirectives: true,
       parserOptions: {
         ecmaVersion: 2020,
@@ -95,6 +96,7 @@ module.exports = {
       plugins: [...guildConfig.plugins, 'hive'],
       extends: guildConfig.extends,
       rules: {
+        '@typescript-eslint/no-duplicate-type-constituents': 'error',
         'no-process-env': 'error',
         'no-empty': ['error', { allowEmptyCatch: true }],
         'import/no-absolute-path': 'error',
@@ -136,6 +138,14 @@ module.exports = {
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/ban-types': 'off',
         '@typescript-eslint/triple-slash-reference': 'off',
+      },
+    },
+    {
+      // Disable noise rules for `integration-tests`
+      files: ['integration-tests/**'],
+      rules: {
+        'import/no-extraneous-dependencies': 'off',
+        '@typescript-eslint/no-floating-promises': 'off',
       },
     },
     {
