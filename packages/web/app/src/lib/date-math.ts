@@ -1,11 +1,9 @@
-;
 /**
  * The original source code was taken from Grafana's date-math.ts file and adjusted for Hive needs.
  * @source https://github.com/grafana/grafana/blob/411c89012febe13323e4b8aafc8d692f4460e680/packages/grafana-data/src/datetime/datemath.ts#L1C1-L208C2
  */
 import { add, format, formatISO, parse as parseDate, sub, type Duration } from 'date-fns';
 import { UTCDate } from '@date-fns/utc';
-
 
 export type Period = {
   from: string;
