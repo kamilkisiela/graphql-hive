@@ -1,7 +1,4 @@
-'use client';
-
 import React from 'react';
-import { Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 
@@ -16,19 +13,18 @@ RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 const RadioGroupItem = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({ className, children: _children, ...props }, ref) => {
+>(({ className, children, ...props }, ref) => {
   return (
     <RadioGroupPrimitive.Item
       ref={ref}
       className={cn(
-        'border-primary text-primary ring-offset-background focus-visible:ring-ring aspect-square h-4 w-4 rounded-full border focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+        'focus-visible:ring-ring relative flex h-full w-full items-center focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}
     >
-      <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <Circle className="size-2.5 fill-current text-current" />
-      </RadioGroupPrimitive.Indicator>
+      <RadioGroupPrimitive.Indicator className="border-primary absolute left-0 size-full rounded-md border-2" />
+      {children}
     </RadioGroupPrimitive.Item>
   );
 });

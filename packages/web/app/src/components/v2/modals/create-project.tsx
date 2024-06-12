@@ -68,7 +68,7 @@ const formSchema = z.object({
   }),
 });
 
-function ProjectTypeCard(props: {
+export function ProjectTypeCard(props: {
   title: string;
   description: string;
   type: ProjectType;
@@ -76,17 +76,19 @@ function ProjectTypeCard(props: {
 }) {
   return (
     <FormItem>
-      <FormLabel className="[&:has([data-state=checked])>div]:border-primary">
+      <FormLabel>
         <FormControl>
-          <RadioGroupItem value={props.type} className="sr-only" />
+          <RadioGroupItem
+            value={props.type}
+            className="border-muted hover:border-accent [&:not(:disabled)]:bg-accent flex items-center gap-4 rounded-lg border-2 p-4 text-sm"
+          >
+            <Slot className="size-8 text-gray-400">{props.icon}</Slot>
+            <dl>
+              <dt className="text-left font-medium">{props.title}</dt>
+              <dd className="text-gray-400">{props.description}</dd>
+            </dl>
+          </RadioGroupItem>
         </FormControl>
-        <div className="border-muted hover:border-accent hover:bg-accent flex items-center gap-4 rounded-md border-2 p-4">
-          <Slot className="size-8 text-gray-400">{props.icon}</Slot>
-          <div>
-            <span className="text-sm font-medium">{props.title}</span>
-            <p className="text-sm text-gray-400">{props.description}</p>
-          </div>
-        </div>
       </FormLabel>
     </FormItem>
   );
@@ -98,7 +100,7 @@ export const CreateProjectModal = (props: {
   organizationId: string;
 }) => {
   const { isOpen, toggleModalOpen } = props;
-  const [_, mutate] = useMutation(CreateProjectMutation);
+  const [, mutate] = useMutation(CreateProjectMutation);
   const router = useRouter();
   const { toast } = useToast();
 
