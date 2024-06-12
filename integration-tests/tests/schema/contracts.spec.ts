@@ -1,6 +1,8 @@
 import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
+
+// eslint-disable-next-line no-process-env
 const host = process.env['SCHEMA_SERVICE_HOST_OVERRIDE'] || 'http://localhost:3002';
 
 const client = createTRPCProxyClient<SchemaBuilderApi>({

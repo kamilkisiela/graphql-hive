@@ -48,7 +48,7 @@ test.concurrent(
   'cannot create a role with an access scope that user has no access to',
   async () => {
     const { createOrg } = await initSeed().createOwner();
-    const { inviteAndJoinMember, organization } = await createOrg();
+    const { inviteAndJoinMember } = await createOrg();
     const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
 
     // Create a role with organization:members access, so we could perform the test.

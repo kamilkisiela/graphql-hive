@@ -4,7 +4,6 @@ import { graphql } from 'testkit/gql';
 /* eslint-disable no-process-env */
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { execute } from 'testkit/graphql';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createStorage } from '@hive/storage';
 import {
   createTarget,
@@ -2881,7 +2880,6 @@ test('Composition Error (Federation 2) can be served from the database', async (
     await enableExternalSchemaComposition(
       {
         endpoint: `http://${dockerAddress}/compose`,
-        // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
         organization: organization.cleanId,
@@ -3010,7 +3008,6 @@ test('Composition Network Failure (Federation 2)', async () => {
     await enableExternalSchemaComposition(
       {
         endpoint: `http://${dockerAddress}/compose`,
-        // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
         organization: organization.cleanId,

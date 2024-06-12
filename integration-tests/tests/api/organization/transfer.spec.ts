@@ -1,9 +1,4 @@
 import {
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-} from 'testkit/gql/graphql';
-import {
   answerOrganizationTransferRequest,
   getOrganizationTransferRequest,
   requestOrganizationTransfer,

@@ -29,7 +29,7 @@
     "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
     "graphql:generate": "graphql-codegen --config codegen.mts",
     "integration:prepare": "cd integration-tests && ./local.sh",
-    "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress}/**/*.{ts,tsx,graphql}\"",
+    "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress,integration-tests}/**/*.{ts,tsx,graphql}\"",
     "lint:env-template": "tsx scripts/check-env-template.ts",
     "lint:fix": "pnpm lint --fix",
     "lint:prettier": "prettier --cache --check .",
