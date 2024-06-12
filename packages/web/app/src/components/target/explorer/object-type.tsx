@@ -2,7 +2,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouter } from '@tanstack/react-router';
 import { GraphQLFields, GraphQLTypeCard } from './common';
 
-export const GraphQLObjectTypeComponent_TypeFragment = graphql(`
+const GraphQLObjectTypeComponent_TypeFragment = graphql(`
   fragment GraphQLObjectTypeComponent_TypeFragment on GraphQLObjectType {
     name
     description

@@ -61,7 +61,7 @@ const newTicketFormSchema = z.object({
 
 type NewTicketFormValues = z.infer<typeof newTicketFormSchema>;
 
-export const NewTicketForm_SupportTicketCreateMutation = graphql(`
+const NewTicketForm_SupportTicketCreateMutation = graphql(`
   mutation NewTicketForm_SupportTicketCreateMutation($input: SupportTicketCreateInput!) {
     supportTicketCreate(input: $input) {
       ok {

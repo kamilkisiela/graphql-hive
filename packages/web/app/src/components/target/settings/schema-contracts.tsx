@@ -374,7 +374,7 @@ const CreateContractDialogContentTargetFragment = graphql(`
   }
 `);
 
-export function CreateContractDialogContent(props: {
+function CreateContractDialogContent(props: {
   target: FragmentType<typeof CreateContractDialogContentTargetFragment> | null;
   onCreateContract: () => void;
 }): ReactElement {

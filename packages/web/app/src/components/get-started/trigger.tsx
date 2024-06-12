@@ -4,7 +4,7 @@ import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { GetStartedWizard } from './wizard';
 
-export const GetStartedWizard_GetStartedProgress = graphql(`
+const GetStartedWizard_GetStartedProgress = graphql(`
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
     creatingProject
     publishingSchema

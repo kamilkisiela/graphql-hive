@@ -46,7 +46,7 @@ const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   }
 `);
 
-export const GithubIntegration_EnableProjectNameInGitHubCheckMutation = graphql(`
+const GithubIntegration_EnableProjectNameInGitHubCheckMutation = graphql(`
   mutation GithubIntegration_EnableProjectNameInGitHubCheckMutation($input: ProjectSelectorInput!) {
     enableProjectNameInGithubCheck(input: $input) {
       id

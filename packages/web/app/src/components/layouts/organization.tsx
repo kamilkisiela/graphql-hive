@@ -31,7 +31,7 @@ export enum Page {
   Subscription = 'subscription',
 }
 
-export const OrganizationLayout_OrganizationFragment = graphql(`
+const OrganizationLayout_OrganizationFragment = graphql(`
   fragment OrganizationLayout_OrganizationFragment on Organization {
     id
     cleanId

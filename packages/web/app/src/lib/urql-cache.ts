@@ -32,7 +32,7 @@ const TargetsDocument = graphql(`
   }
 `);
 
-export const getOperationName = (query: DocumentNode): string | void => {
+const getOperationName = (query: DocumentNode): string | void => {
   for (const node of query.definitions) {
     if (node.kind === Kind.OPERATION_DEFINITION) {
       return node.name?.value;
