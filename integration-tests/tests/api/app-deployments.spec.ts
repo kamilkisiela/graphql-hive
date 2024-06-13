@@ -87,7 +87,8 @@ const RetireAppDeployment = graphql(`
 
 test('create app deployment, add operations, publish, access via CDN (happy path)', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -192,7 +193,8 @@ test('create app deployment, add operations, publish, access via CDN (happy path
 
 test('create app deployment with same name and version succeed if deployment is not active', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -251,7 +253,8 @@ test('create app deployment with same name and version succeed if deployment is 
 
 test('create app deployment with same name and version does not fail if deployment is active', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -333,7 +336,8 @@ test('create app deployment with same name and version does not fail if deployme
 
 test('create app deployment fails if app name is empty', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -364,7 +368,8 @@ test('create app deployment fails if app name is empty', async () => {
 
 test('create app deployment fails if app name exceeds length of 256 characters', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -395,7 +400,8 @@ test('create app deployment fails if app name exceeds length of 256 characters',
 
 test('create app deployment fails if app version is empty', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -426,7 +432,8 @@ test('create app deployment fails if app version is empty', async () => {
 
 test('create app deployment fails if app version exceeds length of 256 characters', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -455,9 +462,39 @@ test('create app deployment fails if app version exceeds length of 256 character
   });
 });
 
-test('add documents to app deployment fails if there is no initial schema published', async () => {
+test('create app deployment fails without feature flag enabled for organization', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
+  const { createToken } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  const { createAppDeployment } = await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(createAppDeployment).toEqual({
+    error: {
+      details: null,
+      message:
+        'This organization has no access to app deployments. Please contact the Hive team for early access.',
+    },
+    ok: null,
+  });
+});
+
+test('add documents to app deployment fails if there is no initial schema published', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -514,7 +551,8 @@ test('add documents to app deployment fails if there is no initial schema publis
 
 test('add documents to app deployment fails if document hash is shorter than 3 characters', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -582,7 +620,8 @@ test('add documents to app deployment fails if document hash is shorter than 3 c
 
 test('add documents to app deployment fails if document hash is longer than 256 characters', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -650,7 +689,8 @@ test('add documents to app deployment fails if document hash is longer than 256 
 
 test('add documents to app deployment fails if document is not parse-able', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -718,7 +758,8 @@ test('add documents to app deployment fails if document is not parse-able', asyn
 
 test('add documents to app deployment fails if document does not pass validation against the target schema', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -786,7 +827,8 @@ test('add documents to app deployment fails if document does not pass validation
 
 test('add documents to app deployment fails if app deployment does not exist', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -818,9 +860,53 @@ test('add documents to app deployment fails if app deployment does not exist', a
   });
 });
 
-test('activate app deployment fails if app deployment does not exist', async () => {
+test('add documents to app deployment fails without feature flag enabled for organization', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
+  const { createToken } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  await token.publishSchema({
+    sdl: /* GraphQL */ `
+      type Query {
+        hello: String
+      }
+    `,
+  });
+
+  const { addDocumentsToAppDeployment } = await execute({
+    document: AddDocumentsToAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+        documents: [
+          {
+            hash: 'hash',
+            body: 'query { hello }',
+          },
+        ],
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(addDocumentsToAppDeployment).toEqual({
+    error: {
+      details: null,
+      message:
+        'This organization has no access to app deployments. Please contact the Hive team for early access.',
+    },
+    ok: null,
+  });
+});
+
+test('activate app deployment fails if app deployment does not exist', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -847,7 +933,8 @@ test('activate app deployment fails if app deployment does not exist', async () 
 
 test('retire app deployment fails if app deployment does not exist', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken, target } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -875,7 +962,8 @@ test('retire app deployment fails if app deployment does not exist', async () =>
 
 test('retire app deployment fails if app deployment is pending (not active)', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken, target } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -914,7 +1002,8 @@ test('retire app deployment fails if app deployment is pending (not active)', as
 
 test('retire app deployment succeeds if app deployment is active', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken, target } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -969,7 +1058,8 @@ test('retire app deployment succeeds if app deployment is active', async () => {
 
 test('retire app deployments makes the persisted operations unavailable via CDN', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
   const { createToken, target } = await createProject();
   const token = await createToken({
     targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
@@ -1054,4 +1144,33 @@ test('retire app deployments makes the persisted operations unavailable via CDN'
   });
 
   expect(response.status).toBe(404);
+});
+
+test('retire app deployments fails without feature flag enabled for organization', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken, target } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  const { retireAppDeployment } = await execute({
+    document: RetireAppDeployment,
+    variables: {
+      input: {
+        targetId: target.id,
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(retireAppDeployment).toEqual({
+    error: {
+      message:
+        'This organization has no access to app deployments. Please contact the Hive team for early access.',
+    },
+    ok: null,
+  });
 });

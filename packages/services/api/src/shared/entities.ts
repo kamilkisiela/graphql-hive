@@ -189,6 +189,7 @@ export interface Organization {
      * @deprecated This feature flag should be removed once no longer needed.
      */
     forceLegacyCompositionInTargets: string[];
+    appDeployments: boolean;
   };
   zendeskId: string | null;
 }
