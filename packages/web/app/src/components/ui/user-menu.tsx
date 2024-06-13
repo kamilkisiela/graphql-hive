@@ -23,7 +23,6 @@ import {
   SettingsIcon,
   TrendingUpIcon,
 } from '@/components/v2/icon';
-import { LeaveOrganizationModal } from '@/components/v2/modals/leave-organization';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AuthProvider } from '@/gql/graphql';
@@ -36,6 +35,7 @@ import { MemberRoleMigrationStickyNote } from '../organization/members/migration
 import { UserSettingsModal } from '../user/settings';
 import { Changelog } from './changelog/changelog';
 import { latestChangelog } from './changelog/generated-changelog';
+import { LeaveOrganizationModal } from './modal/leave-organization';
 
 const UserMenu_OrganizationConnectionFragment = graphql(`
   fragment UserMenu_OrganizationConnectionFragment on OrganizationConnection {
