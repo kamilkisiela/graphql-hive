@@ -39,9 +39,9 @@ export function connectLab(server: FastifyInstance) {
     const headers: Record<string, string> = {};
 
     if (req.headers['x-hive-key']) {
-      headers['Authorization'] = `Bearer ${req.headers['x-hive-key'] as string}`;
+      headers.Authorization = `Bearer ${req.headers['x-hive-key'] as string}`;
     } else {
-      headers['Cookie'] = req.headers.cookie as string;
+      headers.Cookie = req.headers.cookie as string;
     }
 
     const body = {

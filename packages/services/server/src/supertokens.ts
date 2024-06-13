@@ -255,7 +255,7 @@ const getEnsureUserOverrides = (
 
       function extractOidcId(args: typeof input) {
         if (input.provider.id === 'oidc') {
-          const oidcId: unknown = args.userContext['oidcId'];
+          const oidcId: unknown = args.userContext.oidcId;
           if (typeof oidcId === 'string') {
             return oidcId;
           }

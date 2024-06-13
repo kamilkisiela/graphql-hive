@@ -55,7 +55,7 @@ function useGitHubAction(): CIRunner {
     },
     env() {
       // eslint-disable-next-line no-process-env
-      const repository = process.env['GITHUB_REPOSITORY'] ?? null;
+      const repository = process.env.GITHUB_REPOSITORY ?? null;
       let pullRequestNumber: string | null = null;
       let commit: string | null = null;
 

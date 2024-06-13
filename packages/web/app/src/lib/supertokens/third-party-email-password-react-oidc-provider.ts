@@ -14,7 +14,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
     ...originalImplementation,
     generateStateToSendToOAuthProvider(input) {
       const hash = originalImplementation.generateStateToSendToOAuthProvider(input);
-      const oidcId = input?.userContext?.['oidcId'];
+      const oidcId = input?.userContext?.oidcId;
 
       if (typeof oidcId === 'string') {
         return `${hash}${delimiter}${oidcId}`;
@@ -23,7 +23,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
       return hash;
     },
     getAuthorisationURLFromBackend(input) {
-      const maybeId: unknown = input.userContext['oidcId'];
+      const maybeId: unknown = input.userContext.oidcId;
 
       return originalImplementation.getAuthorisationURLFromBackend(
         typeof maybeId === 'string'

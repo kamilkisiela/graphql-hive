@@ -239,7 +239,7 @@ export default class SchemaPublish extends Command {
 
       if (usesGitHubApp) {
         // eslint-disable-next-line no-process-env
-        const repository = process.env['GITHUB_REPOSITORY'] ?? null;
+        const repository = process.env.GITHUB_REPOSITORY ?? null;
         if (!repository) {
           throw new Errors.CLIError(`Missing "GITHUB_REPOSITORY" environment variable.`);
         }
