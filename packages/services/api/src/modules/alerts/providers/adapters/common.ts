@@ -12,9 +12,6 @@ interface NotificationIntegrations {
   slack: {
     token: string | null | undefined;
   };
-  teams?: {
-    webhookUrl: string;
-  };
 }
 
 export interface SchemaChangeNotificationInput {
@@ -44,7 +41,7 @@ export interface ChannelConfirmationInput {
     project: Pick<Project, 'id' | 'cleanId' | 'name'>;
   };
   channel: AlertChannel;
-  integrations: NotificationIntegrations;
+  integrations?: NotificationIntegrations;
 }
 
 export interface CommunicationAdapter {

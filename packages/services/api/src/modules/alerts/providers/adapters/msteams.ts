@@ -29,7 +29,7 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
       input.event.project.id,
       input.event.target.id,
     );
-    const webhookUrl = input.integrations.teams?.webhookUrl;
+    const webhookUrl = input.channel.webhookEndpoint;
 
     if (!webhookUrl) {
       this.logger.debug(`Microsoft Teams Integration is not available`);
@@ -52,8 +52,8 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
       });
 
       const message = input.event.initial
-        ? `:bee: Hi, I received your *first* schema in project ${projectLink}, target ${targetLink} (${viewLink}):`
-        : `:bee: Hi, I found *${totalChanges} ${this.pluralize(
+        ? `🐝 Hi, I received your *first* schema in project ${projectLink}, target ${targetLink} (${viewLink}):`
+        : `🐝 Hi, I found *${totalChanges} ${this.pluralize(
             'change',
             totalChanges,
           )}* in project ${projectLink}, target ${targetLink} (${viewLink}):`;
@@ -75,7 +75,7 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
       input.event.project.id,
     );
 
-    const webhookUrl = input.integrations.teams?.webhookUrl;
+    const webhookUrl = input.channel.webhookEndpoint;
 
     if (!webhookUrl) {
       this.logger.debug(`Microsoft Teams Integration is not available`);
@@ -94,7 +94,7 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
       });
 
       const message = [
-        `:wave: Hi! I'm the notification :bee:.`,
+        `👋 Hi! I'm the notification 🐝.`,
         `${actionMessage} about your ${projectLink} project.`,
       ].join('\n');
 
@@ -199,8 +199,13 @@ function renderAttachments({
     .join('\n');
 
   return {
-    color,
     title,
     text,
+    markdown: true,
+    facts: changes.map(change => ({
+      name: change.criticality,
+      value: slackCoderize(change.message),
+    })),
+    themeColor: color,
   };
 }

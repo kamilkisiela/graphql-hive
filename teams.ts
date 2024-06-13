@@ -39,7 +39,7 @@ const sendTeamsNotification = async (
 };
 
 const message =
-  '**This** is a _test_ notification from our system.\n\n- Item 1\n- Item 2\n- Item 3';
+  '**This** is a _test_ notification from our system2.\n\n- Item 1\n- Item 2\n- Item 3';
 const title = 'Test Notification';
 
 sendTeamsNotification(webhookUrl, message, title);
