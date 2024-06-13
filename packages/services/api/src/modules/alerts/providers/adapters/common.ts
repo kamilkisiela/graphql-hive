@@ -41,7 +41,7 @@ export interface ChannelConfirmationInput {
     project: Pick<Project, 'id' | 'cleanId' | 'name'>;
   };
   channel: AlertChannel;
-  integrations?: NotificationIntegrations;
+  integrations: NotificationIntegrations;
 }
 
 export interface CommunicationAdapter {
