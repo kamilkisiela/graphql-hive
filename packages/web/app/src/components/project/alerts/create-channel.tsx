@@ -61,7 +61,7 @@ export const CreateChannelModal = ({
           ),
         endpoint: Yup.string()
           .url()
-          .when('type', ([type], schema) =>
+          .when('type', ([_type], schema) =>
             isWebhookLike ? schema.required('Must enter endpoint') : schema,
           ),
       }),

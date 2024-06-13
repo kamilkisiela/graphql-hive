@@ -149,7 +149,7 @@ function createAttachmentsText(
   let text = '';
 
   if (breakingChanges.length) {
-    text += renderAttachmentsText({
+    text += renderChangeList({
       color: '#E74C3B',
       title: 'Breaking changes',
       changes: breakingChanges,
@@ -157,7 +157,7 @@ function createAttachmentsText(
   }
 
   if (safeChanges.length) {
-    text += renderAttachmentsText({
+    text += renderChangeList({
       color: '#23B99A',
       title: 'Safe changes',
       changes: safeChanges,
@@ -171,10 +171,9 @@ function createAttachmentsText(
   return text;
 }
 
-function renderAttachmentsText({
+function renderChangeList({
   changes,
   title,
-  color,
 }: {
   color: string;
   title: string;
@@ -182,7 +181,7 @@ function renderAttachmentsText({
 }): string {
   const text = changes
     .map(change => {
-      let text = change.message;
+      let text = ` - ${change.message}`;
       if (change.isSafeBasedOnUsage) {
         text += ' (safe based on usage)';
       }

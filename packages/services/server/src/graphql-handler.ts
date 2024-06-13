@@ -98,13 +98,13 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     plugins: [
       persistedOperations
         ? usePersistedOperations({
-          allowArbitraryOperations: true,
-          skipDocumentValidation: true,
-          getPersistedOperation(key) {
-            const document = persistedOperations[key] ?? null;
-            return document;
-          },
-        })
+            allowArbitraryOperations: true,
+            skipDocumentValidation: true,
+            getPersistedOperation(key) {
+              const document = persistedOperations[key] ?? null;
+              return document;
+            },
+          })
         : {},
       useArmor(),
       useSentry({
@@ -242,21 +242,21 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       ),
       options.tracing
         ? useOpenTelemetry(
-          {
-            document: true,
-            resolvers: false,
-            result: false,
-            variables: variables => {
-              if (variables && typeof variables === 'object' && 'selector' in variables) {
-                return JSON.stringify(variables.selector);
-              }
+            {
+              document: true,
+              resolvers: false,
+              result: false,
+              variables: variables => {
+                if (variables && typeof variables === 'object' && 'selector' in variables) {
+                  return JSON.stringify(variables.selector);
+                }
 
-              return '';
+                return '';
+              },
+              excludedOperationNames: ['readiness'],
             },
-            excludedOperationNames: ['readiness'],
-          },
-          options.tracing.traceProvider(),
-        )
+            options.tracing.traceProvider(),
+          )
         : {},
       useExecutionCancellation(),
     ],

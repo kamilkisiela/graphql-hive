@@ -148,11 +148,11 @@ describe('TeamsCommunicationAdapter', () => {
           🐝 Hi, I found *4 changes* in project [project-name](app-base-url/org-clean-id/project-clean-id), target [target-name](app-base-url/org-clean-id/project-clean-id/target-clean-id) ([view details](app-base-url/org-clean-id/project-clean-id/target-clean-id/history/schema-id)):
 
         ### Breaking changes
-        Field \`addFoo\` was removed from object type \`Mutation\`
-        Field \`foo3\` was removed from object type \`Query\`
+         - Field \`addFoo\` was removed from object type \`Mutation\`
+         - Field \`foo3\` was removed from object type \`Query\`
         ### Safe changes
-        Field \`addFooT\` was added to object type \`Mutation\`
-        Field \`foo4\` was added to object type \`Query\`
+         - Field \`addFooT\` was added to object type \`Mutation\`
+         - Field \`foo4\` was added to object type \`Query\`
         ,
         ]
       `);
