@@ -993,6 +993,47 @@ describe('changes with usage data', () => {
   });
 
   testChangesWithUsageData({
+    title: 'removing an unused union member is safe (__typename in fragment)',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image | Video
+
+      type Image {
+        url: String
+      }
+
+      type Video {
+        url: String
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image
+
+      type Image {
+        url: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it changes the type of the field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be safe, because union member is not used
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query imageOnly { media { ... on Image { __typename url } } }',
+      operationName: 'imageOnly',
+      fields: 'auto-collect',
+    },
+  });
+
+  testChangesWithUsageData({
     title: 'removing a used union member is a breaking change',
     publishSdl: /* GraphQL */ `
       type Query {
@@ -1028,6 +1069,47 @@ describe('changes with usage data', () => {
     },
     reportOperation: {
       operation: 'query videoOnly { media { ... on Video { url } } }',
+      operationName: 'videoOnly',
+      fields: 'auto-collect',
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'removing a used union member is a breaking change (__typename)',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image | Video
+
+      type Image {
+        url: String
+      }
+
+      type Video {
+        url: String
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image
+
+      type Image {
+        url: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it changes the type of the field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be breaking, because union member is referenced indirectly (__typename)
+      afterReportedOperation: 'SchemaCheckError',
+    },
+    reportOperation: {
+      operation: 'query videoOnly { media { __typename ... on Video { url } } }',
       operationName: 'videoOnly',
       fields: 'auto-collect',
     },
