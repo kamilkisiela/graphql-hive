@@ -20,7 +20,7 @@ const CollectionQuery = graphql(`
   }
 `);
 
-export const CreateCollectionMutation = graphql(`
+const CreateCollectionMutation = graphql(`
   mutation CreateCollection(
     $selector: TargetSelectorInput!
     $input: CreateDocumentCollectionInput!

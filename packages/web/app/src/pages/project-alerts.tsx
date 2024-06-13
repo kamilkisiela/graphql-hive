@@ -96,7 +96,7 @@ function Channels(props: {
   );
 }
 
-export function Alerts(props: {
+function Alerts(props: {
   alerts: FragmentType<typeof AlertsTable_AlertFragment>[];
   channels: FragmentType<typeof CreateAlertModal_AlertChannelFragment>[];
   targets: FragmentType<typeof CreateAlertModal_TargetFragment>[];

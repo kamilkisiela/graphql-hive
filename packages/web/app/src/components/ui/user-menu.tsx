@@ -37,7 +37,7 @@ import { UserSettingsModal } from '../user/settings';
 import { Changelog } from './changelog/changelog';
 import { latestChangelog } from './changelog/generated-changelog';
 
-export const UserMenu_OrganizationConnectionFragment = graphql(`
+const UserMenu_OrganizationConnectionFragment = graphql(`
   fragment UserMenu_OrganizationConnectionFragment on OrganizationConnection {
     nodes {
       id
@@ -54,7 +54,7 @@ export const UserMenu_OrganizationConnectionFragment = graphql(`
   }
 `);
 
-export const UserMenu_MeFragment = graphql(`
+const UserMenu_MeFragment = graphql(`
   fragment UserMenu_MeFragment on User {
     id
     email
@@ -65,7 +65,7 @@ export const UserMenu_MeFragment = graphql(`
   }
 `);
 
-export const UserMenu_MemberFragment = graphql(`
+const UserMenu_MemberFragment = graphql(`
   fragment UserMenu_MemberFragment on Member {
     canLeaveOrganization
   }

@@ -30,21 +30,6 @@ function unitToDurationKey(unit: DurationUnit): keyof Duration {
   }
 }
 
-/**
- * Determine if a string contains a relative date time.
- * @param text
- */
-export function isMathString(text: string): boolean {
-  if (!text) {
-    return false;
-  }
-
-  if (text.substring(0, 3) === 'now') {
-    return true;
-  }
-  return false;
-}
-
 const dateStringFormat = 'yyyy-MM-dd';
 
 function parseDateString(input: string) {
@@ -94,25 +79,12 @@ export function parse(text: string, now = new UTCDate()): Date | undefined {
 }
 
 /**
- * Checks if the input is a valid date string.
- * @param text
- */
-export function isValid(text: string): boolean {
-  const date = parse(text);
-  if (date === undefined) {
-    return false;
-  }
-
-  return false;
-}
-
-/**
  * Parses math part of the time string and shifts supplied time according to that math. See unit tests for examples.
  * @param mathString
  * @param time
  * @param roundUp If true it will round the time to endOf time unit, otherwise to startOf time unit.
  */
-export function parseDateMath(mathString: string, now: Date): Date | undefined {
+function parseDateMath(mathString: string, now: Date): Date | undefined {
   const strippedMathString = mathString.replace(/\s/g, '');
   let result = now;
   let i = 0;

@@ -135,12 +135,12 @@ const root = createRootRoute({
   notFoundComponent: NotFound,
 });
 
-export const anonymousRoute = createRoute({
+const anonymousRoute = createRoute({
   getParentRoute: () => root,
   id: 'anonymous',
 });
 
-export const authenticatedRoute = createRoute({
+const authenticatedRoute = createRoute({
   getParentRoute: () => root,
   id: 'authenticated',
   component: authenticated(function AuthenticatedRoute() {

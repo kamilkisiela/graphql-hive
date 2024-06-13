@@ -10,7 +10,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, UpdateIcon } from '@radix-ui/react-icons';
 
-export const ExternalCompositionStatus_TestQuery = graphql(`
+const ExternalCompositionStatus_TestQuery = graphql(`
   query ExternalCompositionStatus_TestQuery($selector: TestExternalSchemaCompositionInput!) {
     testExternalSchemaComposition(selector: $selector) {
       ok {
@@ -27,7 +27,7 @@ export const ExternalCompositionStatus_TestQuery = graphql(`
   }
 `);
 
-export const ExternalCompositionForm_EnableMutation = graphql(`
+const ExternalCompositionForm_EnableMutation = graphql(`
   mutation ExternalCompositionForm_EnableMutation($input: EnableExternalSchemaCompositionInput!) {
     enableExternalSchemaComposition(input: $input) {
       ok {
@@ -223,7 +223,7 @@ const ExternalCompositionForm = ({
   );
 };
 
-export const ExternalComposition_DisableMutation = graphql(`
+const ExternalComposition_DisableMutation = graphql(`
   mutation ExternalComposition_DisableMutation($input: DisableExternalSchemaCompositionInput!) {
     disableExternalSchemaComposition(input: $input) {
       ok {
@@ -238,7 +238,7 @@ export const ExternalComposition_DisableMutation = graphql(`
   }
 `);
 
-export const ExternalComposition_ProjectConfigurationQuery = graphql(`
+const ExternalComposition_ProjectConfigurationQuery = graphql(`
   query ExternalComposition_ProjectConfigurationQuery($selector: ProjectSelectorInput!) {
     project(selector: $selector) {
       id
