@@ -11,7 +11,7 @@ index 2d571cac7e01f4e89bf516f44419439b6ab689a3..381b2287767a61e4fa09d8340e6eedef
              });
              const dist = buildConfig.dist(`macos/${templateKey}`);
 diff --git a/lib/commands/pack/win.js b/lib/commands/pack/win.js
-index 9057ee611738b861a1eb05b8656e1a48a652b5dd..68451f869daa1bc1da9266dd7a2752fc100ae224 100644
+index ef7f90ef1cc4b166d3d1df74228e92b86ad9234e..2ed38f1971727530243b412d3af87fe337307c4d 100644
 --- a/lib/commands/pack/win.js
 +++ b/lib/commands/pack/win.js
 @@ -310,7 +310,6 @@ the CLI should already exist in a directory named after the CLI that is the root
@@ -23,7 +23,7 @@ index 9057ee611738b861a1eb05b8656e1a48a652b5dd..68451f869daa1bc1da9266dd7a2752fc
              });
              const o = buildConfig.dist(`win32/${templateKey}`);
 diff --git a/lib/commands/promote.js b/lib/commands/promote.js
-index 0ea8c249f1b2fa889671c66b401862f24cf6680b..abb473956e673c5c5c846f54106813670e31c5f3 100644
+index 0ea8c249f1b2fa889671c66b401862f24cf6680b..79ef2f2d2667fb8d376aada327e1e31193749209 100644
 --- a/lib/commands/promote.js
 +++ b/lib/commands/promote.js
 @@ -66,7 +66,7 @@ class Promote extends core_1.Command {
@@ -48,20 +48,13 @@ index 0ea8c249f1b2fa889671c66b401862f24cf6680b..abb473956e673c5c5c846f5410681367
              await aws_1.default.s3.copyObject({
                  ...awsDefaults,
                  CopySource: cloudBucketCommitKey(manifest),
-@@ -88,17 +87,17 @@ class Promote extends core_1.Command {
-             });
-         };
-         const promoteGzTarballs = async (target) => {
-+            // replace the git sha from the file name
-             const versionedTarGzName = (0, upload_util_1.templateShortKey)('versioned', {
-                 arch: target.arch,
+@@ -93,12 +92,11 @@ class Promote extends core_1.Command {
                  bin: config.bin,
                  ext: '.tar.gz',
                  platform: target.platform,
 -                sha: flags.sha,
                  version: flags.version,
--            });
-+            })
+             });
              const versionedTarGzKey = cloudBucketCommitKey(versionedTarGzName);
              // strip version & sha so update/scripts can point to a static channel tarball
 -            const unversionedTarGzName = versionedTarGzName.replace(`-v${flags.version}-${flags.sha}`, '');
@@ -69,20 +62,13 @@ index 0ea8c249f1b2fa889671c66b401862f24cf6680b..abb473956e673c5c5c846f5410681367
              const unversionedTarGzKey = cloudChannelKey(unversionedTarGzName);
              await Promise.all([
                  aws_1.default.s3.copyObject({
-@@ -112,17 +111,17 @@ class Promote extends core_1.Command {
-             ]);
-         };
-         const promoteXzTarballs = async (target) => {
-+            // replace the git sha from the file name
-             const versionedTarXzName = (0, upload_util_1.templateShortKey)('versioned', {
-                 arch: target.arch,
+@@ -117,12 +115,11 @@ class Promote extends core_1.Command {
                  bin: config.bin,
                  ext: '.tar.xz',
                  platform: target.platform,
 -                sha: flags.sha,
                  version: flags.version,
--            });
-+            })
+             });
              const versionedTarXzKey = cloudBucketCommitKey(versionedTarXzName);
              // strip version & sha so update/scripts can point to a static channel tarball
 -            const unversionedTarXzName = versionedTarXzName.replace(`-v${flags.version}-${flags.sha}`, '');
@@ -90,12 +76,11 @@ index 0ea8c249f1b2fa889671c66b401862f24cf6680b..abb473956e673c5c5c846f5410681367
              const unversionedTarXzKey = cloudChannelKey(unversionedTarXzName);
              await Promise.all([
                  aws_1.default.s3.copyObject({
-@@ -139,10 +138,11 @@ class Promote extends core_1.Command {
+@@ -139,10 +136,10 @@ class Promote extends core_1.Command {
              this.log(`Promoting macos pkgs to ${flags.channel}`);
              const arches = (0, util_1.uniq)(buildConfig.targets.filter((t) => t.platform === 'darwin').map((t) => t.arch));
              await Promise.all(arches.map(async (arch) => {
 -                const darwinPkg = (0, upload_util_1.templateShortKey)('macos', { arch, bin: config.bin, sha: flags.sha, version: flags.version });
-+                // replace the git sha from the file name
 +                const darwinPkg = (0, upload_util_1.templateShortKey)('macos', { arch, bin: config.bin, version: flags.version });
                  const darwinCopySource = cloudBucketCommitKey(darwinPkg);
                  // strip version & sha so scripts can point to a static channel pkg
@@ -104,12 +89,11 @@ index 0ea8c249f1b2fa889671c66b401862f24cf6680b..abb473956e673c5c5c846f5410681367
                  await Promise.all([
                      aws_1.default.s3.copyObject({
                          ...awsDefaults,
-@@ -160,10 +160,11 @@ class Promote extends core_1.Command {
+@@ -160,10 +157,10 @@ class Promote extends core_1.Command {
              this.log(`Promoting windows exe to ${flags.channel}`);
              const arches = buildConfig.targets.filter((t) => t.platform === 'win32').map((t) => t.arch);
              await Promise.all(arches.map(async (arch) => {
 -                const winPkg = (0, upload_util_1.templateShortKey)('win32', { arch, bin: config.bin, sha: flags.sha, version: flags.version });
-+                // replace the git sha from the file name
 +                const winPkg = (0, upload_util_1.templateShortKey)('win32', { arch, bin: config.bin, version: flags.version });
                  const winCopySource = cloudBucketCommitKey(winPkg);
                  // strip version & sha so scripts can point to a static channel exe
@@ -207,10 +191,18 @@ index dd732e93883a61dd491f797e2576eea432500b51..4e9f087de4e52c5777a80b42f5b45bfc
  }
  exports.default = UploadTarballs;
 diff --git a/lib/commands/upload/win.js b/lib/commands/upload/win.js
-index 2769337ddf0effe5f397300972b989db20616b4a..ca45979abf87bc16dbe085681fcd3407c59a3be8 100644
+index 2769337ddf0effe5f397300972b989db20616b4a..d725cd670207e4c8b125eef8d74d0a5d43672905 100644
 --- a/lib/commands/upload/win.js
 +++ b/lib/commands/upload/win.js
-@@ -60,12 +60,11 @@ class UploadWin extends core_1.Command {
+@@ -51,7 +51,6 @@ class UploadWin extends core_1.Command {
+             const templateKey = (0, upload_util_1.templateShortKey)('win32', {
+                 arch,
+                 bin: config.bin,
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+             });
+             const localKey = dist(`win32/${templateKey}`);
+@@ -60,12 +59,11 @@ class UploadWin extends core_1.Command {
                      suggestions: ['Run "oclif pack win" before uploading'],
                  });
          }
@@ -224,7 +216,7 @@ index 2769337ddf0effe5f397300972b989db20616b4a..ca45979abf87bc16dbe085681fcd3407
                  version: config.version,
              });
              const localExe = dist(`win32/${templateKey}`);
-@@ -74,7 +73,7 @@ class UploadWin extends core_1.Command {
+@@ -74,7 +72,7 @@ class UploadWin extends core_1.Command {
                  await aws_1.default.s3.uploadFile(localExe, { ...S3Options, CacheControl: 'max-age=86400', Key: cloudKey });
          };
          await Promise.all([uploadWin('x64'), uploadWin('x86')]);
@@ -326,7 +318,7 @@ index 5740bb13522fdad4c65554534bfa286b6dd94f11..619b510d75605a28de2063df316fcbd0
      };
      await Promise.all([
 diff --git a/lib/tarballs/build.js b/lib/tarballs/build.js
-index 43c98a2727341d2728d3432caf7c1ff72bf7b73d..b0d919f04f766308006f6e7ba91c8ce5c06321a9 100644
+index 81ad0929e112195135c32f4d757fb5f68126ba92..cdc8c2152b5ee061ec5830da1d8cb2283e0e778d 100644
 --- a/lib/tarballs/build.js
 +++ b/lib/tarballs/build.js
 @@ -174,8 +174,10 @@ const addDependencies = async (c) => {
@@ -343,7 +335,7 @@ index 43c98a2727341d2728d3432caf7c1ff72bf7b73d..b0d919f04f766308006f6e7ba91c8ce5
      }
  };
 @@ -230,8 +232,8 @@ const buildTarget = async (target, c, options) => {
-     if (!c.updateConfig.s3.host)
+     if (!c.updateConfig.s3?.host)
          return;
      const rollout = typeof c.updateConfig.autoupdate === 'object' && c.updateConfig.autoupdate.rollout;
 -    const gzCloudKey = `${(0, upload_util_1.commitAWSDir)(version, sha, c.updateConfig.s3)}/${gzLocalKey}`;
