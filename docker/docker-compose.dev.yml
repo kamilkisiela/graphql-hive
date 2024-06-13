@@ -70,12 +70,12 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:24.2-alpine
+    image: clickhouse/clickhouse-server:24.4-alpine
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      test: ['CMD', 'wget', '--spider', '-q', 'http://0.0.0.0:8123/ping']
       interval: 30s
       timeout: 5s
       retries: 3

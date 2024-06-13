@@ -603,7 +603,7 @@ const ConditionalBreakingChanges = (props: {
               size="small"
               type="number"
               min="1"
-              max="30"
+              max={targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30}
               className="mx-2 !inline-flex !w-16"
             />
             days.

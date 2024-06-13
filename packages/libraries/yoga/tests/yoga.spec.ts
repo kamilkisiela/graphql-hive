@@ -471,6 +471,65 @@ test('does not report usage if context creating raises an error', async ({ expec
   expect(callback).not.toHaveBeenCalled();
 });
 
+test('operation with non-existing field is handled gracefully', async ({ expect }) => {
+  const yoga = createYoga({
+    schema: createSchema({
+      typeDefs: /* GraphQL */ `
+        type Query {
+          hi: String
+        }
+      `,
+    }),
+    plugins: [
+      useHive({
+        enabled: true,
+        debug: false,
+        token: 'brrrt',
+        selfHosting: {
+          applicationUrl: 'http://localhost/foo',
+          graphqlEndpoint: 'http://localhost/graphql',
+          usageEndpoint: 'http://localhost/usage',
+        },
+        usage: {
+          endpoint: 'http://localhost/usage',
+          clientInfo() {
+            return {
+              name: 'brrr',
+              version: '1',
+            };
+          },
+        },
+        agent: {
+          maxSize: 1,
+          logger: createLogger('silent'),
+        },
+      }),
+    ],
+  });
+
+  const response = await yoga.fetch('http://localhost/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+  });
+  expect(response.status).toBe(200);
+  expect(await response.json()).toMatchObject({
+    errors: [
+      {
+        message: 'Cannot query field "hello" on type "Query".',
+      },
+    ],
+  });
+});
+
 describe('subscription usage reporting', () => {
   describe('built-in see', () => {
     test('reports usage for successful subscription operation', async ({ expect }) => {

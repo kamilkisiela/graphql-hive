@@ -8,7 +8,7 @@ import {
 } from './common';
 import { SupergraphMetadataList } from './super-graph-metadata';
 
-export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
+const GraphQLEnumTypeComponent_TypeFragment = graphql(`
   fragment GraphQLEnumTypeComponent_TypeFragment on GraphQLEnumType {
     name
     description

@@ -2,7 +2,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
 import { SupergraphMetadataList } from './super-graph-metadata';
 
-export const GraphQLUnionTypeComponent_TypeFragment = graphql(`
+const GraphQLUnionTypeComponent_TypeFragment = graphql(`
   fragment GraphQLUnionTypeComponent_TypeFragment on GraphQLUnionType {
     name
     description

@@ -10,7 +10,7 @@ import {
 } from '@/lib/last-visited-org';
 import { useRouter } from '@tanstack/react-router';
 
-export const DefaultOrganizationQuery = graphql(`
+const DefaultOrganizationQuery = graphql(`
   query myDefaultOrganization($previouslyVisitedOrganizationId: ID) {
     myDefaultOrganization(previouslyVisitedOrganizationId: $previouslyVisitedOrganizationId) {
       organization {

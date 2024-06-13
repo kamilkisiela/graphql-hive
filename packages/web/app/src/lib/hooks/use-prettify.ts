@@ -18,15 +18,3 @@ export function usePrettify(sdl: string | null): string | null {
     }
   }, [sdl]);
 }
-
-export function prettifySDL(sdl: string | null): string | null {
-  if (sdl === null) {
-    return null;
-  }
-
-  try {
-    return print(parse(sdl));
-  } catch {
-    return sdl;
-  }
-}

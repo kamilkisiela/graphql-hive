@@ -36,7 +36,15 @@ export const DocsLink = ({
   const fullUrl = href.startsWith('http') ? href : getDocsUrl(href);
 
   return (
-    <Button variant="link" className={cn('p-0 text-orange-500', className)} asChild>
+    <Button
+      asChild
+      variant="link"
+      className={cn(
+        'p-0 text-orange-500',
+        'whitespace-pre-wrap', // to not lose whitespace between tags due to `display: 'inline-flex'`
+        className,
+      )}
+    >
       <a href={fullUrl} target="_blank" rel="noreferrer">
         {icon ?? <Book className="mr-2 size-4" />}
         {children}

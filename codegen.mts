@@ -34,7 +34,6 @@ const config: CodegenConfig = {
           'shared',
           'support',
           'target',
-          'token',
         ],
         scalarsOverrides: {
           DateTime: { type: 'string' },
@@ -56,6 +55,11 @@ const config: CodegenConfig = {
               '../modules/auth/providers/organization-access#OrganizationAccessScope',
             SupportTicketPriority: '../shared/entities#SupportTicketPriority',
             SupportTicketStatus: '../shared/entities#SupportTicketStatus',
+          },
+          resolversNonOptionalTypename: {
+            interfaceImplementingType: true,
+            unionMember: true,
+            excludeTypes: ['TokenInfoPayload'],
           },
         },
       },

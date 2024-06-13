@@ -136,28 +136,6 @@ export const UsersIcon = (props: IconProps & { size: number }): ReactElement => 
   </svg>
 );
 
-export const MoreIcon = ({ className, ...props }: IconProps): ReactElement => (
-  <svg
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    className={clsx('size-6 stroke-current', className)}
-    {...props}
-  >
-    <path
-      d="M12 13C12.5523 13 13 12.5523 13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path
-      d="M12 6C12.5523 6 13 5.55228 13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path
-      d="M12 20C12.5523 20 13 19.5523 13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-  </svg>
-);
-
 export const EditIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 22 22"
@@ -266,31 +244,6 @@ export const CheckIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const TargetIcon = ({ className }: IconProps): ReactElement => (
-  <svg
-    viewBox="0 0 24 24"
-    width="24"
-    height="24"
-    fill="none"
-    stroke="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path
-      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path
-      d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path
-      d="M12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z"
-      {...DEFAULT_PATH_PROPS}
-    />
-  </svg>
-);
-
 export const GridIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
@@ -369,24 +322,6 @@ export const LogOutIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const LinkIcon = ({ className, ...props }: IconProps): ReactElement => (
-  <svg
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    className={clsx('size-6 fill-none stroke-current', className)}
-    {...props}
-  >
-    <path
-      d="M10 13C10.869 14.1617 12.1996 14.8887 13.6466 14.9923C15.0937 15.0959 16.5144 14.566 17.54 13.54L20.54 10.54C22.4349 8.57807 22.4078 5.45954 20.4791 3.53087C18.5504 1.6022 15.4319 1.57511 13.47 3.46997L11.75 5.17997"
-      {...DEFAULT_PATH_PROPS}
-    />
-    <path
-      d="M14.0002 11C13.1312 9.8383 11.8006 9.1113 10.3536 9.00766C8.90653 8.90403 7.48583 9.43399 6.4602 10.46L3.4602 13.46C1.56534 15.4219 1.59244 18.5404 3.52111 20.4691C5.44978 22.3978 8.56831 22.4249 10.5302 20.53L12.2402 18.82"
-      {...DEFAULT_PATH_PROPS}
-    />
-  </svg>
-);
-
 export const KeyIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
@@ -411,32 +346,6 @@ export const XIcon = ({ className }: IconProps): ReactElement => (
   >
     <path d="M18 6L6 18" {...DEFAULT_PATH_PROPS} />
     <path d="M6 6L18 18" {...DEFAULT_PATH_PROPS} />
-  </svg>
-);
-
-export const LinkedInIcon = ({ className, ...props }: IconProps): ReactElement => (
-  <svg
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    className={clsx('size-6 fill-current', className)}
-    {...props}
-  >
-    <path d="M16 8C19.3137 8 22 10.6863 22 14V21H18V14C18 12.8954 17.1046 12 16 12C14.8954 12 14 12.8954 14 14V21H10V14C10 10.6863 12.6863 8 16 8Z" />
-    <rect x={2} y={9} width={4} height={12} />
-    <path d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z" />
-  </svg>
-);
-
-export const GoogleIcon = ({ className }: IconProps): ReactElement => (
-  <svg
-    viewBox="0 0 24 24"
-    width="24"
-    height="24"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path d="M22 12.2339C22 17.9395 18.0287 22 12.1639 22C6.54098 22 2 17.5323 2 12C2 6.46774 6.54098 2 12.1639 2C14.9016 2 17.2049 2.9879 18.9795 4.61694L16.2131 7.23387C12.5943 3.79839 5.86475 6.37903 5.86475 12C5.86475 15.4879 8.69672 18.3145 12.1639 18.3145C16.1885 18.3145 17.6967 15.4758 17.9344 14.004H12.1639V10.5645H21.8402C21.9344 11.0766 22 11.5685 22 12.2339Z" />
   </svg>
 );
 

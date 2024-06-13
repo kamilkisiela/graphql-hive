@@ -57,7 +57,7 @@ const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphq
   }
 `);
 
-export const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
+const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
   fragment ChangesBlock_SchemaChangeApprovalFragment on SchemaChangeApproval {
     approvedBy {
       id
@@ -68,7 +68,7 @@ export const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
   }
 `);
 
-export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
+const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
   fragment ChangesBlock_SchemaChangeWithUsageFragment on SchemaChange {
     path
     message(withSafeBasedOnUsageNote: false)
@@ -94,7 +94,7 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
   }
 `);
 
-export const ChangesBlock_SchemaChangeFragment = graphql(`
+const ChangesBlock_SchemaChangeFragment = graphql(`
   fragment ChangesBlock_SchemaChangeFragment on SchemaChange {
     path
     message(withSafeBasedOnUsageNote: false)
