@@ -5,7 +5,12 @@ import { subHours } from 'date-fns/subHours';
 import { buildASTSchema, parse, print } from 'graphql';
 import { createLogger } from 'graphql-yoga';
 import { graphql } from 'testkit/gql';
-import { OrganizationAccessScope, ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  ProjectType,
+  TargetAccessScope,
+} from 'testkit/gql/graphql';
 import { execute } from 'testkit/graphql';
 import { getServiceHost } from 'testkit/utils';
 import { UTCDate } from '@date-fns/utc';
@@ -15,7 +20,6 @@ import { clickHouseQuery } from '../../../testkit/clickhouse';
 import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 import { CollectedOperation } from '../../../testkit/usage';
-
 
 // We don't use differenceInDays from date-fns as it calculates the difference in days
 // based on daylight savings time, which is not what we want here.
