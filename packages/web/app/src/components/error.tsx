@@ -14,7 +14,7 @@ export function ErrorComponent(props: { error: any }) {
     void flush(2000);
   }, []);
 
-  const isLoggedIn = (session.loading === false && session?.doesSessionExist === true) || false;
+  const isLoggedIn = !session.loading && session.doesSessionExist;
 
   return (
     <div className="flex size-full items-center justify-center">
@@ -41,7 +41,7 @@ export function ErrorComponent(props: { error: any }) {
               <p>
                 If you wish to track it later or share more details with us,{' '}
                 <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
-                  <a href="emailto:support@graphql-hive.com">you can use the support</a>
+                  <a href="mailto:support@graphql-hive.com">you can use the support</a>
                 </Button>
                 .
               </p>

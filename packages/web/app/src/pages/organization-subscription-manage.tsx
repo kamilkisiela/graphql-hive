@@ -280,7 +280,7 @@ function Inner(props: {
     if (plan === 'ENTERPRISE') {
       return (
         <Button type="button" asChild className="mt-2">
-          <a href="emailto:contact@graphql-hive.com">Contact Us</a>
+          <a href="mailto:contact@graphql-hive.com">Contact Us</a>
         </Button>
       );
     }
