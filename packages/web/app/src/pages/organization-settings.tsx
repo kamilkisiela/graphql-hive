@@ -14,15 +14,13 @@ import {
 } from '@/components/ui/card';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
+import { DeleteOrganizationModal } from '@/components/ui/modal/delete-organization';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
 import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { Input } from '@/components/v2/input';
-import {
-  DeleteOrganizationModal,
-  TransferOrganizationOwnershipModal,
-} from '@/components/v2/modals';
+import { TransferOrganizationOwnershipModal } from '@/components/v2/modals';
 import { Tag } from '@/components/v2/tag';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';

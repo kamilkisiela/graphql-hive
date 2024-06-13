@@ -60,7 +60,7 @@ const formSchema = z.object({
 });
 
 export const CreateOrganizationForm = () => {
-  const [mutation, mutate] = useMutation(CreateOrganizationMutation);
+  const [_, mutate] = useMutation(CreateOrganizationMutation);
   const { toast } = useToast();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,17 +69,16 @@ export const CreateOrganizationForm = () => {
     defaultValues: {
       name: '',
     },
-    disabled: mutation.fetching,
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const mutation = await mutate({
+    const { data, error } = await mutate({
       input: {
         name: values.name,
       },
     });
 
-    if (mutation.data?.createOrganization.ok) {
+    if (data?.createOrganization.ok) {
       toast({
         title: 'Organization created',
         description: `You are now an admin of "${values.name}" organization.`,
@@ -88,18 +87,18 @@ export const CreateOrganizationForm = () => {
         to: '/$organizationId',
         params: {
           organizationId:
-            mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
+            data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
         },
       });
-    } else if (mutation.data?.createOrganization.error?.inputErrors?.name) {
+    } else if (data?.createOrganization.error?.inputErrors?.name) {
       form.setError('name', {
         type: 'manual',
-        message: mutation.data.createOrganization.error.inputErrors.name,
+        message: data.createOrganization.error.inputErrors.name,
       });
-    } else if (mutation.error) {
+    } else if (error) {
       toast({
         title: 'Failed to create organization',
-        description: mutation.error.message,
+        description: error.message,
       });
     }
   }
@@ -134,7 +133,9 @@ export const CreateOrganizationForm = () => {
               type="submit"
               className="w-full"
               variant="default"
-              disabled={form.formState.disabled}
+              disabled={
+                form.formState.isSubmitting || !form.formState.isValid || form.formState.disabled
+              }
             >
               {form.formState.isSubmitting ? (
                 <>

@@ -1,14 +1,25 @@
 import { ReactElement, useState } from 'react';
-import { useFormik } from 'formik';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Accordion, CopyValue, Input, Modal, Tag } from '@/components/v2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { Accordion, CopyValue, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { RegistryAccessScope } from '@/lib/access/common';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export const CreateAccessToken_CreateTokenMutation = graphql(`
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
@@ -63,11 +74,7 @@ export function CreateAccessTokenModal(props: {
   const organization = organizationQuery.data?.organization?.organization;
 
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex h-5/6 w-[650px] overflow-hidden"
-    >
+    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
       {organization ? (
         <ModalContent
           organization={organization}
@@ -76,8 +83,22 @@ export function CreateAccessTokenModal(props: {
           targetId={props.targetId}
           toggleModalOpen={toggleModalOpen}
         />
-      ) : null}
-    </Modal>
+      ) : (
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Organization not found</DialogTitle>
+            <DialogDescription>
+              The organization you are trying to access does not exist.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="primary" size="lg" className="ml-auto" onClick={toggleModalOpen}>
+              Ok, got it!
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      )}
+    </Dialog>
   );
 }
 
@@ -97,20 +118,26 @@ function getFinalTargetAccessScopes(
   if (selectedScope === 'no-access') {
     return [];
   }
-  /** When RegistryWrite got selected, we also need to provide RegistryRead.  */
   if (selectedScope === TargetAccessScope.RegistryWrite) {
     return [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite];
   }
   return [TargetAccessScope.RegistryRead];
 }
 
-function ModalContent(props: {
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: 'Token description is required',
+  }),
+});
+
+export function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
   organizationId: string;
   projectId: string;
   targetId: string;
   toggleModalOpen: () => void;
 }): ReactElement {
+  const { toast } = useToast();
   const organization = useFragment(
     CreateAccessTokenModalContent_OrganizationFragment,
     props.organization,
@@ -126,74 +153,89 @@ function ModalContent(props: {
     passMemberScopes: false,
   });
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+    },
+  });
+
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
-      initialValues: { name: '' },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Must enter description'),
-      }),
-      async onSubmit(values) {
-        await mutate({
-          input: {
-            organization: props.organizationId,
-            project: props.projectId,
-            target: props.targetId,
-            name: values.name,
-            organizationScopes: [],
-            projectScopes: [],
-            targetScopes: getFinalTargetAccessScopes(selectedScope),
-          },
-        });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { error } = await mutate({
+      input: {
+        organization: props.organizationId,
+        project: props.projectId,
+        target: props.targetId,
+        name: values.name,
+        organizationScopes: [],
+        projectScopes: [],
+        targetScopes: getFinalTargetAccessScopes(selectedScope),
       },
     });
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to create token',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Token created',
+        description: 'The token has been successfully created.',
+      });
+    }
+  }
 
   const noPermissionsSelected = selectedScope === 'no-access';
+  if (mutation.data?.createToken.ok) {
+    return (
+      <DialogContent>
+        <DialogHeader className="flex flex-col gap-5">
+          <DialogTitle>Token successfully created!</DialogTitle>
+          <DialogDescription className="flex flex-col gap-5">
+            <CopyValue value={mutation.data.createToken.ok.secret} />
+            <Tag color="green">
+              This is your unique API key and it is non-recoverable. If you lose this key, you will
+              need to create a new one.
+            </Tag>
+          </DialogDescription>
+        </DialogHeader>
 
-  return (
-    <>
-      {mutation.data?.createToken.ok ? (
-        <div className="flex grow flex-col gap-5">
-          <Heading className="text-center">Token successfully created!</Heading>
-          <CopyValue value={mutation.data.createToken.ok.secret} />
-          <Tag color="green">
-            This is your unique API key and it is non-recoverable. If you lose this key, you will
-            need to create a new one.
-          </Tag>
-          <div className="grow" />
+        <DialogFooter className="sm:justify-start">
           <Button variant="primary" size="lg" className="ml-auto" onClick={props.toggleModalOpen}>
             Ok, got it!
           </Button>
-        </div>
-      ) : (
-        <form className="flex grow flex-col gap-5" onSubmit={handleSubmit}>
-          <div className="shrink-0">
-            <div className="flex-none">
-              <Heading className="mb-2 text-center">Create an access token</Heading>
-              <p className="mb-2 text-sm text-gray-500">
-                To access GraphQL Hive, your application or tool needs an active API key.
-              </p>
+        </DialogFooter>
+      </DialogContent>
+    );
+  }
 
-              <Input
-                placeholder="Token description"
-                name="name"
-                value={values.name}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={isSubmitting}
-                isInvalid={touched.name && !!errors.name}
-                className="w-full"
-              />
-            </div>
-            {touched.name && errors.name && (
-              <div className="mt-2 text-sm text-red-500">{errors.name}</div>
-            )}
-            {mutation.data?.createToken.error && (
-              <div className="mt-2 text-sm text-red-500">
-                {mutation.data?.createToken.error.message}
-              </div>
-            )}
-          </div>
+  return (
+    <DialogContent>
+      <Form {...form}>
+        <form className="flex grow flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <DialogHeader>
+            <DialogTitle>Create an access token</DialogTitle>
+            <DialogDescription>
+              To access GraphQL Hive, your application or tool needs an active API key.
+            </DialogDescription>
+          </DialogHeader>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="Token description" autoComplete="off" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
           <div className="flex flex-1 flex-col overflow-hidden">
             <Accordion defaultValue="Permissions">
               <Accordion.Item value="Permissions">
@@ -221,31 +263,27 @@ function ModalContent(props: {
               </Accordion.Item>
             </Accordion>
           </div>
-          <div className="shrink-0">
-            {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
-
-            <div className="flex w-full gap-2">
-              <Button
-                type="button"
-                size="lg"
-                className="w-full justify-center"
-                onClick={props.toggleModalOpen}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full justify-center"
-                variant="primary"
-                disabled={isSubmitting || noPermissionsSelected}
-              >
-                Generate Token
-              </Button>
-            </div>
-          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              size="lg"
+              className="w-full justify-center"
+              onClick={props.toggleModalOpen}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full justify-center"
+              variant="primary"
+              disabled={form.formState.isSubmitting || noPermissionsSelected}
+            >
+              Generate Token
+            </Button>
+          </DialogFooter>
         </form>
-      )}
-    </>
+      </Form>
+    </DialogContent>
   );
 }

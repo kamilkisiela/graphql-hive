@@ -3,8 +3,8 @@ import { LogOutIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DottedBackground } from '@/components/ui/dotted-background';
 import { Meta } from '@/components/ui/meta';
+import { CreateOrganizationForm } from '@/components/ui/modal/create-organization';
 import { HiveLogo } from '@/components/v2/icon';
-import { CreateOrganizationForm } from '@/components/v2/modals/create-organization';
 import { Link, useRouter } from '@tanstack/react-router';
 
 export function NewOrgPage(): ReactElement {
