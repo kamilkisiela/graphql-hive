@@ -1,3 +1,11 @@
+<!-- Graphql logo readme banner START -->
+<p style="float: right; margin: 0 0 10px 10px;">
+  <a href="https://the-guild.dev">
+    <img src="https://the-guild-org.github.io/press-kit/full-dark-logo.svg" alt="Created by The guild" style="width: 100px;"/>
+  </a>
+</p>
+<!-- Graphql logo readme banner END -->
+
 # GraphQL Hive
 
 GraphQL Hive provides all the tools the get visibility of your GraphQL architecture at all stages,
@@ -13,7 +21,7 @@ from standalone APIs to composed schemas (Federation, Stitching).
 GraphQL Hive has been built with 3 main objectives in mind:
 
 - **Help GraphQL developers to get to know their GraphQL APIs** a little more with our Schema
-  Registry, Performance Monitoring, Alerts, and Integrations.
+  Registry, Performance Monitoring, Alerts, and Integrations.Ø
 - **Support all kinds of GraphQL APIs**, from Federation, and Stitching, to standalone APIs.
 - **Open Source at the heart**: 100% open-source and built in public with the community.
 - **A plug and play Cloud solution**: to give access to Hive to most people with a generous free

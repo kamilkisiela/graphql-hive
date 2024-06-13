@@ -475,8 +475,8 @@ export class SchemaPublisher {
     const activeContracts =
       project.type === ProjectType.FEDERATION
         ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
-            targetId: target.id,
-          })
+          targetId: target.id,
+        })
         : null;
 
     let checkResult: SchemaCheckResult;
@@ -529,8 +529,8 @@ export class SchemaPublisher {
 
     const schemaVersionContracts = comparedSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
-          schemaVersionId: comparedSchemaVersion.id,
-        })
+        schemaVersionId: comparedSchemaVersion.id,
+      })
       : null;
 
     switch (project.type) {
@@ -541,17 +541,17 @@ export class SchemaPublisher {
           selector,
           latest: latestVersion
             ? {
-                isComposable: latestVersion.valid,
-                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: [ensureSingleSchema(latestVersion.schemas)],
-              }
+              isComposable: latestVersion.valid,
+              sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: [ensureSingleSchema(latestVersion.schemas)],
+            }
             : null,
           latestComposable: latestComposableVersion
             ? {
-                isComposable: latestComposableVersion.valid,
-                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
-              }
+              isComposable: latestComposableVersion.valid,
+              sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
+            }
             : null,
           baseSchema,
           project,
@@ -581,17 +581,17 @@ export class SchemaPublisher {
           selector,
           latest: latestVersion
             ? {
-                isComposable: latestVersion.valid,
-                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
+              isComposable: latestVersion.valid,
+              sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: ensureCompositeSchemas(latestVersion.schemas),
+            }
             : null,
           latestComposable: latestComposableVersion
             ? {
-                isComposable: latestComposableVersion.valid,
-                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
-              }
+              isComposable: latestComposableVersion.valid,
+              sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+            }
             : null,
           schemaVersionContractNames:
             schemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
@@ -632,15 +632,15 @@ export class SchemaPublisher {
         schemaPolicyErrors: checkResult.state.schemaPolicy?.errors ?? null,
         ...(checkResult.state.composition.errors
           ? {
-              schemaCompositionErrors: checkResult.state.composition.errors,
-              compositeSchemaSDL: null,
-              supergraphSDL: null,
-            }
+            schemaCompositionErrors: checkResult.state.composition.errors,
+            compositeSchemaSDL: null,
+            supergraphSDL: null,
+          }
           : {
-              schemaCompositionErrors: null,
-              compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
-              supergraphSDL: checkResult.state.composition.supergraphSDL,
-            }),
+            schemaCompositionErrors: null,
+            compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
+            supergraphSDL: checkResult.state.composition.supergraphSDL,
+          }),
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
@@ -737,20 +737,20 @@ export class SchemaPublisher {
         schemaPolicyErrors: null,
         ...(compositeSchemaSdl
           ? {
-              isSuccess: true,
-              schemaCompositionErrors: null,
-              compositeSchemaSDL: compositeSchemaSdl,
-              supergraphSDL: supergraphSdl,
-            }
+            isSuccess: true,
+            schemaCompositionErrors: null,
+            compositeSchemaSDL: compositeSchemaSdl,
+            supergraphSDL: supergraphSdl,
+          }
           : {
-              isSuccess: false,
-              schemaCompositionErrors: assertNonNull(
-                compositionErrors,
-                'Composite Schema SDL, but no composition errors.',
-              ),
-              compositeSchemaSDL: null,
-              supergraphSDL: null,
-            }),
+            isSuccess: false,
+            schemaCompositionErrors: assertNonNull(
+              compositionErrors,
+              'Composite Schema SDL, but no composition errors.',
+            ),
+            compositeSchemaSDL: null,
+            supergraphSDL: null,
+          }),
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
@@ -768,26 +768,26 @@ export class SchemaPublisher {
         }),
         contracts: schemaVersionContracts
           ? await Promise.all(
-              schemaVersionContracts?.edges.map(async edge => ({
-                contractId: edge.node.contractId,
-                contractName: edge.node.contractName,
-                comparedContractVersionId:
-                  edge.node.schemaCompositionErrors === null
-                    ? edge.node.id
-                    : // if this version is not composable - we need to get the previous composable version
-                      await this.contracts
-                        .getDiffableContractVersionForContractVersion({
-                          contractVersion: edge.node,
-                        })
-                        .then(contractVersion => contractVersion?.id ?? null),
-                isSuccess: !!edge.node.schemaCompositionErrors,
-                compositeSchemaSdl: edge.node.compositeSchemaSdl,
-                supergraphSchemaSdl: edge.node.supergraphSdl,
-                schemaCompositionErrors: edge.node.schemaCompositionErrors,
-                breakingSchemaChanges: null,
-                safeSchemaChanges: null,
-              })),
-            )
+            schemaVersionContracts?.edges.map(async edge => ({
+              contractId: edge.node.contractId,
+              contractName: edge.node.contractName,
+              comparedContractVersionId:
+                edge.node.schemaCompositionErrors === null
+                  ? edge.node.id
+                  : // if this version is not composable - we need to get the previous composable version
+                  await this.contracts
+                    .getDiffableContractVersionForContractVersion({
+                      contractVersion: edge.node,
+                    })
+                    .then(contractVersion => contractVersion?.id ?? null),
+              isSuccess: !!edge.node.schemaCompositionErrors,
+              compositeSchemaSdl: edge.node.compositeSchemaSdl,
+              supergraphSchemaSdl: edge.node.supergraphSdl,
+              schemaCompositionErrors: edge.node.schemaCompositionErrors,
+              breakingSchemaChanges: null,
+              safeSchemaChanges: null,
+            })),
+          )
           : null,
       });
     }
@@ -1274,8 +1274,8 @@ export class SchemaPublisher {
         const contracts =
           project.type === ProjectType.FEDERATION
             ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
-                targetId: input.target.id,
-              })
+              targetId: input.target.id,
+            })
             : null;
 
         const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
@@ -1297,10 +1297,10 @@ export class SchemaPublisher {
           },
           latestComposable: latestComposableVersion
             ? {
-                isComposable: latestComposableVersion.valid,
-                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
-              }
+              isComposable: latestComposableVersion.valid,
+              sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+            }
             : null,
           baseSchema,
           project,
@@ -1346,17 +1346,17 @@ export class SchemaPublisher {
                 })) ?? null,
               ...(deleteResult.state.fullSchemaSdl
                 ? {
-                    compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
-                    supergraphSDL: deleteResult.state.supergraph,
-                    schemaCompositionErrors: null,
-                    tags: deleteResult.state.tags,
-                  }
+                  compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
+                  supergraphSDL: deleteResult.state.supergraph,
+                  schemaCompositionErrors: null,
+                  tags: deleteResult.state.tags,
+                }
                 : {
-                    compositeSchemaSDL: null,
-                    supergraphSDL: null,
-                    schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
-                    tags: null,
-                  }),
+                  compositeSchemaSDL: null,
+                  supergraphSDL: null,
+                  schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
+                  tags: null,
+                }),
               actionFn: async () => {
                 if (deleteResult.state.composable) {
                   const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
@@ -1619,8 +1619,8 @@ export class SchemaPublisher {
     const contracts =
       project.type === ProjectType.FEDERATION
         ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
-            targetId: target.id,
-          })
+          targetId: target.id,
+        })
         : null;
 
     const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
@@ -1641,8 +1641,8 @@ export class SchemaPublisher {
       : latestSchemaVersion;
     const schemaVersionContracts = comparedSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
-          schemaVersionId: comparedSchemaVersion.id,
-        })
+        schemaVersionId: comparedSchemaVersion.id,
+      })
       : null;
 
     let publishResult: SchemaPublishResult;
@@ -1658,17 +1658,17 @@ export class SchemaPublisher {
           input,
           latest: latestVersion
             ? {
-                isComposable: latestVersion.valid,
-                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: [ensureSingleSchema(latestVersion.schemas)],
-              }
+              isComposable: latestVersion.valid,
+              sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: [ensureSingleSchema(latestVersion.schemas)],
+            }
             : null,
           latestComposable: latestComposable
             ? {
-                isComposable: latestComposable.valid,
-                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: [ensureSingleSchema(latestComposable.schemas)],
-              }
+              isComposable: latestComposable.valid,
+              sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: [ensureSingleSchema(latestComposable.schemas)],
+            }
             : null,
           organization,
           project,
@@ -1690,17 +1690,17 @@ export class SchemaPublisher {
           input,
           latest: latestVersion
             ? {
-                isComposable: latestVersion.valid,
-                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
-              }
+              isComposable: latestVersion.valid,
+              sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: ensureCompositeSchemas(latestVersion.schemas),
+            }
             : null,
           latestComposable: latestComposable
             ? {
-                isComposable: latestComposable.valid,
-                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
-                schemas: ensureCompositeSchemas(latestComposable.schemas),
-              }
+              isComposable: latestComposable.valid,
+              sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
+              schemas: ensureCompositeSchemas(latestComposable.schemas),
+            }
             : null,
           schemaVersionContractNames:
             schemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
@@ -1727,17 +1727,17 @@ export class SchemaPublisher {
       const linkToWebsite =
         typeof this.schemaModuleConfig.schemaPublishLink === 'function'
           ? this.schemaModuleConfig.schemaPublishLink({
-              organization: {
-                cleanId: organization.cleanId,
-              },
-              project: {
-                cleanId: project.cleanId,
-              },
-              target: {
-                cleanId: target.cleanId,
-              },
-              version: latestVersion ? { id: latestVersion.version } : undefined,
-            })
+            organization: {
+              cleanId: organization.cleanId,
+            },
+            project: {
+              cleanId: project.cleanId,
+            },
+            target: {
+              cleanId: target.cleanId,
+            },
+            version: latestVersion ? { id: latestVersion.version } : undefined,
+          })
           : null;
 
       if (githubCheckRun) {
@@ -1794,15 +1794,15 @@ export class SchemaPublisher {
         }>
       ).concat(
         getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)?.changes ??
-          [],
+        [],
         getReasonByCode(publishResult.reasons, PublishFailureReasonCode.CompositionFailure)
           ?.compositionErrors ?? [],
         getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MetadataParsingFailure)
           ? [
-              {
-                message: 'Failed to parse metadata',
-              },
-            ]
+            {
+              message: 'Failed to parse metadata',
+            },
+          ]
           : [],
       );
 
@@ -1928,23 +1928,22 @@ export class SchemaPublisher {
         })) ?? null,
       ...(fullSchemaSdl
         ? {
-            compositeSchemaSDL: fullSchemaSdl,
-            supergraphSDL: supergraph,
-            schemaCompositionErrors: null,
-            tags: publishResult.state?.tags ?? null,
-          }
+          compositeSchemaSDL: fullSchemaSdl,
+          supergraphSDL: supergraph,
+          schemaCompositionErrors: null,
+          tags: publishResult.state?.tags ?? null,
+        }
         : {
-            compositeSchemaSDL: null,
-            supergraphSDL: null,
-            schemaCompositionErrors: assertNonNull(
-              publishResult.state.compositionErrors,
-              "Can't be null",
-            ),
-            tags: null,
-          }),
+          compositeSchemaSDL: null,
+          supergraphSDL: null,
+          schemaCompositionErrors: assertNonNull(
+            publishResult.state.compositionErrors,
+            "Can't be null",
+          ),
+          tags: null,
+        }),
     });
-    console.log('schemaVersion', schemaVersion);
-    console.log('changes', changes);
+
     if (changes.length > 0 || errors.length > 0) {
       void this.alertsManager
         .triggerSchemaChangeNotifications({
@@ -1969,21 +1968,21 @@ export class SchemaPublisher {
     const linkToWebsite =
       typeof this.schemaModuleConfig.schemaPublishLink === 'function'
         ? this.schemaModuleConfig.schemaPublishLink({
-            organization: {
-              cleanId: organization.cleanId,
-            },
-            project: {
-              cleanId: project.cleanId,
-            },
-            target: {
-              cleanId: target.cleanId,
-            },
-            version: latestVersion
-              ? {
-                  id: schemaVersion.id,
-                }
-              : undefined,
-          })
+          organization: {
+            cleanId: organization.cleanId,
+          },
+          project: {
+            cleanId: project.cleanId,
+          },
+          target: {
+            cleanId: target.cleanId,
+          },
+          version: latestVersion
+            ? {
+              id: schemaVersion.id,
+            }
+            : undefined,
+        })
         : null;
 
     if (githubCheckRun) {

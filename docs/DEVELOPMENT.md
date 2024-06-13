@@ -6,7 +6,8 @@ Developing Hive locally requires you to have the following software installed lo
 
 - Node.js 21 (or `nvm` or `fnm`)
 - pnpm v9
-- Docker
+- Docker version 26.1.1 or later(previous versions will not work correctly on arm64)
+- make sure these ports are free: 5432, 6379, 9000, 9001, 8123, 9092, 8081, 8082, 9644, 3567, 7043
 
 ## Setup Instructions
 
