@@ -26,7 +26,7 @@ services:
   clickhouse:
     image: clickhouse/clickhouse-server:24.2-alpine
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      test: ['CMD', 'wget', '--spider', '-q', 'http://0.0.0.0:8123/ping']
       interval: 5s
       timeout: 5s
       retries: 6

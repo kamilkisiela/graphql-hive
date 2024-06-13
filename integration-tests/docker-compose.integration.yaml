@@ -221,6 +221,7 @@ services:
     volumes:
       - ./.hive/clickhouse/logs:/var/log/clickhouse-server
       - ./.hive/clickhouse/db:/var/lib/clickhouse
+      - ./configs/clickhouse:/etc/clickhouse-server/conf.d
 
   supertokens:
     ports:

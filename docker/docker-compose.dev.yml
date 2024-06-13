@@ -75,7 +75,7 @@ services:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
     healthcheck:
-      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      test: ['CMD', 'wget', '--spider', '-q', 'http://0.0.0.0:8123/ping']
       interval: 30s
       timeout: 5s
       retries: 3
