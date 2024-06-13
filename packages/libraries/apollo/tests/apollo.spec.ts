@@ -137,11 +137,7 @@ test('should capture client name and version headers', async () => {
     ],
   });
 
-  await startStandaloneServer(apollo, {
-    listen: {
-      port: 4000,
-    },
-  });
+  await startStandaloneServer(apollo);
 
   await fetch('http://localhost:4000/graphql', {
     method: 'POST',
@@ -387,6 +383,7 @@ describe('built-in HTTP usage reporting', async () => {
       })().catch(reject);
     });
     graphqlScope.done();
+    await testServer.stop();
   });
 
   test('successful mutation operation is reported', async () => {
@@ -476,6 +473,7 @@ describe('built-in HTTP usage reporting', async () => {
     });
 
     graphqlScope.done();
+    await testServer.stop();
   });
 
   test('operation error is reported', async () => {
@@ -586,6 +584,7 @@ describe('built-in HTTP usage reporting', async () => {
     });
 
     graphqlScope.done();
+    await testServer.stop();
   });
 
   test('custom client info based on context', async () => {
@@ -691,6 +690,52 @@ describe('built-in HTTP usage reporting', async () => {
     });
 
     graphqlScope.done();
+    await testServer.stop();
+  });
+
+  test('operation with non-existing field is handled gracefully', async ({ expect }) => {
+    const testServer = new ApolloServer({
+      typeDefs: /* GraphQL */ `
+        type Query {
+          hi: String
+        }
+      `,
+      plugins: [
+        useHive({
+          token: 'token',
+          selfHosting: {
+            applicationUrl: 'http://localhost/foo',
+            graphqlEndpoint: 'http://localhost/graphql',
+            usageEndpoint: 'http://localhost/usage',
+          },
+          usage: {
+            endpoint: 'http://localhost/usage',
+          },
+          enabled: true,
+          debug: false,
+          agent: {
+            maxSize: 1,
+            logger: createLogger(),
+          },
+        }),
+      ],
+    });
+
+    const response = await testServer.executeOperation({
+      query: '{hello}',
+    });
+
+    expect(response.http.status).toBe(400);
+    expect(response.body).toMatchObject({
+      singleResult: {
+        errors: [
+          {
+            message: 'Cannot query field "hello" on type "Query".',
+          },
+        ],
+      },
+    });
+    await testServer.stop();
   });
 });
 
