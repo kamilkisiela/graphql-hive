@@ -2,7 +2,7 @@ import { differenceInHours } from 'date-fns/differenceInHours';
 import { formatISO } from 'date-fns/formatISO';
 import { parse as parseDate } from 'date-fns/parse';
 import { subHours } from 'date-fns/subHours';
-import { buildASTSchema, parse, print } from 'graphql';
+import { buildASTSchema, buildSchema, parse, print, TypeInfo } from 'graphql';
 import { createLogger } from 'graphql-yoga';
 import { graphql } from 'testkit/gql';
 import {
@@ -17,6 +17,7 @@ import { UTCDate } from '@date-fns/utc';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
 import { createHive } from '../../../../packages/libraries/core/src';
+import { collectSchemaCoordinates } from '../../../../packages/libraries/core/src/client/collect-schema-coordinates';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
 import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
@@ -655,7 +656,7 @@ describe('changes with usage data', () => {
     reportOperation: {
       operation: string;
       operationName: string;
-      fields: string[];
+      fields: string[] | 'auto-collect';
     };
     expectedSchemaCheckTypename: {
       beforeReportedOperation: 'SchemaCheckSuccess' | 'SchemaCheckError';
@@ -701,12 +702,29 @@ describe('changes with usage data', () => {
       expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
       expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
+      let fields: string[] = [];
+
+      if (input.reportOperation.fields === 'auto-collect') {
+        const schema = buildSchema(input.publishSdl);
+        fields = Array.from(
+          collectSchemaCoordinates({
+            documentNode: parse(input.reportOperation.operation),
+            variables: null,
+            processVariables: false,
+            schema,
+            typeInfo: new TypeInfo(schema),
+          }),
+        );
+      } else {
+        fields = input.reportOperation.fields;
+      }
+
       const collectResult = await token.collectLegacyOperations([
         {
           timestamp: Date.now(),
           operation: input.reportOperation.operation,
           operationName: input.reportOperation.operationName,
-          fields: input.reportOperation.fields,
+          fields,
           execution: {
             ok: true,
             duration: 200_000_000,
@@ -932,6 +950,88 @@ describe('changes with usage data', () => {
       fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
     },
   });
+
+  testChangesWithUsageData({
+    title: 'removing an unused union member is safe',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image | Video
+
+      type Image {
+        url: String
+      }
+
+      type Video {
+        url: String
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image
+
+      type Image {
+        url: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it changes the type of the field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be safe, because union member is not used
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query imageOnly { media { ... on Image { url } } }',
+      operationName: 'imageOnly',
+      fields: 'auto-collect',
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'removing a used union member is a breaking change',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image | Video
+
+      type Image {
+        url: String
+      }
+
+      type Video {
+        url: String
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        media: Media
+      }
+
+      union Media = Image
+
+      type Image {
+        url: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it changes the type of the field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be breaking, because union member is used
+      afterReportedOperation: 'SchemaCheckError',
+    },
+    reportOperation: {
+      operation: 'query videoOnly { media { ... on Video { url } } }',
+      operationName: 'videoOnly',
+      fields: 'auto-collect',
+    },
+  });
 });
 
 test.concurrent('number of produced and collected operations should match', async () => {
@@ -997,7 +1097,7 @@ test.concurrent('number of produced and collected operations should match', asyn
     SELECT
       target, client_name, hash, sum(total) as total
     FROM clients_daily
-    WHERE 
+    WHERE
       timestamp >= subtractDays(now(), 30)
       AND timestamp <= now()
       AND target = '${target.id}'
@@ -1482,7 +1582,7 @@ test.concurrent('ensure correct data', async () => {
       quantilesMerge(0.99)(duration_quantiles) as quantiles,
       timestamp,
       expires_at
-    FROM operations_daily 
+    FROM operations_daily
     WHERE target = '${target.id}'
     GROUP BY target, hash, timestamp, expires_at
   `);
@@ -1519,7 +1619,7 @@ test.concurrent('ensure correct data', async () => {
       coordinate,
       timestamp,
       expires_at
-    FROM coordinates_daily 
+    FROM coordinates_daily
     WHERE target = '${target.id}'
     GROUP BY target, hash, coordinate, timestamp, expires_at
   `);
@@ -1801,7 +1901,7 @@ test.concurrent('ensure correct data when data retention period is non-default',
       sum(total_ok) as total_ok,
       hash,
       quantilesMerge(0.99)(duration_quantiles) as quantiles
-    FROM operations_daily 
+    FROM operations_daily
     WHERE target = '${target.id}'
     GROUP BY target, hash, timestamp, expires_at
   `);
@@ -1838,7 +1938,7 @@ test.concurrent('ensure correct data when data retention period is non-default',
       coordinate,
       timestamp,
       expires_at
-    FROM coordinates_daily 
+    FROM coordinates_daily
     WHERE target = '${target.id}'
     GROUP BY target, hash, coordinate, timestamp, expires_at
   `);
