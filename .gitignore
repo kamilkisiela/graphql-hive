@@ -140,3 +140,4 @@ deployment/utils/vector.types.ts
 deployment/utils/contour.types.ts
 
 schema.graphql
+resolvers.generated.ts
