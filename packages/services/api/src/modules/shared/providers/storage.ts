@@ -93,7 +93,7 @@ export interface Storage {
   getOrganizationByGitHubInstallationId(_: {
     installationId: string;
   }): Promise<Organization | null>;
-  getOrganization(_: OrganizationSelector): Promise<Organization | never>;
+  getOrganization(_: { organization: string }): Promise<Organization | never>;
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(

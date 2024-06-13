@@ -82,6 +82,7 @@ export class AppDeploymentsManager {
     });
 
     return await this.appDeployments.createAppDeployment({
+      organizationId: tokenRecord.organization,
       targetId: tokenRecord.target,
       appDeployment: args.appDeployment,
     });
@@ -133,6 +134,7 @@ export class AppDeploymentsManager {
     });
 
     return await this.appDeployments.activateAppDeployment({
+      organizationId: tokenRecord.organization,
       targetId: tokenRecord.target,
       appDeployment: args.appDeployment,
     });
@@ -155,6 +157,7 @@ export class AppDeploymentsManager {
     });
 
     return await this.appDeployments.retireAppDeployment({
+      organizationId: target.orgId,
       targetId: target.id,
       appDeployment: args.appDeployment,
     });

@@ -22,6 +22,9 @@ const AppDeploymentVersionModel = z
   .max(256, 'Must be at most 256 characters long')
   .regex(/^[a-zA-Z0-9._-]+$/, "Can only contain letters, numbers, '.', '_', and '-'");
 
+const noAccessToAppDeploymentsMessage =
+  'This organization has no access to app deployments. Please contact the Hive team for early access.';
+
 @Injectable({
   scope: Scope.Operation,
   global: true,
@@ -90,16 +93,47 @@ export class AppDeployments {
   }
 
   async createAppDeployment(args: {
+    organizationId: string;
     targetId: string;
     appDeployment: {
       name: string;
       version: string;
     };
   }) {
+    this.logger.debug(
+      'create app deployment (targetId=%s, appName=%s, appVersion=%s)',
+      args.targetId,
+      args.appDeployment.name,
+      args.appDeployment.version,
+    );
+
+    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+    if (organization.featureFlags.appDeployments === false) {
+      this.logger.debug(
+        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        args.targetId,
+        args.appDeployment.name,
+        args.appDeployment.version,
+      );
+      return {
+        type: 'error' as const,
+        error: {
+          message: noAccessToAppDeploymentsMessage,
+          details: null,
+        },
+      };
+    }
+
     const nameValidationResult = AppDeploymentNameModel.safeParse(args.appDeployment.name);
     const versionValidationResult = AppDeploymentVersionModel.safeParse(args.appDeployment.version);
 
     if (nameValidationResult.success === false || versionValidationResult.success === false) {
+      this.logger.debug(
+        'app deployment input validation failed (targetId=%s, appName=%s, appVersion=%s)',
+        args.targetId,
+        args.appDeployment.name,
+        args.appDeployment.version,
+      );
       return {
         type: 'error' as const,
         error: {
@@ -135,10 +169,7 @@ export class AppDeployments {
           type: 'error' as const,
           error: {
             message: 'App deployment already exists',
-            details: {
-              appName: null,
-              appVersion: null,
-            },
+            details: null,
           },
         };
       }
@@ -187,6 +218,22 @@ export class AppDeployments {
       body: string;
     }>;
   }) {
+    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+
+    if (organization.featureFlags.appDeployments === false) {
+      this.logger.debug(
+        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+      );
+
+      return {
+        type: 'error' as const,
+        error: {
+          message: noAccessToAppDeploymentsMessage,
+          details: null,
+        },
+      };
+    }
+
     // todo: validate input
 
     const appDeployment = await this.findAppDeployment({
@@ -276,6 +323,7 @@ export class AppDeployments {
   }
 
   async activateAppDeployment(args: {
+    organizationId: string;
     targetId: string;
     appDeployment: {
       name: string;
@@ -283,6 +331,19 @@ export class AppDeployments {
     };
   }) {
     this.logger.debug('activate app deployment (targetId=%s, appName=%s, appVersion=%s)');
+
+    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+    if (organization.featureFlags.appDeployments === false) {
+      this.logger.debug(
+        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+      );
+
+      return {
+        type: 'error' as const,
+        message: noAccessToAppDeploymentsMessage,
+      };
+    }
+
     const appDeployment = await this.findAppDeployment({
       targetId: args.targetId,
       name: args.appDeployment.name,
@@ -378,6 +439,7 @@ export class AppDeployments {
   }
 
   async retireAppDeployment(args: {
+    organizationId: string;
     targetId: string;
     appDeployment: {
       name: string;
@@ -385,6 +447,19 @@ export class AppDeployments {
     };
   }) {
     this.logger.debug('activate app deployment (targetId=%s, appName=%s, appVersion=%s)');
+
+    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+    if (organization.featureFlags.appDeployments === false) {
+      this.logger.debug(
+        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+      );
+
+      return {
+        type: 'error' as const,
+        message: noAccessToAppDeploymentsMessage,
+      };
+    }
+
     const appDeployment = await this.findAppDeployment({
       targetId: args.targetId,
       name: args.appDeployment.name,

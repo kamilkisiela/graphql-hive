@@ -4870,6 +4870,8 @@ const FeatureFlagsModel = zod
   .object({
     compareToPreviousComposableVersion: zod.boolean().default(false),
     forceLegacyCompositionInTargets: zod.array(zod.string()).default([]),
+    /** whether app deployments are enabled for the given organization */
+    appDeployments: zod.boolean().default(false),
   })
   .optional()
   .nullable()
@@ -4879,6 +4881,7 @@ const FeatureFlagsModel = zod
       val ?? {
         compareToPreviousComposableVersion: false,
         forceLegacyCompositionInTargets: [],
+        appDeployments: false,
       },
   );
 
