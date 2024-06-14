@@ -5,6 +5,7 @@ import githubIntegrationImage from '../../../../public/docs/pages/management/org
 import slackIntegrationImage from '../../../../public/docs/pages/management/org-slack-integration.png'
 import projectGitLinkImage from '../../../../public/docs/pages/management/project-git-link.png'
 import projectHttpAlertImage from '../../../../public/docs/pages/management/project-http-alert.png'
+import msteamsFormImage from '../../../../public/docs/pages/management/project-msteams-alert.png'
 import slackAlertFormImage from '../../../../public/docs/pages/management/project-slack-alert.png'
 
 # Project Management
@@ -144,7 +145,7 @@ Hive project:
 
 You set up Hive MS Teams webhook to receive alerts and notifications from Hive, when an alert or a
 notification is triggered. All you need to do is to provide a valid HTTP URL, and Hive will dispatch
-a `POST` request to that URL, with a JSON payload acceptable by MS Teams. 
+a `POST` request to that URL, with a JSON payload acceptable by MS Teams.
 [MS Teams Webhook JSON example](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#example-of-connector-message)
 
 Typically the webhook URL looks like:
@@ -156,7 +157,11 @@ https://USERNAME.webhook.office.com/webhookb2/XXXXX/IncomingWebhook/YYYY/ZZZZZ
 You can find more information on how to set up a webhook in MS Teams in the
 [official documentation - Create Incoming Webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet).
 
-
+<NextImage
+  alt="MS Teams Alert Configuration"
+  src={msteamsFormImage}
+  className="mt-6 max-w-sm rounded-lg drop-shadow-md"
+/>
 
 #### HTTP Webhook
 
