@@ -1,0 +1,16 @@
+---
+title: MS Teams Webhooks Alerts
+description: Configure MS Teams webhooks to receive alerts and notifications from Hive.
+date: 2024-06-14
+authors: [jiri]
+---
+
+We added support for configuring MS Teams webhooks to receive alerts and notifications from Hive.
+
+![MS Teams Webhook dialog](/changelog/2024-06-14-ms-teams-webhooks-alerts/project-msteams-alert.png)
+
+Before you can start receiving alerts and notifications in MS Teams, you need to configure the
+webhook in the project settings. To do this, navigate to the project settings and click on the
+**Alerts** tab. In the **Alerts** section, click on the **Add channel** button and select **MS Teams
+Webhook** from the dropdown menu. Enter the webhook URL in `Endpoint` field and click **Save**. Then
+you can create an alert that will be triggered when schema change is detected upon publish.
