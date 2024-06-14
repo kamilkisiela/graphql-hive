@@ -68,19 +68,24 @@ export class Proxy {
             },
           },
           routes: routes.map(route => ({
-            conditions: [
+            conditions:
               route.path === '/'
-                ? {
-                    prefix: route.path,
-                  }
-                : {
+                ? [
+                    {
+                      prefix: route.path,
+                    },
+                  ]
+                : [
+                    // Contour does not support Envoy's path_separated_prefix
                     // See: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-path-separated-prefix
-                    // If specified, the route is a path-separated prefix rule meaning that the :path header (without the query string) must either exactly match the path_separated_prefix or have it as a prefix, followed by /
-                    // For example, /api/dev would match /api/dev, /api/dev/, /api/dev/v1, and /api/dev?param=true but would not match /api/developer
-                    // Expect the value to not contain ? or # and not to end in /
-                    path_separated_prefix: route.path,
-                  },
-            ],
+                    // This could help us to avoid the need of two conditions for the same route.
+                    {
+                      exact: route.path,
+                    },
+                    {
+                      prefix: route.path + '/',
+                    },
+                  ],
             services: [
               {
                 name: route.service.metadata.name,
