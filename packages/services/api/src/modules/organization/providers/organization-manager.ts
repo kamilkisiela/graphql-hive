@@ -110,6 +110,10 @@ export class OrganizationManager {
     return this.storage.getOrganizations({ user: user.id });
   }
 
+  getFeatureFlags(selector: OrganizationSelector) {
+    return this.getOrganization(selector).then(organization => organization.featureFlags);
+  }
+
   async canLeaveOrganization({
     organizationId,
     userId,

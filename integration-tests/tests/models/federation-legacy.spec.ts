@@ -284,7 +284,7 @@ describe('publish', () => {
       }),
     ).resolves.toMatchInlineSnapshot(`
       v Published initial schema.
-      i Available at http://localhost:8080/$organization/$project/production
+      i Available at http://localhost:8080/$organization/$project/$target
     `);
 
     await expect(
@@ -308,7 +308,7 @@ describe('publish', () => {
       Safe changes:
       - Field price was added to object type Product
       v Schema published
-      i Available at http://localhost:8080/$organization/$project/production/history/$version
+      i Available at http://localhost:8080/$organization/$project/$target/history/$version
     `);
   });
 });

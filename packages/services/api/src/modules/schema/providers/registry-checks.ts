@@ -233,6 +233,7 @@ export class RegistryChecks {
 
   async composition({
     orchestrator,
+    targetId,
     project,
     organization,
     schemas,
@@ -240,6 +241,7 @@ export class RegistryChecks {
     contracts,
   }: {
     orchestrator: Orchestrator;
+    targetId: string;
     project: Project;
     organization: Organization;
     schemas: Schemas;
@@ -250,7 +252,7 @@ export class RegistryChecks {
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
       {
         external: project.externalComposition,
-        native: this.checkProjectNativeFederationSupport(project, organization),
+        native: this.checkProjectNativeFederationSupport(targetId, project, organization),
         contracts,
       },
     );
@@ -305,6 +307,7 @@ export class RegistryChecks {
     orchestrator: Orchestrator;
     organization: Organization;
     project: Project;
+    targetId: string;
   }): Promise<string | null> {
     this.logger.debug('Retrieve previous version SDL.');
     if (!args.version) {
@@ -328,7 +331,11 @@ export class RegistryChecks {
       args.version.schemas.map(s => this.helper.createSchemaObject(s)),
       {
         external: args.project.externalComposition,
-        native: this.checkProjectNativeFederationSupport(args.project, args.organization),
+        native: this.checkProjectNativeFederationSupport(
+          args.targetId,
+          args.project,
+          args.organization,
+        ),
         contracts: null,
       },
     );
@@ -669,6 +676,7 @@ export class RegistryChecks {
   }
 
   public checkProjectNativeFederationSupport(
+    targetId: string,
     project: Project,
     organization: Organization,
   ): boolean {
@@ -685,6 +693,16 @@ export class RegistryChecks {
         'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
         organization.id,
         project.id,
+      );
+      return false;
+    }
+
+    if (organization.featureFlags.forceLegacyCompositionInTargets.includes(targetId)) {
+      this.logger.warn(
+        'Project is using legacy composition in target, ignoring native Federation support (organization=%s, project=%s, target=%s)',
+        organization.id,
+        project.id,
+        targetId,
       );
       return false;
     }

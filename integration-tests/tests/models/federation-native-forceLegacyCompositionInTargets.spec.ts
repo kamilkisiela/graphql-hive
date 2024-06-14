@@ -1,31 +1,25 @@
+import { updateTargetSchemaComposition } from 'testkit/flow';
 import { ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { normalizeCliOutput } from '../../../scripts/serializers/cli-output';
 import { createCLI, schemaPublish } from '../../testkit/cli';
-import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
 
-type FFValue = boolean | string[];
-type FeatureFlags = [string, FFValue][];
+type TargetOption = 'targetWithNativeComposition' | 'targetWithLegacyComposition';
 
-const cases = [
-  ['default' as const, [] as FeatureFlags],
-  [
-    'compareToPreviousComposableVersion' as const,
-    [['compareToPreviousComposableVersion', true]] as FeatureFlags,
-  ],
-  ['@apollo/federation' as const, [] as FeatureFlags],
-] as const;
+function isLegacyComposition(caseName: TargetOption) {
+  return caseName === 'targetWithLegacyComposition';
+}
 
-const isLegacyComposition = (caseName: string) => caseName === '@apollo/federation';
+const options = ['targetWithNativeComposition', 'targetWithLegacyComposition'] as TargetOption[];
 
 describe('publish', () => {
-  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
+  describe.concurrent.each(options)('%s', caseName => {
     const legacyComposition = isLegacyComposition(caseName);
 
     test.concurrent('accepted: composable', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
       await publish({
         sdl: `type Query { topProductName: String }`,
         serviceName: 'products',
@@ -37,7 +31,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, breaking changes', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
       await publish({
         sdl: /* GraphQL */ `
           type Query {
@@ -66,7 +60,7 @@ describe('publish', () => {
       async () => {
         const {
           cli: { publish },
-        } = await prepare(ffs, legacyComposition);
+        } = await prepare(caseName);
 
         // non-composable
         await publish({
@@ -85,7 +79,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, previous version was not', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // non-composable
       await publish({
@@ -123,7 +117,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, no changes', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // composable
       await publish({
@@ -153,7 +147,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, no changes, no metadata modification', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // composable
       await publish({
@@ -185,7 +179,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, new url', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // composable
       await publish({
@@ -215,7 +209,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, new metadata', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // composable
       await publish({
@@ -247,7 +241,7 @@ describe('publish', () => {
     test.concurrent('rejected: missing service name', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // composable
       await publish({
@@ -264,7 +258,7 @@ describe('publish', () => {
     test.concurrent('rejected: missing service url', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       // composable
       await publish({
@@ -281,7 +275,7 @@ describe('publish', () => {
     test.concurrent('CLI output', async ({ expect }) => {
       const {
         cli: { publish },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       const service = {
         serviceName: 'products',
@@ -341,13 +335,13 @@ describe('publish', () => {
 });
 
 describe('check', () => {
-  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
+  describe.concurrent.each(options)('%s', caseName => {
     const legacyComposition = isLegacyComposition(caseName);
 
     test.concurrent('accepted: composable, no breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -377,7 +371,7 @@ describe('check', () => {
     test.concurrent('accepted: composable, previous version was not', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -413,7 +407,7 @@ describe('check', () => {
     test.concurrent('accepted: no changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -440,7 +434,7 @@ describe('check', () => {
     test.concurrent('rejected: missing service name', async () => {
       const {
         cli: { check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       const message = await check({
         sdl: /* GraphQL */ `
@@ -457,7 +451,7 @@ describe('check', () => {
     test.concurrent('rejected: composable, breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -486,7 +480,7 @@ describe('check', () => {
     test.concurrent('rejected: not composable, no breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -516,7 +510,7 @@ describe('check', () => {
     test.concurrent('rejected: not composable, breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, legacyComposition);
+      } = await prepare(caseName);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -529,7 +523,7 @@ describe('check', () => {
             name: String
           }
         `,
-        serviceName: 'products',
+        serviceName: 'products' + caseName,
         serviceUrl: 'http://products:3000/graphql',
         expect: 'latest-composable',
       });
@@ -546,7 +540,7 @@ describe('check', () => {
               name: String
             }
           `,
-          serviceName: 'products',
+          serviceName: 'products' + caseName,
           expect: 'rejected',
         }),
       );
@@ -562,11 +556,9 @@ describe('check', () => {
 });
 
 describe('delete', () => {
-  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
-    const legacyComposition = isLegacyComposition(caseName);
-
+  describe.concurrent.each(options)('%s', caseName => {
     test.concurrent('accepted: composable before and after', async () => {
-      const { cli } = await prepare(ffs, legacyComposition);
+      const { cli } = await prepare(caseName);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -609,7 +601,7 @@ describe('delete', () => {
     });
 
     test.concurrent('rejected: unknown service', async () => {
-      const { cli } = await prepare(ffs, legacyComposition);
+      const { cli } = await prepare(caseName);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -638,7 +630,7 @@ describe('delete', () => {
 });
 
 describe('other', () => {
-  describe.concurrent.each(cases)('%s', (_, ffs) => {
+  describe.concurrent.each(options)('%s', caseName => {
     test.concurrent('service url should be available in supergraph', async () => {
       const { createOrg } = await initSeed().createOwner();
       const { inviteAndJoinMember, createProject } = await createOrg();
@@ -667,21 +659,9 @@ describe('other', () => {
     test.concurrent(
       'publishing composable schema without the definition of the Query type, but only extension, should work',
       async () => {
-        const { createOrg } = await initSeed().createOwner();
-        const { createProject, setFeatureFlag } = await createOrg();
+        const { tokens } = await prepare(caseName);
 
-        for await (const [name, enabled] of ffs) {
-          await setFeatureFlag(name, enabled);
-        }
-
-        const { createToken } = await createProject(ProjectType.Federation);
-        const readWriteToken = await createToken({
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-          projectScopes: [],
-          organizationScopes: [],
-        });
-
-        await readWriteToken.publishSchema({
+        await tokens.readWriteToken.publishSchema({
           service: 'products',
           author: 'Kamil',
           commit: 'products',
@@ -701,7 +681,7 @@ describe('other', () => {
           `,
         });
 
-        await readWriteToken.publishSchema({
+        await tokens.readWriteToken.publishSchema({
           service: 'users',
           author: 'Kamil',
           commit: 'users',
@@ -720,7 +700,7 @@ describe('other', () => {
           `,
         });
 
-        const latestValid = await readWriteToken.fetchLatestValidSchema();
+        const latestValid = await tokens.readWriteToken.fetchLatestValidSchema();
         expect(latestValid.latestValidVersion?.schemas.nodes[0]).toEqual(
           expect.objectContaining({
             commit: 'users',
@@ -732,21 +712,9 @@ describe('other', () => {
     test.concurrent(
       '(experimental_acceptBreakingChanges and force) publishing composable schema on second attempt',
       async () => {
-        const { createOrg } = await initSeed().createOwner();
-        const { createProject, setFeatureFlag } = await createOrg();
+        const { tokens } = await prepare(caseName);
 
-        for await (const [name, enabled] of ffs) {
-          await setFeatureFlag(name, enabled);
-        }
-
-        const { createToken } = await createProject(ProjectType.Federation);
-        const readWriteToken = await createToken({
-          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-          projectScopes: [],
-          organizationScopes: [],
-        });
-
-        await readWriteToken.publishSchema({
+        await tokens.readWriteToken.publishSchema({
           service: 'reviews',
           author: 'Kamil',
           commit: 'reviews',
@@ -771,7 +739,7 @@ describe('other', () => {
           `,
         });
 
-        await readWriteToken.publishSchema({
+        await tokens.readWriteToken.publishSchema({
           service: 'products',
           author: 'Kamil',
           commit: 'products',
@@ -830,7 +798,7 @@ describe('other', () => {
           `,
         });
 
-        const latestValid = await readWriteToken.fetchLatestValidSchema();
+        const latestValid = await tokens.readWriteToken.fetchLatestValidSchema();
         expect(latestValid.latestValidVersion?.schemas.nodes[0]).toEqual(
           expect.objectContaining({
             commit: 'products',
@@ -840,7 +808,7 @@ describe('other', () => {
     );
 
     test.concurrent('metadata should always be published as an array', async () => {
-      const { cli, cdn } = await prepare(ffs);
+      const { cli, cdn } = await prepare(caseName);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -905,21 +873,102 @@ describe('other', () => {
   });
 });
 
-async function prepare(featureFlags: Array<[string, FFValue]> = [], legacyComposition = false) {
-  const { tokens, setFeatureFlag, setNativeFederation, cdn } = await prepareProject(
-    ProjectType.Federation,
+async function prepare(targetPick: TargetOption) {
+  const { targetWithLegacyComposition, targetWithNativeComposition, organization, project } =
+    await prepareProject(ProjectType.Federation);
+
+  // force legacy composition
+  await updateTargetSchemaComposition(
+    {
+      organization: organization.cleanId,
+      project: project.cleanId,
+      target: targetWithLegacyComposition.cleanId,
+      nativeComposition: false,
+    },
+    targetWithLegacyComposition.tokens.secrets.settings,
   );
 
-  for await (const [name, value] of featureFlags) {
-    await setFeatureFlag(name, value);
+  const target =
+    targetPick === 'targetWithLegacyComposition'
+      ? targetWithLegacyComposition
+      : targetWithNativeComposition;
+
+  return {
+    cli: createCLI(target.tokens.secrets),
+    cdn: target.cdn,
+    tokens: target.tokens,
+  };
+}
+
+async function prepareProject(projectType: ProjectType) {
+  const { createOrg } = await initSeed().createOwner();
+  const { organization, createProject } = await createOrg();
+  const { project, createToken, targets } = await createProject(projectType, {
+    useLegacyRegistryModels: false,
+  });
+
+  if (targets.length < 2) {
+    throw new Error('Expected at least two targets');
   }
 
-  if (legacyComposition === true) {
-    await setNativeFederation(false);
+  const nativeTarget = targets[0];
+  const legacyTarget = targets[1];
+
+  async function prepareTarget(target: (typeof targets)[number]) {
+    // Create a token with write rights
+    const readWriteToken = await createToken({
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      target,
+    });
+
+    // Create a token with read-only rights
+    const readonlyToken = await createToken({
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.RegistryRead],
+      target,
+    });
+
+    const settingsToken = await createToken({
+      organizationScopes: [],
+      projectScopes: [],
+      targetScopes: [TargetAccessScope.Settings],
+      target,
+    });
+
+    // Create CDN token
+    const { secretAccessToken: cdnToken, cdnUrl } = await readWriteToken.createCdnAccess();
+
+    return {
+      id: target.id,
+      cleanId: target.cleanId,
+      fetchVersions: readonlyToken.fetchVersions,
+      tokens: {
+        secrets: {
+          readwrite: readWriteToken.secret,
+          readonly: readonlyToken.secret,
+          settings: settingsToken.secret,
+        },
+        readWriteToken,
+        readonlyToken,
+      },
+      cdn: {
+        token: cdnToken,
+        url: cdnUrl,
+        fetchMetadata() {
+          return readWriteToken.fetchMetadataFromCDN();
+        },
+      },
+    };
   }
 
   return {
-    cli: createCLI(tokens.registry),
-    cdn,
+    organization,
+    project,
+    targets,
+    targetWithNativeComposition: await prepareTarget(nativeTarget),
+    targetWithLegacyComposition: await prepareTarget(legacyTarget),
   };
 }

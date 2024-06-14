@@ -314,6 +314,38 @@ export class TargetManager {
       target: args.targetId,
     });
   }
+
+  /**
+   * @deprecated It's a temporary method to force legacy composition in targets, when native composition is enabled for a project.
+   */
+  async updateTargetSchemaComposition(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    nativeComposition: boolean;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    this.logger.info(
+      `Updating target schema composition (targetId=%s, nativeComposition=%s)`,
+      args.targetId,
+      args.nativeComposition,
+    );
+
+    const target = await this.storage.updateTargetSchemaComposition({
+      organizationId: args.organizationId,
+      projectId: args.projectId,
+      targetId: args.targetId,
+      nativeComposition: args.nativeComposition,
+    });
+
+    return target;
+  }
 }
 
 const TargetGraphQLEndpointUrlModel = zod

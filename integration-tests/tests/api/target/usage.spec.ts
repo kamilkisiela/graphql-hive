@@ -360,7 +360,7 @@ test.concurrent('check usage from two selected targets', async () => {
     ],
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
-    targetId: productionTarget.cleanId,
+    target: productionTarget,
   });
 
   const schemaPublishResult = await stagingToken
@@ -677,7 +677,7 @@ describe('changes with usage data', () => {
         ],
         projectScopes: [ProjectAccessScope.Read],
         organizationScopes: [OrganizationAccessScope.Read],
-        targetId: target.cleanId,
+        target,
       });
 
       const schemaPublishResult = await token

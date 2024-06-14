@@ -162,5 +162,22 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
       return injector.get(ProjectManager).getProjects({ organization: organization.id });
     },
   },
+  Project: {
+    async experimental_nativeCompositionPerTarget(project, _, { injector }) {
+      if (project.type !== ProjectType.FEDERATION) {
+        return false;
+      }
+
+      if (!project.nativeFederation) {
+        return false;
+      }
+
+      const organization = await injector.get(OrganizationManager).getOrganization({
+        organization: project.orgId,
+      });
+
+      return organization.featureFlags.forceLegacyCompositionInTargets.length > 0;
+    },
+  },
   ProjectConnection: createConnection(),
 };

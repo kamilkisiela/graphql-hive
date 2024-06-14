@@ -105,6 +105,7 @@ export class CompositeLegacyModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
+      targetId: selector.target,
       project,
       organization,
       schemas,
@@ -117,6 +118,7 @@ export class CompositeLegacyModel {
       version: latest,
       organization,
       project,
+      targetId: selector.target,
     });
 
     const diffCheck = await this.checks.diff({
@@ -265,6 +267,7 @@ export class CompositeLegacyModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
+      targetId: target.id,
       project,
       organization,
       schemas,
@@ -277,6 +280,7 @@ export class CompositeLegacyModel {
       version: latestVersion,
       organization,
       project,
+      targetId: target.id,
     });
 
     const [diffCheck, metadataCheck] = await Promise.all([

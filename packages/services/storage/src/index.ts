@@ -4714,6 +4714,52 @@ export async function createStorage(
           AND "user_id" = ${userId}
       `);
     },
+    async updateTargetSchemaComposition(args) {
+      // I could do it in one query, but the amount of SQL needed to do it in one go is just not worth it...
+      // It is just too complex to understand.
+      await pool.transaction(async t => {
+        const { feature_flags } = await t.one<
+          Pick<organizations, 'feature_flags'>
+        >(sql`/* updateTargetSchemaComposition_select */
+          SELECT feature_flags FROM organizations WHERE id = ${args.organizationId};
+        `);
+
+        const ff = decodeFeatureFlags(feature_flags);
+
+        let modify = false;
+        const includesTarget = ff.forceLegacyCompositionInTargets.includes(args.targetId);
+
+        if (args.nativeComposition) {
+          // delete from the list of targets that need to be forced to use the legacy composition
+          if (includesTarget) {
+            ff.forceLegacyCompositionInTargets = ff.forceLegacyCompositionInTargets.filter(
+              id => id !== args.targetId,
+            );
+            modify = true;
+          }
+        } else {
+          // add to the list of targets that need to be forced to use the legacy composition
+          if (!includesTarget) {
+            ff.forceLegacyCompositionInTargets.push(args.targetId);
+            modify = true;
+          }
+        }
+
+        if (modify) {
+          await pool.query(sql`/* updateTargetSchemaComposition_update */
+            UPDATE organizations
+            SET feature_flags = ${sql.jsonb(ff)}
+            WHERE id = ${args.organizationId};
+          `);
+        }
+      });
+
+      return this.getTarget({
+        target: args.targetId,
+        project: args.projectId,
+        organization: args.organizationId,
+      });
+    },
     pool,
   };
 
@@ -4823,6 +4869,7 @@ const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
 const FeatureFlagsModel = zod
   .object({
     compareToPreviousComposableVersion: zod.boolean().default(false),
+    forceLegacyCompositionInTargets: zod.array(zod.string()).default([]),
   })
   .optional()
   .nullable()
@@ -4831,6 +4878,7 @@ const FeatureFlagsModel = zod
     val =>
       val ?? {
         compareToPreviousComposableVersion: false,
+        forceLegacyCompositionInTargets: [],
       },
   );
 

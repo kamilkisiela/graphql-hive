@@ -1,13 +1,25 @@
 import { useCallback, useState } from 'react';
-import { useFormik } from 'formik';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductUpdatesLink } from '@/components/ui/docs-note';
-import { DocsNote, Input, Spinner, Switch, Tooltip } from '@/components/v2';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DocsNote, Spinner, Switch } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckIcon, Cross2Icon, UpdateIcon } from '@radix-ui/react-icons';
 
 const ExternalCompositionStatus_TestQuery = graphql(`
@@ -81,25 +93,52 @@ const ExternalCompositionStatus = ({
   const error = query.error?.message ?? query.data?.testExternalSchemaComposition?.error?.message;
 
   return (
-    <Tooltip.Provider delayDuration={100}>
+    <TooltipProvider delayDuration={100}>
       {query.fetching ? (
-        <Tooltip content="Connecting..." contentProps={{ side: 'right' }}>
-          <UpdateIcon className="size-5 animate-spin text-gray-500" />
+        <Tooltip>
+          <TooltipTrigger>
+            <UpdateIcon className="size-5 animate-spin text-gray-500" />
+          </TooltipTrigger>
+          <TooltipContent side="right">Connecting...</TooltipContent>
         </Tooltip>
       ) : null}
       {error ? (
-        <Tooltip content={error} contentProps={{ side: 'right' }}>
-          <Cross2Icon className="size-5 text-red-500" />
+        <Tooltip>
+          <TooltipTrigger>
+            <Cross2Icon className="size-5 text-red-500" />
+          </TooltipTrigger>
+          <TooltipContent side="right">{error}</TooltipContent>
         </Tooltip>
       ) : null}
       {query.data?.testExternalSchemaComposition?.ok?.externalSchemaComposition?.endpoint ? (
-        <Tooltip content="Service is available" contentProps={{ side: 'right' }}>
-          <CheckIcon className="size-5 text-green-500" />
+        <Tooltip>
+          <TooltipTrigger>
+            <CheckIcon className="size-5 text-green-500" />
+          </TooltipTrigger>
+          <TooltipContent side="right">Service is available</TooltipContent>
         </Tooltip>
       ) : null}
-    </Tooltip.Provider>
+    </TooltipProvider>
   );
 };
+
+const formSchema = z.object({
+  endpoint: z
+    .string({
+      required_error: 'Please provide an endpoint',
+    })
+    .url({
+      message: 'Invalid URL',
+    }),
+  secret: z
+    .string({
+      required_error: 'Please provide a secret',
+    })
+    .min(2, 'Too short')
+    .max(256, 'Max 256 characters long'),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const ExternalCompositionForm = ({
   endpoint,
@@ -116,109 +155,136 @@ const ExternalCompositionForm = ({
   );
   const notify = useNotifications();
   const [mutation, enable] = useMutation(ExternalCompositionForm_EnableMutation);
-  const {
-    handleSubmit,
-    values,
-    handleChange,
-    handleBlur,
-    isSubmitting,
-    errors,
-    touched,
-    dirty,
-    resetForm,
-  } = useFormik({
-    enableReinitialize: true,
-    initialValues: {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
       endpoint: endpoint ?? '',
       secret: '',
     },
-    validationSchema: Yup.object().shape({
-      endpoint: Yup.string().required(),
-      secret: Yup.string().required(),
-    }),
-    onSubmit: values =>
-      enable({
-        input: {
-          project: project.cleanId,
-          organization: organization.cleanId,
-          endpoint: values.endpoint,
-          secret: values.secret,
-        },
-      }).then(result => {
-        resetForm();
-        if (result.data?.enableExternalSchemaComposition?.ok) {
-          notify('External composition enabled', 'success');
-        }
-      }),
+    disabled: mutation.fetching,
   });
 
-  const mutationError = mutation.data?.enableExternalSchemaComposition.error;
+  function onSubmit(values: FormValues) {
+    void enable({
+      input: {
+        project: project.cleanId,
+        organization: organization.cleanId,
+        endpoint: values.endpoint,
+        secret: values.secret,
+      },
+    }).then(result => {
+      if (result.data?.enableExternalSchemaComposition?.ok) {
+        notify('External composition enabled', 'success');
+        const endpoint =
+          result.data?.enableExternalSchemaComposition?.ok.externalSchemaComposition?.endpoint;
+
+        if (endpoint) {
+          form.reset(
+            {
+              endpoint,
+              secret: '',
+            },
+            {
+              keepDirty: false,
+              keepDirtyValues: false,
+            },
+          );
+        }
+      } else {
+        const error =
+          result.error?.message || result.data?.enableExternalSchemaComposition.error?.message;
+
+        if (error) {
+          notify(error, 'error');
+        }
+
+        const inputErrors = result.data?.enableExternalSchemaComposition.error?.inputErrors;
+
+        if (inputErrors?.endpoint) {
+          form.setError('endpoint', {
+            type: 'manual',
+            message: inputErrors.endpoint,
+          });
+        }
+
+        if (inputErrors?.secret) {
+          form.setError('secret', {
+            type: 'manual',
+            message: inputErrors.secret,
+          });
+        }
+      }
+    });
+  }
 
   return (
     <div className="flex justify-between">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <span>HTTP endpoint</span>
-          <p className="pb-2 text-xs text-gray-300">A POST request will be sent to that endpoint</p>
-          <div className="flex items-center gap-2">
-            <Input
-              placeholder="Endpoint"
-              name="endpoint"
-              value={values.endpoint}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={isSubmitting}
-              isInvalid={touched.endpoint && !!errors.endpoint}
-              className="w-96"
-            />
-            {!dirty &&
-            (endpoint ||
-              mutation.data?.enableExternalSchemaComposition.ok?.externalSchemaComposition
-                ?.endpoint) ? (
-              <ExternalCompositionStatus
-                projectId={project.cleanId}
-                organizationId={organization.cleanId}
-              />
-            ) : null}
-          </div>
-          {touched.endpoint && (errors.endpoint || mutationError?.inputErrors?.endpoint) && (
-            <div className="mt-2 text-xs text-red-500">
-              {errors.endpoint ?? mutationError?.inputErrors?.endpoint}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <span>Secret</span>
-          <p className="pb-2 text-xs text-gray-300">
-            The secret is needed to sign and verify the request.
-          </p>
-          <Input
-            placeholder="Secret"
-            name="secret"
-            type="password"
-            value={values.secret}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            disabled={isSubmitting}
-            isInvalid={touched.secret && !!errors.secret}
-            className="w-96"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="endpoint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>HTTP Endpoint</FormLabel>
+                <FormDescription>A POST request will be sent to that endpoint</FormDescription>
+                <div className="flex w-full max-w-sm items-center space-x-2">
+                  <FormControl>
+                    <Input
+                      className="w-96 shrink-0"
+                      placeholder="Endpoint"
+                      type="text"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  {!form.formState.isDirty &&
+                  (endpoint ||
+                    mutation.data?.enableExternalSchemaComposition.ok?.externalSchemaComposition
+                      ?.endpoint) ? (
+                    <ExternalCompositionStatus
+                      projectId={project.cleanId}
+                      organizationId={organization.cleanId}
+                    />
+                  ) : null}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {touched.secret && (errors.secret || mutationError?.inputErrors?.secret) && (
-            <div className="mt-2 text-xs text-red-500">
-              {errors.secret ?? mutationError?.inputErrors?.secret}
-            </div>
+          <FormField
+            control={form.control}
+            name="secret"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Secret</FormLabel>
+                <FormDescription>
+                  The secret is needed to sign and verify the request.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    className="w-96"
+                    placeholder="Secret"
+                    type="password"
+                    autoComplete="off"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {mutation.error && (
+            <div className="mt-2 text-xs text-red-500">{mutation.error.message}</div>
           )}
-        </div>
-        {mutation.error && (
-          <div className="mt-2 text-xs text-red-500">{mutation.error.message}</div>
-        )}
-        <div>
-          <Button type="submit" disabled={isSubmitting}>
-            Save
-          </Button>
-        </div>
-      </form>
+          <div>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Save
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 };
@@ -322,7 +388,7 @@ export const ExternalCompositionSettings = (props: {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <div>External Composition</div>
+          <div>External Schema Composition</div>
           <div>
             {isLoading ? (
               <Spinner />
@@ -338,16 +404,17 @@ export const ExternalCompositionSettings = (props: {
         </CardTitle>
         <CardDescription>
           <ProductUpdatesLink href="#native-composition">
-            You can enable native Apollo Federation v2 support in Hive
+            Enable native Apollo Federation v2 support in Hive
           </ProductUpdatesLink>
         </CardDescription>
       </CardHeader>
 
       <CardContent>
         {isNativeCompositionEnabled && isEnabled ? (
-          <DocsNote warn>
-            It appears that Native Federation v2 Composition is activated, external composition
-            won't have any effect.
+          <DocsNote warn className={isFormVisible ? 'mb-6 mt-0' : ''}>
+            It appears that Native Federation v2 Composition is activated and will be used instead.
+            <br />
+            External composition won't have any effect.
           </DocsNote>
         ) : null}
 
@@ -357,7 +424,11 @@ export const ExternalCompositionSettings = (props: {
             organization={organization}
             endpoint={externalCompositionConfig?.endpoint}
           />
-        ) : null}
+        ) : (
+          <Button disabled={mutation.fetching} onClick={() => handleSwitch(true)}>
+            Enable external composition
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
