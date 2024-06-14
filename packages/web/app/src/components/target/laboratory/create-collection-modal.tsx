@@ -174,7 +174,6 @@ export function CreateCollectionModal(props: {
             },
             input: {
               collectionId,
-
               name: values.name,
               description: values.description,
             },

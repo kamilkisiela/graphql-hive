@@ -4,7 +4,8 @@ import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
-import { Input, Modal, Select } from '@/components/v2';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useCollections } from '@/pages/target-laboratory';
 import { useEditorContext } from '@graphiql/react';
@@ -80,6 +81,7 @@ export function CreateOperationModal(props: {
     touched,
     isSubmitting,
     resetForm,
+    setFieldValue,
   } = useFormik({
     initialValues: {
       name: '',
@@ -144,18 +146,23 @@ export function CreateOperationModal(props: {
               Which collection would you like to save this operation to?
             </label>
             <Select
-              name="collectionId"
-              placeholder="Select collection"
-              options={collections?.map(c => ({
-                value: c.id,
-                name: c.name,
-              }))}
               value={values.collectionId}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              isInvalid={!!(touched.collectionId && errors.collectionId)}
-              data-cy="select.collectionId"
-            />
+              onValueChange={async v => {
+                await setFieldValue('collectionId', v);
+              }}
+            >
+              <SelectTrigger>
+                {collections.find(c => c.id === values.collectionId)?.name || 'Select collection'}
+              </SelectTrigger>
+              <SelectContent className="w-[--radix-select-trigger-width]">
+                {collections.map(c => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                    <div className="mt-1 line-clamp-1 text-xs opacity-50">{c.description}</div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {touched.collectionId && errors.collectionId && (
               <div className="text-sm text-red-500">{errors.collectionId}</div>
             )}
