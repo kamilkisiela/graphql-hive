@@ -1,11 +1,10 @@
 import { createClient as createSSEClient } from 'graphql-sse';
 import Session from 'supertokens-auth-react/recipe/session';
-import { createClient, fetchExchange, subscriptionExchange } from 'urql';
+import { createClient, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
 import { env } from '@/env/frontend';
 import schema from '@/gql/schema';
 import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { persistedExchange } from '@urql/exchange-persisted';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
 
@@ -17,8 +16,6 @@ const sseClient = createSSEClient({
   url: env.graphqlPublicSubscriptionEndpoint,
   credentials: 'include',
 });
-
-const usePersistedOperations = env.graphql.persistedOperations;
 
 export const urqlClient = createClient({
   url: env.graphqlPublicEndpoint,
@@ -107,14 +104,18 @@ export const urqlClient = createClient({
         },
       };
     }),
-    usePersistedOperations
-      ? persistedExchange({
-          enforcePersistedQueries: true,
-          enableForMutation: true,
-          enableForSubscriptions: true,
-          generateHash: (_, document) => {
-            // TODO: improve types here
-            return Promise.resolve((document as any)?.['__meta__']?.['hash'] ?? '');
+    env.graphql.persistedOperationsPrefix !== null
+      ? mapExchange({
+          onOperation(op) {
+            return {
+              ...op,
+              query: {
+                documentId:
+                  (env.graphql.persistedOperationsPrefix ?? '') +
+                  (op.query as any)?.['__meta__']?.['hash'],
+                definitions: [],
+              } as any,
+            };
           },
         })
       : null,

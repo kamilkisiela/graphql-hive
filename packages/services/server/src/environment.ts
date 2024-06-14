@@ -195,6 +195,17 @@ const AuthOktaMultiTenantSchema = zod.object({
   AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
+const HivePersistedDocumentsSchema = zod.union([
+  zod.object({
+    HIVE_PERSISTED_DOCUMENTS: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    HIVE_PERSISTED_DOCUMENTS: zod.literal('1'),
+    HIVE_PERSISTED_DOCUMENTS_CDN_ENDPOINT: zod.string().url(),
+    HIVE_PERSISTED_DOCUMENTS_CDN_ACCESS_KEY_ID: zod.string(),
+  }),
+]);
+
 const LogModel = zod.object({
   LOG_LEVEL: emptyString(
     zod
@@ -237,6 +248,7 @@ const configs = {
   log: LogModel.safeParse(processEnv),
   zendeskSupport: ZendeskSupportModel.safeParse(processEnv),
   tracing: OpenTelemetryConfigurationModel.safeParse(processEnv),
+  hivePersistedDocuments: HivePersistedDocumentsSchema.safeParse(processEnv),
 };
 
 const environmentErrors: Array<string> = [];
@@ -279,6 +291,7 @@ const hive = extractConfig(configs.hive);
 const s3 = extractConfig(configs.s3);
 const zendeskSupport = extractConfig(configs.zendeskSupport);
 const tracing = extractConfig(configs.tracing);
+const hivePersistedDocuments = extractConfig(configs.hivePersistedDocuments);
 
 const hiveConfig =
   hive.HIVE === '1'
@@ -295,7 +308,16 @@ const hiveConfig =
       }
     : null;
 
+const hivePersistedDocumentsConfig =
+  hivePersistedDocuments.HIVE_PERSISTED_DOCUMENTS === '1'
+    ? {
+        cdnEndpoint: hivePersistedDocuments.HIVE_PERSISTED_DOCUMENTS_CDN_ENDPOINT,
+        cdnAccessKeyId: hivePersistedDocuments.HIVE_PERSISTED_DOCUMENTS_CDN_ACCESS_KEY_ID,
+      }
+    : null;
+
 export type HiveConfig = typeof hiveConfig;
+export type HivePersistedDocumentsConfig = typeof hivePersistedDocumentsConfig;
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -433,8 +455,8 @@ export const env = {
         }
       : null,
   hive: hiveConfig,
+  hivePersistedDocuments: hivePersistedDocumentsConfig,
   graphql: {
-    persistedOperationsPath: base.GRAPHQL_PERSISTED_OPERATIONS_PATH ?? null,
     origin: base.GRAPHQL_PUBLIC_ORIGIN,
   },
   zendeskSupport:
