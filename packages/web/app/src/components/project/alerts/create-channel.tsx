@@ -140,7 +140,7 @@ export const CreateChannelModal = ({
           {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
 
-        {[AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(values.type) && (
+        {isWebhookLike  && (
           <div className="flex flex-col gap-4">
             <label className="text-sm font-semibold" htmlFor="endpoint">
               Endpoint
