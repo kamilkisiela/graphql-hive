@@ -97,7 +97,7 @@ async function buildWithNext(cwd: string, additionalRequire: string | null) {
     await tsup({
       entryPoints: [normalize(join(cwd, additionalRequire))],
       outDir: normalize(join(cwd, 'dist')),
-      target: 'node21',
+      target: 'node22',
       format: ['cjs'],
       splitting: false,
       skipNodeModulesBundle: true,
@@ -138,7 +138,7 @@ async function compile(
       normalize(join(cwd, entryPoint)),
     ),
     outDir: out,
-    target: 'node21',
+    target: 'node22',
     format: [useEsm ? 'esm' : 'cjs'],
     splitting: false,
     sourcemap: true,
