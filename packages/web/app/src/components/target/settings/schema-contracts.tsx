@@ -447,7 +447,7 @@ function CreateContractDialogContent(props: {
                 disabled={form.isSubmitting}
                 autoComplete="off"
               />
-              <span className="text-sm text-red-500 after:content-['\200b']">
+              <span className="text-sm text-red-500 after:content-['\\200b']">
                 {mutation.data?.createContract.error?.details?.contractName ??
                   form.errors.contractName}
               </span>
@@ -538,7 +538,7 @@ function CreateContractDialogContent(props: {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  <div className="mt-2 text-sm text-red-500 after:content-['\200b']">
+                  <div className="mt-2 text-sm text-red-500 after:content-['\\200b']">
                     {mutation.data?.createContract.error?.details?.includeTags ??
                       form.errors.includeTags}
                   </div>
@@ -651,7 +651,7 @@ function CreateContractDialogContent(props: {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  <div className="mt-2 text-sm text-red-500 after:content-['\200b']">
+                  <div className="mt-2 text-sm text-red-500 after:content-['\\200b']">
                     {mutation.data?.createContract.error?.details?.excludeTags ??
                       form.errors.excludeTags}
                   </div>
