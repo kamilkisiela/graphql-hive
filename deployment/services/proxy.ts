@@ -65,14 +65,6 @@ export function deployProxy({
         retriable: true,
       },
       {
-        name: 'graphql-api',
-        path: '/graphql',
-        customRewrite: '/graphql',
-        service: graphql.service,
-        requestTimeout: '60s',
-        retriable: true,
-      },
-      {
         name: 'graphql-api-subscriptions',
         path: '/graphql/stream',
         customRewrite: '/graphql',
@@ -80,6 +72,14 @@ export function deployProxy({
         requestTimeout: 'infinity',
         // we send a ping every 12 seconds
         idleTimeout: '30s',
+        retriable: true,
+      },
+      {
+        name: 'graphql-api',
+        path: '/graphql',
+        customRewrite: '/graphql',
+        service: graphql.service,
+        requestTimeout: '60s',
         retriable: true,
       },
       {
