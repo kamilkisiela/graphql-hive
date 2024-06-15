@@ -302,6 +302,7 @@ export const CollectionsQuery = graphql(`
           node {
             id
             name
+            description
             operations(first: 100) {
               edges {
                 node {
