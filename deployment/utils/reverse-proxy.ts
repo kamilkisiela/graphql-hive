@@ -19,6 +19,7 @@ export class Proxy {
     routes: {
       name: string;
       path: string;
+      match: 'exact' | 'prefix' | 'path_separated_prefix';
       service: k8s.core.v1.Service;
       requestTimeout?: `${number}s` | 'infinity';
       idleTimeout?: `${number}s`;
@@ -69,31 +70,30 @@ export class Proxy {
           },
           routes: routes
             .map(route =>
-              route.path === '/'
-                ? [{ ...route, condition: 'prefix' as const }]
-                : // Contour does not support Envoy's path_separated_prefix
-                  // See: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-path-separated-prefix
+              route.match === 'path_separated_prefix' // Contour does not support Envoy's path_separated_prefix
+                ? // See: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-path-separated-prefix
                   // This could help us to avoid the need of two routes for the same endpoint.
                   [
                     {
                       ...route,
                       // Accepts: /graphql
                       // Rejects: /graphql/ and /graphql-hive
-                      condition: 'exact' as const,
+                      match: 'exact',
                     },
                     {
                       ...route,
                       path: route.path + '/',
                       // Accepts: /graphql/ and /graphql/anything
                       // Rejects: /graphql and /graphql-hive
-                      condition: 'prefix' as const,
+                      match: 'prefix',
                     },
-                  ],
+                  ]
+                : [route],
             )
             .flat(1)
             .map(route => ({
               conditions: [
-                route.condition === 'prefix'
+                route.match === 'prefix'
                   ? {
                       prefix: route.path,
                     }

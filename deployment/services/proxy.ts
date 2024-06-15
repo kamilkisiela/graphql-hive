@@ -41,24 +41,28 @@ export function deployProxy({
       {
         name: 'app',
         path: '/',
+        match: 'prefix',
         service: app.service,
         requestTimeout: '60s',
       },
       {
         name: 'server',
         path: '/server',
+        match: 'path_separated_prefix',
         service: graphql.service,
         requestTimeout: '60s',
       },
       {
         name: 'registry-api-health',
         path: '/registry/_health',
+        match: 'exact',
         customRewrite: '/_health',
         service: graphql.service,
       },
       {
         name: 'registry-api',
         path: '/registry',
+        match: 'exact',
         customRewrite: '/graphql',
         service: graphql.service,
         requestTimeout: '60s',
@@ -67,6 +71,7 @@ export function deployProxy({
       {
         name: 'graphql-api-subscriptions',
         path: '/graphql/stream',
+        match: 'path_separated_prefix',
         customRewrite: '/graphql',
         service: graphql.service,
         requestTimeout: 'infinity',
@@ -77,6 +82,7 @@ export function deployProxy({
       {
         name: 'graphql-api',
         path: '/graphql',
+        match: 'path_separated_prefix',
         customRewrite: '/graphql',
         service: graphql.service,
         requestTimeout: '60s',
@@ -85,6 +91,7 @@ export function deployProxy({
       {
         name: 'auth',
         path: '/auth-api',
+        match: 'path_separated_prefix',
         customRewrite: '/auth-api',
         service: graphql.service,
         requestTimeout: '60s',
@@ -93,6 +100,7 @@ export function deployProxy({
       {
         name: 'usage',
         path: '/usage',
+        match: 'exact',
         service: usage.service,
         retriable: true,
       },
