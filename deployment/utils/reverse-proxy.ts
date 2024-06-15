@@ -67,68 +67,83 @@ export class Proxy {
               exposeHeaders: ['*'],
             },
           },
-          routes: routes.map(route => ({
-            conditions:
+          routes: routes
+            .map(route =>
               route.path === '/'
-                ? [
+                ? [{ ...route, condition: 'prefix' as const }]
+                : // Contour does not support Envoy's path_separated_prefix
+                  // See: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-path-separated-prefix
+                  // This could help us to avoid the need of two routes for the same endpoint.
+                  [
                     {
-                      prefix: route.path,
+                      ...route,
+                      // Accepts: /graphql
+                      // Rejects: /graphql/ and /graphql-hive
+                      condition: 'exact' as const,
                     },
-                  ]
-                : [
-                    // Contour does not support Envoy's path_separated_prefix
-                    // See: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-path-separated-prefix
-                    // This could help us to avoid the need of two conditions for the same route.
                     {
-                      exact: route.path,
-                    },
-                    {
-                      prefix: route.path + '/',
+                      ...route,
+                      path: route.path + '/',
+                      // Accepts: /graphql/ and /graphql/anything
+                      // Rejects: /graphql and /graphql-hive
+                      condition: 'prefix' as const,
                     },
                   ],
-            services: [
-              {
-                name: route.service.metadata.name,
-                port: route.service.spec.ports[0].port,
-              },
-            ],
-            ...(route.path === '/'
-              ? {}
-              : {
-                  pathRewritePolicy: {
-                    replacePrefix: [
-                      {
-                        replacement: route.customRewrite || '/',
-                      },
-                    ],
-                  },
-                  ...(route.requestTimeout || route.idleTimeout
-                    ? {
-                        timeoutPolicy: {
-                          ...(route.requestTimeout
-                            ? {
-                                response: route.requestTimeout,
-                              }
-                            : {}),
-                          ...(route.idleTimeout
-                            ? {
-                                idle: route.idleTimeout,
-                              }
-                            : {}),
+            )
+            .flat(1)
+            .map(route => ({
+              conditions: [
+                route.condition === 'prefix'
+                  ? {
+                      prefix: route.path,
+                    }
+                  : {
+                      exact: route.path,
+                    },
+              ],
+              services: [
+                {
+                  name: route.service.metadata.name,
+                  port: route.service.spec.ports[0].port,
+                },
+              ],
+              ...(route.path === '/'
+                ? {}
+                : {
+                    pathRewritePolicy: {
+                      replacePrefix: [
+                        {
+                          replacement: route.customRewrite || '/',
                         },
-                      }
-                    : {}),
-                  ...(route.retriable
-                    ? {
-                        retryPolicy: {
-                          count: 2,
-                          retryOn: ['reset', 'retriable-status-codes'],
-                          retriableStatusCodes: [503],
-                        },
-                      }
-                    : {}),
-                }),
-          })),
+                      ],
+                    },
+                    ...(route.requestTimeout || route.idleTimeout
+                      ? {
+                          timeoutPolicy: {
+                            ...(route.requestTimeout
+                              ? {
+                                  response: route.requestTimeout,
+                                }
+                              : {}),
+                            ...(route.idleTimeout
+                              ? {
+                                  idle: route.idleTimeout,
+                                }
+                              : {}),
+                          },
+                        }
+                      : {}),
+                    ...(route.retriable
+                      ? {
+                          retryPolicy: {
+                            count: 2,
+                            retryOn: ['reset', 'retriable-status-codes'],
+                            retriableStatusCodes: [503],
+                          },
+                        }
+                      : {}),
+                  }),
+            })),
         },
       },
       {
