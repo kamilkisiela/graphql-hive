@@ -13,7 +13,6 @@ import { DocsLink } from '@/components/ui/docs-note';
 import { Link } from '@/components/ui/link';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Accordion } from '@/components/v2/accordion';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { Spinner } from '@/components/v2/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
@@ -31,12 +30,26 @@ import {
   useEditorContext,
 } from '@graphiql/react';
 import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
+import { BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import { cx } from 'class-variance-authority';
 import clsx from 'clsx';
 import { Helmet } from 'react-helmet-async';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Meta } from '@/components/ui/meta';
 import { QueryError } from '@/components/ui/query-error';
 import { useResetState } from '@/lib/hooks/use-reset-state';
@@ -189,106 +202,42 @@ const CollectionItem = (props: {
           <span className="size-1.5 rounded-full border border-orange-600 bg-orange-400" />
         )}
       </Link>
-      <GraphiQLDropdownMenu
-        // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
-        modal={false}
-      >
-        <GraphiQLDropdownMenu.Button
-          className="graphiql-toolbar-button opacity-0 transition [div:hover>&]:bg-transparent [div:hover>&]:opacity-100"
-          aria-label="More"
-          data-cy="operation-3-dots"
-        >
-          <DotsVerticalIcon />
-        </GraphiQLDropdownMenu.Button>
-
-        <GraphiQLDropdownMenu.Content>
-          <GraphiQLDropdownMenu.Item
-            onSelect={async () => {
+      <DropdownMenu>
+        <DropdownMenuTrigger className="graphiql-toolbar-button text-white">
+          <DotsHorizontalIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={async () => {
               const url = new URL(window.location.href);
               await copyToClipboard(`${url.origin}${url.pathname}?operation=${props.node.id}`);
             }}
           >
             Copy link to operation
-          </GraphiQLDropdownMenu.Item>
-          {props.canEdit ? (
-            <GraphiQLDropdownMenu.Item
-              onSelect={async () => {
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {props.canEdit && (
+            <DropdownMenuItem
+              onClick={() => {
                 props.onEdit(props.node.id);
               }}
             >
               Edit
-            </GraphiQLDropdownMenu.Item>
-          ) : null}
-          {props.canDelete ? (
-            <GraphiQLDropdownMenu.Item
-              onSelect={() => {
+            </DropdownMenuItem>
+          )}
+          {props.canDelete && (
+            <DropdownMenuItem
+              onClick={() => {
                 props.onDelete(props.node.id);
               }}
-              className="!text-red-500"
-              data-cy="remove-operation"
+              className="text-red-500"
             >
               Delete
-            </GraphiQLDropdownMenu.Item>
-          ) : null}
-        </GraphiQLDropdownMenu.Content>
-      </GraphiQLDropdownMenu>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
-  );
-};
-
-const AddCollectionItemButton = (props: {
-  collectionId: string;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-}): ReactElement => {
-  const [createOperationState, createOperation] = useMutation(CreateOperationMutation);
-  const notify = useNotifications();
-  const router = useRouter();
-
-  return (
-    <Button
-      variant="link"
-      className="px-2 py-0 text-gray-500 hover:text-white hover:no-underline"
-      onClick={async () => {
-        const result = await createOperation({
-          input: {
-            collectionId: props.collectionId,
-            name: 'New Operation',
-            query: '{}',
-            headers: '',
-            variables: '',
-          },
-          selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
-          },
-        });
-        if (result.error) {
-          notify("Couldn't create operation. Please try again later.", 'error');
-        }
-        if (result.data?.createOperationInDocumentCollection.error) {
-          notify(result.data.createOperationInDocumentCollection.error.message, 'error');
-        }
-        if (result.data?.createOperationInDocumentCollection.ok) {
-          void router.navigate({
-            to: '/$organizationId/$projectId/$targetId/laboratory',
-            params: {
-              organizationId: props.organizationId,
-              projectId: props.projectId,
-              targetId: props.targetId,
-            },
-            search: {
-              operation: result.data.createOperationInDocumentCollection.ok.operation.id,
-            },
-          });
-        }
-      }}
-      disabled={createOperationState.fetching}
-    >
-      <PlusIcon size={10} className="mr-1 inline" /> Add Operation
-    </Button>
   );
 };
 
@@ -451,16 +400,58 @@ function useOperationCollectionsPlugin(props: {
             c.operations.edges.some(({ node }) => node.id === currentOperation.id),
           )?.id;
 
+        const [createOperationState, createOperation] = useMutation(CreateOperationMutation);
+        const notify = useNotifications();
+
+        const addOperation = async (e: { currentTarget: { dataset: DOMStringMap } }) => {
+          const collectionId = e.currentTarget.dataset.collectionId!;
+
+          const result = await createOperation({
+            input: {
+              collectionId,
+              name: 'New Operation',
+              query: '{}',
+              headers: '',
+              variables: '',
+            },
+            selector: {
+              target: props.targetId,
+              organization: props.organizationId,
+              project: props.projectId,
+            },
+          });
+          if (result.error) {
+            notify("Couldn't create operation. Please try again later.", 'error');
+          }
+          if (result.data?.createOperationInDocumentCollection.error) {
+            notify(result.data.createOperationInDocumentCollection.error.message, 'error');
+          }
+          if (result.data?.createOperationInDocumentCollection.ok) {
+            void router.navigate({
+              to: '/$organizationId/$projectId/$targetId/laboratory',
+              params: {
+                organizationId: props.organizationId,
+                projectId: props.projectId,
+                targetId: props.targetId,
+              },
+              search: {
+                operation: result.data.createOperationInDocumentCollection.ok.operation.id,
+              },
+            });
+          }
+        };
+
         return (
-          <div className="flex h-full flex-col">
+          <>
             <div className="flex justify-between">
-              <Title>Collections</Title>
+              <Title>Operation Collections</Title>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
-                      variant="ghost"
+                      variant="orangeLink"
                       size="icon-sm"
+                      className="flex w-auto items-center gap-1"
                       onClick={() => {
                         if (collectionId) {
                           setCollectionId('');
@@ -468,7 +459,7 @@ function useOperationCollectionsPlugin(props: {
                         toggleCollectionModal();
                       }}
                     >
-                      <PlusIcon className="size-3" />
+                      <PlusIcon className="size-4 shrink-0" /> Create collection
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Create new collection</TooltipContent>
@@ -485,75 +476,85 @@ function useOperationCollectionsPlugin(props: {
             ) : collections?.length ? (
               <Accordion
                 defaultValue={initialSelectedCollection ? [initialSelectedCollection] : undefined}
-                className="mt-5 space-y-0"
+                className="mt-5 space-y-2"
                 type="multiple"
               >
                 {collections.map(collection => (
-                  <Accordion.Item key={collection.id} value={collection.id}>
-                    <div className="flex">
-                      <Accordion.Header triggerClassName="pl-1">{collection.name}</Accordion.Header>
+                  <AccordionItem
+                    key={collection.id}
+                    value={collection.id}
+                    className="rounded-lg border-b-0 bg-[hsla(var(--color-neutral),var(--alpha-background-light))]"
+                  >
+                    <AccordionHeader className="flex items-center justify-between">
+                      <AccordionTrigger className="[&[data-state=open]>svg]:-rotate-0 [&_svg]:order-first [&_svg]:mx-2 [&_svg]:-rotate-90">
+                        {collection.name}
+                      </AccordionTrigger>
                       {shouldShowMenu ? (
-                        <GraphiQLDropdownMenu
-                          // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
-                          modal={false}
-                        >
-                          <GraphiQLDropdownMenu.Button
-                            className="graphiql-toolbar-button !shrink-0"
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
                             aria-label="More"
-                            data-cy="collection-3-dots"
+                            className="graphiql-toolbar-button"
                           >
-                            <DotsVerticalIcon />
-                          </GraphiQLDropdownMenu.Button>
-
-                          <GraphiQLDropdownMenu.Content>
-                            <GraphiQLDropdownMenu.Item
-                              onSelect={() => {
+                            <DotsHorizontalIcon />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={addOperation}
+                              disabled={createOperationState.fetching}
+                              data-collection-id={collection.id}
+                            >
+                              Add operation <PlusIcon className="ml-2 size-4" />
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => {
                                 setCollectionId(collection.id);
                                 toggleCollectionModal();
                               }}
-                              data-cy="collection-edit"
                             >
                               Edit
-                            </GraphiQLDropdownMenu.Item>
-                            <GraphiQLDropdownMenu.Item
-                              onSelect={() => {
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
                                 setCollectionId(collection.id);
                                 toggleDeleteCollectionModalOpen();
                               }}
-                              className="!text-red-500"
-                              data-cy="collection-delete"
+                              className="text-red-500"
                             >
                               Delete
-                            </GraphiQLDropdownMenu.Item>
-                          </GraphiQLDropdownMenu.Content>
-                        </GraphiQLDropdownMenu>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       ) : null}
-                    </div>
-                    <Accordion.Content className="pr-0">
-                      {collection.operations.edges.length
-                        ? collection.operations.edges.map(({ node }) => (
-                            <CollectionItem
-                              key={node.id}
-                              node={node}
-                              canDelete={canDelete}
-                              canEdit={canEdit}
-                              onDelete={setOperationToDeleteId}
-                              onEdit={setOperationToEditId}
-                              isChanged={!isSame && node.id === queryParamsOperationId}
-                              organizationId={props.organizationId}
-                              projectId={props.projectId}
-                              targetId={props.targetId}
-                            />
-                          ))
-                        : null}
-                      <AddCollectionItemButton
-                        organizationId={props.organizationId}
-                        projectId={props.projectId}
-                        targetId={props.targetId}
-                        collectionId={collection.id}
-                      />
-                    </Accordion.Content>
-                  </Accordion.Item>
+                    </AccordionHeader>
+                    <AccordionContent className="pb-2 pl-2">
+                      {collection.operations.edges.length ? (
+                        collection.operations.edges.map(({ node }) => (
+                          <CollectionItem
+                            key={node.id}
+                            node={node}
+                            canDelete={canDelete}
+                            canEdit={canEdit}
+                            onDelete={setOperationToDeleteId}
+                            onEdit={setOperationToEditId}
+                            isChanged={!isSame && node.id === queryParamsOperationId}
+                            organizationId={props.organizationId}
+                            projectId={props.projectId}
+                            targetId={props.targetId}
+                          />
+                        ))
+                      ) : (
+                        <Button
+                          variant="orangeLink"
+                          className="mx-auto block"
+                          onClick={addOperation}
+                          data-collection-id={collection.id}
+                        >
+                          <PlusIcon className="mr-1 inline size-4" /> Add Operation
+                        </Button>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
               </Accordion>
             ) : (
@@ -594,7 +595,7 @@ function useOperationCollectionsPlugin(props: {
               toggleModalOpen={toggleDeleteCollectionModalOpen}
               collectionId={collectionId}
             />
-            {operationToDeleteId === null ? null : (
+            {operationToDeleteId !== null && (
               <DeleteOperationModal
                 organizationId={props.organizationId}
                 projectId={props.projectId}
@@ -603,7 +604,7 @@ function useOperationCollectionsPlugin(props: {
                 operationId={operationToDeleteId}
               />
             )}
-            {operationToEditId === null ? null : (
+            {operationToEditId !== null && (
               <EditOperationModal
                 organizationId={props.organizationId}
                 projectId={props.projectId}
@@ -613,7 +614,7 @@ function useOperationCollectionsPlugin(props: {
                 close={() => setOperationToEditId(null)}
               />
             )}
-          </div>
+          </>
         );
       },
       [canEdit, canDelete],
