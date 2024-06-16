@@ -121,25 +121,21 @@ export function UserMenu(props: {
 
           {me && organizations ? (
             <DropdownMenuContent sideOffset={5} align="end" className="min-w-[240px]">
-              <DropdownMenuLabel>
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col space-y-1">
-                    <div className="truncate text-sm font-medium leading-none">
-                      {me?.displayName}
-                    </div>
-                    <div className="text-muted-foreground truncate text-xs font-normal leading-none">
-                      {me?.email}
-                    </div>
+              <DropdownMenuLabel className="flex items-center justify-between">
+                <div className="flex flex-col space-y-1">
+                  <div className="truncate text-sm font-medium leading-none">{me?.displayName}</div>
+                  <div className="text-muted-foreground truncate text-xs font-normal leading-none">
+                    {me?.email}
                   </div>
-                  <div>
-                    {me?.provider === AuthProvider.Google ? (
-                      <FaGoogle title="Signed in using Google" />
-                    ) : me?.provider === AuthProvider.Github ? (
-                      <FaGithub title="Signed in using Github" />
-                    ) : (
-                      <FaKey title="Signed in using username and password" />
-                    )}
-                  </div>
+                </div>
+                <div>
+                  {me?.provider === AuthProvider.Google ? (
+                    <FaGoogle title="Signed in using Google" />
+                  ) : me?.provider === AuthProvider.Github ? (
+                    <FaGithub title="Signed in using Github" />
+                  ) : (
+                    <FaKey title="Signed in using username and password" />
+                  )}
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -156,25 +152,28 @@ export function UserMenu(props: {
                   ) : null}
                   <DropdownMenuSeparator />
                   {organizations.map(org => (
-                    <Link
-                      to="/$organizationId"
-                      params={{
-                        organizationId: org.cleanId,
-                      }}
+                    <DropdownMenuItem
+                      asChild
                       key={org.cleanId}
+                      active={currentOrganization?.cleanId === org.cleanId}
                     >
-                      <DropdownMenuItem active={currentOrganization?.cleanId === org.cleanId}>
+                      <Link
+                        to="/$organizationId"
+                        params={{
+                          organizationId: org.cleanId,
+                        }}
+                      >
                         {org.name}
-                      </DropdownMenuItem>
-                    </Link>
+                      </Link>
+                    </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <Link to="/org/new">
-                    <DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/org/new">
                       Create organization
                       <PlusIcon className="ml-2 size-4" />
-                    </DropdownMenuItem>
-                  </Link>
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuItem asChild>
@@ -204,17 +203,16 @@ export function UserMenu(props: {
                 </a>
               </DropdownMenuItem>
               {currentOrganization && env.zendeskSupport ? (
-                <Link
-                  to="/$organizationId/view/support"
-                  params={{
-                    organizationId: currentOrganization.cleanId,
-                  }}
-                >
-                  <DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    params={{
+                      organizationId: currentOrganization.cleanId,
+                    }}
+                  >
                     <LifeBuoyIcon className="mr-2 size-4" />
                     Support
-                  </DropdownMenuItem>
-                </Link>
+                  </Link>
+                </DropdownMenuItem>
               ) : null}
               <DropdownMenuItem asChild>
                 <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
@@ -222,7 +220,7 @@ export function UserMenu(props: {
                   Status page
                 </a>
               </DropdownMenuItem>
-              {me.isAdmin === true && (
+              {me.isAdmin && (
                 <Link to="/manage">
                   <DropdownMenuItem>
                     <TrendingUpIcon className="mr-2 size-4" />
@@ -231,12 +229,12 @@ export function UserMenu(props: {
                 </Link>
               )}
               {env.nodeEnv === 'development' && (
-                <Link to="/dev">
-                  <DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/dev">
                     <GraphQLIcon className="mr-2 size-4" />
                     Dev GraphiQL
-                  </DropdownMenuItem>
-                </Link>
+                  </Link>
+                </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               {canLeaveOrganization ? (
