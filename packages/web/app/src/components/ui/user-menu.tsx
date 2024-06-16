@@ -205,6 +205,7 @@ export function UserMenu(props: {
               {currentOrganization && env.zendeskSupport ? (
                 <DropdownMenuItem asChild>
                   <Link
+                    to="/$organizationId/view/support"
                     params={{
                       organizationId: currentOrganization.cleanId,
                     }}
