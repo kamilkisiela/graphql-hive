@@ -2,6 +2,7 @@ import path from 'node:path';
 import { Worker } from 'node:worker_threads';
 import { fileURLToPath } from 'url';
 import { Injectable, Scope } from 'graphql-modules';
+import { LogLevel } from 'graphql-yoga';
 import { Logger } from '../../shared/providers/logger';
 import { BatchProcessedEvent, BatchProcessEvent } from './persisted-document-ingester';
 
@@ -26,13 +27,36 @@ export class PersistedDocumentScheduler {
       console.log(name, 'Worker error', { error });
     });
 
-    worker.on('message', (data: BatchProcessedEvent) => {
-      console.log(name, 'received message', data.id, data.event);
-      if (data.event === 'PROCESSED') {
-        this.cache.get(data.id)?.(data);
-        this.cache.delete(data.id);
-      }
-    });
+    worker.on(
+      'message',
+      (
+        data:
+          | BatchProcessedEvent
+          | { event: 'error'; err: Error }
+          | {
+              event: 'log';
+              bindings: Record<string, unknown>;
+              level: LogLevel;
+              args: [string, ...unknown[]];
+            },
+      ) => {
+        if (data.event === 'log') {
+          this.logger.child(data.bindings)[data.level](...data.args);
+          return;
+        }
+
+        // console.log(name, 'received message', data.id, data.event);
+        if (data.event === 'error') {
+          console.error(data.err);
+          throw data.err;
+        }
+
+        if (data.event === 'processedBatch') {
+          this.cache.get(data.id)?.(data);
+          this.cache.delete(data.id);
+        }
+      },
+    );
 
     return worker;
   }

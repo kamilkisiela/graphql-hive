@@ -3,6 +3,7 @@ import PromiseQueue from 'p-queue';
 import { z } from 'zod';
 import { collectSchemaCoordinates } from '@graphql-hive/core/src/client/collect-schema-coordinates';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
+import { ServiceLogger } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';
 import { S3Config } from '../../shared/providers/s3-config';
 
@@ -38,7 +39,7 @@ export type BatchProcessEvent = {
 };
 
 export type BatchProcessedEvent = {
-  event: 'PROCESSED';
+  event: 'processedBatch';
   id: string;
   data:
     | {
@@ -60,17 +61,27 @@ export type BatchProcessedEvent = {
 
 export class PersistedDocumentIngester {
   private promiseQueue = new PromiseQueue({ concurrency: 30 });
+  private logger: ServiceLogger;
 
   constructor(
     private clickhouse: ClickHouse,
     private s3: S3Config,
-  ) {}
+    logger: ServiceLogger,
+  ) {
+    this.logger = logger.child({ source: 'PersistedDocumentIngester' });
+  }
 
   async processBatch(data: BatchProcessEvent['data']) {
+    this.logger.debug(
+      'Processing batch. (targetId=%s, appDeploymentId=%s, operationCount=%n)',
+      data.targetId,
+      data.appDeployment.id,
+      data.documents.length,
+    );
+
     const schema = buildSchema(data.schemaSdl);
     const typeInfo = new TypeInfo(schema);
     const documents: Array<DocumentRecord> = [];
-    // TODO: we need to extract all the schema coordinates from the operations
 
     let index = 0;
     for (const operation of data.documents) {
@@ -78,6 +89,13 @@ export class PersistedDocumentIngester {
       const bodyValidation = AppDeploymentOperationBodyModel.safeParse(operation.body);
 
       if (hashValidation.success === false || bodyValidation.success === false) {
+        this.logger.debug(
+          'Invalid operation provided. Processing failed. (targetId=%s, appDeploymentId=%s, operationIndex=%n)',
+          data.targetId,
+          data.appDeployment.id,
+          index,
+        );
+
         return {
           type: 'error' as const,
           error: {
@@ -99,6 +117,14 @@ export class PersistedDocumentIngester {
         documentNode = parse(operation.body);
       } catch (err) {
         if (err instanceof GraphQLError) {
+          console.error(err);
+          this.logger.debug(
+            'Failed parsing GraphQL operation. (targetId=%s, appDeploymentId=%s, operationIndex=%n)',
+            data.targetId,
+            data.appDeployment.id,
+            index,
+          );
+
           return {
             type: 'error' as const,
             error: {
@@ -117,6 +143,13 @@ export class PersistedDocumentIngester {
       });
 
       if (errors.length > 0) {
+        this.logger.debug(
+          'GraphQL operation did not pass validation against latest valid schema version. (targetId=%s, appDeploymentId=%s, operationIndex=%n)',
+          data.targetId,
+          data.appDeployment.id,
+          index,
+        );
+
         return {
           type: 'error' as const,
           error: {
@@ -151,6 +184,13 @@ export class PersistedDocumentIngester {
     }
 
     if (documents.length) {
+      this.logger.debug(
+        'inserting documents into clickhouse and s3. (targetId=%s, appDeployment=%s, documentCount=%n)',
+        data.targetId,
+        data.appDeployment.id,
+        documents.length,
+      );
+
       await this.insertDocuments({
         targetId: data.targetId,
         appDeployment: data.appDeployment,
@@ -167,6 +207,7 @@ export class PersistedDocumentIngester {
   private async insertDocuments(args: {
     targetId: string;
     appDeployment: {
+      id: string;
       name: string;
       version: string;
     };
@@ -196,13 +237,34 @@ export class PersistedDocumentIngester {
       )}
       `;
 
+    this.logger.debug(
+      'Inserting documents into ClickHouse. (targetId=%s, appDeployment=%s, documentCount=%n)',
+      args.targetId,
+      args.appDeployment.id,
+      args.documents.length,
+    );
+
     await this.clickhouse.query({
       query,
       timeout: 10_000,
       queryId: 'insert_app_deployment_documents',
     });
 
+    this.logger.debug(
+      'Inserting documents into ClickHouse finished. (targetId=%s, appDeployment=%s, documentCount=%n)',
+      args.targetId,
+      args.appDeployment.id,
+      args.documents.length,
+    );
+
     // 2. Insert into S3
+
+    this.logger.debug(
+      'Inserting documents into S3. (targetId=%s, appDeployment=%s, documentCount=%n)',
+      args.targetId,
+      args.appDeployment.id,
+      args.documents.length,
+    );
 
     /** We parallelize and queue the requests. */
     const tasks: Array<Promise<void>> = [];
@@ -240,6 +302,13 @@ export class PersistedDocumentIngester {
     }
 
     await Promise.all(tasks);
+
+    this.logger.debug(
+      'Inserting documents into S3 finished. (targetId=%s, appDeployment=%s, documentCount=%n)',
+      args.targetId,
+      args.appDeployment.id,
+      args.documents.length,
+    );
   }
 }
 
