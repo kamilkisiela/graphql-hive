@@ -53,9 +53,15 @@ export function createWorker(
 
   const clickhouse = new ClickHouse(env.clickhouse, new HttpClient(), logger);
 
-  const persistedOperationsProcessor = new PersistedDocumentIngester(clickhouse, s3Config);
+  const persistedOperationsProcessor = new PersistedDocumentIngester(
+    clickhouse,
+    s3Config,
+    logger as any,
+  );
 
   process.on('unhandledRejection', function (err) {
+    console.error('unhandledRejection', err);
+    console.error(err);
     port.postMessage({
       code: 'ERROR',
       err,
@@ -64,6 +70,7 @@ export function createWorker(
   });
 
   process.on('uncaughtException', function (err) {
+    console.error('uncaughtException', err);
     port.postMessage({
       code: 'ERROR',
       err,
@@ -76,7 +83,7 @@ export function createWorker(
     const result = await persistedOperationsProcessor.processBatch(message.data);
     logger.debug('send message result', message.id, message.event);
     port.postMessage({
-      event: 'PROCESSED',
+      event: 'processedBatch',
       id: message.id,
       data: result,
     } satisfies BatchProcessedEvent);
