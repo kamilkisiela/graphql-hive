@@ -78,14 +78,14 @@ export class Proxy {
                       ...route,
                       // Accepts: /graphql
                       // Rejects: /graphql/ and /graphql-hive
-                      match: 'exact',
+                      match: 'exact' as const,
                     },
                     {
                       ...route,
                       path: route.path + '/',
                       // Accepts: /graphql/ and /graphql/anything
                       // Rejects: /graphql and /graphql-hive
-                      match: 'prefix',
+                      match: 'prefix' as const,
                     },
                   ]
                 : [route],
@@ -113,6 +113,7 @@ export class Proxy {
                     pathRewritePolicy: {
                       replacePrefix: [
                         {
+                          prefix: route.path,
                           replacement: route.customRewrite || '/',
                         },
                       ],
