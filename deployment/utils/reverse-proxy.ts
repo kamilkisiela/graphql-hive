@@ -77,7 +77,7 @@ export class Proxy {
                   [
                     {
                       ...route,
-                      regex: `^${route.path}(/.*)?$`,
+                      regex: `${route.path}(/.*)?`,
                       match: 'regex' as const,
                     },
                   ]
