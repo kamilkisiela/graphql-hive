@@ -113,7 +113,7 @@ export class Proxy {
                   port: route.service.spec.ports[0].port,
                 },
               ],
-              ...(route.path === '/'
+              ...(route.path === '/' || route.match === 'exact'
                 ? {}
                 : {
                     pathRewritePolicy: {
