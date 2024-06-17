@@ -203,40 +203,14 @@ export class PersistedDocumentIngester {
     };
   }
 
-  /** inserts operations of an app deployment into clickhouse and s3 */
-  private async insertDocuments(args: {
+  private async insertClickHouseDocuments(args: {
     targetId: string;
     appDeployment: {
       id: string;
-      name: string;
-      version: string;
     };
     documents: Array<DocumentRecord>;
   }) {
-    // 1. Insert into clickhouse
-    const query = c_sql`
-      INSERT INTO "app_deployment_documents" (
-        "app_deployment_id"
-        , "document_hash"
-        , "document_body"
-        , "operation_names"
-        , "schema_coordinates"
-      )
-      VALUES ${c_sql.join(
-        args.documents.map(
-          document =>
-            c_sql`(
-              ${document.appDeploymentId}
-              , ${document.hash}
-              , ${document.body}
-              , (${c_sql.array(document.operationNames, 'String')})
-              , (${c_sql.array(document.schemaCoordinates, 'String')})
-            )`,
-        ),
-        ',',
-      )}
-      `;
-
+    // 1. Insert into ClickHouse
     this.logger.debug(
       'Inserting documents into ClickHouse. (targetId=%s, appDeployment=%s, documentCount=%n)',
       args.targetId,
@@ -244,8 +218,23 @@ export class PersistedDocumentIngester {
       args.documents.length,
     );
 
-    await this.clickhouse.query({
-      query,
+    await this.clickhouse.insert({
+      query: c_sql`
+    INSERT INTO "app_deployment_documents" (
+      "app_deployment_id"
+      , "document_hash"
+      , "document_body"
+      , "operation_names"
+      , "schema_coordinates"
+    )
+    FORMAT CSV`,
+      data: args.documents.map(document => [
+        document.appDeploymentId,
+        document.hash,
+        document.body,
+        document.operationNames,
+        document.schemaCoordinates,
+      ]),
       timeout: 10_000,
       queryId: 'insert_app_deployment_documents',
     });
@@ -256,9 +245,17 @@ export class PersistedDocumentIngester {
       args.appDeployment.id,
       args.documents.length,
     );
+  }
 
-    // 2. Insert into S3
-
+  private async insertS3Documents(args: {
+    targetId: string;
+    appDeployment: {
+      id: string;
+      name: string;
+      version: string;
+    };
+    documents: Array<DocumentRecord>;
+  }) {
     this.logger.debug(
       'Inserting documents into S3. (targetId=%s, appDeployment=%s, documentCount=%n)',
       args.targetId,
@@ -309,6 +306,23 @@ export class PersistedDocumentIngester {
       args.appDeployment.id,
       args.documents.length,
     );
+  }
+
+  /** inserts operations of an app deployment into clickhouse and s3 */
+  private async insertDocuments(args: {
+    targetId: string;
+    appDeployment: {
+      id: string;
+      name: string;
+      version: string;
+    };
+    documents: Array<DocumentRecord>;
+  }) {
+    await Promise.all([
+      // prettier-ignore
+      this.insertClickHouseDocuments(args),
+      this.insertS3Documents(args),
+    ]);
   }
 }
 
