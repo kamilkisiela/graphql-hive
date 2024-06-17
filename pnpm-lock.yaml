@@ -531,7 +531,7 @@ importers:
         version: link:../core/dist
       '@graphql-yoga/plugin-persisted-operations':
         specifier: ^3.3.1
-        version: 3.3.1(@graphql-tools/utils@10.2.1(graphql@16.8.1))(graphql-yoga@5.3.1(graphql@16.8.1))(graphql@16.8.1)
+        version: 3.4.0(@graphql-tools/utils@10.2.2(graphql@16.9.0))(graphql-yoga@5.4.0(graphql@16.9.0))(graphql@16.9.0)
       graphql:
         specifier: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
         version: 16.9.0
@@ -667,6 +667,9 @@ importers:
       '@hive/tokens':
         specifier: workspace:*
         version: link:../tokens
+      '@hive/usage-common':
+        specifier: workspace:*
+        version: link:../usage-common
       '@hive/webhooks':
         specifier: workspace:*
         version: link:../webhooks

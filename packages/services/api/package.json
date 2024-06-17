@@ -23,6 +23,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "@hive/tokens": "workspace:*",
+    "@hive/usage-common": "workspace:*",
     "@hive/webhooks": "workspace:*",
     "@octokit/app": "14.1.0",
     "@octokit/core": "5.2.0",

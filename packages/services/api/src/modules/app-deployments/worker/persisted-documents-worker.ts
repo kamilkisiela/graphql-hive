@@ -80,13 +80,21 @@ export function createWorker(
 
   port.on('message', async (message: BatchProcessEvent) => {
     logger.debug('processing message', message.id, message.event);
-    const result = await persistedOperationsProcessor.processBatch(message.data);
-    logger.debug('send message result', message.id, message.event);
-    port.postMessage({
-      event: 'processedBatch',
-      id: message.id,
-      data: result,
-    } satisfies BatchProcessedEvent);
+    try {
+      const result = await persistedOperationsProcessor.processBatch(message.data);
+      logger.debug('send message result', message.id, message.event);
+      port.postMessage({
+        event: 'processedBatch',
+        id: message.id,
+        data: result,
+      } satisfies BatchProcessedEvent);
+    } catch (err: unknown) {
+      logger.error('unexpected error', message.id, message.event);
+      port.postMessage({
+        code: 'ERROR',
+        err,
+      });
+    }
   });
 
   process.on('exit', function (code) {
