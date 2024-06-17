@@ -4,7 +4,7 @@ import { ContourValues } from './contour.types';
 import { helmChart } from './helm';
 
 // prettier-ignore
-export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '17.0.12');
+export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '18.2.4');
 
 export class Proxy {
   private lbService: Output<k8s.core.v1.Service> | null = null;
@@ -77,17 +77,15 @@ export class Proxy {
                   [
                     {
                       ...route,
-                      regex: `${route.path}(/.*)?`,
-                      match: 'regex' as const,
+                      path: route.path,
+                      match: 'prefix' as const,
                     },
                   ]
                 : [route],
             )
             .flat(1)
             .map(route => ({
-              conditions: [
-                route.match === 'regex' ? { regex: route.regex } : { prefix: route.path },
-              ],
+              conditions: [{ prefix: route.path }],
               services: [
                 {
                   name: route.service.metadata.name,
