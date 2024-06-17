@@ -100,9 +100,9 @@ export class Proxy {
                       },
                     ]
                   : [
-                      {
-                        prefix: route.path,
-                      },
+                      // {
+                      //   prefix: route.path,
+                      // },
                       {
                         exact: route.path,
                       },
