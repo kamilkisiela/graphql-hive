@@ -92,15 +92,21 @@ export class Proxy {
             )
             .flat(1)
             .map(route => ({
-              conditions: [
+              conditions:
                 route.match === 'prefix'
-                  ? {
-                      prefix: route.path,
-                    }
-                  : {
-                      exact: route.path,
-                    },
-              ],
+                  ? [
+                      {
+                        prefix: route.path,
+                      },
+                    ]
+                  : [
+                      {
+                        prefix: route.path,
+                      },
+                      {
+                        exact: route.path,
+                      },
+                    ],
               services: [
                 {
                   name: route.service.metadata.name,
