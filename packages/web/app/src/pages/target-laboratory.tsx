@@ -23,8 +23,7 @@ import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import {
-  Button as GraphiQLButton,
-  DropdownMenu as GraphiQLDropdownMenu,
+  UnStyledButton as GraphiQLButton,
   GraphiQLPlugin,
   Tooltip as GraphiQLTooltip,
   useEditorContext,
@@ -733,25 +732,24 @@ function Save(props: {
     currentOperation.variables === variableEditor?.getValue() &&
     currentOperation.headers === headerEditor?.getValue();
 
+  const label = 'Save operation';
+
   return (
-    <>
-      <GraphiQLDropdownMenu
-        // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
-        modal={false}
-      >
-        <GraphiQLDropdownMenu.Button
-          className="graphiql-toolbar-button relative"
-          aria-label="More"
-          data-cy="save-operation"
-        >
-          {!isSame && (
-            <span className="absolute right-1 top-1 size-1.5 rounded-full border border-orange-600 bg-orange-400" />
-          )}
-          <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
-        </GraphiQLDropdownMenu.Button>
-        <GraphiQLDropdownMenu.Content>
-          {!isSame && currentOperation && (
-            <GraphiQLDropdownMenu.Item
+    <DropdownMenu>
+      <GraphiQLTooltip label={label}>
+        <DropdownMenuTrigger asChild>
+          <GraphiQLButton className="graphiql-toolbar-button relative" aria-label={label}>
+            {!isSame && (
+              <span className="absolute right-1 top-1 size-1.5 rounded-full border border-orange-600 bg-orange-400" />
+            )}
+            <SaveIcon className="graphiql-toolbar-icon h-5" />
+          </GraphiQLButton>
+        </DropdownMenuTrigger>
+      </GraphiQLTooltip>
+      <DropdownMenuContent align="end">
+        {!isSame && currentOperation && (
+          <>
+            <DropdownMenuItem
               disabled={isSame || !currentOperation}
               className="mb-0 text-red-600"
               onClick={async () => {
@@ -760,56 +758,57 @@ function Save(props: {
               }}
             >
               Discard changes
-            </GraphiQLDropdownMenu.Item>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <DropdownMenuItem
+          disabled={isSame || !currentOperation}
+          className={cx(
+            (isSame || !currentOperation) && 'cursor-default text-gray-400 hover:bg-transparent',
           )}
-          <GraphiQLDropdownMenu.Item
-            disabled={isSame || !currentOperation}
-            className={cx(
-              (isSame || !currentOperation) && 'cursor-default text-gray-400 hover:bg-transparent',
-            )}
-            onClick={async () => {
-              if (!currentOperation || isSame) {
-                return;
-              }
-              const { error, data } = await mutateUpdate({
-                selector: {
-                  target: props.targetId,
-                  organization: props.organizationId,
-                  project: props.projectId,
-                },
-                input: {
-                  name: currentOperation.name,
-                  collectionId: currentOperation.collection.id,
-                  query: queryEditor?.getValue(),
-                  variables: variableEditor?.getValue(),
-                  headers: headerEditor?.getValue(),
-                  operationId: currentOperation.id,
-                },
-              });
-              if (data) {
-                clearOperation();
-                notify('Updated!', 'success');
-              }
-              if (error) {
-                notify(error.message, 'error');
-              }
-            }}
-          >
-            Save
-          </GraphiQLDropdownMenu.Item>
-          <GraphiQLDropdownMenu.Item
-            onClick={async () => {
-              if (!collections.length) {
-                notify('Please create a collection first.', 'error');
-                return;
-              }
-              toggleOperationModal();
-            }}
-          >
-            Save as
-          </GraphiQLDropdownMenu.Item>
-        </GraphiQLDropdownMenu.Content>
-      </GraphiQLDropdownMenu>
+          onClick={async () => {
+            if (!currentOperation || isSame) {
+              return;
+            }
+            const { error, data } = await mutateUpdate({
+              selector: {
+                target: props.targetId,
+                organization: props.organizationId,
+                project: props.projectId,
+              },
+              input: {
+                name: currentOperation.name,
+                collectionId: currentOperation.collection.id,
+                query: queryEditor?.getValue(),
+                variables: variableEditor?.getValue(),
+                headers: headerEditor?.getValue(),
+                operationId: currentOperation.id,
+              },
+            });
+            if (data) {
+              clearOperation();
+              notify('Updated!', 'success');
+            }
+            if (error) {
+              notify(error.message, 'error');
+            }
+          }}
+        >
+          Save
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={async () => {
+            if (!collections.length) {
+              notify('Please create a collection first.', 'error');
+              return;
+            }
+            toggleOperationModal();
+          }}
+        >
+          Save as
+        </DropdownMenuItem>
+      </DropdownMenuContent>
       <CreateOperationModal
         organizationId={props.organizationId}
         projectId={props.projectId}
@@ -818,7 +817,7 @@ function Save(props: {
         close={toggleOperationModal}
         onSaveSuccess={onSaveSuccess}
       />
-    </>
+    </DropdownMenu>
   );
 }
 
