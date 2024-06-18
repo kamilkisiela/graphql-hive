@@ -863,6 +863,7 @@ function LaboratoryPageContent(props: {
   });
   const router = useRouter();
   const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const currentOrganization = query.data?.organization?.organization;
 
@@ -942,8 +943,6 @@ function LaboratoryPageContent(props: {
     'operation' in searchObj && typeof searchObj.operation === 'string'
       ? searchObj.operation
       : null;
-
-  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const FullScreenComponent = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
 
