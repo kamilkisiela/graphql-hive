@@ -5,9 +5,12 @@ import { createConnectionString } from './connection-string';
 import { env } from './environment';
 import { runPGMigrations } from './run-pg-migrations';
 
-const slonik = await createPool(createConnectionString(env.postgres), {
+const connectionString = createConnectionString(env.postgres);
+console.log('connectionString:', connectionString)
+const slonik = await createPool(connectionString, {
   // 10 minute timeout per statement
   statementTimeout: 10 * 60 * 1000,
+  
 });
 
 // This is used by production build of this package.

@@ -2,8 +2,12 @@
 import pgpFactory from 'pg-promise';
 import cn from './db-connection-string.cjs';
 
-const pgp = pgpFactory();
-const db = pgp(cn('postgres'));
+const pgp = pgpFactory({
+  schema: process.env.POSTGRES_SCHEMA
+});
+const db = pgp({
+  connectionString: cn('postgres')
+});
 
 const dbName = 'registry';
 

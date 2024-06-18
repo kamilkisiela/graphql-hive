@@ -7,5 +7,5 @@ export function createConnectionString(config: {
   ssl: boolean;
 }) {
   // prettier-ignore
-  return `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}${config.ssl ? '?sslmode=require' : '?sslmode=disable'}`;
+  return `postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.db}${config.ssl ? '?sslmode=require' : '?sslmode=disable&options=-c%20search_path%3Dfoo'}`;
 }
