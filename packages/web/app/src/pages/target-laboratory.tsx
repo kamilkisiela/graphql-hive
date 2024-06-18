@@ -1113,7 +1113,6 @@ function LaboratoryPageContent(props: {
             visiblePlugin={operationCollectionsPlugin}
             schema={schema}
             forcedTheme="dark"
-            disableTabs
           >
             <GraphiQL.Logo>
               <EditorBreadcrumbs
