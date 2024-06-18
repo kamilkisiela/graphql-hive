@@ -953,6 +953,7 @@ function LaboratoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Laboratory}
+      className="flex h-[--hive-content-height] flex-col"
     >
       <div className="flex py-6">
         <div className="flex-1">
@@ -1109,7 +1110,7 @@ function LaboratoryPageContent(props: {
               <Button
                 onClick={() => setIsFullScreen(prev => !prev)}
                 variant="outline"
-                className="h-auto gap-2 p-2"
+                className="h-auto gap-2"
               >
                 <FullScreenComponent className="size-4" />
                 {isFullScreen ? 'Exit' : 'Enter'} Full Screen

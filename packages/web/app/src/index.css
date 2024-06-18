@@ -36,6 +36,8 @@
     --ring: 215 20.2% 65.1%;
 
     --radius: 0.5rem;
+    
+    --hive-content-height: calc(100vh - 84px - 47px);
   }
 
   .dark {
