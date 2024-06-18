@@ -35,21 +35,6 @@ schemas, and other resources.
 - `deleteProject`
 - `updateName`
 
-### ArtifactStorageWriter
-
-- `writeArtifact`
-- `deleteArtifact`
-
-### CompositeLegacyModel
-
-- `check`
-- `publish`
-
-### SingleLegacyModel
-
-- `check`
-- `publish`
-
 ### TargetManager
 
 - `createTarget`
@@ -62,9 +47,7 @@ schemas, and other resources.
 
 ### SchemaPublisher
 
-- `updateVersionStatus`
 - `delete`
-- `publishToCDN`
 
 ### SchemaManager
 
@@ -101,9 +84,6 @@ schemas, and other resources.
 
 - `register`
 - `unregister`
-- `createCheckRun`
-- `updateCheckRun`
-- `updateCheckRunToSuccess`
 - `enableProjectNameInGithubCheck`
 
 ### SlackIntegrationManager
@@ -117,16 +97,10 @@ schemas, and other resources.
 - `updateOIDCIntegration`
 - `deleteOIDCIntegration`
 
-### ContractsManager
-
-- `createContract`
-- `disableContract`
-
 ### Contracts
 
 - `createContract`
 - `disableContract`
-- `approveContractChecksForSchemaCheckId`
 
 ### AlertsManager
 
@@ -135,10 +109,46 @@ schemas, and other resources.
 - `addAlert`
 - `deleteAlerts`
 
+## Storage
+
+- updateUser
+- updateOrganizationName
+- updateOrganizationPlan
+- updateOrganizationRateLimits
+- createOrganizationInvitation
+- deleteOrganizationInvitationByEmail
+- createOrganizationTransferRequest
+- answerOrganizationTransferRequest
+- addOrganizationMemberViaInvitationCode
+- deleteOrganizationMember
+- updateOrganizationMemberAccess
+- assignOrganizationMemberRole
+- assignOrganizationMemberRoleToMany
+- deleteOrganizationMemberRole
+- updateProjectRegistryModel
+- createVersion
+- updateVersionStatus
+- createActivity
+- addSlackIntegration
+- deleteSlackIntegration
+- addGitHubIntegration
+- deleteGitHubIntegration
+- setSchemaPolicyForOrganization
+- setSchemaPolicyForProject
+- createDocumentCollection
+- deleteDocumentCollection
+- updateDocumentCollection
+- createDocumentCollectionDocument
+- deleteDocumentCollectionDocument
+- updateDocumentCollectionDocument
+- createSchemaCheck
+
+
 ## Implementation
 
-Proposed implementation is to use a single clickhouse table to store all events. The table will have
+Proposed implementation is to use a single Clickhouse table to store all events. The table will have
 the following columns:
+
 
 ```sql
 CREATE TABLE audit_log (
