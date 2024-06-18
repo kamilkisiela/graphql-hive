@@ -105,7 +105,6 @@ schemas, and other resources.
 - `updateCheckRun`
 - `updateCheckRunToSuccess`
 - `enableProjectNameInGithubCheck`
-- `limitOutput`
 
 ### SlackIntegrationManager
 
@@ -117,7 +116,6 @@ schemas, and other resources.
 - `createOIDCIntegrationForOrganization`
 - `updateOIDCIntegration`
 - `deleteOIDCIntegration`
-- `subscribeToOIDCIntegrationLogs`
 
 ### ContractsManager
 
@@ -128,8 +126,6 @@ schemas, and other resources.
 
 - `createContract`
 - `disableContract`
-- `loadLatestValidContractVersionsByTargetId`
-- `loadActiveContractsWithLatestValidContractVersionsByTargetId`
 - `approveContractChecksForSchemaCheckId`
 
 ### AlertsManager
@@ -138,8 +134,6 @@ schemas, and other resources.
 - `deleteChannels`
 - `addAlert`
 - `deleteAlerts`
-- `triggerSchemaChangeNotifications`
-- `triggerChannelConfirmation`
 
 ## Implementation
 
