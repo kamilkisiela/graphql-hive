@@ -1,6 +1,9 @@
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { cx } from 'class-variance-authority';
+import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
+import { Helmet } from 'react-helmet-async';
 import { useMutation, useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
@@ -8,32 +11,6 @@ import { CreateCollectionModal } from '@/components/target/laboratory/create-col
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
-import { Button } from '@/components/ui/button';
-import { DocsLink } from '@/components/ui/docs-note';
-import { Link } from '@/components/ui/link';
-import { Subtitle, Title } from '@/components/ui/page';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
-import { Spinner } from '@/components/v2/spinner';
-import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
-import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';
-import { graphql } from '@/gql';
-import { TargetAccessScope } from '@/gql/graphql';
-import { canAccessTarget } from '@/lib/access/target';
-import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
-import { cn } from '@/lib/utils';
-import {
-  UnStyledButton as GraphiQLButton,
-  GraphiQLPlugin,
-  Tooltip as GraphiQLTooltip,
-  useEditorContext,
-} from '@graphiql/react';
-import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
-import 'graphiql/graphiql.css';
-import { cx } from 'class-variance-authority';
-import clsx from 'clsx';
-import { Helmet } from 'react-helmet-async';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import {
   Accordion,
@@ -42,6 +19,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { DocsLink } from '@/components/ui/docs-note';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,11 +28,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Link } from '@/components/ui/link';
 import { Meta } from '@/components/ui/meta';
+import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
+import { Spinner } from '@/components/v2/spinner';
+import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
+import { graphql } from '@/gql';
+import { TargetAccessScope } from '@/gql/graphql';
+import { canAccessTarget } from '@/lib/access/target';
+import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
+import { cn } from '@/lib/utils';
+import {
+  UnStyledButton as GraphiQLButton,
+  GraphiQLPlugin,
+  Tooltip as GraphiQLTooltip,
+  useEditorContext,
+} from '@graphiql/react';
+import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
+import {
+  BookmarkIcon,
+  DotsHorizontalIcon,
+  EnterFullScreenIcon,
+  ExitFullScreenIcon,
+} from '@radix-ui/react-icons';
 import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
+import 'graphiql/graphiql.css';
 
 function Share(props: { operation: string | null }): ReactElement {
   const label = 'Share query';
