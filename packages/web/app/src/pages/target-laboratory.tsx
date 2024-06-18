@@ -943,6 +943,10 @@ function LaboratoryPageContent(props: {
       ? searchObj.operation
       : null;
 
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  const FullScreenComponent = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
+
   return (
     <TargetLayout
       organizationId={props.organizationId}
@@ -1031,7 +1035,6 @@ function LaboratoryPageContent(props: {
         .graphiql-container {
           --color-base: transparent !important;
           --color-primary: 40, 89%, 60% !important;
-          min-height: 600px;
         }
         .graphiql-container .graphiql-tab-add {
           display: none;
@@ -1074,57 +1077,46 @@ function LaboratoryPageContent(props: {
       `}</style>
       </Helmet>
 
-      {query.fetching ? null : (
-        <GraphiQL
-          fetcher={fetcher}
-          toolbar={{
-            additionalContent: (
-              <>
-                <Save
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
-                />
-                <Share operation={operation} />
-              </>
-            ),
-          }}
-          showPersistHeadersSettings={false}
-          shouldPersistHeaders={false}
-          plugins={[operationCollectionsPlugin]}
-          visiblePlugin={operationCollectionsPlugin}
-          schema={schema}
-          forcedTheme="dark"
-        >
-          <GraphiQL.Logo>
-            <EditorBreadcrumbs
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
-            />
-            <div className="ml-auto">
-              <LegacyTooltip
-                content={
-                  actualSelectedApiEndpoint === 'linkedApi' ? (
-                    <>
-                      Operations are executed against{' '}
-                      <span>{query.data?.target?.graphqlEndpointUrl}</span>.
-                    </>
-                  ) : (
-                    <>Operations are executed against the mock endpoint.</>
-                  )
-                }
+      {!query.fetching && (
+        <div className={clsx('grow', isFullScreen && 'fixed inset-0 bg-[#030711]')}>
+          <GraphiQL
+            fetcher={fetcher}
+            toolbar={{
+              additionalContent: (
+                <>
+                  <Save
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
+                  <Share operation={operation} />
+                </>
+              ),
+            }}
+            showPersistHeadersSettings={false}
+            shouldPersistHeaders={false}
+            plugins={[operationCollectionsPlugin]}
+            visiblePlugin={operationCollectionsPlugin}
+            schema={schema}
+            forcedTheme="dark"
+          >
+            <GraphiQL.Logo>
+              <EditorBreadcrumbs
+                organizationId={props.organizationId}
+                projectId={props.projectId}
+                targetId={props.targetId}
+              />
+              <Button
+                onClick={() => setIsFullScreen(prev => !prev)}
+                variant="outline"
+                className="h-auto gap-2 p-2"
               >
-                <span className="cursor-help pr-2 text-xs font-normal">
-                  {actualSelectedApiEndpoint === 'linkedApi'
-                    ? 'Querying GraphQL API'
-                    : 'Querying Mock API'}
-                </span>
-              </LegacyTooltip>
-              <HiveLogo className="h-6 w-auto" />
-            </div>
-          </GraphiQL.Logo>
-        </GraphiQL>
+                <FullScreenComponent className="size-4" />
+                {isFullScreen ? 'Exit' : 'Enter'} Full Screen
+              </Button>
+            </GraphiQL.Logo>
+          </GraphiQL>
+        </div>
       )}
       <ConnectLabModal
         endpoint={mockEndpoint}
