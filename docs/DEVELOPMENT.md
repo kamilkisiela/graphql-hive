@@ -119,7 +119,7 @@ We recommend the following flow if you are having issues with running Hive local
 
 1. Server: Set the following env variables in `packages/services/server/.env`:
 
-   ```
+   ```dotenv
    INTEGRATION_GITHUB=1
    INTEGRATION_GITHUB_GITHUB_APP_ID=<your-github-app-id>
    ```
@@ -130,7 +130,7 @@ We recommend the following flow if you are having issues with running Hive local
    (`packages/services/server/github-app.pem`)
 
 2. Web App: Set the following in `packages/web/app/.env`:
-   ```
+   ```dotenv
    INTEGRATION_GITHUB_APP_NAME=<your-github-app-name>
    ```
 

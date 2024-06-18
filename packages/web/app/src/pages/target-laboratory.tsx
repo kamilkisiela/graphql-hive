@@ -1091,6 +1091,7 @@ function LaboratoryPageContent(props: {
           plugins={[operationCollectionsPlugin]}
           visiblePlugin={operationCollectionsPlugin}
           schema={schema}
+          forcedTheme="dark"
         >
           <GraphiQL.Logo>
             <EditorBreadcrumbs
