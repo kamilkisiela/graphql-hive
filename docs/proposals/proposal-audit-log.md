@@ -164,11 +164,13 @@ CREATE TABLE audit_log (
   event_action STRING,
   event_details JSON
 ) ENGINE = MergeTree ()
-ORDER BY
-  event_time;
+ORDER BY event_time
+TTL timestamp + INTERVAL 3 MONTH;
 ```
+Data in clickhouse would be append only. We would never manually delete them, we would rely on TTL removing old rows after X months
+Of course we could make the interval configurable if necessary.
 
-our log function will be a simple function that inserts a row into the table:
+Our log function will be a simple function that inserts a row into the table:
 
 ```ts
 import { ClickHouse } from 'clickhouse';
