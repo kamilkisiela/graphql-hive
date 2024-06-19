@@ -87,6 +87,8 @@ const handler: ExportedHandler<Env> = {
       },
     });
 
+    const cache = await caches.open('cdn-responses');
+
     const handleArtifactRequest = createArtifactRequestHandler({
       isKeyValid,
       analytics,
@@ -96,6 +98,15 @@ const handler: ExportedHandler<Env> = {
         getCache: () => caches.open('artifacts-auth'),
         waitUntil: p => ctx.waitUntil(p),
       }),
+      requestCache: {
+        get(request) {
+          const cacheKey = new Request(request.url.toString(), request);
+          return cache.match(cacheKey);
+        },
+        set(request, response) {
+          ctx.waitUntil(cache.put(request, response.clone()));
+        },
+      },
     });
 
     const router = itty

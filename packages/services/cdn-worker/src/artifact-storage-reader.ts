@@ -163,7 +163,7 @@ export class ArtifactStorageReader {
     return response.status === 200;
   }
 
-  async generateAppDeploymentPersistedOperationReadUrl(
+  async loadAppDeploymentPersistedOperation(
     targetId: string,
     appName: string,
     appVersion: string,
@@ -172,37 +172,47 @@ export class ArtifactStorageReader {
   ) {
     const key = buildOperationS3BucketKey(targetId, appName, appVersion, hash);
 
+    const headers: Record<string, string> = {};
+    if (etagValue) {
+      headers['if-none-match'] = etagValue;
+    }
+
     const response = await this.s3.client.fetch(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
-        method: 'HEAD',
+        method: 'GET',
         aws: {
           signQuery: true,
         },
+        headers,
       },
     );
+
     this.analytics?.track(
       {
         type: 'r2',
         statusCode: response.status,
-        action: 'HEAD persistedOperation',
+        action: 'GET persistedOperation',
       },
       targetId,
     );
 
-    if (response.status === 200) {
-      if (etagValue && response.headers.get('etag') === etagValue) {
-        return { type: 'notModified' } as const;
-      }
+    if (etagValue && response.status === 304) {
+      return { type: 'notModified' } as const;
+    }
 
+    if (response.status === 200) {
+      const body = await response.text();
       return {
-        type: 'redirect',
-        location: await this.generatePresignedGetUrl(key),
+        type: 'body',
+        body,
       } as const;
     }
+
     if (response.status === 404) {
       return { type: 'notFound' } as const;
     }
+
     const body = await response.text();
     throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
   }

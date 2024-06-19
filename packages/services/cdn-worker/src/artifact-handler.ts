@@ -15,6 +15,7 @@ export type GetArtifactActionFn = (
 ) => Promise<
   | { type: 'notModified' }
   | { type: 'notFound' }
+  | { type: 'body'; body: string }
   | {
       type: 'redirect';
       location: {
@@ -33,6 +34,10 @@ type ArtifactRequestHandler = {
     request: Request,
     params: { targetId: string; artifactType: string },
   ) => Promise<Response | undefined>;
+  requestCache?: {
+    get: (request: Request) => Promise<Response | undefined>;
+    set: (request: Request, response: Response) => void;
+  };
 };
 
 const ParamsModel = zod.object({
@@ -249,6 +254,11 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         return maybeResponse;
       }
 
+      const response = await deps.requestCache?.get(request);
+      if (response) {
+        return response;
+      }
+
       if (
         false ===
         (await deps.isAppDeploymentActive(params.targetId, params.appName, params.appVersion))
@@ -273,17 +283,16 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
       const eTag = request.headers.get('if-none-match');
 
-      const result =
-        await deps.artifactStorageReader.generateAppDeploymentPersistedOperationReadUrl(
-          params.targetId,
-          params.appName,
-          params.appVersion,
-          params.operationHash,
-          eTag,
-        );
+      const result = await deps.artifactStorageReader.loadAppDeploymentPersistedOperation(
+        params.targetId,
+        params.appName,
+        params.appVersion,
+        params.operationHash,
+        eTag,
+      );
 
       if (result.type === 'notModified') {
-        return createResponse(
+        const response = createResponse(
           analytics,
           null,
           {
@@ -292,27 +301,34 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
           params.targetId,
           request,
         );
+
+        deps.requestCache?.set(request, response);
+        return response;
       }
 
       if (result.type === 'notFound') {
         return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
       }
 
-      if (result.type === 'redirect') {
-        return createResponse(
+      if (result.type === 'body') {
+        const response = createResponse(
           analytics,
-          'Found.',
+          result.body,
           // We're using here a public location, because we expose the Location to the end user and
           // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
           // If they are the same, private and public locations will be the same.
-          { status: 302, headers: { Location: result.location.public } },
+          { status: 200 },
           params.targetId,
           request,
         );
+
+        deps.requestCache?.set(request, response);
+        return response;
       }
     },
   );
 
-  return (request: Request, captureException?: (error: unknown) => void) =>
-    router.handle(request, captureException);
+  return async (request: Request, captureException?: (error: unknown) => void) => {
+    return router.handle(request, captureException);
+  };
 };

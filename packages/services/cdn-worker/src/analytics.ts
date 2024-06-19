@@ -60,7 +60,7 @@ type Event =
         | 'HEAD artifact'
         | 'GET cdn-legacy-keys'
         | 'GET cdn-access-token'
-        | 'HEAD persistedOperation'
+        | 'GET persistedOperation'
         | 'HEAD appDeploymentIsEnabled';
       statusCode: number;
     }
