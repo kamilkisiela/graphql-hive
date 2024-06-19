@@ -171,7 +171,6 @@ ORDER BY
 our log function will be a simple function that inserts a row into the table:
 
 ```ts
-
 import { ClickHouse } from 'clickhouse';
 
 const clickhouse = new ClickHouse(...)
