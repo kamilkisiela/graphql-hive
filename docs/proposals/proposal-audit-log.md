@@ -162,7 +162,11 @@ CREATE TABLE audit_log (
   schema_version_id UUID,
   event_kind STRING,
   event_action STRING,
-  event_details JSON
+  event_details JSON,
+  INDEX idx_user_id user_id TYPE set(0) GRANULARITY 64,
+  INDEX idx_organization_id organization_id TYPE set(0) GRANULARITY 64,
+  INDEX idx_project_id project_id TYPE set(0) GRANULARITY 64,
+  INDEX idx_event_kind event_kind TYPE set(0) GRANULARITY 64
 ) ENGINE = MergeTree ()
 ORDER BY event_time
 TTL timestamp + INTERVAL 3 MONTH;
