@@ -178,37 +178,47 @@ import { ClickHouse } from 'clickhouse';
 const clickhouse = new ClickHouse(/* ... */)
 
 type AuditLogEvent = {
-  userId: string;
-  organizationId?: string;
-  projectId?: string;
-  targetId?: string;
-  schemaVersionId?: string;
-  action: string;
-  details: Record<string, any>;
+  userId?: string | null;
+  organizationId?: string | null;
+  projectId?: string | null;
+  targetId?: string | null;
+  schemaVersionId?: string | null;
   eventKind: string;
+  eventAction: string;
+  details: Record<string, any>;
 }
 
-const logAuditEvent = async (event: AuditLogEvent) => {
-  const { userId, organizationId, projectId, targetId, schemaVersionId, action, details, eventKind } = event;
-  const query = `
-    INSERT INTO audit_log (user_id, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_kind, event_action, event_details)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-  await clickhouse.query(query, [
-    userId,
-    organizationId,
-    projectId,
-    projectId,
-    targetId,
-    schemaVersionId,
-    eventKind,
-    JSON.stringify(details),
-  ]);
-};
+@Injectable({
+  scope: Scope.Singleton,
+  global: true,
+})
+export class AuditLog {
+  logAuditEvent (event: AuditLogEvent) {
+    const { userId, organizationId, projectId, targetId, schemaVersionId, eventAction, details, eventKind } = event;
+    const query = `
+      INSERT INTO audit_log (user_id, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_kind, event_action, event_details)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    clickhouse.query(query, [
+      userId,
+      organizationId,
+      projectId,
+      projectId,
+      targetId,
+      schemaVersionId,
+      eventKind,
+      eventAction,
+      JSON.stringify(details),
+    ]).catch((err) => {
+      console.error('Failed to log audit event', err);
+    })
+  };
+}
 
-// sample usage
-// do not await to avoid blocking the the thread
-logAuditEvent({
+// sample usage - do not await to avoid blocking the the thread
+
+
+this.auditLog.logAuditEvent({
   userId: '690ae6ae-30e7-4e6c-8114-97e50e41aee5',
   organizationId: 'da2dbbf8-6c03-4abf-964d-8a2d949da5cb',
   eventKind: 'OrganizationManager',
