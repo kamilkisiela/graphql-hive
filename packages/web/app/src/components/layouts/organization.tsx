@@ -100,7 +100,7 @@ export function OrganizationLayout({
   return (
     <>
       <header>
-        <div className="container flex h-[84px] items-center justify-between">
+        <div className="container flex h-[--header-height] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             <OrganizationSelector
@@ -117,7 +117,7 @@ export function OrganizationLayout({
           </div>
         </div>
       </header>
-      <div className="relative border-b border-gray-800">
+      <div className="relative h-[--tabs-navbar-height] border-b border-gray-800">
         <div className="container flex items-center justify-between">
           {currentOrganization && meInCurrentOrg ? (
             <Tabs value={page}>
