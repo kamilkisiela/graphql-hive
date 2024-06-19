@@ -70,8 +70,6 @@ files.forEach(file => {
   const classes = extractClassesAndMethods(file, sourceFile);
   if (classes.length > 0) {
     classesAndMethods.push({ file, classes });
-  }
-  if (classes.length > 0) {
     console.log(JSON.stringify(classes, null, 2));
   }
 });
