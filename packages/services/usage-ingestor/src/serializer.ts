@@ -1,8 +1,9 @@
 import LRU from 'tiny-lru';
-import type {
-  ProcessedOperation,
-  ProcessedRegistryRecord,
-  ProcessedSubscriptionOperation,
+import {
+  castValue,
+  type ProcessedOperation,
+  type ProcessedRegistryRecord,
+  type ProcessedSubscriptionOperation,
 } from '@hive/usage-common';
 import { cache } from './helpers';
 
@@ -121,35 +122,4 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
 
 function castDate(date: number): string {
   return cachedFormatDate(date).value;
-}
-
-function castValue(value: boolean): number;
-function castValue(value: string): string;
-function castValue(value: number): number;
-function castValue(value: any[]): string;
-function castValue(value?: any): string;
-function castValue(value: undefined): string;
-function castValue(value?: any) {
-  if (typeof value === 'boolean') {
-    return castValue(value ? 1 : 0);
-  }
-
-  if (typeof value === 'string') {
-    // According to https://datatracker.ietf.org/doc/html/rfc4180
-    // if double-quotes are used to enclose fields,
-    // then a double-quote appearing inside a field
-    // must be escaped by preceding it with another double quote
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  if (Array.isArray(value)) {
-    return `"[${value.map(val => `'${val}'`).join(',')}]"`;
-  }
-
-  return '\\N'; // NULL is \N
-  // Yes, it's ᴺᵁᴸᴸ not NULL :) This is what JSONStringsEachRow does for NULLs
 }

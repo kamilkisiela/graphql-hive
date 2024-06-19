@@ -149,16 +149,20 @@ dependencies = [
 
 [[package]]
 name = "apollo-federation"
-version = "1.48.1"
+version = "1.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c23c411f261f1b1882bce140c4ce35f2e891176714c26b03c0fb45ae0d9f86ba"
+checksum = "b530c798da50475e6d9e09506c5d54326841402cba5eb732fc88fef9f84f488c"
 dependencies = [
  "apollo-compiler",
  "derive_more",
  "indexmap 2.2.5",
+ "itertools 0.13.0",
  "lazy_static",
  "multimap 0.10.0",
+ "nom",
  "petgraph",
+ "serde",
+ "serde_json",
  "serde_json_bytes",
  "strum 0.26.2",
  "strum_macros 0.26.1",
@@ -180,9 +184,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.48.1"
+version = "1.49.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18101965b2092a70fd4a8bf4a5983d35e92f4e7154f7e7cba634bf427c89d553"
+checksum = "4ea3631de1827bbf82f10048676f13b3402296d254aeec4e0b1bf0bd738ed9f9"
 dependencies = [
  "access-json",
  "anyhow",
@@ -210,6 +214,7 @@ dependencies = [
  "clap",
  "console",
  "cookie",
+ "crossbeam-channel",
  "dashmap",
  "derivative",
  "derive_more",
@@ -2752,6 +2757,15 @@ name = "itertools"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
