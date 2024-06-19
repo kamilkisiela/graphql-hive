@@ -160,13 +160,11 @@ CREATE TABLE audit_log (
   target_id UUID,
   target_name STRING,
   schema_version_id UUID,
-  event_kind STRING,
   event_action STRING,
   event_details JSON,
   INDEX idx_user_id user_id TYPE set(0) GRANULARITY 64,
   INDEX idx_organization_id organization_id TYPE set(0) GRANULARITY 64,
   INDEX idx_project_id project_id TYPE set(0) GRANULARITY 64,
-  INDEX idx_event_kind event_kind TYPE set(0) GRANULARITY 64
 ) ENGINE = MergeTree ()
 ORDER BY event_time
 TTL timestamp + INTERVAL 3 MONTH;
@@ -177,9 +175,8 @@ Of course we could make the interval configurable if necessary.
 Our log function will be a simple function that inserts a row into the table:
 
 ```ts
-import { ClickHouse } from 'clickhouse';
-
-const clickhouse = new ClickHouse(/* ... */)
+const { createClient } = require('@clickhouse/client');
+const clickhouse = createClient()
 
 type AuditLogEvent = {
   userId?: string | null;
@@ -187,7 +184,6 @@ type AuditLogEvent = {
   projectId?: string | null;
   targetId?: string | null;
   schemaVersionId?: string | null;
-  eventKind: string;
   eventAction: string;
   details: Record<string, any>;
 }
@@ -198,9 +194,9 @@ type AuditLogEvent = {
 })
 export class AuditLog {
   logAuditEvent (event: AuditLogEvent) {
-    const { userId, organizationId, projectId, targetId, schemaVersionId, eventAction, details, eventKind } = event;
+    const { userId, organizationId, projectId, targetId, schemaVersionId, eventAction, details } = event;
     const query = `
-      INSERT INTO audit_log (user_id, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_kind, event_action, event_details)
+      INSERT INTO audit_log (user_id, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_action, event_details)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     clickhouse.query(query, [
@@ -225,7 +221,6 @@ export class AuditLog {
 this.auditLog.logAuditEvent({
   userId: '690ae6ae-30e7-4e6c-8114-97e50e41aee5',
   organizationId: 'da2dbbf8-6c03-4abf-964d-8a2d949da5cb',
-  eventKind: 'OrganizationManager',
   action: 'joinOrganization',
 })
 ```
