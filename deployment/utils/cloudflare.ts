@@ -36,6 +36,10 @@ export class CloudflareCDN {
           name: 'HIVE_DATA',
           namespaceId: kvStorage.id,
         },
+        {
+          name: 'HIVE_PERSISTED_DOCUMENTS',
+          namespaceId: 'hive-dev-persisted-documents',
+        },
       ],
       analyticsEngineBindings: [
         {

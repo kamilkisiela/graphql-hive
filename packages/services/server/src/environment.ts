@@ -115,6 +115,9 @@ const CdnCFModel = zod.union([
   zod.object({
     CDN_CF: zod.literal('1'),
     CDN_CF_BASE_URL: zod.string(),
+    CDN_CF_KEY_VALUE_ACCOUNT_ID: zod.string(),
+    CDN_CF_KEY_VALUE_NAMESPACE_ID: zod.string(),
+    CDN_CF_KEY_VALUE_API_KEY: zod.string(),
   }),
 ]);
 
@@ -402,6 +405,11 @@ export const env = {
         cdnCf.CDN_CF === '1'
           ? {
               baseUrl: cdnCf.CDN_CF_BASE_URL,
+              keyValueStore: {
+                accountId: cdnCf.CDN_CF_KEY_VALUE_ACCOUNT_ID,
+                namespaceId: cdnCf.CDN_CF_KEY_VALUE_NAMESPACE_ID,
+                apiKey: cdnCf.CDN_CF_KEY_VALUE_API_KEY,
+              },
             }
           : null,
       api: cdnApi.CDN_API === '1' ? { baseUrl: cdnApi.CDN_API_BASE_URL } : null,

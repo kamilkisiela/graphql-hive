@@ -18,7 +18,7 @@ export function createWorker(
   port: MessagePort,
   baseLogger: Logger,
   env: {
-    s3: {
+    readonly s3: {
       readonly bucketName: string;
       readonly endpoint: string;
       readonly credentials: {
@@ -27,7 +27,18 @@ export function createWorker(
         readonly sessionToken: string | undefined;
       };
     };
-    clickhouse: {
+    readonly cdn: {
+      readonly providers: {
+        readonly cloudflare: null | {
+          readonly keyValueStore: {
+            readonly accountId: string;
+            readonly namespaceId: string;
+            readonly apiKey: string;
+          };
+        };
+      };
+    };
+    readonly clickhouse: {
       readonly host: string;
       readonly port: number;
       readonly protocol?: string;
@@ -56,6 +67,7 @@ export function createWorker(
   const persistedOperationsProcessor = new PersistedDocumentIngester(
     clickhouse,
     s3Config,
+    env.cdn.providers.cloudflare?.keyValueStore ?? null,
     logger as any,
   );
 

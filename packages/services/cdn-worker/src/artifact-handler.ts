@@ -38,6 +38,8 @@ type ArtifactRequestHandler = {
     get: (request: Request) => Promise<Response | undefined>;
     set: (request: Request, response: Response) => void;
   };
+  /** only available on CloudFlare */
+  persistedDocumentsKVStore?: KVNamespace;
 };
 
 const ParamsModel = zod.object({
@@ -259,6 +261,26 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         return response;
       }
 
+      if (deps.persistedDocumentsKVStore) {
+        const document = await deps.persistedDocumentsKVStore.get(
+          `pd/${params.appName}/${params.appVersion}/${params.operationHash}`,
+        );
+        console.log('loaded document from KV store.');
+
+        if (document) {
+          return createResponse(
+            analytics,
+            document,
+            // We're using here a public location, because we expose the Location to the end user and
+            // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
+            // If they are the same, private and public locations will be the same.
+            { status: 200, headers: { 'Content-Type': 'text/plain' } },
+            params.targetId,
+            request,
+          );
+        }
+      }
+
       if (
         false ===
         (await deps.isAppDeploymentActive(params.targetId, params.appName, params.appVersion))
@@ -315,7 +337,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
           // We're using here a public location, because we expose the Location to the end user and
           // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
           // If they are the same, private and public locations will be the same.
-          { status: 200 },
+          { status: 200, headers: { 'Content-Type': 'text/plain' } },
           params.targetId,
           request,
         );

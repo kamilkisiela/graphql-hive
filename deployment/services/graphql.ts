@@ -82,6 +82,12 @@ export function deployGraphQL({
   sentry: Sentry;
 }) {
   const apiConfig = new pulumi.Config('api');
+  const cfCustomConfig = new pulumi.Config('cloudflareCustom');
+  const cloudflareSecret = new ServiceSecret<{
+    apiToken: string | pulumi.Output<string>;
+  }>('cloudflare-secret', {
+    apiToken: cfCustomConfig.requireSecret('apiToken'),
+  });
   const apiEnv = apiConfig.requireObject<Record<string, string>>('env');
 
   const oauthConfig = new pulumi.Config('oauth');
@@ -129,6 +135,8 @@ export function deployGraphQL({
           WEB_APP_URL: `https://${environment.appDns}`,
           GRAPHQL_PUBLIC_ORIGIN: `https://${environment.appDns}`,
           CDN_CF: '1',
+          CDN_CF_KEY_VALUE_ACCOUNT_ID: cfCustomConfig.require('accountId'),
+          CDN_CF_KEY_VALUE_NAMESPACE_ID: cfCustomConfig.require('keyValueNamespaceId'),
           HIVE: '1',
           HIVE_REPORTING: '1',
           HIVE_USAGE: '1',
@@ -185,6 +193,7 @@ export function deployGraphQL({
       // CDN
       .withSecret('CDN_AUTH_PRIVATE_KEY', cdn.secret, 'authPrivateKey')
       .withSecret('CDN_CF_BASE_URL', cdn.secret, 'baseUrl')
+      .withSecret('CDN_CF_KEY_VALUE_API_KEY', cloudflareSecret, 'apiToken')
       // S3
       .withSecret('S3_ACCESS_KEY_ID', s3.secret, 'accessKeyId')
       .withSecret('S3_SECRET_ACCESS_KEY', s3.secret, 'secretAccessKey')
