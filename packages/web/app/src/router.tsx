@@ -11,7 +11,7 @@ import { frontendConfig } from '@/config/supertokens/frontend';
 import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { urqlClient } from '@/lib/urql';
-import { configureScope, init } from '@sentry/react';
+import { getCurrentScope, init } from '@sentry/react';
 import {
   createRootRoute,
   createRoute,
@@ -60,17 +60,16 @@ import { TargetInsightsOperationPage } from './pages/target-insights-operation';
 import { TargetLaboratoryPage } from './pages/target-laboratory';
 import { TargetSettingsPage } from './pages/target-settings';
 
-if (globalThis.window) {
-  SuperTokens.init(frontendConfig());
-  if (env.sentry) {
-    init({
-      dsn: env.sentry.dsn,
-      enabled: true,
-      dist: 'webapp',
-      release: env.release,
-      environment: env.environment,
-    });
-  }
+SuperTokens.init(frontendConfig());
+
+if (env.sentry) {
+  init({
+    dsn: env.sentry.dsn,
+    enabled: true,
+    dist: 'webapp',
+    release: env.release,
+    environment: env.environment,
+  });
 }
 
 const LazyTanStackRouterDevtools = lazy(() =>
@@ -80,9 +79,8 @@ const LazyTanStackRouterDevtools = lazy(() =>
 );
 
 function identifyOnSentry(userId: string, email: string): void {
-  configureScope(scope => {
-    scope.setUser({ id: userId, email });
-  });
+  const scope = getCurrentScope();
+  scope.setUser({ id: userId, email });
 }
 
 function RootComponent() {
