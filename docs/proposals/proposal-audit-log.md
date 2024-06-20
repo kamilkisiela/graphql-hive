@@ -1,4 +1,4 @@
-# Audit log
+# Audit log backend part
 
 ### Purpose of audit log
 
@@ -128,7 +128,6 @@ schemas, and other resources.
 - updateProjectRegistryModel
 - createVersion
 - updateVersionStatus
-- createActivity
 - addSlackIntegration
 - deleteSlackIntegration
 - addGitHubIntegration
@@ -138,9 +137,6 @@ schemas, and other resources.
 - createDocumentCollection
 - deleteDocumentCollection
 - updateDocumentCollection
-- createDocumentCollectionDocument
-- deleteDocumentCollectionDocument
-- updateDocumentCollectionDocument
 - createSchemaCheck
 
 
@@ -203,7 +199,6 @@ export class AuditLog {
       userId,
       organizationId,
       projectId,
-      projectId,
       targetId,
       schemaVersionId,
       eventKind,
@@ -227,3 +222,16 @@ this.auditLog.logAuditEvent({
 
 We would call this `logAuditEvent` function in all the places in the codebase to log the events
 listed above.
+
+## Audit log UI
+
+# How user could pull audit logs and filter them?
+
+Download would be triggered by a `Download CSV` button in Hive UI.
+
+We would provide these filters:
+- **date range** - to avoid pulling entire history of events
+- **by user** - in case somebody wants to see actions made by a user
+- **by project** - to scope down the logs to a specific project (by default audit log contains data from all projects of the org)
+- **by target** - to scope down it even more
+- **by action** - type or group of action types
