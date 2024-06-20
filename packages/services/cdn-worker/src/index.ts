@@ -33,6 +33,7 @@ type Env = {
   RESPONSE_ANALYTICS: AnalyticsEngine;
   R2_ANALYTICS: AnalyticsEngine;
   KEY_VALIDATION_ANALYTICS: AnalyticsEngine;
+  HIVE_PERSISTED_DOCUMENTS: KVNamespace;
 };
 
 const handler: ExportedHandler<Env> = {
@@ -107,6 +108,7 @@ const handler: ExportedHandler<Env> = {
           ctx.waitUntil(cache.put(request, response.clone()));
         },
       },
+      persistedDocumentsKVStore: env.HIVE_PERSISTED_DOCUMENTS,
     });
 
     const router = itty
