@@ -66,9 +66,63 @@ export class PersistedDocumentIngester {
   constructor(
     private clickhouse: ClickHouse,
     private s3: S3Config,
+    private cloudflareKeyValueStoreConfig: null | {
+      readonly accountId: string;
+      readonly namespaceId: string;
+      readonly apiKey: string;
+    },
     logger: ServiceLogger,
   ) {
     this.logger = logger.child({ source: 'PersistedDocumentIngester' });
+  }
+
+  private async attemptInsertDocumentsIntoCloudflareKV(args: {
+    documents: Array<DocumentRecord>;
+    appDeployment: {
+      name: string;
+      version: string;
+    };
+  }) {
+    const config = this.cloudflareKeyValueStoreConfig;
+    if (config === null) {
+      this.logger.debug(
+        'Skip inserting persisted documents into Cloudflare KV, no configuration provided.',
+      );
+      return;
+    }
+
+    this.logger.debug('Inserting persisted documents into Cloudflare KV.');
+
+    const endpoint = `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/storage/kv/namespaces/${config.namespaceId}/bulk`;
+
+    const now = Date.now();
+
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(
+        args.documents.map(doc => ({
+          // TODO: double check length constraints
+          key: `pd/${args.appDeployment.name}/${args.appDeployment.version}/${doc.appDeploymentId}/${doc.hash}`,
+          value: doc.body,
+        })),
+      ),
+    });
+
+    if (response.status !== 200) {
+      this.logger.debug('Failed inserting persisted documents into Cloudflare KV.');
+      throw new Error(
+        `Failed to insert documents into Cloudflare KV: ${response.statusText} ${await response.text()}`,
+      );
+    }
+
+    this.logger.debug(
+      'Inserted persisted documents into Cloudflare KV. (duration=%sms)',
+      Date.now() - now,
+    );
   }
 
   async processBatch(data: BatchProcessEvent['data']) {
@@ -263,6 +317,8 @@ export class PersistedDocumentIngester {
       args.documents.length,
     );
 
+    const now = Date.now();
+
     /** We parallelize and queue the requests. */
     const tasks: Array<Promise<void>> = [];
 
@@ -301,11 +357,17 @@ export class PersistedDocumentIngester {
     await Promise.all(tasks);
 
     this.logger.debug(
-      'Inserting documents into S3 finished. (targetId=%s, appDeployment=%s, documentCount=%n)',
+      'Inserting documents into S3 finished. (targetId=%s, appDeployment=%s, documentCount=%n, duration=%sms)',
       args.targetId,
       args.appDeployment.id,
       args.documents.length,
+      Date.now() - now,
     );
+
+    await this.attemptInsertDocumentsIntoCloudflareKV({
+      documents: args.documents,
+      appDeployment: args.appDeployment,
+    });
   }
 
   /** inserts operations of an app deployment into clickhouse and s3 */
@@ -322,6 +384,7 @@ export class PersistedDocumentIngester {
       // prettier-ignore
       this.insertClickHouseDocuments(args),
       this.insertS3Documents(args),
+      this.attemptInsertDocumentsIntoCloudflareKV(args),
     ]);
   }
 }
