@@ -3,14 +3,6 @@ import { AdminModule } from './__generated__/types';
 import { AdminManager } from './providers/admin-manager';
 
 export const resolvers: AdminModule.Resolvers = {
-  AdminQuery: {
-    stats(_, { period, resolution }) {
-      return {
-        period,
-        resolution,
-      };
-    },
-  },
   AdminGeneralStats: {
     operationsOverTime({ period, resolution }, _, { injector }) {
       const dateRange = parseDateRangeInput(period);
