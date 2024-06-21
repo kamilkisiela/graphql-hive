@@ -18,7 +18,7 @@
     "ajv": "8.16.0",
     "dotenv": "16.4.5",
     "eslint": "8.57.0",
-    "fastify": "4.27.0",
+    "fastify": "4.28.0",
     "graphql": "16.8.1",
     "pino-pretty": "11.1.0",
     "zod": "3.23.8",
