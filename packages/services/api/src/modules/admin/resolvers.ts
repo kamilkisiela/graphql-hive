@@ -3,11 +3,6 @@ import { AdminModule } from './__generated__/types';
 import { AdminManager } from './providers/admin-manager';
 
 export const resolvers: AdminModule.Resolvers = {
-  Query: {
-    admin() {
-      return {};
-    },
-  },
   AdminQuery: {
     stats(_, { period, resolution }) {
       return {
