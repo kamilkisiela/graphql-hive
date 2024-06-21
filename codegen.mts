@@ -22,7 +22,6 @@ const config: CodegenConfig = {
           'alerts',
           'auth',
           'billing',
-          'cdn',
           'collection',
           'feedback',
           'integrations',
