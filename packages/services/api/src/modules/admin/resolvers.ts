@@ -11,18 +11,6 @@ export const resolvers: AdminModule.Resolvers = {
       };
     },
   },
-  AdminStats: {
-    organizations({ period }, __, { injector }) {
-      const dateRange = parseDateRangeInput(period);
-      return injector.get(AdminManager).getStats({
-        from: dateRange.from,
-        to: dateRange.to,
-      });
-    },
-    general({ period, resolution }) {
-      return { period, resolution };
-    },
-  },
   AdminGeneralStats: {
     operationsOverTime({ period, resolution }, _, { injector }) {
       const dateRange = parseDateRangeInput(period);
