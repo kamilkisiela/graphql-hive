@@ -3,7 +3,7 @@ import { AdminManager } from '../providers/admin-manager';
 import type { AdminGeneralStatsResolvers } from './../../../__generated__/types.next';
 
 export const AdminGeneralStats: AdminGeneralStatsResolvers = {
-  operationsOverTime: async ({ period, resolution }, _, { injector }) => {
+  operationsOverTime: ({ period, resolution }, _, { injector }) => {
     const dateRange = parseDateRangeInput(period);
     return injector.get(AdminManager).getOperationsOverTime({
       period: {
