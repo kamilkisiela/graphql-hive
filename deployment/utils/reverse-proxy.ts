@@ -173,6 +173,7 @@ export class Proxy {
           '@timestamp',
           'bytes_received',
           'bytes_sent',
+          'content_length=%REQ(CONTENT-LENGTH)%',
           'downstream_local_address',
           'duration',
           'method',
