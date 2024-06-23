@@ -1,9 +1,0 @@
-export { ChangePermissionsModal } from '../../ui/modal/change-permissions';
-export { ConnectSchemaModal } from '../../ui/modal/connect-schema';
-export { CreateAccessTokenModal } from '../../ui/modal/create-access-token';
-export { CreateProjectModal } from '../../ui/modal/create-project';
-export { CreateTargetModal } from '../../ui/modal/create-target';
-export { DeleteOrganizationModal } from '../../ui/modal/delete-organization';
-export { DeleteProjectModal } from '../../ui/modal/delete-project';
-export { DeleteTargetModal } from '../../ui/modal/delete-target';
-export { TransferOrganizationOwnershipModal } from './transfer-organization-ownership';
