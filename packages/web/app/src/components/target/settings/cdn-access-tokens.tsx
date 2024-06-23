@@ -133,12 +133,16 @@ function CreateCDNAccessTokenModal(props: {
               }}
             />
           </div>
-          <DialogFooter>
-            <Button variant="secondary" className="ml-auto" onClick={props.onClose}>
+          <DialogFooter className="flex w-full gap-2">
+            <Button className="w-full justify-center" variant="default" onClick={props.onClose}>
               Cancel
             </Button>
-
-            <Button type="submit" disabled={createCdnAccessToken.fetching}>
+            <Button
+              variant="primary"
+              className="w-full justify-center"
+              type="submit"
+              disabled={createCdnAccessToken.fetching || !form.formState.isValid}
+            >
               Create
             </Button>
           </DialogFooter>
@@ -165,8 +169,8 @@ function CreateCDNAccessTokenModal(props: {
         </div>
 
         <InlineCode content={createCdnAccessToken.data.createCdnAccessToken.ok.secretAccessToken} />
-        <DialogFooter>
-          <Button className="ml-auto" onClick={props.onClose}>
+        <DialogFooter className="flex w-full gap-2">
+          <Button className="w-full justify-center" onClick={props.onClose}>
             Close
           </Button>
         </DialogFooter>

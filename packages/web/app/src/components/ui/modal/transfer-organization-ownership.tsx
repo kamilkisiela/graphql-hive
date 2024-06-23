@@ -300,6 +300,7 @@ export const TransferOrganizationOwnershipModal = ({
             type="button"
             className="w-full justify-center"
             size="lg"
+            variant="default"
             onClick={toggleModalOpen}
           >
             Cancel
@@ -307,7 +308,7 @@ export const TransferOrganizationOwnershipModal = ({
           <Button
             size="lg"
             className="w-full justify-center"
-            variant="default"
+            variant="primary"
             disabled={isSubmitting || !isValid || !touched.confirmation || !touched.newOwner}
             onClick={() => handleSubmit()}
           >
