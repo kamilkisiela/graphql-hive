@@ -214,13 +214,7 @@ export const ConnectSchemaModal = (props: {
           </>
         )}
         <DialogFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            size="lg"
-            onClick={toggleModalOpen}
-            className="self-end"
-          >
+          <Button className="w-full" type="submit" onClick={toggleModalOpen} variant="default">
             Close
           </Button>
         </DialogFooter>

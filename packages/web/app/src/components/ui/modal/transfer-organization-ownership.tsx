@@ -170,16 +170,6 @@ export const TransferOrganizationOwnershipModal = ({
     },
   });
 
-  const [selected, setSelected] = useState<Member | undefined>();
-
-  const onSelect = useCallback(
-    (member: Member) => {
-      setSelected(member);
-      void setFieldValue('newOwner', member.user.id, true);
-    },
-    [setSelected, setFieldValue],
-  );
-
   const members = (query.data?.organization?.organization.members.nodes ?? []).filter(
     member => !member.isOwner,
   );
@@ -229,7 +219,7 @@ export const TransferOrganizationOwnershipModal = ({
                 {searchPhrase
                   ? options.find(option => option.value === searchPhrase)?.label
                   : 'Select new owner...'}
-                <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
@@ -268,7 +258,7 @@ export const TransferOrganizationOwnershipModal = ({
                           {option.label}
                           <CheckIcon
                             className={cn(
-                              'ml-auto h-4 w-4',
+                              'ml-auto size-4',
                               searchPhrase === option.value ? 'opacity-100' : 'opacity-0',
                             )}
                           />
