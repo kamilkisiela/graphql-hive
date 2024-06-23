@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -83,10 +83,6 @@ const MemberFields = graphql(`
   }
 `);
 
-type Member = NonNullable<
-  FragmentType<typeof MemberFields>[' $fragmentRefs']
->['MemberFieldsFragment'];
-
 const TransferOrganizationOwnershipModal_OrganizationFragment = graphql(`
   fragment TransferOrganizationOwnershipModal_OrganizationFragment on Organization {
     id
@@ -132,7 +128,6 @@ export const TransferOrganizationOwnershipModal = ({
     isValid,
     errors,
     touched,
-    setFieldValue,
   } = useFormik({
     enableReinitialize: true,
     initialValues: {
