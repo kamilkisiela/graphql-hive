@@ -26,6 +26,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { CaretSortIcon } from '@radix-ui/react-icons';
+import { useRouter } from '@tanstack/react-router';
 
 const TransferOrganizationOwnership_Request = graphql(`
   mutation TransferOrganizationOwnership_Request($input: RequestOrganizationTransferInput!) {
@@ -106,6 +107,7 @@ export const TransferOrganizationOwnershipModal = ({
     TransferOrganizationOwnershipModal_OrganizationFragment,
     props.organization,
   );
+  const router = useRouter();
   const notify = useNotifications();
   const [, mutate] = useMutation(TransferOrganizationOwnership_Request);
   const [query] = useQuery({
@@ -237,7 +239,20 @@ export const TransferOrganizationOwnershipModal = ({
                   <CommandEmpty>No new owner found.</CommandEmpty>
                   <CommandGroup>
                     {options.length === 0 ? (
-                      <CommandItem className="cursor-help">
+                      <CommandItem
+                        className="cursor-pointer"
+                        onSelect={() => {
+                          void router.navigate({
+                            to: '/$organizationId/view/members',
+                            params: {
+                              organizationId: organization.cleanId,
+                            },
+                            search: {
+                              page: 'list',
+                            },
+                          });
+                        }}
+                      >
                         Visit Members page to add new owner before transferring.
                       </CommandItem>
                     ) : (
@@ -280,8 +295,8 @@ export const TransferOrganizationOwnershipModal = ({
           </div>
           <div className="h-0 w-full border-t-2 border-gray-900" />
           <div className="font-bold">About the ownership transfer</div>
-          <ul className="list-inside list-disc px-3 text-sm text-white">
-            <li>
+          <ul className="list-disc px-3 text-sm text-white">
+            <li className="pt-5">
               The new owner will receive a confirmation email. If the new owner doesn't accept the
               transfer within 24 hours, the invitation will expire.
             </li>
