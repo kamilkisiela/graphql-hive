@@ -899,8 +899,8 @@ importers:
         specifier: 4.14.0
         version: 4.14.0(encoding@0.1.13)
       nodemailer:
-        specifier: 6.9.13
-        version: 6.9.13
+        specifier: 6.9.14
+        version: 6.9.14
       p-timeout:
         specifier: 6.1.2
         version: 6.1.2
@@ -13187,8 +13187,8 @@ packages:
   nodemailer-shared@1.1.0:
     resolution: {integrity: sha512-68xW5LSyPWv8R0GLm6veAvm7E+XFXkVgvE3FW0FGxNMMZqMkPFeGDVALfR1DPdSfcoO36PnW7q5AAOgFImEZGg==}
 
-  nodemailer@6.9.13:
-    resolution: {integrity: sha512-7o38Yogx6krdoBf3jCAqnIN4oSQFx+fMa0I7dK1D+me9kBxx12D+/33wSb+fhOCtIxvYJ+4x4IMEhmhCKfAiOA==}
+  nodemailer@6.9.14:
+    resolution: {integrity: sha512-Dobp/ebDKBvz91sbtRKhcznLThrKxKt97GI2FAlAyy+fk19j73Uz3sBXolVtmcXjaorivqsbbbjDY+Jkt4/bQA==}
     engines: {node: '>=6.0.0'}
 
   nodemailer@6.9.7:
@@ -32091,7 +32091,7 @@ snapshots:
     dependencies:
       nodemailer-fetch: 1.6.0
 
-  nodemailer@6.9.13: {}
+  nodemailer@6.9.14: {}
 
   nodemailer@6.9.7: {}
 
