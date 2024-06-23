@@ -10,6 +10,7 @@
     "generate-changelog": "node ../../../scripts/generate-changelog.js",
     "postinstall": "pnpm generate-changelog",
     "storybook": "storybook dev -p 6006",
+    "test": "vitest .",
     "typecheck": "tsc"
   },
   "devDependencies": {
