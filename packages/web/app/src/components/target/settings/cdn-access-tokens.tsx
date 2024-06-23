@@ -1,14 +1,11 @@
 import { ReactElement, useEffect, useState } from 'react';
-import { useFormik } from 'formik';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
-import * as Yup from 'yup';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -23,9 +20,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Heading } from '@/components/ui/heading';
 import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
-import { DocsLink, Input, Modal, Table, Tag, TBody, Td, TimeAgo, Tr } from '@/components/v2';
+import { DocsLink, Input, Table, Tag, TBody, Td, TimeAgo, Tr } from '@/components/v2';
 import { AlertTriangleIcon, TrashIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -92,7 +88,7 @@ function CreateCDNAccessTokenModal(props: {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { data, error } = await mutate({
+    await mutate({
       input: {
         selector: {
           organization: props.organizationId,
