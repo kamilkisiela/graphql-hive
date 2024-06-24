@@ -1,6 +1,9 @@
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { cx } from 'class-variance-authority';
+import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
+import { Helmet } from 'react-helmet-async';
 import { useMutation, useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
@@ -8,32 +11,6 @@ import { CreateCollectionModal } from '@/components/target/laboratory/create-col
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
-import { Button } from '@/components/ui/button';
-import { DocsLink } from '@/components/ui/docs-note';
-import { Link } from '@/components/ui/link';
-import { Subtitle, Title } from '@/components/ui/page';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
-import { Spinner } from '@/components/v2/spinner';
-import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
-import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';
-import { graphql } from '@/gql';
-import { TargetAccessScope } from '@/gql/graphql';
-import { canAccessTarget } from '@/lib/access/target';
-import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
-import { cn } from '@/lib/utils';
-import {
-  UnStyledButton as GraphiQLButton,
-  GraphiQLPlugin,
-  Tooltip as GraphiQLTooltip,
-  useEditorContext,
-} from '@graphiql/react';
-import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
-import 'graphiql/graphiql.css';
-import { cx } from 'class-variance-authority';
-import clsx from 'clsx';
-import { Helmet } from 'react-helmet-async';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import {
   Accordion,
@@ -42,6 +19,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { DocsLink } from '@/components/ui/docs-note';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,11 +28,36 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Link } from '@/components/ui/link';
 import { Meta } from '@/components/ui/meta';
+import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
+import { Spinner } from '@/components/v2/spinner';
+import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
+import { graphql } from '@/gql';
+import { TargetAccessScope } from '@/gql/graphql';
+import { canAccessTarget } from '@/lib/access/target';
+import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
+import { cn } from '@/lib/utils';
+import {
+  UnStyledButton as GraphiQLButton,
+  GraphiQLPlugin,
+  Tooltip as GraphiQLTooltip,
+  useEditorContext,
+} from '@graphiql/react';
+import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
+import {
+  BookmarkIcon,
+  DotsHorizontalIcon,
+  EnterFullScreenIcon,
+  ExitFullScreenIcon,
+} from '@radix-ui/react-icons';
 import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
+import 'graphiql/graphiql.css';
 
 function Share(props: { operation: string | null }): ReactElement {
   const label = 'Share query';
@@ -859,6 +863,7 @@ function LaboratoryPageContent(props: {
   });
   const router = useRouter();
   const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const currentOrganization = query.data?.organization?.organization;
 
@@ -939,12 +944,15 @@ function LaboratoryPageContent(props: {
       ? searchObj.operation
       : null;
 
+  const FullScreenComponent = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
+
   return (
     <TargetLayout
       organizationId={props.organizationId}
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Laboratory}
+      className="flex h-[--hive-content-height] flex-col"
     >
       <div className="flex py-6">
         <div className="flex-1">
@@ -1027,7 +1035,6 @@ function LaboratoryPageContent(props: {
         .graphiql-container {
           --color-base: transparent !important;
           --color-primary: 40, 89%, 60% !important;
-          min-height: 600px;
         }
         .graphiql-container .graphiql-tab-add {
           display: none;
@@ -1070,57 +1077,46 @@ function LaboratoryPageContent(props: {
       `}</style>
       </Helmet>
 
-      {query.fetching ? null : (
-        <GraphiQL
-          fetcher={fetcher}
-          toolbar={{
-            additionalContent: (
-              <>
-                <Save
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
-                />
-                <Share operation={operation} />
-              </>
-            ),
-          }}
-          showPersistHeadersSettings={false}
-          shouldPersistHeaders={false}
-          plugins={[operationCollectionsPlugin]}
-          visiblePlugin={operationCollectionsPlugin}
-          schema={schema}
-          forcedTheme="dark"
-        >
-          <GraphiQL.Logo>
-            <EditorBreadcrumbs
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
-            />
-            <div className="ml-auto">
-              <LegacyTooltip
-                content={
-                  actualSelectedApiEndpoint === 'linkedApi' ? (
-                    <>
-                      Operations are executed against{' '}
-                      <span>{query.data?.target?.graphqlEndpointUrl}</span>.
-                    </>
-                  ) : (
-                    <>Operations are executed against the mock endpoint.</>
-                  )
-                }
+      {!query.fetching && (
+        <div className={clsx('grow', isFullScreen && 'fixed inset-0 bg-[#030711]')}>
+          <GraphiQL
+            fetcher={fetcher}
+            toolbar={{
+              additionalContent: (
+                <>
+                  <Save
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
+                  <Share operation={operation} />
+                </>
+              ),
+            }}
+            showPersistHeadersSettings={false}
+            shouldPersistHeaders={false}
+            plugins={[operationCollectionsPlugin]}
+            visiblePlugin={operationCollectionsPlugin}
+            schema={schema}
+            forcedTheme="dark"
+          >
+            <GraphiQL.Logo>
+              <EditorBreadcrumbs
+                organizationId={props.organizationId}
+                projectId={props.projectId}
+                targetId={props.targetId}
+              />
+              <Button
+                onClick={() => setIsFullScreen(prev => !prev)}
+                variant="outline"
+                className="h-auto gap-2"
               >
-                <span className="cursor-help pr-2 text-xs font-normal">
-                  {actualSelectedApiEndpoint === 'linkedApi'
-                    ? 'Querying GraphQL API'
-                    : 'Querying Mock API'}
-                </span>
-              </LegacyTooltip>
-              <HiveLogo className="h-6 w-auto" />
-            </div>
-          </GraphiQL.Logo>
-        </GraphiQL>
+                <FullScreenComponent className="size-4" />
+                {isFullScreen ? 'Exit' : 'Enter'} Full Screen
+              </Button>
+            </GraphiQL.Logo>
+          </GraphiQL>
+        </div>
       )}
       <ConnectLabModal
         endpoint={mockEndpoint}
