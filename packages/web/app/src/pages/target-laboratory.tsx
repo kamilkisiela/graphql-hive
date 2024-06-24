@@ -207,7 +207,7 @@ const CollectionItem = (props: {
         )}
       </Link>
       <DropdownMenu>
-        <DropdownMenuTrigger className="graphiql-toolbar-button text-white">
+        <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
           <DotsHorizontalIcon />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -1183,10 +1183,15 @@ function EditorBreadcrumbs(props: { organizationId: string; projectId: string; t
   }
 
   return (
-    <div className="text-xs font-normal italic">
-      {currentOperation?.id
-        ? `${currentOperation.collection.name} > ${currentOperation.name}`
-        : 'New Operation'}
+    <div className="text-sm font-normal italic">
+      {currentOperation?.id ? (
+        <>
+          {currentOperation.collection.name} <span className="not-italic">{'>'}</span>{' '}
+          {currentOperation.name}
+        </>
+      ) : (
+        'New Operation'
+      )}
     </div>
   );
 }
