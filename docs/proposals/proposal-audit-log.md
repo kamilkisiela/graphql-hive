@@ -104,6 +104,8 @@ We would provide these filters:
 
 ## Audit log events
 
+Left column shows the event action name, right column shows a human readable example of the event message which we would show in the UI.
+
 | Event Action name              | Human Readable Event sample                                                                           |
 |--------------------------------|-------------------------------------------------------------------------------------------------------|
 | USER_INVITED                   | User **jane@acme.com** was invited to **Acme**.                                                       |
