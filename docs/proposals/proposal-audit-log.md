@@ -104,26 +104,26 @@ We would provide these filters:
 
 ## Audit log events
 
-Left column shows the event action name, right column shows a human readable example of the event message which we would show in the UI.
+Left column shows the event action name, right column shows a human readable example of the event message which we would show in the UI. Keep in mind in the UI we always show the actor of the event, so we don't need to include it in the event message.
 
-| Event Action name              | Human Readable Event sample                                                                           |
-|--------------------------------|-------------------------------------------------------------------------------------------------------|
-| USER_INVITED                   | User **jane@acme.com** was invited to **Acme**.                                                       |
-| USER_JOINED                    | User **john@acme.com** joined **Acme**. Approved by **admin@acme.com**. Referrer: **jane@acme.com**.  |
-| EXPIRED_INVITE_HIT             | User **john@acme.com** tried to join **Acme** with an expired/invalid invite. Referrer: jane@acme.com |
-| PROJECT_CREATED                | User **john@acme.com** created a project named **Project Alpha**.                                     |
-| TARGET_CREATED                 | User **john@acme.com** created a target named **Project Alpha**.                                      |
-| ROLE_CREATED                   | Admin **admin@acme.com** created a new role **SAMPLE_ROLE**.                                          |
-| ROLE_ASSIGNED                  | Admin **admin@acme.com** assigned a new role to user **john@acme.com**.                               |
-| USER_REMOVED                   | Admin **admin@acme.com** removed user **john@acme.com**.                                              |
-| ORG_TRANSFERRED                | Admin **admin@acme.com** transferred ownership.                                                       |
-| SCHEMA_CHECKED                 | CI made a schema check for **Project Alpha**.                                                         |
-| SCHEMA_PUBLISH                 | User **john@acme.com** published a new schema version for **Project Alpha**.                          |
-| SCHEMA_DELETED                 | Hive background job deleted old schema.                                                               |
-| PROJECT_SETTINGS_UPDATED       | Changes made to project **Acme API** settings by **admin@acme.com**.                                  |
-| ORGANIZATION_SETTINGS_UPDATED  | Changes made to organization **Acme** settings by **admin@acme.com**.                                 |
-| TARGET_SETTINGS_UPDATED        | Changes made to target **Acme dev API** settings by **admin@acme.com**.                               |
-| SCHEMA_POLICY_SETTINGS_UPDATED | Changes made to schema policy settings under an org or a project by **admin@acme.com**.               |
+| Event Action name              | Human Readable Event sample                                                                               |
+|--------------------------------|-----------------------------------------------------------------------------------------------------------|
+| USER_INVITED                   | User **jane@acme.com** was invited to **Acme**.                                                           |
+| USER_JOINED                    | User **john@acme.com** joined **Acme**. Approved by **admin@acme.com**. Referrer: **jane@acme.com**.      |
+| EXPIRED_INVITE_HIT             | User **john@acme.com** tried to join **Acme** with an expired/invalid invite. Referrer: **jane@acme.com** |
+| PROJECT_CREATED                | User **john@acme.com** created a project named **Project Alpha**.                                         |
+| TARGET_CREATED                 | User **john@acme.com** created a target named **Project Alpha**.                                          |
+| ROLE_CREATED                   | Admin **admin@acme.com** created a new role **SAMPLE_ROLE**.                                              |
+| ROLE_ASSIGNED                  | Admin **admin@acme.com** assigned a new role to user **john@acme.com**.                                   |
+| USER_REMOVED                   | Admin **admin@acme.com** removed user **john@acme.com**.                                                  |
+| ORG_TRANSFERRED                | Admin **admin@acme.com** transferred ownership.                                                           |
+| SCHEMA_CHECKED                 | CI made a schema check for **Project Alpha**.                                                             |
+| SCHEMA_PUBLISH                 | User **john@acme.com** published a new schema version for **Project Alpha**.                              |
+| SCHEMA_DELETED                 | Hive background job deleted old schema.                                                                   |
+| PROJECT_SETTINGS_UPDATED       | Changes made to project **Acme API** settings by **admin@acme.com**.                                      |
+| ORGANIZATION_SETTINGS_UPDATED  | Changes made to organization **Acme** settings by **admin@acme.com**.                                     |
+| TARGET_SETTINGS_UPDATED        | Changes made to target **Acme dev API** settings by **admin@acme.com**.                                   |
+| SCHEMA_POLICY_SETTINGS_UPDATED | Changes made to schema policy settings under an org or a project by **admin@acme.com**.                   |
 
 
 Graphql Schema for these queries would look like this:
@@ -221,15 +221,16 @@ Graphql Schema for these queries would look like this:
 ## Audit log export
 
 Stored file is either a CSV or plain text file with a list of events. The file is stored in S3 and a link to download it is returned to the user. The file is stored for 30 days-TTL would be set on S3 object.
-We store metadata about the export in postgres:
+We store metadata about the export in a new postgres table `audit_log_export`:
+
 
 ```sql
 CREATE TABLE audit_log_export (
   id UUID PRIMARY KEY,
   url TEXT,
   filters JSON,
-  valid_until TIMESTAMP,
-  created_at TIMESTAMP DEFAULT now()
+  valid_until TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
 
