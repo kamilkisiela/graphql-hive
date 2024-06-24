@@ -5,6 +5,6 @@ import { Label } from '@/components/common';
 export function labelize(message: string): ReactNode[] {
   // Replace '...' with <Label>...</Label>
   return reactStringReplace(message, /'([^']+)'/gim, (match, i) => (
-    <Label key={i} dangerouslySetInnerHTML={{ __html: match }} />
+    <Label key={i}>{match.replaceAll('&apos;', "'").replaceAll('&quot;', '"')}</Label>
   ));
 }

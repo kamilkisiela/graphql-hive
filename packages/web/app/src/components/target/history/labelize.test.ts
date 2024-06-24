@@ -9,29 +9,17 @@ describe('labelize', () => {
     ).toMatchInlineSnapshot(`
       [
         Description for argument id on field ,
-        <Label
-          dangerouslySetInnerHTML={
-            {
-              __html: User.email,
-            }
-          }
-        />,
+        <Label>
+          User.email
+        </Label>,
          changed from ,
-        <Label
-          dangerouslySetInnerHTML={
-            {
-              __html: ID&apos;s of &quot;User&quot;,
-            }
-          }
-        />,
+        <Label>
+          ID's of "User"
+        </Label>,
          to ,
-        <Label
-          dangerouslySetInnerHTML={
-            {
-              __html: ID&apos;s of &quot;Hello&quot;,
-            }
-          }
-        />,
+        <Label>
+          ID's of "Hello"
+        </Label>,
         ,
       ]
     `);
