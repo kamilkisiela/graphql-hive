@@ -1069,7 +1069,7 @@ function LaboratoryPageContent(props: {
         .graphiql-container .graphiql-logo {
           width: 100%;
           display: flex;
-          align-items: flex-start;
+          align-items: center;
         }
 
         .graphiql-container .graphiql-session-header {
