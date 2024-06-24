@@ -220,7 +220,24 @@ Graphql Schema for these queries would look like this:
 
 ## Audit log export
 
-Stored file is either a CSV or plain text file with a list of events. The file is stored in S3 and a link to download it is returned to the user. The file is stored for 30 days-TTL would be set on S3 object.
+Stored file is either a CSV or plain text file with a list of events. The file is stored in S3 and a link to download it is returned to the user. The file is stored for 30 days-TTL would be set on S3 object so that we don't have to clean up old files using a CRON job.
+CSV file would be generated using clickhouse client and streamed to S3 to avoid any possible memory issues:
+
+```ts
+  await clickhouse.query({
+    query,
+    format: 'CSV',
+  }).stream().pipe(writableStream);
+```
+
+For plain text file we would use the similar approach but without the CSV format.
+
+```ts
+  await clickhouse.query({
+    query
+  }).stream().pipe(formatToPlainText).pipe(writableStream);
+```
+
 We store metadata about the export in a new postgres table `audit_log_export`:
 
 
