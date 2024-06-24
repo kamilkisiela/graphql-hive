@@ -45,7 +45,7 @@
     "date-fns": "3.6.0",
     "fast-json-stable-stringify": "2.1.0",
     "got": "14.4.1",
-    "graphql": "16.8.1",
+    "graphql": "16.9.0",
     "graphql-modules": "2.3.0",
     "graphql-parse-resolve-info": "4.13.0",
     "graphql-scalars": "1.23.0",

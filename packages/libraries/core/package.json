@@ -55,7 +55,7 @@
     "@apollo/federation": "0.38.1",
     "@apollo/subgraph": "2.8.1",
     "@types/lodash.sortby": "4.7.9",
-    "graphql": "16.8.1",
+    "graphql": "16.9.0",
     "nock": "14.0.0-beta.7",
     "tslib": "2.6.3",
     "vitest": "1.6.0"
