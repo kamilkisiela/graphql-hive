@@ -8,31 +8,31 @@ describe('labelize', () => {
       ),
     ).toMatchInlineSnapshot(`
       [
-        "Description for argument id on field ",
+        Description for argument id on field ,
         <Label
           dangerouslySetInnerHTML={
             {
-              "__html": "User.email",
+              __html: User.email,
             }
           }
         />,
-        " changed from ",
+         changed from ,
         <Label
           dangerouslySetInnerHTML={
             {
-              "__html": "ID&apos;s of &quot;User&quot;",
+              __html: ID&apos;s of &quot;User&quot;,
             }
           }
         />,
-        " to ",
+         to ,
         <Label
           dangerouslySetInnerHTML={
             {
-              "__html": "ID&apos;s of &quot;Hello&quot;",
+              __html: ID&apos;s of &quot;Hello&quot;,
             }
           }
         />,
-        "",
+        ,
       ]
     `);
   });
