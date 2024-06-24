@@ -114,7 +114,7 @@ importers:
         version: 0.11.9(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.4.5)
       '@theguild/prettier-config':
         specifier: 2.0.6
-        version: 2.0.6(prettier@3.3.1)
+        version: 2.0.6(prettier@3.3.2)
       '@types/node':
         specifier: 20.14.8
         version: 20.14.8
@@ -158,17 +158,17 @@ importers:
         specifier: 8.12.0
         version: 8.12.0
       prettier:
-        specifier: 3.3.1
-        version: 3.3.1
+        specifier: 3.3.2
+        version: 3.3.2
       prettier-plugin-sql:
         specifier: 0.18.0
-        version: 0.18.0(prettier@3.3.1)
+        version: 0.18.0(prettier@3.3.2)
       prettier-plugin-tailwindcss:
         specifier: 0.6.4
-        version: 0.6.4(@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.1))(prettier@3.3.1)
+        version: 0.6.4(@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.2))(prettier@3.3.2)
       pretty-quick:
         specifier: 4.0.0
-        version: 4.0.0(prettier@3.3.1)
+        version: 4.0.0(prettier@3.3.2)
       rimraf:
         specifier: 4.4.1
         version: 4.4.1
@@ -224,8 +224,8 @@ importers:
         specifier: 2.6.4
         version: 2.6.4
       prettier:
-        specifier: 3.3.1
-        version: 3.3.1
+        specifier: 3.3.2
+        version: 3.3.2
       tar-stream:
         specifier: 3.1.7
         version: 3.1.7
@@ -1717,7 +1717,7 @@ importers:
         version: 7.116.0
       '@storybook/addon-essentials':
         specifier: 8.1.6
-        version: 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/addon-interactions':
         specifier: 8.1.6
         version: 8.1.6(vitest@1.6.0(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))
@@ -1726,13 +1726,13 @@ importers:
         version: 8.1.6(react@18.3.1)
       '@storybook/blocks':
         specifier: 8.1.6
-        version: 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react':
         specifier: 8.1.6
-        version: 8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
+        version: 8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
       '@storybook/react-vite':
         specifier: 8.1.6
-        version: 8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@2.78.0)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))
+        version: 8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@2.78.0)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))
       '@stripe/react-stripe-js':
         specifier: 2.7.1
         version: 2.7.1(@stripe/stripe-js@3.5.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -14119,8 +14119,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  prettier@3.3.1:
-    resolution: {integrity: sha512-7CAwy5dRsxs8PHXT3twixW9/OEll8MLE0VRPCJyl7CkS6VHGPSlsVaWTiASPTyGyYRyApxlaWTzwUxVNrhcwDg==}
+  prettier@3.3.2:
+    resolution: {integrity: sha512-rAVeHYMcv8ATV5d508CFdn+8/pHPpXeIid1DdrPwXnaAdH7cqjVbpJaT5eq4yRAFU/lsbwYwSF/n5iNrdJHPQA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -20771,14 +20771,14 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.2': {}
 
-  '@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.1)':
+  '@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.2)':
     dependencies:
       '@babel/core': 7.24.0
       '@babel/generator': 7.23.6
       '@babel/parser': 7.24.0
       '@babel/traverse': 7.24.0
       '@babel/types': 7.24.0
-      prettier: 3.3.1
+      prettier: 3.3.2
       semver: 7.6.2
     transitivePeerDependencies:
       - supports-color
@@ -23871,9 +23871,9 @@ snapshots:
       memoizerific: 1.11.3
       ts-dedent: 2.2.0
 
-  '@storybook/addon-controls@8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/addon-controls@8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@storybook/blocks': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/blocks': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       dequal: 2.0.3
       lodash: 4.17.21
       ts-dedent: 2.2.0
@@ -23886,11 +23886,11 @@ snapshots:
       - react-dom
       - supports-color
 
-  '@storybook/addon-docs@8.1.6(@types/react-dom@18.3.0)(encoding@0.1.13)(prettier@3.3.1)':
+  '@storybook/addon-docs@8.1.6(@types/react-dom@18.3.0)(encoding@0.1.13)(prettier@3.3.2)':
     dependencies:
       '@babel/core': 7.24.5
       '@mdx-js/react': 3.0.1(@types/react@18.3.3)(react@18.3.1)
-      '@storybook/blocks': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/blocks': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/client-logger': 8.1.6
       '@storybook/components': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/csf-plugin': 8.1.6
@@ -23914,18 +23914,18 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/addon-essentials@8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/addon-essentials@8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/addon-actions': 8.1.6
       '@storybook/addon-backgrounds': 8.1.6
-      '@storybook/addon-controls': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@storybook/addon-docs': 8.1.6(@types/react-dom@18.3.0)(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/addon-controls': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/addon-docs': 8.1.6(@types/react-dom@18.3.0)(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/addon-highlight': 8.1.6
       '@storybook/addon-measure': 8.1.6
       '@storybook/addon-outline': 8.1.6
       '@storybook/addon-toolbars': 8.1.6
       '@storybook/addon-viewport': 8.1.6
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/manager-api': 8.1.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/node-logger': 8.1.6
       '@storybook/preview-api': 8.1.6
@@ -23982,14 +23982,14 @@ snapshots:
     dependencies:
       memoizerific: 1.11.3
 
-  '@storybook/blocks@8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/blocks@8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@storybook/channels': 8.1.6
       '@storybook/client-logger': 8.1.6
       '@storybook/components': 8.1.6(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/core-events': 8.1.6
       '@storybook/csf': 0.1.7
-      '@storybook/docs-tools': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/docs-tools': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/global': 5.0.0
       '@storybook/icons': 1.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/manager-api': 8.1.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -24018,10 +24018,10 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/builder-manager@8.1.6(encoding@0.1.13)(prettier@3.3.1)':
+  '@storybook/builder-manager@8.1.6(encoding@0.1.13)(prettier@3.3.2)':
     dependencies:
       '@fal-works/esbuild-plugin-global-externals': 2.1.2
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/manager': 8.1.6
       '@storybook/node-logger': 8.1.6
       '@types/ejs': 3.1.2
@@ -24039,11 +24039,11 @@ snapshots:
       - prettier
       - supports-color
 
-  '@storybook/builder-vite@8.1.6(encoding@0.1.13)(prettier@3.3.1)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))':
+  '@storybook/builder-vite@8.1.6(encoding@0.1.13)(prettier@3.3.2)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))':
     dependencies:
       '@storybook/channels': 8.1.6
       '@storybook/client-logger': 8.1.6
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/core-events': 8.1.6
       '@storybook/csf-plugin': 8.1.6
       '@storybook/node-logger': 8.1.6
@@ -24080,12 +24080,12 @@ snapshots:
       '@babel/types': 7.24.5
       '@ndelangen/get-tarball': 3.0.7
       '@storybook/codemod': 8.1.6
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/core-events': 8.1.6
-      '@storybook/core-server': 8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@storybook/core-server': 8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/csf-tools': 8.1.6
       '@storybook/node-logger': 8.1.6
-      '@storybook/telemetry': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/telemetry': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/types': 8.1.6
       '@types/semver': 7.5.6
       '@yarnpkg/fslib': 2.10.3
@@ -24104,7 +24104,7 @@ snapshots:
       jscodeshift: 0.15.1(@babel/preset-env@7.24.5(@babel/core@7.24.5))
       leven: 3.1.0
       ora: 5.4.1
-      prettier: 3.3.1
+      prettier: 3.3.2
       prompts: 2.4.2
       read-pkg-up: 7.0.1
       semver: 7.6.2
@@ -24139,7 +24139,7 @@ snapshots:
       globby: 14.0.1
       jscodeshift: 0.15.1(@babel/preset-env@7.24.5(@babel/core@7.24.5))
       lodash: 4.17.21
-      prettier: 3.3.1
+      prettier: 3.3.2
       recast: 0.23.6
       tiny-invariant: 1.3.3
     transitivePeerDependencies:
@@ -24163,7 +24163,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@storybook/core-common@8.1.6(encoding@0.1.13)(prettier@3.3.1)':
+  '@storybook/core-common@8.1.6(encoding@0.1.13)(prettier@3.3.2)':
     dependencies:
       '@storybook/core-events': 8.1.6
       '@storybook/csf-tools': 8.1.6
@@ -24186,7 +24186,7 @@ snapshots:
       node-fetch: 2.6.12(encoding@0.1.13)
       picomatch: 2.3.1
       pkg-dir: 5.0.0
-      prettier-fallback: prettier@3.3.1
+      prettier-fallback: prettier@3.3.2
       pretty-hrtime: 1.0.3
       resolve-from: 5.0.0
       semver: 7.6.2
@@ -24195,7 +24195,7 @@ snapshots:
       ts-dedent: 2.2.0
       util: 0.12.5
     optionalDependencies:
-      prettier: 3.3.1
+      prettier: 3.3.2
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -24205,15 +24205,15 @@ snapshots:
       '@storybook/csf': 0.1.7
       ts-dedent: 2.2.0
 
-  '@storybook/core-server@8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@storybook/core-server@8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@aw-web-design/x-default-browser': 1.4.126
       '@babel/core': 7.24.5
       '@babel/parser': 7.24.5
       '@discoveryjs/json-ext': 0.5.7
-      '@storybook/builder-manager': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/builder-manager': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/channels': 8.1.6
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/core-events': 8.1.6
       '@storybook/csf': 0.1.7
       '@storybook/csf-tools': 8.1.6
@@ -24223,7 +24223,7 @@ snapshots:
       '@storybook/manager-api': 8.1.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/node-logger': 8.1.6
       '@storybook/preview-api': 8.1.6
-      '@storybook/telemetry': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/telemetry': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/types': 8.1.6
       '@types/detect-port': 1.3.2
       '@types/diff': 5.2.1
@@ -24288,9 +24288,9 @@ snapshots:
 
   '@storybook/docs-mdx@3.1.0-next.0': {}
 
-  '@storybook/docs-tools@8.1.6(encoding@0.1.13)(prettier@3.3.1)':
+  '@storybook/docs-tools@8.1.6(encoding@0.1.13)(prettier@3.3.2)':
     dependencies:
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/core-events': 8.1.6
       '@storybook/preview-api': 8.1.6
       '@storybook/types': 8.1.6
@@ -24369,13 +24369,13 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/react-vite@8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@2.78.0)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))':
+  '@storybook/react-vite@8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rollup@2.78.0)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))':
     dependencies:
       '@joshwooding/vite-plugin-react-docgen-typescript': 0.3.1(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))
       '@rollup/pluginutils': 5.0.2(rollup@2.78.0)
-      '@storybook/builder-vite': 8.1.6(encoding@0.1.13)(prettier@3.3.1)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))
+      '@storybook/builder-vite': 8.1.6(encoding@0.1.13)(prettier@3.3.2)(typescript@5.4.5)(vite@5.2.13(@types/node@20.14.8)(less@4.2.0)(terser@5.20.0))
       '@storybook/node-logger': 8.1.6
-      '@storybook/react': 8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
+      '@storybook/react': 8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)
       '@storybook/types': 8.1.6
       find-up: 5.0.0
       magic-string: 0.30.5
@@ -24394,10 +24394,10 @@ snapshots:
       - typescript
       - vite-plugin-glimmerx
 
-  '@storybook/react@8.1.6(encoding@0.1.13)(prettier@3.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)':
+  '@storybook/react@8.1.6(encoding@0.1.13)(prettier@3.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.4.5)':
     dependencies:
       '@storybook/client-logger': 8.1.6
-      '@storybook/docs-tools': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/docs-tools': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/global': 5.0.0
       '@storybook/preview-api': 8.1.6
       '@storybook/react-dom-shim': 8.1.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -24432,10 +24432,10 @@ snapshots:
       memoizerific: 1.11.3
       qs: 6.11.2
 
-  '@storybook/telemetry@8.1.6(encoding@0.1.13)(prettier@3.3.1)':
+  '@storybook/telemetry@8.1.6(encoding@0.1.13)(prettier@3.3.2)':
     dependencies:
       '@storybook/client-logger': 8.1.6
-      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.1)
+      '@storybook/core-common': 8.1.6(encoding@0.1.13)(prettier@3.3.2)
       '@storybook/csf-tools': 8.1.6
       chalk: 4.1.2
       detect-package-manager: 2.0.1
@@ -24717,12 +24717,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@theguild/prettier-config@2.0.6(prettier@3.3.1)':
+  '@theguild/prettier-config@2.0.6(prettier@3.3.2)':
     dependencies:
-      '@ianvs/prettier-plugin-sort-imports': 4.2.1(prettier@3.3.1)
-      prettier: 3.3.1
-      prettier-plugin-pkg: 0.18.0(prettier@3.3.1)
-      prettier-plugin-sh: 0.14.0(prettier@3.3.1)
+      '@ianvs/prettier-plugin-sort-imports': 4.2.1(prettier@3.3.2)
+      prettier: 3.3.2
+      prettier-plugin-pkg: 0.18.0(prettier@3.3.2)
+      prettier-plugin-sh: 0.14.0(prettier@3.3.2)
     transitivePeerDependencies:
       - '@vue/compiler-sfc'
       - supports-color
@@ -30080,7 +30080,7 @@ snapshots:
       mkdirp: 3.0.1
       mz: 2.7.0
       node-fetch: 3.3.2
-      prettier: 3.3.1
+      prettier: 3.3.2
 
   json-schema-traverse@0.4.1: {}
 
@@ -32990,33 +32990,33 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-pkg@0.18.0(prettier@3.3.1):
+  prettier-plugin-pkg@0.18.0(prettier@3.3.2):
     dependencies:
-      prettier: 3.3.1
+      prettier: 3.3.2
 
-  prettier-plugin-sh@0.14.0(prettier@3.3.1):
+  prettier-plugin-sh@0.14.0(prettier@3.3.2):
     dependencies:
       mvdan-sh: 0.10.1
-      prettier: 3.3.1
+      prettier: 3.3.2
       sh-syntax: 0.4.1
 
-  prettier-plugin-sql@0.18.0(prettier@3.3.1):
+  prettier-plugin-sql@0.18.0(prettier@3.3.2):
     dependencies:
       jsox: 1.2.118
       node-sql-parser: 4.12.0
-      prettier: 3.3.1
+      prettier: 3.3.2
       sql-formatter: 15.0.2
       tslib: 2.6.3
 
-  prettier-plugin-tailwindcss@0.6.4(@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.1))(prettier@3.3.1):
+  prettier-plugin-tailwindcss@0.6.4(@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.2))(prettier@3.3.2):
     dependencies:
-      prettier: 3.3.1
+      prettier: 3.3.2
     optionalDependencies:
-      '@ianvs/prettier-plugin-sort-imports': 4.2.1(prettier@3.3.1)
+      '@ianvs/prettier-plugin-sort-imports': 4.2.1(prettier@3.3.2)
 
   prettier@2.8.8: {}
 
-  prettier@3.3.1: {}
+  prettier@3.3.2: {}
 
   pretty-bytes@5.6.0: {}
 
@@ -33038,7 +33038,7 @@ snapshots:
     dependencies:
       parse-ms: 2.1.0
 
-  pretty-quick@4.0.0(prettier@3.3.1):
+  pretty-quick@4.0.0(prettier@3.3.2):
     dependencies:
       execa: 5.1.1
       find-up: 5.0.0
@@ -33046,7 +33046,7 @@ snapshots:
       mri: 1.2.0
       picocolors: 1.0.0
       picomatch: 3.0.1
-      prettier: 3.3.1
+      prettier: 3.3.2
       tslib: 2.6.3
 
   proc-log@3.0.0: {}
