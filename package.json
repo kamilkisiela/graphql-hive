@@ -83,7 +83,7 @@
     "eslint-plugin-hive": "file:rules",
     "eslint-plugin-tailwindcss": "3.17.3",
     "fs-extra": "11.2.0",
-    "graphql": "16.8.1",
+    "graphql": "16.9.0",
     "husky": "9.0.11",
     "jest-snapshot-serializer-raw": "2.0.0",
     "lint-staged": "15.2.7",

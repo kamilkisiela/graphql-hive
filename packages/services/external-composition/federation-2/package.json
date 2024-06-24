@@ -12,7 +12,7 @@
     "@apollo/federation-internals": "2.8.1",
     "@graphql-hive/external-composition": "workspace:*",
     "@whatwg-node/server": "0.9.35",
-    "graphql": "16.8.1",
+    "graphql": "16.9.0",
     "lru-cache": "^7.17.0",
     "zod": "3.23.8"
   }
