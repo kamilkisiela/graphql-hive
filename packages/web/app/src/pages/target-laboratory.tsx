@@ -59,16 +59,17 @@ import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
 import 'graphiql/graphiql.css';
 
-function Share(props: { operation: string | null }): ReactElement {
+function Share({ operation }: { operation: string | null }): ReactElement | null {
   const label = 'Share query';
   const copyToClipboard = useClipboard();
+
+  if (!operation) return null;
 
   return (
     <GraphiQLTooltip label={label}>
       <GraphiQLButton
         className="graphiql-toolbar-button"
         aria-label={label}
-        disabled={!props.operation}
         onClick={async () => {
           await copyToClipboard(window.location.href);
         }}
