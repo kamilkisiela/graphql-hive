@@ -37,7 +37,9 @@
 
     --radius: 0.5rem;
 
-    --hive-content-height: calc(100vh - 84px - 47px);
+    --header-height: 84px;
+    --tabs-navbar-height: 47px;
+    --content-height: calc(100vh - var(--header-height) - var(--tabs-navbar-height));
   }
 
   .dark {
@@ -81,8 +83,14 @@
   * {
     @apply border-border;
   }
+
+  html,
   body {
-    @apply bg-background text-foreground;
+    height: 100%;
+  }
+
+  body {
+    @apply text-foreground bg-[#030711];
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
@@ -99,12 +107,6 @@
   *:active,
   *:focus {
     outline: none !important;
-  }
-
-  html,
-  body,
-  #root {
-    @apply h-screen;
   }
 
   #root {
@@ -201,9 +203,4 @@
   input::-webkit-inner-spin-button {
     -webkit-appearance: none;
   }
-}
-
-html,
-body {
-  background: #030711;
 }

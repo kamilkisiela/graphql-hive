@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cx } from 'class-variance-authority';
 import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
@@ -309,321 +309,332 @@ function useOperationCollectionsPlugin(props: {
   projectId: string;
   targetId: string;
 }): GraphiQLPlugin {
-  const { canDelete, canEdit } = props;
-  return {
-    title: 'Operation Collections',
-    icon: BookmarkIcon,
-    content: useCallback(
-      function Content() {
-        const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
-        const { collections, fetching: loading } = useCollections({
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
-        });
-        const [collectionId, setCollectionId] = useState('');
-        const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
-        const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
-        const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
-        const { clearOperation, savedOperation, setSavedOperation } = useSyncOperationState({
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
-        });
-        const router = useRouter();
+  return useMemo(() => {
+    function Content() {
+      const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
+      const { collections, fetching: loading } = useCollections({
+        organizationId: props.organizationId,
+        projectId: props.projectId,
+        targetId: props.targetId,
+      });
+      const [collectionId, setCollectionId] = useState('');
+      const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
+      const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
+      const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
+      const { clearOperation, savedOperation, setSavedOperation } = useSyncOperationState({
+        organizationId: props.organizationId,
+        projectId: props.projectId,
+        targetId: props.targetId,
+      });
+      const router = useRouter();
+      const [accordionValue, setAccordionValue] = useState<string[]>([]);
+      const containerRef = useRef<HTMLDivElement>(null);
+      const [isScrolled, setIsScrolled] = useState(false);
 
-        const currentOperation = useCurrentOperation({
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
-        });
-        const editorContext = useEditorContext({ nonNull: true });
+      const currentOperation = useCurrentOperation({
+        organizationId: props.organizationId,
+        projectId: props.projectId,
+        targetId: props.targetId,
+      });
+      const editorContext = useEditorContext({ nonNull: true });
 
-        const hasAllEditors = !!(
-          editorContext.queryEditor &&
-          editorContext.variableEditor &&
-          editorContext.headerEditor
-        );
+      const hasAllEditors = !!(
+        editorContext.queryEditor &&
+        editorContext.variableEditor &&
+        editorContext.headerEditor
+      );
 
-        const isSame =
-          !!currentOperation &&
-          currentOperation.query === editorContext.queryEditor?.getValue() &&
-          currentOperation.variables === editorContext.variableEditor?.getValue() &&
-          currentOperation.headers === editorContext.headerEditor?.getValue();
+      const isSame =
+        !!currentOperation &&
+        currentOperation.query === editorContext.queryEditor?.getValue() &&
+        currentOperation.variables === editorContext.variableEditor?.getValue() &&
+        currentOperation.headers === editorContext.headerEditor?.getValue();
 
-        const queryParamsOperationId =
-          'operation' in router.latestLocation.search &&
-          typeof router.latestLocation.search.operation === 'string'
-            ? router.latestLocation.search.operation
-            : null;
+      const queryParamsOperationId =
+        'operation' in router.latestLocation.search &&
+        typeof router.latestLocation.search.operation === 'string'
+          ? router.latestLocation.search.operation
+          : null;
 
-        useEffect(() => {
-          if (!hasAllEditors || !currentOperation) {
+      useEffect(() => {
+        if (!hasAllEditors || !currentOperation) {
+          return;
+        }
+
+        if (queryParamsOperationId) {
+          // Set selected operation in editors
+          editorContext.queryEditor?.setValue(currentOperation.query);
+          editorContext.variableEditor?.setValue(currentOperation.variables ?? '');
+          editorContext.headerEditor?.setValue(currentOperation.headers ?? '');
+
+          if (!savedOperation) {
             return;
           }
 
-          if (queryParamsOperationId) {
-            // Set selected operation in editors
-            editorContext.queryEditor?.setValue(currentOperation.query);
-            editorContext.variableEditor?.setValue(currentOperation.variables ?? '');
-            editorContext.headerEditor?.setValue(currentOperation.headers ?? '');
-
-            if (!savedOperation) {
-              return;
-            }
-
-            const oneWeek = 7 * 24 * 60 * 60 * 1000;
-            if (savedOperation.updatedAt + oneWeek < Date.now()) {
-              clearOperation();
-              return;
-            }
-
-            const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
-            if (savedOperation.updatedAt > currentOperationUpdatedAt) {
-              editorContext.queryEditor?.setValue(savedOperation.query);
-              editorContext.variableEditor?.setValue(savedOperation.variables);
-            }
-          }
-        }, [hasAllEditors, queryParamsOperationId, currentOperation]);
-
-        useEffect(() => {
-          if (!hasAllEditors || !currentOperation || isSame) {
+          const oneWeek = 7 * 24 * 60 * 60 * 1000;
+          if (savedOperation.updatedAt + oneWeek < Date.now()) {
+            clearOperation();
             return;
           }
-          setSavedOperation({
-            query: editorContext.queryEditor?.getValue() ?? '',
-            variables: editorContext.variableEditor?.getValue() ?? '',
-          });
-        }, [editorContext.queryEditor?.getValue(), editorContext.variableEditor?.getValue()]);
 
-        const shouldShowMenu = canEdit || canDelete;
+          const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
+          if (savedOperation.updatedAt > currentOperationUpdatedAt) {
+            editorContext.queryEditor?.setValue(savedOperation.query);
+            editorContext.variableEditor?.setValue(savedOperation.variables);
+          }
+        }
+      }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
-        const initialSelectedCollection =
-          currentOperation?.id &&
-          collections?.find(c =>
-            c.operations.edges.some(({ node }) => node.id === currentOperation.id),
-          )?.id;
+      useEffect(() => {
+        if (!hasAllEditors || !currentOperation || isSame) {
+          return;
+        }
+        setSavedOperation({
+          query: editorContext.queryEditor?.getValue() ?? '',
+          variables: editorContext.variableEditor?.getValue() ?? '',
+        });
+      }, [editorContext.queryEditor?.getValue(), editorContext.variableEditor?.getValue()]);
 
-        const [createOperationState, createOperation] = useMutation(CreateOperationMutation);
-        const notify = useNotifications();
+      const shouldShowMenu = props.canEdit || props.canDelete;
 
-        const addOperation = async (e: { currentTarget: { dataset: DOMStringMap } }) => {
-          const collectionId = e.currentTarget.dataset.collectionId!;
+      const initialSelectedCollection =
+        currentOperation?.id &&
+        collections?.find(c =>
+          c.operations.edges.some(({ node }) => node.id === currentOperation.id),
+        )?.id;
 
-          const result = await createOperation({
-            input: {
-              collectionId,
-              name: 'New Operation',
-              query: '{}',
-              headers: '',
-              variables: '',
+      const [createOperationState, createOperation] = useMutation(CreateOperationMutation);
+      const notify = useNotifications();
+
+      const addOperation = async (e: { currentTarget: { dataset: DOMStringMap } }) => {
+        const collectionId = e.currentTarget.dataset.collectionId!;
+
+        const result = await createOperation({
+          input: {
+            collectionId,
+            name: 'New Operation',
+            query: '{}',
+            headers: '',
+            variables: '',
+          },
+          selector: {
+            target: props.targetId,
+            organization: props.organizationId,
+            project: props.projectId,
+          },
+        });
+        if (result.error) {
+          notify("Couldn't create operation. Please try again later.", 'error');
+        }
+        if (result.data?.createOperationInDocumentCollection.error) {
+          notify(result.data.createOperationInDocumentCollection.error.message, 'error');
+        }
+        if (result.data?.createOperationInDocumentCollection.ok) {
+          void router.navigate({
+            to: '/$organizationId/$projectId/$targetId/laboratory',
+            params: {
+              organizationId: props.organizationId,
+              projectId: props.projectId,
+              targetId: props.targetId,
             },
-            selector: {
-              target: props.targetId,
-              organization: props.organizationId,
-              project: props.projectId,
+            search: {
+              operation: result.data.createOperationInDocumentCollection.ok.operation.id,
             },
           });
-          if (result.error) {
-            notify("Couldn't create operation. Please try again later.", 'error');
-          }
-          if (result.data?.createOperationInDocumentCollection.error) {
-            notify(result.data.createOperationInDocumentCollection.error.message, 'error');
-          }
-          if (result.data?.createOperationInDocumentCollection.ok) {
-            void router.navigate({
-              to: '/$organizationId/$projectId/$targetId/laboratory',
-              params: {
-                organizationId: props.organizationId,
-                projectId: props.projectId,
-                targetId: props.targetId,
-              },
-              search: {
-                operation: result.data.createOperationInDocumentCollection.ok.operation.id,
-              },
-            });
-          }
-        };
+        }
+      };
 
-        return (
-          <>
-            <div className="flex justify-between">
-              <Title>Operation Collections</Title>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="orangeLink"
-                      size="icon-sm"
-                      className="flex w-auto items-center gap-1"
-                      onClick={() => {
-                        if (collectionId) {
-                          setCollectionId('');
-                        }
-                        toggleCollectionModal();
-                      }}
-                    >
-                      <PlusIcon className="size-4 shrink-0" /> Create collection
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Create new collection</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            {loading ? (
-              <div className="flex h-fit flex-1 items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <Spinner />
-                  <div className="mt-2 text-xs">Loading collections</div>
-                </div>
-              </div>
-            ) : collections?.length ? (
-              <Accordion
-                defaultValue={initialSelectedCollection ? [initialSelectedCollection] : undefined}
-                className="mt-5 space-y-2"
-                type="multiple"
-              >
-                {collections.map(collection => (
-                  <AccordionItem
-                    key={collection.id}
-                    value={collection.id}
-                    className="rounded-lg border-b-0 bg-[hsla(var(--color-neutral),var(--alpha-background-light))]"
+      useEffect(() => {
+        if (!initialSelectedCollection || isScrolled) return;
+
+        setAccordionValue([initialSelectedCollection]);
+        setTimeout(() => {
+          const link = containerRef.current!.querySelector(`a[href$="${queryParamsOperationId}"]`);
+          link!.scrollIntoView();
+          setIsScrolled(true);
+        }, 150);
+      }, [initialSelectedCollection]);
+
+      return (
+        <>
+          <div className="mb-5 flex justify-between">
+            <Title>Operation Collections</Title>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="orangeLink"
+                    size="icon-sm"
+                    className="flex w-auto items-center gap-1"
+                    onClick={() => {
+                      if (collectionId) {
+                        setCollectionId('');
+                      }
+                      toggleCollectionModal();
+                    }}
                   >
-                    <AccordionHeader className="flex items-center justify-between">
-                      <AccordionTrigger className="[&[data-state=open]>svg]:-rotate-0 [&_svg]:order-first [&_svg]:mx-2 [&_svg]:-rotate-90">
-                        {collection.name}
-                      </AccordionTrigger>
-                      {shouldShowMenu ? (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            aria-label="More"
-                            className="graphiql-toolbar-button"
+                    <PlusIcon className="size-4 shrink-0" /> Create collection
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Create new collection</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          {loading ? (
+            <div className="flex flex-col items-center gap-4 text-xs">
+              <Spinner />
+              Loading collections...
+            </div>
+          ) : collections?.length ? (
+            <Accordion
+              ref={containerRef}
+              value={accordionValue}
+              onValueChange={setAccordionValue}
+              className="space-y-2"
+              type="multiple"
+            >
+              {collections.map(collection => (
+                <AccordionItem
+                  key={collection.id}
+                  value={collection.id}
+                  className="rounded-lg border-b-0 bg-[hsla(var(--color-neutral),var(--alpha-background-light))]"
+                >
+                  <AccordionHeader className="flex items-center justify-between">
+                    <AccordionTrigger className="flex-none [&[data-state=open]>svg]:rotate-0 [&_svg]:order-first [&_svg]:mx-2 [&_svg]:-rotate-90">
+                      {collection.name}
+                    </AccordionTrigger>
+                    {shouldShowMenu ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger aria-label="More" className="graphiql-toolbar-button">
+                          <DotsHorizontalIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={addOperation}
+                            disabled={createOperationState.fetching}
+                            data-collection-id={collection.id}
                           >
-                            <DotsHorizontalIcon />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={addOperation}
-                              disabled={createOperationState.fetching}
-                              data-collection-id={collection.id}
-                            >
-                              Add operation <PlusIcon className="ml-2 size-4" />
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setCollectionId(collection.id);
-                                toggleCollectionModal();
-                              }}
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setCollectionId(collection.id);
-                                toggleDeleteCollectionModalOpen();
-                              }}
-                              className="text-red-500"
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ) : null}
-                    </AccordionHeader>
-                    <AccordionContent className="pb-2 pl-2">
-                      {collection.operations.edges.length ? (
-                        collection.operations.edges.map(({ node }) => (
-                          <CollectionItem
-                            key={node.id}
-                            node={node}
-                            canDelete={canDelete}
-                            canEdit={canEdit}
-                            onDelete={setOperationToDeleteId}
-                            onEdit={setOperationToEditId}
-                            isChanged={!isSame && node.id === queryParamsOperationId}
-                            organizationId={props.organizationId}
-                            projectId={props.projectId}
-                            targetId={props.targetId}
-                          />
-                        ))
-                      ) : (
-                        <Button
-                          variant="orangeLink"
-                          className="mx-auto block"
-                          onClick={addOperation}
-                          data-collection-id={collection.id}
-                        >
-                          <PlusIcon className="mr-1 inline size-4" /> Add Operation
-                        </Button>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            ) : (
-              <div className="flex h-fit flex-1 items-center justify-center">
-                <div className="flex flex-col items-center">
-                  <BookmarkIcon width={30} height={30} />
-                  <div className="mt-2 text-xs">There are no collections available.</div>
-                  {canEdit ? (
-                    <Button
-                      onClick={() => {
-                        if (collectionId) {
-                          setCollectionId('');
-                        }
-                        toggleCollectionModal();
-                      }}
-                      data-cy="create-collection"
-                      className="mt-3"
-                    >
-                      Create your first Collection.
-                    </Button>
-                  ) : null}
-                </div>
+                            Add operation <PlusIcon className="ml-2 size-4" />
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setCollectionId(collection.id);
+                              toggleCollectionModal();
+                            }}
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setCollectionId(collection.id);
+                              toggleDeleteCollectionModalOpen();
+                            }}
+                            className="text-red-500"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : null}
+                  </AccordionHeader>
+                  <AccordionContent className="pb-2 pl-2">
+                    {collection.operations.edges.length ? (
+                      collection.operations.edges.map(({ node }) => (
+                        <CollectionItem
+                          key={node.id}
+                          node={node}
+                          canDelete={props.canDelete}
+                          canEdit={props.canEdit}
+                          onDelete={setOperationToDeleteId}
+                          onEdit={setOperationToEditId}
+                          isChanged={!isSame && node.id === queryParamsOperationId}
+                          organizationId={props.organizationId}
+                          projectId={props.projectId}
+                          targetId={props.targetId}
+                        />
+                      ))
+                    ) : (
+                      <Button
+                        variant="orangeLink"
+                        className="mx-auto block"
+                        onClick={addOperation}
+                        data-collection-id={collection.id}
+                      >
+                        <PlusIcon className="mr-1 inline size-4" /> Add Operation
+                      </Button>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <div className="flex h-fit flex-1 items-center justify-center">
+              <div className="flex flex-col items-center">
+                <BookmarkIcon width={30} height={30} />
+                <div className="mt-2 text-xs">There are no collections available.</div>
+                {props.canEdit ? (
+                  <Button
+                    onClick={() => {
+                      if (collectionId) {
+                        setCollectionId('');
+                      }
+                      toggleCollectionModal();
+                    }}
+                    data-cy="create-collection"
+                    className="mt-3"
+                  >
+                    Create your first Collection.
+                  </Button>
+                ) : null}
               </div>
-            )}
-            <CreateCollectionModal
+            </div>
+          )}
+          <CreateCollectionModal
+            organizationId={props.organizationId}
+            projectId={props.projectId}
+            targetId={props.targetId}
+            isOpen={isCollectionModalOpen}
+            toggleModalOpen={toggleCollectionModal}
+            collectionId={collectionId}
+          />
+          <DeleteCollectionModal
+            organizationId={props.organizationId}
+            projectId={props.projectId}
+            targetId={props.targetId}
+            isOpen={isDeleteCollectionModalOpen}
+            toggleModalOpen={toggleDeleteCollectionModalOpen}
+            collectionId={collectionId}
+          />
+          {operationToDeleteId !== null && (
+            <DeleteOperationModal
               organizationId={props.organizationId}
               projectId={props.projectId}
               targetId={props.targetId}
-              isOpen={isCollectionModalOpen}
-              toggleModalOpen={toggleCollectionModal}
-              collectionId={collectionId}
+              close={() => setOperationToDeleteId(null)}
+              operationId={operationToDeleteId}
             />
-            <DeleteCollectionModal
+          )}
+          {operationToEditId !== null && (
+            <EditOperationModal
               organizationId={props.organizationId}
               projectId={props.projectId}
               targetId={props.targetId}
-              isOpen={isDeleteCollectionModalOpen}
-              toggleModalOpen={toggleDeleteCollectionModalOpen}
-              collectionId={collectionId}
+              key={operationToEditId}
+              operationId={operationToEditId}
+              close={() => setOperationToEditId(null)}
             />
-            {operationToDeleteId !== null && (
-              <DeleteOperationModal
-                organizationId={props.organizationId}
-                projectId={props.projectId}
-                targetId={props.targetId}
-                close={() => setOperationToDeleteId(null)}
-                operationId={operationToDeleteId}
-              />
-            )}
-            {operationToEditId !== null && (
-              <EditOperationModal
-                organizationId={props.organizationId}
-                projectId={props.projectId}
-                targetId={props.targetId}
-                key={operationToEditId}
-                operationId={operationToEditId}
-                close={() => setOperationToEditId(null)}
-              />
-            )}
-          </>
-        );
-      },
-      [canEdit, canDelete],
-    ),
-  };
+          )}
+        </>
+      );
+    }
+
+    return {
+      title: 'Operation Collections',
+      icon: BookmarkIcon,
+      content: Content,
+    };
+  }, [props.canEdit, props.canDelete]);
 }
 
 const UpdateOperationMutation = graphql(`
@@ -953,7 +964,7 @@ function LaboratoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Laboratory}
-      className="flex h-[--hive-content-height] flex-col"
+      className="flex h-[--content-height] flex-col"
     >
       <div className="flex py-6">
         <div className="flex-1">
@@ -1044,20 +1055,20 @@ function LaboratoryPageContent(props: {
           color: #4c5462;
         }
 
-        .graphiql-container .graphiql-doc-explorer-search {
+        .graphiql-container .graphiql-doc-explorer-search,
+        .graphiql-container .CodeMirror-hints{
           background-color: #070d17;
         }
         .graphiql-container .cm-punctuation {
           color: #ccc;
         }
         .graphiql-container .cm-punctuation:hover {
-          color: #ffffff;
+          color: #fff;
         }
 
         .graphiql-container .graphiql-logo {
           width: 100%;
           display: flex;
-          justify-content: space-between;
           align-items: center;
         }
 
@@ -1071,15 +1082,17 @@ function LaboratoryPageContent(props: {
         .graphiql-container .graphiql-session-header-right {
           width: 100%;
         }
-
-        .graphiql-container .CodeMirror-hints {
-          background-color: #070d17;
-        }
       `}</style>
       </Helmet>
 
       {!query.fetching && (
-        <div className={clsx('grow', isFullScreen && 'fixed inset-0 bg-[#030711]')}>
+        <div
+          className={clsx(
+            'grow',
+            isFullScreen && 'fixed inset-0 bg-[#030711]',
+            'min-h-0', // trick to allow content be scrollable
+          )}
+        >
           <GraphiQL
             fetcher={fetcher}
             toolbar={{
@@ -1100,6 +1113,7 @@ function LaboratoryPageContent(props: {
             visiblePlugin={operationCollectionsPlugin}
             schema={schema}
             forcedTheme="dark"
+            disableTabs
           >
             <GraphiQL.Logo>
               <EditorBreadcrumbs
@@ -1110,7 +1124,7 @@ function LaboratoryPageContent(props: {
               <Button
                 onClick={() => setIsFullScreen(prev => !prev)}
                 variant="outline"
-                className="h-auto gap-2"
+                className="ml-auto h-auto gap-2"
               >
                 <FullScreenComponent className="size-4" />
                 {isFullScreen ? 'Exit' : 'Enter'} Full Screen
