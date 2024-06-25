@@ -1632,8 +1632,8 @@ importers:
         specifier: 3.2.0
         version: 3.2.0(graphql@16.9.0)
       '@headlessui/react':
-        specifier: 2.0.4
-        version: 2.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 2.1.0
+        version: 2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@hookform/resolvers':
         specifier: 3.6.0
         version: 3.6.0(react-hook-form@7.52.0(react@18.3.1))
@@ -4844,8 +4844,8 @@ packages:
       react: ^16 || ^17 || ^18
       react-dom: ^16 || ^17 || ^18
 
-  '@headlessui/react@2.0.4':
-    resolution: {integrity: sha512-16d/rOLeYsFsmPlRmXGu8DCBzrWD0zV1Ccx3n73wN87yFu8Y9+X04zflv8EJEt9TAYRyLKOmQXUnOnqQl6NgpA==}
+  '@headlessui/react@2.1.0':
+    resolution: {integrity: sha512-/MizQk2xqR5ELkmCI1xWy3VgJULvR8gcAXtZhcK7sY53TNRCPeMdeODEXKSv9LPSSRlEAyzW1+NGJiaXq6dLRw==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^18
@@ -21499,7 +21499,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@headlessui/react@2.0.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@headlessui/react@2.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@floating-ui/react': 0.26.16(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@react-aria/focus': 3.17.1(react@18.3.1)
@@ -24002,7 +24002,7 @@ snapshots:
       '@react-aria/interactions': 3.21.3(react@18.3.1)
       '@react-aria/utils': 3.24.1(react@18.3.1)
       '@react-types/shared': 3.23.1(react@18.3.1)
-      '@swc/helpers': 0.5.5
+      '@swc/helpers': 0.5.11
       clsx: 2.1.1
       react: 18.3.1
 
@@ -24011,12 +24011,12 @@ snapshots:
       '@react-aria/ssr': 3.9.4(react@18.3.1)
       '@react-aria/utils': 3.24.1(react@18.3.1)
       '@react-types/shared': 3.23.1(react@18.3.1)
-      '@swc/helpers': 0.5.5
+      '@swc/helpers': 0.5.11
       react: 18.3.1
 
   '@react-aria/ssr@3.9.4(react@18.3.1)':
     dependencies:
-      '@swc/helpers': 0.5.5
+      '@swc/helpers': 0.5.11
       react: 18.3.1
 
   '@react-aria/utils@3.24.1(react@18.3.1)':
@@ -24024,13 +24024,13 @@ snapshots:
       '@react-aria/ssr': 3.9.4(react@18.3.1)
       '@react-stately/utils': 3.10.1(react@18.3.1)
       '@react-types/shared': 3.23.1(react@18.3.1)
-      '@swc/helpers': 0.5.5
+      '@swc/helpers': 0.5.11
       clsx: 2.1.1
       react: 18.3.1
 
   '@react-stately/utils@3.10.1(react@18.3.1)':
     dependencies:
-      '@swc/helpers': 0.5.5
+      '@swc/helpers': 0.5.11
       react: 18.3.1
 
   '@react-types/shared@3.23.1(react@18.3.1)':
@@ -25647,7 +25647,6 @@ snapshots:
   '@swc/helpers@0.5.11':
     dependencies:
       tslib: 2.6.3
-    optional: true
 
   '@swc/helpers@0.5.5':
     dependencies:
