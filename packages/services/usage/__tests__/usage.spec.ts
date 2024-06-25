@@ -52,6 +52,7 @@ test('should split report based on operation map length', () => {
     id: 'test-id',
     size: 5,
     target: 'test-target',
+    organization: 'test-organization',
     map: {
       op1: {
         key: 'op1',
@@ -76,15 +77,21 @@ test('should split report based on operation map length', () => {
   expect(reports).toHaveLength(3);
 
   expect(Object.keys(reports[0].map)).toEqual(['op1']);
+  expect(reports[0].organization).toEqual('test-organization');
+  expect(reports[0].target).toEqual('test-target');
   expect(reports[0].size).toEqual(2);
   expect(reports[0].operations[0].operationMapKey).toEqual('op1');
   expect(reports[0].operations[1].operationMapKey).toEqual('op1');
 
   expect(Object.keys(reports[1].map)).toEqual(['op2']);
+  expect(reports[1].organization).toEqual('test-organization');
+  expect(reports[1].target).toEqual('test-target');
   expect(reports[1].size).toEqual(1);
   expect(reports[1].operations[0].operationMapKey).toEqual('op2');
 
   expect(Object.keys(reports[2].map)).toEqual(['op3']);
+  expect(reports[2].organization).toEqual('test-organization');
+  expect(reports[2].target).toEqual('test-target');
   expect(reports[2].size).toEqual(2);
   expect(reports[2].operations[0].operationMapKey).toEqual('op3');
   expect(reports[2].operations[1].operationMapKey).toEqual('op3');
