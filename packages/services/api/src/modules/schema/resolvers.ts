@@ -216,7 +216,7 @@ export const resolvers: SchemaModule.Resolvers = {
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
       const parsedResolveInfoFragment = parseResolveInfo(info);
       const isSchemaPublishMissingUrlErrorSelected =
-        !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
+        !!parsedResolveInfoFragment?.fieldsByTypeName.SchemaPublishMissingUrlError;
 
       const result = await injector.get(SchemaPublisher).publish(
         {

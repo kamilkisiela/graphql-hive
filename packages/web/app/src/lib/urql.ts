@@ -114,7 +114,7 @@ export const urqlClient = createClient({
           enableForSubscriptions: true,
           generateHash: (_, document) => {
             // TODO: improve types here
-            return Promise.resolve((document as any)?.['__meta__']?.['hash'] ?? '');
+            return Promise.resolve((document as any)?.__meta__?.hash ?? '');
           },
         })
       : null,

@@ -436,7 +436,7 @@ export async function createStorage(
       type: activity.activity_type,
       meta: activity.activity_metadata,
       createdAt: activity.created_at,
-      target: target['id']
+      target: target.id
         ? {
             ...TargetModel.parse(target),
             orgId: organization.id,

@@ -189,7 +189,7 @@ export class Config {
     }
 
     if ('default' in content) {
-      return content['default'];
+      return content.default;
     }
 
     return content;

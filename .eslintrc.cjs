@@ -114,6 +114,9 @@ module.exports = {
             optionalDependencies: false,
           },
         ],
+        // Note: you must disable the base rule as it can report incorrect errors
+        'dot-notation': 'off',
+        '@typescript-eslint/dot-notation': 'error',
         'hive/enforce-deps-in-dev': [
           'error',
           {
