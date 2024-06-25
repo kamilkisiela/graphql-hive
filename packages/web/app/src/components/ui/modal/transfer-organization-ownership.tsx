@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -82,6 +82,10 @@ const MemberFields = graphql(`
     targetAccessScopes
   }
 `);
+
+type Member = NonNullable<
+  FragmentType<typeof MemberFields>[' $fragmentRefs']
+>['MemberFieldsFragment'];
 
 const TransferOrganizationOwnershipModal_OrganizationFragment = graphql(`
   fragment TransferOrganizationOwnershipModal_OrganizationFragment on Organization {
@@ -190,10 +194,26 @@ export const TransferOrganizationOwnershipModal = ({
 
   const [open, setOpen] = useState(false);
 
+  type Option = {
+    value: string;
+    label: string;
+  };
+
   const options = filteredMembers.map(member => ({
     value: member.id,
     label: member.fullName,
-  }));
+  })) as Option[];
+  const [selected, setSelected] = useState<Member | undefined>();
+
+  // take the value and search for the member in filteredMembers
+  const onSelect = useCallback(
+    (option: Option) => {
+      const member = members.find(m => m.id === option.value);
+      setSelected(member as Member);
+      setSearchPhrase(option.value === searchPhrase ? '' : option.value);
+    },
+    [filteredMembers],
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
@@ -244,11 +264,8 @@ export const TransferOrganizationOwnershipModal = ({
                       options.map(option => (
                         <CommandItem
                           key={option.value}
-                          value={option.value}
-                          onSelect={currentValue => {
-                            setSearchPhrase(currentValue === searchPhrase ? '' : currentValue);
-                            setOpen(false);
-                          }}
+                          value={selected?.user.id}
+                          onSelect={() => onSelect(option)}
                         >
                           {option.label}
                           <CheckIcon
