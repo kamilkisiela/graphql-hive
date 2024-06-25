@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import { ensureEnv } from './env';
 import { getServiceHost } from './utils';
 

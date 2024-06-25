@@ -123,7 +123,7 @@ describe('Policy Access', () => {
       async () => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, createProject, inviteAndJoinMember } = await createOrg();
-        const { project, target } = await createProject(ProjectType.Single);
+        const { project } = await createProject(ProjectType.Single);
         const { memberToken } = await inviteAndJoinMember();
 
         await execute({

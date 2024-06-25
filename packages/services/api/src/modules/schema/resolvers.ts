@@ -1910,16 +1910,7 @@ function deprecationReasonFromDirectives(directives: readonly ConstDirectiveNode
 
 function buildGraphQLTypesFromSDL(
   sdl: DocumentNode,
-  getStats: (
-    typeName: string,
-  ) => ReturnType<
-    | GraphQLObjectTypeMapper['usage']
-    | GraphQLInterfaceTypeMapper['usage']
-    | GraphQLUnionTypeMapper['usage']
-    | GraphQLEnumTypeMapper['usage']
-    | GraphQLInputObjectTypeMapper['usage']
-    | GraphQLScalarTypeMapper['usage']
-  >,
+  getStats: (typeName: string) => ReturnType<GraphQLObjectTypeMapper['usage']>,
   supergraph: SuperGraphInformation | null,
 ) {
   const types: Array<
