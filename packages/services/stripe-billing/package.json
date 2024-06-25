@@ -19,7 +19,7 @@
     "date-fns": "3.6.0",
     "dotenv": "16.4.5",
     "got": "14.4.1",
-    "pino-pretty": "11.1.0",
+    "pino-pretty": "11.2.1",
     "reflect-metadata": "0.2.2",
     "stripe": "14.25.0",
     "zod": "3.23.8"
