@@ -36,7 +36,7 @@
     "@swc/core": "1.6.5",
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",
-    "@whatwg-node/server": "0.9.35",
+    "@whatwg-node/server": "0.9.36",
     "dotenv": "16.4.5",
     "fastify": "4.28.0",
     "got": "14.4.1",
