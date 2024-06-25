@@ -4,7 +4,7 @@ import { ContourValues } from './contour.types';
 import { helmChart } from './helm';
 
 // prettier-ignore
-export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '17.0.12');
+export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '18.2.4');
 
 export class Proxy {
   private lbService: Output<k8s.core.v1.Service> | null = null;
@@ -19,6 +19,7 @@ export class Proxy {
     routes: {
       name: string;
       path: string;
+      match: 'exact' | 'prefix' | 'path_separated_prefix';
       service: k8s.core.v1.Service;
       requestTimeout?: `${number}s` | 'infinity';
       idleTimeout?: `${number}s`;
@@ -67,55 +68,68 @@ export class Proxy {
               exposeHeaders: ['*'],
             },
           },
-          routes: routes.map(route => ({
-            conditions: [
-              {
-                prefix: route.path,
-              },
-            ],
-            services: [
-              {
-                name: route.service.metadata.name,
-                port: route.service.spec.ports[0].port,
-              },
-            ],
-            ...(route.path === '/'
-              ? {}
-              : {
-                  pathRewritePolicy: {
-                    replacePrefix: [
-                      {
-                        replacement: route.customRewrite || '/',
-                      },
-                    ],
-                  },
-                  ...(route.requestTimeout || route.idleTimeout
-                    ? {
-                        timeoutPolicy: {
-                          ...(route.requestTimeout
-                            ? {
-                                response: route.requestTimeout,
-                              }
-                            : {}),
-                          ...(route.idleTimeout
-                            ? {
-                                idle: route.idleTimeout,
-                              }
-                            : {}),
+          routes: routes
+            .map(route =>
+              route.match === 'path_separated_prefix' || route.match === 'exact'
+                ? // Contour does not support Envoy's path_separated_prefix
+                  // See: https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto#envoy-v3-api-field-config-route-v3-routematch-path-separated-prefix
+                  // This could help us to avoid the need of two routes for the same endpoint.
+                  [
+                    {
+                      ...route,
+                      path: route.path,
+                      match: 'prefix' as const,
+                    },
+                  ]
+                : [route],
+            )
+            .flat(1)
+            .map(route => ({
+              conditions: [{ prefix: route.path }],
+              services: [
+                {
+                  name: route.service.metadata.name,
+                  port: route.service.spec.ports[0].port,
+                },
+              ],
+              ...(route.path === '/'
+                ? {}
+                : {
+                    pathRewritePolicy: {
+                      replacePrefix: [
+                        {
+                          prefix: route.path,
+                          replacement: route.customRewrite || '/',
                         },
-                      }
-                    : {}),
-                  ...(route.retriable
-                    ? {
-                        retryPolicy: {
-                          count: 2,
-                          retryOn: ['reset', 'retriable-status-codes'],
-                          retriableStatusCodes: [503],
-                        },
-                      }
-                    : {}),
-                }),
-          })),
+                      ],
+                    },
+                    ...(route.requestTimeout || route.idleTimeout
+                      ? {
+                          timeoutPolicy: {
+                            ...(route.requestTimeout
+                              ? {
+                                  response: route.requestTimeout,
+                                }
+                              : {}),
+                            ...(route.idleTimeout
+                              ? {
+                                  idle: route.idleTimeout,
+                                }
+                              : {}),
+                          },
+                        }
+                      : {}),
+                    ...(route.retriable
+                      ? {
+                          retryPolicy: {
+                            count: 2,
+                            retryOn: ['reset', 'retriable-status-codes'],
+                            retriableStatusCodes: [503],
+                          },
+                        }
+                      : {}),
+                  }),
+            })),
         },
       },
       {
