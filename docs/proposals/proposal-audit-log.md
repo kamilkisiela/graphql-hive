@@ -9,7 +9,7 @@ schemas, and other resources.
 ## Implementation
 
 Proposed implementation is to use a single Clickhouse table to store all events. The table will have
-the following columns:
+the following schema:
 
 
 ```sql
@@ -60,12 +60,15 @@ type AuditLogEvent = {
 export class AuditLog {
   logAuditEvent (event: AuditLogEvent) {
     const { userId, organizationId, projectId, targetId, schemaVersionId, eventAction, details } = event;
+    const userEmail = userId ? await getUserEmail(userId) : null; // get user email would be cached in redis for 10 minutes to avoid hitting the DB too often
+
     const query = `
-      INSERT INTO audit_log (user_id, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_action, event_details)
+      INSERT INTO audit_log (user_id, user_email, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_action, event_details)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     return clickhouse.query(query, [
       userId,
+      userEmail,
       organizationId,
       projectId,
       targetId,
@@ -86,21 +89,7 @@ await this.auditLog.logAuditEvent({
 ```
 
 We would call this `logAuditEvent` function in all the places in the codebase to log the events
-listed above.
-
-## Audit log UI
-
-# How user could pull audit logs and filter them?
-
-Download would be triggered by a `Download CSV` button in Hive UI.
-
-We would provide these filters:
-- **date range** - to avoid pulling entire history of events
-- **by user** - in case somebody wants to see actions made by a user
-- **by project** - to scope down the logs to a specific project (by default audit log contains data from all projects of the org)
-- **by target** - to scope down it even more
-- **by action** - type or group of action types
-
+listed in the next section.
 
 ## Audit log events
 
@@ -126,7 +115,21 @@ Left column shows the event action name, right column shows a human readable exa
 | SCHEMA_POLICY_SETTINGS_UPDATED | Changes made to schema policy settings under an org or a project by **admin@acme.com**.                   |
 
 
-Graphql Schema for these queries would look like this:
+## Audit log UI
+
+Download would be triggered by a `Download CSV` button in Hive UI.
+
+We would provide these filters:
+- **date range** - to avoid pulling entire history of events
+- **by user** - in case somebody wants to see actions made by a user
+- **by project** - to scope down the logs to a specific project (by default audit log contains data from all projects of the org)
+- **by target** - to scope down it even more
+- **by action** - type or group of action types
+
+
+### Graphql API for UI
+
+Graphql Schema to support a UI with these filters looks like this:
 
 ```graphql
 
