@@ -27,7 +27,7 @@ export function objectToParams<T extends Record<string, any>>(
         return null;
       }
       if (Array.isArray(obj[key])) {
-        return transformArray!(key, obj[key]);
+        return transformArray!(key, obj[key] as any);
       }
       if (typeof obj[key] === 'object') {
         return sql.json(obj[key]);
