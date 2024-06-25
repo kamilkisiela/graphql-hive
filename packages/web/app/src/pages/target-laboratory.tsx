@@ -3,6 +3,7 @@ import { cx } from 'class-variance-authority';
 import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
+import { FolderIcon, FolderOpenIcon, SquareTerminalIcon } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useMutation, useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -17,7 +18,7 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionItem,
-  AccordionTrigger,
+  AccordionTriggerPrimitive,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { DocsLink } from '@/components/ui/docs-note';
@@ -197,11 +198,14 @@ const CollectionItem = (props: {
           operation: props.node.id,
         }}
         className={cn(
-          'flex w-full items-center justify-between rounded p-2 !text-gray-300 hover:bg-gray-100/10',
-          operationIdFromSearch === props.node.id && 'bg-gray-100/10 text-white',
+          'flex w-full items-center justify-between rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
+          operationIdFromSearch === props.node.id && 'text-white',
         )}
       >
-        {props.node.name}
+        <div className="flex items-center gap-x-3">
+          <SquareTerminalIcon className="size-4" />
+          {props.node.name}
+        </div>
         {props.isChanged && (
           <span className="size-1.5 rounded-full border border-orange-600 bg-orange-400" />
         )}
@@ -458,7 +462,7 @@ function useOperationCollectionsPlugin(props: {
       return (
         <>
           <div className="mb-5 flex justify-between">
-            <Title>Operation Collections</Title>
+            <Title>Operations</Title>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -473,10 +477,10 @@ function useOperationCollectionsPlugin(props: {
                       toggleCollectionModal();
                     }}
                   >
-                    <PlusIcon className="size-4 shrink-0" /> Create collection
+                    <PlusIcon className="size-4 shrink-0" /> New collection
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Create new collection</TooltipContent>
+                <TooltipContent>Create a new collection of GraphQL Operations</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
@@ -490,19 +494,16 @@ function useOperationCollectionsPlugin(props: {
               ref={containerRef}
               value={accordionValue}
               onValueChange={setAccordionValue}
-              className="space-y-2"
               type="multiple"
             >
               {collections.map(collection => (
-                <AccordionItem
-                  key={collection.id}
-                  value={collection.id}
-                  className="rounded-lg border-b-0 bg-[hsla(var(--color-neutral),var(--alpha-background-light))]"
-                >
+                <AccordionItem key={collection.id} value={collection.id} className="border-b-0">
                   <AccordionHeader className="flex items-center justify-between">
-                    <AccordionTrigger className="flex-none [&[data-state=open]>svg]:rotate-0 [&_svg]:order-first [&_svg]:mx-2 [&_svg]:-rotate-90">
-                      {collection.name}
-                    </AccordionTrigger>
+                    <AccordionTriggerPrimitive className="group flex w-full flex-row items-center gap-x-3 rounded p-2 text-white hover:bg-gray-100/10">
+                      <FolderIcon className="size-4 group-[&[data-state=open]]:hidden" />
+                      <FolderOpenIcon className="size-4 group-[&[data-state=closed]]:hidden" />
+                      <div className="font-medium">{collection.name}</div>
+                    </AccordionTriggerPrimitive>
                     {shouldShowMenu ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger aria-label="More" className="graphiql-toolbar-button">
@@ -538,7 +539,7 @@ function useOperationCollectionsPlugin(props: {
                       </DropdownMenu>
                     ) : null}
                   </AccordionHeader>
-                  <AccordionContent className="pb-2 pl-2">
+                  <AccordionContent className="space-y-0 pb-2 pl-2">
                     {collection.operations.edges.length ? (
                       collection.operations.edges.map(({ node }) => (
                         <CollectionItem

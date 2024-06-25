@@ -16,11 +16,13 @@ const AccordionItem = React.forwardRef<
 ));
 AccordionItem.displayName = 'AccordionItem';
 
+const AccordionTriggerPrimitive = AccordionPrimitive.Trigger;
+
 const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Trigger
+  <AccordionTriggerPrimitive
     ref={ref}
     className={cn(
       'flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180',
@@ -30,7 +32,7 @@ const AccordionTrigger = React.forwardRef<
   >
     {children}
     <ChevronDown className="size-4 shrink-0 transition-transform duration-200" />
-  </AccordionPrimitive.Trigger>
+  </AccordionTriggerPrimitive>
 ));
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
@@ -49,4 +51,11 @@ const AccordionContent = React.forwardRef<
 
 AccordionContent.displayName = AccordionPrimitive.Content.displayName;
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionHeader };
+export {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionTriggerPrimitive,
+  AccordionContent,
+  AccordionHeader,
+};
