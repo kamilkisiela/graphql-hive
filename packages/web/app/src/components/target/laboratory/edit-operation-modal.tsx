@@ -114,21 +114,13 @@ export const EditOperationModal = (props: {
             <div className="text-sm text-red-500">{updateOperationNameState.error.message}</div>
           )}
 
-          <div className="flex w-full gap-2">
-            <Button
-              type="button"
-              size="lg"
-              className="w-full justify-center"
-              onClick={() => {
-                close();
-              }}
-            >
+          <div className="grid grid-cols-2 gap-2">
+            <Button type="button" size="lg" onClick={props.close}>
               Cancel
             </Button>
             <Button
               type="submit"
               size="lg"
-              className="w-full justify-center"
               variant="primary"
               disabled={isSubmitting || !isValid}
               data-cy="confirm"

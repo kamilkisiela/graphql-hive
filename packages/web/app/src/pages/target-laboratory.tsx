@@ -199,7 +199,7 @@ const CollectionItem = (props: {
         }}
         className={cn(
           'flex w-full items-center justify-between rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
-          operationIdFromSearch === props.node.id && 'text-white',
+          operationIdFromSearch === props.node.id && 'bg-gray-100/10 text-white',
         )}
       >
         <div className="flex items-center gap-x-3">
@@ -417,7 +417,7 @@ function useOperationCollectionsPlugin(props: {
           input: {
             collectionId,
             name: 'New Operation',
-            query: '{}',
+            query: '{\n  \n}',
             headers: '',
             variables: '',
           },
@@ -461,7 +461,7 @@ function useOperationCollectionsPlugin(props: {
 
       return (
         <>
-          <div className="mb-5 flex justify-between">
+          <div className="mb-5 flex justify-between gap-1">
             <Title>Operations</Title>
             <TooltipProvider>
               <Tooltip>
@@ -469,7 +469,10 @@ function useOperationCollectionsPlugin(props: {
                   <Button
                     variant="orangeLink"
                     size="icon-sm"
-                    className="flex w-auto items-center gap-1"
+                    className={clsx(
+                      'flex w-auto items-center gap-1',
+                      'min-w-0', // trick to make work truncate
+                    )}
                     onClick={() => {
                       if (collectionId) {
                         setCollectionId('');
@@ -477,7 +480,8 @@ function useOperationCollectionsPlugin(props: {
                       toggleCollectionModal();
                     }}
                   >
-                    <PlusIcon className="size-4 shrink-0" /> New collection
+                    <PlusIcon className="size-4 shrink-0" />
+                    <span className="truncate">New collection</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Create a new collection of GraphQL Operations</TooltipContent>
@@ -499,10 +503,10 @@ function useOperationCollectionsPlugin(props: {
               {collections.map(collection => (
                 <AccordionItem key={collection.id} value={collection.id} className="border-b-0">
                   <AccordionHeader className="flex items-center justify-between">
-                    <AccordionTriggerPrimitive className="group flex w-full flex-row items-center gap-x-3 rounded p-2 text-white hover:bg-gray-100/10">
-                      <FolderIcon className="size-4 group-[&[data-state=open]]:hidden" />
-                      <FolderOpenIcon className="size-4 group-[&[data-state=closed]]:hidden" />
-                      <div className="font-medium">{collection.name}</div>
+                    <AccordionTriggerPrimitive className="group flex w-full items-center gap-x-3 rounded p-2 font-medium text-white hover:bg-gray-100/10">
+                      <FolderIcon className="group-radix-state-open:hidden size-4" />
+                      <FolderOpenIcon className="group-radix-state-closed:hidden size-4" />
+                      {collection.name}
                     </AccordionTriggerPrimitive>
                     {shouldShowMenu ? (
                       <DropdownMenu>
@@ -607,7 +611,7 @@ function useOperationCollectionsPlugin(props: {
             toggleModalOpen={toggleDeleteCollectionModalOpen}
             collectionId={collectionId}
           />
-          {operationToDeleteId !== null && (
+          {operationToDeleteId && (
             <DeleteOperationModal
               organizationId={props.organizationId}
               projectId={props.projectId}
@@ -616,12 +620,11 @@ function useOperationCollectionsPlugin(props: {
               operationId={operationToDeleteId}
             />
           )}
-          {operationToEditId !== null && (
+          {operationToEditId && (
             <EditOperationModal
               organizationId={props.organizationId}
               projectId={props.projectId}
               targetId={props.targetId}
-              key={operationToEditId}
               operationId={operationToEditId}
               close={() => setOperationToEditId(null)}
             />
@@ -1069,8 +1072,8 @@ function LaboratoryPageContent(props: {
 
         .graphiql-container .graphiql-logo {
           width: 100%;
-          display: flex;
-          align-items: center;
+          position: relative;
+          padding: 12px 16px 0 16px;
         }
 
         .graphiql-container .graphiql-session-header {
@@ -1125,7 +1128,7 @@ function LaboratoryPageContent(props: {
               <Button
                 onClick={() => setIsFullScreen(prev => !prev)}
                 variant="outline"
-                className="ml-auto h-auto gap-2"
+                className="absolute right-3 top-3 gap-2"
               >
                 <FullScreenComponent className="size-4" />
                 {isFullScreen ? 'Exit' : 'Enter'} Full Screen
