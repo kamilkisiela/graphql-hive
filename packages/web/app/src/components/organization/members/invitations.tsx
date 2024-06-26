@@ -36,6 +36,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useClipboard } from '@/lib/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from '@tanstack/react-router';
 import { RoleSelector } from './common';
 
 const MemberInvitationForm_InviteByEmail = graphql(`
@@ -245,7 +246,8 @@ export function MemberInvitationButton(props: {
   organization: FragmentType<typeof MemberInvitationForm_OrganizationFragment>;
   refetchInvitations(): void;
 }) {
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const [open, setOpen] = useState(router.latestLocation.hash === 'invite');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
