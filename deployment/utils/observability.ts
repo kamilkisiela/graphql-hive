@@ -111,7 +111,7 @@ export class Observability {
             },
           },
           logging: {
-            verbosity: 'detailed',
+            verbosity: 'basic',
           },
           prometheusremotewrite: {
             endpoint: interpolate`https://${this.config.prom.username}:${this.config.prom.password}@${this.config.prom.endpoint}`,
