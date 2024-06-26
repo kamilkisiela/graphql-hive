@@ -43,6 +43,7 @@ import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
+import { explorerPlugin } from '@graphiql/plugin-explorer';
 import {
   UnStyledButton as GraphiQLButton,
   GraphiQLPlugin,
@@ -59,6 +60,18 @@ import {
 import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
 import 'graphiql/graphiql.css';
+import '@graphiql/plugin-explorer/dist/style.css';
+
+const explorer = explorerPlugin({
+  hideActions: true,
+  styles: {
+    actionButtonStyle: {
+      fontSize: 22,
+      lineHeight: 0,
+      marginLeft: 6,
+    },
+  },
+});
 
 function Share({ operation }: { operation: string | null }): ReactElement | null {
   const label = 'Share query';
@@ -1073,7 +1086,6 @@ function LaboratoryPageContent(props: {
         .graphiql-container .graphiql-logo {
           width: 100%;
           position: relative;
-          padding: 12px 16px 0 16px;
         }
 
         .graphiql-container .graphiql-session-header {
@@ -1113,7 +1125,7 @@ function LaboratoryPageContent(props: {
             }}
             showPersistHeadersSettings={false}
             shouldPersistHeaders={false}
-            plugins={[operationCollectionsPlugin]}
+            plugins={[explorer, operationCollectionsPlugin]}
             visiblePlugin={operationCollectionsPlugin}
             schema={schema}
             forcedTheme="dark"
