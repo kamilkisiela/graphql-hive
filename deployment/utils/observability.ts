@@ -23,7 +23,7 @@ export type ObservabilityConfig = {
 };
 
 // prettier-ignore
-export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.96.0');
+export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.54.1');
 // prettier-ignore
 export const VECTOR_HELM_CHART = helmChart('https://helm.vector.dev', 'vector', '0.34.0');
 
@@ -43,9 +43,6 @@ export class Observability {
 
     // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
     const chartValues: OpenTelemetryCollectorValues = {
-      image: {
-        repository: 'otel/opentelemetry-collector-contrib',
-      },
       mode: 'deployment',
       replicaCount: 1,
       resources: {
