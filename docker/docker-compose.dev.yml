@@ -3,6 +3,7 @@ name: 'hive-dev'
 services:
   db:
     image: postgres:14.12-alpine
+    user: '${UID}:${GID}'
     networks:
       - 'stack'
     healthcheck:
@@ -22,6 +23,7 @@ services:
 
   redis:
     image: bitnami/redis:7.2.5
+    user: '${UID}:${GID}'
     networks:
       - 'stack'
     healthcheck:

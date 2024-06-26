@@ -1943,7 +1943,8 @@ export class SchemaPublisher {
             tags: null,
           }),
     });
-
+    console.log('schemaVersion', schemaVersion);
+    console.log('changes', changes);
     if (changes.length > 0 || errors.length > 0) {
       void this.alertsManager
         .triggerSchemaChangeNotifications({
