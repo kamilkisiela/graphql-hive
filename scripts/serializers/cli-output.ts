@@ -9,7 +9,7 @@ export function normalizeCliOutput(value: string) {
         .replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '')
         .replace(
           /(http:\/\/localhost:\d+)\/([^\/]+)\/([^\/]+)\/([^\/]+)/,
-          '$1/$organization/$project/$target',
+          '$appUrl/$organization/$project/$target',
         )
         .replace(/history\/[$]*\w+-\w+-\w+-\w+-\w+/i, 'history/$version')
         .trim(),

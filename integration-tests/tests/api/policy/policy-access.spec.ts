@@ -19,7 +19,7 @@ describe('Policy Access', () => {
 
     test.concurrent(
       'should successfully fetch Target.schemaPolicy if the user has access to SETTINGS',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, createProject, inviteAndJoinMember } = await createOrg();
         const { project, target } = await createProject(ProjectType.Single);
@@ -53,7 +53,7 @@ describe('Policy Access', () => {
 
     test.concurrent(
       'should fail to fetch Target.schemaPolicy if the user lacks access to SETTINGS',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, createProject, inviteAndJoinMember } = await createOrg();
         const { project, target } = await createProject(ProjectType.Single);
@@ -87,7 +87,7 @@ describe('Policy Access', () => {
 
     test.concurrent(
       'should successfully fetch Project.schemaPolicy if the user has access to SETTINGS',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, createProject, inviteAndJoinMember } = await createOrg();
         const { project } = await createProject(ProjectType.Single);
@@ -120,7 +120,7 @@ describe('Policy Access', () => {
 
     test.concurrent(
       'should fail to fetch Project.schemaPolicy if the user lacks access to SETTINGS',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, createProject, inviteAndJoinMember } = await createOrg();
         const { project, target } = await createProject(ProjectType.Single);
@@ -154,7 +154,7 @@ describe('Policy Access', () => {
     `);
     test.concurrent(
       'should successfully fetch Organization.schemaPolicy if the user has access to SETTINGS',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, inviteAndJoinMember } = await createOrg();
         const adminRole = organization.memberRoles.find(r => r.name === 'Admin');
@@ -185,7 +185,7 @@ describe('Policy Access', () => {
 
     test.concurrent(
       'should fail to fetch Organization.schemaPolicy if the user lacks access to SETTINGS',
-      async () => {
+      async ({ expect }) => {
         const { createOrg } = await initSeed().createOwner();
         const { organization, inviteAndJoinMember } = await createOrg();
         const { memberToken } = await inviteAndJoinMember();

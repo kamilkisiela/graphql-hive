@@ -92,6 +92,20 @@
       "open": true,
       "cwd": "packages/services/usage-ingestor",
       "command": "pnpm dev"
+    },
+    {
+      "name": "external-composition:dev",
+      "description": "Run External Composition example",
+      "open": true,
+      "cwd": "packages/libraries/external-composition/",
+      "command": "pnpm example"
+    },
+    {
+      "name": "external-composition-fed2:dev",
+      "description": "Run External Composition for Federation 2",
+      "open": true,
+      "cwd": "packages/services/external-composition/federation-2",
+      "command": "pnpm dev"
     }
   ]
 }
