@@ -14,25 +14,22 @@ the following schema:
 
 ```sql
 CREATE TABLE audit_log (
-  event_time DateTime DEFAULT now(),
+  timestamp DateTime('UTC') CODEC(DoubleDelta, LZ4),
   user_id UUID,
   user_email STRING,
   organization_id UUID,
-  project_id UUID,
+  project_id LowCardinality(String)  CODEC(ZSTD(1)),
   project_name STRING,
   target_id UUID,
   target_name STRING,
   schema_version_id UUID,
-  event_action STRING NOT NULL,
+  event_action LowCardinality(String) CODEC(ZSTD(1)),
   event_details JSON,
   INDEX idx_user_id user_id TYPE set(0) GRANULARITY 64,
   INDEX idx_user_email user_email TYPE set(0) GRANULARITY 64,
-  INDEX idx_organization_id organization_id TYPE set(0) GRANULARITY 64,
-  INDEX idx_project_id project_id TYPE set(0) GRANULARITY 64,
-  INDEX idx_target_id target_id TYPE set(0) GRANULARITY 64,
 ) ENGINE = MergeTree ()
-ORDER BY event_time
-TTL timestamp + INTERVAL 3 MONTH;
+ORDER BY (timestamp, organization_id, project_id, target_id)
+TTL timestamp + INTERVAL 2 YEAR;  
 ```
 Data in clickhouse would be append only. We would never manually delete them, we would rely on TTL removing old rows after X months
 Of course we could make the interval configurable if necessary.
@@ -44,12 +41,15 @@ const { createClient } = require('@clickhouse/client');
 const clickhouse = createClient()
 
 type AuditLogEvent = {
-  userId?: string | null;
+  user?: {
+    id: string;
+    email: string;
+  };
   organizationId?: string | null;
   projectId?: string | null;
   targetId?: string | null;
   schemaVersionId?: string | null;
-  eventAction: string;
+  eventAction: AuditLogEventAction;
   details: Record<string, any>;
 }
 
@@ -58,17 +58,22 @@ type AuditLogEvent = {
   global: true,
 })
 export class AuditLog {
+  constructor(
+    private clickHouse: ClickHouse,
+    private logger: Logger,
+  ) {}
+
   logAuditEvent (event: AuditLogEvent) {
-    const { userId, organizationId, projectId, targetId, schemaVersionId, eventAction, details } = event;
-    const userEmail = userId ? await getUserEmail(userId) : null; // get user email would be cached in redis for 10 minutes to avoid hitting the DB too often
+    const startTime = Date.now();
+    const { user, organizationId, projectId, targetId, schemaVersionId, eventAction, details } = event;
 
     const query = `
       INSERT INTO audit_log (user_id, user_email, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_action, event_details)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    return clickhouse.query(query, [
-      userId,
-      userEmail,
+    const insertResult = this.clickHouse.query(query, [
+      userId: user.id,
+      userEmail: user.email,
       organizationId,
       projectId,
       targetId,
@@ -77,6 +82,8 @@ export class AuditLog {
       eventAction,
       JSON.stringify(details),
     ])
+    auditLogTimingMetric.inc(startTime - Date.now());
+    return insertResult;
   };
 }
 
@@ -105,7 +112,7 @@ Left column shows the event action name, right column shows a human readable exa
 | ROLE_CREATED                   | Admin **admin@acme.com** created a new role **SAMPLE_ROLE**.                                              |
 | ROLE_ASSIGNED                  | Admin **admin@acme.com** assigned a new role to user **john@acme.com**.                                   |
 | USER_REMOVED                   | Admin **admin@acme.com** removed user **john@acme.com**.                                                  |
-| ORG_TRANSFERRED                | Admin **admin@acme.com** transferred ownership.                                                           |
+| ORGANIZATION_TRANSFERRED       | Admin **admin@acme.com** transferred ownership to **admin2@acme.com**.                                    |
 | SCHEMA_CHECKED                 | CI made a schema check for **Project Alpha**.                                                             |
 | SCHEMA_PUBLISH                 | User **john@acme.com** published a new schema version for **Project Alpha**.                              |
 | SCHEMA_DELETED                 | Hive background job deleted old schema.                                                                   |
