@@ -195,7 +195,7 @@ export class AlertsManager {
 
     const integrations: SchemaChangeNotificationInput['integrations'] = {
       slack: {
-        token: slackToken!,
+        token: slackToken,
       },
     };
 
@@ -271,6 +271,9 @@ export class AlertsManager {
         project: project.id,
         context: IntegrationsAccessContext.ChannelConfirmation,
       });
+      if (!slackToken) {
+        throw new Error(`Slack token was not found for channel "${channel.id}"`);
+      }
 
       await this.slack.sendChannelConfirmation({
         event: {
@@ -289,7 +292,7 @@ export class AlertsManager {
         channel,
         integrations: {
           slack: {
-            token: slackToken!,
+            token: slackToken,
           },
         },
       });
