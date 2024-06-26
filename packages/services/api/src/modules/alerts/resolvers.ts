@@ -217,4 +217,13 @@ export const resolvers: AlertsModule.Resolvers = {
       return channel.webhookEndpoint!;
     },
   },
+  TeamsWebhookChannel: {
+    __isTypeOf(channel) {
+      return channel.type === 'MSTEAMS_WEBHOOK';
+    },
+    endpoint(channel) {
+      // @ts-expect-error TODO not sure where this type is coming from
+      return channel.webhookEndpoint!;
+    },
+  },
 };

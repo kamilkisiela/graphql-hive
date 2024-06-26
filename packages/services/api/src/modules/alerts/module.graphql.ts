@@ -141,6 +141,13 @@ export default gql`
     endpoint: String!
   }
 
+  type TeamsWebhookChannel implements AlertChannel {
+    id: ID!
+    name: String!
+    type: AlertChannelType!
+    endpoint: String!
+  }
+
   type Alert {
     id: ID!
     type: AlertType!
