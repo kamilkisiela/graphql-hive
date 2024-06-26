@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { scopes } from '@/lib/access/common';
 
 const ChangePermissionsModal_OrganizationFragment = graphql(`
@@ -51,9 +52,31 @@ export function ChangePermissionsModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <ChangePermissionsModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      manager={manager}
+      initialScopes={initialScopes}
+      onSubmit={() => manager.submit}
+    />
+  );
+}
+
+export const ChangePermissionsModalContent = (props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  manager: ReturnType<typeof usePermissionsManager>;
+  onSubmit: () => void;
+  initialScopes: {
+    organization: OrganizationAccessScope[];
+    project: ProjectAccessScope[];
+    target: TargetAccessScope[];
+  };
+}): ReactElement => {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="w-[600px]">
-        <form className="flex w-full flex-col items-center gap-5" onSubmit={manager.submit}>
+        <form className="flex w-full flex-col items-center gap-5" onSubmit={props.manager.submit}>
           <DialogHeader>
             <DialogTitle>Permissions (legacy)</DialogTitle>
           </DialogHeader>
@@ -66,26 +89,26 @@ export function ChangePermissionsModal({
             <PermissionsSpace
               title="Organization"
               scopes={scopes.organization}
-              initialScopes={initialScopes.organization}
-              selectedScopes={manager.organizationScopes}
-              onChange={manager.setOrganizationScopes}
-              checkAccess={manager.canAccessOrganization}
+              initialScopes={props.initialScopes.organization}
+              selectedScopes={props.manager.organizationScopes}
+              onChange={props.manager.setOrganizationScopes}
+              checkAccess={props.manager.canAccessOrganization}
             />
             <PermissionsSpace
               title="Projects"
               scopes={scopes.project}
-              initialScopes={initialScopes.project}
-              selectedScopes={manager.projectScopes}
-              onChange={manager.setProjectScopes}
-              checkAccess={manager.canAccessProject}
+              initialScopes={props.initialScopes.project}
+              selectedScopes={props.manager.projectScopes}
+              onChange={props.manager.setProjectScopes}
+              checkAccess={props.manager.canAccessProject}
             />
             <PermissionsSpace
               title="Targets"
               scopes={scopes.target}
-              initialScopes={initialScopes.target}
-              selectedScopes={manager.targetScopes}
-              onChange={manager.setTargetScopes}
-              checkAccess={manager.canAccessTarget}
+              initialScopes={props.initialScopes.target}
+              selectedScopes={props.manager.targetScopes}
+              onChange={props.manager.setTargetScopes}
+              checkAccess={props.manager.canAccessTarget}
             />
           </Tabs>
           <DialogFooter className="flex w-full gap-2">
@@ -93,7 +116,7 @@ export function ChangePermissionsModal({
               type="button"
               size="lg"
               className="w-full justify-center"
-              onClick={toggleModalOpen}
+              onClick={props.toggleModalOpen}
             >
               Cancel
             </Button>
@@ -105,4 +128,4 @@ export function ChangePermissionsModal({
       </DialogContent>
     </Dialog>
   );
-}
+};
