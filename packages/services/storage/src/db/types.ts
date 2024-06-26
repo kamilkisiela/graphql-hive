@@ -7,7 +7,7 @@
  *
  */
 
-export type alert_channel_type = 'SLACK' | 'WEBHOOK';
+export type alert_channel_type = 'MSTEAMS_WEBHOOK' | 'SLACK' | 'WEBHOOK';
 export type alert_type = 'SCHEMA_CHANGE_NOTIFICATIONS';
 export type schema_policy_resource = 'ORGANIZATION' | 'PROJECT';
 export type user_role = 'ADMIN' | 'MEMBER';

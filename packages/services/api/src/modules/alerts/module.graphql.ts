@@ -16,6 +16,7 @@ export default gql`
   enum AlertChannelType {
     SLACK
     WEBHOOK
+    MSTEAMS_WEBHOOK
   }
 
   enum AlertType {
