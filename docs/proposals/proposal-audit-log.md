@@ -168,7 +168,7 @@ Graphql Schema to support a UI with these filters looks like this:
     event_time: Date!
     user_id: String
     user_email: String
-    organization_id: String
+    organization_id: String!
     project_id: String
     project_name: String
     target_id: String
@@ -258,7 +258,7 @@ CREATE TABLE audit_log_export (
   id UUID PRIMARY KEY,
   url TEXT,
   filters JSON,
-  valid_until TIMESTAMP WITH TIME ZONE,
+  expires_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
