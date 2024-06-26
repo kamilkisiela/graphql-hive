@@ -143,5 +143,4 @@ deployment/utils/contour.types.ts
 schema.graphql
 resolvers.generated.ts
 
-
 docker/docker-compose.override.yml
