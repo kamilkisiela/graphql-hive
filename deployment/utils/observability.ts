@@ -255,7 +255,7 @@ export class Observability {
                       ],
                       action: 'replace',
                       regex: '([^:]+)(?::d+)?;(d+)',
-                      replacement: '$1:$2',
+                      replacement: '${1}:${2}',
                       target_label: '__address__',
                     },
                     {
