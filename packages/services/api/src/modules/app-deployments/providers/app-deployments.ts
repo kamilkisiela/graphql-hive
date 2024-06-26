@@ -2,6 +2,12 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import { sql, UniqueIntegrityConstraintViolationError, type DatabasePool } from 'slonik';
 import { z } from 'zod';
 import { buildAppDeploymentIsEnabledKey } from '@hive/cdn-script/artifact-storage-reader';
+import {
+  decodeCreatedAtAndUUIDIdBasedCursor,
+  decodeHashBasedCursor,
+  encodeCreatedAtAndUUIDIdBasedCursor,
+  encodeHashBasedCursor,
+} from '@hive/storage';
 import { ClickHouse, sql as cSql } from '../../operations/providers/clickhouse-client';
 import { SchemaVersionHelper } from '../../schema/providers/schema-version-helper';
 import { Logger } from '../../shared/providers/logger';
@@ -576,6 +582,139 @@ export class AppDeployments {
       appDeployment: updatedAppDeployment,
     };
   }
+
+  async getPaginatedAppDeployments(args: {
+    targetId: string;
+    cursor: string | null;
+    first: number | null;
+  }) {
+    const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+    const cursor = args.cursor ? decodeCreatedAtAndUUIDIdBasedCursor(args.cursor) : null;
+
+    const result = await this.pool.query<unknown>(sql`
+      SELECT
+        ${appDeploymentFields}
+      FROM
+        "app_deployments"
+      WHERE
+        "target_id" = ${args.targetId}
+        ${
+          cursor
+            ? sql`
+                AND (
+                  (
+                    "created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+            : sql``
+        }
+      ORDER BY "created_at" DESC, "id"
+      LIMIT ${limit + 1}
+    `);
+
+    let items = result.rows.map(row => {
+      const node = AppDeploymentModel.parse(row);
+
+      return {
+        cursor: encodeCreatedAtAndUUIDIdBasedCursor(node),
+        node,
+      };
+    });
+
+    const hasNextPage = items.length > limit;
+
+    items = items.slice(0, limit);
+
+    return {
+      edges: items,
+      pageInfo: {
+        hasNextPage,
+        hasPreviousPage: cursor !== null,
+        endCursor: items[items.length - 1]?.cursor ?? '',
+        startCursor: items[0]?.cursor ?? '',
+      },
+    };
+  }
+
+  async getPaginatedGraphQLDocuments(args: {
+    appDeploymentId: string;
+    cursor: string | null;
+    first: number | null;
+  }) {
+    const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+    const cursor = args.cursor ? decodeHashBasedCursor(args.cursor) : null;
+    const result = await this.clickhouse.query({
+      query: cSql`
+        SELECT
+          "document_hash" AS "hash"
+          , "document_body" AS "body"
+          , "operation_names" AS "operationNames"
+        FROM
+          "app_deployment_documents"
+        WHERE
+          "app_deployment_id" = ${args.appDeploymentId}
+          ${cursor?.id ? cSql`AND "document_hash" > ${cursor.id}` : cSql``}
+        ORDER BY "app_deployment_id", "document_hash"
+        LIMIT 1 BY "app_deployment_id", "document_hash"
+        LIMIT ${cSql.raw(String(limit + 1))}
+      `,
+      queryId: 'get-paginated-graphql-documents',
+      timeout: 20_000,
+    });
+
+    let items = result.data.map(row => {
+      const node = GraphQLDocumentModel.parse(row);
+
+      return {
+        cursor: encodeHashBasedCursor({ id: node.hash }),
+        node,
+      };
+    });
+
+    const hasNextPage = items.length > limit;
+
+    items = items.slice(0, limit);
+
+    return {
+      edges: items,
+      pageInfo: {
+        hasNextPage,
+        hasPreviousPage: cursor !== null,
+        endCursor: items[items.length - 1]?.cursor ?? '',
+        startCursor: items[0]?.cursor ?? '',
+      },
+    };
+  }
+
+  async getDocumentCountForAppDeployments(args: { appDeploymentIds: Array<string> }) {
+    const result = await this.clickhouse.query({
+      query: cSql`
+        SELECT
+          "app_deployment_id" AS "appDeploymentId"
+          , count() AS "count"
+        FROM
+          "app_deployment_documents"
+        WHERE
+          "app_deployment_id" IN (${cSql.array(args.appDeploymentIds, 'String')})
+        GROUP BY
+          "app_deployment_id"
+      `,
+      queryId: 'get-document-count-for-app-deployments',
+      timeout: 20_000,
+    });
+
+    const model = z.array(
+      z.object({
+        appDeploymentId: z.string(),
+        count: z.string().transform(str => parseInt(str, 10)),
+      }),
+    );
+
+    return model.parse(result.data);
+  }
 }
 
 const appDeploymentFields = sql`
@@ -614,5 +753,11 @@ const AppDeploymentModel = z.intersection(
     }),
   ]),
 );
+
+const GraphQLDocumentModel = z.object({
+  hash: z.string(),
+  body: z.string(),
+  operationNames: z.array(z.string()).transform(names => (names.length === 0 ? null : names)),
+});
 
 export type AppDeploymentRecord = z.infer<typeof AppDeploymentModel>;

@@ -112,7 +112,6 @@ export class PersistedDocumentIngester {
         };
       }
       let documentNode: DocumentNode;
-      // TODO: error handling
       try {
         documentNode = parse(operation.body);
       } catch (err) {

@@ -5,7 +5,8 @@ export default gql`
     id: ID!
     name: String!
     version: String!
-    operations(first: Int!, after: String): OperationConnection
+    documents(first: Int, after: String): GraphQLDocumentConnection
+    totalDocumentCount: Int!
     status: AppDeploymentStatus!
   }
 
@@ -15,14 +16,20 @@ export default gql`
     retired
   }
 
-  type OperationConnection {
+  type GraphQLDocumentConnection {
     pageInfo: PageInfo!
-    edges: [OperationEdge!]!
+    edges: [GraphQLDocumentEdge!]!
   }
 
-  type OperationEdge {
+  type GraphQLDocumentEdge {
     cursor: String!
-    node: Operation!
+    node: GraphQLDocument!
+  }
+
+  type GraphQLDocument {
+    hash: String!
+    body: String!
+    operationNames: [String!]
   }
 
   type AppDeploymentConnection {
@@ -39,7 +46,7 @@ export default gql`
     """
     The app deployments for this target.
     """
-    appDeployments(first: Int!, after: String): AppDeploymentConnection
+    appDeployments(first: Int, after: String): AppDeploymentConnection
     appDeployment(appName: String!, appVersion: String!): AppDeployment
   }
 

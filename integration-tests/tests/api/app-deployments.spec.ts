@@ -85,6 +85,34 @@ const RetireAppDeployment = graphql(`
   }
 `);
 
+const GetPaginatedPersistedDocuments = graphql(`
+  query GetPaginatedPersistedDocuments(
+    $targetSelector: TargetSelectorInput!
+    $appDeploymentName: String!
+    $appDeploymentVersion: String!
+    $first: Int
+    $cursor: String
+  ) {
+    target(selector: $targetSelector) {
+      appDeployment(appName: $appDeploymentName, appVersion: $appDeploymentVersion) {
+        id
+        documents(first: $first, after: $cursor) {
+          edges {
+            cursor
+            node {
+              hash
+              body
+            }
+          }
+          pageInfo {
+            hasNextPage
+          }
+        }
+      }
+    }
+  }
+`);
+
 test('create app deployment, add operations, publish, access via CDN (happy path)', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, setFeatureFlag } = await createOrg();
@@ -1172,5 +1200,293 @@ test('retire app deployments fails without feature flag enabled for organization
         'This organization has no access to app deployments. Please contact the Hive team for early access.',
     },
     ok: null,
+  });
+});
+
+test('get app deployment documents via GraphQL API', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag, organization } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
+  const { createToken, project, target } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  const { createAppDeployment } = await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(createAppDeployment.error).toBeNull();
+
+  await token.publishSchema({
+    sdl: /* GraphQL */ `
+      type Query {
+        a: String
+        b: String
+        c: String
+        d: String
+      }
+    `,
+  });
+
+  const { addDocumentsToAppDeployment } = await execute({
+    document: AddDocumentsToAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+        documents: [
+          {
+            hash: 'aaa',
+            body: 'query { a }',
+          },
+          {
+            hash: 'bbb',
+            body: 'query { b }',
+          },
+          {
+            hash: 'ccc',
+            body: 'query { c }',
+          },
+          {
+            hash: 'ddd',
+            body: 'query { d }',
+          },
+        ],
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(addDocumentsToAppDeployment.error).toBeNull();
+
+  const result = await execute({
+    document: GetPaginatedPersistedDocuments,
+    variables: {
+      targetSelector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      appDeploymentName: 'app-name',
+      appDeploymentVersion: 'app-version',
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(result.target).toMatchObject({
+    appDeployment: {
+      documents: {
+        edges: [
+          {
+            cursor: 'YWFh',
+            node: {
+              body: 'query { a }',
+              hash: 'aaa',
+            },
+          },
+          {
+            cursor: 'YmJi',
+            node: {
+              body: 'query { b }',
+              hash: 'bbb',
+            },
+          },
+          {
+            cursor: 'Y2Nj',
+            node: {
+              body: 'query { c }',
+              hash: 'ccc',
+            },
+          },
+          {
+            cursor: 'ZGRk',
+            node: {
+              body: 'query { d }',
+              hash: 'ddd',
+            },
+          },
+        ],
+        pageInfo: {
+          hasNextPage: false,
+        },
+      },
+      id: expect.any(String),
+    },
+  });
+});
+
+test('paginate app deployment documents via GraphQL API', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag, organization } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
+  const { createToken, project, target } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  const { createAppDeployment } = await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(createAppDeployment.error).toBeNull();
+
+  await token.publishSchema({
+    sdl: /* GraphQL */ `
+      type Query {
+        a: String
+        b: String
+        c: String
+        d: String
+      }
+    `,
+  });
+
+  const { addDocumentsToAppDeployment } = await execute({
+    document: AddDocumentsToAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+        documents: [
+          {
+            hash: 'aaa',
+            body: 'query { a }',
+          },
+          {
+            hash: 'bbb',
+            body: 'query { b }',
+          },
+          {
+            hash: 'ccc',
+            body: 'query { c }',
+          },
+          {
+            hash: 'ddd',
+            body: 'query { d }',
+          },
+        ],
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(addDocumentsToAppDeployment.error).toBeNull();
+
+  let result = await execute({
+    document: GetPaginatedPersistedDocuments,
+    variables: {
+      targetSelector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      appDeploymentName: 'app-name',
+      appDeploymentVersion: 'app-version',
+      first: 1,
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(result.target).toMatchObject({
+    appDeployment: {
+      documents: {
+        edges: [
+          {
+            cursor: 'YWFh',
+            node: {
+              body: 'query { a }',
+              hash: 'aaa',
+            },
+          },
+        ],
+        pageInfo: {
+          hasNextPage: true,
+        },
+      },
+      id: expect.any(String),
+    },
+  });
+  result = await execute({
+    document: GetPaginatedPersistedDocuments,
+    variables: {
+      targetSelector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      appDeploymentName: 'app-name',
+      appDeploymentVersion: 'app-version',
+      first: 1,
+      cursor: 'YWFh',
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(result.target).toMatchObject({
+    appDeployment: {
+      documents: {
+        edges: [
+          {
+            cursor: 'YmJi',
+            node: {
+              body: 'query { b }',
+              hash: 'bbb',
+            },
+          },
+        ],
+        pageInfo: {
+          hasNextPage: true,
+        },
+      },
+      id: expect.any(String),
+    },
+  });
+  result = await execute({
+    document: GetPaginatedPersistedDocuments,
+    variables: {
+      targetSelector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      appDeploymentName: 'app-name',
+      appDeploymentVersion: 'app-version',
+      cursor: 'YmJi',
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(result.target).toMatchObject({
+    appDeployment: {
+      documents: {
+        edges: [
+          {
+            cursor: 'Y2Nj',
+            node: {
+              body: 'query { c }',
+              hash: 'ccc',
+            },
+          },
+          {
+            cursor: 'ZGRk',
+            node: {
+              body: 'query { d }',
+              hash: 'ddd',
+            },
+          },
+        ],
+        pageInfo: {
+          hasNextPage: false,
+        },
+      },
+      id: expect.any(String),
+    },
   });
 });

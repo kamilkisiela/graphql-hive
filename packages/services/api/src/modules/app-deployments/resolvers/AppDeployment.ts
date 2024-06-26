@@ -12,10 +12,18 @@ import type { AppDeploymentResolvers } from './../../../__generated__/types.next
  */
 export const AppDeployment: AppDeploymentResolvers = {
   /* Implement AppDeployment resolver logic here */
-  operations: async (_parent, _arg, _ctx) => {
-    throw new Error('TO BE IMPLEMENTED');
-  },
   status: async (appDeployment, _arg, { injector }) => {
     return injector.get(AppDeploymentsManager).getStatusForAppDeployment(appDeployment);
+  },
+  documents: async (appDeployment, args, { injector }) => {
+    return injector
+      .get(AppDeploymentsManager)
+      .getPaginatedDocumentsForAppDeployment(appDeployment, {
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+  },
+  totalDocumentCount: async (appDeployment, _, { injector }) => {
+    return injector.get(AppDeploymentsManager).getDocumentCountForAppDeployment(appDeployment);
   },
 };

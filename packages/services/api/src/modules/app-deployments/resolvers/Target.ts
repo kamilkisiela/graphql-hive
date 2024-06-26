@@ -18,7 +18,10 @@ export const Target: Pick<TargetResolvers, 'appDeployment' | 'appDeployments'> =
       version: args.appVersion,
     });
   },
-  appDeployments: async (_target, _args, _ctx) => {
-    throw new Error('TO BE IMPLEMENTED');
+  appDeployments: async (target, args, { injector }) => {
+    return injector.get(AppDeploymentsManager).getPaginatedAppDeploymentsForTarget(target, {
+      cursor: args.after ?? null,
+      first: args.first ?? null,
+    });
   },
 };

@@ -1,4 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { batch } from '@theguild/buddy';
 import { Target } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/scopes';
@@ -162,4 +163,49 @@ export class AppDeploymentsManager {
       appDeployment: args.appDeployment,
     });
   }
+
+  async getPaginatedDocumentsForAppDeployment(
+    appDeployment: AppDeploymentRecord,
+    args: {
+      cursor: string | null;
+      first: number | null;
+    },
+  ) {
+    return await this.appDeployments.getPaginatedGraphQLDocuments({
+      appDeploymentId: appDeployment.id,
+      cursor: args.cursor,
+      first: args.first,
+    });
+  }
+
+  async getPaginatedAppDeploymentsForTarget(
+    target: Target,
+    args: { cursor: string | null; first: number | null },
+  ) {
+    await this.auth.ensureTargetAccess({
+      organization: target.orgId,
+      project: target.projectId,
+      target: target.id,
+      scope: TargetAccessScope.READ,
+    });
+
+    return await this.appDeployments.getPaginatedAppDeployments({
+      targetId: target.id,
+      cursor: args.cursor,
+      first: args.first,
+    });
+  }
+
+  getDocumentCountForAppDeployment = batch<AppDeploymentRecord, number>(async args => {
+    const appDeploymentIds = args.map(appDeployment => appDeployment.id);
+    const counts = await this.appDeployments.getDocumentCountForAppDeployments({
+      appDeploymentIds,
+    });
+    const countMap = new Map<string, number>();
+    for (const count of counts) {
+      countMap.set(count.appDeploymentId, count.count);
+    }
+
+    return appDeploymentIds.map(id => Promise.resolve(countMap.get(id) ?? 0));
+  });
 }
