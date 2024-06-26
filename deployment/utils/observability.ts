@@ -43,6 +43,9 @@ export class Observability {
 
     // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
     const chartValues: OpenTelemetryCollectorValues = {
+      image: {
+        repository: 'otel/opentelemetry-collector-contrib',
+      },
       mode: 'deployment',
       replicaCount: 1,
       resources: {
