@@ -272,19 +272,10 @@ function Feature(props: {
                         </p>
                       </div>
                       <div
-                        className="mt-10 w-[45rem] rounded-lg sm:w-auto lg:mt-0 lg:w-[67.8125rem]"
+                        className="mt-10 w-[45rem] rounded-lg p-4 sm:w-auto lg:mt-0 lg:w-[67.8125rem] lg:p-12"
                         style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
                       >
-                        <div className="p-4 lg:p-12">
-                          <div className="overflow-hidden rounded-xl">
-                            <Image
-                              {...highlight.image}
-                              className="w-full"
-                              style={{ color: 'transparent' }}
-                              alt={title}
-                            />
-                          </div>
-                        </div>
+                        <Image src={highlight.image} className="rounded-xl" alt={title} />
                       </div>
                     </div>
                   ))}

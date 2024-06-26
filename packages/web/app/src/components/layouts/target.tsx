@@ -119,7 +119,7 @@ export const TargetLayout = ({
   return (
     <>
       <header>
-        <div className="container flex h-[84px] items-center justify-between">
+        <div className="container flex h-[--header-height] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             <TargetSelector
@@ -143,7 +143,7 @@ export const TargetLayout = ({
         <ProjectMigrationToast orgId={orgId} projectId={projectId} />
       ) : null}
 
-      <div className="relative border-b border-gray-800">
+      <div className="relative h-[--tabs-navbar-height] border-b border-gray-800">
         <div className="container flex items-center justify-between">
           {currentOrganization && currentProject && currentTarget ? (
             <Tabs className="flex h-full grow flex-col" value={page}>
@@ -269,11 +269,7 @@ export const TargetLayout = ({
           ) : null}
         </div>
       </div>
-      <div className="container h-full pb-7">
-        <div className={cn('flex h-full justify-between gap-12', className)}>
-          <div className="flex grow flex-col">{children}</div>
-        </div>
-      </div>
+      <div className={cn('container pb-7', className)}>{children}</div>
     </>
   );
 };
