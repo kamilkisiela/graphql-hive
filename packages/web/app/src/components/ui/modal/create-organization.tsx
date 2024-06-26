@@ -1,4 +1,5 @@
-import { useForm } from 'react-hook-form';
+import { ReactElement } from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -103,9 +104,16 @@ export const CreateOrganizationForm = () => {
     }
   }
 
+  return <CreateOrganizationFormContent form={form} onSubmit={() => onSubmit(form.getValues())} />;
+};
+
+export const CreateOrganizationFormContent = (props: {
+  onSubmit: () => void;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+}): ReactElement => {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-black">
+    <Form {...props.form}>
+      <form className="bg-black" onSubmit={props.form.handleSubmit(props.onSubmit)}>
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Create an organization</CardTitle>
@@ -116,7 +124,7 @@ export const CreateOrganizationForm = () => {
           </CardHeader>
           <CardContent>
             <FormField
-              control={form.control}
+              control={props.form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
@@ -134,10 +142,12 @@ export const CreateOrganizationForm = () => {
               className="w-full"
               variant="default"
               disabled={
-                form.formState.isSubmitting || !form.formState.isValid || form.formState.disabled
+                props.form.formState.isSubmitting ||
+                !props.form.formState.isValid ||
+                props.form.formState.disabled
               }
             >
-              {form.formState.isSubmitting ? (
+              {props.form.formState.isSubmitting ? (
                 <>
                   <Spinner className="size-6 text-black" />
                   <span className="ml-4">Creating...</span>

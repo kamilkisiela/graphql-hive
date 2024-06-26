@@ -1,4 +1,5 @@
-import { useForm } from 'react-hook-form';
+import { ReactElement } from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -105,10 +106,26 @@ export const CreateTargetModal = (props: {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <CreateTargetModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      onSubmit={() => onSubmit(form.getValues())}
+      form={form}
+    />
+  );
+};
+
+export const CreateTargetModalContent = (props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  onSubmit: () => void;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+}): ReactElement => {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="absolute w-[600px] max-w-none">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
             <DialogHeader>
               <DialogTitle>Create a new target</DialogTitle>
               <DialogDescription>
@@ -117,7 +134,7 @@ export const CreateTargetModal = (props: {
             </DialogHeader>
             <div className="space-y-8">
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="name"
                 render={({ field }) => {
                   return (
@@ -135,9 +152,9 @@ export const CreateTargetModal = (props: {
               <Button
                 className="w-full"
                 type="submit"
-                disabled={form.formState.isSubmitting || !form.formState.isValid}
+                disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
               >
-                {form.formState.isSubmitting ? 'Submitting...' : 'Create Target'}
+                {props.form.formState.isSubmitting ? 'Submitting...' : 'Create Target'}
               </Button>
             </DialogFooter>
           </form>

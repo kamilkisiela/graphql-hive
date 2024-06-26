@@ -42,44 +42,71 @@ export function LeaveOrganizationModal({
   const [, mutate] = useMutation(LeaveOrganizationModal_LeaveOrganizationMutation);
   const notify = useNotifications();
 
+  async function onSubmit() {
+    const result = await mutate({
+      input: {
+        organization: organizationId,
+      },
+    });
+
+    if (result.error) {
+      notify("Couldn't leave organization. Please try again.", 'error');
+    }
+
+    if (result.data?.leaveOrganization.error) {
+      notify(result.data.leaveOrganization.error.message, 'error');
+    }
+
+    if (result.data?.leaveOrganization.ok) {
+      toggleModalOpen();
+      cookies.remove(LAST_VISITED_ORG_KEY);
+      window.location.href = '/';
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <LeaveOrganizationModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      organizationName={organizationName}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+export const LeaveOrganizationModalContent = (props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationName: string;
+  onSubmit: () => void;
+}): ReactElement => {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="flex flex-col items-center gap-5">
         <DialogHeader>
           <FaUsersSlash className="h-16 w-auto text-red-500 opacity-70" />
-          <DialogTitle>Leave {organizationName}?</DialogTitle>
+          <DialogTitle>Leave {props.organizationName}?</DialogTitle>
         </DialogHeader>
         <DialogDescription>
           Are you sure you want to leave this organization? You will lose access to{' '}
-          <span className="font-semibold">{organizationName}</span>. This action is irreversible!
+          <span className="font-semibold">{props.organizationName}</span>. This action is
+          irreversible!
         </DialogDescription>
         <DialogFooter className="flex w-full gap-2">
-          <Button type="button" variant="ghost" onClick={toggleModalOpen}>
+          <Button
+            type="button"
+            size="lg"
+            onClick={props.toggleModalOpen}
+            className="w-full justify-center"
+          >
             Cancel
           </Button>
           <Button
+            size="lg"
+            type="button"
             variant="destructive"
-            onClick={async () => {
-              const result = await mutate({
-                input: {
-                  organization: organizationId,
-                },
-              });
-
-              if (result.error) {
-                notify("Couldn't leave organization. Please try again.", 'error');
-              }
-
-              if (result.data?.leaveOrganization.error) {
-                notify(result.data.leaveOrganization.error.message, 'error');
-              }
-
-              if (result.data?.leaveOrganization.ok) {
-                toggleModalOpen();
-                cookies.remove(LAST_VISITED_ORG_KEY);
-                window.location.href = '/';
-              }
-            }}
+            className="w-full justify-center"
+            onClick={props.onSubmit}
           >
             Leave organization
           </Button>
@@ -87,4 +114,4 @@ export function LeaveOrganizationModal({
       </DialogContent>
     </Dialog>
   );
-}
+};

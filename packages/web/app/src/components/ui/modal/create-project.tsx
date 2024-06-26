@@ -1,6 +1,6 @@
-import { FunctionComponentElement } from 'react';
+import { FunctionComponentElement, ReactElement } from 'react';
 import { BlocksIcon, BoxIcon, FoldVerticalIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -68,7 +68,7 @@ const formSchema = z.object({
   }),
 });
 
-function ProjectTypeCard(props: {
+export function ProjectTypeCard(props: {
   title: string;
   description: string;
   type: ProjectType;
@@ -141,10 +141,26 @@ export const CreateProjectModal = (props: {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <CreateProjectModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      form={form}
+      onSubmit={() => onSubmit(form.getValues())}
+    />
+  );
+};
+
+export const CreateProjectModalContent = (props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  onSubmit: () => void;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+}): ReactElement => {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="absolute w-[600px] max-w-none">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
             <DialogHeader>
               <DialogTitle>Create a project</DialogTitle>
               <DialogDescription>
@@ -153,7 +169,7 @@ export const CreateProjectModal = (props: {
             </DialogHeader>
             <div className="space-y-8">
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="name"
                 render={({ field }) => {
                   return (
@@ -168,7 +184,7 @@ export const CreateProjectModal = (props: {
                 }}
               />
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="type"
                 render={({ field }) => {
                   return (
@@ -206,9 +222,9 @@ export const CreateProjectModal = (props: {
               <Button
                 className="w-full"
                 type="submit"
-                disabled={form.formState.isSubmitting || !form.formState.isValid}
+                disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
               >
-                {form.formState.isSubmitting ? 'Submitting...' : 'Create Project'}
+                {props.form.formState.isSubmitting ? 'Submitting...' : 'Create Project'}
               </Button>
             </DialogFooter>
           </form>

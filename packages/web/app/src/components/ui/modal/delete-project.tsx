@@ -70,7 +70,21 @@ export const DeleteProjectModal = (props: {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <DeleteProjectModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+};
+
+export const DeleteProjectModalContent = (props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+}): ReactElement => {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="flex flex-col items-center gap-5">
         <DialogHeader>
           <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
@@ -83,7 +97,7 @@ export const DeleteProjectModal = (props: {
           <Button
             type="button"
             size="lg"
-            onClick={toggleModalOpen}
+            onClick={props.toggleModalOpen}
             className="w-full justify-center"
           >
             Cancel
@@ -91,7 +105,7 @@ export const DeleteProjectModal = (props: {
           <Button
             size="lg"
             variant="destructive"
-            onClick={handleDelete}
+            onClick={props.handleDelete}
             className="w-full justify-center"
           >
             Delete
