@@ -212,7 +212,7 @@ function HistoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.History}
-      className="h-full"
+      className="h-[--content-height] overflow-scroll"
     >
       {hasVersions ? (
         <div className="flex size-full flex-row gap-x-6">

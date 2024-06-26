@@ -55,21 +55,19 @@ type SubPageLayoutHeaderProps = {
   description?: string | ReactNode;
 } & HTMLAttributes<HTMLDivElement>;
 
-const SubPageLayoutHeader = forwardRef<HTMLDivElement, SubPageLayoutHeaderProps>(
-  ({ ...props }, ref) => (
-    <div className="flex flex-row items-center justify-between" ref={ref}>
-      <div className="space-y-1.5">
-        <CardTitle>{props.title}</CardTitle>
-        {typeof props.description === 'string' ? (
-          <CardDescription>{props.description}</CardDescription>
-        ) : (
-          props.description
-        )}
-      </div>
-      <div>{props.children}</div>
+const SubPageLayoutHeader = forwardRef<HTMLDivElement, SubPageLayoutHeaderProps>((props, ref) => (
+  <div className="flex flex-row items-center justify-between" ref={ref}>
+    <div className="space-y-1.5">
+      <CardTitle>{props.title}</CardTitle>
+      {typeof props.description === 'string' ? (
+        <CardDescription>{props.description}</CardDescription>
+      ) : (
+        props.description
+      )}
     </div>
-  ),
-);
+    <div>{props.children}</div>
+  </div>
+));
 SubPageLayoutHeader.displayName = 'SubPageLayoutHeader';
 
 export { PageLayout, NavLayout, PageLayoutContent, SubPageLayout, SubPageLayoutHeader };
