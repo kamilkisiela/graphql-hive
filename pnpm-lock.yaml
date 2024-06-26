@@ -246,8 +246,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       json-schema-to-typescript:
-        specifier: 14.0.5
-        version: 14.0.5
+        specifier: 14.1.0
+        version: 14.1.0
       tmp:
         specifier: 0.2.3
         version: 0.2.3
@@ -8247,9 +8247,6 @@ packages:
   '@types/lodash@4.14.202':
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
 
-  '@types/lodash@4.17.4':
-    resolution: {integrity: sha512-wYCP26ZLxaT3R39kiN2+HcJ4kTd3U1waI/cY7ivWYqFP6pW3ZNpvi6Wd6PHZx7T/t8z0vlkXMg3QYLa7DZ/IJQ==}
-
   '@types/lodash@4.17.5':
     resolution: {integrity: sha512-MBIOHVZqVqgfro1euRDWX7OO0fBVUUMrN6Pwm8LQsz8cWhEpihlvR70ENj3f40j58TNxZaWv2ndSkInykNBBJw==}
 
@@ -12388,8 +12385,8 @@ packages:
   json-schema-ref-resolver@1.0.1:
     resolution: {integrity: sha512-EJAj1pgHc1hxF6vo2Z3s69fMjO1INq6eGHXZ8Z6wCQeldCuwxGK9Sxf4/cScGn3FZubCVUehfWtcDM/PLteCQw==}
 
-  json-schema-to-typescript@14.0.5:
-    resolution: {integrity: sha512-JmHsbgY0KKo8Pw0HRXpGzAlZYxlu+M5kFhSzhNkUSrVJ4sCXPdAGIdSpzva5ev2/Kybz10S6AfnNdF4o3Pzt3A==}
+  json-schema-to-typescript@14.1.0:
+    resolution: {integrity: sha512-VIeAFQkn88gFh26MSHWG4uX7TjK/arTw0NVLMZn6vX1WrSF+P6xu5MyEdovu+9PJ0uiS5gm0wzwQvYW9eSq1uw==}
     engines: {node: '>=16.0.0'}
     hasBin: true
 
@@ -26135,8 +26132,6 @@ snapshots:
 
   '@types/lodash@4.14.202': {}
 
-  '@types/lodash@4.17.4': {}
-
   '@types/lodash@4.17.5': {}
 
   '@types/long@4.0.2': {}
@@ -31172,11 +31167,11 @@ snapshots:
     dependencies:
       fast-deep-equal: 3.1.3
 
-  json-schema-to-typescript@14.0.5:
+  json-schema-to-typescript@14.1.0:
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.6.1
       '@types/json-schema': 7.0.15
-      '@types/lodash': 4.17.4
+      '@types/lodash': 4.17.5
       cli-color: 2.0.4
       glob: 10.3.12
       is-glob: 4.0.3
@@ -31184,7 +31179,6 @@ snapshots:
       lodash: 4.17.21
       minimist: 1.2.8
       mkdirp: 3.0.1
-      mz: 2.7.0
       node-fetch: 3.3.2
       prettier: 3.3.2
 
