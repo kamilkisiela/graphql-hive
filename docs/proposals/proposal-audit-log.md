@@ -15,16 +15,17 @@ the following schema:
 ```sql
 CREATE TABLE audit_log (
   timestamp DateTime('UTC') CODEC(DoubleDelta, LZ4),
-  user_id UUID,
+  user_id LowCardinality(String) CODEC(ZSTD(1)),
   user_email STRING,
-  organization_id UUID,
-  project_id LowCardinality(String)  CODEC(ZSTD(1)),
+  organization_id LowCardinality(String) CODEC(ZSTD(1)),
+  project_id LowCardinality(String) CODEC(ZSTD(1)),
   project_name STRING,
-  target_id UUID,
+  target_id LowCardinality(String) CODEC(ZSTD(1)),
   target_name STRING,
-  schema_version_id UUID,
+  schema_version_id LowCardinality(String) CODEC(ZSTD(1)),
   event_action LowCardinality(String) CODEC(ZSTD(1)),
   event_details JSON,
+  event_human_readable STRING,
   INDEX idx_user_id user_id TYPE set(0) GRANULARITY 64,
   INDEX idx_user_email user_email TYPE set(0) GRANULARITY 64,
 ) ENGINE = MergeTree ()
@@ -114,7 +115,7 @@ Left column shows the event action name, right column shows a human readable exa
 | USER_REMOVED                   | Admin **admin@acme.com** removed user **john@acme.com**.                                                  |
 | ORGANIZATION_TRANSFERRED       | Admin **admin@acme.com** transferred ownership to **admin2@acme.com**.                                    |
 | SCHEMA_CHECKED                 | CI made a schema check for **Project Alpha**.                                                             |
-| SCHEMA_PUBLISH                 | User **john@acme.com** published a new schema version for **Project Alpha**.                              |
+| SCHEMA_PUBLISHED                 | User **john@acme.com** published a new schema version for **Project Alpha**.                              |
 | SCHEMA_DELETED                 | Hive background job deleted old schema.                                                                   |
 | PROJECT_SETTINGS_UPDATED       | Changes made to project **Acme API** settings by **admin@acme.com**.                                      |
 | ORGANIZATION_SETTINGS_UPDATED  | Changes made to organization **Acme** settings by **admin@acme.com**.                                     |
