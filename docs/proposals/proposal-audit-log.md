@@ -69,12 +69,12 @@ export class AuditLog {
     const { user, organizationId, projectId, targetId, schemaVersionId, eventAction, details } = event;
 
     const query = `
-      INSERT INTO audit_log (user_id, user_email, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_action, event_details)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO audit_log (user_id, user_email, organization_id, project_id, project_name, target_id, target_name, schema_version_id, event_action, event_details, event_human_readable)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const insertResult = this.clickHouse.query(query, [
-      userId: user.id,
-      userEmail: user.email,
+      user.id,
+      user.email,
       organizationId,
       projectId,
       targetId,
@@ -82,6 +82,7 @@ export class AuditLog {
       eventKind,
       eventAction,
       JSON.stringify(details),
+      renderEventHumanReadable(event),
     ])
     auditLogTimingMetric.inc(startTime - Date.now());
     return insertResult;
