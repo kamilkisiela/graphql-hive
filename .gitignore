@@ -130,6 +130,7 @@ packages/web/app/environment-*.mjs
 packages/web/app/src/gql/*.ts
 packages/web/app/src/gql/*.json
 packages/web/app/src/graphql/*.ts
+packages/web/docs/public/feed.xml
 # Changelog
 packages/web/app/src/components/ui/changelog/generated-changelog.ts
 
