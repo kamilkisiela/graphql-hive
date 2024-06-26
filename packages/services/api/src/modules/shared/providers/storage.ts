@@ -80,6 +80,8 @@ export interface Storage {
       id: string;
       defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     };
+    firstName: string | null;
+    lastName: string | null;
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
@@ -600,6 +602,7 @@ export interface Storage {
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+  getOIDCIntegrationIdForOrganizationCleanId(_: { cleanId: string }): Promise<string | null>;
 
   getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
 

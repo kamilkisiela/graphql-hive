@@ -1,19 +1,15 @@
 namespace Cypress {
   export interface Chainable {
-    fillSupertokensFormAndSubmit(data: { email: string; password: string }): Chainable;
-
+    fillAuthFormAndSubmit(data: { email: string; password: string }): Chainable;
     signup(data: { email: string; password: string }): Chainable;
-
     login(data: { email: string; password: string }): Chainable;
-
     loginAndSetCookie(data: { email: string; password: string }): Chainable;
-
     dataCy(name: string): Chainable<JQuery<HTMLElement>>;
   }
 }
 
-Cypress.Commands.add('fillSupertokensFormAndSubmit', user => {
-  cy.get('form', { includeShadowDom: true }).within(() => {
+Cypress.Commands.add('fillAuthFormAndSubmit', user => {
+  cy.get('form').within(() => {
     cy.get('input[name="email"]').type(user.email);
     cy.get('input[name="password"]').type(user.password, {
       force: true, // skip waiting for async email validation
@@ -25,8 +21,8 @@ Cypress.Commands.add('fillSupertokensFormAndSubmit', user => {
 Cypress.Commands.add('signup', user => {
   cy.visit('/');
 
-  cy.get('span[data-supertokens="link"]', { includeShadowDom: true }).contains('Sign Up').click();
-  cy.fillSupertokensFormAndSubmit(user);
+  cy.get('span[data-auth-link="sign-up"]').contains('Sign Up').click();
+  cy.fillAuthFormAndSubmit(user);
 
   cy.contains('Create Organization');
 });
@@ -34,7 +30,7 @@ Cypress.Commands.add('signup', user => {
 Cypress.Commands.add('login', user => {
   cy.visit('/');
 
-  cy.fillSupertokensFormAndSubmit(user);
+  cy.fillAuthFormAndSubmit(user);
 
   cy.contains('Create Organization');
 });
