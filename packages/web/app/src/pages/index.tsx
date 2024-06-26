@@ -56,7 +56,7 @@ export function IndexPage() {
     <>
       <Meta title="Welcome" />
       <div className="flex size-full flex-row items-center justify-center">
-        <HiveLogo className="size-16 animate-pulse" />
+        <HiveLogo animated={false} className="size-16 animate-pulse" />
       </div>
     </>
   );
