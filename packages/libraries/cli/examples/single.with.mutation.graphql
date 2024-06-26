@@ -4,11 +4,10 @@ type Query {
   test: String
   last: Boolean
   fooTwo: Int!
-  foo4: Int!
 }
 
 type Mutation {
-  addFooT(foo: Int!): Int!
+  addFooAnother(foo: Int!): Int!
   addBar(bar: String): String
   addTest(test: String): String
 }

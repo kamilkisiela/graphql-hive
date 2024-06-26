@@ -58,11 +58,11 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
             totalChanges,
           )}* in project ${projectLink}, target ${targetLink} (${viewLink}):`;
 
-      const attachments = input.event.initial
-        ? []
-        : createAttachments(input.event.changes, input.event.messages);
+      const attachmentsText = input.event.initial
+        ? ''
+        : createAttachmentsText(input.event.changes, input.event.messages);
 
-      await this.sendTeamsMessage(webhookUrl, message, attachments);
+      await this.sendTeamsMessage(webhookUrl, `${message}\n\n${attachmentsText}`);
     } catch (error) {
       this.logger.error(`Failed to send Microsoft Teams notification`, error);
     }
@@ -108,7 +108,7 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
     return word + (num > 1 ? 's' : '');
   }
 
-  private async sendTeamsMessage(webhookUrl: string, message: string, attachments: any[] = []) {
+  private async sendTeamsMessage(webhookUrl: string, message: string) {
     const payload = {
       '@type': 'MessageCard',
       '@context': 'http://schema.org/extensions',
@@ -119,7 +119,6 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
           activityTitle: 'Notification',
           text: message,
           markdown: true,
-          ...(attachments.length > 0 && { attachments: attachments }),
         },
       ],
     };
@@ -138,47 +137,41 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
   }
 }
 
-function createAttachments(changes: readonly SchemaChangeType[], messages: readonly string[]) {
+function createAttachmentsText(
+  changes: readonly SchemaChangeType[],
+  messages: readonly string[],
+): string {
   const breakingChanges = changes.filter(
     change => change.criticality === CriticalityLevel.Breaking,
   );
   const safeChanges = changes.filter(change => change.criticality !== CriticalityLevel.Breaking);
 
-  const attachments: any[] = [];
+  let text = '';
 
   if (breakingChanges.length) {
-    attachments.push(
-      renderAttachments({
-        color: '#E74C3B',
-        title: 'Breaking changes',
-        changes: breakingChanges,
-      }),
-    );
-  }
-
-  if (safeChanges.length) {
-    attachments.push(
-      renderAttachments({
-        color: '#23B99A',
-        title: 'Safe changes',
-        changes: safeChanges,
-      }),
-    );
-  }
-
-  if (messages.length) {
-    const text = messages.map(message => slackCoderize(message)).join('\n');
-    attachments.push({
-      color: '#1C8DC7',
-      title: 'Other changes',
-      text,
+    text += renderAttachmentsText({
+      color: '#E74C3B',
+      title: 'Breaking changes',
+      changes: breakingChanges,
     });
   }
 
-  return attachments;
+  if (safeChanges.length) {
+    text += renderAttachmentsText({
+      color: '#23B99A',
+      title: 'Safe changes',
+      changes: safeChanges,
+    });
+  }
+
+  if (messages.length) {
+    text += `### Other changes\n${messages.map(message => slackCoderize(message)).join('\n')}\n`;
+  }
+
+  return text;
 }
 
-function renderAttachments({
+function renderAttachmentsText({
   changes,
   title,
   color,
@@ -186,7 +179,7 @@ function renderAttachments({
   color: string;
   title: string;
   changes: readonly SchemaChangeType[];
-}): any {
+}): string {
   const text = changes
     .map(change => {
       let text = change.message;
@@ -198,14 +191,5 @@ function renderAttachments({
     })
     .join('\n');
 
-  return {
-    title,
-    text,
-    markdown: true,
-    facts: changes.map(change => ({
-      name: change.criticality,
-      value: slackCoderize(change.message),
-    })),
-    themeColor: color,
-  };
+  return `### ${title}\n${text}\n`;
 }

@@ -12,7 +12,7 @@ import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
 import type { ProjectSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
-import { SchemaChangeNotificationInput } from './adapters/common';
+import { ChannelConfirmationInput, SchemaChangeNotificationInput } from './adapters/common';
 import { TeamsCommunicationAdapter } from './adapters/msteams';
 import { SlackCommunicationAdapter } from './adapters/slack';
 import { WebhookCommunicationAdapter } from './adapters/webhook';
@@ -187,7 +187,6 @@ export class AlertsManager {
         channel: channels.find(channel => channel.id === alert.channelId)!,
       };
     });
-    console.log('pairs:', pairs);
 
     const slackToken = await this.slackIntegrationManager.getToken({
       organization: event.organization.id,
@@ -277,6 +276,28 @@ export class AlertsManager {
       }),
     ]);
 
+    const channelConfirmationContext: ChannelConfirmationInput = {
+      event: {
+        kind: input.kind,
+        organization: {
+          id: organization.id,
+          cleanId: organization.cleanId,
+          name: organization.name,
+        },
+        project: {
+          id: project.id,
+          cleanId: project.cleanId,
+          name: project.name,
+        },
+      },
+      channel,
+      integrations: {
+        slack: {
+          token: null,
+        },
+      },
+    };
+
     if (channel.type === 'SLACK') {
       const slackToken = await this.slackIntegrationManager.getToken({
         organization: organization.id,
@@ -287,45 +308,10 @@ export class AlertsManager {
         throw new Error(`Slack token was not found for channel "${channel.id}"`);
       }
 
-      const newLocal = {
-        event: {
-          kind: input.kind,
-          organization: {
-            id: organization.id,
-            cleanId: organization.cleanId,
-            name: organization.name,
-          },
-          project: {
-            id: project.id,
-            cleanId: project.cleanId,
-            name: project.name,
-          },
-        },
-        channel,
-        integrations: {
-          slack: {
-            token: slackToken,
-          },
-        },
-      };
-      await this.slack.sendChannelConfirmation(newLocal);
+      channelConfirmationContext.integrations.slack.token = slackToken;
+      await this.slack.sendChannelConfirmation(channelConfirmationContext);
     } else if (channel.type === 'MSTEAMS_WEBHOOK') {
-      await this.teamsWebhook.sendChannelConfirmation({
-        event: {
-          kind: input.kind,
-          organization: {
-            id: organization.id,
-            cleanId: organization.cleanId,
-            name: organization.name,
-          },
-          project: {
-            id: project.id,
-            cleanId: project.cleanId,
-            name: project.name,
-          },
-        },
-        channel,
-      });
+      await this.teamsWebhook.sendChannelConfirmation(channelConfirmationContext);
     } else {
       await this.webhook.sendChannelConfirmation();
     }
