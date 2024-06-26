@@ -140,6 +140,7 @@ const config: CodegenConfig = {
           AlertChannel: '../modules/alerts/module.graphql.mappers#AlertChannelMapper',
           AlertSlackChannel: '../modules/alerts/module.graphql.mappers#AlertSlackChannelMapper',
           AlertWebhookChannel: '../modules/alerts/module.graphql.mappers#AlertWebhookChannelMapper',
+          TeamsWebhookChannel: '../modules/alerts/module.graphql.mappers#TeamsWebhookChannelMapper',
           Alert: '../modules/alerts/module.graphql.mappers#AlertMapper',
           AdminQuery: '../modules/admin/module.graphql.mappers#AdminQueryMapper',
           AdminStats: '../modules/admin/module.graphql.mappers#AdminStatsMapper',

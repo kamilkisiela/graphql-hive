@@ -222,7 +222,6 @@ export const resolvers: AlertsModule.Resolvers = {
       return channel.type === 'MSTEAMS_WEBHOOK';
     },
     endpoint(channel) {
-      // @ts-expect-error TODO not sure where this type is coming from
       return channel.webhookEndpoint!;
     },
   },
