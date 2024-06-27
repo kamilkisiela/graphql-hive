@@ -22,6 +22,7 @@ export enum Page {
   History = 'history',
   Insights = 'insights',
   Laboratory = 'laboratory',
+  Apps = 'apps',
   Settings = 'settings',
 }
 
@@ -208,6 +209,18 @@ export const TargetLayout = ({
                         }}
                       >
                         Insights
+                      </Link>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value={Page.Apps} asChild>
+                      <Link
+                        to="/$organizationId/$projectId/$targetId/apps"
+                        params={{
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
+                        }}
+                      >
+                        Apps
                       </Link>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={Page.Laboratory} asChild>
