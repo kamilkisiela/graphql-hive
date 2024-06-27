@@ -17,64 +17,36 @@ const meta: Meta<typeof TransferOrganizationOwnershipModalContent> = {
 export default meta;
 type Story = StoryObj<typeof TransferOrganizationOwnershipModalContent>;
 
-const formSchema = z.object({
-  newOwner: z.string().min(1, 'New owner is not defined'),
-  confirmation: z
-    .string()
-    .min(1)
-    .refine(val => {
-      if (val !== 'organization') {
-        return false;
-      }
-      return true;
-    }, 'Type organization name to confirm'),
-});
+
+type Option = {
+  value: string;
+  label: string;
+};
 
 export const Default: Story = {
   render: () => {
-    const form = useForm<z.infer<typeof formSchema>>({
-      mode: 'onChange',
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        newOwner: '',
-        confirmation: '',
-      },
-    });
-
     const [openModal, setOpenModal] = useState(false);
-    const [openPopup, setOpenPopup] = useState(false);
-    const [selected, setSelected] = useState<MemberFromFragment | undefined>();
+    const [openPopover, setOpenPopover] = useState(false);
+    const [valuePopover, setValuePopover] = useState<Option | null | undefined>(null);
     const toggleModalOpen = () => setOpenModal(!openModal);
-
     return (
       <>
         <Button onClick={toggleModalOpen}>Open Modal</Button>
         {openModal && (
           <TransferOrganizationOwnershipModalContent
-            handleRoute={() => console.log('Route')}
+            handleRoute={() => console.log('handleRoute')}
             isOpen={openModal}
-            onSelect={() => console.log('Select')}
-            options={[
-              {
-                label: 'Test',
-                value: 'test',
-              },
-              {
-                label: 'Test 2',
-                value: 'test2',
-              },
-            ]}
-            onSubmit={async () => console.log('Submit')}
-            toggleModalOpen={toggleModalOpen}
-            openPopup={openPopup}
+            openPopover={openPopover}
+            options={[]}
             organization={{
-              cleanId: 'test',
+              cleanId: 'cleanId',
             }}
-            searchPhrase="test"
-            selected={selected}
-            setOpenPopup={setOpenPopup}
-            schema={formSchema}
-            key={'transfer-organization-ownership-modal'}
+            organizationName='Organization Name'
+            setOpenPopover={setOpenPopover}
+            setValuePopover={setValuePopover}
+            toggleModalOpen={toggleModalOpen}
+            key={"key"}
+            valuePopover={valuePopover}
           />
         )}
       </>
