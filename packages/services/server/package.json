@@ -45,7 +45,7 @@
     "hyperid": "3.2.0",
     "ioredis": "5.4.1",
     "pino-pretty": "11.2.1",
-    "prom-client": "15.1.2",
+    "prom-client": "15.1.3",
     "reflect-metadata": "0.2.2",
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "15.2.1",
