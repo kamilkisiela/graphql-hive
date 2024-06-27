@@ -1,5 +1,5 @@
-import { ReactElement, useCallback, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { ReactElement, useState } from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation, useQuery, UseQueryState } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
 } from '@/components/ui/command';
 import {
   Dialog,
@@ -21,14 +20,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CheckIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TransferOrganizationOwnership_MembersQuery } from '@/gql/graphql';
-import { useNotifications } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CaretSortIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
+import { useToast } from '../use-toast';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { FormControl, FormField, FormItem, FormMessage, FormLabel } from '../form';
 
 const TransferOrganizationOwnership_Request = graphql(`
   mutation TransferOrganizationOwnership_Request($input: RequestOrganizationTransferInput!) {
@@ -96,6 +95,8 @@ const TransferOrganizationOwnershipModal_OrganizationFragment = graphql(`
   }
 `);
 
+
+
 export const TransferOrganizationOwnershipModal = ({
   isOpen,
   toggleModalOpen,
@@ -143,65 +144,21 @@ export const TransferOrganizationOwnershipModalForm = ({
     { selector: { organization: string } }
   >;
 }): ReactElement => {
-  const notify = useNotifications();
-  const [, mutate] = useMutation(TransferOrganizationOwnership_Request);
   const router = useRouter();
+  const organizationName = query.data?.organization?.organization.name;
 
-  const [searchPhrase, setSearchPhrase] = useState('');
-  const normalizedSearchPhrase = searchPhrase.toLowerCase().replace(/\s+/g, '');
-
-  const schema = z.object({
-    newOwner: z.string().min(1, 'New owner is not defined'),
-    confirmation: z
-      .string()
-      .min(1)
-      .refine(val => val === organization.cleanId, 'Type organization name to confirm'),
-  });
-
-  type FormValues = z.infer<typeof schema>;
-
-  const onSubmit = async (values: FormValues) => {
-    const result = await mutate({
-      input: { organization: organization.cleanId, user: values.newOwner },
-    });
-
-    if (result.error) {
-      notify('Failed to transfer ownership', 'error');
-      return;
-    }
-
-    const errorMessage = result.data?.requestOrganizationTransfer.error?.message;
-    if (errorMessage) {
-      notify(errorMessage, 'error');
-      return;
-    }
-
-    if (result.data?.requestOrganizationTransfer.ok) {
-      notify('Ownership transfer requested', 'success');
-      toggleModalOpen();
-    }
-  };
 
   const members = (query.data?.organization?.organization.members.nodes ?? []).filter(
     member => !member.isOwner,
   );
-
-  const [openPopup, setOpenPopup] = useState(false);
-  const [selected, setSelected] = useState<MemberFromFragment | undefined>();
+  const [openPopover, setOpenPopover] = useState(false);
+  const [valuePopover, setValuePopover] = useState<Option | null | undefined>(null);
 
   const options = members.map(member => ({
     value: member.id,
     label: member.user.fullName,
   })) as Option[];
 
-  const onSelect = useCallback(
-    (option: Option) => {
-      const member = members.find(m => m.id === option.value);
-      setSelected(member as MemberFromFragment);
-      setSearchPhrase(option.value === searchPhrase ? '' : option.value);
-    },
-    [members, searchPhrase],
-  );
 
   const handleRoute = () => {
     void router.navigate({
@@ -211,128 +168,157 @@ export const TransferOrganizationOwnershipModalForm = ({
     });
   };
 
+  const formSchema = z.object({
+    newOwner: z.string().min(1, 'New owner is not defined'),
+    confirmation: z
+      .string()
+      .min(1)
+      .refine(val => val === organizationName, 'Type organization name to confirm'),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    mode: 'onChange',
+    resolver: zodResolver(formSchema),
+    defaultValues: { newOwner: '', confirmation: '' },
+  });
+
+  const { toast } = useToast();
+  const [, mutate] = useMutation(TransferOrganizationOwnership_Request);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const result = await mutate({
+      input: { organization: organization.cleanId, user: values.newOwner },
+    });
+
+    if (result.error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to request ownership transfer',
+      });
+    }
+
+    if (result.data?.requestOrganizationTransfer.ok) {
+      toast({
+        title: 'Success',
+        description: `Ownership transfer request sent to ${result.data.requestOrganizationTransfer.ok.email}`,
+      });
+      toggleModalOpen();
+    }
+  }
+
   return (
     <TransferOrganizationOwnershipModalContent
       isOpen={isOpen}
       toggleModalOpen={toggleModalOpen}
-      openPopup={openPopup}
-      setOpenPopup={setOpenPopup}
-      searchPhrase={searchPhrase}
+      openPopover={openPopover}
+      setOpenPopover={setOpenPopover}
+      valuePopover={valuePopover}
+      setValuePopover={setValuePopover}
       options={options}
       handleRoute={handleRoute}
-      selected={selected}
-      onSelect={onSelect}
       organization={organization}
-      schema={schema}
+      organizationName={organizationName}
+      form={form}
+      formSchema={formSchema}
+      mutate={mutate}
       onSubmit={onSubmit}
     />
   );
 };
 
-export const TransferOrganizationOwnershipModalContent = ({
-  isOpen,
-  toggleModalOpen,
-  openPopup,
-  setOpenPopup,
-  searchPhrase,
-  options,
-  handleRoute,
-  selected,
-  onSelect,
-  organization,
-  schema,
-  onSubmit,
-}: {
+
+
+export const TransferOrganizationOwnershipModalContent = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  openPopup: boolean;
-  setOpenPopup: (value: boolean) => void;
-  searchPhrase: string;
+  openPopover: boolean;
+  setOpenPopover: (open: boolean) => void;
+  valuePopover?: Option | null | undefined;
+  setValuePopover: (value: Option | null | undefined) => void;
   options: Option[];
   handleRoute: () => void;
-  selected: MemberFromFragment | undefined;
-  onSelect: (option: Option) => void;
   organization: { cleanId: string };
-  schema: z.ZodObject<{
-    newOwner: z.ZodString;
-    confirmation: z.ZodEffects<z.ZodString, string, string>;
-  }>;
-  onSubmit: (values: { newOwner: string; confirmation: string }) => Promise<void>;
+  organizationName: string | undefined;
+  formSchema: z.ZodObject<{ newOwner: z.ZodString; confirmation: z.ZodString }>;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+  mutate: ReturnType<typeof useMutation>[0];
+  onSubmit: () => void;
 }): ReactElement => {
-  const form = useForm<z.infer<typeof schema>>({
-    mode: 'onChange',
-    resolver: zodResolver(schema),
-    defaultValues: { newOwner: '', confirmation: '' },
-  });
+
 
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="flex w-[800px] flex-col items-center gap-5">
         <DialogHeader>
           <DialogTitle>Transfer Ownership</DialogTitle>
         </DialogHeader>
         <DialogDescription className="flex flex-col gap-2">
           Transferring is completed after the new owner approves the transfer.
-          <Popover open={openPopup} onOpenChange={setOpenPopup}>
+          <Popover open={props.openPopover} onOpenChange={props.setOpenPopover}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
                 role="combobox"
-                aria-expanded={openPopup}
+                aria-expanded={props.openPopover}
                 className="w-full justify-between"
               >
-                {searchPhrase
-                  ? options.find(option => option.value === searchPhrase)?.label
-                  : 'Select new owner...'}
-                <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
+                {props.valuePopover
+                  ? props.options.find((option) => option.value === props.valuePopover?.value)?.label
+                  : "Select new owner"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
               <Command>
-                <CommandInput placeholder="Search new owner..." className="h-9 w-[410px]" />
-                <CommandList>
-                  <CommandEmpty>No new owner found.</CommandEmpty>
-                  <CommandGroup>
-                    {options.length === 0 ? (
-                      <CommandItem className="cursor-pointer" onSelect={handleRoute}>
-                        Visit Members page to add new owner before transferring.
-                      </CommandItem>
-                    ) : (
-                      options.map(option => (
-                        <CommandItem
-                          key={option.value}
-                          value={selected?.user.id}
-                          onSelect={() => onSelect(option)}
-                        >
-                          {option.label}
-                          <CheckIcon
-                            className={cn(
-                              'ml-auto size-4',
-                              searchPhrase === option.value ? 'opacity-100' : 'opacity-0',
-                            )}
-                          />
-                        </CommandItem>
-                      ))
-                    )}
-                  </CommandGroup>
-                </CommandList>
+                <CommandInput className=' relative w-full' placeholder="Search members" />
+                <CommandEmpty
+                  className='cursor-pointer'
+                  onClick={props.handleRoute}>
+                  No members found - Click to route to members page
+                </CommandEmpty>
+                <CommandGroup>
+                  {props.options.map((option) => (
+                    <CommandItem
+                      key={option.value}
+                      value={option.value}
+                      onSelect={(currentValue) => {
+                        props.setValuePopover(props.options.find((option) => option.value === currentValue))
+                        props.setOpenPopover(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          props.valuePopover?.label === option.label ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {option.label}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
               </Command>
             </PopoverContent>
           </Popover>
           <div className="flex flex-col gap-2">
-            <div>
-              Type <span className="font-bold text-white">{organization.cleanId}</span> to confirm.
-            </div>
-            <Controller
-              name="confirmation"
+            <FormField
               control={form.control}
+              name="confirmation"
               render={({ field }) => (
-                <Input {...field} disabled={form.formState.isSubmitting} className="w-full" />
+                <FormItem>
+                  <FormControl>
+                    <FormLabel>
+                      Type
+                      <span className="font-bold text-white">{props.organization.cleanId}</span>
+                      name to confirm
+                    </FormLabel>
+                    <Input
+                      disabled={!props.valuePopover}
+                      placeholder="Organization name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
             />
-            {form.formState.errors.confirmation && (
-              <p className="text-red-500">{form.formState.errors.confirmation.message}</p>
-            )}
           </div>
           <div className="h-0 w-full border-t-2 border-gray-900" />
           <div className="font-bold">About the ownership transfer</div>
@@ -357,7 +343,7 @@ export const TransferOrganizationOwnershipModalContent = ({
             className="w-full justify-center"
             size="lg"
             variant="default"
-            onClick={toggleModalOpen}
+            onClick={props.toggleModalOpen}
           >
             Cancel
           </Button>
@@ -365,13 +351,12 @@ export const TransferOrganizationOwnershipModalContent = ({
             size="lg"
             className="w-full justify-center"
             variant="primary"
-            disabled={form.formState.isSubmitting || !form.formState.isValid}
-            onClick={form.handleSubmit(onSubmit)}
-          >
+            disabled={!props.valuePopover}
+            onClick={form.handleSubmit(onSubmit)}>
             Transfer this organization
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 };
