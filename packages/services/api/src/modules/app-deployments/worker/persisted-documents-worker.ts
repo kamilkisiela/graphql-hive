@@ -92,6 +92,7 @@ export function createWorker(
       logger.error('unexpected error', message.id, message.event);
       port.postMessage({
         code: 'ERROR',
+        id: message.id,
         err,
       });
     }

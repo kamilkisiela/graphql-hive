@@ -8,23 +8,52 @@ import { BatchProcessedEvent, BatchProcessEvent } from './persisted-document-ing
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+type PendingTaskRecord = {
+  resolve: (data: BatchProcessedEvent) => void;
+  reject: (err: unknown) => void;
+};
+
 @Injectable({
   scope: Scope.Singleton,
   global: true,
 })
 export class PersistedDocumentScheduler {
   private logger: Logger;
-  private workers: Array<Worker>;
-  private cache = new Map<string, (data: BatchProcessedEvent) => void>();
+  private workers: Array<
+    (input: BatchProcessEvent['data']) => Promise<BatchProcessedEvent['data']>
+  >;
 
-  createWorker(index: number) {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ source: 'PersistedDocumentScheduler' });
+    this.workers = Array.from({ length: 4 }, (_, i) => this.createWorker(i));
+  }
+
+  private createWorker(index: number) {
+    this.logger.debug('Creating worker %s', index);
     const name = `persisted-documents-worker-${index}`;
     const worker = new Worker(path.join(__dirname, 'persisted-documents-worker.js'), {
       name,
     });
+    const tasks = new Map<string, PendingTaskRecord>();
 
     worker.on('error', error => {
-      console.log(name, 'Worker error', { error });
+      console.error(error);
+      this.logger.error('Worker error %s', error);
+    });
+
+    worker.on('exit', code => {
+      this.logger.error('Worker stopped with exit code %s', String(code));
+      if (code === 0) {
+        return;
+      }
+
+      this.logger.debug('Re-Creating worker %s', index);
+
+      for (const [, task] of tasks) {
+        task.reject(new Error('Worker stopped.'));
+      }
+
+      this.workers[index] = this.createWorker(index);
     });
 
     worker.on(
@@ -32,7 +61,7 @@ export class PersistedDocumentScheduler {
       (
         data:
           | BatchProcessedEvent
-          | { event: 'error'; err: Error }
+          | { event: 'error'; id: string; err: Error }
           | {
               event: 'log';
               bindings: Record<string, unknown>;
@@ -45,59 +74,62 @@ export class PersistedDocumentScheduler {
           return;
         }
 
-        // console.log(name, 'received message', data.id, data.event);
         if (data.event === 'error') {
-          console.error(data.err);
-          throw data.err;
+          tasks.get(data.id)?.reject(data.err);
         }
 
         if (data.event === 'processedBatch') {
-          this.cache.get(data.id)?.(data);
-          this.cache.delete(data.id);
+          tasks.get(data.id)?.resolve(data);
         }
       },
     );
 
-    return worker;
+    const { logger } = this;
+
+    return async function batchProcess(data: BatchProcessEvent['data']) {
+      const id = crypto.randomUUID();
+      const d = createDeferred<BatchProcessedEvent>();
+      const timeout = setTimeout(() => {
+        task.reject(new Error('Timeout, worker did not respond within time.'));
+      }, 20_000);
+
+      const task: PendingTaskRecord = {
+        resolve: data => {
+          tasks.delete(id);
+          clearTimeout(timeout);
+          d.resolve(data);
+        },
+        reject: err => {
+          tasks.delete(id);
+          clearTimeout(timeout);
+          d.reject(err);
+        },
+      };
+
+      tasks.set(id, task);
+      const time = process.hrtime();
+
+      worker.postMessage({
+        event: 'PROCESS',
+        id,
+        data,
+      });
+
+      const result = await d.promise.finally(() => {
+        const endTime = process.hrtime(time);
+        logger.debug('Time taken: %ds %dms', endTime[0], endTime[1] / 1000000);
+      });
+
+      return result.data;
+    };
   }
 
-  getRandomWorker() {
+  private getRandomWorker() {
     return this.workers[Math.floor(Math.random() * this.workers.length)];
   }
 
-  constructor(logger: Logger) {
-    this.logger = logger.child({ source: 'PersistedDocumentScheduler' });
-    this.workers = Array.from({ length: 4 }, (_, i) => this.createWorker(i));
-  }
-
   async processBatch(data: BatchProcessEvent['data']) {
-    const id = crypto.randomUUID();
-    const d = createDeferred<BatchProcessedEvent>();
-
-    const timeout = setTimeout(() => {
-      this.cache.delete(id);
-      d.reject(new Error('Timeout.'));
-    }, 20_000);
-
-    this.cache.set(id, data => {
-      clearTimeout(timeout);
-      d.resolve(data);
-    });
-
-    const time = process.hrtime();
-
-    this.getRandomWorker().postMessage({
-      event: 'PROCESS',
-      id,
-      data,
-    });
-
-    const result = await d.promise;
-
-    const endTime = process.hrtime(time);
-    console.log('Time taken: %ds %dms', endTime[0], endTime[1] / 1000000);
-
-    return result.data;
+    return this.getRandomWorker()(data);
   }
 }
 
