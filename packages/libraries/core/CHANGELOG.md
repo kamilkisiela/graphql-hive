@@ -1,5 +1,13 @@
 # @graphql-hive/core
 
+## 0.4.0
+
+### Minor Changes
+
+- [#5097](https://github.com/kamilkisiela/graphql-hive/pull/5097)
+  [`b8998e7`](https://github.com/kamilkisiela/graphql-hive/commit/b8998e7ead84a2714d13678aaf1e349e648eb90a)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add retry mechanism to the http client
+
 ## 0.3.1
 
 ### Patch Changes
