@@ -45,6 +45,8 @@ import { ProjectAlertsPage } from './pages/project-alerts';
 import { ProjectPolicyPage } from './pages/project-policy';
 import { ProjectSettingsPage } from './pages/project-settings';
 import { TargetPage } from './pages/target';
+import { TargetAppVersionPage } from './pages/target-app-version';
+import { TargetAppsPage } from './pages/target-apps';
 import { TargetChecksPage } from './pages/target-checks';
 import { TargetChecksSinglePage } from './pages/target-checks-single';
 import { TargetExplorerPage } from './pages/target-explorer';
@@ -433,6 +435,35 @@ const targetLaboratoryRoute = createRoute({
   },
 });
 
+const targetAppsRoute = createRoute({
+  getParentRoute: () => targetRoute,
+  path: 'apps',
+  component: function TargetAppsRoute() {
+    const { organizationId, projectId, targetId } = targetAppsRoute.useParams();
+    return (
+      <TargetAppsPage organizationId={organizationId} projectId={projectId} targetId={targetId} />
+    );
+  },
+});
+
+const targetAppVersionRoute = createRoute({
+  getParentRoute: () => targetRoute,
+  path: 'apps/$appName/$appVersion',
+  component: function TargetAppVersionRoute() {
+    const { organizationId, projectId, targetId, appName, appVersion } =
+      targetAppVersionRoute.useParams();
+    return (
+      <TargetAppVersionPage
+        organizationId={organizationId}
+        projectId={projectId}
+        targetId={targetId}
+        appName={appName}
+        appVersion={appVersion}
+      />
+    );
+  },
+});
+
 const targetInsightsRoute = createRoute({
   getParentRoute: () => targetRoute,
   path: 'insights',
@@ -666,6 +697,8 @@ const routeTree = root.addChildren([
       targetExplorerUnusedRoute,
       targetExplorerTypeRoute,
       targetChecksRoute.addChildren([targetChecksSingleRoute]),
+      targetAppVersionRoute,
+      targetAppsRoute,
     ]),
   ]),
 ]);

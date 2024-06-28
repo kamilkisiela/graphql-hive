@@ -5,6 +5,7 @@ import { env } from '@/env/frontend';
 import schema from '@/gql/schema';
 import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
+import { relayPagination } from '@urql/exchange-graphcache/extras';
 import { persistedExchange } from '@urql/exchange-persisted';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
@@ -33,6 +34,14 @@ export const urqlClient = createClient({
       schema,
       updates: {
         Mutation,
+      },
+      resolvers: {
+        Target: {
+          appDeployments: relayPagination(),
+        },
+        AppDeployment: {
+          documents: relayPagination(),
+        },
       },
       keys: {
         RequestsOverTime: noKey,
