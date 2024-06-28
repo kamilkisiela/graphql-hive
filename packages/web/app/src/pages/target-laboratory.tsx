@@ -62,16 +62,7 @@ import { Link as RouterLink, useRouter } from '@tanstack/react-router';
 import 'graphiql/graphiql.css';
 import '@graphiql/plugin-explorer/dist/style.css';
 
-const explorer = explorerPlugin({
-  hideActions: true,
-  styles: {
-    actionButtonStyle: {
-      fontSize: 22,
-      lineHeight: 0,
-      marginLeft: 6,
-    },
-  },
-});
+const explorer = explorerPlugin();
 
 function Share({ operation }: { operation: string | null }): ReactElement | null {
   const label = 'Share query';

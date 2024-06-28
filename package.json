@@ -126,11 +126,6 @@
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch"
-    },
-    "overrides": {
-      "@graphiql/plugin-explorer": "link:/Users/dmytro/Desktop/GUILD/graphiql/packages/graphiql-plugin-explorer",
-      "graphiql": "link:/Users/dmytro/Desktop/GUILD/graphiql/packages/graphiql",
-      "@graphiql/react": "link:/Users/dmytro/Desktop/GUILD/graphiql/packages/graphiql-react"
     }
   }
 }
