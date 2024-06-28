@@ -1,9 +1,9 @@
 import colors from 'colors';
 import { print, type GraphQLError } from 'graphql';
 import type { ExecutionResult } from 'graphql';
+import { http } from '@graphql-hive/core';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
-import { fetch } from '@whatwg-node/fetch';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
@@ -166,14 +166,16 @@ export default abstract class extends Command {
         operation: TypedDocumentNode<TResult, TVariables>,
         ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
       ): Promise<TResult> {
-        const response = await fetch(endpoint, {
-          headers: requestHeaders,
-          method: 'POST',
-          body: JSON.stringify({
+        const response = await http.post(
+          endpoint,
+          JSON.stringify({
             query: typeof operation === 'string' ? operation : print(operation),
             variables,
           }),
-        });
+          {
+            headers: requestHeaders,
+          },
+        );
 
         if (!response.ok) {
           throw new Error(`Invalid status code for HTTP call: ${response.status}`);
