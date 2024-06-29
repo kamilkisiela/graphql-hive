@@ -110,13 +110,13 @@ Left column shows the event action name, right column shows a human readable exa
 | USER_JOINED                    | User **john@acme.com** joined **Acme**. Approved by **admin@acme.com**. Referrer: **jane@acme.com**.      |
 | EXPIRED_INVITE_HIT             | User **john@acme.com** tried to join **Acme** with an expired/invalid invite. Referrer: **jane@acme.com** |
 | PROJECT_CREATED                | User **john@acme.com** created a project named **Project Alpha**.                                         |
-| TARGET_CREATED                 | User **john@acme.com** created a target named **Project Alpha**.                                          |
+| TARGET_CREATED                 | User **john@acme.com** created a target named **Project Alpha staging**.                                  |
 | ROLE_CREATED                   | Admin **admin@acme.com** created a new role **SAMPLE_ROLE**.                                              |
 | ROLE_ASSIGNED                  | Admin **admin@acme.com** assigned a new role to user **john@acme.com**.                                   |
 | USER_REMOVED                   | Admin **admin@acme.com** removed user **john@acme.com**.                                                  |
 | ORGANIZATION_TRANSFERRED       | Admin **admin@acme.com** transferred ownership to **admin2@acme.com**.                                    |
 | SCHEMA_CHECKED                 | CI made a schema check for **Project Alpha**.                                                             |
-| SCHEMA_PUBLISHED                 | User **john@acme.com** published a new schema version for **Project Alpha**.                              |
+| SCHEMA_PUBLISHED               | User **john@acme.com** published a new schema version for project **Project Alpha**.                      |
 | SCHEMA_DELETED                 | Hive background job deleted old schema.                                                                   |
 | PROJECT_SETTINGS_UPDATED       | Changes made to project **Acme API** settings by **admin@acme.com**.                                      |
 | ORGANIZATION_SETTINGS_UPDATED  | Changes made to organization **Acme** settings by **admin@acme.com**.                                     |
