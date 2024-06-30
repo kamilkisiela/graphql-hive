@@ -24,7 +24,7 @@
     "bcryptjs": "2.4.3",
     "dotenv": "16.4.5",
     "esbuild": "0.21.5",
-    "fastify": "4.28.0",
+    "fastify": "4.28.1",
     "graphql": "16.9.0",
     "itty-router": "4.2.2",
     "itty-router-extras": "0.4.6",
