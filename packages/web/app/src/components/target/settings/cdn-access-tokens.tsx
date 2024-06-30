@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { DocsLink } from '@/components/ui/docs-note';
 import {
   Form,
   FormControl,
@@ -21,7 +22,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
-import { DocsLink, Input, Table, Tag, TBody, Td, TimeAgo, Tr } from '@/components/v2';
+import { Tag } from '@/components/ui/tag';
+import { Input, Table, TBody, Td, TimeAgo, Tr } from '@/components/v2';
 import { AlertTriangleIcon, TrashIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { FragmentType, graphql, useFragment } from '@/gql';

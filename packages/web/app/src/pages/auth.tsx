@@ -5,7 +5,7 @@ import { getRoutingComponent } from 'supertokens-auth-react/ui';
 import { FullLogo } from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import { Meta } from '@/components/ui/meta';
-import { Spinner } from '@/components/v2';
+import { Spinner } from '@/components/ui/spinner';
 import { env } from '@/env/frontend';
 import { useBrowser } from '@/lib/hooks/use-browser';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';

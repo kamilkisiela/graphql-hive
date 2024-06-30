@@ -18,10 +18,10 @@ import { DeleteOrganizationModal } from '@/components/ui/modal/delete-organizati
 import { TransferOrganizationOwnershipModal } from '@/components/ui/modal/transfer-organization-ownership';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { Tag } from '@/components/ui/tag';
 import { useToast } from '@/components/ui/use-toast';
 import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import { Input } from '@/components/v2/input';
-import { Tag } from '@/components/v2/tag';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {

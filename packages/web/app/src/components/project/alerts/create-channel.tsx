@@ -4,7 +4,8 @@ import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
-import { Input, Modal, Select, Tag } from '@/components/v2';
+import { Tag } from '@/components/ui/tag';
+import { Input, Modal, Select } from '@/components/v2';
 import { graphql } from '@/gql';
 import { AlertChannelType } from '@/gql/graphql';
 

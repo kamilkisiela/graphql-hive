@@ -1,4 +1,5 @@
-import { Checkbox, Table, Tag, TBody, Td, Tr } from '@/components/v2';
+import { Tag } from '@/components/ui/tag';
+import { Checkbox, Table, TBody, Td, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AlertChannelType } from '@/gql/graphql';
 

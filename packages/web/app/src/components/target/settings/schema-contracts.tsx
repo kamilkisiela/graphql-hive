@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { DocsLink } from '@/components/ui/docs-note';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +40,6 @@ import {
 } from '@/components/ui/table';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsLink } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { cn } from '@/lib/utils';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
