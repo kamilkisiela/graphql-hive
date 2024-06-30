@@ -6,9 +6,9 @@ import { SchemaEditor } from '@/components/schema-editor';
 import {
   ChangesBlock,
   CompositionErrorsSection,
-  labelize,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { labelize } from '@/components/target/history/labelize';
 import { Button } from '@/components/ui/button';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';

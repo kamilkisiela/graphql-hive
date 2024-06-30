@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { CheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
-import { Label, Label as LegacyLabel } from '@/components/common';
+import { Label as LegacyLabel } from '@/components/common';
 import {
   Accordion,
   AccordionContent,
@@ -29,14 +29,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { Link } from '@tanstack/react-router';
-
-export function labelize(message: string) {
-  // Turn " into '
-  // Replace '...' with <Label>...</Label>
-  return reactStringReplace(message.replace(/"/g, "'"), /'([^']+)'/gim, (match, i) => {
-    return <Label key={i}>{match}</Label>;
-  });
-}
+import { labelize } from './labelize';
 
 const criticalityLevelMapping = {
   [CriticalityLevel.Safe]: clsx('text-emerald-400'),

@@ -197,6 +197,10 @@ export function implement<Model = never>() {
   };
 }
 
+function replaceQuotes(value: string): string {
+  return value.replaceAll("'", '&apos;').replaceAll('"', '&quot;');
+}
+
 export const FieldArgumentDescriptionChangedModel =
   implement<FieldArgumentDescriptionChangedChange>().with({
     type: FieldArgumentDescriptionChangedLiteral,
@@ -204,8 +208,8 @@ export const FieldArgumentDescriptionChangedModel =
       typeName: z.string(),
       fieldName: z.string(),
       argumentName: z.string(),
-      oldDescription: z.union([z.string(), z.null()]),
-      newDescription: z.union([z.string(), z.null()]),
+      oldDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
+      newDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
     }),
   });
 
@@ -253,8 +257,8 @@ export const DirectiveDescriptionChangedModel = implement<DirectiveDescriptionCh
     type: DirectiveDescriptionChangedLiteral,
     meta: z.object({
       directiveName: z.string(),
-      oldDirectiveDescription: z.union([z.string(), z.null()]),
-      newDirectiveDescription: z.union([z.string(), z.null()]),
+      oldDirectiveDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
+      newDirectiveDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
     }),
   },
 );
@@ -298,8 +302,8 @@ export const DirectiveArgumentDescriptionChangedModel =
     meta: z.object({
       directiveName: z.string(),
       directiveArgumentName: z.string(),
-      oldDirectiveArgumentDescription: z.union([z.string(), z.null()]),
-      newDirectiveArgumentDescription: z.union([z.string(), z.null()]),
+      oldDirectiveArgumentDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
+      newDirectiveArgumentDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
     }),
   });
 
@@ -351,8 +355,8 @@ export const EnumValueDescriptionChangedModel = implement<EnumValueDescriptionCh
     meta: z.object({
       enumName: z.string(),
       enumValueName: z.string(),
-      oldEnumValueDescription: z.union([z.string(), z.null()]),
-      newEnumValueDescription: z.union([z.string(), z.null()]),
+      oldEnumValueDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
+      newEnumValueDescription: z.union([z.string().transform(replaceQuotes), z.null()]),
     }),
   },
 );
@@ -414,8 +418,8 @@ export const FieldDescriptionChangedModel = implement<FieldDescriptionChangedCha
   meta: z.object({
     typeName: z.string(),
     fieldName: z.string(),
-    oldDescription: z.string(),
-    newDescription: z.string(),
+    oldDescription: z.string().transform(replaceQuotes),
+    newDescription: z.string().transform(replaceQuotes),
   }),
 });
 
@@ -562,8 +566,8 @@ export const InputFieldDescriptionChangedModel =
     meta: z.object({
       inputName: z.string(),
       inputFieldName: z.string(),
-      oldInputFieldDescription: z.string(),
-      newInputFieldDescription: z.string(),
+      oldInputFieldDescription: z.string().transform(replaceQuotes),
+      newInputFieldDescription: z.string().transform(replaceQuotes),
     }),
   });
 
@@ -662,8 +666,8 @@ export const TypeDescriptionChangedModel = implement<TypeDescriptionChangedChang
   type: TypeDescriptionChangedLiteral,
   meta: z.object({
     typeName: z.string(),
-    oldTypeDescription: z.string(),
-    newTypeDescription: z.string(),
+    oldTypeDescription: z.string().transform(replaceQuotes),
+    newTypeDescription: z.string().transform(replaceQuotes),
   }),
 });
 
