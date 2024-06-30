@@ -41,7 +41,7 @@ export const WithOutMembers: Story = {
                 members={[]}
                 onSubmit={() => console.log('submit')}
                 toggleModalOpen={toggleModalOpen}
-                organizationCleanId="organizationCleanId"
+                organizationCleanId="org"
                 handleRoute={() => console.log('handleRoute')}
               />
             </div>
@@ -82,7 +82,7 @@ export const WithMembers: Story = {
                     user: {
                       id: '1',
                       __typename: 'User',
-                      displayName: 'Test User',
+                      displayName: 'Test User 1',
                       email: 'test@gmail.com',
                       fullName: 'Test User',
                     },
@@ -97,7 +97,7 @@ export const WithMembers: Story = {
                     user: {
                       id: '2',
                       __typename: 'User',
-                      displayName: 'Test User',
+                      displayName: 'Test User 2',
                       email: 'test@gmail.com',
                       fullName: 'Test User',
                     },
@@ -112,7 +112,7 @@ export const WithMembers: Story = {
                     user: {
                       id: '3',
                       __typename: 'User',
-                      displayName: 'Test User',
+                      displayName: 'Test User 3',
                       email: 'test@gmail.com',
                       fullName: 'Test User',
                     },
@@ -127,7 +127,7 @@ export const WithMembers: Story = {
                     user: {
                       id: '4',
                       __typename: 'User',
-                      displayName: 'Test User',
+                      displayName: 'Test User 4',
                       email: 'test@gmail.com',
                       fullName: 'Test User',
                     },
@@ -135,7 +135,7 @@ export const WithMembers: Story = {
                 ]}
                 onSubmit={() => console.log('submit')}
                 toggleModalOpen={toggleModalOpen}
-                organizationCleanId="organizationCleanId"
+                organizationCleanId="org"
                 handleRoute={() => console.log('handleRoute')}
               />
             </div>
