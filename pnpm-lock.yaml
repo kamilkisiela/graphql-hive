@@ -776,8 +776,8 @@ importers:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       supertokens-node:
-        specifier: 15.2.1
-        version: 15.2.1(encoding@0.1.13)
+        specifier: 18.0.1
+        version: 18.0.1(encoding@0.1.13)
       tslib:
         specifier: 2.6.3
         version: 2.6.3
@@ -1202,8 +1202,8 @@ importers:
         specifier: 0.0.4
         version: 0.0.4
       supertokens-node:
-        specifier: 15.2.1
-        version: 15.2.1(encoding@0.1.13)
+        specifier: 18.0.1
+        version: 18.0.1(encoding@0.1.13)
       tslib:
         specifier: 2.6.3
         version: 2.6.3
@@ -8934,9 +8934,6 @@ packages:
     resolution: {integrity: sha512-M0JtH+hlOL5pLQwHOLNYZaXuhqmvS8oExsqB1SBYgA4Dk7u/xx+YdGHXaK5pyUfed5mYXdlYiphWq3G8cRi5JQ==}
     engines: {node: '>=4'}
 
-  axios@0.26.1:
-    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
-
   axios@1.6.5:
     resolution: {integrity: sha512-Ii012v05KEVuUoFWmMW/UQv9aRIc3ZwkWDcM+h5Il8izZCtRVpDUfwpoFf7eOtajT3QiGR4yDUx7lPqHJULgbg==}
 
@@ -9948,6 +9945,9 @@ packages:
 
   dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
+
+  dayjs@1.11.11:
+    resolution: {integrity: sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==}
 
   dayjs@1.11.7:
     resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
@@ -13576,10 +13576,6 @@ packages:
     resolution: {integrity: sha512-Dobp/ebDKBvz91sbtRKhcznLThrKxKt97GI2FAlAyy+fk19j73Uz3sBXolVtmcXjaorivqsbbbjDY+Jkt4/bQA==}
     engines: {node: '>=6.0.0'}
 
-  nodemailer@6.9.7:
-    resolution: {integrity: sha512-rUtR77ksqex/eZRLmQ21LKVH5nAAsVicAtAYudK7JgwenEDZ0UIQ1adUGqErz7sMkWYxWTTU1aeP2Jga6WQyJw==}
-    engines: {node: '>=6.0.0'}
-
   noms@0.0.0:
     resolution: {integrity: sha512-lNDU9VJaOPxUmXcLb+HQFeUgQQPtMI24Gt6hgfuMHRJgMRHMF/qZ4HJD3GDru4sSw9IQl2jPjAYnQrdIeLbwow==}
 
@@ -15845,8 +15841,8 @@ packages:
   supertokens-js-override@0.0.4:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
 
-  supertokens-node@15.2.1:
-    resolution: {integrity: sha512-3zJ2EsiHYJHnYwAzDQI5Alp+4x/KcwEOBgeoPN5bWglZY0Xw0AzcZvd8S3N71vjLGvab0J3XxWmHeEHqSz5dbg==}
+  supertokens-node@18.0.1:
+    resolution: {integrity: sha512-hyZkXJeDX6769kVJ2o1/DtdxAbFr+gGeT4YJhooQjRPdyUvTfRO3gOSVODsYe3zlpuj4ha+uGOHLQIUR1/4eqA==}
 
   supertokens-web-js@0.8.0:
     resolution: {integrity: sha512-kkvuPbdy1I0e7nejVJAhpPJhR5h7EUHdn7Fh1YqfSjZfSJh46J3JU2qWGCgSDVZuD1hSuUKb6skF9CQnltHWrQ==}
@@ -16258,8 +16254,8 @@ packages:
   tweetnacl@0.14.5:
     resolution: {integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA==}
 
-  twilio@4.7.2:
-    resolution: {integrity: sha512-sTdEwAhkDzoDoXE3i83F/CdZegZ5O1FPDY0hAnJmGr/TjDqGl+Q6WzjC0+9cTmQnjCaDg6H4L97UZeJLFFEh3A==}
+  twilio@4.23.0:
+    resolution: {integrity: sha512-LdNBQfOe0dY2oJH2sAsrxazpgfFQo5yXGxe96QA8UWB5uu+433PrUbkv8gQ5RmrRCqUTPQ0aOrIyAdBr1aB03Q==}
     engines: {node: '>=14.0'}
 
   twoslash-protocol@0.2.4:
@@ -24322,7 +24318,7 @@ snapshots:
       '@slack/types': 2.11.0
       '@types/node': 20.14.9
       '@types/retry': 0.12.0
-      axios: 1.6.5
+      axios: 1.6.5(debug@4.3.5)
       eventemitter3: 5.0.1
       form-data: 4.0.0
       is-electron: 2.2.2
@@ -26882,15 +26878,9 @@ snapshots:
 
   axe-core@4.7.0: {}
 
-  axios@0.26.1(debug@4.3.4):
+  axios@1.6.5(debug@4.3.5):
     dependencies:
-      follow-redirects: 1.15.4(debug@4.3.4)
-    transitivePeerDependencies:
-      - debug
-
-  axios@1.6.5:
-    dependencies:
-      follow-redirects: 1.15.4(debug@4.3.4)
+      follow-redirects: 1.15.4(debug@4.3.5)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -28135,6 +28125,8 @@ snapshots:
   date-fns@3.6.0: {}
 
   dateformat@4.6.3: {}
+
+  dayjs@1.11.11: {}
 
   dayjs@1.11.7: {}
 
@@ -29508,9 +29500,9 @@ snapshots:
 
   focus-visible@5.2.0: {}
 
-  follow-redirects@1.15.4(debug@4.3.4):
+  follow-redirects@1.15.4(debug@4.3.5):
     optionalDependencies:
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5(supports-color@8.1.1)
 
   for-each@0.3.3:
     dependencies:
@@ -33023,8 +33015,6 @@ snapshots:
 
   nodemailer@6.9.14: {}
 
-  nodemailer@6.9.7: {}
-
   noms@0.0.0:
     dependencies:
       inherits: 2.0.4
@@ -35564,20 +35554,20 @@ snapshots:
 
   supertokens-js-override@0.0.4: {}
 
-  supertokens-node@15.2.1(encoding@0.1.13):
+  supertokens-node@18.0.1(encoding@0.1.13):
     dependencies:
       content-type: 1.0.5
       cookie: 0.4.0
       cross-fetch: 3.1.8(encoding@0.1.13)
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5(supports-color@8.1.1)
       inflation: 2.0.0
       jose: 4.14.4
       libphonenumber-js: 1.10.14
-      nodemailer: 6.9.7
+      nodemailer: 6.9.14
       pkce-challenge: 3.1.0
       psl: 1.8.0
       supertokens-js-override: 0.0.4
-      twilio: 4.7.2(debug@4.3.4)
+      twilio: 4.23.0(debug@4.3.5)
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -36016,10 +36006,10 @@ snapshots:
 
   tweetnacl@0.14.5: {}
 
-  twilio@4.7.2(debug@4.3.4):
+  twilio@4.23.0(debug@4.3.5):
     dependencies:
-      axios: 0.26.1(debug@4.3.4)
-      dayjs: 1.11.7
+      axios: 1.6.5(debug@4.3.5)
+      dayjs: 1.11.11
       https-proxy-agent: 5.0.1
       jsonwebtoken: 9.0.0
       qs: 6.11.2
