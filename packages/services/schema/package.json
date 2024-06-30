@@ -22,7 +22,7 @@
     "@types/ioredis-mock": "8.2.5",
     "dotenv": "16.4.5",
     "fast-json-stable-stringify": "2.1.0",
-    "fastify": "4.28.0",
+    "fastify": "4.28.1",
     "got": "14.4.1",
     "graphql": "16.9.0",
     "ioredis": "5.4.1",
