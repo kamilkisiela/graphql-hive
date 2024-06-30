@@ -198,6 +198,10 @@ export const TransferOrganizationOwnershipContent = (props: {
     label: member.user.fullName,
   })) as Option[];
 
+  // Did this way to avoid using formSchema inside the component scope
+  const newOwner = props.form.watch('newOwner');
+  const orgIdMatchToNewOwner = newOwner === props.organizationCleanId;
+
   return (
     <Form {...props.form}>
       <form className="bg-black" onSubmit={props.form.handleSubmit(props.onSubmit)}>
@@ -271,6 +275,14 @@ export const TransferOrganizationOwnershipContent = (props: {
               <FormField
                 disabled={options.length === 0}
                 control={props.form.control}
+                rules={{
+                  validate: value => {
+                    if (value !== props.organizationCleanId) {
+                      return 'Organization name is not correct';
+                    }
+                    return true;
+                  },
+                }}
                 name="newOwner"
                 render={({ field }) => (
                   <FormItem className="flex w-full flex-col">
@@ -319,7 +331,7 @@ export const TransferOrganizationOwnershipContent = (props: {
                 size="lg"
                 className="w-full justify-center"
                 variant="primary"
-                disabled={!valuePopover || !props.form.formState.isValid}
+                disabled={!orgIdMatchToNewOwner || !valuePopover}
               >
                 Transfer this organization
               </Button>
