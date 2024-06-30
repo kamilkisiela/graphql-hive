@@ -1,12 +1,6 @@
 import { Tag } from '@/components/ui/tag';
 import { Meta, StoryObj } from '@storybook/react';
 
-const colors = {
-  green: 'bg-green-500/10 text-green-500',
-  yellow: 'bg-yellow-500/10 text-yellow-500',
-  gray: 'bg-gray-500/10 text-gray-500',
-} as const;
-
 const meta: Meta<typeof Tag> = {
   title: 'Components/Tag',
   component: Tag,

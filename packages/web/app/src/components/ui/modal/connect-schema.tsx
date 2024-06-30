@@ -251,7 +251,7 @@ export const ConnectSchemaModalContent = (props: {
               </Tag>
             </p>
             <Button asChild variant="link" className="whitespace-pre-wrap p-0 text-orange-500">
-              <a href={'/features/high-availability-cdn'} target="_blank" rel="noreferrer">
+              <a href="/features/high-availability-cdn" target="_blank" rel="noreferrer">
                 Learn more about Hive High-Availability CDN
                 <ExternalLinkIcon className="inline pl-1" />
               </a>

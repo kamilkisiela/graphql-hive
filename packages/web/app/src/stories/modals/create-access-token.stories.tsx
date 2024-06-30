@@ -70,7 +70,7 @@ export const GenerateToken: Story = {
           selectedScope="no-access"
           setSelectedScope={setSelectedScope}
           toggleModalOpen={toggleModalOpen}
-          key={'generate-token-content'}
+          key="generate-token-content"
         />
       </Dialog>
     );
