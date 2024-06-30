@@ -154,7 +154,7 @@ export const Default: Story = {
                 <span className="text-sm text-gray-500">
                   To access your schema from Hive's CDN, use the following endpoint:
                 </span>
-                <CopyValue value={'test'} />
+                <CopyValue value="test" />
                 <span className="text-sm text-gray-500">
                   To authenticate,{' '}
                   <Link
@@ -182,7 +182,7 @@ export const Default: Story = {
                   </Tag>
                 </p>
                 <Button asChild variant="link" className="whitespace-pre-wrap p-0 text-orange-500">
-                  <a href={'/features/high-availability-cdn'} target="_blank" rel="noreferrer">
+                  <a href="/features/high-availability-cdn" target="_blank" rel="noreferrer">
                     Learn more about Hive High-Availability CDN
                     <ExternalLinkIcon className="inline pl-1" />
                   </a>
