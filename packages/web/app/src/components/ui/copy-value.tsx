@@ -1,8 +1,9 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
-import { Input } from '@/components/v2';
 import { CheckIcon, CopyIcon } from '@/components/v2/icon';
 import { useClipboard } from '@/lib/hooks';
-import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
+import { Button } from './button';
+import { Input } from './input';
 
 export const CopyValue = ({
   value,
@@ -31,21 +32,21 @@ export const CopyValue = ({
   }, [value, copyToClipboard]);
 
   return (
-    <Input
-      className={className}
-      value={value}
-      readOnly
-      suffix={
-        <Button
-          size="icon"
-          variant="link"
-          className="p-0 focus:ring-transparent"
-          onClick={handleClick}
-          title={isCopied ? 'Copied!' : 'Copy to clipboard'}
-        >
-          {isCopied ? <CheckIcon /> : <CopyIcon />}
-        </Button>
-      }
-    />
+    <div className={cn('relative', className)}>
+      <Input
+        value={value}
+        readOnly
+        className="pr-10" // Adjust padding to make room for the button
+      />
+      <Button
+        size="icon"
+        variant="link"
+        className="absolute right-0 top-0 p-2 focus:ring-transparent"
+        onClick={handleClick}
+        title={isCopied ? 'Copied!' : 'Copy to clipboard'}
+      >
+        {isCopied ? <CheckIcon /> : <CopyIcon />}
+      </Button>
+    </div>
   );
 };

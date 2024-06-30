@@ -4,7 +4,7 @@ import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProductUpdatesLink } from '@/components/ui/docs-note';
+import { DocsNote, ProductUpdatesLink } from '@/components/ui/docs-note';
 import {
   Form,
   FormControl,
@@ -15,8 +15,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsNote, Spinner, Switch } from '@/components/v2';
+import { Switch } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';

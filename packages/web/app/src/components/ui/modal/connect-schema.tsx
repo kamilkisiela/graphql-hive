@@ -1,5 +1,5 @@
 import { ReactElement, useMemo, useState } from 'react';
-import { useQuery } from 'urql';
+import { useQuery, UseQueryState } from 'urql';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -9,10 +9,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Heading } from '@/components/ui/heading';
-import { CopyValue, DocsLink, Link, RadixSelect, Tag } from '@/components/v2';
 import { graphql } from '@/gql';
-import { ProjectType } from '@/gql/graphql';
+import { ProjectType, type ConnectSchemaModalQuery as ConnectSchemaQuery } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import { Link } from '@tanstack/react-router';
+import { CopyValue } from '../copy-value';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '../select';
+import { Tag } from '../tag';
 
 const ConnectSchemaModalQuery = graphql(`
   query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
@@ -38,13 +50,13 @@ const ConnectSchemaModalQuery = graphql(`
 
 type CdnArtifactType = 'sdl' | 'services' | 'supergraph' | 'metadata';
 
-const ArtifactToProjectTypeMapping: Record<ProjectType, CdnArtifactType[]> = {
+export const ArtifactToProjectTypeMapping: Record<ProjectType, CdnArtifactType[]> = {
   [ProjectType.Single]: ['sdl', 'metadata'],
   [ProjectType.Stitching]: ['sdl', 'services'],
   [ProjectType.Federation]: ['sdl', 'services', 'supergraph'],
 };
 
-const ArtifactTypeToDisplayName: Record<CdnArtifactType, string> = {
+export const ArtifactTypeToDisplayName: Record<CdnArtifactType, string> = {
   sdl: 'GraphQL SDL',
   services: 'Services Definition and SDL',
   supergraph: 'Apollo Federation Supergraph',
@@ -64,7 +76,6 @@ export const ConnectSchemaModal = (props: {
 }): ReactElement => {
   const { isOpen, toggleModalOpen } = props;
   const [selectedGraph, setSelectedGraph] = useState<string>('DEFAULT_GRAPH');
-  const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
   const [query] = useQuery({
     query: ConnectSchemaModalQuery,
     variables: {
@@ -89,21 +100,55 @@ export const ConnectSchemaModal = (props: {
   }, [selectedGraph, query.data?.target?.activeContracts.edges]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <ConnectSchemaModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      query={query}
+      selectedGraph={selectedGraph}
+      setSelectedGraph={setSelectedGraph}
+      selectedContract={selectedContract}
+      organizationId={props.organizationId}
+      projectId={props.projectId}
+      targetId={props.targetId}
+    />
+  );
+};
+
+export const ConnectSchemaModalContent = (props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  query: UseQueryState<ConnectSchemaQuery>;
+  selectedGraph: string;
+  setSelectedGraph: (value: string) => void;
+  selectedContract:
+    | {
+        __typename: 'Contract';
+        id: string;
+        contractName: string;
+        cdnUrl: string;
+      }
+    | null
+    | undefined;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}): ReactElement => {
+  const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="flex w-[800px] flex-col gap-5">
         <DialogHeader>
           <DialogTitle>
             <Heading className="text-center">Hive CDN Access</Heading>
           </DialogTitle>
         </DialogHeader>
-        {query.data?.target && (
+        {props.query.data?.target && (
           <>
             <p className="text-sm text-gray-500">
               Hive leverages the{' '}
               <Link
                 as="a"
-                variant="primary"
-                className="font-bold underline"
+                className="font-bold text-orange-500 underline"
                 href="https://www.cloudflare.com/network"
                 target="_blank"
                 rel="noreferrer"
@@ -117,24 +162,10 @@ export const ConnectSchemaModal = (props: {
             <p className="text-sm text-gray-500">
               Based on your project type, you can access different artifacts from Hive's CDN:
             </p>
-            <div>
-              <RadixSelect
-                className="mr-2"
-                placeholder="Select Graph"
-                name="graph-variant-select"
-                position="popper"
-                value={selectedGraph}
-                options={[
-                  {
-                    value: 'DEFAULT_GRAPH',
-                    label: 'Default Graph',
-                  },
-                  ...query.data.target.activeContracts.edges.map(({ node }) => ({
-                    value: node.contractName,
-                    label: node.contractName,
-                  })),
-                ]}
-                onChange={value => {
+            <div className="flex flex-row justify-between">
+              <Select
+                value={props.selectedGraph}
+                onValueChange={value => {
                   if (
                     value !== 'DEFAULT_GRAPH' &&
                     selectedArtifact !== 'sdl' &&
@@ -142,28 +173,54 @@ export const ConnectSchemaModal = (props: {
                   ) {
                     setSelectedArtifact('sdl');
                   }
-                  setSelectedGraph(value);
+                  props.setSelectedGraph(value);
                 }}
-              />
-              <RadixSelect
-                placeholder="Select Artifact"
-                name="artifact-select"
-                position="popper"
+              >
+                <SelectTrigger className="mr-2 w-[280px]">
+                  <SelectValue placeholder="Select Graph" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    <SelectLabel>Graphs</SelectLabel>
+                    {[
+                      { value: 'DEFAULT_GRAPH', label: 'Default Graph' },
+                      ...props.query.data.target.activeContracts.edges.map(({ node }) => ({
+                        value: node.contractName,
+                        label: node.contractName,
+                      })),
+                    ].map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <Select
                 value={selectedArtifact}
-                options={ArtifactToProjectTypeMapping[query.data.target.project.type].map(t => ({
-                  value: t,
-                  label: ArtifactTypeToDisplayName[t],
-                  disabled: t !== 'supergraph' && t !== 'sdl' && selectedGraph !== 'DEFAULT_GRAPH',
-                }))}
-                onChange={setSelectedArtifact}
-              />
+                onValueChange={value => setSelectedArtifact(value as CdnArtifactType)}
+              >
+                <SelectTrigger className="mr-2 w-[280px]">
+                  <SelectValue placeholder="Select Artifact" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectGroup>
+                    <SelectLabel>Artifacts</SelectLabel>
+                    {ArtifactToProjectTypeMapping[props.query.data.target.project.type].map(t => (
+                      <SelectItem key={t} value={t}>
+                        {ArtifactTypeToDisplayName[t]}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
             <span className="text-sm text-gray-500">
               To access your schema from Hive's CDN, use the following endpoint:
             </span>
             <CopyValue
               value={composeEndpoint(
-                selectedContract?.cdnUrl ?? query.data.target.cdnUrl,
+                props.selectedContract?.cdnUrl ?? props.query.data.target.cdnUrl,
                 selectedArtifact,
               )}
             />
@@ -173,8 +230,7 @@ export const ConnectSchemaModal = (props: {
                 search={{
                   page: 'cdn',
                 }}
-                variant="primary"
-                className="font-bold underline"
+                className="font-bold text-orange-500 underline"
                 to="/$organizationId/$projectId/$targetId/settings"
                 params={{
                   organizationId: props.organizationId,
@@ -190,18 +246,21 @@ export const ConnectSchemaModal = (props: {
               <br />
             </span>
             <p className="text-sm text-gray-500">
-              <Tag>
+              <Tag className="w-full">
                 X-Hive-CDN-Key: {'<'}Your Access Token{'>'}
               </Tag>
             </p>
-            <DocsLink href="/features/high-availability-cdn">
-              Learn more about Hive High-Availability CDN
-            </DocsLink>
-            {query.data.target.project.type === ProjectType.Federation ? (
+            <Button asChild variant="link" className="whitespace-pre-wrap p-0 text-orange-500">
+              <a href={'/features/high-availability-cdn'} target="_blank" rel="noreferrer">
+                Learn more about Hive High-Availability CDN
+                <ExternalLinkIcon className="inline pl-1" />
+              </a>
+            </Button>
+            {props.query.data.target.project.type === ProjectType.Federation ? (
               <p className="text-sm text-gray-500">
                 Read the{' '}
                 <Link
-                  variant="primary"
+                  className="text-orange-500"
                   target="_blank"
                   rel="noreferrer"
                   to={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn')}
@@ -214,7 +273,12 @@ export const ConnectSchemaModal = (props: {
           </>
         )}
         <DialogFooter>
-          <Button className="w-full" type="submit" onClick={toggleModalOpen} variant="default">
+          <Button
+            className="w-full"
+            type="submit"
+            onClick={props.toggleModalOpen}
+            variant="default"
+          >
             Close
           </Button>
         </DialogFooter>

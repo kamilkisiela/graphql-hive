@@ -1,6 +1,6 @@
 import { ReactElement, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useMutation, useQuery } from 'urql';
+import { useForm, UseFormReturn } from 'react-hook-form';
+import { AnyVariables, useMutation, UseMutationState, useQuery } from 'urql';
 import { z } from 'zod';
 import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
 import { Button } from '@/components/ui/button';
@@ -15,11 +15,13 @@ import {
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { Accordion, CopyValue, Tag } from '@/components/v2';
+import { Accordion } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { RegistryAccessScope } from '@/lib/access/common';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CopyValue } from '../copy-value';
+import { Tag } from '../tag';
 
 export const CreateAccessToken_CreateTokenMutation = graphql(`
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
@@ -190,32 +192,64 @@ export function ModalContent(props: {
 
   const noPermissionsSelected = selectedScope === 'no-access';
   if (mutation.data?.createToken.ok) {
-    return (
-      <DialogContent>
-        <DialogHeader className="flex flex-col gap-5">
-          <DialogTitle>Token successfully created!</DialogTitle>
-          <DialogDescription className="flex flex-col gap-5">
-            <CopyValue value={mutation.data.createToken.ok.secret} />
-            <Tag color="green">
-              This is your unique API key and it is non-recoverable. If you lose this key, you will
-              need to create a new one.
-            </Tag>
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter className="sm:justify-start">
-          <Button variant="primary" size="lg" className="ml-auto" onClick={props.toggleModalOpen}>
-            Ok, got it!
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    );
+    return <CreatedTokenContent mutation={mutation} toggleModalOpen={props.toggleModalOpen} />;
   }
 
   return (
+    <GenerateTokenContent
+      form={form}
+      manager={manager}
+      noPermissionsSelected={noPermissionsSelected}
+      onSubmit={onSubmit}
+      selectedScope="no-access"
+      setSelectedScope={setSelectedScope}
+      toggleModalOpen={props.toggleModalOpen}
+    />
+  );
+}
+
+export const CreatedTokenContent = (props: {
+  mutation: UseMutationState<any, AnyVariables>;
+  toggleModalOpen: () => void;
+}): ReactElement => {
+  return (
     <DialogContent>
-      <Form {...form}>
-        <form className="flex grow flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)}>
+      <DialogHeader className="flex flex-col gap-5">
+        <DialogTitle>Token successfully created!</DialogTitle>
+        <DialogDescription className="flex flex-col gap-5">
+          <CopyValue value={props.mutation.data.createToken.ok.secret} />
+          <Tag color="green">
+            This is your unique API key and it is non-recoverable. If you lose this key, you will
+            need to create a new one.
+          </Tag>
+        </DialogDescription>
+      </DialogHeader>
+
+      <DialogFooter className="sm:justify-start">
+        <Button variant="primary" size="lg" className="ml-auto" onClick={props.toggleModalOpen}>
+          Ok, got it!
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+};
+
+export const GenerateTokenContent = (props: {
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  manager: ReturnType<typeof usePermissionsManager>;
+  setSelectedScope: (scope: 'no-access' | TargetAccessScope) => void;
+  selectedScope: 'no-access' | TargetAccessScope;
+  toggleModalOpen: () => void;
+  noPermissionsSelected: boolean;
+}): ReactElement => {
+  return (
+    <DialogContent>
+      <Form {...props.form}>
+        <form
+          className="flex grow flex-col gap-5"
+          onSubmit={props.form.handleSubmit(props.onSubmit)}
+        >
           <DialogHeader>
             <DialogTitle>Create an access token</DialogTitle>
             <DialogDescription>
@@ -223,7 +257,7 @@ export function ModalContent(props: {
             </DialogDescription>
           </DialogHeader>
           <FormField
-            control={form.control}
+            control={props.form.control}
             name="name"
             render={({ field }) => {
               return (
@@ -244,20 +278,20 @@ export function ModalContent(props: {
                   <PermissionScopeItem
                     scope={RegistryAccessScope}
                     canManageScope={
-                      manager.canAccessTarget(RegistryAccessScope.mapping['read-only']) ||
-                      manager.canAccessTarget(RegistryAccessScope.mapping['read-write'])
+                      props.manager.canAccessTarget(RegistryAccessScope.mapping['read-only']) ||
+                      props.manager.canAccessTarget(RegistryAccessScope.mapping['read-write'])
                     }
-                    checkAccess={manager.canAccessTarget}
+                    checkAccess={props.manager.canAccessTarget}
                     onChange={value => {
                       if (value === 'no-access') {
-                        setSelectedScope('no-access');
+                        props.setSelectedScope('no-access');
                         return;
                       }
-                      setSelectedScope(value);
+                      props.setSelectedScope(value);
                     }}
                     possibleScope={Object.values(RegistryAccessScope.mapping)}
-                    initialScope={selectedScope}
-                    selectedScope={selectedScope}
+                    initialScope={props.selectedScope}
+                    selectedScope={props.selectedScope}
                   />
                 </Accordion.Content>
               </Accordion.Item>
@@ -277,7 +311,7 @@ export function ModalContent(props: {
               size="lg"
               className="w-full justify-center"
               variant="primary"
-              disabled={form.formState.isSubmitting || noPermissionsSelected}
+              disabled={props.form.formState.isSubmitting || props.noPermissionsSelected}
             >
               Generate Token
             </Button>
@@ -286,4 +320,4 @@ export function ModalContent(props: {
       </Form>
     </DialogContent>
   );
-}
+};

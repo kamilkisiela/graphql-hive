@@ -12,7 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input, Tag } from '@/components/v2';
+import { Tag } from '@/components/ui/tag';
+import { Input } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
