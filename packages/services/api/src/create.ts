@@ -5,6 +5,7 @@ import { activityModule } from './modules/activity';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
 import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
+import { appDeploymentsModule } from './modules/app-deployments';
 import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
@@ -89,6 +90,7 @@ const modules = [
   oidcIntegrationsModule,
   schemaPolicyModule,
   collectionModule,
+  appDeploymentsModule,
 ];
 
 export function createRegistry({

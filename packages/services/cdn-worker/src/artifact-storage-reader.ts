@@ -20,8 +20,27 @@ type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 
 export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
 
+/** S3 key for stored operation body (used by CDN). */
+export function buildOperationS3BucketKey(
+  targetId: string,
+  appName: string,
+  appVersion: string,
+  hash: string,
+) {
+  return ['app', targetId, appName, appVersion, hash].join('/');
+}
+
+/** S3 key for determining whether app deployment is enabled or not. */
+export function buildAppDeploymentIsEnabledKey(
+  targetId: string,
+  appName: string,
+  appVersion: string,
+) {
+  return ['apps-enabled', targetId, appName, appVersion].join('/');
+}
+
 /**
- * Read an Artifact to an S3 bucket.
+ * Read an artifact/app deployment operation from S3.
  */
 export class ArtifactStorageReader {
   private publicUrl: URL | null;
@@ -116,6 +135,84 @@ export class ArtifactStorageReader {
     if (response.status === 404) {
       return { type: 'notFound' } as const;
     }
+    const body = await response.text();
+    throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
+  }
+
+  async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {
+    const key = buildAppDeploymentIsEnabledKey(targetId, appName, appVersion);
+
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+      {
+        method: 'HEAD',
+        aws: {
+          signQuery: true,
+        },
+      },
+    );
+    this.analytics?.track(
+      {
+        type: 'r2',
+        statusCode: response.status,
+        action: 'HEAD appDeploymentIsEnabled',
+      },
+      targetId,
+    );
+
+    return response.status === 200;
+  }
+
+  async loadAppDeploymentPersistedOperation(
+    targetId: string,
+    appName: string,
+    appVersion: string,
+    hash: string,
+    etagValue: string | null,
+  ) {
+    const key = buildOperationS3BucketKey(targetId, appName, appVersion, hash);
+
+    const headers: Record<string, string> = {};
+    if (etagValue) {
+      headers['if-none-match'] = etagValue;
+    }
+
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+      {
+        method: 'GET',
+        aws: {
+          signQuery: true,
+        },
+        headers,
+      },
+    );
+
+    this.analytics?.track(
+      {
+        type: 'r2',
+        statusCode: response.status,
+        action: 'GET persistedOperation',
+      },
+      targetId,
+    );
+
+    if (etagValue && response.status === 304) {
+      return { type: 'notModified' } as const;
+    }
+
+    if (response.status === 200) {
+      const body = await response.text();
+      return {
+        type: 'body',
+        body,
+      } as const;
+    }
+
+    if (response.status === 404) {
+      return { type: 'notFound' } as const;
+    }
+
     const body = await response.text();
     throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
   }

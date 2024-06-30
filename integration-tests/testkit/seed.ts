@@ -169,7 +169,7 @@ export function initSeed() {
               return members;
             },
             async createProject(
-              projectType: ProjectType,
+              projectType: ProjectType = ProjectType.Single,
               options?: {
                 useLegacyRegistryModels?: boolean;
               },

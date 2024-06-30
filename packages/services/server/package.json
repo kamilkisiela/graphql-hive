@@ -5,8 +5,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "tsx ../../../scripts/runify.ts && tsx ./scripts/copy-persisted-operations.mts",
-    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
+    "build": "tsx ../../../scripts/runify.ts src/index.ts src/persisted-documents-worker.ts && tsx ./scripts/copy-persisted-operations.mts",
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts src/persisted-documents-worker.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

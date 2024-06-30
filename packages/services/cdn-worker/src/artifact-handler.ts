@@ -1,8 +1,9 @@
 import * as itty from 'itty-router';
 import zod from 'zod';
 import { createAnalytics, type Analytics } from './analytics';
-import { type ArtifactsType } from './artifact-storage-reader';
+import { type ArtifactStorageReader, type ArtifactsType } from './artifact-storage-reader';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
+import { IsAppDeploymentActive } from './is-app-deployment-active';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
 
@@ -14,6 +15,7 @@ export type GetArtifactActionFn = (
 ) => Promise<
   | { type: 'notModified' }
   | { type: 'notFound' }
+  | { type: 'body'; body: string }
   | {
       type: 'redirect';
       location: {
@@ -24,13 +26,18 @@ export type GetArtifactActionFn = (
 >;
 
 type ArtifactRequestHandler = {
-  getArtifactAction: GetArtifactActionFn;
+  artifactStorageReader: ArtifactStorageReader;
   isKeyValid: KeyValidator;
+  isAppDeploymentActive: IsAppDeploymentActive;
   analytics?: Analytics;
   fallback?: (
     request: Request,
     params: { targetId: string; artifactType: string },
   ) => Promise<Response | undefined>;
+  requestCache?: {
+    get: (request: Request) => Promise<Response | undefined>;
+    set: (request: Request, response: Response) => void;
+  };
 };
 
 const ParamsModel = zod.object({
@@ -48,6 +55,13 @@ const ParamsModel = zod.object({
     .string()
     .optional()
     .transform(value => value ?? null),
+});
+
+const PersistedOperationParamsModel = zod.object({
+  targetId: zod.string(),
+  appName: zod.string(),
+  appVersion: zod.string(),
+  operationHash: zod.string(),
 });
 
 const authHeaderName = 'x-hive-cdn-key' as const;
@@ -124,7 +138,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.getArtifactAction(
+    const result = await deps.artifactStorageReader.generateArtifactReadUrl(
       params.targetId,
       params.contractName,
       params.artifactType,
@@ -210,7 +224,111 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
   router.get('/artifacts/v1/:targetId/contracts/:contractName/:artifactType', handlerV1);
   router.get('/artifacts/v1/:targetId/:artifactType', handlerV1);
+  router.get(
+    '/artifacts/v1/:targetId/apps/:appName/:appVersion/:operationHash',
+    async function PersistedOperationHandler(request) {
+      const parseResult = PersistedOperationParamsModel.safeParse(request.params);
 
-  return (request: Request, captureException?: (error: unknown) => void) =>
-    router.handle(request, captureException);
+      if (parseResult.success === false) {
+        analytics.track(
+          { type: 'error', value: ['invalid-params'] },
+          request.params?.targetId ?? 'unknown',
+        );
+
+        return createResponse(
+          analytics,
+          'Not found.',
+          {
+            status: 404,
+          },
+          request.params?.targetId ?? 'unknown',
+          request,
+        );
+      }
+
+      const params = parseResult.data;
+
+      const maybeResponse = await authenticate(request, params.targetId);
+
+      if (maybeResponse !== null) {
+        return maybeResponse;
+      }
+
+      const response = await deps.requestCache?.get(request);
+      if (response) {
+        return response;
+      }
+
+      if (
+        false ===
+        (await deps.isAppDeploymentActive(params.targetId, params.appName, params.appVersion))
+      ) {
+        analytics.track(
+          { type: 'error', value: ['app-deployment-not-active'] },
+          request.params?.targetId ?? 'unknown',
+        );
+
+        return createResponse(
+          analytics,
+          'Not found.',
+          {
+            status: 404,
+          },
+          params.targetId,
+          request,
+        );
+      }
+
+      analytics.track({ type: 'app-deployment-operation', version: 'v1' }, params.targetId);
+
+      const eTag = request.headers.get('if-none-match');
+
+      const result = await deps.artifactStorageReader.loadAppDeploymentPersistedOperation(
+        params.targetId,
+        params.appName,
+        params.appVersion,
+        params.operationHash,
+        eTag,
+      );
+
+      if (result.type === 'notModified') {
+        const response = createResponse(
+          analytics,
+          null,
+          {
+            status: 304,
+          },
+          params.targetId,
+          request,
+        );
+
+        deps.requestCache?.set(request, response);
+        return response;
+      }
+
+      if (result.type === 'notFound') {
+        return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
+      }
+
+      if (result.type === 'body') {
+        const response = createResponse(
+          analytics,
+          result.body,
+          // We're using here a public location, because we expose the Location to the end user and
+          // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
+          // If they are the same, private and public locations will be the same.
+          { status: 200 },
+          params.targetId,
+          request,
+        );
+
+        deps.requestCache?.set(request, response);
+        return response;
+      }
+    },
+  );
+
+  return async (request: Request, captureException?: (error: unknown) => void) => {
+    return router.handle(request, captureException);
+  };
 };

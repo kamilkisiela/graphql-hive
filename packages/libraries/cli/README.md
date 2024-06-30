@@ -34,6 +34,8 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 
 <!-- commands -->
 
+- [`hive app:create FILE`](#hive-appcreate-file)
+- [`hive app:publish`](#hive-apppublish)
 - [`hive artifact:fetch`](#hive-artifactfetch)
 - [`hive config:delete KEY`](#hive-configdelete-key)
 - [`hive config:get KEY`](#hive-configget-key)
@@ -49,6 +51,53 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 - [`hive schema:publish FILE`](#hive-schemapublish-file)
 - [`hive update [CHANNEL]`](#hive-update-channel)
 - [`hive whoami`](#hive-whoami)
+
+## `hive app:create FILE`
+
+create an app deployment
+
+```
+USAGE
+  $ hive app:create FILE --name <value> --version <value> [--registry.endpoint <value>] [--registry.accessToken
+    <value>]
+
+ARGUMENTS
+  FILE  Path to the persisted operations mapping.
+
+FLAGS
+  --name=<value>                  (required) app name
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --version=<value>               (required) app version
+
+DESCRIPTION
+  create an app deployment
+```
+
+_See code:
+[dist/commands/app/create.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/app/create.js)_
+
+## `hive app:publish`
+
+publish an app deployment
+
+```
+USAGE
+  $ hive app:publish --name <value> --version <value> [--registry.endpoint <value>] [--registry.accessToken
+    <value>]
+
+FLAGS
+  --name=<value>                  (required) app name
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --version=<value>               (required) app version
+
+DESCRIPTION
+  publish an app deployment
+```
+
+_See code:
+[dist/commands/app/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/app/publish.js)_
 
 ## `hive artifact:fetch`
 

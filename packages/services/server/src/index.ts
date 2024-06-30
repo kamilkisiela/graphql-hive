@@ -20,6 +20,7 @@ import { createRedisClient } from '@hive/api/src/modules/shared/providers/redis'
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
+import { createIsAppDeploymentActive } from '@hive/cdn-script/is-app-deployment-active';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   configureTracing,
@@ -506,14 +507,12 @@ export async function main() {
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
-        async getArtifactAction(targetId, contractName, artifactType, eTag) {
-          return artifactStorageReader.generateArtifactReadUrl(
-            targetId,
-            contractName,
-            artifactType,
-            eTag,
-          );
-        },
+        artifactStorageReader,
+        isAppDeploymentActive: createIsAppDeploymentActive({
+          artifactStorageReader,
+          getCache: null,
+          waitUntil: null,
+        }),
       });
       const artifactRouteHandler = createServerAdapter(
         // TODO: remove `as any` once the fallback logic in packages/services/cdn-worker/src/artifact-handler.ts is removed

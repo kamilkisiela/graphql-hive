@@ -45,6 +45,9 @@
       ],
       "@hive/cdn-script/cdn-token": ["./packages/services/cdn-worker/src/cdn-token.ts"],
       "@hive/cdn-script/key-validation": ["./packages/services/cdn-worker/src/key-validation.ts"],
+      "@hive/cdn-script/is-app-deployment-active": [
+        "./packages/services/cdn-worker/src/is-app-deployment-active.ts"
+      ],
       "@hive/cdn-script/aws": ["./packages/services/cdn-worker/src/aws.ts"],
       "@hive/server": ["./packages/services/server/src/api.ts"],
       "@hive/stripe-billing": ["./packages/services/stripe-billing/src/api.ts"],
@@ -66,6 +69,9 @@
         "./packages/libraries/external-composition/src/index.ts"
       ],
       "@graphql-hive/core": ["./packages/libraries/core/src/index.ts"],
+      "@graphql-hive/core/src/client/collect-schema-coordinates": [
+        "./packages/libraries/core/src/client/collect-schema-coordinates.ts"
+      ],
       "@/*": ["./packages/web/app/src/*"],
       "testkit/*": ["./integration-tests/testkit/*"]
     }

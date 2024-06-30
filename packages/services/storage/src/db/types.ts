@@ -42,6 +42,16 @@ export interface alerts {
   type: alert_type;
 }
 
+export interface app_deployments {
+  activated_at: Date | null;
+  created_at: Date;
+  id: string;
+  name: string;
+  retired_at: Date | null;
+  target_id: string;
+  version: string;
+}
+
 export interface cdn_access_tokens {
   alias: string;
   created_at: Date;
@@ -388,6 +398,7 @@ export interface DBTables {
   activities: activities;
   alert_channels: alert_channels;
   alerts: alerts;
+  app_deployments: app_deployments;
   cdn_access_tokens: cdn_access_tokens;
   contract_checks: contract_checks;
   contract_schema_change_approvals: contract_schema_change_approvals;

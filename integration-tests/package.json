@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:services",
+    "start": "./local.sh",
     "test:integration": "vitest",
     "typecheck": "tsc --noEmit"
   },

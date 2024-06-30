@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
 import { Inject, Injectable } from 'graphql-modules';
 import { SpanKind, trace } from '@hive/service-common';
+import { castValue, compress } from '@hive/usage-common';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
@@ -48,6 +49,7 @@ const httpsAgent = new Agent.HttpsAgent(agentConfig);
 export class ClickHouse {
   private logger: Logger;
   private tracer: ReturnType<(typeof trace)['getTracer']>;
+  private endpoint: string;
 
   constructor(
     @Inject(CLICKHOUSE_CONFIG) private config: ClickHouseConfig,
@@ -58,6 +60,7 @@ export class ClickHouse {
     this.logger = logger.child({
       service: 'ClickHouse',
     });
+    this.endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
   }
 
   @atomic(({ query }: { query: SqlStatement }) => hashQuery(query))
@@ -71,7 +74,6 @@ export class ClickHouse {
     timeout: number;
   }): Promise<QueryResponse<T>> {
     const startedAt = Date.now();
-    const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
     const executionId = queryId + '-' + Math.random().toString(16).substring(2);
     const span = this.tracer.startSpan(`ClickHouse: ${queryId}`, {
       kind: SpanKind.CLIENT,
@@ -92,7 +94,7 @@ export class ClickHouse {
 
     const response = await this.httpClient
       .post<QueryResponse<T>>(
-        endpoint,
+        this.endpoint,
         {
           body: query.sql,
           headers: {
@@ -217,6 +219,100 @@ export class ClickHouse {
     });
 
     return response;
+  }
+
+  /** Please insert data with this function :) */
+  async insert(args: {
+    query: SqlStatement;
+    queryId: string;
+    data: unknown[][];
+    timeout: number;
+  }): Promise<void> {
+    const startedAt = Date.now();
+    const executionId = args.queryId + '-' + Math.random().toString(16).substring(2);
+    const span = this.tracer.startSpan(`ClickHouse Insert: ${args.queryId}`, {
+      kind: SpanKind.CLIENT,
+      attributes: {
+        'db.type': 'ClickHouse',
+        'db.query': args.query.sql,
+        'db.query.id': args.queryId,
+        'execution.id': executionId,
+      },
+    });
+    this.logger.debug(
+      `Executing ClickHouse Query (executionId: %s): %s`,
+      executionId,
+      args.query.sql.replace(/\n/g, ' ').replace(/\s+/g, ' '),
+    );
+
+    const maxRetry = 5;
+
+    await this.httpClient
+      .post(
+        this.endpoint,
+        {
+          body: await compress(
+            args.data.map(row => row.map(value => castValue(value)).join(',')).join('\n'),
+          ),
+          searchParams: {
+            query: args.query.sql,
+            async_insert: 1,
+            wait_for_async_insert: 1,
+          },
+          username: this.config.username,
+          password: this.config.password,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'text/csv',
+            'Content-Encoding': 'gzip',
+          },
+          retry: {
+            calculateDelay: info => {
+              if (info.attemptCount >= maxRetry) {
+                this.logger.warn(
+                  'Exceeded the retry limit (%s/%s) for %s',
+                  info.attemptCount,
+                  maxRetry,
+                  args.query.sql,
+                );
+                // After N retries, stop.
+                return 0;
+              }
+
+              this.logger.debug('Retry %s/%s for %s', info.attemptCount, maxRetry, args.query.sql);
+              return info.attemptCount * 500;
+            },
+          },
+          timeout: {
+            lookup: 2000,
+            connect: 2000,
+            secureConnect: 2000,
+            request: 30_000,
+          },
+          agent: {
+            http: httpAgent,
+            https: httpsAgent,
+          },
+        },
+        span,
+      )
+      .catch(error => {
+        this.logger.error(
+          `Failed to run ClickHouse Insert query, executionId: %s, code: %s , error name: %s, message: %s`,
+          executionId,
+          error.code,
+          error.name,
+          error.message,
+        );
+        return Promise.reject(error);
+      })
+      .finally(() => {
+        this.logger.debug(
+          `Finished ClickHouse Insert Query (executionId: %s, duration=%sms)`,
+          executionId,
+          Date.now() - startedAt,
+        );
+      });
   }
 
   translateWindow({ value, unit }: { value: number; unit: 'd' | 'h' | 'm' }) {
