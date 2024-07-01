@@ -190,7 +190,9 @@ export function useOperationCollectionsPlugin(props: {
         projectId: props.projectId,
         targetId: props.targetId,
       });
-      const editorContext = useEditorContext({ nonNull: true });
+      const { queryEditor, variableEditor, headerEditor, tabs } = useEditorContext({
+        nonNull: true,
+      });
 
       const hasAllEditors = !!(
         editorContext.queryEditor &&
@@ -198,11 +200,26 @@ export function useOperationCollectionsPlugin(props: {
         editorContext.headerEditor
       );
 
+      console.log(111, QueryIdMap);
+
+      // console.log(
+      //   Object.entries(localStorage)
+      //     .filter(([key]) => key.includes('hive:operation-'))
+      //     .map(([key, value]) => ({
+      //       ...JSON.parse(value),
+      //       id: key.replace('hive:operation-', ''),
+      //     })),
+      // );
+
+      // console.log(collections.flatMap(c => c.operations.edges.map(({ node }) => node)));
+
+      const hasAllEditors = !!(queryEditor && variableEditor && headerEditor);
+
       const isSame =
         !!currentOperation &&
-        currentOperation.query === editorContext.queryEditor?.getValue() &&
-        currentOperation.variables === editorContext.variableEditor?.getValue() &&
-        currentOperation.headers === editorContext.headerEditor?.getValue();
+        currentOperation.query === queryEditor?.getValue() &&
+        currentOperation.variables === variableEditor?.getValue() &&
+        currentOperation.headers === headerEditor?.getValue();
 
       const queryParamsOperationId =
         'operation' in router.latestLocation.search &&
@@ -217,9 +234,9 @@ export function useOperationCollectionsPlugin(props: {
 
         if (queryParamsOperationId) {
           // Set selected operation in editors
-          editorContext.queryEditor?.setValue(currentOperation.query);
-          editorContext.variableEditor?.setValue(currentOperation.variables ?? '');
-          editorContext.headerEditor?.setValue(currentOperation.headers ?? '');
+          queryEditor.setValue(currentOperation.query);
+          variableEditor.setValue(currentOperation.variables ?? '');
+          headerEditor.setValue(currentOperation.headers ?? '');
 
           if (!savedOperation) {
             return;
@@ -233,8 +250,8 @@ export function useOperationCollectionsPlugin(props: {
 
           const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
           if (savedOperation.updatedAt > currentOperationUpdatedAt) {
-            editorContext.queryEditor?.setValue(savedOperation.query);
-            editorContext.variableEditor?.setValue(savedOperation.variables);
+            queryEditor.setValue(savedOperation.query);
+            variableEditor.setValue(savedOperation.variables);
           }
         }
       }, [hasAllEditors, queryParamsOperationId, currentOperation]);
@@ -244,16 +261,16 @@ export function useOperationCollectionsPlugin(props: {
           return;
         }
         setSavedOperation({
-          query: editorContext.queryEditor?.getValue() ?? '',
-          variables: editorContext.variableEditor?.getValue() ?? '',
+          query: queryEditor.getValue() ?? '',
+          variables: variableEditor.getValue() ?? '',
         });
-      }, [editorContext.queryEditor?.getValue(), editorContext.variableEditor?.getValue()]);
+      }, [queryEditor?.getValue(), variableEditor?.getValue()]);
 
       const shouldShowMenu = props.canEdit || props.canDelete;
 
       const initialSelectedCollection =
         currentOperation?.id &&
-        collections?.find(c =>
+        collections.find(c =>
           c.operations.edges.some(({ node }) => node.id === currentOperation.id),
         )?.id;
 
@@ -403,7 +420,7 @@ export function useOperationCollectionsPlugin(props: {
                           canEdit={props.canEdit}
                           onDelete={setOperationToDeleteId}
                           onEdit={setOperationToEditId}
-                          isChanged={!isSame && node.id === queryParamsOperationId}
+                          isChanged={node.id === queryParamsOperationId && !isSame}
                           organizationId={props.organizationId}
                           projectId={props.projectId}
                           targetId={props.targetId}
