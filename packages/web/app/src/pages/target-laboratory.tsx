@@ -891,36 +891,25 @@ function LaboratoryPageContent(props: {
     targetId: props.targetId,
   });
 
-  const schema = useMemo(() => {
-    if (!query.data?.target?.latestSchemaVersion?.sdl) {
-      return null;
-    }
-    return buildSchema(query.data.target.latestSchemaVersion.sdl);
-  }, [query.data?.target?.latestSchemaVersion?.sdl]);
+  const sdl = query.data?.target?.latestSchemaVersion?.sdl;
+  const schema = useMemo(() => (sdl ? buildSchema(sdl) : null), [sdl]);
 
   const [actualSelectedApiEndpoint, setEndpointType] = useApiTabValueState(
     query.data?.target?.graphqlEndpointUrl ?? null,
   );
 
-  const mockEndpoint = useMemo(() => {
-    if (globalThis.window) {
-      return `${location.origin}/api/lab/${props.organizationId}/${props.projectId}/${props.targetId}`;
-    }
-
-    return '';
-  }, [props.organizationId, props.projectId, props.targetId]);
+  const mockEndpoint = `${location.origin}/api/lab/${props.organizationId}/${props.projectId}/${props.targetId}`;
 
   const fetcher = useMemo<Fetcher>(() => {
     return async (params, opts) => {
-      const fetcher = createGraphiQLFetcher({
-        url:
-          (actualSelectedApiEndpoint === 'linkedApi'
-            ? query.data?.target?.graphqlEndpointUrl
-            : undefined) ?? mockEndpoint,
-        fetch,
-      });
+      const url =
+        (actualSelectedApiEndpoint === 'linkedApi'
+          ? query.data?.target?.graphqlEndpointUrl
+          : undefined) ?? mockEndpoint;
 
-      const result = await fetcher(params, opts);
+      const _fetcher = createGraphiQLFetcher({ url, fetch });
+
+      const result = await _fetcher(params, opts);
 
       // We only want to expose the error message, not the whole stack trace.
       if (isAsyncIterable(result)) {
@@ -934,13 +923,9 @@ function LaboratoryPageContent(props: {
               await push(value);
             }
             stop();
-          } catch (err: unknown) {
+          } catch (err) {
             const error = new Error(err instanceof Error ? err.message : 'Unexpected error.');
-            Object.defineProperty(error, 'stack', {
-              get() {
-                return undefined;
-              },
-            });
+            delete error.stack;
             stop(error);
           }
         });
@@ -960,7 +945,7 @@ function LaboratoryPageContent(props: {
       ? searchObj.operation
       : null;
 
-  const FullScreenComponent = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
+  const FullScreenIcon = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
 
   return (
     <TargetLayout
@@ -1048,45 +1033,20 @@ function LaboratoryPageContent(props: {
       </div>
       <Helmet>
         <style key="laboratory">{`
-        .graphiql-container {
-          --color-base: transparent !important;
-          --color-primary: 40, 89%, 60% !important;
-        }
-        .graphiql-container .graphiql-tab-add {
-          display: none;
-        }
-        .graphiql-container .graphiql-toolbar-icon {
-          color: #4c5462;
-        }
+          .graphiql-container,
+          .graphiql-dialog a {
+            --color-primary: 40, 89%, 60% !important;
+          }
 
-        .graphiql-container .graphiql-doc-explorer-search,
-        .graphiql-container .CodeMirror-hints{
-          background-color: #070d17;
-        }
-        .graphiql-container .cm-punctuation {
-          color: #ccc;
-        }
-        .graphiql-container .cm-punctuation:hover {
-          color: #fff;
-        }
-
-        .graphiql-container .graphiql-logo {
-          width: 100%;
-          position: relative;
-          padding: 12px 16px 0 16px;
-        }
-
-        .graphiql-container .graphiql-session-header {
-          display: flex;
-          flex-direction: column-reverse;
-          align-items: flex-start;
-          height: auto;
-        }
-
-        .graphiql-container .graphiql-session-header-right {
-          width: 100%;
-        }
-      `}</style>
+          .graphiql-container,
+          .graphiql-dialog,
+          .CodeMirror-info {
+            --color-base: 223, 70%, 3.9% !important;
+          }
+          .graphiql-tooltip, .graphiql-dropdown-content {
+            background: #030711;
+          }
+        `}</style>
       </Helmet>
 
       {!query.fetching && (
@@ -1135,6 +1095,39 @@ function LaboratoryPageContent(props: {
             </GraphiQL.Logo>
           </GraphiQL>
         </div>
+        <GraphiQL
+          fetcher={fetcher}
+          toolbar={{
+            additionalContent: (
+              <>
+                <Save
+                  organizationId={props.organizationId}
+                  projectId={props.projectId}
+                  targetId={props.targetId}
+                />
+                <Share operation={operation} />
+              </>
+            ),
+          }}
+          showPersistHeadersSettings={false}
+          shouldPersistHeaders={false}
+          plugins={[operationCollectionsPlugin]}
+          visiblePlugin={operationCollectionsPlugin}
+          schema={schema}
+          forcedTheme="dark"
+          className={isFullScreen ? 'fixed inset-0 bg-[#030711]' : ''}
+        >
+          <GraphiQL.Logo>
+            <Button
+              onClick={() => setIsFullScreen(prev => !prev)}
+              variant="orangeLink"
+              className="gap-2 whitespace-nowrap"
+            >
+              <FullScreenIcon className="size-4" />
+              {isFullScreen ? 'Exit' : 'Enter'} Full Screen
+            </Button>
+          </GraphiQL.Logo>
+        </GraphiQL>
       )}
       <ConnectLabModal
         endpoint={mockEndpoint}
