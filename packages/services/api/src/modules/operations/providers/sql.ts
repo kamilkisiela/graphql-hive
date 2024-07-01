@@ -23,7 +23,7 @@ export type SqlValue = {
   readonly values: readonly Value[];
 };
 
-type ValueExpression = string | SpecialValues;
+type ValueExpression = string | SpecialValues  | null;
 type SpecialValues = SqlValue | ArrayValue | JoinValue | RawValue;
 
 type SqlTaggedTemplate = {
