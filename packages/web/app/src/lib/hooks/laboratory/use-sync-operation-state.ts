@@ -16,25 +16,18 @@ export function useSyncOperationState(props: {
   });
   const storageKey = currentOperation ? `hive:operation-${currentOperation?.id}` : null;
   const savedOperationData = storageKey ? localStorage.getItem(storageKey) : null;
-  const operation = savedOperationData ? JSON.parse(savedOperationData) : null;
-
-  const setSavedOperation = (value: { query: string; variables: string }) => {
-    if (!storageKey) {
-      return;
-    }
-    localStorage.setItem(storageKey, JSON.stringify({ ...value, updatedAt: Date.now() }));
-  };
-
-  const clearOperation = () => {
-    if (!storageKey) {
-      return;
-    }
-    localStorage.removeItem(storageKey);
-  };
 
   return {
-    savedOperation: operation,
-    setSavedOperation,
-    clearOperation,
+    savedOperation: savedOperationData ? JSON.parse(savedOperationData) : null,
+    setSavedOperation(value: { query: string; variables: string }) {
+      if (storageKey) {
+        localStorage.setItem(storageKey, JSON.stringify({ ...value, updatedAt: Date.now() }));
+      }
+    },
+    clearOperation() {
+      if (storageKey) {
+        localStorage.removeItem(storageKey);
+      }
+    },
   };
 }
