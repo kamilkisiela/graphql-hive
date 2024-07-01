@@ -508,7 +508,7 @@ function useOperationCollectionsPlugin(props: {
                       <FolderOpenIcon className="group-radix-state-closed:hidden size-4" />
                       {collection.name}
                     </AccordionTriggerPrimitive>
-                    {shouldShowMenu ? (
+                    {shouldShowMenu && (
                       <DropdownMenu>
                         <DropdownMenuTrigger aria-label="More" className="graphiql-toolbar-button">
                           <DotsHorizontalIcon />
@@ -541,7 +541,7 @@ function useOperationCollectionsPlugin(props: {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    ) : null}
+                    )}
                   </AccordionHeader>
                   <AccordionContent className="space-y-0 pb-2 pl-2">
                     {collection.operations.edges.length ? (
@@ -578,7 +578,7 @@ function useOperationCollectionsPlugin(props: {
               <div className="flex flex-col items-center">
                 <BookmarkIcon width={30} height={30} />
                 <div className="mt-2 text-xs">There are no collections available.</div>
-                {props.canEdit ? (
+                {props.canEdit && (
                   <Button
                     onClick={() => {
                       if (collectionId) {
@@ -591,7 +591,7 @@ function useOperationCollectionsPlugin(props: {
                   >
                     Create your first Collection.
                   </Button>
-                ) : null}
+                )}
               </div>
             </div>
           )}
@@ -975,9 +975,7 @@ function LaboratoryPageContent(props: {
                   projectId: props.projectId,
                   targetId: props.targetId,
                 }}
-                search={{
-                  page: 'general',
-                }}
+                search={{ page: 'general' }}
               >
                 <Button variant="outline" className="mr-2" size="sm">
                   Connect GraphQL API Endpoint
