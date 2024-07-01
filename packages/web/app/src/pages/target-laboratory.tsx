@@ -3,6 +3,7 @@ import { cx } from 'class-variance-authority';
 import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
+import { Helmet } from 'react-helmet-async';
 import { useMutation, useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
@@ -25,6 +26,9 @@ import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
+import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
+import { useOperationCollectionsPlugin } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
+import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
 import {
@@ -57,53 +61,6 @@ function Share({ operation }: { operation: string | null }): ReactElement | null
       </GraphiQLButton>
     </GraphiQLTooltip>
   );
-}
-
-const OperationQuery = graphql(`
-  query Operation($selector: TargetSelectorInput!, $id: ID!) {
-    target(selector: $selector) {
-      id
-      documentCollectionOperation(id: $id) {
-        id
-        name
-        query
-        headers
-        variables
-        updatedAt
-        collection {
-          id
-          name
-        }
-      }
-    }
-  }
-`);
-
-function useCurrentOperation(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-}) {
-  const router = useRouter();
-  const operationIdFromSearch =
-    'operation' in router.latestLocation.search &&
-    typeof router.latestLocation.search.operation === 'string'
-      ? router.latestLocation.search.operation
-      : null;
-  const [{ data }] = useQuery({
-    query: OperationQuery,
-    variables: {
-      selector: {
-        target: props.targetId,
-        project: props.projectId,
-        organization: props.organizationId,
-      },
-      id: operationIdFromSearch!,
-    },
-    pause: !operationIdFromSearch,
-  });
-  // if operationId is undefined `data` could contain previous state
-  return operationIdFromSearch ? data?.target?.documentCollectionOperation : null;
 }
 
 export const CollectionsQuery = graphql(`
@@ -184,45 +141,6 @@ const UpdateOperationMutation = graphql(`
     }
   }
 `);
-
-function useSyncOperationState(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-}): {
-  savedOperation: { query: string; variables: string; updatedAt: number } | null;
-  setSavedOperation: (value: { query: string; variables: string }) => void;
-  clearOperation: () => void;
-} {
-  const currentOperation = useCurrentOperation({
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
-  });
-  const storageKey = currentOperation ? `hive:operation-${currentOperation?.id}` : null;
-  const savedOperationData = storageKey ? localStorage.getItem(storageKey) : null;
-  const operation = savedOperationData ? JSON.parse(savedOperationData) : null;
-
-  const setSavedOperation = (value: { query: string; variables: string }) => {
-    if (!storageKey) {
-      return;
-    }
-    localStorage.setItem(storageKey, JSON.stringify({ ...value, updatedAt: Date.now() }));
-  };
-
-  const clearOperation = () => {
-    if (!storageKey) {
-      return;
-    }
-    localStorage.removeItem(storageKey);
-  };
-
-  return {
-    savedOperation: operation,
-    setSavedOperation,
-    clearOperation,
-  };
-}
 
 function Save(props: {
   organizationId: string;

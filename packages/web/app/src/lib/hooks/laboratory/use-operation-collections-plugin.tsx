@@ -32,6 +32,8 @@ import { useCollections } from '@/pages/target-laboratory';
 import { GraphiQLPlugin, useEditorContext } from '@graphiql/react';
 import { BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
+import { useCurrentOperation } from './use-current-operation';
+import { useSyncOperationState } from './use-sync-operation-state';
 
 const CreateOperationMutation = graphql(`
   mutation CreateOperation(
