@@ -21,6 +21,7 @@ const LabBody = z.object({
     required_error: 'Missing query',
   }),
   variables: z.record(z.unknown()).optional(),
+  operationName: z.string().optional(),
 });
 
 export function connectLab(server: FastifyInstance) {
@@ -35,14 +36,6 @@ export function connectLab(server: FastifyInstance) {
     }
 
     const { organizationId, projectId, targetId } = labParamsResult.data;
-
-    const headers: Record<string, string> = {};
-
-    if (req.headers['x-hive-key']) {
-      headers['Authorization'] = `Bearer ${req.headers['x-hive-key'] as string}`;
-    } else {
-      headers['Cookie'] = req.headers.cookie as string;
-    }
 
     const body = {
       operationName: 'lab',
@@ -63,16 +56,17 @@ export function connectLab(server: FastifyInstance) {
       },
     };
 
-    if (req.headers['x-request-id']) {
-      headers['x-request-id'] = req.headers['x-request-id'] as string;
-    }
-
     const response = await fetch(url, {
       headers: {
         'content-type': 'application/json',
         'graphql-client-name': 'Hive App',
         'graphql-client-version': env.release,
-        ...headers,
+        ...(req.headers['x-hive-key']
+          ? { Authorization: `Bearer ${req.headers['x-hive-key']}` }
+          : { Cookie: req.headers.cookie as string }),
+        ...(req.headers['x-request-id'] && {
+          'x-request-id': req.headers['x-request-id'] as string,
+        }),
       },
       credentials: 'include',
       method: 'POST',
@@ -110,14 +104,13 @@ export function connectLab(server: FastifyInstance) {
         document,
         variableValues: graphqlRequest.variables || {},
         contextValue: {},
+        operationName: graphqlRequest.operationName,
       });
 
       void res.status(200).send(result);
     } catch (e) {
       req.log.error(e);
-      void res.status(200).send({
-        errors: [e],
-      });
+      void res.status(200).send({ errors: [e] });
     }
   });
 }
