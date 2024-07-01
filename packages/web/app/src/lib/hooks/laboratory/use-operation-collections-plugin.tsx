@@ -29,8 +29,8 @@ import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useCollections } from '@/pages/target-laboratory';
-import { GraphiQLPlugin, useEditorContext } from '@graphiql/react';
-import { BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { GraphiQLPlugin, useEditorContext, usePluginContext } from '@graphiql/react';
+import { BookmarkFilledIcon, BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 import { useCurrentOperation } from './use-current-operation';
 import { useSyncOperationState } from './use-sync-operation-state';
@@ -108,9 +108,10 @@ export function useOperationCollectionsPlugin(props: {
         projectId: props.projectId,
         targetId: props.targetId,
       });
-      const { queryEditor, variableEditor, headerEditor, tabs } = useEditorContext({
-        nonNull: true,
-      });
+      const { queryEditor, variableEditor, headerEditor, tabs, updateActiveTabValues } =
+        useEditorContext({
+          nonNull: true,
+        });
 
       const hasAllEditors = !!(
         editorContext.queryEditor &&
@@ -348,8 +349,8 @@ export function useOperationCollectionsPlugin(props: {
                                 node.id === queryParamsOperationId && 'bg-gray-100/10 text-white',
                               )}
                             >
-                                <SquareTerminalIcon className="size-4" />
-                                {node.name}
+                              <SquareTerminalIcon className="size-4" />
+                              {node.name}
                             </Link>
                             <DropdownMenu>
                               <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
@@ -465,10 +466,17 @@ export function useOperationCollectionsPlugin(props: {
       );
     }
 
-    return {
+    const plugin = {
       title: 'Operation Collections',
-      icon: BookmarkIcon,
       content: Content,
+      icon: function Icon() {
+        const pluginContext = usePluginContext();
+        const IconToUse =
+          pluginContext?.visiblePlugin === plugin ? BookmarkFilledIcon : BookmarkIcon;
+        return <IconToUse />;
+      },
     };
+
+    return plugin;
   }, [props.canEdit, props.canDelete]);
 }

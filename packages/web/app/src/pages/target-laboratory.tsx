@@ -177,9 +177,7 @@ function Save(props: {
             projectId: props.projectId,
             targetId: props.targetId,
           },
-          search: {
-            operation: operationId,
-          },
+          search: { operation: operationId },
         });
       }
       clearOperation();

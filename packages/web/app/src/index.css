@@ -206,5 +206,5 @@
 }
 
 .hive-badge-is-changed:after {
-  @apply content-[''] size-1.5 rounded-full border bg-orange-400 border-orange-600 absolute right-2;
+  @apply absolute right-2 size-1.5 rounded-full border border-orange-600 bg-orange-400 content-[''];
 }
