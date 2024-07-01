@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { FolderIcon, FolderOpenIcon, SquareTerminalIcon } from 'lucide-react';
 import { useMutation } from 'urql';
@@ -73,89 +73,6 @@ const CreateOperationMutation = graphql(`
   }
 `);
 
-function CollectionItem(props: {
-  node: { id: string; name: string };
-  canDelete: boolean;
-  canEdit: boolean;
-  onDelete: (operationId: string) => void;
-  onEdit: (operationId: string) => void;
-  isChanged?: boolean;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-}): ReactElement {
-  const router = useRouter();
-  const operationIdFromSearch =
-    'operation' in router.latestLocation.search &&
-    typeof router.latestLocation.search.operation === 'string'
-      ? router.latestLocation.search.operation
-      : null;
-  const copyToClipboard = useClipboard();
-
-  return (
-    <div key={props.node.id} className="flex items-center justify-between">
-      <Link
-        to="/$organizationId/$projectId/$targetId/laboratory"
-        params={{
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
-        }}
-        search={{
-          operation: props.node.id,
-        }}
-        className={cn(
-          'flex w-full items-center justify-between rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
-          operationIdFromSearch === props.node.id && 'bg-gray-100/10 text-white',
-        )}
-      >
-        <div className="flex items-center gap-x-3">
-          <SquareTerminalIcon className="size-4" />
-          {props.node.name}
-        </div>
-        {props.isChanged && (
-          <span className="size-1.5 rounded-full border border-orange-600 bg-orange-400" />
-        )}
-      </Link>
-      <DropdownMenu>
-        <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
-          <DotsHorizontalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={async () => {
-              const url = new URL(window.location.href);
-              await copyToClipboard(`${url.origin}${url.pathname}?operation=${props.node.id}`);
-            }}
-          >
-            Copy link to operation
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          {props.canEdit && (
-            <DropdownMenuItem
-              onClick={() => {
-                props.onEdit(props.node.id);
-              }}
-            >
-              Edit
-            </DropdownMenuItem>
-          )}
-          {props.canDelete && (
-            <DropdownMenuItem
-              onClick={() => {
-                props.onDelete(props.node.id);
-              }}
-              className="text-red-500"
-            >
-              Delete
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
-
 export function useOperationCollectionsPlugin(props: {
   canEdit: boolean;
   canDelete: boolean;
@@ -184,6 +101,7 @@ export function useOperationCollectionsPlugin(props: {
       const [accordionValue, setAccordionValue] = useState<string[]>([]);
       const containerRef = useRef<HTMLDivElement>(null);
       const [isScrolled, setIsScrolled] = useState(false);
+      const copyToClipboard = useClipboard();
 
       const currentOperation = useCurrentOperation({
         organizationId: props.organizationId,
@@ -412,20 +330,67 @@ export function useOperationCollectionsPlugin(props: {
                   </AccordionHeader>
                   <AccordionContent className="space-y-0 pb-2 pl-2">
                     {collection.operations.edges.length ? (
-                      collection.operations.edges.map(({ node }) => (
-                        <CollectionItem
-                          key={node.id}
-                          node={node}
-                          canDelete={props.canDelete}
-                          canEdit={props.canEdit}
-                          onDelete={setOperationToDeleteId}
-                          onEdit={setOperationToEditId}
-                          isChanged={node.id === queryParamsOperationId && !isSame}
-                          organizationId={props.organizationId}
-                          projectId={props.projectId}
-                          targetId={props.targetId}
-                        />
-                      ))
+                      collection.operations.edges.map(({ node }) => {
+                        const isChanged = node.id === queryParamsOperationId && !isSame;
+                        return (
+                          <div key={node.id} className="flex items-center justify-between">
+                            <Link
+                              to="/$organizationId/$projectId/$targetId/laboratory"
+                              params={{
+                                organizationId: props.organizationId,
+                                projectId: props.projectId,
+                                targetId: props.targetId,
+                              }}
+                              search={{ operation: node.id }}
+                              className={cn(
+                                'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
+                                isChanged && 'hive-badge-is-changed relative',
+                                node.id === queryParamsOperationId && 'bg-gray-100/10 text-white',
+                              )}
+                            >
+                                <SquareTerminalIcon className="size-4" />
+                                {node.name}
+                            </Link>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
+                                <DotsHorizontalIcon />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={async () => {
+                                    const url = new URL(window.location.href);
+                                    await copyToClipboard(
+                                      `${url.origin}${url.pathname}?operation=${node.id}`,
+                                    );
+                                  }}
+                                >
+                                  Copy link to operation
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                {props.canEdit && (
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setOperationToEditId(node.id);
+                                    }}
+                                  >
+                                    Edit
+                                  </DropdownMenuItem>
+                                )}
+                                {props.canDelete && (
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setOperationToDeleteId(node.id);
+                                    }}
+                                    className="text-red-500"
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        );
+                      })
                     ) : (
                       <Button
                         variant="orangeLink"

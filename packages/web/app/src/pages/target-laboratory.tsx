@@ -198,10 +198,13 @@ function Save(props: {
     <DropdownMenu>
       <GraphiQLTooltip label={label}>
         <DropdownMenuTrigger asChild>
-          <GraphiQLButton className="graphiql-toolbar-button relative" aria-label={label}>
-            {!isSame && (
-              <span className="absolute right-1 top-1 size-1.5 rounded-full border border-orange-600 bg-orange-400" />
+          <GraphiQLButton
+            className={clsx(
+              'graphiql-toolbar-button',
+              !isSame && 'hive-badge-is-changed relative after:top-1',
             )}
+            aria-label={label}
+          >
             <SaveIcon className="graphiql-toolbar-icon h-5" />
           </GraphiQLButton>
         </DropdownMenuTrigger>
