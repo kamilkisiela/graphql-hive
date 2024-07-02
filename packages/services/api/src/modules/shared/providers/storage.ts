@@ -115,8 +115,21 @@ export interface Storage {
   >;
 
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
+    _: OrganizationSelector & Pick<Organization, 'name'> & { user: string },
   ): Promise<Organization | never>;
+  updateOrganizationCleanId(
+    _: OrganizationSelector &
+      Pick<Organization, 'cleanId'> & { user: string; reservedNames: string[] },
+  ): Promise<
+    | {
+        ok: true;
+        organization: Organization;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  >;
 
   updateOrganizationPlan(
     _: OrganizationSelector & Pick<Organization, 'billingPlan'>,

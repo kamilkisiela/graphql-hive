@@ -99,6 +99,10 @@ const organizationGetStartedMapping: Record<
   enablingUsageBasedBreakingChanges: 'get_started_usage_breaking',
 };
 
+function addRandomHashToId(id: string) {
+  return `${id}-${Math.random().toString(16).substring(2, 6)}`;
+}
+
 function ensureDefined<T>(value: T | null | undefined, propertyName: string): T {
   if (value == null) {
     throw new Error(`${propertyName} is null or undefined`);
@@ -139,6 +143,37 @@ async function tracedTransaction<T>(
       span.end();
     }
   });
+}
+
+async function ensureFreeOrganizationCleanId(
+  newCleanId: string,
+  currentCleanId: string | null,
+  connection: Connection,
+  reservedNames: string[],
+): Promise<string> {
+  if (reservedNames.includes(newCleanId)) {
+    return ensureFreeOrganizationCleanId(
+      addRandomHashToId(newCleanId),
+      currentCleanId,
+      connection,
+      reservedNames,
+    );
+  }
+
+  const orgCleanIdExists = await connection.exists(
+    sql`/* orgCleanIdExistsGlobally */ SELECT 1 FROM organizations WHERE clean_id = ${newCleanId} LIMIT 1`,
+  );
+
+  if (orgCleanIdExists) {
+    return ensureFreeOrganizationCleanId(
+      addRandomHashToId(newCleanId),
+      currentCleanId,
+      connection,
+      reservedNames,
+    );
+  }
+
+  return newCleanId;
 }
 
 function resolveAuthProviderOfUser(
@@ -593,27 +628,12 @@ export async function createStorage(
       },
       connection: Connection,
     ) {
-      function addRandomHashToId(id: string) {
-        return `${id}-${Math.random().toString(16).substring(2, 6)}`;
-      }
-
-      async function ensureFreeCleanId(id: string, originalId: string | null): Promise<string> {
-        if (reservedNames.includes(id)) {
-          return ensureFreeCleanId(addRandomHashToId(id), originalId);
-        }
-
-        const orgCleanIdExists = await connection.exists(
-          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${id} LIMIT 1`,
-        );
-
-        if (orgCleanIdExists) {
-          return ensureFreeCleanId(addRandomHashToId(id), originalId);
-        }
-
-        return id;
-      }
-      const availableCleanId = await ensureFreeCleanId(cleanId, null);
-
+      const availableCleanId = await ensureFreeOrganizationCleanId(
+        cleanId,
+        null,
+        connection,
+        reservedNames,
+      );
       const org = await connection.one<Slonik<organizations>>(
         sql`/* createOrganization */
           INSERT INTO organizations
@@ -1294,16 +1314,50 @@ export async function createStorage(
         ),
       );
     },
-    async updateOrganizationName({ name, cleanId, organization }) {
+    async updateOrganizationName({ name, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`/* updateOrganizationName */
           UPDATE organizations
-          SET name = ${name}, clean_id = ${cleanId}
+          SET name = ${name}
           WHERE id = ${organization}
           RETURNING *
         `),
       );
     },
+    async updateOrganizationCleanId({ cleanId, organization, reservedNames }) {
+      return pool.transaction(async t => {
+        if (reservedNames.includes(cleanId)) {
+          return {
+            ok: false,
+            message: 'Provided organization slug is not allowed',
+          };
+        }
+
+        const orgCleanIdExists = await t.exists(
+          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${cleanId} AND id != ${organization} LIMIT 1`,
+        );
+
+        if (orgCleanIdExists) {
+          return {
+            ok: false,
+            message: 'Organization slug is already taken',
+          };
+        }
+
+        return {
+          ok: true,
+          organization: transformOrganization(
+            await pool.one<Slonik<organizations>>(sql`/* updateOrganizationSlug */
+              UPDATE organizations
+              SET clean_id = ${cleanId}
+              WHERE id = ${organization}
+              RETURNING *
+            `),
+          ),
+        };
+      });
+    },
+
     async updateOrganizationPlan({ billingPlan, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`/* updateOrganizationPlan */
