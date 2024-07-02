@@ -10,8 +10,8 @@ export function AuthCardHeader(props: {
     <CardHeader>
       <div className="flex flex-row items-center justify-between">
         <div className="space-y-1.5">
-          <CardTitle className="text-2xl">{props.title}</CardTitle>
-          {props.description ? <CardDescription>{props.description}</CardDescription> : null}
+          <CardTitle className="text-2xl" data-cy="auth-card-header-title">{props.title}</CardTitle>
+          {props.description ? <CardDescription data-cy="auth-card-header-description">{props.description}</CardDescription> : null}
         </div>
         <div>
           <HiveLogo animated={false} />

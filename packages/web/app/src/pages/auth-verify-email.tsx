@@ -72,7 +72,7 @@ export function AuthVerifyEmailPage() {
         <AuthCardContent>
           <AuthCardStack>
             <div className="flex justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-t-[#3c3c3c]"/>
+              <div className="size-8 animate-spin rounded-full border-2 border-t-[#3c3c3c]"/>
             </div>
           </AuthCardStack>
         </AuthCardContent>

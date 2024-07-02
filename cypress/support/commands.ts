@@ -3,7 +3,6 @@ namespace Cypress {
     fillAuthFormAndSubmit(data: { email: string; password: string }): Chainable;
     signup(data: { email: string; password: string }): Chainable;
     login(data: { email: string; password: string }): Chainable;
-    loginAndSetCookie(data: { email: string; password: string }): Chainable;
     dataCy(name: string): Chainable<JQuery<HTMLElement>>;
   }
 }
@@ -21,7 +20,7 @@ Cypress.Commands.add('fillAuthFormAndSubmit', user => {
 Cypress.Commands.add('signup', user => {
   cy.visit('/');
 
-  cy.get('span[data-auth-link="sign-up"]').contains('Sign Up').click();
+  cy.get('a[data-auth-link="sign-up"]').contains('Sign Up').click();
   cy.fillAuthFormAndSubmit(user);
 
   cy.contains('Create Organization');
@@ -33,31 +32,6 @@ Cypress.Commands.add('login', user => {
   cy.fillAuthFormAndSubmit(user);
 
   cy.contains('Create Organization');
-});
-
-Cypress.Commands.add('loginAndSetCookie', ({ email, password }) => {
-  cy.request({
-    method: 'POST',
-    url: '/api/auth/signin',
-    body: {
-      formFields: [
-        { id: 'email', value: email },
-        { id: 'password', value: password },
-      ],
-    },
-  }).then(response => {
-    const { status, headers, body } = response;
-    if (status !== 200) {
-      throw new Error(`Create session failed. ${status}.\n${JSON.stringify(body)}`);
-    }
-    const frontToken = headers['front-token'] as string;
-    const accessToken = headers['st-access-token'] as string;
-    const timeJoined = String(body.user.timeJoined);
-
-    cy.setCookie('sAccessToken', accessToken);
-    cy.setCookie('sFrontToken', frontToken);
-    cy.setCookie('st-last-access-token-update', timeJoined);
-  });
 });
 
 Cypress.Commands.add('dataCy', value => {

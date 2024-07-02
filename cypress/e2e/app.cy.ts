@@ -88,5 +88,5 @@ it('oidc login for invalid url shows correct error message', () => {
   cy.clearAllLocalStorage();
   cy.clearAllSessionStorage();
   cy.visit('/auth/oidc?id=invalid');
-  cy.get('div.text-red-500').contains('Could not find OIDC integration.');
+  cy.get('[data-cy="auth-card-header-description"]').contains('Could not find OIDC integration.');
 });
