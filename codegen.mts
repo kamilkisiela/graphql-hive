@@ -10,6 +10,10 @@ const config: CodegenConfig = {
     './packages/services/api/src': defineConfig(
       {
         typeDefsFilePath: false,
+        mergeSchema: {
+          path: '../../../../schema.graphql',
+          config: { includeDirectives: true },
+        },
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
@@ -259,12 +263,6 @@ const config: CodegenConfig = {
           Date: 'string',
           SafeInt: 'number',
         },
-      },
-    },
-    './schema.graphql': {
-      plugins: ['schema-ast'],
-      config: {
-        includeDirectives: true,
       },
     },
   },
