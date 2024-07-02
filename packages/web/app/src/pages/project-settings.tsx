@@ -18,12 +18,12 @@ import {
 } from '@/components/ui/card';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
+import { DeleteProjectModal } from '@/components/ui/modal/delete-project';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
 import { HiveLogo } from '@/components/v2/icon';
 import { Input } from '@/components/v2/input';
-import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';

@@ -13,6 +13,8 @@ import { CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
+import { CreateAccessTokenModal } from '@/components/ui/modal/create-access-token';
+import { DeleteTargetModal } from '@/components/ui/modal/delete-target';
 import {
   NavLayout,
   PageLayout,
@@ -21,15 +23,14 @@ import {
   SubPageLayoutHeader,
 } from '@/components/ui/page-content-layout';
 import { QueryError } from '@/components/ui/query-error';
+import { Spinner } from '@/components/ui/spinner';
+import { Tag } from '@/components/ui/tag';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
 import { Input } from '@/components/v2/input';
-import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
-import { Spinner } from '@/components/v2/spinner';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
-import { Tag } from '@/components/v2/tag';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';

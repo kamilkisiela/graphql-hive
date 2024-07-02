@@ -1,4 +1,5 @@
-import { useForm } from 'react-hook-form';
+import { ReactElement } from 'react';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -12,8 +13,8 @@ import {
 } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/components/ui/use-toast';
-import { Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from '@tanstack/react-router';
@@ -60,7 +61,7 @@ const formSchema = z.object({
 });
 
 export const CreateOrganizationForm = () => {
-  const [mutation, mutate] = useMutation(CreateOrganizationMutation);
+  const [_, mutate] = useMutation(CreateOrganizationMutation);
   const { toast } = useToast();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,17 +70,16 @@ export const CreateOrganizationForm = () => {
     defaultValues: {
       name: '',
     },
-    disabled: mutation.fetching,
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const mutation = await mutate({
+    const { data, error } = await mutate({
       input: {
         name: values.name,
       },
     });
 
-    if (mutation.data?.createOrganization.ok) {
+    if (data?.createOrganization.ok) {
       toast({
         title: 'Organization created',
         description: `You are now an admin of "${values.name}" organization.`,
@@ -88,25 +88,32 @@ export const CreateOrganizationForm = () => {
         to: '/$organizationId',
         params: {
           organizationId:
-            mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
+            data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
         },
       });
-    } else if (mutation.data?.createOrganization.error?.inputErrors?.name) {
+    } else if (data?.createOrganization.error?.inputErrors?.name) {
       form.setError('name', {
         type: 'manual',
-        message: mutation.data.createOrganization.error.inputErrors.name,
+        message: data.createOrganization.error.inputErrors.name,
       });
-    } else if (mutation.error) {
+    } else if (error) {
       toast({
         title: 'Failed to create organization',
-        description: mutation.error.message,
+        description: error.message,
       });
     }
   }
 
+  return <CreateOrganizationFormContent form={form} onSubmit={() => onSubmit(form.getValues())} />;
+};
+
+export const CreateOrganizationFormContent = (props: {
+  onSubmit: () => void;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+}): ReactElement => {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-black">
+    <Form {...props.form}>
+      <form className="bg-black" onSubmit={props.form.handleSubmit(props.onSubmit)}>
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Create an organization</CardTitle>
@@ -117,7 +124,7 @@ export const CreateOrganizationForm = () => {
           </CardHeader>
           <CardContent>
             <FormField
-              control={form.control}
+              control={props.form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
@@ -134,9 +141,13 @@ export const CreateOrganizationForm = () => {
               type="submit"
               className="w-full"
               variant="default"
-              disabled={form.formState.disabled}
+              disabled={
+                props.form.formState.isSubmitting ||
+                !props.form.formState.isValid ||
+                props.form.formState.disabled
+              }
             >
-              {form.formState.isSubmitting ? (
+              {props.form.formState.isSubmitting ? (
                 <>
                   <Spinner className="size-6 text-black" />
                   <span className="ml-4">Creating...</span>

@@ -1,10 +1,10 @@
 import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
+import { CreateProjectModal } from '@/components/ui/modal/create-project';
 import { UserMenu } from '@/components/ui/user-menu';
 import { HiveLink } from '@/components/v2/hive-link';
 import { PlusIcon } from '@/components/v2/icon';
-import { CreateProjectModal } from '@/components/v2/modals';
 import { Tabs } from '@/components/v2/tabs';
 import { env } from '@/env/frontend';
 import { graphql, useFragment } from '@/gql';
