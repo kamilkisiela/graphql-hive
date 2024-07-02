@@ -70,7 +70,7 @@ export function AuthSSOPage(props: { redirectToPath: string }) {
     mutationFn: fetchOidcId,
     onSuccess(data) {
       if (data.ok) {
-        router.navigate({
+        void router.navigate({
           to: '/auth/oidc',
           search: {
             id: data.id,

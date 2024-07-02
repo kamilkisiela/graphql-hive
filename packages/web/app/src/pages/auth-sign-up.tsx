@@ -56,7 +56,7 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
   const sendVerificationEmailMutation = useMutation({
     mutationFn: () => sendVerificationEmail(),
     onSuccess() {
-      router.navigate({
+      void router.navigate({
         to: '/auth/verify-email',
       });
     },
@@ -65,7 +65,7 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
       // In case of an error, we still want to redirect the user to the verify email page
       // so they can request a new verification email, if needed
       // and understand that the account was created.
-      router.navigate({
+      void router.navigate({
         to: '/auth/verify-email',
       });
     },
@@ -81,19 +81,19 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
           if (env.auth.requireEmailVerification) {
             sendVerificationEmailMutation.mutate();
           } else {
-            router.navigate({
+            void router.navigate({
               to: props.redirectToPath,
             });
           }
           break;
         }
         case 'FIELD_ERROR': {
-          data.formFields.forEach(field => {
+          for (const field of data.formFields) {
             form.setError(field.id as keyof SignUpFormValues, {
               type: 'manual',
               message: field.error,
-            });
-          });
+            }); 
+          }
           break;
         }
         case 'SIGN_UP_NOT_ALLOWED': {

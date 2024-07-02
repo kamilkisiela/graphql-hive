@@ -507,7 +507,7 @@ export async function main() {
             body: req.body,
           },
         });
-        res.status(400).send({
+        void res.status(400).send({
           ok: false,
           title: 'Invalid input',
           description: 'Failed to resolve SSO information due to invalid input.',
@@ -519,11 +519,11 @@ export async function main() {
       const result = await oidcIdLookup(inputResult.data.slug, storage, req.log);
 
       if (result.ok) {
-        res.status(200).send(result);
+        void res.status(200).send(result);
         return;
       }
 
-      res.status(result.status).send(result);
+      void res.status(result.status).send(result);
       return;
     });
 

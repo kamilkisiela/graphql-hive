@@ -47,12 +47,12 @@ export function AuthResetPasswordPage(props: { email: string | null; redirectToP
           break;
         }
         case 'FIELD_ERROR': {
-          data.formFields.forEach(field => {
+          for (const field of data.formFields) {
             form.setError(field.id as keyof ResetPasswordFormValues, {
               type: 'manual',
               message: field.error,
             });
-          });
+          }
           break;
         }
         case 'PASSWORD_RESET_NOT_ALLOWED': {

@@ -63,7 +63,7 @@ export function AuthCallbackPage(props: { provider: Provider; redirectToPath: st
 
   if (auth.isSuccess) {
     if (auth.data.status === 'OK') {
-      router.navigate({
+      void router.navigate({
         to: props.redirectToPath,
       });
     } else {

@@ -52,7 +52,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
 
       switch (status) {
         case 'OK': {
-          router.navigate({
+          void router.navigate({
             to: props.redirectToPath,
           });
           break;
@@ -66,12 +66,12 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
           break;
         }
         case 'FIELD_ERROR': {
-          data.formFields.forEach(field => {
+          for (const field of data.formFields) {
             form.setError(field.id as keyof SignInFormValues, {
               type: 'manual',
               message: field.error,
-            });
-          });
+            }); 
+          }
           break;
         }
         case 'SIGN_IN_NOT_ALLOWED': {
