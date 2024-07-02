@@ -90,15 +90,6 @@ export const ConnectSchemaModal = (props: {
     pause: !isOpen,
   });
 
-  const selectedContract = useMemo(() => {
-    if (selectedGraph === 'DEFAULT_GRAPH') {
-      return null;
-    }
-    return query.data?.target?.activeContracts.edges.find(
-      ({ node }) => node.contractName === selectedGraph,
-    )?.node;
-  }, [selectedGraph, query.data?.target?.activeContracts.edges]);
-
   return (
     <ConnectSchemaModalContent
       isOpen={isOpen}
@@ -106,7 +97,6 @@ export const ConnectSchemaModal = (props: {
       query={query}
       selectedGraph={selectedGraph}
       setSelectedGraph={setSelectedGraph}
-      selectedContract={selectedContract}
       organizationId={props.organizationId}
       projectId={props.projectId}
       targetId={props.targetId}
@@ -120,20 +110,20 @@ export const ConnectSchemaModalContent = (props: {
   query: UseQueryState<ConnectSchemaQuery>;
   selectedGraph: string;
   setSelectedGraph: (value: string) => void;
-  selectedContract:
-    | {
-        __typename: 'Contract';
-        id: string;
-        contractName: string;
-        cdnUrl: string;
-      }
-    | null
-    | undefined;
   organizationId: string;
   projectId: string;
   targetId: string;
 }): ReactElement => {
   const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
+  const selectedContract = useMemo(() => {
+    if (props.selectedGraph === 'DEFAULT_GRAPH') {
+      return null;
+    }
+    return props.query.data?.target?.activeContracts.edges.find(
+      ({ node }) => node.contractName === props.selectedGraph,
+    )?.node;
+  }, [props.selectedGraph, props.query.data?.target?.activeContracts.edges]);
+
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="flex w-[800px] flex-col gap-5">
@@ -220,7 +210,7 @@ export const ConnectSchemaModalContent = (props: {
             </span>
             <CopyValue
               value={composeEndpoint(
-                props.selectedContract?.cdnUrl ?? props.query.data.target.cdnUrl,
+                selectedContract?.cdnUrl ?? props.query.data.target.cdnUrl,
                 selectedArtifact,
               )}
             />
