@@ -10,19 +10,20 @@ const config: CodegenConfig = {
     './packages/services/api/src': defineConfig(
       {
         typeDefsFilePath: false,
+        mergeSchema: {
+          path: '../../../../schema.graphql',
+          config: { includeDirectives: true },
+        },
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
         blacklistedModules: [
           'activity',
-          'admin',
           'alerts',
           'auth',
           'billing',
-          'cdn',
           'collection',
           'feedback',
-          'integrations',
           'lab',
           'oidc-integrations',
           'operations',
@@ -30,7 +31,6 @@ const config: CodegenConfig = {
           'policy',
           'project',
           'schema',
-          'support',
           'target',
         ],
         scalarsOverrides: {
@@ -259,12 +259,6 @@ const config: CodegenConfig = {
           Date: 'string',
           SafeInt: 'number',
         },
-      },
-    },
-    './schema.graphql': {
-      plugins: ['schema-ast'],
-      config: {
-        includeDirectives: true,
       },
     },
   },
