@@ -92,7 +92,7 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
             form.setError(field.id as keyof SignUpFormValues, {
               type: 'manual',
               message: field.error,
-            }); 
+            });
           }
           break;
         }

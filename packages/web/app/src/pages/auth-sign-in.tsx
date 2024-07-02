@@ -70,7 +70,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
             form.setError(field.id as keyof SignInFormValues, {
               type: 'manual',
               message: field.error,
-            }); 
+            });
           }
           break;
         }
