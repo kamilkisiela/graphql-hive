@@ -34,7 +34,6 @@ const config: CodegenConfig = {
           'policy',
           'project',
           'schema',
-          'support',
           'target',
         ],
         scalarsOverrides: {
