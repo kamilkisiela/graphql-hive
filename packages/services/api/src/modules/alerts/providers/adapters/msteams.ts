@@ -46,9 +46,10 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
         text: input.event.target.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
       });
+      const changeUrl = `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`;
       const viewLink = createMDLink({
         text: 'view details',
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`,
+        url: changeUrl,
       });
 
       const message = input.event.initial
@@ -62,7 +63,14 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
         ? ''
         : createAttachmentsText(input.event.changes, input.event.messages);
 
-      await this.sendTeamsMessage(webhookUrl, `${message}\n\n${attachmentsText}`);
+      await this.sendTeamsMessage(
+        webhookUrl,
+        `${message}\n\n${attachmentsText}`,
+        createMDLink({
+          text: 'view full report',
+          url: changeUrl,
+        }),
+      );
     } catch (error) {
       this.logger.error(`Failed to send Microsoft Teams notification`, error);
     }
@@ -108,7 +116,14 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
     return word + (num > 1 ? 's' : '');
   }
 
-  private async sendTeamsMessage(webhookUrl: string, message: string) {
+  /**
+   * message gets truncated to max 27k characters-max payload size for Microsoft Teams is 28 KB
+   */
+  async sendTeamsMessage(webhookUrl: string, message: string, fullReportMdLink?: string) {
+    if (message.length > 27000) {
+      message = message.slice(0, 27000) + `\n\n... message truncated. ${fullReportMdLink ?? ''}`;
+    }
+
     const payload = {
       '@type': 'MessageCard',
       '@context': 'http://schema.org/extensions',

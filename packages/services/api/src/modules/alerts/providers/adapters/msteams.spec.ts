@@ -4,17 +4,19 @@ import { SchemaChangeType } from '@hive/storage';
 import { ChannelConfirmationInput, SchemaChangeNotificationInput } from './common';
 import { TeamsCommunicationAdapter } from './msteams';
 
+const logger = {
+  child: () => ({
+    debug: vi.fn(),
+    error: vi.fn(),
+  }),
+};
+
+const appBaseUrl = 'app-base-url';
+const webhookUrl = 'webhook-url';
+
 describe('TeamsCommunicationAdapter', () => {
   describe('sendSchemaChangeNotification', () => {
     it('should send schema change notification', async () => {
-      const logger = {
-        child: () => ({
-          debug: vi.fn(),
-          error: vi.fn(),
-        }),
-      };
-      const appBaseUrl = 'app-base-url';
-      const webhookUrl = 'webhook-url';
       const changes = [
         {
           id: 'id-1',
@@ -154,6 +156,7 @@ describe('TeamsCommunicationAdapter', () => {
          - Field \`addFooT\` was added to object type \`Mutation\`
          - Field \`foo4\` was added to object type \`Query\`
         ,
+          [view full report](app-base-url/org-clean-id/project-clean-id/target-clean-id/history/schema-id),
         ]
       `);
     });
@@ -163,12 +166,6 @@ describe('TeamsCommunicationAdapter', () => {
 });
 describe('sendChannelConfirmation', () => {
   it('should send channel confirmation', async () => {
-    const logger = {
-      child: () => ({
-        debug: vi.fn(),
-        error: vi.fn(),
-      }),
-    };
     const appBaseUrl = 'app-base-url';
     const webhookUrl = 'webhook-url';
     const input = {
@@ -208,5 +205,51 @@ describe('sendChannelConfirmation', () => {
       I will no longer send here notifications about your [project-name](app-base-url/org-clean-id/project-clean-id) project.,
       ]
     `);
+  });
+
+  describe('sendTeamsMessage', () => {
+    const adapter = new TeamsCommunicationAdapter(logger as any, appBaseUrl);
+
+    beforeAll(() => {
+      // @ts-expect-error mocking fetch
+      global.fetch = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          statusText: 'OK',
+        }),
+      );
+    });
+
+    it('sends a message under 27k characters', async () => {
+      const message = 'Short message';
+      await adapter.sendTeamsMessage('http://example.com/webhook', message);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining(message),
+        }),
+      );
+    });
+
+    it('truncates and appends link for messages over 27k characters', async () => {
+      const longMessage = 'a'.repeat(27001);
+      const link = 'http://example.com/fullReport';
+      await adapter.sendTeamsMessage('http://example.com/webhook', longMessage, link);
+      expect(fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining('... message truncated. ' + link),
+        }),
+      );
+    });
+
+    it('handles failed send operation', async () => {
+      // @ts-expect-error types obviously don't account for the fact this is mocked
+      fetch.mockImplementationOnce(() => Promise.resolve({ ok: false, statusText: 'Bad Request' }));
+
+      await expect(
+        adapter.sendTeamsMessage('http://example.com/webhook', 'Test message'),
+      ).rejects.toThrow('Failed to send Microsoft Teams message: Bad Request');
+    });
   });
 });
