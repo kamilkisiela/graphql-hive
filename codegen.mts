@@ -19,14 +19,11 @@ const config: CodegenConfig = {
         resolverTypesPath: './__generated__/types.next.ts',
         blacklistedModules: [
           'activity',
-          'admin',
           'alerts',
           'auth',
           'billing',
-          'cdn',
           'collection',
           'feedback',
-          'integrations',
           'lab',
           'oidc-integrations',
           'operations',
@@ -34,7 +31,6 @@ const config: CodegenConfig = {
           'policy',
           'project',
           'schema',
-          'support',
           'target',
         ],
         scalarsOverrides: {
