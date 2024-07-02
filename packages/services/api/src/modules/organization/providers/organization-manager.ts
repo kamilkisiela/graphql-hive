@@ -428,7 +428,6 @@ export class OrganizationManager {
       user: user.id,
     });
 
-    // TODO: Add activity for slug change
     await this.activityManager.create({
       type: 'ORGANIZATION_NAME_UPDATED',
       selector: {
