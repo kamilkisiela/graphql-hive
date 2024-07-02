@@ -29,7 +29,7 @@ export function createSupergraphSDLFetcher(options: SupergraphSDLFetcherOptions)
     ? options.endpoint
     : joinUrl(options.endpoint, 'supergraph');
 
-  return function supergraphSDLFetcher() {
+  return function supergraphSDLFetcher(): Promise<{ id: string; supergraphSdl: string }> {
     const headers: {
       [key: string]: string;
     } = {
@@ -41,49 +41,42 @@ export function createSupergraphSDLFetcher(options: SupergraphSDLFetcherOptions)
       headers['If-None-Match'] = cacheETag;
     }
 
-    let retryCount = 0;
+    return http
+      .get(endpoint, {
+        headers,
+        retry: {
+          retryWhen: response => response.status >= 500,
+          okWhen: response => response.status === 304,
+          retries: 10,
+          maxTimeout: 200,
+          minTimeout: 1,
+        },
+      })
+      .then(async response => {
+        if (response.ok) {
+          const supergraphSdl = await response.text();
+          const result = {
+            id: await createHash('SHA-256').update(supergraphSdl).digest('base64'),
+            supergraphSdl,
+          };
 
-    const retry = (status: number) => {
-      if (retryCount >= 10 || status < 499) {
-        return Promise.reject(new Error(`Failed to fetch [${status}]`));
-      }
-
-      retryCount = retryCount + 1;
-
-      return fetchWithRetry();
-    };
-
-    const fetchWithRetry = (): Promise<{ id: string; supergraphSdl: string }> => {
-      return http
-        .get(endpoint, {
-          headers,
-        })
-        .then(async response => {
-          if (response.ok) {
-            const supergraphSdl = await response.text();
-            const result = {
-              id: await createHash('SHA-256').update(supergraphSdl).digest('base64'),
-              supergraphSdl,
-            };
-
-            const etag = response.headers.get('etag');
-            if (etag) {
-              cached = result;
-              cacheETag = etag;
-            }
-
-            return result;
+          const etag = response.headers.get('etag');
+          if (etag) {
+            cached = result;
+            cacheETag = etag;
           }
 
-          if (response.status === 304 && cached !== null) {
-            return cached;
-          }
+          return result;
+        }
 
-          return retry(response.status);
-        });
-    };
+        if (response.status === 304 && cached !== null) {
+          return cached;
+        }
 
-    return fetchWithRetry();
+        throw new Error(
+          `Failed to GET ${endpoint}, received: ${response.status} ${response.statusText ?? 'Internal Server Error'}`,
+        );
+      });
   };
 }
 

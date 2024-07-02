@@ -289,6 +289,8 @@ test('fail in case of unexpected CDN status code (nRetryCount=11)', async () => 
   try {
     await fetcher();
   } catch (e) {
-    expect(e).toMatchInlineSnapshot(`[Error: Failed to fetch [500]]`);
+    expect(e).toMatchInlineSnapshot(
+      `[Error: Failed to fetch http://localhost/services, received: 500 Internal Server Error]`,
+    );
   }
 });
