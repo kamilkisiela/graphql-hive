@@ -11,7 +11,21 @@ function getDockerConnection() {
   return docker;
 }
 
-export async function getServiceHost(serviceName: string, servicePort: number): Promise<string> {
+const LOCAL_SERVICES = {
+  server: 3001,
+  clickhouse: 8123,
+  emails: 6260,
+  composition_federation_2: 3012,
+  usage: 4001,
+} as const;
+
+export type KnownServices = keyof typeof LOCAL_SERVICES;
+
+export async function getServiceHost(serviceName: KnownServices, servicePort: number): Promise<string> {
+  if (process.env.DEV === "1") {
+    return `localhost:${LOCAL_SERVICES[serviceName]}`;
+  }
+  
   const docker = getDockerConnection();
   const containers = await docker.listContainers({
     filters: JSON.stringify({

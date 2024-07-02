@@ -12,6 +12,7 @@ import {
   publishSchema,
 } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
+import { getServiceHost } from 'testkit/utils';
 
 test.concurrent('cannot publish a schema without target:registry:write access', async () => {
   const { createOrg } = await initSeed().createOwner();
@@ -2819,7 +2820,7 @@ test('Target.schemaVersion: result is read from the database', async () => {
 
 test('Composition Error (Federation 2) can be served from the database', async () => {
   const storage = await createStorage(connectionString(), 1);
-  const dockerAddress = `composition_federation_2:3069`;
+  const serviceAddress = await getServiceHost('composition_federation_2', 3069);
 
   try {
     const initialSchema = /* GraphQL */ `
@@ -2880,7 +2881,7 @@ test('Composition Error (Federation 2) can be served from the database', async (
 
     await enableExternalSchemaComposition(
       {
-        endpoint: `http://${dockerAddress}/compose`,
+        endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
@@ -2949,7 +2950,7 @@ test('Composition Error (Federation 2) can be served from the database', async (
 
 test('Composition Network Failure (Federation 2)', async () => {
   const storage = await createStorage(connectionString(), 1);
-  const dockerAddress = `composition_federation_2:3069`;
+  const serviceAddress = await getServiceHost('composition_federation_2', 3069);
 
   try {
     const initialSchema = /* GraphQL */ `
@@ -3009,7 +3010,7 @@ test('Composition Network Failure (Federation 2)', async () => {
 
     await enableExternalSchemaComposition(
       {
-        endpoint: `http://${dockerAddress}/compose`,
+        endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
@@ -3050,7 +3051,7 @@ test('Composition Network Failure (Federation 2)', async () => {
 
     await enableExternalSchemaComposition(
       {
-        endpoint: `http://${dockerAddress}/no_compose`,
+        endpoint: `http://${serviceAddress}/no_compose`,
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
         organization: organization.cleanId,

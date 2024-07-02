@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "tsx ../../../../scripts/runify.ts",
-    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/index.ts"
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts"
   },
   "devDependencies": {
     "@apollo/composition": "2.8.2",

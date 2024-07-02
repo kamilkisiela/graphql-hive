@@ -6,6 +6,7 @@
   "scripts": {
     "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:services",
     "test:integration": "vitest",
+    "dev:integration": "DEV=1 vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

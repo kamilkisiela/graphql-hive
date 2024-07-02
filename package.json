@@ -46,6 +46,7 @@
     "test": "vitest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "test:integration": "cd integration-tests && pnpm test:integration",
+    "dev:integration": "cd integration-tests && pnpm dev:integration",
     "typecheck": "pnpm run -r --filter '!@hive/deployment' typecheck",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "workspace": "pnpm run --filter $1 $2"

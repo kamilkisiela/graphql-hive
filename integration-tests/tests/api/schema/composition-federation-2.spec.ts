@@ -1,11 +1,11 @@
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { enableExternalSchemaComposition } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
-import { generateUnique } from '../../../testkit/utils';
+import { generateUnique, getServiceHost } from '../../../testkit/utils';
 
 // We do not resolve this to a host address, because we are calling this through a different flow:
 // GraphQL API -> Schema service -> Composition service
-const dockerAddress = `composition_federation_2:3069`;
+const dockerAddress = getServiceHost('composition_federation_2', 3069);
 
 test.concurrent('call an external service to compose and validate services', async () => {
   const { createOrg } = await initSeed().createOwner();
@@ -42,7 +42,7 @@ test.concurrent('call an external service to compose and validate services', asy
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
     {
-      endpoint: `http://${dockerAddress}/compose`,
+      endpoint: `http://${await dockerAddress}/compose`,
       // eslint-disable-next-line no-process-env
       secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
       project: project.cleanId,
@@ -53,7 +53,7 @@ test.concurrent('call an external service to compose and validate services', asy
   expect(
     externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
       ?.endpoint,
-  ).toBe(`http://${dockerAddress}/compose`);
+  ).toBe(`http://${await dockerAddress}/compose`);
   // Disable Native Federation v2 composition to allow the external composition to take place
   await setNativeFederation(false);
 

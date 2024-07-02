@@ -6,6 +6,7 @@ import { initSeed } from 'testkit/seed';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createStorage } from '@hive/storage';
 import { sortSDL } from '@theguild/federation-composition';
+import { getServiceHost } from 'testkit/utils';
 
 function connectionString() {
   const {
@@ -245,7 +246,7 @@ test.concurrent(
 
       await enableExternalSchemaComposition(
         {
-          endpoint: `http://${`composition_federation_2:3069`}/compose`,
+          endpoint: `http://${await getServiceHost('composition_federation_2', 3069)}/compose`,
           // eslint-disable-next-line no-process-env
           secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
           project: project.cleanId,

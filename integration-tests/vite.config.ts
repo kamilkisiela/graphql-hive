@@ -1,5 +1,13 @@
 import { defineConfig } from 'vitest/config';
 
+const setupFiles = ['../scripts/serializer.ts', './expect.ts'];
+
+if (!process.env.DEV) {
+  setupFiles.unshift('dotenv/config');
+} else {
+  setupFiles.unshift('./local-dev.ts');
+}
+
 export default defineConfig({
   test: {
     globals: true,
@@ -11,7 +19,7 @@ export default defineConfig({
         import.meta.url,
       ).pathname,
     },
-    setupFiles: ['dotenv/config', '../scripts/serializer.ts', './expect.ts'],
+    setupFiles,
     testTimeout: 90_000,
   },
 });

@@ -14,7 +14,7 @@ import { createSupergraphManager } from '@graphql-hive/apollo';
 import { graphql } from '../../testkit/gql';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
-import { getServiceHost } from '../../testkit/utils';
+import { getServiceHost, KnownServices } from '../../testkit/utils';
 
 const s3Client = new S3Client({
   endpoint: 'http://127.0.0.1:9000',
@@ -85,7 +85,7 @@ function generateLegacyToken(targetId: string) {
  */
 function runArtifactsCDNTests(
   name: string,
-  runtime: { service: string; port: number; path: string },
+  runtime: { service: KnownServices; port: number; path: string },
 ) {
   const getBaseEndpoint = () =>
     getServiceHost(runtime.service, runtime.port).then(v => `http://${v}${runtime.path}`);
