@@ -10,6 +10,11 @@ export interface HiveClient {
   reportSchema: SchemaReporter['report'];
   /** Collect usage for Query and Mutation operations */
   collectUsage(): CollectUsageCallback;
+  collectRawUsage(
+    args: ExecutionArgs,
+    result: GraphQLErrorsResult | AbortAction,
+    duration: number,
+  ): void;
   /** Collect usage for Subscription operations */
   collectSubscriptionUsage(args: { args: ExecutionArgs }): void;
   createInstrumentedExecute(executeImpl: any): any;

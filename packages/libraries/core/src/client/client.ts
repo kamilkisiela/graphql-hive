@@ -37,6 +37,10 @@ export function createHive(options: HivePluginOptions): HiveClient {
     return usage.collect();
   }
 
+  function collectRawUsage(...args: Parameters<typeof usage.collectRaw>) {
+    return usage.collectRaw(...args);
+  }
+
   async function dispose() {
     await Promise.all([schemaReporter.dispose(), usage.dispose()]);
   }
@@ -207,6 +211,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
     info,
     reportSchema,
     collectUsage,
+    collectRawUsage,
     dispose,
     collectSubscriptionUsage: usage.collectSubscription,
     createInstrumentedSubscribe,
