@@ -34,12 +34,6 @@ if (env.auth.organizationOIDC) {
 }
 
 function useOidcProviderId() {
-  if (typeof window === 'undefined') {
-    return {
-      loading: true,
-    } as const;
-  }
-
   const url = new URL(window.location.href, env.appBaseUrl);
 
   if (!supertokenRoutes.has(url.pathname)) {
@@ -90,7 +84,7 @@ const SupertokensLazyComponent = lazy(() =>
 
 const isOkta = () =>
   env.auth.okta !== null &&
-  new URLSearchParams(globalThis.window?.location.search ?? '').get('provider') === 'okta';
+  new URLSearchParams(window.location.search ?? '').get('provider') === 'okta';
 
 /**
  * Route for showing the SuperTokens login page.
