@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import rawSnapshotSerializer from 'jest-snapshot-serializer-raw/always';
 import { expect } from 'vitest';
 import { normalizeCliOutput } from './serializers/cli-output';

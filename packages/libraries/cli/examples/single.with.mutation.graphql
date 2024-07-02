@@ -1,0 +1,19 @@
+type Query {
+  foo: Int!
+  bar: String
+  test: String
+  last: Boolean
+  fooTwo: Int!
+}
+
+type Mutation {
+  addFooAnother(foo: Int!): Int!
+  addBar(bar: String): String
+  addTest(test: String): String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+# test 3
