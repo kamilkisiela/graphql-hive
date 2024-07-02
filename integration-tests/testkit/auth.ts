@@ -94,6 +94,8 @@ const createSession = async (
       superTokensUserId,
       email,
       oidcIntegrationId,
+      firstName: null,
+      lastName: null,
     });
 
     const sessionData = createSessionPayload(superTokensUserId, email);
