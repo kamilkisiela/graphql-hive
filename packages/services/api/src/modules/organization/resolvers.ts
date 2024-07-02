@@ -17,6 +17,13 @@ import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 const OrganizationNameModel = NameModel.min(2).max(50);
+const OrganizationSlugModel = z
+  .string({
+    required_error: 'Organization slug is required',
+  })
+  .min(1, 'Organization slug is required')
+  .max(50, 'Slug must be less than 50 characters')
+  .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers and dashes');
 
 const createOrUpdateMemberRoleInputSchema = z.object({
   name: z
@@ -252,6 +259,45 @@ export const resolvers: OrganizationModule.Resolvers = {
             },
             organization,
           },
+        },
+      };
+    },
+    async updateOrganizationSlug(_, { input }, { injector }) {
+      const parsedInput = OrganizationSlugModel.safeParse(input.slug.trim());
+
+      if (!parsedInput.success) {
+        return {
+          error: {
+            message:
+              parsedInput.error.formErrors.fieldErrors?.[0]?.[0] ??
+              'Changing the organization slug failed.',
+          },
+        };
+      }
+
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
+      const result = await injector.get(OrganizationManager).updateSlug({
+        slug: input.slug,
+        organization: organizationId,
+      });
+
+      if (result.ok) {
+        return {
+          ok: {
+            updatedOrganizationPayload: {
+              selector: {
+                organization: result.organization.cleanId,
+              },
+              organization: result.organization,
+            },
+          },
+        };
+      }
+
+      return {
+        ok: null,
+        error: {
+          message: result.message,
         },
       };
     },

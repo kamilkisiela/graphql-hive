@@ -264,6 +264,7 @@ const OIDCTokenSchema = zod.object({ access_token: zod.string() });
 const getOIDCIdFromInput = (input: { userContext: any }, logger: FastifyBaseLogger): string => {
   const fastifyRequest = input.userContext._default.request as FastifyRequest;
   const originalUrl = 'http://localhost' + fastifyRequest.getOriginalURL();
+  console.log(originalUrl);
   const oidcId = new URL(originalUrl).searchParams.get('oidc_id');
 
   if (typeof oidcId !== 'string') {

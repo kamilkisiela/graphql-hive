@@ -16,7 +16,7 @@
   "packageManager": "pnpm@9.4.0",
   "engines": {
     "node": ">=22",
-    "pnpm": ">=9.3.0"
+    "pnpm": ">=9.4.0"
   },
   "scripts": {
     "build": "pnpm turbo build --color",

@@ -384,7 +384,12 @@ export const SlackIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const HiveLogo = ({ className }: IconProps): ReactElement => {
+export const HiveLogo = ({
+  className,
+  animated = true,
+}: IconProps & {
+  animated?: boolean;
+}): ReactElement => {
   return (
     <motion.svg
       width="42"
@@ -393,9 +398,13 @@ export const HiveLogo = ({ className }: IconProps): ReactElement => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={clsx('inline fill-none', className)}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+      {...(animated
+        ? {
+            whileHover: { scale: 1.1 },
+            whileTap: { scale: 0.9 },
+            transition: { type: 'spring', stiffness: 400, damping: 17 },
+          }
+        : {})}
     >
       <motion.path
         fillRule="evenodd"
