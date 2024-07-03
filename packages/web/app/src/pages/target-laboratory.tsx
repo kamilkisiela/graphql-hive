@@ -105,7 +105,7 @@ function Save(props: {
     targetId: props.targetId,
   });
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
-  const { queryEditor, variableEditor, headerEditor } = useEditorContext()!;
+  const { queryEditor, variableEditor, headerEditor, updateActiveTabValues } = useEditorContext()!;
   const { clearOperation } = useSyncOperationState({
     organizationId: props.organizationId,
     projectId: props.projectId,
@@ -188,6 +188,7 @@ function Save(props: {
             if (data) {
               clearOperation();
               notify('Updated!', 'success');
+              updateActiveTabValues({ className: '' });
             }
             if (error) {
               notify(error.message, 'error');
