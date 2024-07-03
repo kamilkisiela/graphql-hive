@@ -37,6 +37,14 @@ export function connectLab(server: FastifyInstance) {
 
     const { organizationId, projectId, targetId } = labParamsResult.data;
 
+    const headers: Record<string, string> = {};
+
+    if (req.headers['x-hive-key']) {
+      headers['Authorization'] = `Bearer ${req.headers['x-hive-key'] as string}`;
+    } else {
+      headers['Cookie'] = req.headers.cookie as string;
+    }
+
     const body = {
       operationName: 'lab',
       query: /* GraphQL */ `
@@ -56,17 +64,16 @@ export function connectLab(server: FastifyInstance) {
       },
     };
 
+    if (req.headers['x-request-id']) {
+      headers['x-request-id'] = req.headers['x-request-id'] as string;
+    }
+
     const response = await fetch(url, {
       headers: {
         'content-type': 'application/json',
         'graphql-client-name': 'Hive App',
         'graphql-client-version': env.release,
-        ...(req.headers['x-hive-key']
-          ? { Authorization: `Bearer ${req.headers['x-hive-key']}` }
-          : { Cookie: req.headers.cookie as string }),
-        ...(req.headers['x-request-id'] && {
-          'x-request-id': req.headers['x-request-id'] as string,
-        }),
+        ...headers,
       },
       credentials: 'include',
       method: 'POST',
