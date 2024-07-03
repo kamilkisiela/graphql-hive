@@ -8,7 +8,7 @@ import { Outlet } from '@tanstack/react-router';
 function ExternalLink(props: { href: string; children: React.ReactNode }) {
   return (
     <a
-      href="https://the-guild.dev/graphql/hive/docs"
+      href={props.href}
       className="group relative isolate flex flex-none items-center gap-x-3 rounded-lg px-2 py-0.5 text-[0.8125rem]/6 font-medium text-white/30 transition-colors hover:text-orange-500"
     >
       <span className="absolute inset-0 -z-10 scale-75 rounded-lg bg-white/5 opacity-0 transition group-hover:scale-100 group-hover:opacity-100" />
@@ -31,7 +31,7 @@ export function AuthPage() {
               <HiveLogo animated={false} className="size-8 animate-pulse" />
             </div>
           ) : (
-            <div className="h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-3 lg:px-0">
+            <div className="grid h-full items-center justify-center lg:max-w-none lg:grid-cols-3 lg:px-0">
               <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
                 <div className="absolute inset-0 bg-[#101014]" />
                 <div className="relative z-20 flex items-center text-lg font-medium">
@@ -40,7 +40,7 @@ export function AuthPage() {
                 </div>
                 {/* TODO: responsive design */}
                 <div className="relative my-auto">
-                  <h1 className="text-3xl/tight font-light text-white">
+                  <h1 className="font-light text-white md:text-2xl/tight lg:text-3xl/tight">
                     Open-source <span className="text-orange-500">GraphQL</span> management platform
                   </h1>
                   <p className="mt-4 text-sm/6 text-gray-300">
@@ -52,10 +52,10 @@ export function AuthPage() {
                       <BookIcon className="size-4 flex-none" />
                       <span className="self-baseline text-white">Documentation</span>
                     </ExternalLink>
-                    <a href="https://github.com/kamilkisiela/graphql-hive">
+                    <ExternalLink href="https://github.com/kamilkisiela/graphql-hive">
                       <SiGithub className="size-4 flex-none" />
                       <span className="self-baseline text-white">Github</span>
-                    </a>
+                    </ExternalLink>
                   </div>
                 </div>
               </div>
