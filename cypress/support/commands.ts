@@ -1,8 +1,18 @@
 namespace Cypress {
   export interface Chainable {
-    fillSignInFormAndSubmit(data: { email: string; password: string; }): Chainable;
-    fillSignUpFormAndSubmit(data: { email: string; password: string; firstName: string; lastName: string }): Chainable;
-    signup(data: { email: string; password: string; firstName: string; lastName: string; }): Chainable;
+    fillSignInFormAndSubmit(data: { email: string; password: string }): Chainable;
+    fillSignUpFormAndSubmit(data: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+    }): Chainable;
+    signup(data: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+    }): Chainable;
     login(data: { email: string; password: string }): Chainable;
     dataCy(name: string): Chainable<JQuery<HTMLElement>>;
     createOIDCIntegration(organizationName: string): Chainable<{
@@ -27,10 +37,11 @@ Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
   cy.get('div[role="dialog"]').find('button[type="submit"]').click();
 
   cy.url().then(url => {
-    return new URL(url).pathname.split('/')[0]
+    return new URL(url).pathname.split('/')[0];
   });
-  
-  return cy.get('div[role="dialog"]')
+
+  return cy
+    .get('div[role="dialog"]')
     .find('code')
     .last()
     .then($elem => $elem.text())
@@ -45,7 +56,7 @@ Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
         return {
           loginUrl,
           organizationSlug,
-        }
+        };
       });
     });
 });
