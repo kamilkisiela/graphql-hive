@@ -38,24 +38,26 @@ export function AuthPage() {
                   <HiveLogo animated={false} className="mr-2 size-6" />
                   GraphQL Hive
                 </div>
-                {/* TODO: responsive design */}
-                <div className="relative my-auto">
-                  <h1 className="text-balance font-light text-white md:text-2xl/tight lg:text-3xl/tight">
-                    Open-source <span className="text-orange-500">GraphQL</span> management platform
-                  </h1>
-                  <p className="mt-4 text-balance text-sm/6 text-gray-300">
-                    Prevent breaking changes, monitor performance of your GraphQL API, and manage
-                    your API gateway
-                  </p>
-                  <div className="mt-8 flex flex-wrap justify-center gap-x-1 gap-y-3 sm:gap-x-2 lg:justify-start">
-                    <ExternalLink href="https://the-guild.dev/graphql/hive/docs">
-                      <BookIcon className="size-4 flex-none" />
-                      <span className="self-baseline text-white">Documentation</span>
-                    </ExternalLink>
-                    <ExternalLink href="https://github.com/kamilkisiela/graphql-hive">
-                      <SiGithub className="size-4 flex-none" />
-                      <span className="self-baseline text-white">Github</span>
-                    </ExternalLink>
+                <div className="relative flex h-full flex-row items-center justify-center">
+                  <div className="max-w-xs md:max-w-none">
+                    <h1 className="text-balance font-light text-white md:text-2xl/tight lg:text-3xl/tight">
+                      Open-source <span className="text-orange-500">GraphQL</span> management
+                      platform
+                    </h1>
+                    <p className="mt-4 text-balance text-sm/6 text-gray-300">
+                      Prevent breaking changes, monitor performance of your GraphQL API, and manage
+                      your API gateway
+                    </p>
+                    <div className="mt-8 flex flex-wrap justify-center gap-x-1 gap-y-3 sm:gap-x-2 lg:justify-start">
+                      <ExternalLink href="https://the-guild.dev/graphql/hive/docs">
+                        <BookIcon className="size-4 flex-none" />
+                        <span className="self-baseline text-white">Documentation</span>
+                      </ExternalLink>
+                      <ExternalLink href="https://github.com/kamilkisiela/graphql-hive">
+                        <SiGithub className="size-4 flex-none" />
+                        <span className="self-baseline text-white">Github</span>
+                      </ExternalLink>
+                    </div>
                   </div>
                 </div>
               </div>
