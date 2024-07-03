@@ -232,7 +232,6 @@ const getEnsureUserOverrides = (
         throw Error('emailPasswordSignUpPOST is not available');
       }
 
-      console.log(input.formFields);
       const response = await originalImplementation.emailPasswordSignUpPOST(input);
 
       const firstName = input.formFields.find(field => field.id === 'firstName')?.value ?? null;
