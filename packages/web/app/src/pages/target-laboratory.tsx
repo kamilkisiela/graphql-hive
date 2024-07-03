@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { cx } from 'class-variance-authority';
 import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
@@ -26,6 +26,7 @@ import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
+import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
 import { useOperationCollectionsPlugin } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
@@ -61,63 +62,6 @@ function Share({ operation }: { operation: string | null }): ReactElement | null
       </GraphiQLButton>
     </GraphiQLTooltip>
   );
-}
-
-export const CollectionsQuery = graphql(`
-  query Collections($selector: TargetSelectorInput!) {
-    target(selector: $selector) {
-      id
-      documentCollections {
-        edges {
-          cursor
-          node {
-            id
-            name
-            description
-            operations(first: 100) {
-              edges {
-                node {
-                  id
-                  name
-                }
-                cursor
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`);
-
-export function useCollections(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-}) {
-  const [{ data, error, fetching }] = useQuery({
-    query: CollectionsQuery,
-    variables: {
-      selector: {
-        target: props.targetId,
-        organization: props.organizationId,
-        project: props.projectId,
-      },
-    },
-  });
-
-  const notify = useNotifications();
-
-  useEffect(() => {
-    if (error) {
-      notify(error.message, 'error');
-    }
-  }, [error]);
-
-  return {
-    collections: data?.target?.documentCollections.edges.map(v => v.node) || [],
-    fetching,
-  };
 }
 
 const UpdateOperationMutation = graphql(`
@@ -482,7 +426,8 @@ function LaboratoryPageContent(props: {
           .CodeMirror-info {
             --color-base: 223, 70%, 3.9% !important;
           }
-          .graphiql-tooltip, .graphiql-dropdown-content {
+          .graphiql-tooltip,
+          .graphiql-dropdown-content {
             background: #030711;
           }
         `}</style>

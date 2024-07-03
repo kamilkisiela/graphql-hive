@@ -252,9 +252,128 @@ export function useOperationCollectionsPlugin(props: {
         }, 150);
       }, [initialSelectedCollection]);
 
+      const renderedCollections = collections.map(collection => (
+        <AccordionItem key={collection.id} value={collection.id} className="border-b-0">
+          <AccordionHeader className="flex items-center justify-between">
+            <AccordionTriggerPrimitive className="group flex w-full items-center gap-x-3 rounded p-2 font-medium text-white hover:bg-gray-100/10">
+              <FolderIcon className="group-radix-state-open:hidden size-4" />
+              <FolderOpenIcon className="group-radix-state-closed:hidden size-4" />
+              {collection.name}
+            </AccordionTriggerPrimitive>
+            {shouldShowMenu && (
+              <DropdownMenu>
+                <DropdownMenuTrigger aria-label="More" className="graphiql-toolbar-button">
+                  <DotsHorizontalIcon />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={addOperation}
+                    disabled={createOperationState.fetching}
+                    data-collection-id={collection.id}
+                  >
+                    Add operation <PlusIcon className="ml-2 size-4" />
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setCollectionId(collection.id);
+                      toggleCollectionModal();
+                    }}
+                  >
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setCollectionId(collection.id);
+                      toggleDeleteCollectionModalOpen();
+                    }}
+                    className="text-red-500"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </AccordionHeader>
+          <AccordionContent className="space-y-0 pb-2 pl-2">
+            {collection.operations.edges.length ? (
+              collection.operations.edges.map(({ node }) => (
+                <div key={node.id} className="flex items-center">
+                  <Link
+                    to="/$organizationId/$projectId/$targetId/laboratory"
+                    params={{
+                      organizationId: props.organizationId,
+                      projectId: props.projectId,
+                      targetId: props.targetId,
+                    }}
+                    search={{ operation: node.id }}
+                    className={cn(
+                      'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
+                      node.id === queryParamsOperationId && [
+                        'bg-gray-100/10 text-white',
+                        !isSame && 'hive-badge-is-changed relative',
+                      ],
+                    )}
+                  >
+                    <SquareTerminalIcon className="size-4" />
+                    {node.name}
+                  </Link>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
+                      <DotsHorizontalIcon />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={async () => {
+                          const url = new URL(window.location.href);
+                          await copyToClipboard(
+                            `${url.origin}${url.pathname}?operation=${node.id}`,
+                          );
+                        }}
+                      >
+                        Copy link to operation
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      {props.canEdit && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setOperationToEditId(node.id);
+                          }}
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                      )}
+                      {props.canDelete && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setOperationToDeleteId(node.id);
+                          }}
+                          className="text-red-500"
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))
+            ) : (
+              <Button
+                variant="orangeLink"
+                className="mx-auto block"
+                onClick={addOperation}
+                data-collection-id={collection.id}
+              >
+                <PlusIcon className="mr-1 inline size-4" /> Add Operation
+              </Button>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      ));
+
       return (
         <>
-          <div className="mb-5 flex justify-between gap-1 items-center">
+          <div className="mb-5 flex items-center justify-between gap-1">
             <div className="graphiql-doc-explorer-title">Operations</div>
             <TooltipProvider>
               <Tooltip>
@@ -286,131 +405,14 @@ export function useOperationCollectionsPlugin(props: {
               <Spinner />
               Loading collections...
             </div>
-          ) : collections?.length ? (
+          ) : collections.length ? (
             <Accordion
               ref={containerRef}
               value={accordionValue}
               onValueChange={setAccordionValue}
               type="multiple"
             >
-              {collections.map(collection => (
-                <AccordionItem key={collection.id} value={collection.id} className="border-b-0">
-                  <AccordionHeader className="flex items-center justify-between">
-                    <AccordionTriggerPrimitive className="group flex w-full items-center gap-x-3 rounded p-2 font-medium text-white hover:bg-gray-100/10">
-                      <FolderIcon className="group-radix-state-open:hidden size-4" />
-                      <FolderOpenIcon className="group-radix-state-closed:hidden size-4" />
-                      {collection.name}
-                    </AccordionTriggerPrimitive>
-                    {shouldShowMenu && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger aria-label="More" className="graphiql-toolbar-button">
-                          <DotsHorizontalIcon />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={addOperation}
-                            disabled={createOperationState.fetching}
-                            data-collection-id={collection.id}
-                          >
-                            Add operation <PlusIcon className="ml-2 size-4" />
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setCollectionId(collection.id);
-                              toggleCollectionModal();
-                            }}
-                          >
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setCollectionId(collection.id);
-                              toggleDeleteCollectionModalOpen();
-                            }}
-                            className="text-red-500"
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </AccordionHeader>
-                  <AccordionContent className="space-y-0 pb-2 pl-2">
-                    {collection.operations.edges.length ? (
-                      collection.operations.edges.map(({ node }) => (
-                        <div key={node.id} className="flex items-center">
-                          <Link
-                            to="/$organizationId/$projectId/$targetId/laboratory"
-                            params={{
-                              organizationId: props.organizationId,
-                              projectId: props.projectId,
-                              targetId: props.targetId,
-                            }}
-                            search={{ operation: node.id }}
-                            className={cn(
-                              'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
-                              node.id === queryParamsOperationId && [
-                                'bg-gray-100/10 text-white',
-                                !isSame && 'hive-badge-is-changed relative',
-                              ],
-                            )}
-                          >
-                            <SquareTerminalIcon className="size-4" />
-                            {node.name}
-                          </Link>
-                          <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
-                              <DotsHorizontalIcon />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={async () => {
-                                  const url = new URL(window.location.href);
-                                  await copyToClipboard(
-                                    `${url.origin}${url.pathname}?operation=${node.id}`,
-                                  );
-                                }}
-                              >
-                                Copy link to operation
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              {props.canEdit && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setOperationToEditId(node.id);
-                                  }}
-                                >
-                                  Edit
-                                </DropdownMenuItem>
-                              )}
-                              {props.canDelete && (
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setOperationToDeleteId(node.id);
-                                  }}
-                                  className="text-red-500"
-                                >
-                                  Delete
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      ))
-                    ) : (
-                      <Button
-                        variant="orangeLink"
-                        className="mx-auto block"
-                        onClick={addOperation}
-                        data-collection-id={collection.id}
-                      >
-                        <PlusIcon className="mr-1 inline size-4" /> Add Operation
-                      </Button>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+              {renderedCollections}
             </Accordion>
           ) : (
             <div className="flex h-fit flex-1 items-center justify-center">

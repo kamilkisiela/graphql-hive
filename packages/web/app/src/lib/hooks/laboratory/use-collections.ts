@@ -30,6 +30,8 @@ export const CollectionsQuery = graphql(`
   }
 `);
 
+const EMPTY_ARRAY = [] as const;
+
 export function useCollections(props: {
   organizationId: string;
   projectId: string;
@@ -55,7 +57,7 @@ export function useCollections(props: {
   }, [error]);
 
   return {
-    collections: data?.target?.documentCollections.edges.map(v => v.node) || [],
+    collections: data?.target?.documentCollections.edges.map(v => v.node) || EMPTY_ARRAY,
     fetching,
   };
 }
