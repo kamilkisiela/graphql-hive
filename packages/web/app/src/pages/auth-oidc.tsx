@@ -5,15 +5,6 @@ import { env } from '@/env/frontend';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 import { useQuery } from '@tanstack/react-query';
 
-function Wrapper(props: { children: React.ReactNode }) {
-  return (
-    <>
-      <Meta title="OIDC Login" />
-      {props.children}
-    </>
-  );
-}
-
 function AuthOIDC(props: { oidcId: string; redirectToPath: string }) {
   const auth = useQuery({
     queryKey: ['oidc', props.oidcId],
