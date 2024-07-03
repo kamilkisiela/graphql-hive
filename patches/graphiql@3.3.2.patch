@@ -1,9 +1,3 @@
-diff --git a/esm/cdn.d.ts.map b/esm/cdn.d.ts.map
-deleted file mode 100644
-index 8b990e81fdfd6b08e9013ac69788d83cde9d197a..0000000000000000000000000000000000000000
-diff --git a/esm/cdn.js.map b/esm/cdn.js.map
-deleted file mode 100644
-index a0c74fd8c58ca18a874909ffe1732e405c115548..0000000000000000000000000000000000000000
 diff --git a/esm/components/GraphiQL.d.ts b/esm/components/GraphiQL.d.ts
 index c262ae28337381d680204b7faf11a1754551bc5d..6a5def851317cc7a3ea3b580c77f336377f394f6 100644
 --- a/esm/components/GraphiQL.d.ts
