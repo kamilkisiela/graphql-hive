@@ -1733,6 +1733,9 @@ importers:
       '@stripe/stripe-js':
         specifier: 3.5.0
         version: 3.5.0
+      '@tanstack/react-query':
+        specifier: 5.48.0
+        version: 5.48.0(react@18.3.1)
       '@tanstack/react-router':
         specifier: 1.34.9
         version: 1.34.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7824,6 +7827,14 @@ packages:
   '@tanstack/history@1.31.16':
     resolution: {integrity: sha512-rahAZXlR879P7dngDH7BZwGYiODA9D5Hqo6nUHn9GAURcqZU5IW0ZiT54dPtV5EPES7muZZmknReYueDHs7FFQ==}
     engines: {node: '>=12'}
+
+  '@tanstack/query-core@5.48.0':
+    resolution: {integrity: sha512-lZAfPPeVIqXCswE9SSbG33B6/91XOWt/Iq41bFeWb/mnHwQSIfFRbkS4bfs+WhIk9abRArF9Id2fp0Mgo+hq6Q==}
+
+  '@tanstack/react-query@5.48.0':
+    resolution: {integrity: sha512-GDExbjYWzvDokyRqMSWXdrPiYpp95Aig0oeMIrxTaruOJJgWiWfUP//OAaowm2RrRkGVsavSZdko/XmIrrV2Nw==}
+    peerDependencies:
+      react: ^18.0.0
 
   '@tanstack/react-router@1.34.9':
     resolution: {integrity: sha512-dU7rkiWQTH7glJIcnUcFezkmANzqQwlgRiJFiHJOPjYSoKVGI9dWQMbNc8W5d4JjXB/Nhh0QOiI/+GoYZ3WrhA==}
@@ -25586,6 +25597,13 @@ snapshots:
       defer-to-connect: 2.0.1
 
   '@tanstack/history@1.31.16': {}
+
+  '@tanstack/query-core@5.48.0': {}
+
+  '@tanstack/react-query@5.48.0(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.48.0
+      react: 18.3.1
 
   '@tanstack/react-router@1.34.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
