@@ -31,7 +31,7 @@ export function AuthPage() {
               <HiveLogo animated={false} className="size-8 animate-pulse" />
             </div>
           ) : (
-            <div className="grid h-full items-center justify-center lg:max-w-none lg:grid-cols-3 lg:px-0">
+            <div className="grid h-full items-center justify-center md:grid-cols-2 lg:max-w-none lg:grid-cols-3 lg:px-0">
               <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
                 <div className="absolute inset-0 bg-[#101014]" />
                 <div className="relative z-20 flex items-center text-lg font-medium">
@@ -40,10 +40,10 @@ export function AuthPage() {
                 </div>
                 {/* TODO: responsive design */}
                 <div className="relative my-auto">
-                  <h1 className="font-light text-white md:text-2xl/tight lg:text-3xl/tight">
+                  <h1 className="text-balance font-light text-white md:text-2xl/tight lg:text-3xl/tight">
                     Open-source <span className="text-orange-500">GraphQL</span> management platform
                   </h1>
-                  <p className="mt-4 text-sm/6 text-gray-300">
+                  <p className="mt-4 text-balance text-sm/6 text-gray-300">
                     Prevent breaking changes, monitor performance of your GraphQL API, and manage
                     your API gateway
                   </p>
