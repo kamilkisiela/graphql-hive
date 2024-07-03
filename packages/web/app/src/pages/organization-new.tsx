@@ -28,7 +28,7 @@ export function NewOrgPage(): ReactElement {
           <Link to="/" className="absolute left-6 top-6">
             <HiveLogo className="size-10" />
           </Link>
-          <div className="container w-1/3">
+          <div className="container w-4/5 max-w-[520px] md:w-3/5">
             <CreateOrganizationForm />
           </div>
         </div>

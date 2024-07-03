@@ -80,6 +80,8 @@ export interface Storage {
       id: string;
       defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     };
+    firstName: string | null;
+    lastName: string | null;
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
@@ -113,8 +115,21 @@ export interface Storage {
   >;
 
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
+    _: OrganizationSelector & Pick<Organization, 'name'> & { user: string },
   ): Promise<Organization | never>;
+  updateOrganizationCleanId(
+    _: OrganizationSelector &
+      Pick<Organization, 'cleanId'> & { user: string; reservedNames: string[] },
+  ): Promise<
+    | {
+        ok: true;
+        organization: Organization;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  >;
 
   updateOrganizationPlan(
     _: OrganizationSelector & Pick<Organization, 'billingPlan'>,
@@ -600,6 +615,7 @@ export interface Storage {
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+  getOIDCIntegrationIdForOrganizationCleanId(_: { cleanId: string }): Promise<string | null>;
 
   getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
 

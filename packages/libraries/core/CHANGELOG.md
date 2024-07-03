@@ -1,5 +1,14 @@
 # @graphql-hive/core
 
+## 0.5.0
+
+### Minor Changes
+
+- [#5116](https://github.com/kamilkisiela/graphql-hive/pull/5116)
+  [`f1e43c6`](https://github.com/kamilkisiela/graphql-hive/commit/f1e43c641f3ebac931839c7dfbdcb3a885167562)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Added `collectRawUsage` to Hive Client core
+  package
+
 ## 0.4.0
 
 ### Minor Changes
