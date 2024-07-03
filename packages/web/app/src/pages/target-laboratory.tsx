@@ -140,13 +140,7 @@ function Save(props: {
     <DropdownMenu>
       <GraphiQLTooltip label={label}>
         <DropdownMenuTrigger asChild>
-          <GraphiQLButton
-            className={clsx(
-              'graphiql-toolbar-button',
-              !isSame && 'hive-badge-is-changed relative after:top-1',
-            )}
-            aria-label={label}
-          >
+          <GraphiQLButton className="graphiql-toolbar-button" aria-label={label}>
             <SaveIcon className="graphiql-toolbar-icon h-5" />
           </GraphiQLButton>
         </DropdownMenuTrigger>
@@ -157,7 +151,7 @@ function Save(props: {
             <DropdownMenuItem
               disabled={isSame || !currentOperation}
               className="mb-0 text-red-600"
-              onClick={async () => {
+              onClick={() => {
                 queryEditor?.setValue(currentOperation.query);
                 clearOperation();
               }}
@@ -427,7 +421,8 @@ function LaboratoryPageContent(props: {
             --color-base: 223, 70%, 3.9% !important;
           }
           .graphiql-tooltip,
-          .graphiql-dropdown-content {
+          .graphiql-dropdown-content,
+          .CodeMirror-lint-tooltip {
             background: #030711;
           }
         `}</style>
@@ -455,6 +450,21 @@ function LaboratoryPageContent(props: {
           schema={schema}
           forcedTheme="dark"
           className={isFullScreen ? 'fixed inset-0 bg-[#030711]' : ''}
+          onTabChange={({ tabs, activeTabIndex }) => {
+            const activeTab = tabs.find((_, index) => index === activeTabIndex)!;
+            // Set search params while clicking on tab
+            if (activeTab.id !== operation) {
+              void router.navigate({
+                to: '/$organizationId/$projectId/$targetId/laboratory',
+                params: {
+                  organizationId: props.organizationId,
+                  projectId: props.projectId,
+                  targetId: props.targetId,
+                },
+                search: { operation: activeTab.id },
+              });
+            }
+          }}
         >
           <GraphiQL.Logo>
             <Button
