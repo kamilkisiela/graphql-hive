@@ -26,9 +26,6 @@ patchedDependencies:
   got@14.4.1:
     hash: b6pwqmrs3qqykctltsasvrfwti
     path: patches/got@14.4.1.patch
-  graphiql@3.3.2:
-    hash: p4mc7pxwsatzeupmv5hnqi5t6q
-    path: patches/graphiql@3.3.0.patch
   mjml-core@4.14.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.14.0.patch
@@ -1825,7 +1822,7 @@ importers:
         version: 11.2.12(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphiql:
         specifier: 3.3.2
-        version: 3.3.2(patch_hash=p4mc7pxwsatzeupmv5hnqi5t6q)(@codemirror/language@6.10.2)(@types/node@20.14.9)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 3.3.2(@codemirror/language@6.10.2)(@types/node@20.14.9)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql:
         specifier: 16.9.0
         version: 16.9.0
@@ -29967,7 +29964,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphiql@3.3.2(patch_hash=p4mc7pxwsatzeupmv5hnqi5t6q)(@codemirror/language@6.10.2)(@types/node@20.14.9)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  graphiql@3.3.2(@codemirror/language@6.10.2)(@types/node@20.14.9)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@graphiql/react': 0.22.4(@codemirror/language@6.10.2)(@types/node@20.14.9)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit': 0.9.1(@types/node@20.14.9)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)

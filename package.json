@@ -124,8 +124,7 @@
       "got@14.4.1": "patches/got@14.4.1.patch",
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
-      "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "graphiql@3.3.2": "patches/graphiql@3.3.0.patch"
+      "oclif@4.13.6": "patches/oclif@4.13.6.patch"
     }
   }
 }
