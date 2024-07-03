@@ -56,7 +56,7 @@
     "@storybook/blocks": "8.1.11",
     "@storybook/react": "8.1.11",
     "@storybook/react-vite": "8.1.11",
-    "@stripe/react-stripe-js": "2.7.2",
+    "@stripe/react-stripe-js": "2.7.3",
     "@stripe/stripe-js": "3.5.0",
     "@tanstack/react-query": "5.48.0",
     "@tanstack/react-router": "1.34.9",
