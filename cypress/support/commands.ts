@@ -1,80 +1,19 @@
 namespace Cypress {
   export interface Chainable {
-    fillSignInFormAndSubmit(data: { email: string; password: string }): Chainable;
-    fillSignUpFormAndSubmit(data: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-    }): Chainable;
-    signup(data: {
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-    }): Chainable;
+    fillSupertokensFormAndSubmit(data: { email: string; password: string }): Chainable;
+
+    signup(data: { email: string; password: string }): Chainable;
+
     login(data: { email: string; password: string }): Chainable;
+
+    loginAndSetCookie(data: { email: string; password: string }): Chainable;
+
     dataCy(name: string): Chainable<JQuery<HTMLElement>>;
-    createOIDCIntegration(organizationName: string): Chainable<{
-      loginUrl: string;
-      organizationSlug: string;
-    }>;
   }
 }
 
-Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
-  cy.get('input[name="name"]').type(organizationName);
-  cy.get('button[type="submit"]').click();
-  cy.get('[data-cy="organization-picker-current"]').contains(organizationName);
-  cy.get('a[href$="/view/settings"]').click();
-  cy.get('a[href$="/view/settings#create-oidc-integration"]').click();
-  cy.get('input[id="tokenEndpoint"]').type('http://oidc-server-mock:80/connect/token');
-  cy.get('input[id="userinfoEndpoint"]').type('http://oidc-server-mock:80/connect/userinfo');
-  cy.get('input[id="authorizationEndpoint"]').type('http://localhost:7043/connect/authorize');
-  cy.get('input[id="clientId"]').type('implicit-mock-client');
-  cy.get('input[id="clientSecret"]').type('client-credentials-mock-client-secret');
-
-  cy.get('div[role="dialog"]').find('button[type="submit"]').click();
-
-  cy.url().then(url => {
-    return new URL(url).pathname.split('/')[0];
-  });
-
-  return cy
-    .get('div[role="dialog"]')
-    .find('code')
-    .last()
-    .then($elem => $elem.text())
-    .then(loginUrl => {
-      return cy.url().then(url => {
-        const organizationSlug = new URL(url).pathname.split('/')[1];
-
-        if (!organizationSlug) {
-          throw new Error('Failed to resolve organization slug from URL:' + url);
-        }
-
-        return {
-          loginUrl,
-          organizationSlug,
-        };
-      });
-    });
-});
-
-Cypress.Commands.add('fillSignInFormAndSubmit', user => {
-  cy.get('form').within(() => {
-    cy.get('input[name="email"]').type(user.email);
-    cy.get('input[name="password"]').type(user.password, {
-      force: true, // skip waiting for async email validation
-    });
-    cy.root().submit();
-  });
-});
-
-Cypress.Commands.add('fillSignUpFormAndSubmit', user => {
-  cy.get('form').within(() => {
-    cy.get('input[name="firstName"]').type(user.firstName);
-    cy.get('input[name="lastName"]').type(user.lastName);
+Cypress.Commands.add('fillSupertokensFormAndSubmit', user => {
+  cy.get('form', { includeShadowDom: true }).within(() => {
     cy.get('input[name="email"]').type(user.email);
     cy.get('input[name="password"]').type(user.password, {
       force: true, // skip waiting for async email validation
@@ -86,8 +25,8 @@ Cypress.Commands.add('fillSignUpFormAndSubmit', user => {
 Cypress.Commands.add('signup', user => {
   cy.visit('/');
 
-  cy.get('a[data-auth-link="sign-up"]').click();
-  cy.fillSignUpFormAndSubmit(user);
+  cy.get('span[data-supertokens="link"]', { includeShadowDom: true }).contains('Sign Up').click();
+  cy.fillSupertokensFormAndSubmit(user);
 
   cy.contains('Create Organization');
 });
@@ -95,9 +34,34 @@ Cypress.Commands.add('signup', user => {
 Cypress.Commands.add('login', user => {
   cy.visit('/');
 
-  cy.fillSignInFormAndSubmit(user);
+  cy.fillSupertokensFormAndSubmit(user);
 
   cy.contains('Create Organization');
+});
+
+Cypress.Commands.add('loginAndSetCookie', ({ email, password }) => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/signin',
+    body: {
+      formFields: [
+        { id: 'email', value: email },
+        { id: 'password', value: password },
+      ],
+    },
+  }).then(response => {
+    const { status, headers, body } = response;
+    if (status !== 200) {
+      throw new Error(`Create session failed. ${status}.\n${JSON.stringify(body)}`);
+    }
+    const frontToken = headers['front-token'] as string;
+    const accessToken = headers['st-access-token'] as string;
+    const timeJoined = String(body.user.timeJoined);
+
+    cy.setCookie('sAccessToken', accessToken);
+    cy.setCookie('sFrontToken', frontToken);
+    cy.setCookie('st-last-access-token-update', timeJoined);
+  });
 });
 
 Cypress.Commands.add('dataCy', value => {

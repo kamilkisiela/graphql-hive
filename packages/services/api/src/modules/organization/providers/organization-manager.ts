@@ -3,7 +3,7 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import { Organization, OrganizationMemberRole } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { cache, diffArrays, share } from '../../../shared/helpers';
+import { cache, diffArrays, share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
@@ -418,12 +418,15 @@ export class OrganizationManager {
       }),
     ]);
 
-    if (organization.name === name) {
-      return organization;
+    let cleanId = paramCase(name);
+
+    if (await this.storage.getOrganizationByCleanId({ cleanId })) {
+      cleanId = paramCase(`${name}-${uuid(4)}`);
     }
 
     const result = await this.storage.updateOrganizationName({
       name,
+      cleanId,
       organization: organization.id,
       user: user.id,
     });
@@ -437,53 +440,6 @@ export class OrganizationManager {
         value: result.name,
       },
     });
-
-    return result;
-  }
-
-  async updateSlug(
-    input: {
-      slug: string;
-    } & OrganizationSelector,
-  ) {
-    const { slug } = input;
-    this.logger.info('Updating an organization clean id (input=%o)', input);
-    await this.authManager.ensureOrganizationAccess({
-      ...input,
-      scope: OrganizationAccessScope.SETTINGS,
-    });
-    const [user, organization] = await Promise.all([
-      this.authManager.getCurrentUser(),
-      this.getOrganization({
-        organization: input.organization,
-      }),
-    ]);
-
-    if (organization.cleanId === slug) {
-      return {
-        ok: true,
-        organization,
-      } as const;
-    }
-
-    const result = await this.storage.updateOrganizationCleanId({
-      cleanId: slug,
-      organization: organization.id,
-      user: user.id,
-      reservedNames: reservedOrganizationNames,
-    });
-
-    if (result.ok) {
-      await this.activityManager.create({
-        type: 'ORGANIZATION_ID_UPDATED',
-        selector: {
-          organization: organization.id,
-        },
-        meta: {
-          value: result.organization.cleanId,
-        },
-      });
-    }
 
     return result;
   }

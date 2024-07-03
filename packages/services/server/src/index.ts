@@ -13,7 +13,6 @@ import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import 'reflect-metadata';
 import { hostname } from 'os';
 import { createPubSub } from 'graphql-yoga';
-import { z } from 'zod';
 import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { HivePubSub } from '@hive/api/src/modules/shared/providers/pub-sub';
@@ -51,7 +50,7 @@ import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
-import { initSupertokens, oidcIdLookup } from './supertokens';
+import { initSupertokens } from './supertokens';
 
 export async function main() {
   let tracing: TracingInstance | undefined;
@@ -490,41 +489,6 @@ export async function main() {
         reportReadiness(false);
         res.status(400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
-    });
-
-    const oidcIdLookupSchema = z.object({
-      slug: z.string({
-        required_error: 'Slug is required',
-      }),
-    });
-    server.post('/auth-api/oidc-id-lookup', async (req, res) => {
-      const inputResult = oidcIdLookupSchema.safeParse(req.body);
-
-      if (!inputResult.success) {
-        captureException(inputResult.error, {
-          extra: {
-            path: '/auth-api/oidc-id-lookup',
-            body: req.body,
-          },
-        });
-        void res.status(400).send({
-          ok: false,
-          title: 'Invalid input',
-          description: 'Failed to resolve SSO information due to invalid input.',
-          status: 400,
-        } satisfies Awaited<ReturnType<typeof oidcIdLookup>>);
-        return;
-      }
-
-      const result = await oidcIdLookup(inputResult.data.slug, storage, req.log);
-
-      if (result.ok) {
-        void res.status(200).send(result);
-        return;
-      }
-
-      void res.status(result.status).send(result);
-      return;
     });
 
     if (env.cdn.providers.api !== null) {

@@ -24,7 +24,6 @@ export default gql`
       input: DeleteOrganizationInvitationInput!
     ): DeleteOrganizationInvitationResult!
     updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
-    updateOrganizationSlug(input: UpdateOrganizationSlugInput!): UpdateOrganizationSlugResult!
     updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
     requestOrganizationTransfer(
       input: RequestOrganizationTransferInput!
@@ -52,19 +51,6 @@ export default gql`
   }
 
   type UpdateOrganizationNameError implements Error {
-    message: String!
-  }
-
-  type UpdateOrganizationSlugResult {
-    ok: UpdateOrganizationSlugOk
-    error: UpdateOrganizationSlugError
-  }
-
-  type UpdateOrganizationSlugOk {
-    updatedOrganizationPayload: OrganizationPayload!
-  }
-
-  type UpdateOrganizationSlugError implements Error {
     message: String!
   }
 
@@ -182,11 +168,6 @@ export default gql`
   input UpdateOrganizationNameInput {
     organization: ID!
     name: String!
-  }
-
-  input UpdateOrganizationSlugInput {
-    organization: ID!
-    slug: String!
   }
 
   input InviteToOrganizationByEmailInput {

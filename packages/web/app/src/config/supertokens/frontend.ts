@@ -37,7 +37,7 @@ export const frontendConfig = () => {
   const url = new URL(globalThis.window.location.toString());
 
   if (
-    env.auth.oidc === true && // Open ID Connect linked to organization
+    env.auth.organizationOIDC === true && // Open ID Connect linked to organization
     // We only add it conditionally, so it does not show a button on the login page
     (url.pathname === '/auth/oidc' || url.pathname === '/auth/callback/oidc')
   ) {
@@ -50,23 +50,6 @@ export const frontendConfig = () => {
       ThirdPartyEmailPasswordReact.init({
         signInAndUpFeature: {
           providers,
-          signUpForm: {
-            formFields: [
-              {
-                id: 'firstName',
-                label: 'First Name',
-                placeholder: 'First Name',
-                // optional because of OIDC integration
-                optional: true,
-              },
-              {
-                id: 'lastName',
-                label: 'Last Name',
-                placeholder: 'Last Name',
-                optional: true,
-              },
-            ],
-          },
         },
         async getRedirectionURL(context) {
           if (context.action === 'SUCCESS') {
@@ -78,7 +61,7 @@ export const frontendConfig = () => {
             return '/';
           }
         },
-        override: env.auth.oidc ? getOIDCOverrides() : undefined,
+        override: env.auth.organizationOIDC ? getOIDCOverrides() : undefined,
       }),
       EmailVerification.init({
         mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',

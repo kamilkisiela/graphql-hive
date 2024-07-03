@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { captureException, flush } from '@sentry/react';
 import { useRouter } from '@tanstack/react-router';
 
-export function ErrorComponent(props: { error: any; message?: string }) {
+export function ErrorComponent(props: { error: any }) {
   const router = useRouter();
   const session = useSessionContext();
 
@@ -34,9 +34,7 @@ export function ErrorComponent(props: { error: any; message?: string }) {
       <div className="flex max-w-[960px] flex-col items-center gap-x-6 sm:flex-row">
         <img src="/images/figures/connection.svg" alt="Ghost" className="block size-[200px]" />
         <div className="grow text-center sm:text-left">
-          <h1 className="text-xl font-semibold">
-            {props.message || 'Oops, something went wrong.'}
-          </h1>
+          <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
           <div className="mt-2">
             <div className="text-sm">
               <p>Don't worry, our technical support got this error reported automatically.</p>

@@ -99,10 +99,6 @@ const organizationGetStartedMapping: Record<
   enablingUsageBasedBreakingChanges: 'get_started_usage_breaking',
 };
 
-function addRandomHashToId(id: string) {
-  return `${id}-${Math.random().toString(16).substring(2, 6)}`;
-}
-
 function ensureDefined<T>(value: T | null | undefined, propertyName: string): T {
   if (value == null) {
     throw new Error(`${propertyName} is null or undefined`);
@@ -143,37 +139,6 @@ async function tracedTransaction<T>(
       span.end();
     }
   });
-}
-
-async function ensureFreeOrganizationCleanId(
-  newCleanId: string,
-  currentCleanId: string | null,
-  connection: Connection,
-  reservedNames: string[],
-): Promise<string> {
-  if (reservedNames.includes(newCleanId)) {
-    return ensureFreeOrganizationCleanId(
-      addRandomHashToId(newCleanId),
-      currentCleanId,
-      connection,
-      reservedNames,
-    );
-  }
-
-  const orgCleanIdExists = await connection.exists(
-    sql`/* orgCleanIdExistsGlobally */ SELECT 1 FROM organizations WHERE clean_id = ${newCleanId} LIMIT 1`,
-  );
-
-  if (orgCleanIdExists) {
-    return ensureFreeOrganizationCleanId(
-      addRandomHashToId(newCleanId),
-      currentCleanId,
-      connection,
-      reservedNames,
-    );
-  }
-
-  return newCleanId;
 }
 
 function resolveAuthProviderOfUser(
@@ -628,12 +593,27 @@ export async function createStorage(
       },
       connection: Connection,
     ) {
-      const availableCleanId = await ensureFreeOrganizationCleanId(
-        cleanId,
-        null,
-        connection,
-        reservedNames,
-      );
+      function addRandomHashToId(id: string) {
+        return `${id}-${Math.random().toString(16).substring(2, 6)}`;
+      }
+
+      async function ensureFreeCleanId(id: string, originalId: string | null): Promise<string> {
+        if (reservedNames.includes(id)) {
+          return ensureFreeCleanId(addRandomHashToId(id), originalId);
+        }
+
+        const orgCleanIdExists = await connection.exists(
+          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${id} LIMIT 1`,
+        );
+
+        if (orgCleanIdExists) {
+          return ensureFreeCleanId(addRandomHashToId(id), originalId);
+        }
+
+        return id;
+      }
+      const availableCleanId = await ensureFreeCleanId(cleanId, null);
+
       const org = await connection.one<Slonik<organizations>>(
         sql`/* createOrganization */
           INSERT INTO organizations
@@ -751,20 +731,15 @@ export async function createStorage(
     email: string;
     externalAuthUserId: string | null;
     oidcIntegrationId: string | null;
-    firstName: string | null;
-    lastName: string | null;
   }) {
-    const { firstName, lastName } = input;
-    const name =
-      firstName && lastName
-        ? `${firstName} ${lastName}`
-        : input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
+    const displayName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
+    const fullName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
 
     return {
       superTokensUserId: input.superTokensUserId,
       email: input.email,
-      displayName: name,
-      fullName: name,
+      displayName,
+      fullName,
       externalAuthUserId: input.externalAuthUserId,
       oidcIntegrationId: input.oidcIntegrationId,
     };
@@ -787,13 +762,9 @@ export async function createStorage(
       externalAuthUserId,
       email,
       oidcIntegration,
-      firstName,
-      lastName,
     }: {
       superTokensUserId: string;
       externalAuthUserId?: string | null;
-      firstName: string | null;
-      lastName: string | null;
       email: string;
       oidcIntegration: null | {
         id: string;
@@ -810,8 +781,6 @@ export async function createStorage(
               email,
               externalAuthUserId: externalAuthUserId ?? null,
               oidcIntegrationId: oidcIntegration?.id ?? null,
-              firstName,
-              lastName,
             }),
             t,
           );
@@ -1314,50 +1283,16 @@ export async function createStorage(
         ),
       );
     },
-    async updateOrganizationName({ name, organization }) {
+    async updateOrganizationName({ name, cleanId, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`/* updateOrganizationName */
           UPDATE organizations
-          SET name = ${name}
+          SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${organization}
           RETURNING *
         `),
       );
     },
-    async updateOrganizationCleanId({ cleanId, organization, reservedNames }) {
-      return pool.transaction(async t => {
-        if (reservedNames.includes(cleanId)) {
-          return {
-            ok: false,
-            message: 'Provided organization slug is not allowed',
-          };
-        }
-
-        const orgCleanIdExists = await t.exists(
-          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${cleanId} AND id != ${organization} LIMIT 1`,
-        );
-
-        if (orgCleanIdExists) {
-          return {
-            ok: false,
-            message: 'Organization slug is already taken',
-          };
-        }
-
-        return {
-          ok: true,
-          organization: transformOrganization(
-            await pool.one<Slonik<organizations>>(sql`/* updateOrganizationSlug */
-              UPDATE organizations
-              SET clean_id = ${cleanId}
-              WHERE id = ${organization}
-              RETURNING *
-            `),
-          ),
-        };
-      });
-    },
-
     async updateOrganizationPlan({ billingPlan, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`/* updateOrganizationPlan */
@@ -3408,26 +3343,6 @@ export async function createStorage(
       }
 
       return decodeOktaIntegrationRecord(result);
-    },
-
-    async getOIDCIntegrationIdForOrganizationCleanId({ cleanId }) {
-      const id =
-        await pool.maybeOneFirst<string>(sql`/* getOIDCIntegrationIdForOrganizationCleanId */
-        SELECT
-          "id"
-        FROM
-          "oidc_integrations"
-        WHERE
-          "linked_organization_id" = (
-            SELECT "id"
-            FROM "organizations"
-            WHERE "clean_id" = ${cleanId}
-            LIMIT 1
-          )
-        LIMIT 1
-      `);
-
-      return id;
     },
 
     async createOIDCIntegrationForOrganization(args) {
