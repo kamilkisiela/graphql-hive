@@ -1,14 +1,22 @@
 import { AuthCard, AuthCardContent, AuthCardHeader } from '@/components/auth';
+import { Meta } from '@/components/ui/meta';
 import { DocsLink } from '@/components/v2';
 import { env } from '@/env/frontend';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 import { useQuery } from '@tanstack/react-query';
 
-export function AuthOIDCPage(props: { oidcId: string | undefined; redirectToPath: string }) {
-  const oidcId = props.oidcId;
+function Wrapper(props: { children: React.ReactNode }) {
+  return (
+    <>
+      <Meta title="OIDC Login" />
+      {props.children}
+    </>
+  );
+}
+
+function AuthOIDC(props: { oidcId: string; redirectToPath: string }) {
   const auth = useQuery({
-    queryKey: ['oidc', oidcId],
-    enabled: typeof oidcId === 'string' && oidcId.length > 0,
+    queryKey: ['oidc', props.oidcId],
     refetchOnWindowFocus: false,
     retryOnMount: false,
     async queryFn() {
@@ -16,31 +24,9 @@ export function AuthOIDCPage(props: { oidcId: string | undefined; redirectToPath
         throw new Error('OIDC provider is not configured');
       }
 
-      if (typeof oidcId === 'string') {
-        await startAuthFlowForOIDCProvider(oidcId, props.redirectToPath);
-      }
-
-      throw new Error('Missing OIDC ID');
+      await startAuthFlowForOIDCProvider(props.oidcId, props.redirectToPath);
     },
   });
-
-  if (!oidcId) {
-    return (
-      <AuthCard>
-        <AuthCardHeader
-          title="Missing ID"
-          description="You need to provide an OIDC ID to sign in."
-        />
-        <AuthCardContent>
-          <p className="text-muted-foreground">
-            <DocsLink href="/management/sso-oidc-provider#login-via-oidc">
-              Learn how to login via OIDC
-            </DocsLink>
-          </p>
-        </AuthCardContent>
-      </AuthCard>
-    );
-  }
 
   if (auth.isError) {
     return (
@@ -57,5 +43,35 @@ export function AuthOIDCPage(props: { oidcId: string | undefined; redirectToPath
         description="You are being redirected to your OIDC provider."
       />
     </AuthCard>
+  );
+}
+
+function MissingOIDCId() {
+  return (
+    <AuthCard>
+      <AuthCardHeader title="Missing ID" description="You need to provide an OIDC ID to sign in." />
+      <AuthCardContent>
+        <p className="text-muted-foreground">
+          <DocsLink href="/management/sso-oidc-provider#login-via-oidc">
+            Learn how to login via OIDC
+          </DocsLink>
+        </p>
+      </AuthCardContent>
+    </AuthCard>
+  );
+}
+
+export function AuthOIDCPage(props: { oidcId: string | undefined; redirectToPath: string }) {
+  const oidcId = props.oidcId;
+
+  return (
+    <>
+      <Meta title="OIDC Login" />
+      {oidcId ? (
+        <AuthOIDC oidcId={oidcId} redirectToPath={props.redirectToPath} />
+      ) : (
+        <MissingOIDCId />
+      )}
+    </>
   );
 }

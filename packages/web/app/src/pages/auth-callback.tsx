@@ -1,5 +1,6 @@
 import { thirdPartySignInAndUp } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { AuthCard, AuthCardHeader } from '@/components/auth';
+import { Meta } from '@/components/ui/meta';
 import { env } from '@/env/frontend';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
@@ -35,7 +36,7 @@ const providerDetailsMap: {
   },
 };
 
-export function AuthCallbackPage(props: { provider: Provider; redirectToPath: string }) {
+function AuthCallback(props: { provider: Provider; redirectToPath: string }) {
   const router = useRouter();
   const auth = useQuery({
     gcTime: 0, // disabled caching
@@ -89,5 +90,14 @@ export function AuthCallbackPage(props: { provider: Provider; redirectToPath: st
         description="Your are being redirected to GraphQL Hive."
       />
     </AuthCard>
+  );
+}
+
+export function AuthCallbackPage(props: { provider: Provider; redirectToPath: string }) {
+  return (
+    <>
+      <Meta title="Redirecting" />
+      <AuthCallback provider={props.provider} redirectToPath={props.redirectToPath} />
+    </>
   );
 }

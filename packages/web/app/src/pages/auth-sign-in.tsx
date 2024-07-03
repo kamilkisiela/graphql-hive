@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Meta } from '@/components/ui/meta';
 import { useToast } from '@/components/ui/use-toast';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { enabledProviders, isProviderEnabled } from '@/lib/supertokens/thirdparty';
@@ -150,118 +151,121 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
   }
 
   return (
-    <AuthCard>
-      <AuthCardHeader title="Login" description="Sign in to your account" />
-      <AuthCardContent>
-        <AuthCardStack>
-          <Form {...form}>
-            <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="m@example.com" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center">
-                      <FormLabel>Password</FormLabel>
-                      <Link
-                        tabIndex={-1}
-                        to="/auth/reset-password"
-                        search={{
-                          email: form.getValues().email || undefined,
-                          redirectToPath: props.redirectToPath,
-                        }}
-                        className="ml-auto inline-block text-sm underline"
-                      >
-                        Forgot your password?
-                      </Link>
-                    </div>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {emailPasswordSignIn.data?.status === 'OK'
-                  ? 'Redirecting...'
-                  : emailPasswordSignIn.isPending
-                    ? 'Signing in...'
-                    : 'Sign in'}
-              </Button>
-            </form>
-          </Form>
-          {enabledProviders.length ? <AuthOrSeparator /> : null}
-          {isProviderEnabled('google') ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => thirdPartySignIn.mutate('google')}
-              disabled={isPending}
-            >
-              <SiGoogle className="mr-4 size-4" /> Login with Google
-            </Button>
-          ) : null}
-          {isProviderEnabled('github') ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => thirdPartySignIn.mutate('github')}
-              disabled={isPending}
-            >
-              <SiGithub className="mr-4 size-4" /> Login with Github
-            </Button>
-          ) : null}
-          {isProviderEnabled('okta') ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => thirdPartySignIn.mutate('okta')}
-              disabled={isPending}
-            >
-              <SiOkta className="mr-4 size-4" /> Login with Okta
-            </Button>
-          ) : null}
-          {isProviderEnabled('oidc') ? (
-            <Button asChild variant="outline" className="w-full" disabled={isPending}>
-              <Link
-                to="/auth/sso"
-                search={{
-                  redirectToPath: props.redirectToPath,
-                }}
+    <>
+      <Meta title="Sign in" />
+      <AuthCard>
+        <AuthCardHeader title="Login" description="Sign in to your account" />
+        <AuthCardContent>
+          <AuthCardStack>
+            <Form {...form}>
+              <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="m@example.com" type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center">
+                        <FormLabel>Password</FormLabel>
+                        <Link
+                          tabIndex={-1}
+                          to="/auth/reset-password"
+                          search={{
+                            email: form.getValues().email || undefined,
+                            redirectToPath: props.redirectToPath,
+                          }}
+                          className="ml-auto inline-block text-sm underline"
+                        >
+                          Forgot your password?
+                        </Link>
+                      </div>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {emailPasswordSignIn.data?.status === 'OK'
+                    ? 'Redirecting...'
+                    : emailPasswordSignIn.isPending
+                      ? 'Signing in...'
+                      : 'Sign in'}
+                </Button>
+              </form>
+            </Form>
+            {enabledProviders.length ? <AuthOrSeparator /> : null}
+            {isProviderEnabled('google') ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => thirdPartySignIn.mutate('google')}
+                disabled={isPending}
               >
-                <FaRegUserCircle className="mr-4 size-4" /> Login with SSO
-              </Link>
-            </Button>
-          ) : null}
-        </AuthCardStack>
-        <div className="mt-4 text-center text-sm">
-          Don't have an account?{' '}
-          <Link
-            to="/auth/sign-up"
-            search={{
-              redirectToPath: props.redirectToPath,
-            }}
-            data-auth-link="sign-up"
-            className="underline"
-          >
-            Sign up
-          </Link>
-        </div>
-      </AuthCardContent>
-    </AuthCard>
+                <SiGoogle className="mr-4 size-4" /> Login with Google
+              </Button>
+            ) : null}
+            {isProviderEnabled('github') ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => thirdPartySignIn.mutate('github')}
+                disabled={isPending}
+              >
+                <SiGithub className="mr-4 size-4" /> Login with Github
+              </Button>
+            ) : null}
+            {isProviderEnabled('okta') ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => thirdPartySignIn.mutate('okta')}
+                disabled={isPending}
+              >
+                <SiOkta className="mr-4 size-4" /> Login with Okta
+              </Button>
+            ) : null}
+            {isProviderEnabled('oidc') ? (
+              <Button asChild variant="outline" className="w-full" disabled={isPending}>
+                <Link
+                  to="/auth/sso"
+                  search={{
+                    redirectToPath: props.redirectToPath,
+                  }}
+                >
+                  <FaRegUserCircle className="mr-4 size-4" /> Login with SSO
+                </Link>
+              </Button>
+            ) : null}
+          </AuthCardStack>
+          <div className="mt-4 text-center text-sm">
+            Don't have an account?{' '}
+            <Link
+              to="/auth/sign-up"
+              search={{
+                redirectToPath: props.redirectToPath,
+              }}
+              data-auth-link="sign-up"
+              className="underline"
+            >
+              Sign up
+            </Link>
+          </div>
+        </AuthCardContent>
+      </AuthCard>
+    </>
   );
 }

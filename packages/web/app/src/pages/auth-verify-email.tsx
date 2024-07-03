@@ -5,11 +5,12 @@ import {
 } from 'supertokens-auth-react/recipe/emailverification';
 import { AuthCard, AuthCardContent, AuthCardHeader, AuthCardStack } from '@/components/auth';
 import { Button } from '@/components/ui/button';
+import { Meta } from '@/components/ui/meta';
 import { useToast } from '@/components/ui/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 
-export function AuthVerifyEmailPage() {
+function AuthVerifyEmail() {
   const token = getEmailVerificationTokenFromURL();
   const enabled = typeof token === 'string' && token.length > 0;
   const { toast } = useToast();
@@ -164,5 +165,14 @@ export function AuthVerifyEmailPage() {
         </AuthCardStack>
       </AuthCardContent>
     </AuthCard>
+  );
+}
+
+export function AuthVerifyEmailPage() {
+  return (
+    <>
+      <Meta title="Email verification" />
+      <AuthVerifyEmail />
+    </>
   );
 }

@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Meta } from '@/components/ui/meta';
 import { useToast } from '@/components/ui/use-toast';
 import { env } from '@/env/frontend';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
@@ -189,21 +190,53 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
     : true;
 
   return (
-    <AuthCard>
-      <AuthCardHeader title="Register" description="Enter your information to create an account" />
-      <AuthCardContent>
-        <AuthCardStack>
-          <Form {...form}>
-            <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-2 gap-4">
+    <>
+      <Meta title="Sign Up" />
+      <AuthCard>
+        <AuthCardHeader
+          title="Register"
+          description="Enter your information to create an account"
+        />
+        <AuthCardContent>
+          <AuthCardStack>
+            <Form {...form}>
+              <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Max" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Robinson" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name="firstName"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First name</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Max" {...field} />
+                        <Input placeholder="m@example.com" type="email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -211,109 +244,83 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
                 />
                 <FormField
                   control={form.control}
-                  name="lastName"
+                  name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last name</FormLabel>
+                      <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input placeholder="Robinson" {...field} />
+                        <Input type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="m@example.com" type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {signUp.isSuccess && signUp.data.status === 'OK' && isVerificationSettled
-                  ? 'Redirecting...'
-                  : signUp.isPending
-                    ? 'Creating account...'
-                    : 'Create an account'}
-              </Button>
-            </form>
-          </Form>
-          {enabledProviders.length ? <AuthOrSeparator /> : null}
-          {isProviderEnabled('google') ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => thirdPartySignIn.mutate('google')}
-              disabled={isPending}
-            >
-              <SiGoogle className="mr-4 size-4" /> Sign up with Google
-            </Button>
-          ) : null}
-          {isProviderEnabled('github') ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => thirdPartySignIn.mutate('github')}
-              disabled={isPending}
-            >
-              <SiGithub className="mr-4 size-4" /> Sign up with Github
-            </Button>
-          ) : null}
-          {isProviderEnabled('okta') ? (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => thirdPartySignIn.mutate('okta')}
-              disabled={isPending}
-            >
-              <SiOkta className="mr-4 size-4" /> Sign up with Okta
-            </Button>
-          ) : null}
-          {isProviderEnabled('oidc') ? (
-            <Button asChild variant="outline" className="w-full" disabled={isPending}>
-              <Link
-                to="/auth/sso"
-                search={{
-                  redirectToPath: props.redirectToPath,
-                }}
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {signUp.isSuccess && signUp.data.status === 'OK' && isVerificationSettled
+                    ? 'Redirecting...'
+                    : signUp.isPending
+                      ? 'Creating account...'
+                      : 'Create an account'}
+                </Button>
+              </form>
+            </Form>
+            {enabledProviders.length ? <AuthOrSeparator /> : null}
+            {isProviderEnabled('google') ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => thirdPartySignIn.mutate('google')}
+                disabled={isPending}
               >
-                <FaRegUserCircle className="mr-4 size-4" /> Sign up with SSO
-              </Link>
-            </Button>
-          ) : null}
-        </AuthCardStack>
-        <div className="mt-4 text-center text-sm">
-          Already have an account?{' '}
-          <Link
-            to="/auth/sign-in"
-            search={{ redirectToPath: props.redirectToPath }}
-            data-auth-link="sign-in"
-            className="underline"
-          >
-            Sign in
-          </Link>
-        </div>
-      </AuthCardContent>
-    </AuthCard>
+                <SiGoogle className="mr-4 size-4" /> Sign up with Google
+              </Button>
+            ) : null}
+            {isProviderEnabled('github') ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => thirdPartySignIn.mutate('github')}
+                disabled={isPending}
+              >
+                <SiGithub className="mr-4 size-4" /> Sign up with Github
+              </Button>
+            ) : null}
+            {isProviderEnabled('okta') ? (
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => thirdPartySignIn.mutate('okta')}
+                disabled={isPending}
+              >
+                <SiOkta className="mr-4 size-4" /> Sign up with Okta
+              </Button>
+            ) : null}
+            {isProviderEnabled('oidc') ? (
+              <Button asChild variant="outline" className="w-full" disabled={isPending}>
+                <Link
+                  to="/auth/sso"
+                  search={{
+                    redirectToPath: props.redirectToPath,
+                  }}
+                >
+                  <FaRegUserCircle className="mr-4 size-4" /> Sign up with SSO
+                </Link>
+              </Button>
+            ) : null}
+          </AuthCardStack>
+          <div className="mt-4 text-center text-sm">
+            Already have an account?{' '}
+            <Link
+              to="/auth/sign-in"
+              search={{ redirectToPath: props.redirectToPath }}
+              data-auth-link="sign-in"
+              className="underline"
+            >
+              Sign in
+            </Link>
+          </div>
+        </AuthCardContent>
+      </AuthCard>
+    </>
   );
 }

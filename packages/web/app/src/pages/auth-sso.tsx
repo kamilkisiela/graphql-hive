@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Meta } from '@/components/ui/meta';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { env } from '@/env/frontend';
@@ -128,65 +129,68 @@ export function AuthSSOPage(props: { redirectToPath: string }) {
   }
 
   return (
-    <AuthCard>
-      <AuthCardHeader
-        title="Login with SSO"
-        description="Sign in to your account with an organization slug"
-      />
-      <AuthCardContent>
-        <AuthCardStack>
-          <Form {...form}>
-            <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex flex-row items-center gap-x-2">
-                      Organization slug{' '}
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <CircleHelpIcon className="size-4" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              The organization slug is the unique identifier used in your
-                              organization's URLs.
-                            </p>
-                            <p>For instance, in app.graphql-hive.com/acme, "acme" is the slug.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="acme" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={sso.isPending}>
-                {sso.isSuccess && sso.data.ok
-                  ? 'Redirecting...'
-                  : sso.isPending
-                    ? 'Signing in...'
-                    : 'Sign in'}
-              </Button>
-            </form>
-          </Form>
-        </AuthCardStack>
-        <div className="mt-4 text-center text-sm">
-          <Link
-            to="/auth/sign-in"
-            search={{ redirectToPath: props.redirectToPath }}
-            data-auth-link="sign-in"
-            className="underline"
-          >
-            Back to other sign-in options
-          </Link>
-        </div>
-      </AuthCardContent>
-    </AuthCard>
+    <>
+      <Meta title="Login with SSO" />
+      <AuthCard>
+        <AuthCardHeader
+          title="Login with SSO"
+          description="Sign in to your account with an organization slug"
+        />
+        <AuthCardContent>
+          <AuthCardStack>
+            <Form {...form}>
+              <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex flex-row items-center gap-x-2">
+                        Organization slug{' '}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <CircleHelpIcon className="size-4" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                The organization slug is the unique identifier used in your
+                                organization's URLs.
+                              </p>
+                              <p>For instance, in app.graphql-hive.com/acme, "acme" is the slug.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="acme" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={sso.isPending}>
+                  {sso.isSuccess && sso.data.ok
+                    ? 'Redirecting...'
+                    : sso.isPending
+                      ? 'Signing in...'
+                      : 'Sign in'}
+                </Button>
+              </form>
+            </Form>
+          </AuthCardStack>
+          <div className="mt-4 text-center text-sm">
+            <Link
+              to="/auth/sign-in"
+              search={{ redirectToPath: props.redirectToPath }}
+              data-auth-link="sign-in"
+              className="underline"
+            >
+              Back to other sign-in options
+            </Link>
+          </div>
+        </AuthCardContent>
+      </AuthCard>
+    </>
   );
 }

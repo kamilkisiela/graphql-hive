@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Meta } from '@/components/ui/meta';
 import { useToast } from '@/components/ui/use-toast';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +31,7 @@ const ResetPasswordFormSchema = z.object({
 
 type ResetPasswordFormValues = z.infer<typeof ResetPasswordFormSchema>;
 
-export function AuthResetPasswordPage(props: { email: string | null; redirectToPath: string }) {
+function AuthResetPassword(props: { email: string | null; redirectToPath: string }) {
   const initialEmail = props.email ?? '';
 
   const resetEmail = useMutation({
@@ -186,5 +187,14 @@ export function AuthResetPasswordPage(props: { email: string | null; redirectToP
         </div>
       </AuthCardContent>
     </AuthCard>
+  );
+}
+
+export function AuthResetPasswordPage(props: { email: string | null; redirectToPath: string }) {
+  return (
+    <>
+      <Meta title="Reset Password" />
+      <AuthResetPassword email={props.email} redirectToPath={props.redirectToPath} />
+    </>
   );
 }
