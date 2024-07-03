@@ -196,7 +196,8 @@ module.exports = {
       settings: {
         tailwindcss: {
           config: 'packages/web/app/tailwind.config.cjs',
-          whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
+          whitelist: ['drag-none'],
+          cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/graphiql.css'],
         },
       },
     },

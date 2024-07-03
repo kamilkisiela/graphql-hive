@@ -1,6 +1,6 @@
-import { useRouter } from '@tanstack/react-router';
 import { useQuery } from 'urql';
 import { graphql } from '@/gql';
+import { useRouter } from '@tanstack/react-router';
 
 const OperationQuery = graphql(`
   query Operation($selector: TargetSelectorInput!, $id: ID!) {

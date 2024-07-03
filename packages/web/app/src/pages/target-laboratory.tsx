@@ -526,31 +526,3 @@ function useApiTabValueState(graphqlEndpointUrl: string | null) {
     ),
   ] as const;
 }
-
-function EditorBreadcrumbs(props: { organizationId: string; projectId: string; targetId: string }) {
-  const router = useRouter();
-  const operationId =
-    'operation' in router.latestLocation.search &&
-    typeof router.latestLocation.search.operation === 'string'
-      ? router.latestLocation.search.operation
-      : null;
-  const currentOperation = useCurrentOperation(props);
-
-  // Avoiding blinking `New Operation` when switching between operations (when current operation data is not yet fetched)
-  if (operationId && (!currentOperation || currentOperation.id !== operationId)) {
-    return null;
-  }
-
-  return (
-    <div className="text-sm font-normal italic">
-      {currentOperation?.id ? (
-        <>
-          {currentOperation.collection.name} <span className="not-italic">{'>'}</span>{' '}
-          {currentOperation.name}
-        </>
-      ) : (
-        'New Operation'
-      )}
-    </div>
-  );
-}
