@@ -73,6 +73,12 @@ const CreateOperationMutation = graphql(`
   }
 `);
 
+const tabBadgeClassName = clsx(
+  'hive-badge-is-changed',
+  'relative after:top-1/2 after:-translate-y-1/2 after:right-[.65rem] hover:after:hidden',
+  '[&_.graphiql-tab-close]:hidden [&:hover_.graphiql-tab-close]:block',
+);
+
 export function useOperationCollectionsPlugin(props: {
   canEdit: boolean;
   canDelete: boolean;
@@ -120,38 +126,20 @@ export function useOperationCollectionsPlugin(props: {
         nonNull: true,
       });
 
-      const hasAllEditors = !!(
-        editorContext.queryEditor &&
-        editorContext.variableEditor &&
-        editorContext.headerEditor
-      );
-
-      console.log(111, QueryIdMap);
-
-      // console.log(
-      //   Object.entries(localStorage)
-      //     .filter(([key]) => key.includes('hive:operation-'))
-      //     .map(([key, value]) => ({
-      //       ...JSON.parse(value),
-      //       id: key.replace('hive:operation-', ''),
-      //     })),
-      // );
-
-      // console.log(collections.flatMap(c => c.operations.edges.map(({ node }) => node)));
-
       const hasAllEditors = !!(queryEditor && variableEditor && headerEditor);
-
-      const isSame =
-        !!currentOperation &&
-        currentOperation.query === queryEditor?.getValue() &&
-        currentOperation.variables === variableEditor?.getValue() &&
-        currentOperation.headers === headerEditor?.getValue();
-
       const queryParamsOperationId =
         'operation' in router.latestLocation.search &&
         typeof router.latestLocation.search.operation === 'string'
           ? router.latestLocation.search.operation
           : null;
+      const activeTab = tabs.find(tab => tab.id === queryParamsOperationId);
+
+      const isSame =
+        !currentOperation ||
+        !activeTab ||
+        (currentOperation.query === activeTab.query &&
+          currentOperation.variables === activeTab.variables &&
+          currentOperation.headers === (activeTab.headers || ''));
 
       useEffect(() => {
         if (!hasAllEditors || !currentOperation) {
@@ -159,10 +147,19 @@ export function useOperationCollectionsPlugin(props: {
         }
 
         if (queryParamsOperationId) {
+          const tabIndex = tabs.findIndex(tab => tab.id === queryParamsOperationId);
+
+          if (tabIndex !== -1) {
+            changeTab(tabIndex);
+            return;
+          }
           // Set selected operation in editors
-          queryEditor.setValue(currentOperation.query);
-          variableEditor.setValue(currentOperation.variables ?? '');
-          headerEditor.setValue(currentOperation.headers ?? '');
+          addTab({
+            id: queryParamsOperationId,
+            query: (savedOperation || currentOperation).query,
+            variables: (savedOperation || currentOperation).variables,
+            headers: currentOperation.headers,
+          });
 
           if (!savedOperation) {
             return;
@@ -183,12 +180,14 @@ export function useOperationCollectionsPlugin(props: {
       }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
       useEffect(() => {
+        updateActiveTabValues({ className: isSame ? '' : tabBadgeClassName });
+
         if (!hasAllEditors || !currentOperation || isSame) {
           return;
         }
         setSavedOperation({
-          query: queryEditor.getValue() ?? '',
-          variables: variableEditor.getValue() ?? '',
+          query: queryEditor.getValue() || '',
+          variables: variableEditor.getValue() || '',
         });
       }, [queryEditor?.getValue(), variableEditor?.getValue()]);
 
@@ -311,7 +310,10 @@ export function useOperationCollectionsPlugin(props: {
                       'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
                       node.id === queryParamsOperationId && [
                         'bg-gray-100/10 text-white',
-                        !isSame && 'hive-badge-is-changed relative',
+                        currentOperation &&
+                          node.id === currentOperation.id &&
+                          !isSame &&
+                          'hive-badge-is-changed relative',
                       ],
                     )}
                   >

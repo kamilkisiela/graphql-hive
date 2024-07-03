@@ -14,7 +14,7 @@ export function useSyncOperationState(props: {
     projectId: props.projectId,
     targetId: props.targetId,
   });
-  const storageKey = currentOperation ? `hive:operation-${currentOperation?.id}` : null;
+  const storageKey = currentOperation ? `hive:operation-${currentOperation.id}` : null;
   const savedOperationData = storageKey ? localStorage.getItem(storageKey) : null;
 
   return {
