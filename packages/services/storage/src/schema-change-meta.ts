@@ -90,12 +90,14 @@ export type RegistryServiceUrlChangeChange = RegistryServiceUrlChangeSerializabl
   path?: string;
 };
 
+type ChangeType = Change['type'];
+
 /**
  * Create the schema change from the persisted meta data.
  */
 export function schemaChangeFromSerializableChange(
   change: SerializableChange,
-): Change | RegistryServiceUrlChangeChange {
+): ChangeType | RegistryServiceUrlChangeChange {
   switch (change.type) {
     case ChangeType.FieldArgumentDescriptionChanged:
       return fieldArgumentDescriptionChangedFromMeta(change);
@@ -204,6 +206,8 @@ export function schemaChangeFromSerializableChange(
     case 'REGISTRY_SERVICE_URL_CHANGED':
       return buildRegistryServiceURLFromMeta(change);
   }
+
+  throw new Error(`Unknown change type: ${change.type}`);
 }
 
 export function buildRegistryServiceURLFromMeta(

@@ -16,7 +16,7 @@
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts && prettier --write src/db/types.ts"
   },
   "devDependencies": {
-    "@graphql-inspector/core": "6.1.0",
+    "@graphql-inspector/core": "6.1.1-alpha-20240703150118-f111f17a030795d68cae4fb8d191fc4d04cd8d0d",
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.118.0",
     "@sentry/types": "7.118.0",

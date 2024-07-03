@@ -74,7 +74,7 @@ services:
 
   clickhouse:
     image: clickhouse/clickhouse-server:24.4-alpine
-    mem_limit: 300m
+    mem_limit: 500m
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
