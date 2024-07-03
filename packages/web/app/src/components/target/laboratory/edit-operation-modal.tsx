@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useCollections } from '../../../pages/target-laboratory';
+import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 
 const UpdateOperationNameMutation = graphql(`
   mutation UpdateOperation(

@@ -16,7 +16,7 @@ import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-o
 import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
 import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
 import { graphql } from '@/gql';
-import { CollectionsQuery } from '@/pages/target-laboratory';
+import { CollectionsQuery } from '@/lib/hooks/laboratory/use-collections';
 import { TokensDocument, type DeleteTokensDocument } from '@/pages/target-settings';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';

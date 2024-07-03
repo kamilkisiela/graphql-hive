@@ -28,10 +28,10 @@ import { PlusIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
-import { useCollections } from '@/pages/target-laboratory';
 import { GraphiQLPlugin, useEditorContext, usePluginContext } from '@graphiql/react';
 import { BookmarkFilledIcon, BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
+import { useCollections } from './use-collections';
 import { useCurrentOperation } from './use-current-operation';
 import { useSyncOperationState } from './use-sync-operation-state';
 
@@ -108,10 +108,17 @@ export function useOperationCollectionsPlugin(props: {
         projectId: props.projectId,
         targetId: props.targetId,
       });
-      const { queryEditor, variableEditor, headerEditor, tabs, updateActiveTabValues } =
-        useEditorContext({
-          nonNull: true,
-        });
+      const {
+        queryEditor,
+        variableEditor,
+        headerEditor,
+        tabs,
+        updateActiveTabValues,
+        changeTab,
+        addTab,
+      } = useEditorContext({
+        nonNull: true,
+      });
 
       const hasAllEditors = !!(
         editorContext.queryEditor &&
@@ -247,8 +254,8 @@ export function useOperationCollectionsPlugin(props: {
 
       return (
         <>
-          <div className="mb-5 flex justify-between gap-1">
-            <Title>Operations</Title>
+          <div className="mb-5 flex justify-between gap-1 items-center">
+            <div className="graphiql-doc-explorer-title">Operations</div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -331,67 +338,66 @@ export function useOperationCollectionsPlugin(props: {
                   </AccordionHeader>
                   <AccordionContent className="space-y-0 pb-2 pl-2">
                     {collection.operations.edges.length ? (
-                      collection.operations.edges.map(({ node }) => {
-                        const isChanged = node.id === queryParamsOperationId && !isSame;
-                        return (
-                          <div key={node.id} className="flex items-center justify-between">
-                            <Link
-                              to="/$organizationId/$projectId/$targetId/laboratory"
-                              params={{
-                                organizationId: props.organizationId,
-                                projectId: props.projectId,
-                                targetId: props.targetId,
-                              }}
-                              search={{ operation: node.id }}
-                              className={cn(
-                                'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
-                                isChanged && 'hive-badge-is-changed relative',
-                                node.id === queryParamsOperationId && 'bg-gray-100/10 text-white',
-                              )}
-                            >
-                              <SquareTerminalIcon className="size-4" />
-                              {node.name}
-                            </Link>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
-                                <DotsHorizontalIcon />
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                      collection.operations.edges.map(({ node }) => (
+                        <div key={node.id} className="flex items-center">
+                          <Link
+                            to="/$organizationId/$projectId/$targetId/laboratory"
+                            params={{
+                              organizationId: props.organizationId,
+                              projectId: props.projectId,
+                              targetId: props.targetId,
+                            }}
+                            search={{ operation: node.id }}
+                            className={cn(
+                              'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
+                              node.id === queryParamsOperationId && [
+                                'bg-gray-100/10 text-white',
+                                !isSame && 'hive-badge-is-changed relative',
+                              ],
+                            )}
+                          >
+                            <SquareTerminalIcon className="size-4" />
+                            {node.name}
+                          </Link>
+                          <DropdownMenu modal={false}>
+                            <DropdownMenuTrigger className="graphiql-toolbar-button text-white opacity-0 transition-opacity [div:hover>&]:opacity-100">
+                              <DotsHorizontalIcon />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={async () => {
+                                  const url = new URL(window.location.href);
+                                  await copyToClipboard(
+                                    `${url.origin}${url.pathname}?operation=${node.id}`,
+                                  );
+                                }}
+                              >
+                                Copy link to operation
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              {props.canEdit && (
                                 <DropdownMenuItem
-                                  onClick={async () => {
-                                    const url = new URL(window.location.href);
-                                    await copyToClipboard(
-                                      `${url.origin}${url.pathname}?operation=${node.id}`,
-                                    );
+                                  onClick={() => {
+                                    setOperationToEditId(node.id);
                                   }}
                                 >
-                                  Copy link to operation
+                                  Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                {props.canEdit && (
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setOperationToEditId(node.id);
-                                    }}
-                                  >
-                                    Edit
-                                  </DropdownMenuItem>
-                                )}
-                                {props.canDelete && (
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setOperationToDeleteId(node.id);
-                                    }}
-                                    className="text-red-500"
-                                  >
-                                    Delete
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        );
-                      })
+                              )}
+                              {props.canDelete && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setOperationToDeleteId(node.id);
+                                  }}
+                                  className="text-red-500"
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      ))
                     ) : (
                       <Button
                         variant="orangeLink"
