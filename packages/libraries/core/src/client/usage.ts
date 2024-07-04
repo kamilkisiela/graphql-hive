@@ -16,6 +16,7 @@ import type {
   AbortAction,
   ClientInfo,
   CollectUsageCallback,
+  GraphQLErrorsResult,
   HivePluginOptions,
   HiveUsagePluginOptions,
 } from './types.js';
@@ -23,6 +24,11 @@ import { cache, cacheDocumentKey, logIf, measureDuration, memo } from './utils.j
 
 interface UsageCollector {
   collect(): CollectUsageCallback;
+  collectRaw(
+    args: ExecutionArgs,
+    result: GraphQLErrorsResult | AbortAction,
+    durationMs: number,
+  ): void;
   collectSubscription(args: { args: ExecutionArgs }): void;
   dispose(): Promise<void>;
 }
@@ -37,6 +43,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       collect() {
         return async () => {};
       },
+      collectRaw() {},
       async dispose() {},
       collectSubscription() {},
     };
@@ -149,87 +156,93 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       ? dynamicSampling(options.sampler)
       : randomSampling(options.sampleRate ?? 1.0);
 
+  const collectRaw: UsageCollector['collectRaw'] = (args, result, duration) => {
+    let providedOperationName: string | undefined = undefined;
+    try {
+      if (isAbortAction(result)) {
+        if (result.logging) {
+          logger.info(result.reason);
+        }
+        return;
+      }
+
+      const document = args.document;
+      const rootOperation = document.definitions.find(
+        o => o.kind === Kind.OPERATION_DEFINITION,
+      ) as OperationDefinitionNode;
+      providedOperationName = args.operationName || rootOperation.name?.value;
+      const operationName = providedOperationName || 'anonymous';
+      // Check if operationName is a match with any string or regex in excludeSet
+      const isMatch = Array.from(excludeSet).some(excludingValue =>
+        excludingValue instanceof RegExp
+          ? excludingValue.test(operationName)
+          : operationName === excludingValue,
+      );
+      if (
+        !isMatch &&
+        shouldInclude({
+          operationName,
+          document,
+          variableValues: args.variableValues,
+          contextValue: args.contextValue,
+        })
+      ) {
+        const errors =
+          result.errors?.map(error => ({
+            message: error.message,
+            path: error.path?.join('.'),
+          })) ?? [];
+        const collect = collector({
+          schema: args.schema,
+          max: options.max ?? 1000,
+          ttl: options.ttl,
+          processVariables: options.processVariables ?? false,
+        });
+
+        agent.capture(
+          collect(document, args.variableValues ?? null).then(({ key, value: info }) => {
+            return {
+              type: 'request',
+              data: {
+                key,
+                timestamp: Date.now(),
+                operationName,
+                operation: info.document,
+                fields: info.fields,
+                execution: {
+                  ok: errors.length === 0,
+                  duration,
+                  errorsTotal: errors.length,
+                  errors,
+                },
+                // TODO: operationHash is ready to accept hashes of persisted operations
+                client: pickClientInfoProperties(
+                  typeof args.contextValue !== 'undefined' &&
+                    typeof options.clientInfo !== 'undefined'
+                    ? options.clientInfo(args.contextValue)
+                    : createDefaultClientInfo()(args.contextValue),
+                ),
+              },
+            };
+          }),
+        );
+      }
+    } catch (error) {
+      const details = providedOperationName ? ` (name: "${providedOperationName}")` : '';
+      logger.error(`Failed to collect operation${details}`, error);
+    }
+  };
+
   return {
     dispose: agent.dispose,
+    collectRaw,
     collect() {
       const finish = measureDuration();
 
       return async function complete(args, result) {
         const duration = finish();
-        let providedOperationName: string | undefined = undefined;
-        try {
-          if (isAbortAction(result)) {
-            if (result.logging) {
-              logger.info(result.reason);
-            }
-            return;
-          }
 
-          const document = args.document;
-          const rootOperation = document.definitions.find(
-            o => o.kind === Kind.OPERATION_DEFINITION,
-          ) as OperationDefinitionNode;
-          providedOperationName = args.operationName || rootOperation.name?.value;
-          const operationName = providedOperationName || 'anonymous';
-          // Check if operationName is a match with any string or regex in excludeSet
-          const isMatch = Array.from(excludeSet).some(excludingValue =>
-            excludingValue instanceof RegExp
-              ? excludingValue.test(operationName)
-              : operationName === excludingValue,
-          );
-          if (
-            !isMatch &&
-            shouldInclude({
-              operationName,
-              document,
-              variableValues: args.variableValues,
-              contextValue: args.contextValue,
-            })
-          ) {
-            const errors =
-              result.errors?.map(error => ({
-                message: error.message,
-                path: error.path?.join('.'),
-              })) ?? [];
-            const collect = collector({
-              schema: args.schema,
-              max: options.max ?? 1000,
-              ttl: options.ttl,
-              processVariables: options.processVariables ?? false,
-            });
-
-            agent.capture(
-              collect(document, args.variableValues ?? null).then(({ key, value: info }) => {
-                return {
-                  type: 'request',
-                  data: {
-                    key,
-                    timestamp: Date.now(),
-                    operationName,
-                    operation: info.document,
-                    fields: info.fields,
-                    execution: {
-                      ok: errors.length === 0,
-                      duration,
-                      errorsTotal: errors.length,
-                      errors,
-                    },
-                    // TODO: operationHash is ready to accept hashes of persisted operations
-                    client: pickClientInfoProperties(
-                      typeof args.contextValue !== 'undefined' &&
-                        typeof options.clientInfo !== 'undefined'
-                        ? options.clientInfo(args.contextValue)
-                        : createDefaultClientInfo()(args.contextValue),
-                    ),
-                  },
-                };
-              }),
-            );
-          }
-        } catch (error) {
-          const details = providedOperationName ? ` (name: "${providedOperationName}")` : '';
-          logger.error(`Failed to collect operation${details}`, error);
-        }
+        return collectRaw(args, result, duration);
       };
     },
     async collectSubscription({ args }) {

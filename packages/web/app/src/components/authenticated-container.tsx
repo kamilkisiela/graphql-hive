@@ -11,7 +11,6 @@ export const authenticated =
     return (
       <SessionAuth>
         <HiveStripeWrapper>
-          {/* <Header /> */}
           <Component {...props} />
         </HiveStripeWrapper>
       </SessionAuth>

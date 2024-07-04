@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@apollo/composition": "2.8.2",
-    "esbuild": "0.21.5",
+    "esbuild": "0.23.0",
     "fastify": "4.28.1",
     "graphql": "16.9.0"
   },
