@@ -17,7 +17,7 @@
     "@envelop/opentelemetry": "6.3.1",
     "@envelop/sentry": "7.1.1",
     "@envelop/types": "5.0.0",
-    "@escape.tech/graphql-armor-max-aliases": "2.4.0",
+    "@escape.tech/graphql-armor-max-aliases": "2.5.0",
     "@escape.tech/graphql-armor-max-depth": "2.3.0",
     "@escape.tech/graphql-armor-max-directives": "2.2.0",
     "@escape.tech/graphql-armor-max-tokens": "2.4.0",
