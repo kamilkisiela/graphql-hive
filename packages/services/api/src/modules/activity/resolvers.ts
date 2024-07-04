@@ -6,18 +6,6 @@ import { ActivityManager } from './providers/activity-manager';
 
 export const resolvers: ActivityModule.Resolvers = {
   Query: {
-    async projectActivities(_, { selector }, { injector }) {
-      const [organization, project] = await Promise.all([
-        injector.get(IdTranslator).translateOrganizationId(selector),
-        injector.get(IdTranslator).translateProjectId(selector),
-      ]);
-
-      return injector.get(ActivityManager).getByProject({
-        organization,
-        project,
-        limit: selector.limit,
-      });
-    },
     async targetActivities(_, { selector }, { injector }) {
       const [organization, project, target] = await Promise.all([
         injector.get(IdTranslator).translateOrganizationId(selector),
