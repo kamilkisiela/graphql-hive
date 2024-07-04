@@ -214,7 +214,7 @@ export const CreateChannelModal = ({
           <Button
             type="submit"
             size="lg"
-            className="w-full justify-center"
+            className="w-full justify-center text-ellipsis whitespace-nowrap"
             variant="primary"
             disabled={isSubmitting}
           >

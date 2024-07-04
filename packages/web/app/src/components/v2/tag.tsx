@@ -19,7 +19,7 @@ export function Tag({
 }): ReactElement {
   return (
     <span
-      className={cn('inline-flex items-center gap-x-1 rounded-sm p-2', colors[color], className)}
+      className={cn('inline-flex items-center gap-x-1 rounded-sm p-2 whitespace-nowrap', colors[color], className)}
     >
       {children}
     </span>
