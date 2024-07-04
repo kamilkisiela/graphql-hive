@@ -27,7 +27,7 @@
     "dotenv": "16.4.5",
     "fast-json-stable-stringify": "2.1.0",
     "got": "14.4.1",
-    "param-case": "3.0.4",
+    "param-case": "4.0.0",
     "pg-promise": "11.8.0",
     "slonik": "30.4.4",
     "slonik-interceptor-query-logging": "45.6.0",
