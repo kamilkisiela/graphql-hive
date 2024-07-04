@@ -58,7 +58,7 @@
     "graphql-ws": "5.16.0",
     "nock": "14.0.0-beta.7",
     "vitest": "1.6.0",
-    "ws": "8.17.1"
+    "ws": "8.18.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
