@@ -800,8 +800,8 @@ importers:
         specifier: 0.23.0
         version: 0.23.0
       itty-router:
-        specifier: 4.2.2
-        version: 4.2.2
+        specifier: 5.0.17
+        version: 5.0.17
       toucan-js:
         specifier: 3.4.0
         version: 3.4.0
@@ -845,8 +845,8 @@ importers:
         specifier: 16.9.0
         version: 16.9.0
       itty-router:
-        specifier: 4.2.2
-        version: 4.2.2
+        specifier: 5.0.17
+        version: 5.0.17
       itty-router-extras:
         specifier: 0.4.6
         version: 0.4.6
@@ -12383,8 +12383,8 @@ packages:
   itty-router-extras@0.4.6:
     resolution: {integrity: sha512-6r7HQBkFMPSJfcKksrKC7avEQnPCSSEvoz6PAAZMNhz8hthYu1pzedXDrvTFDWXJosfuaittzoNciWHO/TxMaw==}
 
-  itty-router@4.2.2:
-    resolution: {integrity: sha512-KegPW0l9SNPadProoFT07AB84uOqLUwzlXQ7HsqkS31WUrxkjdhcemRpTDUuetbMJ89uBtWeQSVoiEmUAu31uw==}
+  itty-router@5.0.17:
+    resolution: {integrity: sha512-ZHnPI0OOyTTLuNp2FdciejYaK4Wl3ZV3O0yEm8njOGggh/k/ek3BL7X2I5YsCOfc5vLhIJgj3Z4pUtLs6k9Ucg==}
 
   jackspeak@2.3.6:
     resolution: {integrity: sha512-N3yCS/NegsOBokc8GAdM8UcmfsKiSS8cipheD/nivzr700H+nsMOxJjQnvwOcRYVuFkdH0wGUvW2WbXGmrZGbQ==}
@@ -31271,7 +31271,7 @@ snapshots:
 
   itty-router-extras@0.4.6: {}
 
-  itty-router@4.2.2: {}
+  itty-router@5.0.17: {}
 
   jackspeak@2.3.6:
     dependencies:
