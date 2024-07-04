@@ -59,9 +59,11 @@ export function ChannelsTable(props: {
                 checked={props.isChecked(channel.id)}
               />
             </Td>
-            <Td className='text-ellipsis whitespace-nowrap'>{channel.name}</Td>
-            <Td className="truncate text-xs text-gray-400 max-w-xs">{renderChannelEndpoint(channel)}</Td>
-            <Td className='max-w-24 flex content-end'>
+            <Td className="text-ellipsis whitespace-nowrap">{channel.name}</Td>
+            <Td className="max-w-xs truncate text-xs text-gray-400">
+              {renderChannelEndpoint(channel)}
+            </Td>
+            <Td className="flex max-w-24 content-end">
               <Tag color={colorMap[channel.type]}>{channel.type}</Tag>
             </Td>
           </Tr>
