@@ -1,4 +1,4 @@
-import { ActivityObject } from '../../../shared/entities';
+import type { ActivityObject } from '../../../shared/entities';
 import type { OrganizationPlanChangeActivityResolvers } from './../../../__generated__/types.next';
 
 export const OrganizationPlanChangeActivity: OrganizationPlanChangeActivityResolvers = {
