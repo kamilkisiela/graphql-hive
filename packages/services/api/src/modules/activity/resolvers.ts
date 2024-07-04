@@ -1,26 +1,8 @@
 import { ActivityObject } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
-import { IdTranslator } from '../shared/providers/id-translator';
 import { ActivityModule } from './__generated__/types';
-import { ActivityManager } from './providers/activity-manager';
 
 export const resolvers: ActivityModule.Resolvers = {
-  Query: {
-    async targetActivities(_, { selector }, { injector }) {
-      const [organization, project, target] = await Promise.all([
-        injector.get(IdTranslator).translateOrganizationId(selector),
-        injector.get(IdTranslator).translateProjectId(selector),
-        injector.get(IdTranslator).translateTargetId(selector),
-      ]);
-
-      return injector.get(ActivityManager).getByTarget({
-        organization,
-        project,
-        target,
-        limit: selector.limit,
-      });
-    },
-  },
   OrganizationCreatedActivity: {
     __isTypeOf(activity) {
       return activity.type === 'ORGANIZATION_CREATED';
