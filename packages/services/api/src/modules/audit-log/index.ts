@@ -1,15 +1,12 @@
 import { createModule } from 'graphql-modules';
-
+import { ClickHouse } from '../operations/providers/clickhouse-client';
 import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
-import { ClickHouse } from '../operations/providers/clickhouse-client';
 
-export const authModule = createModule({
+export const auditLogModule = createModule({
   id: 'audit-log',
   dirname: __dirname,
   typeDefs,
   resolvers,
-  providers: [
-    ClickHouse
-  ],
+  providers: [ClickHouse],
 });

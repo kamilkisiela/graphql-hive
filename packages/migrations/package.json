@@ -12,7 +12,7 @@
     "build": "tsx ../../scripts/runify.ts",
     "db:create": "node tools/create-db.mjs",
     "db:init": "pnpm db:create && pnpm migration:run",
-    "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
+    "db:migrator": "tsx src/index.ts",
     "migration:run": "pnpm db:migrator up",
     "test": "WATCH=0 tsup-node --config ../../configs/tsup/dev.config.node.ts ./test/root.ts"
   },
@@ -32,6 +32,7 @@
     "slonik": "30.4.4",
     "ts-node": "10.9.2",
     "tslib": "2.6.3",
+    "tsx": "4.16.2",
     "typescript": "5.5.3",
     "zod": "3.23.8"
   },
