@@ -45,6 +45,7 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import type { Contracts } from '../../schema/providers/contracts';
+import type { SchemaCoordinatesDiffResult } from '../../schema/providers/inspector';
 
 export interface OrganizationSelector {
   organization: string;
@@ -481,6 +482,7 @@ export interface Storage {
       };
       contracts: null | Array<CreateContractVersionInput>;
       conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
     } & TargetSelector) &
       (
         | {
@@ -513,6 +515,19 @@ export interface Storage {
   ): Promise<SchemaVersion | never>;
 
   getSchemaLog(_: { commit: string; target: string }): Promise<SchemaLog>;
+
+  getSchemaCoordinatesOlderThanDate(_: {
+    targetId: string;
+    /**
+     * Data is aggregated daily, so we need to check the day after the date.
+     */
+    date: Date;
+  }): Promise<
+    ReadonlyArray<{
+      coordinate: string;
+      timestamp: number;
+    }>
+  >;
 
   createActivity(
     _: {

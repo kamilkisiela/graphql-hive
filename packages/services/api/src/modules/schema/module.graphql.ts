@@ -703,7 +703,7 @@ export default gql`
     Experimental: This field is not stable and may change in the future.
     """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer
-    unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer
+    unusedSchema(filter: UnusedSchemaExplorerFilterInput): UnusedSchemaExplorer
     deprecatedSchema(usage: DeprecatedSchemaExplorerUsageInput): DeprecatedSchemaExplorer
 
     schemaCompositionErrors: SchemaErrorConnection
@@ -748,8 +748,16 @@ export default gql`
     period: DateRangeInput!
   }
 
-  input UnusedSchemaExplorerUsageInput {
-    period: DateRangeInput!
+  """
+  @oneOf
+  """
+  input UnusedSchemaExplorerSchemaFilterInput {
+    createdBeforeDate: DateTime
+  }
+
+  input UnusedSchemaExplorerFilterInput {
+    usage: DateRangeInput!
+    schema: UnusedSchemaExplorerSchemaFilterInput
   }
 
   input DeprecatedSchemaExplorerUsageInput {
@@ -859,7 +867,6 @@ export default gql`
   type GraphQLEnumType {
     name: String!
     description: String
-    deprecationReason: String
     values: [GraphQLEnumValue!]!
     usage: SchemaCoordinateUsage!
     """

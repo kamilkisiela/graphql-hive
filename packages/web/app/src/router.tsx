@@ -693,16 +693,28 @@ const targetExplorerDeprecatedRoute = createRoute({
   },
 });
 
+const TargetExplorerUnusedRouteSearch = z.object({
+  letter: z.string().optional(),
+  created_before: z.string().date().optional(),
+  older_than: z.coerce.number().optional(),
+});
 const targetExplorerUnusedRoute = createRoute({
   getParentRoute: () => targetRoute,
   path: 'explorer/unused',
+  validateSearch(search) {
+    return TargetExplorerUnusedRouteSearch.parse(search);
+  },
   component: function TargetExplorerUnusedRoute() {
     const { organizationId, projectId, targetId } = targetExplorerUnusedRoute.useParams();
+    const { letter, older_than, created_before } = targetExplorerUnusedRoute.useSearch();
     return (
       <TargetExplorerUnusedPage
         organizationId={organizationId}
         projectId={projectId}
         targetId={targetId}
+        letter={letter ?? null}
+        createdBefore={created_before ?? null}
+        olderThan={older_than ?? null}
       />
     );
   },

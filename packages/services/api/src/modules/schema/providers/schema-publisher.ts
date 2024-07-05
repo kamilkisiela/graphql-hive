@@ -1908,6 +1908,7 @@ export class SchemaPublisher {
           });
         }
       },
+      coordinatesDiff: publishResult.state.coordinatesDiff,
       changes,
       diffSchemaVersionId,
       previousSchemaVersion: latestVersion?.version ?? null,

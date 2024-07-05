@@ -482,6 +482,8 @@ export class CompositeModel {
       state: {
         composable: compositionCheck.status === 'completed',
         initial: latestVersion === null,
+        coordinatesDiff:
+          diffCheck.result?.coordinatesDiff ?? diffCheck.reason?.coordinatesDiff ?? null,
         changes: diffCheck.result?.all ?? diffCheck.reason?.all ?? null,
         messages,
         breakingChanges: null,
@@ -686,6 +688,8 @@ export class CompositeModel {
       conclusion: SchemaDeleteConclusion.Accept,
       state: {
         ...composablePartial,
+        coordinatesDiff:
+          diffCheck.result?.coordinatesDiff ?? diffCheck.reason?.coordinatesDiff ?? null,
         changes,
         breakingChanges,
         compositionErrors: compositionCheck.reason?.errors ?? [],

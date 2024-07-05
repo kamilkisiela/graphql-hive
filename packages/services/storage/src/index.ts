@@ -27,6 +27,7 @@ import type {
 } from '@hive/api';
 import { context, SpanKind, SpanStatusCode, trace } from '@hive/service-common';
 import { batch } from '@theguild/buddy';
+import type { SchemaCoordinatesDiffResult } from '../../api/src/modules/schema/providers/inspector';
 import {
   createSDLHash,
   OrganizationMemberRoleModel,
@@ -222,6 +223,13 @@ type MemberRoleColumns =
       role_locked: null;
       role_scopes: null;
     };
+
+const SchemaCleanupTrackerModel = zod.array(
+  zod.object({
+    coordinate: zod.string(),
+    timestamp: zod.number(),
+  }),
+);
 
 export async function createStorage(
   connection: string,
@@ -2793,6 +2801,14 @@ export async function createStorage(
           });
         }
 
+        if (input.coordinatesDiff) {
+          await updateSchemaCleanupTracker(trx, {
+            targetId: input.target,
+            versionId: version.id,
+            coordinatesDiff: input.coordinatesDiff,
+          });
+        }
+
         await input.actionFn();
 
         return {
@@ -2868,6 +2884,29 @@ export async function createStorage(
         );
       });
     }),
+
+    async getSchemaCoordinatesOlderThanDate({ targetId, date }) {
+      const dbResult = await pool.query<unknown>(
+        sql`/* getSchemaCoordinatesOlderThanDate */
+          SELECT 
+            coordinate,
+            created_at as timestamp
+          FROM
+            schema_cleanup_tracker
+          WHERE 
+            target_id = ${targetId}
+            AND
+            created_at <= ${date.toISOString()}
+          ORDER BY 
+            created_at DESC
+        `,
+      );
+
+      console.log('fetched', dbResult.rows);
+
+      return SchemaCleanupTrackerModel.parseAsync(dbResult.rows);
+    },
+
     async createActivity({ organization, project, target, user, type, meta }) {
       const { identifiers, values } = objectToParams<Omit<activities, 'id' | 'created_at'>>({
         activity_metadata: meta,
@@ -5192,6 +5231,81 @@ async function insertSchemaVersion(
   `;
 
   return await trx.one(query).then(SchemaVersionModel.parse);
+}
+
+async function updateSchemaCleanupTracker(
+  trx: DatabaseTransactionConnection,
+  args: {
+    targetId: string;
+    versionId: string;
+    coordinatesDiff: SchemaCoordinatesDiffResult;
+  },
+) {
+  const actions: Promise<unknown>[] = [];
+
+  // TODO: include version_id in the schema_cleanup_tracker table
+
+  if (args.coordinatesDiff.deleted) {
+    actions.push(
+      trx.query(sql`/* schema_cleanup_tracker_deleted */
+      DELETE FROM schema_cleanup_tracker
+      WHERE
+        target_id = ${args.targetId}
+        AND
+        coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deleted), 'text')})
+        created_at <= NOW()
+    `),
+    );
+  }
+
+  if (args.coordinatesDiff.added) {
+    actions.push(
+      trx.query(sql`/* schema_cleanup_tracker_inserted */
+        INSERT INTO schema_cleanup_tracker
+        ( target_id, coordinate, deprecated_at )
+        SELECT * FROM ${sql.unnest(
+          Array.from(args.coordinatesDiff.added).map(coordinate => {
+            const isDeprecatedAsWell = args.coordinatesDiff.deprecated.has(coordinate);
+
+            return [
+              args.targetId,
+              coordinate,
+              // if it's added and deprecated at the same time
+              isDeprecatedAsWell ? 'NOW()' : null,
+              isDeprecatedAsWell ? args.versionId : null,
+            ];
+          }),
+          ['uuid', 'text', 'text', 'uuid'],
+        )}
+      `),
+    );
+  }
+
+  if (args.coordinatesDiff.undeprecated) {
+    actions.push(
+      trx.query(sql`/* schema_cleanup_tracker_undeprecated */
+      UPDATE schema_cleanup_tracker
+      SET deprecated_at = NULL, deprecated_in_version_id = NULL
+      WHERE 
+        target_id = ${args.targetId}
+        AND
+        coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deprecated), 'text')})
+    `),
+    );
+  }
+
+  await Promise.all(actions);
+
+  if (args.coordinatesDiff.deprecated) {
+    await trx.query(sql`/* schema_cleanup_tracker_deprecated */
+      UPDATE schema_cleanup_tracker
+      SET deprecated_at = NOW(), deprecated_in_version_id = ${args.versionId}
+      WHERE 
+        target_id = ${args.targetId}
+        AND
+        coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deprecated), 'text')})
+    `);
+  }
 }
 
 async function insertSchemaVersionContract(

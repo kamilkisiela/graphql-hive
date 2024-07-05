@@ -24,7 +24,7 @@ import type {
   SingleSchema,
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
-import { Inspector } from './inspector';
+import { Inspector, SchemaCoordinatesDiffResult } from './inspector';
 import { SchemaCheckWarning } from './models/shared';
 import { extendWithBase, isCompositeSchema, SchemaHelper } from './schema-helper';
 
@@ -134,6 +134,7 @@ type SchemaDiffFailure = {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
     all: Array<SchemaChangeType> | null;
+    coordinatesDiff: SchemaCoordinatesDiffResult | null;
   };
   result?: never;
 };
@@ -144,6 +145,7 @@ export type SchemaDiffSuccess = {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
     all: Array<SchemaChangeType> | null;
+    coordinatesDiff: SchemaCoordinatesDiffResult | null;
   };
   reason?: never;
 };
@@ -441,7 +443,8 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema);
+    const inspectorDiffResult = await this.inspector.diff(existingSchema, incomingSchema);
+    let inspectorChanges = inspectorDiffResult.changes;
 
     // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
     if (args.filterOutFederationChanges === true) {
@@ -549,6 +552,7 @@ export class RegistryChecks {
             }
             return null;
           },
+          coordinatesDiff: inspectorDiffResult.coordinates,
         },
       } satisfies SchemaDiffFailure;
     }
@@ -568,6 +572,7 @@ export class RegistryChecks {
           }
           return null;
         },
+        coordinatesDiff: inspectorDiffResult.coordinates,
       },
     } satisfies SchemaDiffSuccess;
   }
@@ -673,6 +678,41 @@ export class RegistryChecks {
         reason: String(e instanceof Error ? e.message : e),
       } satisfies CheckResult;
     }
+  }
+
+  // could be prune or purge as well
+  async cleanup(args: { diff: Awaited<ReturnType<RegistryChecks['diff']>> }) {
+    if (args.diff.status === 'skipped') {
+      return {
+        status: 'skipped',
+      } satisfies CheckResult;
+    }
+
+    const coordinatesDiff = args.diff.result?.coordinatesDiff ?? args.diff.reason?.coordinatesDiff;
+
+    // User will define when to warn or error
+    // WARN if a field was not used in past N days.
+    // ERROR if a field was not used in past N days.
+    // BONUS - traffic percentage threshold.
+
+    // 1. Look for configuration in the target settings.
+    // 2. Depending on the configuration, fetch all coordinates for the target that has `timestamp` older than X days.
+    // 3. Compare that with ClickHouse data (think of a way to optimize this).
+    // 4. Apply errors and warnings based on the configuration.
+
+    // -- Select all coordinates for a given target that has fields older than X days or deprecated for X days.
+    // -- Select all used coordinates from ClickHouse for a given target, in past X days (we could optimize it by applying `User.*` filter based on the first query)
+    // -- Compare and detect the fields that are not used in past X days.
+    // -- Warn if a field was not used in past X days.
+    // -- Error if a field was not used in past Y days.
+
+    // await this.operationsReader.getTopOperationsForSchemaCoordinate({
+    //   targetIds: settings.targetIds,
+    //   excludedClients: settings.excludedClientNames,
+    //   period: settings.period,
+    //   requestCountThreshold: settings.requestCountThreshold,
+    //   schemaCoordinate: change.breakingChangeSchemaCoordinate,
+    // });
   }
 
   public checkProjectNativeFederationSupport(

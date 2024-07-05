@@ -260,6 +260,13 @@ export interface schema_checks {
   updated_at: Date;
 }
 
+export interface schema_cleanup_tracker {
+  coordinate: string;
+  created_at: Date;
+  deprecated_at: Date | null;
+  target_id: string;
+}
+
 export interface schema_log {
   action: string;
   author: string;
@@ -406,6 +413,7 @@ export interface DBTables {
   projects: projects;
   schema_change_approvals: schema_change_approvals;
   schema_checks: schema_checks;
+  schema_cleanup_tracker: schema_cleanup_tracker;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;

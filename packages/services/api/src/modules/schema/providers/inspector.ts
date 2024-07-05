@@ -1,8 +1,18 @@
-import { type GraphQLSchema } from 'graphql';
+import {
+  GraphQLFieldMap,
+  isEnumType,
+  isInputObjectType,
+  isInterfaceType,
+  isIntrospectionType,
+  isObjectType,
+  isScalarType,
+  isUnionType,
+  type GraphQLSchema,
+} from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import { Change, ChangeType, diff } from '@graphql-inspector/core';
 import { traceFn } from '@hive/service-common';
-import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
+import { HiveSchemaChangeModel } from '@hive/storage';
 import { Logger } from '../../shared/providers/logger';
 
 @Injectable({
@@ -18,24 +28,28 @@ export class Inspector {
 
   @traceFn('Inspector.diff', {
     resultAttributes: result => ({
-      'hive.diff.changes.count': result.length,
+      'hive.diff.changes.count': result.changes.length,
     }),
   })
-  async diff(existing: GraphQLSchema, incoming: GraphQLSchema): Promise<Array<SchemaChangeType>> {
+  async diff(existing: GraphQLSchema, incoming: GraphQLSchema) {
     this.logger.debug('Comparing Schemas');
 
     const changes = await diff(existing, incoming);
+    const coordinates = diffSchemaCoordinates(existing, incoming);
 
-    return changes
-      .filter(dropTrimmedDescriptionChangedChange)
-      .map(change =>
-        HiveSchemaChangeModel.parse({
-          type: change.type,
-          meta: change.meta,
-          isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage,
-        }),
-      )
-      .sort((a, b) => a.criticality.localeCompare(b.criticality));
+    return {
+      changes: changes
+        .filter(dropTrimmedDescriptionChangedChange)
+        .map(change =>
+          HiveSchemaChangeModel.parse({
+            type: change.type,
+            meta: change.meta,
+            isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage,
+          }),
+        )
+        .sort((a, b) => a.criticality.localeCompare(b.criticality)),
+      coordinates,
+    };
   }
 }
 
@@ -118,5 +132,128 @@ function matchChange<R, T extends ChangeType>(
 ) {
   if (change.type in pattern) {
     return pattern[change.type]?.(change);
+  }
+}
+
+export type SchemaCoordinatesDiffResult = {
+  /**
+   * Coordinates that are in incoming but not in existing (including deprecated ones)
+   */
+  added: Set<string>;
+  /**
+   * Coordinates that are in existing but not in incoming (including deprecated ones)
+   */
+  deleted: Set<string>;
+  /**
+   * Coordinates that are deprecated in incoming, but were not deprecated in existing or non-existent
+   */
+  deprecated: Set<string>;
+  /**
+   * Coordinates that exists in incoming and are not deprecated in incoming, but were deprecated in existing
+   */
+  undeprecated: Set<string>;
+};
+
+export function diffSchemaCoordinates(
+  existingSchema: GraphQLSchema,
+  incomingSchema: GraphQLSchema,
+): SchemaCoordinatesDiffResult {
+  const before = getSchemaCoordinates(existingSchema);
+  const after = getSchemaCoordinates(incomingSchema);
+
+  const added = after.coordinates.difference(before.coordinates);
+  const deleted = before.coordinates.difference(after.coordinates);
+  const deprecated = after.deprecated.difference(before.deprecated);
+  const undeprecated = before.deprecated.intersection(after.coordinates);
+
+  return {
+    added,
+    deleted,
+    deprecated,
+    undeprecated,
+  };
+}
+
+export function getSchemaCoordinates(schema: GraphQLSchema): {
+  coordinates: Set<string>;
+  deprecated: Set<string>;
+} {
+  const coordinates = new Set<string>();
+  const deprecated = new Set<string>();
+
+  const typeMap = schema.getTypeMap();
+
+  for (const typeName in typeMap) {
+    const typeDefinition = typeMap[typeName];
+
+    if (isIntrospectionType(typeDefinition)) {
+      continue;
+    }
+
+    coordinates.add(typeName);
+
+    if (isObjectType(typeDefinition) || isInterfaceType(typeDefinition)) {
+      visitSchemaCoordinatesOfGraphQLFieldMap(
+        typeName,
+        typeDefinition.getFields(),
+        coordinates,
+        deprecated,
+      );
+    } else if (isInputObjectType(typeDefinition)) {
+      const fieldMap = typeDefinition.getFields();
+      for (const fieldName in fieldMap) {
+        const fieldDefinition = fieldMap[fieldName];
+
+        coordinates.add(`${typeName}.${fieldName}`);
+        if (fieldDefinition.deprecationReason) {
+          deprecated.add(`${typeName}.${fieldName}`);
+        }
+      }
+    } else if (isUnionType(typeDefinition)) {
+      coordinates.add(typeName);
+      for (const member of typeDefinition.getTypes()) {
+        coordinates.add(`${typeName}.${member.name}`);
+      }
+    } else if (isEnumType(typeDefinition)) {
+      const values = typeDefinition.getValues();
+      for (const value of values) {
+        coordinates.add(`${typeName}.${value.name}`);
+        if (value.deprecationReason) {
+          deprecated.add(`${typeName}.${value.name}`);
+        }
+      }
+    } else if (isScalarType(typeDefinition)) {
+      coordinates.add(typeName);
+    } else {
+      throw new Error(`Unsupported type kind ${typeName}`);
+    }
+  }
+
+  return {
+    coordinates,
+    deprecated,
+  };
+}
+
+function visitSchemaCoordinatesOfGraphQLFieldMap(
+  typeName: string,
+  fieldMap: GraphQLFieldMap<any, any>,
+  coordinates: Set<string>,
+  deprecated: Set<string>,
+) {
+  for (const fieldName in fieldMap) {
+    const fieldDefinition = fieldMap[fieldName];
+
+    coordinates.add(`${typeName}.${fieldName}`);
+    if (fieldDefinition.deprecationReason) {
+      deprecated.add(`${typeName}.${fieldName}`);
+    }
+
+    for (const arg of fieldDefinition.args) {
+      coordinates.add(`${typeName}.${fieldName}.${arg.name}`);
+      if (arg.deprecationReason) {
+        deprecated.add(`${typeName}.${fieldName}.${arg.name}`);
+      }
+    }
   }
 }
