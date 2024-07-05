@@ -3,17 +3,6 @@ import { createConnection } from '../../shared/schema';
 import { ActivityModule } from './__generated__/types';
 
 export const resolvers: ActivityModule.Resolvers = {
-  ProjectDeletedActivity: {
-    __isTypeOf(activity) {
-      return activity.type === 'PROJECT_DELETED';
-    },
-    name(activity: any) {
-      return (activity as ActivityObject).meta.name;
-    },
-    cleanId(activity: any) {
-      return (activity as ActivityObject).meta.cleanId;
-    },
-  },
   ProjectNameUpdatedActivity: {
     __isTypeOf(activity) {
       return activity.type === 'PROJECT_NAME_UPDATED';
