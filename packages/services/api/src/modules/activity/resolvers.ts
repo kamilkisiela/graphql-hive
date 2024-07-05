@@ -3,14 +3,6 @@ import { createConnection } from '../../shared/schema';
 import { ActivityModule } from './__generated__/types';
 
 export const resolvers: ActivityModule.Resolvers = {
-  MemberLeftActivity: {
-    __isTypeOf(activity) {
-      return activity.type === 'MEMBER_LEFT';
-    },
-    email(activity: any) {
-      return (activity as ActivityObject).meta.email;
-    },
-  },
   ProjectCreatedActivity: {
     __isTypeOf(activity) {
       return activity.type === 'PROJECT_CREATED';
