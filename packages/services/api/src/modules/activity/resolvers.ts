@@ -3,11 +3,6 @@ import { createConnection } from '../../shared/schema';
 import { ActivityModule } from './__generated__/types';
 
 export const resolvers: ActivityModule.Resolvers = {
-  TargetCreatedActivity: {
-    __isTypeOf(activity) {
-      return activity.type === 'TARGET_CREATED';
-    },
-  },
   TargetDeletedActivity: {
     __isTypeOf(activity) {
       return activity.type === 'TARGET_DELETED';
