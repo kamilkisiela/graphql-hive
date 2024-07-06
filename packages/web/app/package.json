@@ -23,7 +23,7 @@
     "@graphql-tools/mock": "9.0.3",
     "@graphql-typed-document-node/core": "3.2.0",
     "@headlessui/react": "2.1.1",
-    "@hookform/resolvers": "3.7.0",
+    "@hookform/resolvers": "3.9.0",
     "@monaco-editor/react": "4.6.0",
     "@n1ru4l/react-time-ago": "1.1.0",
     "@radix-ui/react-accordion": "1.2.0",
