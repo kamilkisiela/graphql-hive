@@ -680,8 +680,8 @@ importers:
         specifier: 7.118.0
         version: 7.118.0
       '@slack/web-api':
-        specifier: 7.3.0
-        version: 7.3.0
+        specifier: 7.3.1
+        version: 7.3.1
       '@theguild/buddy':
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
@@ -7307,8 +7307,8 @@ packages:
     resolution: {integrity: sha512-UlIrDWvuLaDly3QZhCPnwUSI/KYmV1N9LyhuH6EDKCRS1HWZhyTG3Ja46T3D0rYfqdltKYFXbJSSRPwZpwO0cQ==}
     engines: {node: '>= 12.13.0', npm: '>= 6.12.0'}
 
-  '@slack/web-api@7.3.0':
-    resolution: {integrity: sha512-BXpzmNRD7xi/IRErOVfDe8v+8mEZoIgsU3Mqtz2fFkLDRjxu7EzCvuQrcagKdWI+jRm6GhZVhUityGcYJOpqkg==}
+  '@slack/web-api@7.3.1':
+    resolution: {integrity: sha512-n2KfnlqjaPJ5y98nU5Nn0UwTIxafLwQSQIOLpsQXKGYDF24S/ap5Ebv+ifVMtY+vIJBqj1q2+l3W9bpFHeiJ2A==}
     engines: {node: '>= 18', npm: '>= 8.6.0'}
 
   '@smithy/abort-controller@3.1.0':
@@ -24444,7 +24444,7 @@ snapshots:
 
   '@slack/types@2.11.0': {}
 
-  '@slack/web-api@7.3.0':
+  '@slack/web-api@7.3.1':
     dependencies:
       '@slack/logger': 4.0.0
       '@slack/types': 2.11.0
