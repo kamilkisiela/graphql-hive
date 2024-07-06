@@ -58,9 +58,6 @@ const config: CodegenConfig = {
             unionMember: true,
             excludeTypes: ['TokenInfoPayload'],
           },
-          mappers: {
-            Activity: '../modules/activity/module.graphql.mappers#ActivityMapper', // TODO: @eddeee888 to fix server preset not detecting interface mappers
-          },
         },
       },
       {
