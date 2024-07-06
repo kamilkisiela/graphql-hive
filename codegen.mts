@@ -20,7 +20,6 @@ const config: CodegenConfig = {
         blacklistedModules: [
           'activity',
           'alerts',
-          'auth',
           'billing',
           'collection',
           'feedback',
