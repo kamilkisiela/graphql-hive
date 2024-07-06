@@ -18,9 +18,6 @@ export const resolvers: AuthModule.Resolvers & {
     [K in AuthModule.TargetAccessScope]: TargetAccessScope;
   };
 } = {
-  Query: {
-    me: (_, __, { injector }) => injector.get(AuthManager).getCurrentUser(),
-  },
   Mutation: {
     async updateMe(_, { input }, { injector }) {
       const InputModel = z.object({
