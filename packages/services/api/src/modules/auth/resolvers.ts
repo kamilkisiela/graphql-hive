@@ -1,14 +1,10 @@
 import { createConnection } from '../../shared/schema';
 import { AuthModule } from './__generated__/types';
 import { AuthManager } from './providers/auth-manager';
-import { OrganizationAccessScope } from './providers/organization-access';
 import { ProjectAccessScope } from './providers/project-access';
 import { TargetAccessScope } from './providers/target-access';
 
 export const resolvers: AuthModule.Resolvers & {
-  OrganizationAccessScope: {
-    [K in AuthModule.OrganizationAccessScope]: OrganizationAccessScope;
-  };
   ProjectAccessScope: {
     [K in AuthModule.ProjectAccessScope]: ProjectAccessScope;
   };
@@ -16,13 +12,6 @@ export const resolvers: AuthModule.Resolvers & {
     [K in AuthModule.TargetAccessScope]: TargetAccessScope;
   };
 } = {
-  OrganizationAccessScope: {
-    READ: OrganizationAccessScope.READ,
-    DELETE: OrganizationAccessScope.DELETE,
-    MEMBERS: OrganizationAccessScope.MEMBERS,
-    SETTINGS: OrganizationAccessScope.SETTINGS,
-    INTEGRATIONS: OrganizationAccessScope.INTEGRATIONS,
-  },
   ProjectAccessScope: {
     READ: ProjectAccessScope.READ,
     DELETE: ProjectAccessScope.DELETE,
