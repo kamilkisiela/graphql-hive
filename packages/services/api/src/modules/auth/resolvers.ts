@@ -1,11 +1,9 @@
-import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
 import { AuthModule } from './__generated__/types';
 import { AuthManager } from './providers/auth-manager';
 import { OrganizationAccessScope } from './providers/organization-access';
 import { ProjectAccessScope } from './providers/project-access';
 import { TargetAccessScope } from './providers/target-access';
-import { displayNameLengthBoundaries, fullNameLengthBoundaries } from './providers/user-manager';
 
 export const resolvers: AuthModule.Resolvers & {
   OrganizationAccessScope: {
@@ -18,38 +16,6 @@ export const resolvers: AuthModule.Resolvers & {
     [K in AuthModule.TargetAccessScope]: TargetAccessScope;
   };
 } = {
-  Mutation: {
-    async updateMe(_, { input }, { injector }) {
-      const InputModel = z.object({
-        displayName: z
-          .string()
-          .min(displayNameLengthBoundaries.min)
-          .max(displayNameLengthBoundaries.max),
-        fullName: z.string().min(fullNameLengthBoundaries.min).max(fullNameLengthBoundaries.max),
-      });
-      const result = InputModel.safeParse(input);
-
-      if (!result.success) {
-        return {
-          error: {
-            message: 'Please check your input.',
-            inputErrors: {
-              displayName: result.error.formErrors.fieldErrors.displayName?.[0],
-              fullName: result.error.formErrors.fieldErrors.fullName?.[0],
-            },
-          },
-        };
-      }
-
-      const updatedUser = await injector.get(AuthManager).updateCurrentUser(input);
-
-      return {
-        ok: {
-          updatedUser,
-        },
-      };
-    },
-  },
   OrganizationAccessScope: {
     READ: OrganizationAccessScope.READ,
     DELETE: OrganizationAccessScope.DELETE,
