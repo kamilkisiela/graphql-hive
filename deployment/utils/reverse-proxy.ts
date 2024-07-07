@@ -92,6 +92,10 @@ export class Proxy {
                 port: route.service.spec.ports[0].port,
               },
             ],
+            // https://projectcontour.io/docs/1.29/config/request-routing/#session-affinity
+            loadBalancerPolicy: {
+              strategy: 'Cookie',
+            },
             // https://projectcontour.io/docs/1.29/config/rate-limiting/#local-rate-limiting
             rateLimitPolicy: route.rateLimit
               ? {
