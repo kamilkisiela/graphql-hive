@@ -50,6 +50,7 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
   const router = useRouter();
 
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const form = useForm<AgeFilterFormValues>({
     resolver: zodResolver(ageFilterFormSchema),
@@ -81,6 +82,7 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
         };
       },
     });
+    setFilterOpen(false);
   }
 
   function onSubmit(values: AgeFilterFormValues) {
@@ -118,14 +120,17 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
         },
       });
     }
+
+    // TODO: fix a bug when the filter is closed, but the tooltip shows up
+    setFilterOpen(false);
   }
 
   return (
-    <Popover>
+    <Popover open={filterOpen} onOpenChange={setFilterOpen}>
       <TooltipProvider>
-        <Tooltip open={!tooltip ? false : undefined}>
-          <PopoverTrigger asChild>
-            <TooltipTrigger asChild>
+        <Tooltip open={!tooltip || filterOpen ? false : undefined}>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild onClick={() => setFilterOpen(isOpen => !isOpen)}>
               <Button variant="outline">
                 {title}
                 {ageFilter ? (
@@ -139,9 +144,9 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
                   </>
                 ) : null}
               </Button>
-            </TooltipTrigger>
-          </PopoverTrigger>
-          <TooltipContent>{tooltip}</TooltipContent>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent hideWhenDetached>{tooltip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <PopoverContent className="grid w-auto gap-y-4 p-3" align="end">

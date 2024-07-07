@@ -71,11 +71,8 @@ module.exports = {
         800: '#007052',
         900: '#005b43',
       },
-      cyan: '#0acccc',
-      purple: '#5f2eea',
       blue: colors.sky,
       gray: colors.stone,
-      magenta: '#f11197',
       orange: {
         50: '#fefbf5',
         100: '#fef8ec',
