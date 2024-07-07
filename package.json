@@ -116,7 +116,6 @@
   "pnpm": {
     "patchedDependencies": {
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
-      "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.57.0": "patches/eslint@8.57.0.patch",
