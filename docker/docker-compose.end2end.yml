@@ -4,6 +4,11 @@ services:
   oidc-server-mock:
     container_name: oidc-server-mock
     image: ghcr.io/soluto/oidc-server-mock:0.9.2
+    healthcheck:
+      test: ['CMD', 'curl', '--fail', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
     ports:
       - '7043:80'
     environment:
