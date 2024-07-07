@@ -604,8 +604,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       pg-promise:
-        specifier: 11.8.0
-        version: 11.8.0
+        specifier: 11.9.0
+        version: 11.9.0
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -1317,8 +1317,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       pg-promise:
-        specifier: 11.8.0
-        version: 11.8.0
+        specifier: 11.9.0
+        version: 11.9.0
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -14181,8 +14181,8 @@ packages:
     peerDependencies:
       pg: '>=8.0'
 
-  pg-promise@11.8.0:
-    resolution: {integrity: sha512-w9hTFpkM4FByJTJ7KCWLtZSOtQa2BKC+XIV8+3ZvDlfYfBYdz8V4V+BttnqhUPY/d12Itug7Bft4XdILihsY+w==}
+  pg-promise@11.9.0:
+    resolution: {integrity: sha512-yOnJp8unK2xP2zx/2chJV5321TiJxtk57A9bMrgvJlvVM3exJ/j1FsHSccX3MnjUrnSYk1NMH6j329JfDyz8+A==}
     engines: {node: '>=14.0'}
 
   pg-protocol@1.6.1:
@@ -33728,10 +33728,10 @@ snapshots:
     dependencies:
       pg: 8.12.0
 
-  pg-promise@11.8.0:
+  pg-promise@11.9.0:
     dependencies:
       assert-options: 0.8.1
-      pg: 8.11.5
+      pg: 8.12.0
       pg-minify: 1.6.4
       spex: 3.3.0
     transitivePeerDependencies:
