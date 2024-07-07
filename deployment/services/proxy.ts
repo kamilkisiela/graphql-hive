@@ -91,7 +91,7 @@ export function deployProxy({
         retriable: true,
         rateLimit: {
           maxRequests: 5,
-          unit: 'minute',
+          unit: 'hour',
         },
       },
       {
