@@ -1608,8 +1608,8 @@ importers:
         specifier: 7.0.4
         version: 7.0.4
       '@fastify/vite':
-        specifier: 6.0.6
-        version: 6.0.6(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)
+        specifier: 6.0.7
+        version: 6.0.7(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)
       '@graphiql/react':
         specifier: 0.22.4
         version: 0.22.4(@codemirror/language@6.10.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4296,8 +4296,8 @@ packages:
   '@fastify/static@7.0.4':
     resolution: {integrity: sha512-p2uKtaf8BMOZWLs6wu+Ihg7bWNBdjNgCwDza4MJtTqg+5ovKmcbgbR9Xs5/smZ1YISfzKOCNYmZV8LaCj+eJ1Q==}
 
-  '@fastify/vite@6.0.6':
-    resolution: {integrity: sha512-FsWJC92murm5tjeTezTTvMLyZido/ZWy0wYWpVkh/bDe1gAUAabYLB7Vp8hokXGsRE/mOpqYVsRDAKENY2qPUQ==}
+  '@fastify/vite@6.0.7':
+    resolution: {integrity: sha512-+dRo9KUkvmbqdmBskG02SwigWl06Mwkw8SBDK1zTNH6vd4DyXbRvI7RmJEmBkLouSU81KTzy1+OzwHSffqSD6w==}
 
   '@floating-ui/core@1.2.6':
     resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
@@ -20374,7 +20374,7 @@ snapshots:
       fastq: 1.17.1
       glob: 10.3.12
 
-  '@fastify/vite@6.0.6(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)':
+  '@fastify/vite@6.0.7(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)':
     dependencies:
       '@fastify/middie': 8.3.1
       '@fastify/static': 6.12.0
