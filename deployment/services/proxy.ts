@@ -92,9 +92,6 @@ export function deployProxy({
         rateLimit: {
           maxRequests: 10,
           unit: 'minute',
-          responseHeadersToAdd: {
-            'x-ratelimit-active': 'true',
-          },
         },
       },
       {

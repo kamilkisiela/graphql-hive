@@ -98,11 +98,17 @@ export class Proxy {
                   local: {
                     requests: route.rateLimit.maxRequests,
                     unit: route.rateLimit.unit,
-                    responseHeadersToAdd: route.rateLimit.responseHeadersToAdd
-                      ? Object.entries(route.rateLimit.responseHeadersToAdd).map(
-                          ([key, value]) => ({ name: key, value }),
-                        )
-                      : undefined,
+                    responseHeadersToAdd: [
+                      {
+                        name: 'x-rate-limit-active',
+                        value: 'true',
+                      },
+                      ...(route.rateLimit.responseHeadersToAdd
+                        ? Object.entries(route.rateLimit.responseHeadersToAdd).map(
+                            ([key, value]) => ({ name: key, value }),
+                          )
+                        : []),
+                    ],
                     responseStatusCode: route.rateLimit.responseStatusCode || 429,
                     burst: route.rateLimit.burst,
                   },
