@@ -17,7 +17,6 @@ const config: CodegenConfig = {
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
-        blacklistedModules: ['collection'],
         scalarsOverrides: {
           DateTime: {
             type: { input: 'Date', output: 'Date | string | number' },
