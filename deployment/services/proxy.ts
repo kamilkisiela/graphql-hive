@@ -90,8 +90,8 @@ export function deployProxy({
         requestTimeout: '60s',
         retriable: true,
         rateLimit: {
-          maxRequests: 7,
-          unit: 'hour',
+          maxRequests: 10,
+          unit: 'minute',
         },
       },
       {
