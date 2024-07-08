@@ -207,7 +207,7 @@ export function createAgent<TEvent>(
         }
 
         debugLog(`Attempt ${attempt} failed: ${response.status}`);
-        throw new Error(`${response.status}: ${response.statusText}`);
+        throw new Error(`${response.status}: ${response.statusText} ${await response.text()}`);
       };
 
       const response = await retry(sendReport, {
@@ -236,6 +236,7 @@ export function createAgent<TEvent>(
       if (sendOptions?.throwOnError) {
         throw error;
       }
+      console.error('LOL', error);
 
       options.logger.error(`[hive][${prefix}] Failed to send data: ${error.message}`);
 

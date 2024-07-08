@@ -1,5 +1,5 @@
 import { createServer, Server } from 'http';
-import { createSchema, createYoga } from 'graphql-yoga';
+import { createLogger, createSchema, createYoga } from 'graphql-yoga';
 import nock from 'nock';
 import { beforeAll, expect, test } from 'vitest';
 import { useHive } from '../src';
@@ -245,7 +245,7 @@ test('arbitrary options are allowed with allowArbitraryDocuments=true (GraphQL o
   });
 });
 
-test('use persisted operations (GraphQL REST)', async () => {
+test('use persisted operations for subscription (GraphQL over HTTP "documentId")', async () => {
   const httpScope = nock('http://artifatcs-cdn.localhost', {
     reqheaders: {
       'X-Hive-CDN-Key': value => {
@@ -255,16 +255,28 @@ test('use persisted operations (GraphQL REST)', async () => {
     },
   })
     .get('/apps/client-name/client-version/hash')
-    .reply(200, 'query { hi }');
+    .reply(200, 'subscription { hi }');
 
   const yoga = createYoga({
-    graphqlEndpoint: '/graphql/*?',
     schema: createSchema({
       typeDefs: /* GraphQL */ `
         type Query {
           hi: String
         }
+
+        type Subscription {
+          hi: String
+        }
       `,
+      resolvers: {
+        Subscription: {
+          hi: {
+            async *subscribe() {
+              yield { hi: 'hi' };
+            },
+          },
+        },
+      },
     }),
     plugins: [
       useHive({
@@ -277,16 +289,266 @@ test('use persisted operations (GraphQL REST)', async () => {
     ],
   });
 
-  const response = await yoga.fetch('http://localhost/graphql/client-name/client-version/hash', {
+  const response = await yoga.fetch('http://localhost/graphql', {
     method: 'POST',
-    body: JSON.stringify({}),
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
     },
+    body: JSON.stringify({
+      documentId: 'client-name/client-version/hash',
+    }),
   });
 
   expect(response.status).toBe(200);
-  expect(await response.json()).toEqual({ data: { hi: null } });
+  expect(await response.text()).toMatchInlineSnapshot(`
+    :
+
+    event: next
+    data: {"data":{"hi":"hi"}}
+
+    event: complete
+    data:
+  `);
 
   httpScope.done();
+});
+
+test('usage reporting for persisted operation', async () => {
+  const httpScope = nock('http://artifatcs-cdn.localhost', {
+    reqheaders: {
+      'X-Hive-CDN-Key': value => {
+        expect(value).toBe('foo');
+        return true;
+      },
+    },
+  })
+    .get('/apps/client-name/client-version/hash')
+    .reply(200, 'query { hi }');
+
+  const usageScope = nock('http://localhost', {
+    reqheaders: {
+      Authorization: value => {
+        expect(value).toBe('Bearer brrrt');
+        return true;
+      },
+    },
+  })
+    .post('/usage', body => {
+      expect(body.map).toMatchInlineSnapshot(`
+        {
+          ace78a32bbf8a79071356e5d5b13c5c83baf4e14: {
+            fields: [
+              Query.hi,
+            ],
+            operation: {hi},
+            operationName: anonymous,
+          },
+        }
+      `);
+
+      expect(body.operations).toMatchObject([
+        {
+          metadata: {},
+          operationMapKey: 'ace78a32bbf8a79071356e5d5b13c5c83baf4e14',
+          persistedDocumentHash: 'client-name/client-version/hash',
+        },
+      ]);
+
+      return true;
+    })
+    .reply(200);
+
+  const yoga = createYoga({
+    schema: createSchema({
+      typeDefs: /* GraphQL */ `
+        type Query {
+          hi: String
+        }
+      `,
+    }),
+    plugins: [
+      useHive({
+        enabled: true,
+        debug: false,
+        token: 'brrrt',
+        persistedDocuments: {
+          endpoint: 'http://artifatcs-cdn.localhost',
+          accessToken: 'foo',
+        },
+        selfHosting: {
+          applicationUrl: 'http://localhost/foo',
+          graphqlEndpoint: 'http://localhost/graphql',
+          usageEndpoint: 'http://localhost/usage',
+        },
+        usage: {
+          endpoint: 'http://localhost/usage',
+        },
+        agent: {
+          maxSize: 1,
+          logger: createLogger('silent'),
+        },
+      }),
+    ],
+  });
+
+  await new Promise<void>(async (resolve, reject) => {
+    const timeout = setTimeout(() => {
+      resolve();
+    }, 1000);
+    let requestCount = 0;
+
+    usageScope.on('request', () => {
+      requestCount = requestCount + 1;
+      if (requestCount === 1) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+
+    const response = await yoga.fetch('http://localhost/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        documentId: 'client-name/client-version/hash',
+      }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ data: { hi: null } });
+  });
+
+  httpScope.done();
+  usageScope.done();
+});
+
+test('usage reporting for persisted operation (subscription)', async () => {
+  const httpScope = nock('http://artifatcs-cdn.localhost', {
+    reqheaders: {
+      'X-Hive-CDN-Key': value => {
+        expect(value).toBe('foo');
+        return true;
+      },
+    },
+  })
+    .get('/apps/client-name/client-version/hash')
+    .reply(200, 'subscription { hi }');
+
+  const usageScope = nock('http://localhost', {
+    reqheaders: {
+      Authorization: value => {
+        expect(value).toBe('Bearer brrrt');
+        return true;
+      },
+    },
+  })
+    .post('/usage', body => {
+      expect(body.map).toMatchInlineSnapshot(`
+        {
+          74cf03b67c3846231d04927b02e1fca45e727223: {
+            fields: [
+              Subscription.hi,
+            ],
+            operation: subscription{hi},
+            operationName: anonymous,
+          },
+        }
+      `);
+
+      expect(body.subscriptionOperations).toMatchObject([
+        {
+          metadata: {},
+          operationMapKey: '74cf03b67c3846231d04927b02e1fca45e727223',
+          persistedDocumentHash: 'client-name/client-version/hash',
+        },
+      ]);
+
+      return true;
+    })
+    .reply(200);
+
+  const yoga = createYoga({
+    schema: createSchema({
+      typeDefs: /* GraphQL */ `
+        type Query {
+          hi: String
+        }
+        type Subscription {
+          hi: String
+        }
+      `,
+      resolvers: {
+        Subscription: {
+          hi: {
+            async *subscribe() {
+              yield { hi: 'hi' };
+            },
+          },
+        },
+      },
+    }),
+    plugins: [
+      useHive({
+        enabled: true,
+        debug: false,
+        token: 'brrrt',
+        persistedDocuments: {
+          endpoint: 'http://artifatcs-cdn.localhost',
+          accessToken: 'foo',
+        },
+        selfHosting: {
+          applicationUrl: 'http://localhost/foo',
+          graphqlEndpoint: 'http://localhost/graphql',
+          usageEndpoint: 'http://localhost/usage',
+        },
+        usage: {
+          endpoint: 'http://localhost/usage',
+        },
+        agent: {
+          maxSize: 1,
+          logger: createLogger('silent'),
+        },
+      }),
+    ],
+  });
+
+  await new Promise<void>(async (resolve, reject) => {
+    const timeout = setTimeout(() => {
+      resolve();
+    }, 1000);
+    let requestCount = 0;
+
+    usageScope.on('request', () => {
+      requestCount = requestCount + 1;
+      if (requestCount === 1) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+
+    const response = await yoga.fetch('http://localhost/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      },
+      body: JSON.stringify({
+        documentId: 'client-name/client-version/hash',
+      }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.text()).toMatchInlineSnapshot(`
+      :
+
+      event: next
+      data: {"data":{"hi":"hi"}}
+
+      event: complete
+      data:
+    `);
+  });
+
+  httpScope.done();
+  usageScope.done();
 });

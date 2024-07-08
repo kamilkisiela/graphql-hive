@@ -26,4 +26,7 @@ export const AppDeployment: AppDeploymentResolvers = {
   totalDocumentCount: async (appDeployment, _, { injector }) => {
     return injector.get(AppDeploymentsManager).getDocumentCountForAppDeployment(appDeployment);
   },
+  lastUsed: async (appDeployment, _, { injector }) => {
+    return injector.get(AppDeploymentsManager).getLastUsedForAppDeployment(appDeployment);
+  },
 };

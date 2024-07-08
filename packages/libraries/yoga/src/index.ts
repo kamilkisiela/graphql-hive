@@ -19,6 +19,8 @@ type CacheRecord = {
   paramsArgs: GraphQLParams;
   executionArgs?: ExecutionArgs;
   parsedDocument?: DocumentNode;
+  /** persisted document id */
+  documentId?: string;
 };
 
 export function createHive(clientOrOptions: HivePluginOptions) {
@@ -64,7 +66,8 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       latestSchema = schema;
     },
     onParams(context) {
-      if (context.params.query && latestSchema) {
+      // we set the params if there is either a query or documentId in the request
+      if ((context.params.query || 'documentId' in context.params) && latestSchema) {
         cache.set(context.request, {
           callback: hive.collectUsage(),
           paramsArgs: context.params,
@@ -107,16 +110,19 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               errors.push(...ctx.result.errors);
             },
             onEnd() {
-              void record.callback(args, errors.length ? { errors } : {});
+              void record.callback(args, errors.length ? { errors } : {}, record.documentId);
             },
           };
         },
       };
     },
     onSubscribe(context) {
+      const record = cache.get(context.args.contextValue.request);
+
       return {
         onSubscribeResult() {
-          hive.collectSubscriptionUsage({ args: context.args });
+          const persistedDocumentHash = record?.documentId;
+          hive.collectSubscriptionUsage({ args: context.args, persistedDocumentHash });
         },
       };
     },
@@ -135,6 +141,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             document: record.parsedDocument ?? record.executionArgs.document,
           },
           context.result,
+          record.documentId,
         );
         return;
       }
@@ -159,6 +166,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               operationName: record.paramsArgs.operationName,
             },
             context.result,
+            record.documentId,
           );
         } catch (err) {
           console.error(err);
@@ -177,16 +185,23 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               return body.documentId;
             }
 
-            let documentId: string | undefined = request.url.split('/graphql/')[1];
-
-            if (documentId) {
-              return documentId;
-            }
-
             return null;
           },
-          getPersistedOperation(key) {
-            return persistedDocuments.resolve(key);
+          async getPersistedOperation(key, request) {
+            const document = await persistedDocuments.resolve(key);
+            // after we resolve the document we need to update the cache record to contain the resolved document
+            if (document) {
+              const record = cache.get(request);
+              if (record) {
+                record.documentId = key;
+                record.paramsArgs = {
+                  ...record.paramsArgs,
+                  query: document,
+                };
+              }
+            }
+
+            return document;
           },
           allowArbitraryOperations(request) {
             return persistedDocuments.allowArbitraryDocuments({

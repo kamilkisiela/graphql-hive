@@ -176,6 +176,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
       };
 
       let persistedDocumentError: GraphQLError | null = null;
+      let persistedDocumentHash: string | undefined;
 
       if (hive.persistedDocuments) {
         if (
@@ -184,6 +185,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
           'documentId' in context.request.http.body &&
           typeof context.request.http.body.documentId === 'string'
         ) {
+          persistedDocumentHash = context.request.http.body.documentId;
           const document = await hive.persistedDocuments.resolve(
             context.request.http.body.documentId,
           );
@@ -230,15 +232,19 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
           },
           willSendResponse(ctx: any) {
             if (!didResolveSource) {
-              void complete(args, {
-                action: 'abort',
-                reason: 'Did not resolve source',
-                logging: false,
-              });
+              void complete(
+                args,
+                {
+                  action: 'abort',
+                  reason: 'Did not resolve source',
+                  logging: false,
+                },
+                persistedDocumentHash,
+              );
               return;
             }
             doc = ctx.document;
-            void complete(args, ctx.response);
+            void complete(args, ctx.response, persistedDocumentHash);
           },
         } as any;
       }
@@ -250,26 +256,34 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
           },
           async willSendResponse(ctx) {
             if (!didResolveSource) {
-              void complete(args, {
-                action: 'abort',
-                reason: 'Did not resolve source',
-                logging: false,
-              });
+              void complete(
+                args,
+                {
+                  action: 'abort',
+                  reason: 'Did not resolve source',
+                  logging: false,
+                },
+                persistedDocumentHash,
+              );
               return;
             }
 
             if (!ctx.document) {
               const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
-              void complete(args, {
-                action: 'abort',
-                reason: 'Document is not available' + (details ? ` (${details})` : ''),
-                logging: true,
-              });
+              void complete(
+                args,
+                {
+                  action: 'abort',
+                  reason: 'Document is not available' + (details ? ` (${details})` : ''),
+                  logging: true,
+                },
+                persistedDocumentHash,
+              );
               return;
             }
 
             doc = ctx.document!;
-            void complete(args, ctx.response as any);
+            void complete(args, ctx.response as any, persistedDocumentHash);
           },
         });
       }
@@ -295,41 +309,57 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
         },
         async willSendResponse(ctx) {
           if (didFailValidation) {
-            void complete(args, {
-              action: 'abort',
-              reason: 'Validation failed',
-              logging: false,
-            });
+            void complete(
+              args,
+              {
+                action: 'abort',
+                reason: 'Validation failed',
+                logging: false,
+              },
+              persistedDocumentHash,
+            );
             return;
           }
           if (!didResolveSource) {
-            void complete(args, {
-              action: 'abort',
-              reason: 'Did not resolve source',
-              logging: false,
-            });
+            void complete(
+              args,
+              {
+                action: 'abort',
+                reason: 'Did not resolve source',
+                logging: false,
+              },
+              persistedDocumentHash,
+            );
             return;
           }
 
           if (!ctx.document) {
             const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
-            void complete(args, {
-              action: 'abort',
-              reason: 'Document is not available' + (details ? ` (${details})` : ''),
-              logging: true,
-            });
+            void complete(
+              args,
+              {
+                action: 'abort',
+                reason: 'Document is not available' + (details ? ` (${details})` : ''),
+                logging: true,
+              },
+              persistedDocumentHash,
+            );
             return;
           }
 
           doc = ctx.document;
           if (ctx.response.body.kind === 'incremental') {
-            void complete(args, {
-              action: 'abort',
-              reason: '@defer and @stream is not supported by Hive',
-              logging: true,
-            });
+            void complete(
+              args,
+              {
+                action: 'abort',
+                reason: '@defer and @stream is not supported by Hive',
+                logging: true,
+              },
+              persistedDocumentHash,
+            );
           } else {
-            void complete(args, ctx.response.body.singleResult);
+            void complete(args, ctx.response.body.singleResult, persistedDocumentHash);
           }
         },
       });

@@ -21,7 +21,14 @@ export interface HiveClient {
     duration: number,
   ): void;
   /** Collect usage for Subscription operations */
-  collectSubscriptionUsage(args: { args: ExecutionArgs }): void;
+  collectSubscriptionUsage(args: {
+    args: ExecutionArgs;
+    /**
+     * Persisted document if subscription is a persisted document.
+     * It needs to be provided in order to collect app deployment specific information.
+     */
+    persistedDocumentHash?: string;
+  }): void;
   createInstrumentedExecute(executeImpl: any): any;
   createInstrumentedSubscribe(executeImpl: any): any;
   dispose(): Promise<void>;
@@ -42,7 +49,13 @@ export type AbortAction = {
 export type CollectUsageCallback = (
   args: ExecutionArgs,
   result: GraphQLErrorsResult | AbortAction,
+  /**
+   * Persisted document if subscription is a persisted document.
+   * It needs to be provided in order to collect app deployment specific information.
+   */
+  persistedDocumentHash?: string,
 ) => Promise<void>;
+
 export interface ClientInfo {
   name: string;
   version: string;

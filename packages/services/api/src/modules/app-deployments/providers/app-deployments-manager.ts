@@ -208,4 +208,17 @@ export class AppDeploymentsManager {
 
     return appDeploymentIds.map(id => Promise.resolve(countMap.get(id) ?? 0));
   });
+
+  getLastUsedForAppDeployment = batch<AppDeploymentRecord, string | null>(async args => {
+    const appDeploymentIds = args.map(appDeployment => appDeployment.id);
+    const dates = await this.appDeployments.getLastUsedForAppDeployments({
+      appDeploymentIds,
+    });
+    const dateMap = new Map<string, string | null>();
+    for (const count of dates) {
+      dateMap.set(count.appDeploymentId, count.lastUsed);
+    }
+
+    return appDeploymentIds.map(id => Promise.resolve(dateMap.get(id) ?? null));
+  });
 }

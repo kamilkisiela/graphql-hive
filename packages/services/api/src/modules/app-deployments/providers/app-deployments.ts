@@ -19,13 +19,14 @@ import { PersistedDocumentScheduler } from './persisted-document-scheduler';
 const AppDeploymentNameModel = z
   .string()
   .min(1, 'Must be at least 1 character long')
-  .max(256, 'Must be at most 256 characters long');
+  .max(64, 'Must be at most 64 characters long')
+  .regex(/^[a-zA-Z0-9_-]+$/, "Can only contain letters, numbers, '_', and '-'");
 
 const AppDeploymentVersionModel = z
   .string()
   .trim()
   .min(1, 'Must be at least 1 character long')
-  .max(256, 'Must be at most 256 characters long')
+  .max(64, 'Must be at most 64 characters long')
   .regex(/^[a-zA-Z0-9._-]+$/, "Can only contain letters, numbers, '.', '_', and '-'");
 
 const noAccessToAppDeploymentsMessage =
@@ -422,11 +423,15 @@ export class AppDeployments {
         INSERT INTO "app_deployments" (
           "target_id"
           , "app_deployment_id"
+          , "app_name"
+          , "app_version"
           , "is_active"
         )
         VALUES (
           ${appDeployment.targetId}
           , ${appDeployment.id}
+          , ${appDeployment.name}
+          , ${appDeployment.version}
           , True
         );
       `,
@@ -542,11 +547,15 @@ export class AppDeployments {
         INSERT INTO "app_deployments" (
           "target_id"
           , "app_deployment_id"
+          , "app_name"
+          , "app_version"
           , "is_active"
         )
         VALUES (
           ${appDeployment.targetId}
           , ${appDeployment.id}
+          , ${appDeployment.name}
+          , ${appDeployment.version}
           , False
         );
       `,
@@ -651,7 +660,7 @@ export class AppDeployments {
         SELECT
           "document_hash" AS "hash"
           , "document_body" AS "body"
-          , "operation_names" AS "operationNames"
+          , "operation_name" AS "operationName"
         FROM
           "app_deployment_documents"
         WHERE
@@ -715,6 +724,46 @@ export class AppDeployments {
 
     return model.parse(result.data);
   }
+
+  async getLastUsedForAppDeployments(args: { appDeploymentIds: Array<string> }) {
+    const result = await this.clickhouse.query({
+      query: cSql`
+        SELECT
+          "filtered_app_deployments"."app_deployment_id" AS "appDeploymentId"
+          , formatDateTimeInJodaSyntax(max("app_deployment_usage"."last_request"), 'YYYY-MM-dd\\'T\\'HH:mm:SS.000000+00:00') AS "lastUsed"
+        FROM (
+          SELECT
+            "target_id"
+            , "app_deployment_id"
+            , "app_name"
+            , "app_version"
+          FROM
+            "app_deployments"
+          PREWHERE
+            "app_deployment_id" IN (${cSql.array(args.appDeploymentIds, 'String')})
+          ORDER BY ("target_id", "app_deployment_id", "app_name", "app_version")
+          LIMIT 1 BY "app_deployment_id"
+        ) AS "filtered_app_deployments"
+        INNER JOIN "app_deployment_usage" ON (
+            "filtered_app_deployments"."target_id" = "app_deployment_usage"."target_id"
+            AND "filtered_app_deployments"."app_name" = "app_deployment_usage"."app_name"
+            AND "filtered_app_deployments"."app_version" = "app_deployment_usage"."app_version"
+          )
+        GROUP BY "filtered_app_deployments"."app_deployment_id"
+      `,
+      queryId: 'get-document-count-for-app-deployments',
+      timeout: 20_000,
+    });
+
+    const model = z.array(
+      z.object({
+        appDeploymentId: z.string(),
+        lastUsed: z.string(),
+      }),
+    );
+
+    return model.parse(result.data);
+  }
 }
 
 const appDeploymentFields = sql`
@@ -757,7 +806,7 @@ const AppDeploymentModel = z.intersection(
 const GraphQLDocumentModel = z.object({
   hash: z.string(),
   body: z.string(),
-  operationNames: z.array(z.string()).transform(names => (names.length === 0 ? null : names)),
+  operationName: z.string().transform(value => (value === '' ? null : value)),
 });
 
 export type AppDeploymentRecord = z.infer<typeof AppDeploymentModel>;

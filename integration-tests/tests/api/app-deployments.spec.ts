@@ -1,4 +1,9 @@
+import { buildASTSchema, parse } from 'graphql';
+import { createLogger } from 'graphql-yoga';
+import { waitFor } from 'testkit/flow';
 import { initSeed } from 'testkit/seed';
+import { getServiceHost } from 'testkit/utils';
+import { createHive } from '@graphql-hive/core';
 import { graphql } from '../../testkit/gql';
 import { TargetAccessScope } from '../../testkit/gql/graphql';
 import { execute } from '../../testkit/graphql';
@@ -20,6 +25,21 @@ const CreateAppDeployment = graphql(`
           version
           status
         }
+      }
+    }
+  }
+`);
+
+const GetAppDeployment = graphql(`
+  query GetAppDeployment(
+    $targetSelector: TargetSelectorInput!
+    $appDeploymentName: String!
+    $appDeploymentVersion: String!
+  ) {
+    target(selector: $targetSelector) {
+      appDeployment(appName: $appDeploymentName, appVersion: $appDeploymentVersion) {
+        id
+        lastUsed
       }
     }
   }
@@ -417,7 +437,7 @@ test('create app deployment fails if app name exceeds length of 256 characters',
   expect(createAppDeployment).toEqual({
     error: {
       details: {
-        appName: 'Must be at most 256 characters long',
+        appName: 'Must be at most 64 characters long',
         appVersion: null,
       },
       message: 'Invalid input',
@@ -482,7 +502,7 @@ test('create app deployment fails if app version exceeds length of 256 character
     error: {
       details: {
         appName: null,
-        appVersion: 'Must be at most 256 characters long',
+        appVersion: 'Must be at most 64 characters long',
       },
       message: 'Invalid input',
     },
@@ -577,7 +597,7 @@ test('add documents to app deployment fails if there is no initial schema publis
   });
 });
 
-test('add documents to app deployment fails if document hash is shorter than 3 characters', async () => {
+test('add documents to app deployment fails if document hash is less than 1 character', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, setFeatureFlag } = await createOrg();
   await setFeatureFlag('appDeployments', true);
@@ -625,7 +645,7 @@ test('add documents to app deployment fails if document hash is shorter than 3 c
         appVersion: '1.0.0',
         documents: [
           {
-            hash: 'sh',
+            hash: '',
             body: 'query { hello }',
           },
         ],
@@ -638,7 +658,7 @@ test('add documents to app deployment fails if document hash is shorter than 3 c
     error: {
       details: {
         index: 0,
-        message: 'Hash must be at least 3 characters long',
+        message: 'Hash must be at least 1 characters long',
       },
       message: 'Invalid input, please check the operations.',
     },
@@ -694,7 +714,7 @@ test('add documents to app deployment fails if document hash is longer than 256 
         appVersion: '1.0.0',
         documents: [
           {
-            hash: new Array(257).fill('a').join(''),
+            hash: new Array(129).fill('a').join(''),
             body: 'query { hello }',
           },
         ],
@@ -707,7 +727,7 @@ test('add documents to app deployment fails if document hash is longer than 256 
     error: {
       details: {
         index: 0,
-        message: 'Hash must be at most 256 characters long',
+        message: 'Hash must be at most 128 characters long',
       },
       message: 'Invalid input, please check the operations.',
     },
@@ -848,6 +868,76 @@ test('add documents to app deployment fails if document does not pass validation
         message: 'Cannot query field "hi" on type "Query".',
       },
       message: 'Failed to validate GraphQL operation against schema.',
+    },
+    ok: null,
+  });
+});
+
+test('add documents to app deployment fails if document contains multiple executable operation definitions', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
+  const { createToken } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  await token.publishSchema({
+    sdl: /* GraphQL */ `
+      type Query {
+        hello: String
+      }
+    `,
+  });
+
+  const { createAppDeployment } = await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(createAppDeployment).toEqual({
+    error: null,
+    ok: {
+      createdAppDeployment: {
+        id: expect.any(String),
+        name: 'my-app',
+        version: '1.0.0',
+        status: 'pending',
+      },
+    },
+  });
+
+  const { addDocumentsToAppDeployment } = await execute({
+    document: AddDocumentsToAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+        documents: [
+          {
+            hash: 'hash',
+            body: 'query a { hello } query b { hello }',
+          },
+        ],
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(addDocumentsToAppDeployment).toEqual({
+    error: {
+      details: {
+        index: 0,
+        message:
+          'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
+      },
+      message: 'Only one executable operation definition is allowed per document.',
     },
     ok: null,
   });
@@ -1489,4 +1579,137 @@ test('paginate app deployment documents via GraphQL API', async () => {
       id: expect.any(String),
     },
   });
+});
+
+test('app deployment usage reporting', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag, organization } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
+  const { createToken, project, target } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  const { createAppDeployment } = await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(createAppDeployment.error).toBeNull();
+
+  const sdl = /* GraphQL */ `
+    type Query {
+      a: String
+      b: String
+      c: String
+      d: String
+    }
+  `;
+
+  await token.publishSchema({
+    sdl,
+  });
+
+  const { addDocumentsToAppDeployment } = await execute({
+    document: AddDocumentsToAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+        documents: [
+          {
+            hash: 'aaa',
+            body: 'query { a }',
+          },
+        ],
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(addDocumentsToAppDeployment.error).toBeNull();
+
+  const { activateAppDeployment } = await execute({
+    document: ActivateAppDeployment,
+    variables: {
+      input: {
+        appName: 'app-name',
+        appVersion: 'app-version',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(activateAppDeployment.error).toEqual(null);
+
+  let data = await execute({
+    document: GetAppDeployment,
+    variables: {
+      targetSelector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      appDeploymentName: 'app-name',
+      appDeploymentVersion: 'app-version',
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(data.target?.appDeployment?.lastUsed).toEqual(null);
+
+  const usageAddress = await getServiceHost('usage', 8081);
+
+  const client = createHive({
+    enabled: true,
+    token: token.secret,
+    usage: true,
+    debug: false,
+    agent: {
+      logger: createLogger('debug'),
+      maxSize: 1,
+    },
+    selfHosting: {
+      usageEndpoint: 'http://' + usageAddress,
+      graphqlEndpoint: 'http://noop/',
+      applicationUrl: 'http://noop/',
+    },
+  });
+
+  const request = new Request('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: {
+      'x-graphql-client-name': 'app-name',
+      'x-graphql-client-version': 'app-version',
+    },
+  });
+
+  await client.collectUsage()(
+    {
+      document: parse(`query { a }`),
+      schema: buildASTSchema(parse(sdl)),
+      contextValue: { request },
+    },
+    {},
+    'app-name/app-version/aaa',
+  );
+
+  await waitFor(5000);
+
+  data = await execute({
+    document: GetAppDeployment,
+    variables: {
+      targetSelector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      appDeploymentName: 'app-name',
+      appDeploymentVersion: 'app-version',
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(data.target?.appDeployment?.lastUsed).toEqual(expect.any(String));
 });

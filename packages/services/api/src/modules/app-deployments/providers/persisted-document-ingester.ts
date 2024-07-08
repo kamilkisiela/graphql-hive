@@ -2,6 +2,7 @@ import { buildSchema, DocumentNode, GraphQLError, Kind, parse, TypeInfo, validat
 import PromiseQueue from 'p-queue';
 import { z } from 'zod';
 import { collectSchemaCoordinates } from '@graphql-hive/core/src/client/collect-schema-coordinates';
+import { normalizeOperation } from '@graphql-hive/usage-ingestor/src/normalize-operation';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
 import { ServiceLogger } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';
@@ -9,17 +10,21 @@ import { S3Config } from '../../shared/providers/s3-config';
 
 type DocumentRecord = {
   appDeploymentId: string;
+  /** hash as provided by the user */
   hash: string;
+  /** hash as used by usage reporting */
+  internalHash: string;
   body: string;
-  operationNames: Array<string>;
+  operationName: string | null;
   schemaCoordinates: Array<string>;
 };
 
 const AppDeploymentOperationHashModel = z
   .string()
   .trim()
-  .min(3, 'Hash must be at least 3 characters long')
-  .max(256, 'Hash must be at most 256 characters long');
+  .min(1, 'Hash must be at least 1 characters long')
+  .max(128, 'Hash must be at most 128 characters long')
+  .regex(/^([A-Za-z]|[0-9]|_|-)+$/, "Can only contain letters, numbers, '_', and '-'");
 
 const AppDeploymentOperationBodyModel = z.string().min(3, 'Body must be at least 3 character long');
 
@@ -163,6 +168,22 @@ export class PersistedDocumentIngester {
       }
 
       const operationNames = getOperationNames(documentNode);
+      if (operationNames.length > 1) {
+        return {
+          type: 'error' as const,
+          error: {
+            message: 'Only one executable operation definition is allowed per document.',
+            details: {
+              index,
+              message:
+                'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
+            },
+          },
+        };
+      }
+
+      const operationName = operationNames[0] ?? null;
+
       const coordinates = collectSchemaCoordinates({
         documentNode,
         processVariables: false,
@@ -171,11 +192,18 @@ export class PersistedDocumentIngester {
         typeInfo,
       });
 
+      const normalizedOperation = normalizeOperation({
+        document: operation.body,
+        fields: coordinates,
+        operationName,
+      });
+
       documents.push({
         appDeploymentId: data.appDeployment.id,
         hash: operation.hash,
+        internalHash: normalizedOperation?.hash ?? operation.hash,
         body: operation.body,
-        operationNames,
+        operationName,
         schemaCoordinates: Array.from(coordinates),
       });
 
@@ -219,20 +247,22 @@ export class PersistedDocumentIngester {
 
     await this.clickhouse.insert({
       query: c_sql`
-    INSERT INTO "app_deployment_documents" (
-      "app_deployment_id"
-      , "document_hash"
-      , "document_body"
-      , "operation_names"
-      , "schema_coordinates"
-    )
-    FORMAT CSV`,
+        INSERT INTO "app_deployment_documents" (
+          "app_deployment_id"
+          , "document_hash"
+          , "document_body"
+          , "operation_name"
+          , "schema_coordinates"
+          , "hash"
+        )
+        FORMAT CSV`,
       data: args.documents.map(document => [
         document.appDeploymentId,
         document.hash,
         document.body,
-        document.operationNames,
+        document.operationName ?? '',
         document.schemaCoordinates,
+        document.internalHash,
       ]),
       timeout: 10_000,
       queryId: 'insert_app_deployment_documents',

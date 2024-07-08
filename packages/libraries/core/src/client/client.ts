@@ -38,8 +38,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
     return usage.collect();
   }
 
-  function collectRawUsage(...args: Parameters<typeof usage.collectRaw>) {
-    return usage.collectRaw(...args);
+  function collectRawUsage(...args: Parameters<typeof usage.collectRequest>) {
+    return usage.collectRequest(...args);
   }
 
   async function dispose() {

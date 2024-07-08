@@ -8,6 +8,10 @@ export default gql`
     documents(first: Int, after: String): GraphQLDocumentConnection
     totalDocumentCount: Int!
     status: AppDeploymentStatus!
+    """
+    The last time a GraphQL request that used the app deployment was reported.
+    """
+    lastUsed: DateTime
   }
 
   enum AppDeploymentStatus {

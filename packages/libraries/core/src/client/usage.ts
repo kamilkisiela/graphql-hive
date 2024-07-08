@@ -24,12 +24,16 @@ import { cache, cacheDocumentKey, logIf, measureDuration, memo } from './utils.j
 
 interface UsageCollector {
   collect(): CollectUsageCallback;
-  collectRaw(
-    args: ExecutionArgs,
-    result: GraphQLErrorsResult | AbortAction,
-    durationMs: number,
-  ): void;
-  collectSubscription(args: { args: ExecutionArgs }): void;
+  /** collect a short lived GraphQL request (mutation/query operation) */
+  collectRequest(args: {
+    args: ExecutionArgs;
+    result: GraphQLErrorsResult | AbortAction;
+    /** duration in milliseconds */
+    duration: number;
+    persistedDocumentHash?: string;
+  }): void;
+  /** collect a long-lived GraphQL request/subscription (subscription operation) */
+  collectSubscription(args: { args: ExecutionArgs; persistedDocumentHash?: string }): void;
   dispose(): Promise<void>;
 }
 
@@ -43,7 +47,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       collect() {
         return async () => {};
       },
-      collectRaw() {},
+      collectRequest() {},
       async dispose() {},
       collectSubscription() {},
     };
@@ -92,6 +96,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               metadata: {
                 client: operation.client ?? undefined,
               },
+              persistedDocumentHash: operation.persistedDocumentHash,
             });
           } else if (action.type === 'subscription') {
             const operation = action.data;
@@ -101,6 +106,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               metadata: {
                 client: operation.client ?? undefined,
               },
+              persistedDocumentHash: operation.persistedDocumentHash,
             });
           }
 
@@ -156,21 +162,21 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       ? dynamicSampling(options.sampler)
       : randomSampling(options.sampleRate ?? 1.0);
 
-  const collectRaw: UsageCollector['collectRaw'] = (args, result, duration) => {
+  const collectRequest: UsageCollector['collectRequest'] = args => {
     let providedOperationName: string | undefined = undefined;
     try {
-      if (isAbortAction(result)) {
-        if (result.logging) {
-          logger.info(result.reason);
+      if (isAbortAction(args.result)) {
+        if (args.result.logging) {
+          logger.info(args.result.reason);
         }
         return;
       }
 
-      const document = args.document;
+      const document = args.args.document;
       const rootOperation = document.definitions.find(
         o => o.kind === Kind.OPERATION_DEFINITION,
       ) as OperationDefinitionNode;
-      providedOperationName = args.operationName || rootOperation.name?.value;
+      providedOperationName = args.args.operationName || rootOperation.name?.value;
       const operationName = providedOperationName || 'anonymous';
       // Check if operationName is a match with any string or regex in excludeSet
       const isMatch = Array.from(excludeSet).some(excludingValue =>
@@ -183,24 +189,24 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         shouldInclude({
           operationName,
           document,
-          variableValues: args.variableValues,
-          contextValue: args.contextValue,
+          variableValues: args.args.variableValues,
+          contextValue: args.args.contextValue,
         })
       ) {
         const errors =
-          result.errors?.map(error => ({
+          args.result.errors?.map(error => ({
             message: error.message,
             path: error.path?.join('.'),
           })) ?? [];
         const collect = collector({
-          schema: args.schema,
+          schema: args.args.schema,
           max: options.max ?? 1000,
           ttl: options.ttl,
           processVariables: options.processVariables ?? false,
         });
 
         agent.capture(
-          collect(document, args.variableValues ?? null).then(({ key, value: info }) => {
+          collect(document, args.args.variableValues ?? null).then(({ key, value: info }) => {
             return {
               type: 'request',
               data: {
@@ -211,17 +217,19 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                 fields: info.fields,
                 execution: {
                   ok: errors.length === 0,
-                  duration,
+                  duration: args.duration,
                   errorsTotal: errors.length,
                   errors,
                 },
                 // TODO: operationHash is ready to accept hashes of persisted operations
-                client: pickClientInfoProperties(
-                  typeof args.contextValue !== 'undefined' &&
-                    typeof options.clientInfo !== 'undefined'
-                    ? options.clientInfo(args.contextValue)
-                    : createDefaultClientInfo()(args.contextValue),
-                ),
+                client: args.persistedDocumentHash
+                  ? undefined
+                  : pickClientInfoProperties(
+                      typeof args.args.contextValue !== 'undefined' &&
+                        typeof options.clientInfo !== 'undefined'
+                        ? options.clientInfo(args.args.contextValue)
+                        : createDefaultClientInfo()(args.args.contextValue),
+                    ),
               },
             };
           }),
@@ -235,17 +243,16 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
 
   return {
     dispose: agent.dispose,
-    collectRaw,
+    collectRequest,
     collect() {
       const finish = measureDuration();
 
-      return async function complete(args, result) {
+      return async function complete(args, result, persistedDocumentHash) {
         const duration = finish();
-
-        return collectRaw(args, result, duration);
+        return collectRequest({ args, result, duration, persistedDocumentHash });
       };
     },
-    async collectSubscription({ args }) {
+    async collectSubscription({ args, persistedDocumentHash }) {
       const document = args.document;
       const rootOperation = document.definitions.find(
         o => o.kind === Kind.OPERATION_DEFINITION,
@@ -283,12 +290,15 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               operationName,
               operation: info.document,
               fields: info.fields,
-              // TODO: operationHash is ready to accept hashes of persisted operations
-              client:
-                typeof args.contextValue !== 'undefined' &&
-                typeof options.clientInfo !== 'undefined'
+              // when there is a persisted document hash, we don't need to send the client info,
+              // as it's already included in the persisted document hash and usage ingestor will extract that info
+              client: persistedDocumentHash
+                ? undefined
+                : typeof args.contextValue !== 'undefined' &&
+                    typeof options.clientInfo !== 'undefined'
                   ? options.clientInfo(args.contextValue)
                   : createDefaultClientInfo()(args.contextValue),
+              persistedDocumentHash,
             },
           })),
         );
@@ -380,6 +390,7 @@ interface CollectedOperation {
       path?: string;
     }>;
   };
+  persistedDocumentHash?: string;
   client?: ClientInfo | null;
 }
 
@@ -389,6 +400,7 @@ interface CollectedSubscriptionOperation {
   operation: string;
   operationName?: string | null;
   fields: string[];
+  persistedDocumentHash?: string;
   client?: ClientInfo | null;
 }
 
@@ -400,6 +412,7 @@ interface RequestOperation {
     duration: number;
     errorsTotal: number;
   };
+  persistedDocumentHash?: string;
   metadata?: {
     client?: {
       name: string;
@@ -411,6 +424,7 @@ interface RequestOperation {
 interface SubscriptionOperation {
   operationMapKey: string;
   timestamp: number;
+  persistedDocumentHash?: string;
   metadata?: {
     client?: {
       name: string;
