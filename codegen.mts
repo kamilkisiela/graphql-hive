@@ -31,7 +31,6 @@ const config: CodegenConfig = {
           'policy',
           'project',
           'schema',
-          'target',
         ],
         scalarsOverrides: {
           DateTime: { type: 'string' },
