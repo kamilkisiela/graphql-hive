@@ -38,7 +38,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
     return usage.collect();
   }
 
-  function collectRawUsage(...args: Parameters<typeof usage.collectRequest>) {
+  function collectRequest(...args: Parameters<typeof usage.collectRequest>) {
     return usage.collectRequest(...args);
   }
 
@@ -212,7 +212,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
     info,
     reportSchema,
     collectUsage,
-    collectRawUsage,
+    collectRequest,
     dispose,
     collectSubscriptionUsage: usage.collectSubscription,
     createInstrumentedSubscribe,

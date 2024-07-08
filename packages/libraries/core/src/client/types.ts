@@ -15,11 +15,17 @@ export interface HiveClient {
   reportSchema: SchemaReporter['report'];
   /** Collect usage for Query and Mutation operations */
   collectUsage(): CollectUsageCallback;
-  collectRawUsage(
-    args: ExecutionArgs,
-    result: GraphQLErrorsResult | AbortAction,
-    duration: number,
-  ): void;
+  /** Collect usage for Query and Mutation operations */
+  collectRequest(args: {
+    args: ExecutionArgs;
+    result: GraphQLErrorsResult | AbortAction;
+    duration: number;
+    /**
+     * Persisted document if request is using a persisted document.
+     * It needs to be provided in order to collect app deployment specific information.
+     */
+    persistedDocumentHash?: string;
+  }): void;
   /** Collect usage for Subscription operations */
   collectSubscriptionUsage(args: {
     args: ExecutionArgs;
