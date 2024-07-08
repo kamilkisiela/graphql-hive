@@ -24,7 +24,7 @@ services:
       - ./.hive/postgres:/var/lib/postgresql/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:24.4-alpine
+    image: clickhouse/clickhouse-server:24.6-alpine
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'http://0.0.0.0:8123/ping']
       interval: 5s
@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   broker:
-    image: redpandadata/redpanda:v23.3.17
+    image: redpandadata/redpanda:v23.3.18
     container_name: broker
     hostname: broker
     networks:
