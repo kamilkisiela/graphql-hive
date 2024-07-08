@@ -236,7 +236,6 @@ export function createAgent<TEvent>(
       if (sendOptions?.throwOnError) {
         throw error;
       }
-      console.error('LOL', error);
 
       options.logger.error(`[hive][${prefix}] Failed to send data: ${error.message}`);
 
