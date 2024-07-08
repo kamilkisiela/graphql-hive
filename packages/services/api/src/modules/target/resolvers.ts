@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
-import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { TargetModule } from './__generated__/types';
 import { TargetManager } from './providers/target-manager';
@@ -11,43 +10,6 @@ const TargetNameModel = NameModel.min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
-  Target: {
-    project: (target, _args, { injector }) =>
-      injector.get(ProjectManager).getProject({
-        project: target.projectId,
-        organization: target.orgId,
-      }),
-    async validationSettings(target, _args, { injector }) {
-      const targetManager = injector.get(TargetManager);
-
-      const settings = await targetManager.getTargetSettings({
-        organization: target.orgId,
-        project: target.projectId,
-        target: target.id,
-      });
-
-      return {
-        ...settings.validation,
-        targets: await Promise.all(
-          settings.validation.targets.map(tid =>
-            targetManager.getTarget({
-              organization: target.orgId,
-              project: target.projectId,
-              target: tid,
-            }),
-          ),
-        ),
-      };
-    },
-    experimental_forcedLegacySchemaComposition(target, _, { injector }) {
-      return injector
-        .get(OrganizationManager)
-        .getFeatureFlags({
-          organization: target.orgId,
-        })
-        .then(flags => flags.forceLegacyCompositionInTargets.includes(target.id));
-    },
-  },
   Query: {
     async target(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
