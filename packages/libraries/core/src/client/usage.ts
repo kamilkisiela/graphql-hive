@@ -230,6 +230,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                         ? options.clientInfo(args.args.contextValue)
                         : createDefaultClientInfo()(args.args.contextValue),
                     ),
+                persistedDocumentHash: args.persistedDocumentHash,
               },
             };
           }),

@@ -543,10 +543,10 @@ test('usage reporting for persisted operation (subscription)', async () => {
       expect(response.status).toBe(200);
       expect(await response.text()).toMatchInlineSnapshot(`
         :
-  
+
         event: next
         data: {"data":{"hi":"hi"}}
-  
+
         event: complete
         data:
       `);
