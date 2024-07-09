@@ -7,6 +7,7 @@ import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers/storage';
@@ -31,6 +32,7 @@ export class TargetManager {
     private authManager: AuthManager,
     private activityManager: ActivityManager,
     private idTranslator: IdTranslator,
+    private rateLimit: RateLimitProvider,
   ) {
     this.logger = logger.child({ source: 'TargetManager' });
   }
@@ -80,6 +82,8 @@ export class TargetManager {
         target: target.id,
       },
     });
+
+    await this.rateLimit.onNewTargetCreated();
 
     return target;
   }

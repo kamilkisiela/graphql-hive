@@ -117,7 +117,7 @@ export const env = {
     prometheus.PROMETHEUS_METRICS === '1'
       ? {
           labels: {
-            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'schema',
+            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'schema-policy',
           },
         }
       : null,

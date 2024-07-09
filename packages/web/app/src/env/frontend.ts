@@ -45,7 +45,10 @@ const BaseSchema = protectedObject({
   GRAPHQL_PUBLIC_ORIGIN: zod.string().url(),
   GA_TRACKING_ID: emptyString(zod.string().optional()),
   DOCS_URL: emptyString(zod.string().url().optional()),
-  STRIPE_PUBLIC_KEY: emptyString(zod.string().optional()),
+  PADDLE_CLIENT_SIDE_TOKEN: emptyString(zod.string().optional()),
+  PADDLE_ENVIRONMENT: emptyString(
+    zod.union([zod.literal('sandbox'), zod.literal('production')]).optional(),
+  ),
   RELEASE: emptyString(zod.string().optional()),
   AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(
     zod.union([zod.literal('1'), zod.literal('0')]).optional(),
@@ -147,7 +150,10 @@ function buildConfig() {
     graphqlPublicSubscriptionEndpoint: base.GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT,
     graphqlPublicOrigin: base.GRAPHQL_PUBLIC_ORIGIN,
     docsUrl: base.DOCS_URL,
-    stripePublicKey: base.STRIPE_PUBLIC_KEY ?? null,
+    paddle: {
+      clientSideKey: base.PADDLE_CLIENT_SIDE_TOKEN,
+      environment: base.PADDLE_ENVIRONMENT,
+    },
     auth: {
       github: authGithub.AUTH_GITHUB === '1',
       google: authGoogle.AUTH_GOOGLE === '1',
