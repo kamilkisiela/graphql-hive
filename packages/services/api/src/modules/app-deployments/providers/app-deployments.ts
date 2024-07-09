@@ -259,8 +259,6 @@ export class AppDeployments {
       };
     }
 
-    // TODO: should we acquire a lock to make sure nobody marks the deployment as active as long as we are inserting operations?
-
     if (appDeployment.activatedAt !== null) {
       return {
         type: 'error' as const,
@@ -492,10 +490,9 @@ export class AppDeployments {
 
     if (appDeployment.activatedAt === null) {
       this.logger.debug(
-        'activate app deployment failed as it was never active. (targetId=%s, appName=%s, appVersion=%s)',
+        'activate app deployment failed as it was never active. (targetId=%s, appDeploymentId=%s)',
         args.targetId,
-        args.appDeployment.name,
-        args.appDeployment.version,
+        appDeployment.id,
       );
       return {
         type: 'error' as const,
@@ -505,10 +502,8 @@ export class AppDeployments {
 
     if (appDeployment.retiredAt !== null) {
       this.logger.debug(
-        'activate app deployment failed as it is already retired. (targetId=%s, appName=%s, appVersion=%s, appDeploymentId=%s)',
+        'activate app deployment failed as it is already retired. (targetId=%s, appDeploymentId=%s)',
         args.targetId,
-        args.appDeployment.name,
-        args.appDeployment.version,
         appDeployment.id,
       );
 
@@ -538,8 +533,16 @@ export class AppDeployments {
 
     /** We receive a 204 status code if the DELETE operation was successful */
     if (result.status !== 204) {
-      // TODO: better error handling
-      throw new Error(`Failed to disable app deployment: ${result.statusText}`);
+      this.logger.error(
+        'Failed to disable app deployment (organizationId=%s, targetId=%s, appDeploymentId=%s, statusCode=%s)',
+        args.organizationId,
+        args.targetId,
+        appDeployment.id,
+        result.status,
+      );
+      throw new Error(
+        `Failed to disable app deployment. Request failed with status code "${result.statusText}".`,
+      );
     }
 
     await this.clickhouse.query({
@@ -579,7 +582,7 @@ export class AppDeployments {
       .then(result => AppDeploymentModel.parse(result));
 
     this.logger.debug(
-      'retire app deployment succeeded.  (targetId=%s, appName=%s, appVersion=%s, appDeploymentId=%s)',
+      'retire app deployment succeeded. (targetId=%s, appName=%s, appVersion=%s, appDeploymentId=%s)',
       args.targetId,
       args.appDeployment.name,
       args.appDeployment.version,
