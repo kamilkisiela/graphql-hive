@@ -11,49 +11,6 @@ const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
   Mutation: {
-    async createTarget(_, { input }, { injector }) {
-      const CreateTargetModel = z.object({
-        name: TargetNameModel,
-      });
-
-      const result = CreateTargetModel.safeParse(input);
-      if (!result.success) {
-        return {
-          error: {
-            message: 'Check your input.',
-            inputErrors: {
-              name: result.error.formErrors.fieldErrors.name?.[0],
-            },
-          },
-        };
-      }
-
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId({
-          organization: input.organization,
-        }),
-        translator.translateProjectId({
-          organization: input.organization,
-          project: input.project,
-        }),
-      ]);
-      const target = await injector.get(TargetManager).createTarget({
-        organization,
-        project,
-        name: input.name,
-      });
-      return {
-        ok: {
-          selector: {
-            organization: input.organization,
-            project: input.project,
-            target: target.cleanId,
-          },
-          createdTarget: target,
-        },
-      };
-    },
     async updateTargetName(_, { input }, { injector }) {
       const UpdateTargetModel = z.object({
         name: TargetNameModel,
