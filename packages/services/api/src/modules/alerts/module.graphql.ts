@@ -16,6 +16,7 @@ export default gql`
   enum AlertChannelType {
     SLACK
     WEBHOOK
+    MSTEAMS_WEBHOOK
   }
 
   enum AlertType {
@@ -134,6 +135,13 @@ export default gql`
   }
 
   type AlertWebhookChannel implements AlertChannel {
+    id: ID!
+    name: String!
+    type: AlertChannelType!
+    endpoint: String!
+  }
+
+  type TeamsWebhookChannel implements AlertChannel {
     id: ID!
     name: String!
     type: AlertChannelType!

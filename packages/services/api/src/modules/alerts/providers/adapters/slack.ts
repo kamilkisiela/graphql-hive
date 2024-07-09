@@ -7,6 +7,7 @@ import { WEB_APP_URL } from '../../../shared/providers/tokens';
 import {
   ChannelConfirmationInput,
   CommunicationAdapter,
+  createMDLink,
   SchemaChangeNotificationInput,
   slackCoderize,
 } from './common';
@@ -43,15 +44,15 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       const client = new WebClient(input.integrations.slack.token, {});
 
       const totalChanges = input.event.changes.length + input.event.messages.length;
-      const projectLink = this.createLink({
+      const projectLink = createMDLink({
         text: input.event.project.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
       });
-      const targetLink = this.createLink({
+      const targetLink = createMDLink({
         text: input.event.target.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
       });
-      const viewLink = this.createLink({
+      const viewLink = createMDLink({
         text: 'view details',
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`,
       });
@@ -82,6 +83,9 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     }
   }
 
+  /**
+   * triggered when a channel is created or deleted
+   */
   async sendChannelConfirmation(input: ChannelConfirmationInput) {
     this.logger.debug(
       `Sending Channel Confirmation over Slack (organization=%s, project=%s, channel=%s)`,
@@ -90,7 +94,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       input.channel.slackChannel,
     );
 
-    const token = input.integrations.slack.token;
+    const token = input.integrations?.slack.token;
 
     if (!token) {
       this.logger.debug(`Slack Integration is not available`);
@@ -103,7 +107,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
         : `I will no longer send here notifications`;
 
     try {
-      const projectLink = this.createLink({
+      const projectLink = createMDLink({
         text: input.event.project.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
       });

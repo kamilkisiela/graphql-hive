@@ -9,7 +9,12 @@ export default defineConfig({
         .pathname,
     },
     globals: true,
-    exclude: [...defaultExclude, 'integration-tests', 'packages/migrations/test'],
+    exclude: [
+      ...defaultExclude,
+      'integration-tests',
+      'packages/migrations/test',
+      'docker/.hive-dev',
+    ],
     setupFiles: ['./scripts/serializer.ts'],
   },
 });
