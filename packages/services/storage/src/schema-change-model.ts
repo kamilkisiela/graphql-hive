@@ -75,7 +75,7 @@ import {
   DirectiveUsageInputFieldDefinitionAddedChange,
   DirectiveUsageInputFieldDefinitionRemovedChange,
   DirectiveUsageInputObjectAddedChange,
-  DirectiveUsageInputObjectdRemovedChange,
+  DirectiveUsageInputObjectRemovedChange,
   DirectiveUsageInterfaceAddedChange,
   DirectiveUsageInterfaceRemovedChange,
   DirectiveUsageObjectAddedChange,
@@ -845,7 +845,7 @@ export const DirectiveUsageInputObjectAddedModel =
   });
 
 export const DirectiveUsageInputObjectRemovedModel =
-  implement<DirectiveUsageInputObjectdRemovedChange>().with({
+  implement<DirectiveUsageInputObjectRemovedChange>().with({
     type: DirectiveUsageInputObjectRemovedLiteral,
     meta: z.object({
       inputObjectName: z.string(),
