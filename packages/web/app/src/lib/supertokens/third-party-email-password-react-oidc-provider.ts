@@ -72,7 +72,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
 export const startAuthFlowForOIDCProvider = async (oidcId: string, redirectToPath: string) => {
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
     thirdPartyId: 'oidc',
-    frontendRedirectURI: `${env.appBaseUrl}/auth/callback/oidc?redirectToPath=${encodeURIComponent(redirectToPath)}`,
+    frontendRedirectURI: `${env.appBaseUrl}/auth/callback/oidc`,
     // The user context is very important - we store the OIDC ID so we can use it later on.
     userContext: {
       oidcId,

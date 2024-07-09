@@ -12,10 +12,12 @@ export const startAuthFlowForProvider = async (
     throw new Error(`Provider for ${thirdPartyId} is not configured`);
   }
 
+  const providersWithRedirectPartSupport = ['github'];
+
   // Google does not support ?redirectToPath= query param.
   // It gives back an error saying that the redirect_uri is not allowed.
   const redirectPart =
-    redirectToPath && thirdPartyId !== 'google'
+    redirectToPath && providersWithRedirectPartSupport.includes(thirdPartyId)
       ? `?redirectToPath=${encodeURIComponent(redirectToPath)}`
       : '';
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
