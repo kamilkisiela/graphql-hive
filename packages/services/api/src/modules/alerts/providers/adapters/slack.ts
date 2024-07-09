@@ -7,7 +7,6 @@ import { WEB_APP_URL } from '../../../shared/providers/tokens';
 import {
   ChannelConfirmationInput,
   CommunicationAdapter,
-  createMDLink,
   SchemaChangeNotificationInput,
   slackCoderize,
 } from './common';
@@ -44,15 +43,15 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       const client = new WebClient(input.integrations.slack.token, {});
 
       const totalChanges = input.event.changes.length + input.event.messages.length;
-      const projectLink = createMDLink({
+      const projectLink = this.createLink({
         text: input.event.project.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
       });
-      const targetLink = createMDLink({
+      const targetLink = this.createLink({
         text: input.event.target.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
       });
-      const viewLink = createMDLink({
+      const viewLink = this.createLink({
         text: 'view details',
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`,
       });
@@ -107,7 +106,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
         : `I will no longer send here notifications`;
 
     try {
-      const projectLink = createMDLink({
+      const projectLink = this.createLink({
         text: input.event.project.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
       });
