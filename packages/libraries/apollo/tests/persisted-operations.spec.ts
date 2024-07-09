@@ -303,7 +303,7 @@ test('usage reporting for persisted operation', async () => {
     },
   });
 
-  await new Promise<void>(async (resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       resolve();
     }, 1000);
@@ -317,17 +317,19 @@ test('usage reporting for persisted operation', async () => {
       }
     });
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        documentId: 'client-name/client-version/hash',
-      }),
-    });
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ data: { hi: null } });
+    (async () => {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: 'client-name/client-version/hash',
+        }),
+      });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ data: { hi: null } });
+    })().catch(reject);
   });
 
   await testServer.stop();

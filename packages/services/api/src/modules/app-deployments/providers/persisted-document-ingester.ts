@@ -1,8 +1,8 @@
 import { buildSchema, DocumentNode, GraphQLError, Kind, parse, TypeInfo, validate } from 'graphql';
 import PromiseQueue from 'p-queue';
 import { z } from 'zod';
+import { normalizeOperation } from '@@hive/usage-ingestor/src/normalize-operation';
 import { collectSchemaCoordinates } from '@graphql-hive/core/src/client/collect-schema-coordinates';
-import { normalizeOperation } from '@graphql-hive/usage-ingestor/src/normalize-operation';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
 import { ServiceLogger } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';

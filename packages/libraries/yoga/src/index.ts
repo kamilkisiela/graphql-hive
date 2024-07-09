@@ -180,7 +180,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       }
       addPlugin(
         usePersistedOperations({
-          extractPersistedOperationId(body, request) {
+          extractPersistedOperationId(body) {
             if ('documentId' in body && typeof body.documentId === 'string') {
               return body.documentId;
             }

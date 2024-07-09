@@ -392,7 +392,7 @@ test('usage reporting for persisted operation', async () => {
     ],
   });
 
-  await new Promise<void>(async (resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       resolve();
     }, 1000);
@@ -406,17 +406,19 @@ test('usage reporting for persisted operation', async () => {
       }
     });
 
-    const response = await yoga.fetch('http://localhost/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        documentId: 'client-name/client-version/hash',
-      }),
-    });
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ data: { hi: null } });
+    (async () => {
+      const response = await yoga.fetch('http://localhost/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: 'client-name/client-version/hash',
+        }),
+      });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ data: { hi: null } });
+    })().catch(reject);
   });
 
   httpScope.done();
@@ -513,7 +515,7 @@ test('usage reporting for persisted operation (subscription)', async () => {
     ],
   });
 
-  await new Promise<void>(async (resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       resolve();
     }, 1000);
@@ -527,26 +529,28 @@ test('usage reporting for persisted operation (subscription)', async () => {
       }
     });
 
-    const response = await yoga.fetch('http://localhost/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'text/event-stream',
-      },
-      body: JSON.stringify({
-        documentId: 'client-name/client-version/hash',
-      }),
-    });
-    expect(response.status).toBe(200);
-    expect(await response.text()).toMatchInlineSnapshot(`
-      :
-
-      event: next
-      data: {"data":{"hi":"hi"}}
-
-      event: complete
-      data:
-    `);
+    (async () => {
+      const response = await yoga.fetch('http://localhost/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({
+          documentId: 'client-name/client-version/hash',
+        }),
+      });
+      expect(response.status).toBe(200);
+      expect(await response.text()).toMatchInlineSnapshot(`
+        :
+  
+        event: next
+        data: {"data":{"hi":"hi"}}
+  
+        event: complete
+        data:
+      `);
+    })().catch(reject);
   });
 
   httpScope.done();

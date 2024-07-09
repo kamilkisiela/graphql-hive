@@ -670,6 +670,9 @@ importers:
       '@hive/usage-common':
         specifier: workspace:*
         version: link:../usage-common
+      '@hive/usage-ingestor':
+        specifier: workspace:*
+        version: link:../usage-ingestor
       '@hive/webhooks':
         specifier: workspace:*
         version: link:../webhooks

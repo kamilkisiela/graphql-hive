@@ -72,7 +72,7 @@
       "@graphql-hive/core/src/client/collect-schema-coordinates": [
         "./packages/libraries/core/src/client/collect-schema-coordinates.ts"
       ],
-      "@graphql-hive/usage-ingestor/src/normalize-operation": [
+      "@hive/usage-ingestor/src/normalize-operation": [
         "./packages/services/usage-ingestor/src/normalize-operation.ts"
       ],
       "@/*": ["./packages/web/app/src/*"],
