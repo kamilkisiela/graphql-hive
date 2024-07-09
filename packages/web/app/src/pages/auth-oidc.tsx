@@ -4,6 +4,7 @@ import { DocsLink } from '@/components/v2';
 import { env } from '@/env/frontend';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 import { useQuery } from '@tanstack/react-query';
+import { Navigate } from '@tanstack/react-router';
 
 function AuthOIDC(props: { oidcId: string; redirectToPath: string }) {
   const auth = useQuery({
@@ -52,14 +53,32 @@ function MissingOIDCId() {
   );
 }
 
-export function AuthOIDCPage(props: { oidcId: string | undefined; redirectToPath: string }) {
+export function AuthOIDCPage(props: {
+  oidcId: string | undefined;
+  redirectToPath: string;
+  isCallback: boolean;
+}) {
   const oidcId = props.oidcId;
+  const isCallback = props.isCallback;
 
   return (
     <>
       <Meta title="OIDC Login" />
       {oidcId ? (
-        <AuthOIDC oidcId={oidcId} redirectToPath={props.redirectToPath} />
+        isCallback ? (
+          <Navigate
+            to="/auth/callback/$provider"
+            params={{
+              provider: 'oidc',
+            }}
+            search={search => ({
+              ...search,
+              redirectToPath: props.redirectToPath,
+            })}
+          />
+        ) : (
+          <AuthOIDC oidcId={oidcId} redirectToPath={props.redirectToPath} />
+        )
       ) : (
         <MissingOIDCId />
       )}

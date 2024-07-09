@@ -232,6 +232,7 @@ const AuthOIDCRouteSearch = AuthSharedSearch.extend({
       required_error: 'OIDC ID is required',
     })
     .optional(),
+  state: z.string().optional(),
 });
 const authOIDCRoute = createRoute({
   getParentRoute: () => authRoute,
@@ -240,8 +241,14 @@ const authOIDCRoute = createRoute({
     return AuthOIDCRouteSearch.parse(search);
   },
   component: function AuthOIDCRoute() {
-    const { id, redirectToPath } = authOIDCRoute.useSearch();
-    return <AuthOIDCPage oidcId={id} redirectToPath={redirectToPath} />;
+    const { id, redirectToPath, state } = authOIDCRoute.useSearch();
+    return (
+      <AuthOIDCPage
+        oidcId={id}
+        isCallback={typeof state === 'string'}
+        redirectToPath={redirectToPath}
+      />
+    );
   },
 });
 
