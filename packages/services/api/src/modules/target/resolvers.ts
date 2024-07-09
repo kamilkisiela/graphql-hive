@@ -10,20 +10,6 @@ const TargetNameModel = NameModel.min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
-  Query: {
-    async targets(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-      ]);
-
-      return injector.get(TargetManager).getTargets({
-        organization,
-        project,
-      });
-    },
-  },
   Mutation: {
     async createTarget(_, { input }, { injector }) {
       const CreateTargetModel = z.object({
