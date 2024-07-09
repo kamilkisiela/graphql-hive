@@ -197,9 +197,9 @@ const UnionMemberRemovedLiteral = z.literal("UNION_MEMBER_REMOVED" satisfies `${
 // prettier-ignore
 const UnionMemberAddedLiteral = z.literal("UNION_MEMBER_ADDED" satisfies `${typeof ChangeType.UnionMemberAdded}`)
 // prettier-ignore
-const DirrectiveUsageUnionMemberAddedLiteral = z.literal("DIRECTIVE_USAGE_UNION_MEMBER_ADDED" satisfies `${typeof ChangeType.DirectiveUsageUnionMemberAdded}`)
+const DirectiveUsageUnionMemberAddedLiteral = z.literal("DIRECTIVE_USAGE_UNION_MEMBER_ADDED" satisfies `${typeof ChangeType.DirectiveUsageUnionMemberAdded}`)
 // prettier-ignore
-const DirrectiveUsageUnionMemberRemovedLiteral = z.literal("DIRECTIVE_USAGE_UNION_MEMBER_REMOVED" satisfies `${typeof ChangeType.DirectiveUsageUnionMemberRemoved}`)
+const DirectiveUsageUnionMemberRemovedLiteral = z.literal("DIRECTIVE_USAGE_UNION_MEMBER_REMOVED" satisfies `${typeof ChangeType.DirectiveUsageUnionMemberRemoved}`)
 // prettier-ignore
 const DirectiveUsageEnumAddedLiteral = z.literal("DIRECTIVE_USAGE_ENUM_ADDED" satisfies `${typeof ChangeType.DirectiveUsageEnumAdded}`)
 // prettier-ignore
@@ -778,7 +778,7 @@ export const UnionMemberAddedModel = implement<UnionMemberAddedChange>().with({
 
 export const DirectiveUsageUnionMemberAddedModel =
   implement<DirectiveUsageUnionMemberAddedChange>().with({
-    type: DirrectiveUsageUnionMemberAddedLiteral,
+    type: DirectiveUsageUnionMemberAddedLiteral,
     meta: z.object({
       unionName: z.string(),
       addedUnionMemberTypeName: z.string(),
@@ -788,7 +788,7 @@ export const DirectiveUsageUnionMemberAddedModel =
 
 export const DirectiveUsageUnionMemberRemovedModel =
   implement<DirectiveUsageUnionMemberRemovedChange>().with({
-    type: DirrectiveUsageUnionMemberRemovedLiteral,
+    type: DirectiveUsageUnionMemberRemovedLiteral,
     meta: z.object({
       unionName: z.string(),
       removedUnionMemberTypeName: z.string(),
@@ -1087,8 +1087,6 @@ export const SchemaChangeModel = z.union([
   TypeDescriptionRemovedModel,
   UnionMemberRemovedModel,
   UnionMemberAddedModel,
-  DirectiveUsageUnionMemberAddedModel, // Add the missing type here
-  DirectiveUsageUnionMemberRemovedModel, // Add the missing type here
   DirectiveUsageUnionMemberAddedModel,
   DirectiveUsageUnionMemberRemovedModel,
   DirectiveUsageEnumAddedModel,
@@ -1116,7 +1114,7 @@ export const SchemaChangeModel = z.union([
   RegistryServiceUrlChangeModel,
 ]);
 
-({}) as SerializableChange satisfies z.infer<typeof SchemaChangeModel>;
+({}) as SerializableChange satisfies z.TypeOf<typeof SchemaChangeModel>;
 
 export type Change = z.infer<typeof SchemaChangeModel>;
 

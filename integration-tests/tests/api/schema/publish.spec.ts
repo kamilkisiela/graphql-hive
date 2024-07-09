@@ -1549,9 +1549,9 @@ describe('schema publishing changes are persisted', () => {
       meta: {
         enumName: 'Foo',
         enumValueName: 'a',
-        removedEnumValueDeprecationReason: 'b',
+        removedDirectiveName: 'deprecated',
       },
-      type: 'ENUM_VALUE_DEPRECATION_REASON_REMOVED',
+      type: 'DIRECTIVE_USAGE_ENUM_VALUE_REMOVED',
     },
   });
 
