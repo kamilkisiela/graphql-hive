@@ -110,16 +110,6 @@ export function schemaChangeFromSerializableChange(
         message: `Directive '${change.meta.addedDirectiveName}' was added to argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
         meta: change.meta,
       };
-    case ChangeType.DirectiveUsageArgumentDefinitionRemoved:
-      return {
-        type: ChangeType.DirectiveUsageArgumentDefinitionRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
-        meta: change.meta,
-      };
     case ChangeType.DirectiveUsageInputObjectAdded:
       return {
         type: ChangeType.DirectiveUsageInputObjectAdded,
