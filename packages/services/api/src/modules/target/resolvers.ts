@@ -9,28 +9,6 @@ const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
   Mutation: {
-    async setTargetValidation(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      const targetManager = injector.get(TargetManager);
-      await targetManager.setTargetValidation({
-        organization,
-        project,
-        target,
-        enabled: input.enabled,
-      });
-
-      return targetManager.getTarget({
-        organization,
-        project,
-        target,
-      });
-    },
     async updateTargetValidationSettings(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
