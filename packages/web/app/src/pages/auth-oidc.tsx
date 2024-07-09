@@ -15,7 +15,7 @@ function AuthOIDC(props: { oidcId: string; redirectToPath: string }) {
         throw new Error('OIDC provider is not configured');
       }
 
-      await startAuthFlowForOIDCProvider(props.oidcId, props.redirectToPath);
+      await startAuthFlowForOIDCProvider(props.oidcId);
     },
   });
 
