@@ -1,67 +1,14 @@
 import { z } from 'zod';
-import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { TargetModule } from './__generated__/types';
 import { TargetManager } from './providers/target-manager';
 
-const TargetNameModel = NameModel.min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
   Mutation: {
-    async updateTargetName(_, { input }, { injector }) {
-      const UpdateTargetModel = z.object({
-        name: TargetNameModel,
-      });
-
-      const result = UpdateTargetModel.safeParse(input);
-      if (!result.success) {
-        return {
-          error: {
-            message: 'Check your input.',
-            inputErrors: {
-              name: result.error.formErrors.fieldErrors.name?.[0],
-            },
-          },
-        };
-      }
-
-      const translator = injector.get(IdTranslator);
-      const [organizationId, projectId, targetId] = await Promise.all([
-        translator.translateOrganizationId({
-          organization: input.organization,
-        }),
-        translator.translateProjectId({
-          organization: input.organization,
-          project: input.project,
-        }),
-        translator.translateTargetId({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-        }),
-      ]);
-
-      const target = await injector.get(TargetManager).updateName({
-        name: input.name,
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      });
-
-      return {
-        ok: {
-          selector: {
-            organization: input.organization,
-            project: input.project,
-            target: target.cleanId,
-          },
-          updatedTarget: target,
-        },
-      };
-    },
     async deleteTarget(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organizationId, projectId, targetId] = await Promise.all([
