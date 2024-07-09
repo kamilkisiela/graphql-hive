@@ -11,20 +11,6 @@ const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
   Query: {
-    async target(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      return injector.get(TargetManager).getTarget({
-        organization,
-        target,
-        project,
-      });
-    },
     async targets(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
