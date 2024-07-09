@@ -245,16 +245,6 @@ export function schemaChangeFromSerializableChange(
         meta: change.meta,
       };
 
-    case ChangeType.DirectiveUsageArgumentDefinitionAdded:
-      return {
-        type: ChangeType.DirectiveUsageArgumentDefinitionAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
-        meta: change.meta,
-      };
-
     case ChangeType.DirectiveUsageArgumentDefinitionRemoved:
       return {
         type: ChangeType.DirectiveUsageArgumentDefinitionRemoved,
