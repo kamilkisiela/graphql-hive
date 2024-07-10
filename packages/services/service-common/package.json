@@ -5,8 +5,8 @@
   "license": "MIT",
   "private": true,
   "peerDependencies": {
-    "@sentry/node": "^7.0.0",
-    "@sentry/utils": "^7.0.0",
+    "@sentry/node": "^8.0.0",
+    "@sentry/utils": "^8.0.0",
     "@trpc/server": "10.45.2"
   },
   "devDependencies": {
@@ -21,9 +21,9 @@
     "@opentelemetry/sdk-trace-base": "1.25.1",
     "@opentelemetry/sdk-trace-node": "1.25.1",
     "@opentelemetry/semantic-conventions": "1.25.1",
-    "@sentry/node": "7.118.0",
-    "@sentry/types": "7.118.0",
-    "@sentry/utils": "7.118.0",
+    "@sentry/node": "8.16.0",
+    "@sentry/types": "8.16.0",
+    "@sentry/utils": "8.16.0",
     "fastify": "4.28.1",
     "fastify-plugin": "4.5.1",
     "opentelemetry-instrumentation-fetch-node": "1.2.3",

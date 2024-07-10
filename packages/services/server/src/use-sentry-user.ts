@@ -15,10 +15,8 @@ export const useSentryUser = (): Plugin<{
       const id = extractUserId(args.contextValue);
 
       if (id) {
-        Sentry.configureScope(scope => {
-          scope.setUser({
-            id,
-          });
+        Sentry.getCurrentScope()?.setUser({
+          id,
         });
       }
     },
