@@ -30,10 +30,13 @@ interface UsageCollector {
     result: GraphQLErrorsResult | AbortAction;
     /** duration in milliseconds */
     duration: number;
-    persistedDocumentHash?: string;
+    experimental__persistedDocumentHash?: string;
   }): void;
   /** collect a long-lived GraphQL request/subscription (subscription operation) */
-  collectSubscription(args: { args: ExecutionArgs; persistedDocumentHash?: string }): void;
+  collectSubscription(args: {
+    args: ExecutionArgs;
+    experimental__persistedDocumentHash?: string;
+  }): void;
   dispose(): Promise<void>;
 }
 
@@ -204,7 +207,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           ttl: options.ttl,
           processVariables: options.processVariables ?? false,
         });
-
+        console.log('BURR', args);
         agent.capture(
           collect(document, args.args.variableValues ?? null).then(({ key, value: info }) => {
             return {
@@ -222,7 +225,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                   errors,
                 },
                 // TODO: operationHash is ready to accept hashes of persisted operations
-                client: args.persistedDocumentHash
+                client: args.experimental__persistedDocumentHash
                   ? undefined
                   : pickClientInfoProperties(
                       typeof args.args.contextValue !== 'undefined' &&
@@ -230,7 +233,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                         ? options.clientInfo(args.args.contextValue)
                         : createDefaultClientInfo()(args.args.contextValue),
                     ),
-                persistedDocumentHash: args.persistedDocumentHash,
+                persistedDocumentHash: args.experimental__persistedDocumentHash,
               },
             };
           }),
@@ -248,12 +251,12 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     collect() {
       const finish = measureDuration();
 
-      return async function complete(args, result, persistedDocumentHash) {
+      return async function complete(args, result, experimental__persistedDocumentHash) {
         const duration = finish();
-        return collectRequest({ args, result, duration, persistedDocumentHash });
+        return collectRequest({ args, result, duration, experimental__persistedDocumentHash });
       };
     },
-    async collectSubscription({ args, persistedDocumentHash }) {
+    async collectSubscription({ args, experimental__persistedDocumentHash }) {
       const document = args.document;
       const rootOperation = document.definitions.find(
         o => o.kind === Kind.OPERATION_DEFINITION,
@@ -293,13 +296,13 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               fields: info.fields,
               // when there is a persisted document hash, we don't need to send the client info,
               // as it's already included in the persisted document hash and usage ingestor will extract that info
-              client: persistedDocumentHash
+              client: experimental__persistedDocumentHash
                 ? undefined
                 : typeof args.contextValue !== 'undefined' &&
                     typeof options.clientInfo !== 'undefined'
                   ? options.clientInfo(args.contextValue)
                   : createDefaultClientInfo()(args.contextValue),
-              persistedDocumentHash,
+              persistedDocumentHash: experimental__persistedDocumentHash,
             },
           })),
         );

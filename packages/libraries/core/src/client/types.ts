@@ -24,7 +24,7 @@ export interface HiveClient {
      * Persisted document if request is using a persisted document.
      * It needs to be provided in order to collect app deployment specific information.
      */
-    persistedDocumentHash?: string;
+    experimental__persistedDocumentHash?: string;
   }): void;
   /** Collect usage for Subscription operations */
   collectSubscriptionUsage(args: {
@@ -33,12 +33,12 @@ export interface HiveClient {
      * Persisted document if subscription is a persisted document.
      * It needs to be provided in order to collect app deployment specific information.
      */
-    persistedDocumentHash?: string;
+    experimental__persistedDocumentHash?: string;
   }): void;
   createInstrumentedExecute(executeImpl: any): any;
   createInstrumentedSubscribe(executeImpl: any): any;
   dispose(): Promise<void>;
-  persistedDocuments: null | {
+  experimental__persistedDocuments: null | {
     resolve(documentId: string): Promise<string | null>;
     allowArbitraryDocuments(context: { headers?: HeadersObject }): PromiseOrValue<boolean>;
   };
@@ -59,7 +59,7 @@ export type CollectUsageCallback = (
    * Persisted document if subscription is a persisted document.
    * It needs to be provided in order to collect app deployment specific information.
    */
-  persistedDocumentHash?: string,
+  experimental__persistedDocumentHash?: string,
 ) => Promise<void>;
 
 export interface ClientInfo {
@@ -237,8 +237,11 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Yoga / Envelop: Enabled by default for SIGINT and SIGTERM signals
      */
     autoDispose?: boolean | NodeJS.Signals[];
-    /** Persisted operations configuration. */
-    persistedDocuments?: PersistedDocumentsConfiguration;
+    /**
+     * Experimental persisted documents configuration.
+     *
+     **/
+    experimental__persistedDocuments?: PersistedDocumentsConfiguration;
   },
   'enabled',
   'token'
@@ -264,18 +267,35 @@ export interface ServicesFetcherOptions {
 }
 
 export type PersistedDocumentsConfiguration = {
-  accessToken: string;
-  endpoint: string;
   /**
-   * whether arbitrary documents should be allowed along-side persisted documents
+   * CDN configuration for loading persisted documents.
+   **/
+  cdn: {
+    /**
+     * CDN endpoint
+     * @example https://cdn.graphql-hive.com/artifacts/v1/5d80a1c2-2532-419c-8bb5-75bb04ea1112
+     */
+    endpoint: string;
+    /**
+     * CDN access token
+     * @example hv2ZjUxNGUzN2MtNjVhNS0=
+     */
+    accessToken: string;
+  };
+  /**
+   * Whether arbitrary documents should be allowed along-side persisted documents.
    * @default false
    */
-  allowArbitraryDocuments?:
-    | boolean
-    | ((context: { headers?: HeadersObject }) => PromiseOrValue<boolean>);
+  allowArbitraryDocuments?: boolean | AllowArbitraryDocumentsFunction;
   /**
    * Maximum amount of operations that shall be kept in memory after being loaded from the CDN.
+   * Operations are stored in-memory to avoid loading them from the CDN multiple times.
    * @default 10_000
    */
   cache?: number;
 };
+
+export type AllowArbitraryDocumentsFunction = (context: {
+  /** an object for accessing the request headers. */
+  headers?: HeadersObject;
+}) => PromiseOrValue<boolean>;

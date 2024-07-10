@@ -217,8 +217,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
     collectSubscriptionUsage: usage.collectSubscription,
     createInstrumentedSubscribe,
     createInstrumentedExecute,
-    persistedDocuments: options.persistedDocuments
-      ? createPersistedDocuments(options.persistedDocuments)
+    experimental__persistedDocuments: options.experimental__persistedDocuments
+      ? createPersistedDocuments(options.experimental__persistedDocuments)
       : null,
   };
 }

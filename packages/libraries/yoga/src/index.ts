@@ -122,7 +122,10 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       return {
         onSubscribeResult() {
           const persistedDocumentHash = record?.documentId;
-          hive.collectSubscriptionUsage({ args: context.args, persistedDocumentHash });
+          hive.collectSubscriptionUsage({
+            args: context.args,
+            experimental__persistedDocumentHash: persistedDocumentHash,
+          });
         },
       };
     },
@@ -174,8 +177,8 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       }
     },
     onPluginInit({ addPlugin }) {
-      const { persistedDocuments } = hive;
-      if (!persistedDocuments) {
+      const { experimental__persistedDocuments } = hive;
+      if (!experimental__persistedDocuments) {
         return;
       }
       addPlugin(
@@ -188,7 +191,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             return null;
           },
           async getPersistedOperation(key, request) {
-            const document = await persistedDocuments.resolve(key);
+            const document = await experimental__persistedDocuments.resolve(key);
             // after we resolve the document we need to update the cache record to contain the resolved document
             if (document) {
               const record = cache.get(request);
@@ -204,7 +207,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             return document;
           },
           allowArbitraryOperations(request) {
-            return persistedDocuments.allowArbitraryDocuments({
+            return experimental__persistedDocuments.allowArbitraryDocuments({
               headers: request.headers,
             });
           },

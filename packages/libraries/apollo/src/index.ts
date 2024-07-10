@@ -178,7 +178,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
       let persistedDocumentError: GraphQLError | null = null;
       let persistedDocumentHash: string | undefined;
 
-      if (hive.persistedDocuments) {
+      if (hive.experimental__persistedDocuments) {
         if (
           context.request.http?.body &&
           typeof context.request.http.body === 'object' &&
@@ -186,7 +186,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
           typeof context.request.http.body.documentId === 'string'
         ) {
           persistedDocumentHash = context.request.http.body.documentId;
-          const document = await hive.persistedDocuments.resolve(
+          const document = await hive.experimental__persistedDocuments.resolve(
             context.request.http.body.documentId,
           );
 
@@ -205,7 +205,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
           }
         } else if (
           false ===
-          (await hive.persistedDocuments.allowArbitraryDocuments({
+          (await hive.experimental__persistedDocuments.allowArbitraryDocuments({
             headers: {
               get(name: string) {
                 return context.request.http?.headers?.get(name) ?? null;
