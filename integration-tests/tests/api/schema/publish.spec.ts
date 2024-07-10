@@ -1550,7 +1550,6 @@ describe('schema publishing changes are persisted', () => {
         enumName: 'Foo',
         enumValueName: 'a',
         removedDirectiveName: 'deprecated',
-        removedEnumValueDeprecationReason: 'b',
       },
       type: 'DIRECTIVE_USAGE_ENUM_VALUE_REMOVED',
     },
