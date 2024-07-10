@@ -852,7 +852,7 @@ export function OrganizationMemberRolesMigration(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Migration Wizard"
+        subPageTitle="Migration Wizard"
         description={
           <>
             <CardDescription>

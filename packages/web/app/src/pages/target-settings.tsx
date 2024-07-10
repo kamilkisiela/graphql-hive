@@ -139,7 +139,7 @@ function RegistryAccessTokens(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Registry Access Tokens"
+        subPageTitle="Registry Access Tokens"
         description={
           <>
             <CardDescription>
@@ -244,7 +244,7 @@ const ExtendBaseSchema = (props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Extend Your Schema"
+        subPageTitle="Extend Your Schema"
         description={
           <>
             <CardDescription>
@@ -538,7 +538,7 @@ const ConditionalBreakingChanges = (props: {
     <form onSubmit={handleSubmit}>
       <SubPageLayout>
         <SubPageLayoutHeader
-          title="Conditional Breaking Changes"
+          subPageTitle="Conditional Breaking Changes"
           description={
             <>
               <CardDescription>
@@ -784,7 +784,7 @@ function TargetName(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Target Name"
+        subPageTitle="Target Name"
         description={
           <>
             <CardDescription>
@@ -901,7 +901,7 @@ function GraphQLEndpointUrl(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="GraphQL Endpoint URL"
+        subPageTitle="GraphQL Endpoint URL"
         description={
           <>
             <CardDescription>
@@ -1003,7 +1003,7 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Delete Target"
+        subPageTitle="Delete Target"
         description={
           <>
             <CardDescription>

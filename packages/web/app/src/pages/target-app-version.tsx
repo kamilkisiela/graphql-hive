@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ghost from '../../public/images/figures/ghost.svg?url';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useClient, useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -13,6 +14,7 @@ import {
 import { EmptyList } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { SubPageLayoutHeader } from '@/components/ui/page-content-layout';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -22,10 +24,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsLink } from '@/components/v2';
+import { DocsLink, Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 
 const TargetAppsVersionQuery = graphql(`
   query TargetAppsVersionQuery(
@@ -50,7 +52,8 @@ const TargetAppsVersionQuery = graphql(`
             node {
               hash
               body
-              operationNames
+              operationName
+              insightsHash
             }
           }
         }
@@ -80,12 +83,43 @@ export function TargetAppVersionPage(props: {
       after: null,
     },
   });
+  const router = useRouter();
   const client = useClient();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const title = data.data?.target?.appDeployment
     ? `${data.data.target.appDeployment.name}@${data.data.target.appDeployment.version}`
     : 'App Deployment';
+
+  if (!data.fetching && !data.stale && !data?.data?.target?.appDeployment) {
+    return (
+      <>
+        <Meta title="App Version Not found" />
+        <TargetLayout
+          targetId={props.targetId}
+          projectId={props.projectId}
+          organizationId={props.organizationId}
+          page={Page.Apps}
+          className="min-h-content"
+        >
+          <div className="flex h-full flex-1 flex-col items-center justify-center gap-2.5 py-6">
+            <img
+              src={ghost}
+              alt="Ghost illustration"
+              width="200"
+              height="200"
+              className="drag-none"
+            />
+            <h2 className="text-xl font-bold">App Version not found.</h2>
+            <h3 className="font-semibold">This app does not seem to exist anymore.</h3>
+            <Button variant="secondary" className="mt-2" onClick={router.history.back}>
+              Go back
+            </Button>
+          </div>
+        </TargetLayout>
+      </>
+    );
+  }
 
   return (
     <>
@@ -95,10 +129,30 @@ export function TargetAppVersionPage(props: {
         projectId={props.projectId}
         organizationId={props.organizationId}
         page={Page.Apps}
+        className="min-h-content"
       >
-        <div className="flex flex-1 flex-col py-6">
+        <div className="flex h-full flex-1 flex-col py-6">
           <SubPageLayoutHeader
-            title={`App Deployment: ${title}`}
+            subPageTitle={
+              <span className="flex items-center">
+                <Link
+                  to="/$organizationId/$projectId/$targetId/apps"
+                  params={{
+                    organizationId: props.organizationId,
+                    projectId: props.projectId,
+                    targetId: props.targetId,
+                  }}
+                >
+                  App Deployments
+                </Link>{' '}
+                <span className="inline-block px-2 italic text-gray-500">/</span>{' '}
+                {data.data?.target?.appDeployment ? (
+                  `${data.data.target.appDeployment.name}@${data.data.target.appDeployment.version}`
+                ) : (
+                  <Skeleton className="inline-block h-5 w-[150px]" />
+                )}
+              </span>
+            }
             description={
               <>
                 <CardDescription>
@@ -117,7 +171,14 @@ export function TargetAppVersionPage(props: {
             }
           />
           <div className="mt-4" />
-          {!data.data?.target?.appDeployment?.documents?.edges.length ? (
+          {data.fetching || data.stale ? (
+            <div className="flex h-fit flex-1 items-center justify-center">
+              <div className="flex flex-col items-center">
+                <Spinner />
+                <div className="mt-2 text-xs">Loading app deployments</div>
+              </div>
+            </div>
+          ) : !data.data?.target?.appDeployment?.documents?.edges.length ? (
             <EmptyList
               title="No documents have been uploaded for this app deployment"
               description="You can upload documents via the Hive CLI"
@@ -130,7 +191,7 @@ export function TargetAppVersionPage(props: {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="hidden sm:table-cell">Document Hash</TableHead>
-                      <TableHead className="hidden sm:table-cell">Operation Names</TableHead>
+                      <TableHead className="hidden sm:table-cell">Operation Name</TableHead>
                       <TableHead className="hidden text-end sm:table-cell">
                         Document Content
                       </TableHead>
@@ -146,7 +207,7 @@ export function TargetAppVersionPage(props: {
                           </span>
                         </TableCell>
                         <TableCell>
-                          {!edge.node.operationNames ? (
+                          {!edge.node.operationName ? (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -158,18 +219,13 @@ export function TargetAppVersionPage(props: {
                               </Tooltip>
                             </TooltipProvider>
                           ) : (
-                            edge.node.operationNames.map((name, index, all) => (
-                              <>
-                                <span className="rounded bg-gray-800 p-1 font-mono text-sm">
-                                  {name}
-                                </span>
-                                {index < all.length - 1 && ', '}
-                              </>
-                            ))
+                            <span className="rounded bg-gray-800 p-1 font-mono text-xs">
+                              {edge.node.operationName}
+                            </span>
                           )}
                         </TableCell>
                         <TableCell className="text-end">
-                          <span className="rounded bg-gray-800 p-1 font-mono text-sm">
+                          <span className="rounded bg-gray-800 p-1 font-mono text-xs">
                             {edge.node.body.length > 43
                               ? edge.node.body.substring(0, 43).replace(/\n/g, '\\n') + '...'
                               : edge.node.body}
@@ -195,7 +251,21 @@ export function TargetAppVersionPage(props: {
                                     operationString: edge.node.body,
                                   }}
                                 >
-                                  Execute in Laboratory
+                                  Open in Laboratory
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild className="cursor-pointer">
+                                <Link
+                                  to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                                  params={{
+                                    organizationId: props.organizationId,
+                                    projectId: props.projectId,
+                                    targetId: props.targetId,
+                                    operationName: edge.node.operationName ?? edge.node.hash,
+                                    operationHash: edge.node.insightsHash,
+                                  }}
+                                >
+                                  Show Insights
                                 </Link>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -221,7 +291,7 @@ export function TargetAppVersionPage(props: {
                       data?.data?.target?.appDeployment?.documents?.pageInfo?.hasNextPage
                     ) {
                       setIsLoadingMore(true);
-                      client
+                      void client
                         .query(TargetAppsVersionQuery, {
                           targetSelector: {
                             organization: props.organizationId,
@@ -242,8 +312,7 @@ export function TargetAppVersionPage(props: {
                 >
                   {isLoadingMore ? (
                     <>
-                      <LoaderCircleIcon className="rotate mr-2 inline size-4 animate-spin" />{' '}
-                      Loading
+                      <LoaderCircleIcon className="mr-2 inline size-4 animate-spin" /> Loading
                     </>
                   ) : (
                     'Load more'
