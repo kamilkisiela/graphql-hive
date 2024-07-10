@@ -2653,6 +2653,583 @@ describe('schema publishing changes are persisted', () => {
       type: 'REGISTRY_SERVICE_URL_CHANGED',
     },
   });
+
+  // Directives
+
+  // FIELD_DEFINITION
+  persistedTest({
+    name: 'Directive Usage Argument Definition Added',
+    schemaBefore: /* GraphQL */ `
+      type Query {
+        a: String! @foo
+      }
+
+      directive @foo on FIELD_DEFINITION
+    `,
+    schemaAfter: /* GraphQL */ `
+      type Query {
+        a: String! @foo(a: Int)
+      }
+
+      directive @foo(a: Int) on FIELD_DEFINITION
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveArgumentName: 'a',
+        addedDirectiveArgumentTypeIsNonNull: false,
+        directiveName: 'foo',
+      },
+      type: 'DIRECTIVE_ARGUMENT_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Argument Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on FIELD_DEFINITION
+
+      type Query {
+        a: String @external
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on FIELD_DEFINITION
+
+      type Query {
+        a: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        typeName: 'Query',
+        fieldName: 'a',
+        removedDirectiveName: 'external',
+      },
+      type: 'DIRECTIVE_USAGE_FIELD_DEFINITION_REMOVED',
+    },
+  });
+
+  // UNION
+  persistedTest({
+    name: 'Directive Usage Union Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on UNION
+
+      type A {
+        a: String!
+      }
+
+      type B {
+        b: String!
+      }
+
+      union Foo = A | B
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on UNION
+
+      type A {
+        a: String!
+      }
+
+      type B {
+        b: String!
+      }
+
+      union Foo @external = A | B
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        addedUnionMemberTypeName: 'Foo',
+        unionName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_UNION_MEMBER_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Union Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on UNION
+
+      type A {
+        a: String!
+      }
+
+      type B {
+        b: String!
+      }
+
+      union Foo @external = A | B
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on UNION
+
+      type A {
+        a: String!
+      }
+
+      type B {
+        b: String!
+      }
+
+      union Foo = A | B
+    `,
+    equalsObject: {
+      meta: {
+        removedDirectiveName: 'external',
+        removedUnionMemberTypeName: 'Foo',
+        unionName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_UNION_MEMBER_REMOVED',
+    },
+  });
+
+  // ENUM
+  persistedTest({
+    name: 'Directive Usage Enum Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on ENUM
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA {
+        A
+        B
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on ENUM
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA @external {
+        A
+        B
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        enumName: 'enumA',
+      },
+      type: 'DIRECTIVE_USAGE_ENUM_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Enum Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on ENUM
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA @external {
+        A
+        B
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on ENUM
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA {
+        A
+        B
+      }
+    `,
+    equalsObject: {
+      meta: {
+        enumName: 'enumA',
+        removedDirectiveName: 'external',
+      },
+      type: 'DIRECTIVE_USAGE_ENUM_REMOVED',
+    },
+  });
+
+  // ENUM_VALUE
+  persistedTest({
+    name: 'Directive Usage Enum Value Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on ENUM_VALUE
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA {
+        A
+        B
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on ENUM_VALUE
+
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA {
+        A
+        B @external
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        enumName: 'enumA',
+        enumValueName: 'B',
+      },
+      type: 'DIRECTIVE_USAGE_ENUM_VALUE_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Enum Value Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on ENUM_VALUE
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA {
+        A
+        B @external
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on ENUM_VALUE
+      type Query {
+        fieldA: String
+      }
+
+      enum enumA {
+        A
+        B
+      }
+    `,
+    equalsObject: {
+      meta: {
+        enumName: 'enumA',
+        enumValueName: 'B',
+        removedDirectiveName: 'external',
+      },
+      type: 'DIRECTIVE_USAGE_ENUM_VALUE_REMOVED',
+    },
+  });
+
+  // INPUT_OBJECT
+  persistedTest({
+    name: 'Directive Usage Input Object Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on INPUT_OBJECT
+      input Foo {
+        a: String
+        b: String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on INPUT_OBJECT
+      input Foo @external {
+        a: String
+        b: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        addedInputFieldName: '',
+        addedInputFieldType: '',
+        inputObjectName: 'Foo',
+        isAddedInputFieldTypeNullable: false,
+      },
+      type: 'DIRECTIVE_USAGE_INPUT_OBJECT_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Input Object Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on INPUT_OBJECT
+      input Foo @external {
+        a: String
+        b: String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on INPUT_OBJECT
+      input Foo {
+        a: String
+        b: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        inputObjectName: 'Foo',
+        isRemovedInputFieldTypeNullable: false,
+        removedDirectiveName: 'external',
+        removedInputFieldName: '',
+        removedInputFieldType: '',
+      },
+      type: 'DIRECTIVE_USAGE_INPUT_OBJECT_REMOVED',
+    },
+  });
+
+  // SCALAR
+  persistedTest({
+    name: 'Directive Usage Scalar Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on SCALAR
+      scalar Foo
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on SCALAR
+      scalar Foo @external
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        scalarName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_SCALAR_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Scalar Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on SCALAR
+      scalar Foo @external
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on SCALAR
+      scalar Foo
+    `,
+    equalsObject: {
+      meta: {
+        removedDirectiveName: 'external',
+        scalarName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_SCALAR_REMOVED',
+    },
+  });
+
+  // OBJECT
+  persistedTest({
+    name: 'Directive Usage Object Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on OBJECT
+      type Foo {
+        a: String
+        b: String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on OBJECT
+      type Foo @external {
+        a: String
+        b: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        objectName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_OBJECT_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Object Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on OBJECT
+      type Foo @external {
+        a: String
+        b: String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on OBJECT
+      type Foo {
+        a: String
+        b: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        objectName: 'Foo',
+        removedDirectiveName: 'external',
+      },
+      type: 'DIRECTIVE_USAGE_OBJECT_REMOVED',
+    },
+  });
+
+  // INTERFACE
+  persistedTest({
+    name: 'Directive Usage Interface Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on INTERFACE
+      interface Foo {
+        a: String
+        b: String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on INTERFACE
+      interface Foo @external {
+        a: String
+        b: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        interfaceName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_INTERFACE_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Interface Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on INTERFACE
+      interface Foo @external {
+        a: String
+        b: String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on INTERFACE
+      interface Foo {
+        a: String
+        b: String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        interfaceName: 'Foo',
+        removedDirectiveName: 'external',
+      },
+      type: 'DIRECTIVE_USAGE_INTERFACE_REMOVED',
+    },
+  });
+
+  // ARGUMENT_DEFINITION
+  persistedTest({
+    name: 'Directive Usage Argument Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on ARGUMENT_DEFINITION
+      type Query {
+        a(b: String): String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on ARGUMENT_DEFINITION
+      type Query {
+        a(b: String @external): String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        argumentName: 'b',
+        fieldName: 'a',
+        typeName: 'Query',
+      },
+      type: 'DIRECTIVE_USAGE_ARGUMENT_DEFINITION_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Argument Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on ARGUMENT_DEFINITION
+      type Query {
+        a(b: String @external): String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on ARGUMENT_DEFINITION
+      type Query {
+        a(b: String): String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        argumentName: 'b',
+        fieldName: 'a',
+        removedDirectiveName: 'external',
+        typeName: 'Query',
+      },
+      type: 'DIRECTIVE_USAGE_ARGUMENT_DEFINITION_REMOVED',
+    },
+  });
+
+  // SCHEMA
+  persistedTest({
+    name: 'Directive Usage Schema Definition Added',
+    schemaBefore: /* GraphQL */ `
+      directive @external on SCHEMA
+      schema {
+        query: Foo
+      }
+      type Foo {
+        a(a: String): String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on SCHEMA
+      schema @external {
+        query: Foo
+      }
+      type Foo {
+        a(a: String): String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        addedDirectiveName: 'external',
+        schemaTypeName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_SCHEMA_ADDED',
+    },
+  });
+
+  persistedTest({
+    name: 'Directive Usage Schema Definition Removed',
+    schemaBefore: /* GraphQL */ `
+      directive @external on SCHEMA
+      schema @external {
+        query: Foo
+      }
+      type Foo {
+        a(a: String): String
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      directive @external on SCHEMA
+      schema {
+        query: Foo
+      }
+      type Foo {
+        a(a: String): String
+      }
+    `,
+    equalsObject: {
+      meta: {
+        removedDirectiveName: 'external',
+        schemaTypeName: 'Foo',
+      },
+      type: 'DIRECTIVE_USAGE_SCHEMA_REMOVED',
+    },
+  });
 });
 
 const SchemaCompareToPreviousVersionQuery = graphql(`

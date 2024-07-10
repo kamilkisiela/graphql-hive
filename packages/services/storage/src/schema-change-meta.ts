@@ -13,6 +13,26 @@ import {
   directiveLocationAddedFromMeta,
   directiveLocationRemovedFromMeta,
   directiveRemovedFromMeta,
+  directiveUsageArgumentDefinitionAddedFromMeta,
+  directiveUsageArgumentDefinitionRemovedFromMeta,
+  directiveUsageEnumAddedFromMeta,
+  directiveUsageEnumRemovedFromMeta,
+  directiveUsageEnumValueAddedFromMeta,
+  directiveUsageEnumValueRemovedFromMeta,
+  directiveUsageFieldDefinitionAddedFromMeta,
+  directiveUsageFieldDefinitionRemovedFromMeta,
+  directiveUsageInputObjectAddedFromMeta,
+  directiveUsageInputObjectRemovedFromMeta,
+  directiveUsageInterfaceAddedFromMeta,
+  directiveUsageInterfaceRemovedFromMeta,
+  directiveUsageObjectAddedFromMeta,
+  directiveUsageObjectRemovedFromMeta,
+  directiveUsageScalarAddedFromMeta,
+  directiveUsageScalarRemovedFromMeta,
+  directiveUsageSchemaAddedFromMeta,
+  directiveUsageSchemaRemovedFromMeta,
+  directiveUsageUnionMemberAddedFromMeta,
+  directiveUsageUnionMemberRemovedFromMeta,
   enumValueAddedFromMeta,
   enumValueDeprecationReasonAddedFromMeta,
   enumValueDeprecationReasonChangedFromMeta,
@@ -102,210 +122,45 @@ export function schemaChangeFromSerializableChange(
     case ChangeType.FieldArgumentDescriptionChanged:
       return fieldArgumentDescriptionChangedFromMeta(change);
     case ChangeType.DirectiveUsageArgumentDefinitionAdded:
-      return {
-        type: ChangeType.DirectiveUsageArgumentDefinitionAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
-        meta: change.meta,
-      };
-    case ChangeType.DirectiveUsageInputObjectAdded:
-      return {
-        type: ChangeType.DirectiveUsageInputObjectAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to input object '${change.meta.inputObjectName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageInputObjectRemoved:
-      return {
-        type: ChangeType.DirectiveUsageInputObjectRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from input object '${change.meta.inputObjectName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from input object '${change.meta.inputObjectName}'`,
-        meta: change.meta,
-      };
-    case ChangeType.DirectiveUsageInterfaceAdded:
-      return {
-        type: ChangeType.DirectiveUsageInterfaceAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to interface '${change.meta.interfaceName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageInterfaceRemoved:
-      return {
-        type: ChangeType.DirectiveUsageInterfaceRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from interface '${change.meta.interfaceName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from interface '${change.meta.interfaceName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageObjectAdded:
-      return {
-        type: ChangeType.DirectiveUsageObjectAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to object '${change.meta.objectName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageObjectRemoved:
-      return {
-        type: ChangeType.DirectiveUsageObjectRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from object '${change.meta.objectName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from object '${change.meta.objectName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageScalarAdded:
-      return {
-        type: ChangeType.DirectiveUsageScalarAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to scalar '${change.meta.scalarName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageScalarRemoved:
-      return {
-        type: ChangeType.DirectiveUsageScalarRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from scalar '${change.meta.scalarName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from scalar '${change.meta.scalarName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageSchemaAdded:
-      return {
-        type: ChangeType.DirectiveUsageSchemaAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to schema`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageSchemaRemoved:
-      return {
-        type: ChangeType.DirectiveUsageSchemaRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from schema`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from schema`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageUnionMemberAdded:
-      return {
-        type: ChangeType.DirectiveUsageUnionMemberAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to union member '${change.meta.unionName}.${change.meta.addedUnionMemberTypeName}'`,
-        meta: change.meta,
-      };
-
-    case ChangeType.DirectiveUsageUnionMemberRemoved:
-      return {
-        type: ChangeType.DirectiveUsageUnionMemberRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from union member '${change.meta.unionName}.${change.meta.removedUnionMemberTypeName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from union member '${change.meta.unionName}.${change.meta.removedUnionMemberTypeName}'`,
-        meta: change.meta,
-      };
-
+      return directiveUsageArgumentDefinitionAddedFromMeta(change);
     case ChangeType.DirectiveUsageArgumentDefinitionRemoved:
-      return {
-        type: ChangeType.DirectiveUsageArgumentDefinitionRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from argument '${change.meta.typeName}.${change.meta.fieldName}.${change.meta.argumentName}'`,
-        meta: change.meta,
-      };
-
+      return directiveUsageArgumentDefinitionRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageInputObjectAdded:
+      return directiveUsageInputObjectAddedFromMeta(change);
+    case ChangeType.DirectiveUsageInputObjectRemoved:
+      return directiveUsageInputObjectRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageInterfaceAdded:
+      return directiveUsageInterfaceAddedFromMeta(change);
+    case ChangeType.DirectiveUsageInterfaceRemoved:
+      return directiveUsageInterfaceRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageObjectAdded:
+      return directiveUsageObjectAddedFromMeta(change);
+    case ChangeType.DirectiveUsageObjectRemoved:
+      return directiveUsageObjectRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageScalarAdded:
+      return directiveUsageScalarAddedFromMeta(change);
+    case ChangeType.DirectiveUsageScalarRemoved:
+      return directiveUsageScalarRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageSchemaAdded:
+      return directiveUsageSchemaAddedFromMeta(change);
+    case ChangeType.DirectiveUsageSchemaRemoved:
+      return directiveUsageSchemaRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageUnionMemberAdded:
+      return directiveUsageUnionMemberAddedFromMeta(change);
+    case ChangeType.DirectiveUsageUnionMemberRemoved:
+      return directiveUsageUnionMemberRemovedFromMeta(change);
     case ChangeType.DirectiveUsageFieldDefinitionRemoved:
-      return {
-        type: ChangeType.DirectiveUsageFieldDefinitionRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from field '${change.meta.typeName}.${change.meta.fieldName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from field '${change.meta.typeName}.${change.meta.fieldName}'`,
-        meta: change.meta,
-      };
+      return directiveUsageFieldDefinitionRemovedFromMeta(change);
     case ChangeType.DirectiveUsageFieldDefinitionAdded:
-      return {
-        type: ChangeType.DirectiveUsageFieldDefinitionAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to field '${change.meta.typeName}.${change.meta.fieldName}'`,
-        meta: change.meta,
-      };
-
-    // DirectiveUsageEnumValueRemoved
+      return directiveUsageFieldDefinitionAddedFromMeta(change);
     case ChangeType.DirectiveUsageEnumAdded:
-      return {
-        type: ChangeType.DirectiveUsageEnumAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to enum '${change.meta.enumName}'`,
-        meta: change.meta,
-      };
+      return directiveUsageEnumAddedFromMeta(change);
     case ChangeType.DirectiveUsageEnumRemoved:
-      return {
-        type: ChangeType.DirectiveUsageEnumRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from enum '${change.meta.enumName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from enum '${change.meta.enumName}'`,
-        meta: change.meta,
-      };
+      return directiveUsageEnumRemovedFromMeta(change);
     case ChangeType.DirectiveUsageEnumValueRemoved:
-      return {
-        type: ChangeType.DirectiveUsageEnumValueRemoved,
-        criticality: {
-          level: CriticalityLevel.Dangerous,
-          reason: `Directive '${change.meta.removedDirectiveName}' was removed from enum value '${change.meta.enumName}.${change.meta.enumValueName}'`,
-        },
-        message: `Directive '${change.meta.removedDirectiveName}' was removed from enum value '${change.meta.enumName}.${change.meta.enumValueName}'`,
-        meta: change.meta,
-      };
-
+      return directiveUsageEnumValueRemovedFromMeta(change);
     case ChangeType.DirectiveUsageEnumValueAdded:
-      return {
-        type: ChangeType.DirectiveUsageEnumValueAdded,
-        criticality: {
-          level: CriticalityLevel.NonBreaking,
-        },
-        message: `Directive '${change.meta.addedDirectiveName}' was added to enum value '${change.meta.enumName}.${change.meta.enumValueName}'`,
-        meta: change.meta,
-      };
+      return directiveUsageEnumValueAddedFromMeta(change);
     case ChangeType.FieldArgumentDefaultChanged:
       return fieldArgumentDefaultChangedFromMeta(change);
     case ChangeType.FieldArgumentTypeChanged:
