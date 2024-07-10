@@ -263,7 +263,7 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
             >
               {isLoadingMore ? (
                 <>
-                  <LoaderCircleIcon className="rotate mr-2 inline size-4 animate-spin" /> Loading
+                  <LoaderCircleIcon className="mr-2 inline size-4 animate-spin" /> Loading
                 </>
               ) : (
                 'Load more'

@@ -195,7 +195,7 @@ export function TargetAppVersionPage(props: {
                       <TableHead className="hidden text-end sm:table-cell">
                         Document Content
                       </TableHead>
-                      <TableHead className="hidden sm:table-cell"></TableHead>
+                      <TableHead className="hidden sm:table-cell" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
