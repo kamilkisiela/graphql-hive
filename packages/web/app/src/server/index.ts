@@ -59,7 +59,9 @@ async function main() {
     });
   }
 
-  await server.register(cors, {});
+  await server.register(cors, {
+    credentials: true
+  });
 
   server.get('/api/health', (_req, res) => {
     return res.status(200).send('OK');
