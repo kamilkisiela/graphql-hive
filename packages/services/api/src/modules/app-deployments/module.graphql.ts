@@ -33,7 +33,11 @@ export default gql`
   type GraphQLDocument {
     hash: String!
     body: String!
-    operationNames: [String!]
+    operationName: String
+    """
+    The internal hash as used for insights.
+    """
+    insightsHash: String!
   }
 
   type AppDeploymentConnection {

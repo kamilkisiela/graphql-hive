@@ -661,9 +661,10 @@ export class AppDeployments {
     const result = await this.clickhouse.query({
       query: cSql`
         SELECT
-          "document_hash" AS "hash"
-          , "document_body" AS "body"
-          , "operation_name" AS "operationName"
+          "app_deployment_documents"."document_hash" AS "hash"
+          , "app_deployment_documents"."document_body" AS "body"
+          , "app_deployment_documents"."operation_name" AS "operationName"
+          , "app_deployment_documents"."hash" AS "internalHash"
         FROM
           "app_deployment_documents"
         WHERE
@@ -810,6 +811,9 @@ const GraphQLDocumentModel = z.object({
   hash: z.string(),
   body: z.string(),
   operationName: z.string().transform(value => (value === '' ? null : value)),
+  internalHash: z.string(),
 });
 
 export type AppDeploymentRecord = z.infer<typeof AppDeploymentModel>;
+
+export type GraphQLDocumentRecord = z.infer<typeof GraphQLDocumentModel>;
