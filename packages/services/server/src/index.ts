@@ -34,12 +34,10 @@ import {
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import {
+  captureException,
   contextLinesIntegration,
   dedupeIntegration,
   extraErrorDataIntegration,
-} from '@sentry/integrations';
-import {
-  captureException,
   httpIntegration,
   init,
   linkedErrorsIntegration,
@@ -75,13 +73,9 @@ export async function main() {
     environment: env.environment,
     dsn: env.sentry?.dsn,
     enableTracing: false,
-    tracesSampleRate: 1,
-    ignoreTransactions: [
-      'POST /graphql', // Transaction created for a cached response (@graphql-yoga/plugin-response-cache)
-    ],
     release: env.release,
     integrations: [
-      httpIntegration({ tracing: false }),
+      httpIntegration({ breadcrumbs: true }),
       contextLinesIntegration({
         frameContextLines: 0,
       }),
