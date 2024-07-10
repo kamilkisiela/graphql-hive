@@ -23,7 +23,7 @@ import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operation
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId, type TracingInstance } from '@hive/service-common';
-import { runWithAsyncContext } from '@sentry/node';
+import { withIsolationScope } from '@sentry/node';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
 import { resolveUser, type SupertokensSession } from './supertokens';
@@ -272,7 +272,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         requestId,
       },
       async () => {
-        const response = await runWithAsyncContext(() => {
+        const response = await withIsolationScope(() => {
           return server.handleNodeRequestAndResponse(req, reply, {
             req,
             reply,
