@@ -89,9 +89,13 @@ export function createWorker(
         data: result,
       } satisfies BatchProcessedEvent);
     } catch (err: unknown) {
-      logger.error('unexpected error', message.id, message.event);
+      logger.error(
+        'unexpected error while processing message in worker (messageId=%s)',
+        message.id,
+      );
+      logger.error(String(err));
       port.postMessage({
-        code: 'ERROR',
+        event: 'error',
         id: message.id,
         err,
       });

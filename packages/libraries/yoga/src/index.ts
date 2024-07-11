@@ -20,7 +20,7 @@ type CacheRecord = {
   executionArgs?: ExecutionArgs;
   parsedDocument?: DocumentNode;
   /** persisted document id */
-  documentId?: string;
+  experimental__documentId?: string;
 };
 
 export function createHive(clientOrOptions: HivePluginOptions) {
@@ -110,7 +110,11 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               errors.push(...ctx.result.errors);
             },
             onEnd() {
-              void record.callback(args, errors.length ? { errors } : {}, record.documentId);
+              void record.callback(
+                args,
+                errors.length ? { errors } : {},
+                record.experimental__documentId,
+              );
             },
           };
         },
@@ -121,10 +125,10 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
       return {
         onSubscribeResult() {
-          const persistedDocumentHash = record?.documentId;
+          const experimental__persistedDocumentHash = record?.experimental__documentId;
           hive.collectSubscriptionUsage({
             args: context.args,
-            experimental__persistedDocumentHash: persistedDocumentHash,
+            experimental__persistedDocumentHash,
           });
         },
       };
@@ -144,7 +148,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             document: record.parsedDocument ?? record.executionArgs.document,
           },
           context.result,
-          record.documentId,
+          record.experimental__documentId,
         );
         return;
       }
@@ -169,7 +173,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               operationName: record.paramsArgs.operationName,
             },
             context.result,
-            record.documentId,
+            record.experimental__documentId,
           );
         } catch (err) {
           console.error(err);
@@ -196,7 +200,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             if (document) {
               const record = cache.get(request);
               if (record) {
-                record.documentId = key;
+                record.experimental__documentId = key;
                 record.paramsArgs = {
                   ...record.paramsArgs,
                   query: document,
