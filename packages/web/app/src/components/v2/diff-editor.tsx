@@ -46,7 +46,7 @@ export const DiffEditor = (props: {
               <div className="mr-2 text-xs font-normal">Navigate changes </div>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -58,7 +58,7 @@ export const DiffEditor = (props: {
                   <TooltipContent>Previous change</TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -129,7 +129,7 @@ function DownloadButton(props: { contents: string; fileName: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <Button
             variant="ghost"
             size="sm"

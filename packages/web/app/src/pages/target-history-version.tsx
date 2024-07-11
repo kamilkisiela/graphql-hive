@@ -283,13 +283,12 @@ function DefaultSchemaVersionView(props: {
           <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
             {availableViews.map(item => (
               <Tooltip key={item.value}>
-                <TooltipTrigger
-                  // fixes <button> cannot appear as a descendant of <button>
-                  asChild
-                >
-                  <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
-                    {item.icon}
-                    <span className="ml-2">{item.label}</span>
+                <TooltipTrigger>
+                  <TabsTrigger value={item.value} disabled={!!item.disabledReason} asChild>
+                    <span>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </span>
                   </TabsTrigger>
                 </TooltipTrigger>
                 {item.disabledReason && (
@@ -457,9 +456,11 @@ function ContractVersionView(props: {
             {availableViews.map(item => (
               <Tooltip key={item.value}>
                 <TooltipTrigger>
-                  <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
-                    {item.icon}
-                    <span className="ml-2">{item.label}</span>
+                  <TabsTrigger value={item.value} disabled={!!item.disabledReason} asChild>
+                    <span>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </span>
                   </TabsTrigger>
                 </TooltipTrigger>
                 {item.disabledReason && (
