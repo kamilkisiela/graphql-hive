@@ -64,7 +64,9 @@ export function ChannelsTable(props: {
               {renderChannelEndpoint(channel)}
             </Td>
             <Td className="flex max-w-24 content-end">
-              <Tag color={colorMap[channel.type]}>{channel.type}</Tag>
+              <Tag color={colorMap[channel.type]} className="whitespace-nowrap">
+                {channel.type}
+              </Tag>
             </Td>
           </Tr>
         ))}
