@@ -881,8 +881,8 @@ importers:
         specifier: 1.4.7
         version: 1.4.7
       bullmq:
-        specifier: 5.8.4
-        version: 5.8.4
+        specifier: 5.8.6
+        version: 5.8.6
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1572,8 +1572,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       bullmq:
-        specifier: 5.8.4
-        version: 5.8.4
+        specifier: 5.8.6
+        version: 5.8.6
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -9042,8 +9042,8 @@ packages:
   builtins@5.0.1:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
 
-  bullmq@5.8.4:
-    resolution: {integrity: sha512-FkPKnTu9tTkVV+IEBP+RJKRqh7c17idc+AazfgAziIbFzeUajoRluG9bMTpPz5QuEMY9+wUBz6E2aMo55gYFUA==}
+  bullmq@5.8.6:
+    resolution: {integrity: sha512-jc/gV2x8HvdufXvWadUqHeORrQkUzsNCm4P6HlTDspQYbZUnJayf5m/esu1heK1IiDJ6hxOVQsXzUGzycahj0w==}
 
   bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}
@@ -26930,7 +26930,7 @@ snapshots:
     dependencies:
       semver: 7.6.2
 
-  bullmq@5.8.4:
+  bullmq@5.8.6:
     dependencies:
       cron-parser: 4.6.0
       ioredis: 5.4.1
