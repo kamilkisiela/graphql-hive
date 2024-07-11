@@ -1,4 +1,4 @@
-FROM node:22.4.0-slim
+FROM node:22.4.1-slim
 
 RUN apt-get update && apt-get install -y wget ca-certificates && rm -rf /var/lib/apt/lists/*
 
