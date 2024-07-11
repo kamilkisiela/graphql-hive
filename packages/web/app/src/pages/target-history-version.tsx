@@ -284,9 +284,11 @@ function DefaultSchemaVersionView(props: {
             {availableViews.map(item => (
               <Tooltip key={item.value}>
                 <TooltipTrigger>
-                  <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
-                    {item.icon}
-                    <span className="ml-2">{item.label}</span>
+                  <TabsTrigger value={item.value} disabled={!!item.disabledReason} asChild>
+                    <span>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </span>
                   </TabsTrigger>
                 </TooltipTrigger>
                 {item.disabledReason && (
@@ -454,9 +456,11 @@ function ContractVersionView(props: {
             {availableViews.map(item => (
               <Tooltip key={item.value}>
                 <TooltipTrigger>
-                  <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
-                    {item.icon}
-                    <span className="ml-2">{item.label}</span>
+                  <TabsTrigger value={item.value} disabled={!!item.disabledReason} asChild>
+                    <span>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </span>
                   </TabsTrigger>
                 </TooltipTrigger>
                 {item.disabledReason && (

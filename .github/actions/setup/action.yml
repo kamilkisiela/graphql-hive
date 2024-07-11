@@ -46,7 +46,7 @@ runs:
         version: ${{ steps.pnpm.outputs.version }}
 
     - name: install nodejs
-      uses: actions/setup-node@v4.0.2
+      uses: actions/setup-node@v4.0.3
       with:
         node-version-file: .node-version
         cache: ${{ steps.pnpm.outputs.cache }}

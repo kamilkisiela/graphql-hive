@@ -41,7 +41,7 @@ test('stringify operation in correct format and order', () => {
       },
       {
         target: 'my-target',
-        organization: null,
+        organization: 'my-organization',
         timestamp: timestamp.asNumber,
         expiresAt: expiresAt.asNumber,
         operationHash: 'my-hash-1',
@@ -72,7 +72,7 @@ test('stringify operation in correct format and order', () => {
         /* client_version */ `"clientVersion"`,
       ].join(','),
       [
-        /* organization */ `\\N`,
+        /* organization */ `"my-organization"`,
         /* target */ `"my-target"`,
         /* timestamp */ timestamp.asString,
         /* expires_at */ expiresAt.asString,

@@ -61,8 +61,8 @@ export const CreateChannelModal = ({
           ),
         endpoint: Yup.string()
           .url()
-          .when('type', ([type], schema) =>
-            type === AlertChannelType.Webhook ? schema.required('Must enter endpoint') : schema,
+          .when('type', ([_type], schema) =>
+            isWebhookLike ? schema.required('Must enter endpoint') : schema,
           ),
       }),
       async onSubmit(values) {
@@ -73,8 +73,7 @@ export const CreateChannelModal = ({
             name: values.name,
             type: values.type,
             slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
-            webhook:
-              values.type === AlertChannelType.Webhook ? { endpoint: values.endpoint } : null,
+            webhook: isWebhookLike ? { endpoint: values.endpoint } : null,
           },
         });
         if (error) {
@@ -88,6 +87,9 @@ export const CreateChannelModal = ({
         }
       },
     });
+  const isWebhookLike = [AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(
+    values.type,
+  );
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
@@ -132,12 +134,13 @@ export const CreateChannelModal = ({
             options={[
               { value: AlertChannelType.Slack, name: 'Slack' },
               { value: AlertChannelType.Webhook, name: 'Webhook' },
+              { value: AlertChannelType.MsteamsWebhook, name: 'MS Teams Webhook' },
             ]}
           />
           {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
         </div>
 
-        {values.type === AlertChannelType.Webhook && (
+        {isWebhookLike && (
           <div className="flex flex-col gap-4">
             <label className="text-sm font-semibold" htmlFor="endpoint">
               Endpoint
@@ -160,7 +163,13 @@ export const CreateChannelModal = ({
                 {mutation.data.addAlertChannel.error.inputErrors.webhookEndpoint}
               </div>
             )}
-            <p className="text-sm text-gray-500">Hive will send alerts to your endpoint.</p>
+            {values.endpoint ? (
+              <p className="text-sm text-gray-500">Hive will send alerts to your endpoint.</p>
+            ) : (
+              <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet">
+                Follow this guide to set up an incoming webhook connector in MS Teams
+              </a>
+            )}
           </div>
         )}
 
@@ -205,7 +214,7 @@ export const CreateChannelModal = ({
           <Button
             type="submit"
             size="lg"
-            className="w-full justify-center"
+            className="w-full justify-center text-ellipsis whitespace-nowrap"
             variant="primary"
             disabled={isSubmitting}
           >
