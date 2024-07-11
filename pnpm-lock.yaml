@@ -671,8 +671,8 @@ importers:
         specifier: 5.2.0
         version: 5.2.0
       '@octokit/request-error':
-        specifier: 6.1.1
-        version: 6.1.1
+        specifier: 6.1.2
+        version: 6.1.2
       '@sentry/node':
         specifier: 7.118.0
         version: 7.118.0
@@ -5418,8 +5418,8 @@ packages:
     resolution: {integrity: sha512-GETXfE05J0+7H2STzekpKObFe765O5dlAKUTLNGeH+x47z7JjXHfsHKo5z21D/o/IOZTUEI6nyWyR+bZVP/n5Q==}
     engines: {node: '>= 18'}
 
-  '@octokit/request-error@6.1.1':
-    resolution: {integrity: sha512-1mw1gqT3fR/WFvnoVpY/zUM2o/XkMs/2AszUUG9I69xn0JFLv6PGkPhNk5lbfvROs79wiS0bqiJNxfCZcRJJdg==}
+  '@octokit/request-error@6.1.2':
+    resolution: {integrity: sha512-sA0oF7aL5wXbNfl+7zgLYJiFZctei9GaIMJlTraJrlQyFaoIYr4MCqPSakzxxGCfm8fET4vn0cQdRFmD7avlDg==}
     engines: {node: '>= 18'}
 
   '@octokit/request@8.1.6':
@@ -22150,7 +22150,7 @@ snapshots:
       deprecation: 2.3.1
       once: 1.4.0
 
-  '@octokit/request-error@6.1.1':
+  '@octokit/request-error@6.1.2':
     dependencies:
       '@octokit/types': 13.1.0
 
