@@ -19,7 +19,6 @@ const config: CodegenConfig = {
         resolverTypesPath: './__generated__/types.next.ts',
         blacklistedModules: [
           'alerts',
-          'auth',
           'billing',
           'collection',
           'feedback',
