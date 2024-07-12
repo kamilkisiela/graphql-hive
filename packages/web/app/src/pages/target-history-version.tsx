@@ -74,7 +74,7 @@ function SchemaVersionView(props: {
   );
 
   return (
-    <div className="flex h-full grow flex-col">
+    <div className="flex w-full flex-col">
       <div className="py-6">
         <Title>Schema Version {schemaVersion.id}</Title>
         <Subtitle>Detailed view of the schema version</Subtitle>
@@ -309,7 +309,7 @@ function DefaultSchemaVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+      <div className="border-muted grow rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
           <div className="my-4 px-4">
             {schemaVersion.isFirstComposableVersion ? (
@@ -481,7 +481,7 @@ function ContractVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+      <div className="border-muted grow rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
           <div className="my-4 px-4">
             {contractVersion.isFirstComposableVersion ? (

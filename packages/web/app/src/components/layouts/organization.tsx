@@ -207,7 +207,7 @@ export function OrganizationLayout({
           ) : null}
         </div>
       </div>
-      <div className="container pb-7">
+      <div className="container min-h-[var(--content-height)] pb-7">
         {currentOrganization ? (
           <>
             <ProPlanBilling organization={currentOrganization} />

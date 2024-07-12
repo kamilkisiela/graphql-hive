@@ -68,7 +68,6 @@ function Schemas(props: { schemas?: readonly CompositeSchema[]; schema?: SingleS
   if (props.schema) {
     return (
       <GraphQLBlock
-        className="mb-6"
         sdl={props.schema.source}
         url={'url' in props.schema && typeof props.schema.url === 'string' ? props.schema.url : ''}
       />

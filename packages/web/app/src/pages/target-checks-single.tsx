@@ -1046,7 +1046,7 @@ const ActiveSchemaCheck = (props: {
     return null;
   }
 
-  if (query.fetching) {
+  if (query.fetching || query.stale) {
     return (
       <div className="flex h-fit flex-1 items-center justify-center self-center">
         <div className="flex flex-col items-center">
