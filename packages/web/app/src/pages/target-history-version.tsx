@@ -13,6 +13,7 @@ import { DiffEditor, Spinner } from '@/components/v2';
 import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/gql/graphql';
+import { cn } from '@/lib/utils';
 import {
   CheckCircledIcon,
   CrossCircledIcon,
@@ -168,6 +169,7 @@ function SchemaVersionView(props: {
           targetId={props.targetId}
           schemaVersion={schemaVersion}
           projectType={props.projectType}
+          hasContracts={!!schemaVersion.contractVersions?.edges}
         />
       )}
     </div>
@@ -222,6 +224,7 @@ function DefaultSchemaVersionView(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
+  hasContracts: boolean;
 }) {
   const schemaVersion = useFragment(
     DefaultSchemaVersionView_SchemaVersionFragment,
@@ -280,7 +283,12 @@ function DefaultSchemaVersionView(props: {
     <>
       <TooltipProvider>
         <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
-          <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
+          <TabsList
+            className={cn(
+              'bg-background border-muted w-full justify-start rounded-none border-x border-b',
+              !props.hasContracts && 'rounded-t border-t',
+            )}
+          >
             {availableViews.map(item => (
               <Tooltip key={item.value}>
                 <TooltipTrigger>
