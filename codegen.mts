@@ -21,7 +21,6 @@ const config: CodegenConfig = {
           'alerts',
           'billing',
           'collection',
-          'feedback',
           'lab',
           'oidc-integrations',
           'operations',
