@@ -2,15 +2,6 @@ import { OidcIntegrationsModule } from './__generated__/types';
 import { OIDCIntegrationsProvider } from './providers/oidc-integrations.provider';
 
 export const resolvers: OidcIntegrationsModule.Resolvers = {
-  Subscription: {
-    oidcIntegrationLog: {
-      subscribe: (_, args, { injector }) =>
-        injector
-          .get(OIDCIntegrationsProvider)
-          .subscribeToOIDCIntegrationLogs({ oidcIntegrationId: args.input.oidcIntegrationId }),
-      resolve: (payload: { message: string; timestamp: string }) => payload,
-    },
-  },
   Organization: {
     viewerCanManageOIDCIntegration: (organization, _, { injector }) => {
       return injector
