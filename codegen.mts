@@ -22,7 +22,6 @@ const config: CodegenConfig = {
           'billing',
           'collection',
           'lab',
-          'oidc-integrations',
           'operations',
           'organization',
           'policy',
