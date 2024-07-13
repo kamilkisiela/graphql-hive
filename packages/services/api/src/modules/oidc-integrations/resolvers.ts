@@ -1,51 +1,7 @@
-import { OrganizationManager } from '../organization/providers/organization-manager';
 import { OidcIntegrationsModule } from './__generated__/types';
 import { OIDCIntegrationsProvider } from './providers/oidc-integrations.provider';
 
 export const resolvers: OidcIntegrationsModule.Resolvers = {
-  Mutation: {
-    deleteOIDCIntegration: async (_, { input }, { injector }) => {
-      const result = await injector
-        .get(OIDCIntegrationsProvider)
-        .deleteOIDCIntegration({ oidcIntegrationId: input.oidcIntegrationId });
-
-      if (result.type === 'ok') {
-        return {
-          ok: {
-            organization: await injector
-              .get(OrganizationManager)
-              .getOrganization({ organization: result.organizationId }),
-          },
-        };
-      }
-
-      return {
-        error: {
-          message: result.message,
-        },
-      };
-    },
-    async updateOIDCRestrictions(_, { input }, { injector }) {
-      const result = await injector.get(OIDCIntegrationsProvider).updateOIDCRestrictions({
-        oidcIntegrationId: input.oidcIntegrationId,
-        oidcUserAccessOnly: input.oidcUserAccessOnly,
-      });
-
-      if (result.type === 'ok') {
-        return {
-          ok: {
-            updatedOIDCIntegration: result.oidcIntegration,
-          },
-        };
-      }
-
-      return {
-        error: {
-          message: result.message,
-        },
-      };
-    },
-  },
   Subscription: {
     oidcIntegrationLog: {
       subscribe: (_, args, { injector }) =>
