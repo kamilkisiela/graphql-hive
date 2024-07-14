@@ -791,8 +791,8 @@ importers:
   packages/services/broker-worker:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20240620.0
-        version: 4.20240620.0
+        specifier: 4.20240712.0
+        version: 4.20240712.0
       '@types/service-worker-mock':
         specifier: 2.0.4
         version: 2.0.4
@@ -824,8 +824,8 @@ importers:
   packages/services/cdn-worker:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20240620.0
-        version: 4.20240620.0
+        specifier: 4.20240712.0
+        version: 4.20240712.0
       '@types/service-worker-mock':
         specifier: 2.0.4
         version: 2.0.4
@@ -3441,8 +3441,8 @@ packages:
   '@changesets/write@0.3.1':
     resolution: {integrity: sha512-SyGtMXzH3qFqlHKcvFY2eX+6b0NGiFcNav8AFsYwy5l8hejOeoeTDemu5Yjmke2V5jpzY+pBvM0vCCQ3gdZpfw==}
 
-  '@cloudflare/workers-types@4.20240620.0':
-    resolution: {integrity: sha512-CQD8YS6evRob7LChvIX3gE3zYo0KVgaLDOu1SwNP1BVIS2Sa0b+FC8S1e1hhrNN8/E4chYlVN+FDAgA4KRDUEQ==}
+  '@cloudflare/workers-types@4.20240712.0':
+    resolution: {integrity: sha512-C+C0ZnkRrxR2tPkZKAXwBsWEse7bWaA7iMbaG6IKaxaPTo/5ilx7Ei3BkI2izxmOJMsC05VS1eFUf95urXzhmw==}
 
   '@codemirror/language@6.10.2':
     resolution: {integrity: sha512-kgbTYTo0Au6dCSc/TFy7fK3fpJmgHDv1sG1KNQKJXVi+xBTEeBPY/M30YXiU6mMXeH+YIDLsbrT4ZwNRdtF+SA==}
@@ -19046,7 +19046,7 @@ snapshots:
       human-id: 1.0.2
       prettier: 2.8.8
 
-  '@cloudflare/workers-types@4.20240620.0': {}
+  '@cloudflare/workers-types@4.20240712.0': {}
 
   '@codemirror/language@6.10.2':
     dependencies:
