@@ -1,6 +1,6 @@
 import { type GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
-import { Change, ChangeType, diff } from '@graphql-inspector/core';
+import { Change, ChangeType, diff, TypeOfChangeType } from '@graphql-inspector/core';
 import { traceFn } from '@hive/service-common';
 import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
 import { Logger } from '../../shared/providers/logger';
@@ -44,7 +44,7 @@ export class Inspector {
  * If they are equal, it means that the change is no longer relevant and can be dropped.
  * All other changes are kept.
  */
-function dropTrimmedDescriptionChangedChange(change: Change<ChangeType>): boolean {
+function dropTrimmedDescriptionChangedChange(change: Change<TypeOfChangeType>): boolean {
   return (
     matchChange(change, {
       [ChangeType.DirectiveArgumentDescriptionChanged]: change =>
@@ -102,7 +102,7 @@ function trimDescription(description: unknown): string {
 type PropEndsWith<T, E extends string> = T extends `${any}${E}` ? T : never;
 
 function shouldKeepDescriptionChangedChange<
-  T extends ChangeType,
+  T extends TypeOfChangeType,
   TO extends PropEndsWith<keyof Change<T>['meta'], 'Description'>,
   // Prevents comparing values of the same key (e.g. newDescription, newDescription will result in TS error)
   TN extends Exclude<PropEndsWith<keyof Change<T>['meta'], 'Description'>, TO>,
@@ -110,7 +110,7 @@ function shouldKeepDescriptionChangedChange<
   return trimDescription(change.meta[oldKey]) !== trimDescription(change.meta[newKey]);
 }
 
-function matchChange<R, T extends ChangeType>(
+function matchChange<R, T extends TypeOfChangeType>(
   change: Change<T>,
   pattern: {
     [K in T]?: (change: Change<K>) => R;

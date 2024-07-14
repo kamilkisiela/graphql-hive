@@ -13,6 +13,26 @@ import {
   directiveLocationAddedFromMeta,
   directiveLocationRemovedFromMeta,
   directiveRemovedFromMeta,
+  directiveUsageArgumentDefinitionAddedFromMeta,
+  directiveUsageArgumentDefinitionRemovedFromMeta,
+  directiveUsageEnumAddedFromMeta,
+  directiveUsageEnumRemovedFromMeta,
+  directiveUsageEnumValueAddedFromMeta,
+  directiveUsageEnumValueRemovedFromMeta,
+  directiveUsageFieldDefinitionAddedFromMeta,
+  directiveUsageFieldDefinitionRemovedFromMeta,
+  directiveUsageInputObjectAddedFromMeta,
+  directiveUsageInputObjectRemovedFromMeta,
+  directiveUsageInterfaceAddedFromMeta,
+  directiveUsageInterfaceRemovedFromMeta,
+  directiveUsageObjectAddedFromMeta,
+  directiveUsageObjectRemovedFromMeta,
+  directiveUsageScalarAddedFromMeta,
+  directiveUsageScalarRemovedFromMeta,
+  directiveUsageSchemaAddedFromMeta,
+  directiveUsageSchemaRemovedFromMeta,
+  directiveUsageUnionMemberAddedFromMeta,
+  directiveUsageUnionMemberRemovedFromMeta,
   enumValueAddedFromMeta,
   enumValueDeprecationReasonAddedFromMeta,
   enumValueDeprecationReasonChangedFromMeta,
@@ -90,15 +110,57 @@ export type RegistryServiceUrlChangeChange = RegistryServiceUrlChangeSerializabl
   path?: string;
 };
 
+type ChangeType = Change['type'];
+
 /**
  * Create the schema change from the persisted meta data.
  */
 export function schemaChangeFromSerializableChange(
   change: SerializableChange,
-): Change | RegistryServiceUrlChangeChange {
+): ChangeType | RegistryServiceUrlChangeChange {
   switch (change.type) {
     case ChangeType.FieldArgumentDescriptionChanged:
       return fieldArgumentDescriptionChangedFromMeta(change);
+    case ChangeType.DirectiveUsageArgumentDefinitionAdded:
+      return directiveUsageArgumentDefinitionAddedFromMeta(change);
+    case ChangeType.DirectiveUsageArgumentDefinitionRemoved:
+      return directiveUsageArgumentDefinitionRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageInputObjectAdded:
+      return directiveUsageInputObjectAddedFromMeta(change);
+    case ChangeType.DirectiveUsageInputObjectRemoved:
+      return directiveUsageInputObjectRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageInterfaceAdded:
+      return directiveUsageInterfaceAddedFromMeta(change);
+    case ChangeType.DirectiveUsageInterfaceRemoved:
+      return directiveUsageInterfaceRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageObjectAdded:
+      return directiveUsageObjectAddedFromMeta(change);
+    case ChangeType.DirectiveUsageObjectRemoved:
+      return directiveUsageObjectRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageScalarAdded:
+      return directiveUsageScalarAddedFromMeta(change);
+    case ChangeType.DirectiveUsageScalarRemoved:
+      return directiveUsageScalarRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageSchemaAdded:
+      return directiveUsageSchemaAddedFromMeta(change);
+    case ChangeType.DirectiveUsageSchemaRemoved:
+      return directiveUsageSchemaRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageUnionMemberAdded:
+      return directiveUsageUnionMemberAddedFromMeta(change);
+    case ChangeType.DirectiveUsageUnionMemberRemoved:
+      return directiveUsageUnionMemberRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageFieldDefinitionRemoved:
+      return directiveUsageFieldDefinitionRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageFieldDefinitionAdded:
+      return directiveUsageFieldDefinitionAddedFromMeta(change);
+    case ChangeType.DirectiveUsageEnumAdded:
+      return directiveUsageEnumAddedFromMeta(change);
+    case ChangeType.DirectiveUsageEnumRemoved:
+      return directiveUsageEnumRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageEnumValueRemoved:
+      return directiveUsageEnumValueRemovedFromMeta(change);
+    case ChangeType.DirectiveUsageEnumValueAdded:
+      return directiveUsageEnumValueAddedFromMeta(change);
     case ChangeType.FieldArgumentDefaultChanged:
       return fieldArgumentDefaultChangedFromMeta(change);
     case ChangeType.FieldArgumentTypeChanged:
