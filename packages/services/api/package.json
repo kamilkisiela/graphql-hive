@@ -26,7 +26,7 @@
     "@hive/webhooks": "workspace:*",
     "@octokit/app": "14.1.0",
     "@octokit/core": "5.2.0",
-    "@octokit/request-error": "6.1.2",
+    "@octokit/request-error": "6.1.4",
     "@sentry/node": "7.118.0",
     "@sentry/types": "7.118.0",
     "@slack/web-api": "7.3.1",
