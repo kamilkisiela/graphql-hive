@@ -15,7 +15,7 @@
     "@pulumi/random": "4.16.2",
     "js-yaml": "4.1.0",
     "pg-connection-string": "2.6.4",
-    "prettier": "3.3.2",
+    "prettier": "3.3.3",
     "tar-stream": "3.1.7"
   },
   "devDependencies": {
