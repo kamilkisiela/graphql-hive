@@ -14,7 +14,6 @@ export { Radio, RadioGroup } from '@/components/v2/radio-group';
 export { RadixSelect } from '@/components/v2/radix-select';
 export { Select } from '@/components/v2/select';
 export { Sortable } from '@/components/v2/sortable';
-export { Spinner } from '@/components/v2/spinner';
 export { default as Stat } from '@/components/v2/stat';
 export { Switch } from '@/components/v2/switch';
 export { Table, TBody, THead, TFoot, Th, Td, Tr } from '@/components/v2/table';

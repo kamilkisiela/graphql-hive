@@ -35,7 +35,6 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
-import { Spinner } from '@/components/v2/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -59,6 +58,7 @@ import {
 import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
 import 'graphiql/graphiql.css';
+import { Spinner } from '@/components/ui/spinner';
 
 function Share({ operation }: { operation: string | null }): ReactElement | null {
   const label = 'Share query';

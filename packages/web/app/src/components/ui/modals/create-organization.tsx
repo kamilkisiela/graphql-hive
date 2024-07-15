@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/components/ui/use-toast';
-import { Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from '@tanstack/react-router';
@@ -59,7 +59,7 @@ const formSchema = z.object({
     ),
 });
 
-export const CreateOrganizationForm = () => {
+export const CreateOrganizationForm = (): JSX.Element => {
   const [mutation, mutate] = useMutation(CreateOrganizationMutation);
   const { toast } = useToast();
   const router = useRouter();
@@ -104,50 +104,64 @@ export const CreateOrganizationForm = () => {
     }
   }
 
+  return <CreateOrganizationFormContent form={form} onSubmit={() => onSubmit(form.getValues())} />;
+};
+
+type CreateOrganizationFormContentProps = {
+  form: UseFormReturn<z.infer<typeof formSchema>>;
+  onSubmit: () => void;
+};
+
+export const CreateOrganizationFormContent = ({
+  form,
+  onSubmit,
+}: CreateOrganizationFormContentProps): JSX.Element => {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-black">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Create an organization</CardTitle>
-            <CardDescription>
-              An organization is built on top of <b>Projects</b>. You will become an <b>admin</b>{' '}
-              and don't worry, you can add members later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input placeholder="Organization name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button
-              type="submit"
-              className="w-full"
-              variant="default"
-              disabled={form.formState.disabled}
-            >
-              {form.formState.isSubmitting ? (
-                <>
-                  <Spinner className="size-6 text-black" />
-                  <span className="ml-4">Creating...</span>
-                </>
-              ) : (
-                'Create Organization'
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-      </form>
-    </Form>
+    <div className="container w-4/5 max-w-[520px] md:w-3/5">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="bg-black">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Create an organization</CardTitle>
+              <CardDescription>
+                An organization is built on top of <b>Projects</b>. You will become an <b>admin</b>{' '}
+                and don't worry, you can add members later.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Organization name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button
+                type="submit"
+                className="w-full"
+                variant="default"
+                disabled={!form.formState.isValid}
+              >
+                {form.formState.isSubmitting ? (
+                  <>
+                    <Spinner className="size-6 text-black" />
+                    <span className="ml-4">Creating...</span>
+                  </>
+                ) : (
+                  'Create Organization'
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </form>
+      </Form>
+    </div>
   );
 };
