@@ -5,7 +5,12 @@ const { plugins, ...prettierConfig } = require('@theguild/prettier-config');
 
 module.exports = {
   ...prettierConfig,
-  importOrderParserPlugins: ['importAssertions', ...prettierConfig.importOrderParserPlugins],
+  importOrderParserPlugins: [
+    'importAssertions',
+    // `using` keyword
+    'explicitResourceManagement',
+    ...prettierConfig.importOrderParserPlugins,
+  ],
   plugins: [
     'prettier-plugin-sql',
     ...plugins,

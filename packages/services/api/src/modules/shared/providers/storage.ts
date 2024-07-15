@@ -44,6 +44,7 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import type { Contracts } from '../../schema/providers/contracts';
+import type { SchemaCoordinatesDiffResult } from '../../schema/providers/inspector';
 
 export interface OrganizationSelector {
   organization: string;
@@ -442,6 +443,7 @@ export interface Storage {
       diffSchemaVersionId: string | null;
       conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
       contracts: null | Array<CreateContractVersionInput>;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
     } & TargetSelector &
       (
         | {
@@ -480,6 +482,7 @@ export interface Storage {
       };
       contracts: null | Array<CreateContractVersionInput>;
       conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
     } & TargetSelector) &
       (
         | {

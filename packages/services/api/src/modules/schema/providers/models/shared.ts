@@ -2,14 +2,15 @@ import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/s
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
 import type { SchemaChangeType, SchemaCompositionError } from '@hive/storage';
-import { type Contract, type ValidContractVersion } from '../contracts';
-import {
+import type { Contract, ValidContractVersion } from '../contracts';
+import type { SchemaCoordinatesDiffResult } from '../inspector';
+import type {
   ContractCompositionResult,
   ContractCompositionSuccess,
+  RegistryChecks,
   SchemaDiffResult,
   SchemaDiffSkip,
   SchemaDiffSuccess,
-  type RegistryChecks,
 } from '../registry-checks';
 
 export const SchemaPublishConclusion = {
@@ -207,6 +208,7 @@ export type SchemaPublishFailureReason =
       code: (typeof PublishFailureReasonCode)['BreakingChanges'];
       breakingChanges: Array<SchemaChangeType>;
       changes: Array<SchemaChangeType>;
+      coordinatesDiff: SchemaCoordinatesDiffResult;
     };
 
 type ContractResult = {
@@ -223,6 +225,7 @@ type SchemaPublishSuccess = {
   state: {
     composable: boolean;
     initial: boolean;
+    coordinatesDiff: SchemaCoordinatesDiffResult | null;
     changes: Array<SchemaChangeType> | null;
     messages: string[] | null;
     breakingChanges: Array<{
@@ -277,6 +280,7 @@ export type SchemaDeleteSuccess = {
     schemas: PushedCompositeSchema[];
     breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<SchemaCompositionError> | null;
+    coordinatesDiff: SchemaCoordinatesDiffResult | null;
     supergraph: string | null;
     tags: null | Array<string>;
     contracts: null | Array<ContractResult>;
