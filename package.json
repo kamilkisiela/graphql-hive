@@ -24,6 +24,7 @@
     "build:services": "pnpm prebuild && pnpm turbo build --filter=./packages/services/**/* --filter=./packages/migrations --color",
     "build:web": "pnpm prebuild && pnpm turbo build --filter=./packages/web/* --color",
     "cargo:fix": "bash ./scripts/fix-symbolic-link.sh",
+    "dev:integration": "cd integration-tests && pnpm dev:integration",
     "docker:build": "docker buildx bake -f docker/docker.hcl --load build",
     "docker:override-up": "docker compose -f ./docker/docker-compose.override.yml up -d --remove-orphans",
     "env:sync": "tsx scripts/sync-env-files.ts",

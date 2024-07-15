@@ -2,7 +2,7 @@ import { ProjectType } from 'testkit/gql/graphql';
 import { renameTarget } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
-test.concurrent('renaming a target should result changing its cleanId', async () => {
+test.concurrent('renaming a target should result changing its cleanId', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, createProject } = await createOrg();
   const { project, target } = await createProject(ProjectType.Single);

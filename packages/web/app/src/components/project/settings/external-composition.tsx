@@ -15,8 +15,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsNote, Spinner, Switch } from '@/components/v2';
+import { DocsNote, Switch } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
