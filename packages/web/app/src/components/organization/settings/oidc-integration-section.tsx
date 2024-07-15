@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { Tag } from '@/components/v2';
-import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
+import { AlertTriangleIcon, KeyIcon } from '@/components/ui/icon';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { useClipboard } from '@/lib/hooks';

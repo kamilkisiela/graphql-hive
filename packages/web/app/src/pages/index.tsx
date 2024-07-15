@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery } from 'urql';
+import { HiveLogo } from '@/components/ui/icon';
 import { Meta } from '@/components/ui/meta';
 import { QueryError } from '@/components/ui/query-error';
-import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import {
   useLastVisitedOrganizationReader,

@@ -11,7 +11,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar } from '@/components/v2';
 import {
   AlertTriangleIcon,
   CalendarIcon,
@@ -22,7 +21,8 @@ import {
   PlusIcon,
   SettingsIcon,
   TrendingUpIcon,
-} from '@/components/v2/icon';
+} from '@/components/ui/icon';
+import { Avatar } from '@/components/v2';
 import { LeaveOrganizationModal } from '@/components/v2/modals/leave-organization';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
