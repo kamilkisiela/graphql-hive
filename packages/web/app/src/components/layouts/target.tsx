@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
 import { CopyValue, Tag } from '@/components/v2';
-import { Tabs } from '@/components/v2/tabs';
 import { graphql } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
@@ -32,6 +31,7 @@ import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { cn } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
 import { ProjectMigrationToast } from '../project/migration-toast';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { TargetSelector } from './target-selector';
 
 export enum Page {
@@ -168,10 +168,10 @@ export const TargetLayout = ({
         <div className="container flex items-center justify-between">
           {currentOrganization && currentProject && currentTarget ? (
             <Tabs className="flex h-full grow flex-col" value={page}>
-              <Tabs.List>
+              <TabsList variant="menu">
                 {canAccessSchema && (
                   <>
-                    <Tabs.Trigger value={Page.Schema} asChild>
+                    <TabsTrigger variant="menu" value={Page.Schema} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId"
                         params={{
@@ -182,8 +182,8 @@ export const TargetLayout = ({
                       >
                         Schema
                       </Link>
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.Checks} asChild>
+                    </TabsTrigger>
+                    <TabsTrigger variant="menu" value={Page.Checks} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/checks"
                         params={{
@@ -194,8 +194,8 @@ export const TargetLayout = ({
                       >
                         Checks
                       </Link>
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.Explorer} asChild>
+                    </TabsTrigger>
+                    <TabsTrigger variant="menu" value={Page.Explorer} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/explorer"
                         params={{
@@ -206,8 +206,8 @@ export const TargetLayout = ({
                       >
                         Explorer
                       </Link>
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.History} asChild>
+                    </TabsTrigger>
+                    <TabsTrigger variant="menu" value={Page.History} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/history"
                         params={{
@@ -218,8 +218,8 @@ export const TargetLayout = ({
                       >
                         History
                       </Link>
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.Insights} asChild>
+                    </TabsTrigger>
+                    <TabsTrigger variant="menu" value={Page.Insights} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/insights"
                         params={{
@@ -230,9 +230,9 @@ export const TargetLayout = ({
                       >
                         Insights
                       </Link>
-                    </Tabs.Trigger>
+                    </TabsTrigger>
                     {currentOrganization.isAppDeploymentsEnabled && (
-                      <Tabs.Trigger value={Page.Apps} asChild>
+                      <TabsTrigger variant="menu" value={Page.Apps} asChild>
                         <Link
                           to="/$organizationId/$projectId/$targetId/apps"
                           params={{
@@ -243,9 +243,9 @@ export const TargetLayout = ({
                         >
                           Apps
                         </Link>
-                      </Tabs.Trigger>
+                      </TabsTrigger>
                     )}
-                    <Tabs.Trigger value={Page.Laboratory} asChild>
+                    <TabsTrigger variant="menu" value={Page.Laboratory} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/laboratory"
                         params={{
@@ -256,11 +256,11 @@ export const TargetLayout = ({
                       >
                         Laboratory
                       </Link>
-                    </Tabs.Trigger>
+                    </TabsTrigger>
                   </>
                 )}
                 {canAccessSettings && (
-                  <Tabs.Trigger value={Page.Settings} asChild>
+                  <TabsTrigger variant="menu" value={Page.Settings} asChild>
                     <Link
                       to="/$organizationId/$projectId/$targetId/settings"
                       params={{
@@ -272,9 +272,9 @@ export const TargetLayout = ({
                     >
                       Settings
                     </Link>
-                  </Tabs.Trigger>
+                  </TabsTrigger>
                 )}
-              </Tabs.List>
+              </TabsList>
             </Tabs>
           ) : (
             <div className="flex flex-row gap-x-8 border-b-2 border-b-transparent px-4 py-3">
