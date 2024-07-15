@@ -57,7 +57,7 @@
     "graphql": "16.9.0",
     "graphql-ws": "5.16.0",
     "nock": "14.0.0-beta.7",
-    "vitest": "1.6.0",
+    "vitest": "2.0.3",
     "ws": "8.18.0"
   },
   "publishConfig": {

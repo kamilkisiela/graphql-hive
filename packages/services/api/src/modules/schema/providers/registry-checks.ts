@@ -24,7 +24,7 @@ import type {
   SingleSchema,
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
-import { Inspector } from './inspector';
+import { diffSchemaCoordinates, Inspector, SchemaCoordinatesDiffResult } from './inspector';
 import { SchemaCheckWarning } from './models/shared';
 import { extendWithBase, isCompositeSchema, SchemaHelper } from './schema-helper';
 
@@ -37,7 +37,7 @@ export type ConditionalBreakingChangeDiffConfig = {
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
 // https://bit.ly/hive-check-result-data
-export type CheckResult<C = unknown, F = unknown> =
+export type CheckResult<C = unknown, F = unknown, S = unknown> =
   | {
       status: 'completed';
       result: C;
@@ -48,6 +48,7 @@ export type CheckResult<C = unknown, F = unknown> =
     }
   | {
       status: 'skipped';
+      data?: S;
     };
 
 type Schemas = [SingleSchema] | PushedCompositeSchema[];
@@ -134,6 +135,7 @@ type SchemaDiffFailure = {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
     all: Array<SchemaChangeType> | null;
+    coordinatesDiff: SchemaCoordinatesDiffResult | null;
   };
   result?: never;
 };
@@ -144,6 +146,7 @@ export type SchemaDiffSuccess = {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
     all: Array<SchemaChangeType> | null;
+    coordinatesDiff: SchemaCoordinatesDiffResult | null;
   };
   reason?: never;
 };
@@ -412,32 +415,39 @@ export class RegistryChecks {
     /** Settings for fetching conditional breaking changes. */
     conditionalBreakingChangeConfig: null | ConditionalBreakingChangeDiffConfig;
   }) {
-    if (args.existingSdl == null || args.incomingSdl == null) {
-      this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
+    let existingSchema: GraphQLSchema | null = null;
+    let incomingSchema: GraphQLSchema | null = null;
+
+    try {
+      existingSchema = args.existingSdl
+        ? buildSortedSchemaFromSchemaObject(
+            this.helper.createSchemaObject({
+              sdl: args.existingSdl,
+            }),
+          )
+        : null;
+
+      incomingSchema = args.incomingSdl
+        ? buildSortedSchemaFromSchemaObject(
+            this.helper.createSchemaObject({
+              sdl: args.incomingSdl,
+            }),
+          )
+        : null;
+    } catch (error) {
+      this.logger.error('Failed to build schema for diff. Skip diff check.');
       return {
         status: 'skipped',
       } satisfies CheckResult;
     }
 
-    let existingSchema: GraphQLSchema;
-    let incomingSchema: GraphQLSchema;
-
-    try {
-      existingSchema = buildSortedSchemaFromSchemaObject(
-        this.helper.createSchemaObject({
-          sdl: args.existingSdl,
-        }),
-      );
-
-      incomingSchema = buildSortedSchemaFromSchemaObject(
-        this.helper.createSchemaObject({
-          sdl: args.incomingSdl,
-        }),
-      );
-    } catch (error) {
-      this.logger.error('Failed to build schema for diff. Skip diff check.');
+    if (existingSchema === null || incomingSchema === null) {
+      this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
       return {
         status: 'skipped',
+        data: {
+          coordinatesDiff: incomingSchema ? diffSchemaCoordinates(null, incomingSchema) : null,
+        },
       } satisfies CheckResult;
     }
 
@@ -511,6 +521,8 @@ export class RegistryChecks {
     const safeChanges: Array<SchemaChangeType> = [];
     const breakingChanges: Array<SchemaChangeType> = [];
 
+    const coordinatesDiff = diffSchemaCoordinates(existingSchema, incomingSchema);
+
     for (const change of inspectorChanges) {
       if (change.criticality === CriticalityLevel.Breaking) {
         if (change.isSafeBasedOnUsage === true) {
@@ -549,6 +561,7 @@ export class RegistryChecks {
             }
             return null;
           },
+          coordinatesDiff,
         },
       } satisfies SchemaDiffFailure;
     }
@@ -568,6 +581,7 @@ export class RegistryChecks {
           }
           return null;
         },
+        coordinatesDiff,
       },
     } satisfies SchemaDiffSuccess;
   }

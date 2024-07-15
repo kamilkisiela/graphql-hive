@@ -130,6 +130,7 @@ module.exports = {
         'prefer-destructuring': 'off',
         'prefer-const': 'off',
         'no-useless-escape': 'off',
+        'no-inner-declarations': 'off',
         '@typescript-eslint/no-unnecessary-type-assertion': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
