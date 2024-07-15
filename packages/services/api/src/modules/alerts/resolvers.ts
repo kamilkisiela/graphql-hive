@@ -3,20 +3,6 @@ import type { AlertsModule } from './__generated__/types';
 import { AlertsManager } from './providers/alerts-manager';
 
 export const resolvers: AlertsModule.Resolvers = {
-  Project: {
-    async alerts(project, _, { injector }) {
-      return injector.get(AlertsManager).getAlerts({
-        organization: project.orgId,
-        project: project.id,
-      });
-    },
-    async alertChannels(project, _, { injector }) {
-      return injector.get(AlertsManager).getChannels({
-        organization: project.orgId,
-        project: project.id,
-      });
-    },
-  },
   Alert: {
     async channel(alert, _, { injector }) {
       const channels = await injector.get(AlertsManager).getChannels({
