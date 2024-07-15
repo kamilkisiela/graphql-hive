@@ -53,7 +53,8 @@
   "typings": "dist/typings/index.d.ts",
   "scripts": {
     "build": "bob build && node build-example.mjs",
-    "check:build": "bob check"
+    "check:build": "bob check",
+    "example": "pnpm build && PORT=3012 SECRET=secretsecret node dist/example.js"
   },
   "peerDependencies": {
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0"

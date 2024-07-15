@@ -16,41 +16,31 @@ We are using Vitest to test the following concerns:
 
 Integration tests are based pre-built Docker images, so you can run it in 2 modes:
 
-#### Running from Source Code
+#### Running from built artifact (Docker)
 
-**TL;DR**: Use `pnpm integration:prepare` command to set up the complete environment from locally
-running integration tests. You can ignore the rest of the commands in this section, if this script
-worked for you, and just run `pnpm test:integration` to run the actual tests.
+**To run integration tests locally with a built artifact, you need to build a Docker image for the
+services. **
 
-To run integration tests locally, from the local source code, you need to build a valid Docker
-image.
+Use `pnpm integration:prepare` command to set up the complete environment from locally running
+integration tests.
 
-To do so, follow these instructions:
+And then, to run the tests, use the following:
 
-1. Install all deps: `pnpm i`
-2. Generate types: `pnpm graphql:generate`
-3. Build source code: `pnpm build`
-4. Set env vars:
-   ```bash
-   export COMMIT_SHA="local"
-   export RELEASE="local"
-   export BRANCH_NAME="local"
-   export BUILD_TYPE=""
-   export DOCKER_TAG=":local"
-   ```
-5. Compile a local Docker image by running:
-   `docker buildx bake -f docker/docker.hcl integration-tests --load`
-6. Use Docker Compose to run the built containers (based on `community` compose file), along with
-   the extra containers:
+```
+pnpm test:integration
+```
 
-   ```bash
-   export DOCKER_TAG=":local"
-   export DOCKER_REGISTRY=""
-   
-   docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
-   ```
+> Make sure to run the prepare command every time you change your code.
 
-7. Run the tests: `pnpm --filter integration-tests test:integration`
+#### Running from source code (local services)
+
+You can also run integration tests against the local-running services, during development.
+
+To do so, use the following instructions:
+
+1. Run Hive from VSCode (using `Start Hive` button).
+2. Make sure all services are running correctly.
+3. Run integration tests with `pnpm dev:integration` command (from root directory).
 
 #### Running from Pre-Built Docker Image
 
