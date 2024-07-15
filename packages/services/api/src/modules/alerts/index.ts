@@ -3,7 +3,7 @@ import { TeamsCommunicationAdapter } from './providers/adapters/msteams';
 import { SlackCommunicationAdapter } from './providers/adapters/slack';
 import { WebhookCommunicationAdapter } from './providers/adapters/webhook';
 import { AlertsManager } from './providers/alerts-manager';
-import { resolvers } from './resolvers';
+import { resolvers } from './resolvers.generated';
 import typeDefs from './module.graphql';
 
 export const alertsModule = createModule({
