@@ -7,46 +7,6 @@ import { AlertsManager } from './providers/alerts-manager';
 
 export const resolvers: AlertsModule.Resolvers = {
   Mutation: {
-    async addAlert(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organizationId, projectId, targetId] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      const project = await injector.get(ProjectManager).getProject({
-        organization: organizationId,
-        project: projectId,
-      });
-
-      try {
-        const alert = await injector.get(AlertsManager).addAlert({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          channel: input.channel,
-          type: input.type,
-        });
-
-        return {
-          ok: {
-            addedAlert: alert,
-            updatedProject: project,
-          },
-        };
-      } catch (error) {
-        if (error instanceof HiveError) {
-          return {
-            error: {
-              message: error.message,
-            },
-          };
-        }
-
-        throw error;
-      }
-    },
     async deleteAlerts(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organizationId, projectId] = await Promise.all([
