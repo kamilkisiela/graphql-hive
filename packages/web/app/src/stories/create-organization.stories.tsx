@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { CreateOrganizationFormContent } from '@/components/ui/modals/create-organization';
+import { CreateOrganizationFormContent } from '@/pages/organization-new';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Meta, StoryObj } from '@storybook/react';
 
