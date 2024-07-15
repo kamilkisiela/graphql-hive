@@ -10,29 +10,6 @@ const ProjectNameModel = NameModel.min(2).max(40);
 
 export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
   Mutation: {
-    async deleteProject(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organizationId, projectId] = await Promise.all([
-        translator.translateOrganizationId({
-          organization: selector.organization,
-        }),
-        translator.translateProjectId({
-          organization: selector.organization,
-          project: selector.project,
-        }),
-      ]);
-      const deletedProject = await injector.get(ProjectManager).deleteProject({
-        organization: organizationId,
-        project: projectId,
-      });
-      return {
-        selector: {
-          organization: organizationId,
-          project: projectId,
-        },
-        deletedProject,
-      };
-    },
     async updateProjectName(_, { input }, { injector }) {
       const UpdateProjectNameModel = z.object({
         name: ProjectNameModel,
