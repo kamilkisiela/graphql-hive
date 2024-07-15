@@ -2848,6 +2848,25 @@ export async function createStorage(
         );
       });
     }),
+    async getSchemaCoordinatesOlderThanDate({ targetId, date }) {
+      const dbResult = await pool.query<unknown>(
+        sql`/* getSchemaCoordinatesOlderThanDate */
+          SELECT 
+            coordinate,
+            created_at as timestamp
+          FROM
+            schema_coordinate_status
+          WHERE 
+            target_id = ${targetId}
+            AND
+            created_at <= ${date.toISOString()}
+          ORDER BY 
+            created_at DESC
+        `,
+      );
+
+      return SchemaCleanupTrackerModel.parseAsync(dbResult.rows);
+    },
     async createActivity({ organization, project, target, user, type, meta }) {
       const { identifiers, values } = objectToParams<Omit<activities, 'id' | 'created_at'>>({
         activity_metadata: meta,

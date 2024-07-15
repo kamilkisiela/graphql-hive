@@ -228,6 +228,12 @@ function DeprecatedSchemaExplorer(props: {
         </div>
         <div className="flex justify-end gap-x-2">
           <DateRangePicker
+            label="Usage"
+            tooltip={
+              <>
+                <p>Select 7 days to see usage information from the past 7 days.</p>
+              </>
+            }
             validUnits={['y', 'M', 'w', 'd', 'h']}
             selectedRange={dateRangeController.selectedPreset.range}
             startDate={dateRangeController.startDate}

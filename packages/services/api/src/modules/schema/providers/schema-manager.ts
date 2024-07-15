@@ -1336,6 +1336,31 @@ export class SchemaManager {
     this.logger.info('User not found. (userId=%s)', input.userId);
     return null;
   }
+
+  async getSchemaCoordinatesOlderThanDate(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    date: Date;
+  }) {
+    this.logger.debug(
+      'Get schema coordinates older than date. (target=%s, date=%s)',
+      args.targetId,
+      args.date.toISOString(),
+    );
+
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.storage.getSchemaCoordinatesOlderThanDate({
+      targetId: args.targetId,
+      date: args.date,
+    });
+  }
 }
 
 export function shouldUseLatestComposableVersion(

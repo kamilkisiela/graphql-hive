@@ -516,6 +516,19 @@ export interface Storage {
 
   getSchemaLog(_: { commit: string; target: string }): Promise<SchemaLog>;
 
+  getSchemaCoordinatesOlderThanDate(_: {
+    targetId: string;
+    /**
+     * Data is aggregated daily, so we need to check the day after the date.
+     */
+    date: Date;
+  }): Promise<
+    ReadonlyArray<{
+      coordinate: string;
+      timestamp: number;
+    }>
+  >;
+
   createActivity(
     _: {
       user: string;
