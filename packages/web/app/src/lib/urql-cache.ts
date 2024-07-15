@@ -8,8 +8,8 @@ import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/p
 import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
+import type { CreateOrganizationMutation } from '@/components/ui/modals/create-organization';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
-import type { CreateOrganizationMutation } from '@/components/v2/modals/create-organization';
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
