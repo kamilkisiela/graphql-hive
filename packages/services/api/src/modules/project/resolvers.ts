@@ -12,12 +12,6 @@ const URLModel = z.string().url().max(500);
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 
 export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
-  Query: {
-    async projects(_, { selector }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
-      return injector.get(ProjectManager).getProjects({ organization });
-    },
-  },
   Mutation: {
     async createProject(_, { input }, { injector }) {
       const CreateProjectModel = z.object({
