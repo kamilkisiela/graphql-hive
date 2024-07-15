@@ -1,25 +1,6 @@
-import { TargetManager } from '../target/providers/target-manager';
 import type { AlertsModule } from './__generated__/types';
-import { AlertsManager } from './providers/alerts-manager';
 
 export const resolvers: AlertsModule.Resolvers = {
-  Alert: {
-    async channel(alert, _, { injector }) {
-      const channels = await injector.get(AlertsManager).getChannels({
-        organization: alert.organizationId,
-        project: alert.projectId,
-      });
-
-      return channels.find(c => c.id === alert.channelId)!;
-    },
-    target(alert, _, { injector }) {
-      return injector.get(TargetManager).getTarget({
-        organization: alert.organizationId,
-        project: alert.projectId,
-        target: alert.targetId,
-      });
-    },
-  },
   AlertSlackChannel: {
     __isTypeOf(channel) {
       return channel.type === 'SLACK';
