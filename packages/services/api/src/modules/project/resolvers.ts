@@ -13,17 +13,6 @@ const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undef
 
 export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
   Query: {
-    async project(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-      ]);
-      return injector.get(ProjectManager).getProject({
-        project,
-        organization,
-      });
-    },
     async projects(_, { selector }, { injector }) {
       const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
       return injector.get(ProjectManager).getProjects({ organization });
