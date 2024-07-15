@@ -6,7 +6,7 @@ import {
 import { history } from '../../../testkit/emails';
 import { initSeed } from '../../../testkit/seed';
 
-test.concurrent('owner of an organization should have all scopes', async () => {
+test.concurrent('owner of an organization should have all scopes', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { organization } = await createOrg();
 
@@ -23,7 +23,7 @@ test.concurrent('owner of an organization should have all scopes', async () => {
   });
 });
 
-test.concurrent('invited member should have basic scopes (Viewer role)', async () => {
+test.concurrent('invited member should have basic scopes (Viewer role)', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { inviteAndJoinMember } = await createOrg();
   const { member } = await inviteAndJoinMember();
@@ -46,7 +46,7 @@ test.concurrent('invited member should have basic scopes (Viewer role)', async (
 
 test.concurrent(
   'cannot create a role with an access scope that user has no access to',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, organization } = await createOrg();
     const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
@@ -80,7 +80,7 @@ test.concurrent(
 
 test.concurrent(
   'cannot grant an access scope to another user if user has no access to that scope',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, organization } = await createOrg();
     const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
@@ -120,7 +120,7 @@ test.concurrent(
 
 test.concurrent(
   'granting no scopes is equal to setting read-only for org, project and target',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember } = await createOrg();
     const { createMemberRole } = await inviteAndJoinMember();
@@ -139,7 +139,7 @@ test.concurrent(
   },
 );
 
-test.concurrent('cannot downgrade a member when assigning a new role', async () => {
+test.concurrent('cannot downgrade a member when assigning a new role', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { inviteAndJoinMember } = await createOrg();
   const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
@@ -196,7 +196,7 @@ test.concurrent('cannot downgrade a member when assigning a new role', async () 
   });
 });
 
-test.concurrent('cannot downgrade a member when modifying a role', async () => {
+test.concurrent('cannot downgrade a member when modifying a role', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { inviteAndJoinMember } = await createOrg();
   const { createMemberRole, assignMemberRole, member, updateMemberRole } =
@@ -252,7 +252,7 @@ test.concurrent('cannot downgrade a member when modifying a role', async () => {
   });
 });
 
-test.concurrent('cannot delete a role with members', async () => {
+test.concurrent('cannot delete a role with members', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { inviteAndJoinMember } = await createOrg();
   const { createMemberRole, deleteMemberRole, assignMemberRole, member } =
@@ -290,7 +290,7 @@ test.concurrent('cannot delete a role with members', async () => {
   ).rejects.toThrowError('Cannot delete a role with members');
 });
 
-test.concurrent('cannot invite a member with more access than the inviter', async () => {
+test.concurrent('cannot invite a member with more access than the inviter', async ({ expect }) => {
   const seed = initSeed();
   const { createOrg } = await seed.createOwner();
   const { inviteMember, inviteAndJoinMember, organization } = await createOrg();
@@ -334,7 +334,7 @@ test.concurrent('cannot invite a member with more access than the inviter', asyn
   expect(inviteCode).toBeDefined();
 });
 
-test.concurrent('email invitation', async () => {
+test.concurrent('email invitation', async ({ expect }) => {
   const seed = initSeed();
   const { createOrg } = await seed.createOwner();
   const { inviteMember } = await createOrg();
@@ -348,33 +348,36 @@ test.concurrent('email invitation', async () => {
   expect(sentEmails).toContainEqual(expect.objectContaining({ to: inviteEmail }));
 });
 
-test.concurrent('cannot join organization twice using the same invitation code', async () => {
-  const seed = initSeed();
-  const { createOrg } = await seed.createOwner();
-  const { inviteMember, joinMemberUsingCode } = await createOrg();
+test.concurrent(
+  'cannot join organization twice using the same invitation code',
+  async ({ expect }) => {
+    const seed = initSeed();
+    const { createOrg } = await seed.createOwner();
+    const { inviteMember, joinMemberUsingCode } = await createOrg();
 
-  // Invite
-  const invitationResult = await inviteMember();
-  const inviteCode = invitationResult.ok!.code;
-  expect(inviteCode).toBeDefined();
+    // Invite
+    const invitationResult = await inviteMember();
+    const inviteCode = invitationResult.ok!.code;
+    expect(inviteCode).toBeDefined();
 
-  // Join
-  const extra = seed.generateEmail();
-  const { access_token: member_access_token } = await seed.authenticate(extra);
-  const joinResult = await (
-    await joinMemberUsingCode(inviteCode, member_access_token)
-  ).expectNoGraphQLErrors();
+    // Join
+    const extra = seed.generateEmail();
+    const { access_token: member_access_token } = await seed.authenticate(extra);
+    const joinResult = await (
+      await joinMemberUsingCode(inviteCode, member_access_token)
+    ).expectNoGraphQLErrors();
 
-  expect(joinResult.joinOrganization.__typename).toBe('OrganizationPayload');
+    expect(joinResult.joinOrganization.__typename).toBe('OrganizationPayload');
 
-  if (joinResult.joinOrganization.__typename !== 'OrganizationPayload') {
-    throw new Error('Join failed');
-  }
+    if (joinResult.joinOrganization.__typename !== 'OrganizationPayload') {
+      throw new Error('Join failed');
+    }
 
-  const other = seed.generateEmail();
-  const { access_token: other_access_token } = await seed.authenticate(other);
-  const otherJoinResult = await (
-    await joinMemberUsingCode(inviteCode, other_access_token)
-  ).expectNoGraphQLErrors();
-  expect(otherJoinResult.joinOrganization.__typename).toBe('OrganizationInvitationError');
-});
+    const other = seed.generateEmail();
+    const { access_token: other_access_token } = await seed.authenticate(other);
+    const otherJoinResult = await (
+      await joinMemberUsingCode(inviteCode, other_access_token)
+    ).expectNoGraphQLErrors();
+    expect(otherJoinResult.joinOrganization.__typename).toBe('OrganizationInvitationError');
+  },
+);

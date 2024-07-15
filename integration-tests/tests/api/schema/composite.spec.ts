@@ -8,7 +8,7 @@ describe.each`
   ${ProjectType.Stitching}  | ${'legacy'}
   ${ProjectType.Federation} | ${'legacy'}
 `('$projectType ($model)', ({ projectType, model }) => {
-  test.concurrent('should insert lowercase service name to DB', async () => {
+  test.concurrent('should insert lowercase service name to DB', async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(projectType, {
@@ -141,7 +141,7 @@ describe.each`
 `('$projectType', ({ projectType }) => {
   test.concurrent(
     'should publish A, publish B, delete B, publish A and have A and B at the end',
-    async () => {
+    async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject } = await createOrg();
       const { createToken } = await createProject(projectType);

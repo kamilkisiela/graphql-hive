@@ -44,7 +44,7 @@ const CreateOIDCIntegrationMutation = graphql(`
 
 describe('create', () => {
   describe('permissions="organization:integrations"', () => {
-    test.concurrent('success', async () => {
+    test.concurrent('success', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -315,7 +315,7 @@ describe('create', () => {
       `);
     });
 
-    test.concurrent('error: multiple integrations per organization', async () => {
+    test.concurrent('error: multiple integrations per organization', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -399,7 +399,7 @@ const DeleteOIDCIntegrationMutation = graphql(`
 
 describe('delete', () => {
   describe('permissions="organization:integrations"', () => {
-    test.concurrent('success', async () => {
+    test.concurrent('success', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 
@@ -621,7 +621,7 @@ const UpdateOIDCIntegrationMutation = graphql(`
 
 describe('update', () => {
   describe('permissions="organization:integrations"', () => {
-    test.concurrent('success', async () => {
+    test.concurrent('success', async ({ expect }) => {
       const { ownerToken, createOrg } = await initSeed().createOwner();
       const { organization } = await createOrg();
 

@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "dev:integration": "RUN_AGAINST_LOCAL_SERVICES=1 vitest",
     "prepare:env": "cd ../ && pnpm build:libraries && pnpm build:services",
     "test:integration": "vitest",
     "typecheck": "tsc --noEmit"

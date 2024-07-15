@@ -1,7 +1,10 @@
+import { getServiceHost } from 'testkit/utils';
 import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
-const host = process.env['SCHEMA_SERVICE_HOST_OVERRIDE'] || 'http://localhost:3002';
+const host =
+  process.env['SCHEMA_SERVICE_HOST_OVERRIDE'] ||
+  (await getServiceHost('schema', 3002).then(r => `http://${r}`));
 
 const client = createTRPCProxyClient<SchemaBuilderApi>({
   links: [

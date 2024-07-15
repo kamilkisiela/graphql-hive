@@ -12,7 +12,7 @@ import { initSeed } from '../../../testkit/seed';
 
 test.concurrent(
   'accessing non-existing ownership transfer request should result in null',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { organization } = await createOrg();
 
@@ -28,43 +28,49 @@ test.concurrent(
   },
 );
 
-test.concurrent('owner should be able to request the ownership transfer to a member', async () => {
-  const { createOrg, ownerToken } = await initSeed().createOwner();
-  const { organization, inviteAndJoinMember } = await createOrg();
-  const { member, memberEmail } = await inviteAndJoinMember();
+test.concurrent(
+  'owner should be able to request the ownership transfer to a member',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember } = await createOrg();
+    const { member, memberEmail } = await inviteAndJoinMember();
 
-  const transferRequestResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.user.id,
-    },
-    ownerToken,
-  ).then(r => r.expectNoGraphQLErrors());
+    const transferRequestResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.user.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
 
-  expect(transferRequestResult.requestOrganizationTransfer.ok?.email).toBe(memberEmail);
-});
+    expect(transferRequestResult.requestOrganizationTransfer.ok?.email).toBe(memberEmail);
+  },
+);
 
-test.concurrent('non-owner should not be able to request the ownership transfer', async () => {
-  const { createOrg, ownerEmail } = await initSeed().createOwner();
-  const { organization, inviteAndJoinMember, members } = await createOrg();
-  const { memberToken } = await inviteAndJoinMember();
-  const orgMembers = await members();
+test.concurrent(
+  'non-owner should not be able to request the ownership transfer',
+  async ({ expect }) => {
+    const { createOrg, ownerEmail } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember, members } = await createOrg();
+    const { memberToken } = await inviteAndJoinMember();
+    const orgMembers = await members();
 
-  const errors = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: orgMembers.find(u => u.user.email === ownerEmail)!.user.id,
-    },
-    memberToken,
-  ).then(r => r.expectGraphQLErrors());
+    const errors = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: orgMembers.find(u => u.user.email === ownerEmail)!.user.id,
+      },
+      memberToken,
+    ).then(r => r.expectGraphQLErrors());
 
-  expect(errors).toBeDefined();
-  expect(errors.length).toBe(1);
-});
+    expect(errors).toBeDefined();
+    expect(errors.length).toBe(1);
+  },
+);
 
 test.concurrent(
   'owner should not be able to request the ownership transfer to non-member',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { organization, inviteAndJoinMember } = await createOrg();
     const { memberToken, member } = await inviteAndJoinMember();
@@ -81,71 +87,77 @@ test.concurrent(
   },
 );
 
-test.concurrent('non-member should not be able to access the transfer request', async () => {
-  const { createOrg, ownerToken } = await initSeed().createOwner();
-  const { organization, inviteAndJoinMember } = await createOrg();
-  const { member } = await inviteAndJoinMember();
+test.concurrent(
+  'non-member should not be able to access the transfer request',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember } = await createOrg();
+    const { member } = await inviteAndJoinMember();
 
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.user.id,
-    },
-    ownerToken,
-  ).then(r => r.expectNoGraphQLErrors());
+    const requestTransferResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.user.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
 
-  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+    const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
 
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
+    if (!code) {
+      throw new Error('Could not create transfer request');
+    }
 
-  const { ownerToken: nonMemberToken } = await initSeed().createOwner();
+    const { ownerToken: nonMemberToken } = await initSeed().createOwner();
 
-  const errors = await getOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-    },
-    nonMemberToken,
-  ).then(r => r.expectGraphQLErrors());
+    const errors = await getOrganizationTransferRequest(
+      {
+        organization: organization.cleanId,
+        code,
+      },
+      nonMemberToken,
+    ).then(r => r.expectGraphQLErrors());
 
-  expect(errors).toBeDefined();
-  expect(errors.length).toBe(1);
-});
+    expect(errors).toBeDefined();
+    expect(errors.length).toBe(1);
+  },
+);
 
-test.concurrent('non-recipient should not be able to access the transfer request', async () => {
-  const { createOrg, ownerToken } = await initSeed().createOwner();
-  const { organization, inviteAndJoinMember } = await createOrg();
-  const { member } = await inviteAndJoinMember();
-  const { memberToken: lonelyMemberToken } = await inviteAndJoinMember();
+test.concurrent(
+  'non-recipient should not be able to access the transfer request',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember } = await createOrg();
+    const { member } = await inviteAndJoinMember();
+    const { memberToken: lonelyMemberToken } = await inviteAndJoinMember();
 
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.user.id,
-    },
-    ownerToken,
-  ).then(r => r.expectNoGraphQLErrors());
+    const requestTransferResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.user.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
 
-  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+    const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
 
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
+    if (!code) {
+      throw new Error('Could not create transfer request');
+    }
 
-  const requestResult = await getOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-    },
-    lonelyMemberToken,
-  ).then(r => r.expectNoGraphQLErrors());
+    const requestResult = await getOrganizationTransferRequest(
+      {
+        organization: organization.cleanId,
+        code,
+      },
+      lonelyMemberToken,
+    ).then(r => r.expectNoGraphQLErrors());
 
-  expect(requestResult.organizationTransferRequest).toBeNull();
-});
+    expect(requestResult.organizationTransferRequest).toBeNull();
+  },
+);
 
-test.concurrent('recipient should be able to access the transfer request', async () => {
+test.concurrent('recipient should be able to access the transfer request', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, inviteAndJoinMember } = await createOrg();
   const { member, memberToken } = await inviteAndJoinMember();
@@ -174,7 +186,7 @@ test.concurrent('recipient should be able to access the transfer request', async
   expect(requestResult.organizationTransferRequest).not.toBeNull();
 });
 
-test.concurrent('recipient should be able to answer the ownership transfer', async () => {
+test.concurrent('recipient should be able to answer the ownership transfer', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, inviteAndJoinMember } = await createOrg();
   const { member, memberToken } = await inviteAndJoinMember();
@@ -205,11 +217,45 @@ test.concurrent('recipient should be able to answer the ownership transfer', asy
   expect(answerResult.answerOrganizationTransferRequest.ok?.accepted).toBe(true);
 });
 
-test.concurrent('non-member should not be able to answer the ownership transfer', async () => {
+test.concurrent(
+  'non-member should not be able to answer the ownership transfer',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember } = await createOrg();
+    const { member } = await inviteAndJoinMember();
+    const { memberToken: lonelyMemberToken } = await inviteAndJoinMember();
+
+    const requestTransferResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.user.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+    if (!code) {
+      throw new Error('Could not create transfer request');
+    }
+
+    const answerResult = await answerOrganizationTransferRequest(
+      {
+        organization: organization.cleanId,
+        code,
+        accept: true,
+      },
+      lonelyMemberToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
+  },
+);
+
+test.concurrent('owner should not be able to answer the ownership transfer', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, inviteAndJoinMember } = await createOrg();
   const { member } = await inviteAndJoinMember();
-  const { memberToken: lonelyMemberToken } = await inviteAndJoinMember();
 
   const requestTransferResult = await requestOrganizationTransfer(
     {
@@ -231,78 +277,50 @@ test.concurrent('non-member should not be able to answer the ownership transfer'
       code,
       accept: true,
     },
-    lonelyMemberToken,
-  ).then(r => r.expectNoGraphQLErrors());
-
-  expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
-});
-
-test.concurrent('owner should not be able to answer the ownership transfer', async () => {
-  const { createOrg, ownerToken } = await initSeed().createOwner();
-  const { organization, inviteAndJoinMember } = await createOrg();
-  const { member } = await inviteAndJoinMember();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.user.id,
-    },
     ownerToken,
-  ).then(r => r.expectNoGraphQLErrors());
-
-  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    ownerToken,
-  ).then(r => r.expectNoGraphQLErrors());
-
-  expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
-});
-
-test.concurrent('non-member should not be able to answer the ownership transfer', async () => {
-  const { createOrg, ownerToken } = await initSeed().createOwner();
-  const { organization, inviteAndJoinMember } = await createOrg();
-  const { member } = await inviteAndJoinMember();
-
-  const requestTransferResult = await requestOrganizationTransfer(
-    {
-      organization: organization.cleanId,
-      user: member.user.id,
-    },
-    ownerToken,
-  ).then(r => r.expectNoGraphQLErrors());
-
-  const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
-
-  if (!code) {
-    throw new Error('Could not create transfer request');
-  }
-
-  const { ownerToken: nonMemberToken } = await initSeed().createOwner();
-  const answerResult = await answerOrganizationTransferRequest(
-    {
-      organization: organization.cleanId,
-      code,
-      accept: true,
-    },
-    nonMemberToken,
   ).then(r => r.expectNoGraphQLErrors());
 
   expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
 });
 
 test.concurrent(
+  'non-member should not be able to answer the ownership transfer',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, inviteAndJoinMember } = await createOrg();
+    const { member } = await inviteAndJoinMember();
+
+    const requestTransferResult = await requestOrganizationTransfer(
+      {
+        organization: organization.cleanId,
+        user: member.user.id,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const code = requestTransferResult.requestOrganizationTransfer.ok?.code;
+
+    if (!code) {
+      throw new Error('Could not create transfer request');
+    }
+
+    const { ownerToken: nonMemberToken } = await initSeed().createOwner();
+    const answerResult = await answerOrganizationTransferRequest(
+      {
+        organization: organization.cleanId,
+        code,
+        accept: true,
+      },
+      nonMemberToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(answerResult.answerOrganizationTransferRequest.error?.message).toBeDefined();
+  },
+);
+
+test.concurrent(
   'previous owner should keep the ownership until the new owner accepts the transfer',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken, ownerEmail } = await initSeed().createOwner();
     const { organization, inviteAndJoinMember, members } = await createOrg();
     const { member } = await inviteAndJoinMember();
@@ -350,7 +368,7 @@ test.concurrent(
 
 test.concurrent(
   'previous owner should have an Admin role, new owner should get an Admin role as well',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken, ownerEmail } = await initSeed().createOwner();
     const { organization, inviteAndJoinMember, members } = await createOrg();
     const { member, memberToken } = await inviteAndJoinMember();

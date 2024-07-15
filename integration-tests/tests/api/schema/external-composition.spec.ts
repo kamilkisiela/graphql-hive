@@ -1,10 +1,10 @@
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
-import { history, serviceName, servicePort } from '../../../testkit/external-composition';
+import { history } from '../../../testkit/external-composition';
 import { enableExternalSchemaComposition } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
-import { generateUnique } from '../../../testkit/utils';
+import { generateUnique, getServiceHost } from '../../../testkit/utils';
 
-test.concurrent('call an external service to compose and validate services', async () => {
+test.concurrent('call an external service to compose and validate services', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, setNativeFederation } = await createProject(ProjectType.Federation);
@@ -43,7 +43,7 @@ test.concurrent('call an external service to compose and validate services', asy
 
   // we use internal docker network to connect to the external composition service,
   // so we need to use the name and not resolved host
-  const dockerAddress = `${serviceName}:${servicePort}`;
+  const dockerAddress = await getServiceHost('external_composition', 3012, false);
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
     {
@@ -91,7 +91,7 @@ test.concurrent('call an external service to compose and validate services', asy
 
 test.concurrent(
   'an expected error coming from the external composition service should be visible to the user',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, setNativeFederation } = await createProject(
@@ -131,7 +131,7 @@ test.concurrent(
 
     // we use internal docker network to connect to the external composition service,
     // so we need to use the name and not resolved host
-    const dockerAddress = `${serviceName}:${servicePort}`;
+    const dockerAddress = await getServiceHost('external_composition', 3012, false);
     // enable external composition
     const externalCompositionResult = await enableExternalSchemaComposition(
       {
@@ -191,7 +191,7 @@ test.concurrent(
 
 test.concurrent(
   'a network error coming from the external composition service should be visible to the user',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, setNativeFederation } = await createProject(
@@ -231,7 +231,7 @@ test.concurrent(
 
     // we use internal docker network to connect to the external composition service,
     // so we need to use the name and not resolved host
-    const dockerAddress = `${serviceName}:${servicePort}`;
+    const dockerAddress = await getServiceHost('external_composition', 3012, false);
     // enable external composition
     const externalCompositionResult = await enableExternalSchemaComposition(
       {
@@ -326,7 +326,7 @@ test.concurrent('a timeout error should be visible to the user', async ({ expect
 
   // we use internal docker network to connect to the external composition service,
   // so we need to use the name and not resolved host
-  const dockerAddress = `${serviceName}:${servicePort}`;
+  const dockerAddress = await getServiceHost('external_composition', 3012, false);
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
     {
