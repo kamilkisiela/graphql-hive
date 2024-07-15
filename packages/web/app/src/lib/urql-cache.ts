@@ -8,9 +8,9 @@ import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/p
 import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
-import { CreateTarget_CreateTargetMutation } from '@/components/ui/create-target';
+import type { CreateProjectMutation } from '@/components/ui/create-project';
+import type { CreateTarget_CreateTargetMutation } from '@/components/ui/create-target';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
-import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
 import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
 import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
