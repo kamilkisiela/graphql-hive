@@ -4,12 +4,7 @@ import { OrganizationManager } from '../organization/providers/organization-mana
 import type { ProjectModule } from './__generated__/types';
 import { ProjectManager } from './providers/project-manager';
 
-export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
-  ProjectType: {
-    FEDERATION: ProjectType.FEDERATION,
-    STITCHING: ProjectType.STITCHING,
-    SINGLE: ProjectType.SINGLE,
-  },
+export const resolvers: ProjectModule.Resolvers = {
   Organization: {
     projects(organization, _, { injector }) {
       return injector.get(ProjectManager).getProjects({ organization: organization.id });
