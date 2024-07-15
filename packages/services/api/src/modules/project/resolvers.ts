@@ -2,14 +2,8 @@ import { ProjectType } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import type { ProjectModule } from './__generated__/types';
-import { ProjectManager } from './providers/project-manager';
 
 export const resolvers: ProjectModule.Resolvers = {
-  Organization: {
-    projects(organization, _, { injector }) {
-      return injector.get(ProjectManager).getProjects({ organization: organization.id });
-    },
-  },
   Project: {
     async experimental_nativeCompositionPerTarget(project, _, { injector }) {
       if (project.type !== ProjectType.FEDERATION) {
