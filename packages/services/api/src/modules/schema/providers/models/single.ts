@@ -307,6 +307,11 @@ export class SingleModel {
         changes: diffCheck.result?.all ?? diffCheck.reason?.all ?? null,
         messages,
         breakingChanges: null,
+        coordinatesDiff:
+          diffCheck.result?.coordinatesDiff ??
+          diffCheck.reason?.coordinatesDiff ??
+          diffCheck.data?.coordinatesDiff ??
+          null,
         compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,

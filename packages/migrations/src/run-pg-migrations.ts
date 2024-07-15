@@ -66,6 +66,7 @@ import migration_2024_04_09T10_10_00_check_approval_comment from './actions/2024
 import migration_2024_06_11T10_10_00_ms_teams_webhook from './actions/2024.06.11T10-10-00.ms-teams-webhook';
 import migration_2024_07_16T13_44_00_oidc_only_access from './actions/2024.07.16T13-44-00.oidc-only-access';
 import migration_2024_07_17T00_00_00_app_deployments from './actions/2024.07.17T00-00-00.app-deployments';
+import migration_2024_07_23T_09_36_00_schema_cleanup_tracker from './actions/2024.07.23T09.36.00.schema-cleanup-tracker';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -140,5 +141,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2024_06_11T10_10_00_ms_teams_webhook,
       migration_2024_07_16T13_44_00_oidc_only_access,
       migration_2024_07_17T00_00_00_app_deployments,
+      migration_2024_07_23T_09_36_00_schema_cleanup_tracker,
     ],
   });
