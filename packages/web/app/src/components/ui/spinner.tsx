@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { cn } from '@/lib/utils';
 
-export function Spinner({ className }: { className?: string }): ReactElement {
+export const Spinner = ({ className }: { className?: string }): ReactElement => {
   return (
     // Copied from https://chakra-ui.com/docs/components/spinner#usage
     <div
@@ -15,4 +15,4 @@ export function Spinner({ className }: { className?: string }): ReactElement {
       <span className="absolute [clip:rect(0,0,0,0)]">Loading...</span>
     </div>
   );
-}
+};
