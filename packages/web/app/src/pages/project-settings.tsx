@@ -36,6 +36,7 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useToggle } from '@/lib/hooks';
+import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
