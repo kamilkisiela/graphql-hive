@@ -1,4 +1,4 @@
-import { Callout } from '@theguild/components'
+import { Callout, Tabs } from '@theguild/components'
 
 # Hive CLI (Command Line Interface)
 
@@ -25,22 +25,42 @@ npm i -D @graphql-hive/cli
 If you are running a non-JavaScript project, you can download the prebuilt binary of Hive CLI using
 the following command:
 
-```sh
-curl -sSL https://graphql-hive.com/install.sh | sh
-```
+<Tabs items={['MacOS / Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```sh
+    curl -sSL https://graphql-hive.com/install.sh | sh
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ```sh
+    powershell -c "irm https://graphql-hive.com/install.ps1 | iex"
+    ```
+  </Tabs.Tab>
+</Tabs>
 
 #### Specific version
 
 You can also download a specific version of the binary:
 
-```sh
-curl -sSL https://graphql-hive.com/install.sh | sh -s "0.31.0"
-# or
-curl -sSL https://graphql-hive.com/install.sh | HIVE_CLI_VERSION="0.31.0" sh
-# or
-export HIVE_CLI_VERSION="0.31.0"
-curl -sSL https://graphql-hive.com/install.sh | sh
-```
+<Tabs items={['MacOS / Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```sh
+    curl -sSL https://graphql-hive.com/install.sh | sh -s "0.31.0"
+    # or
+    curl -sSL https://graphql-hive.com/install.sh | HIVE_CLI_VERSION="0.31.0" sh
+    # or
+    export HIVE_CLI_VERSION="0.31.0"
+    curl -sSL https://graphql-hive.com/install.sh | sh
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ```sh
+    set HIVE_CLI_VERSION="0.31.0" && powershell -c "irm https://graphql-hive.com/install.ps1 | iex"
+    ```
+  </Tabs.Tab>
+</Tabs>
 
 ## Usage
 
