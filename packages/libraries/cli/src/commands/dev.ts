@@ -1,7 +1,13 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { parse } from 'graphql';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { Flags } from '@oclif/core';
+import {
+  composeServices,
+  compositionHasErrors,
+  CompositionResult,
+} from '@theguild/federation-composition';
 import Command from '../base-command';
 import { graphql } from '../gql';
 import { graphqlEndpoint } from '../helpers/config';
@@ -79,13 +85,19 @@ type ServiceWithSource = {
 
 export default class Dev extends Command {
   static description = [
-    'Develop and compose Supergraph with service substitution',
+    'Develop and compose Supergraph with your local services.',
     'Only available for Federation projects.',
+    '',
+    'Two modes are available:',
+    " 1. Local mode (default): Compose provided services locally. (Uses Hive's native Federation v2 composition)",
+    ' 2. Remote mode: Perform composition remotely (according to project settings) using all services registered in the registry.',
+    '',
     'Work in Progress: Please note that this command is still under development and may undergo changes in future releases',
   ].join('\n');
   static flags = {
     'registry.endpoint': Flags.string({
       description: 'registry endpoint',
+      dependsOn: ['remote'],
     }),
     /** @deprecated */
     registry: Flags.string({
@@ -94,9 +106,11 @@ export default class Dev extends Command {
         message: 'use --registry.endpoint instead',
         version: '0.21.0',
       },
+      dependsOn: ['remote'],
     }),
     'registry.accessToken': Flags.string({
       description: 'registry access token',
+      dependsOn: ['remote'],
     }),
     /** @deprecated */
     token: Flags.string({
@@ -105,6 +119,7 @@ export default class Dev extends Command {
         message: 'use --registry.accessToken instead',
         version: '0.21.0',
       },
+      dependsOn: ['remote'],
     }),
     service: Flags.string({
       description: 'Service name',
@@ -137,11 +152,17 @@ export default class Dev extends Command {
       description: 'Where to save the supergraph schema file',
       default: 'supergraph.graphql',
     }),
+    remote: Flags.boolean({
+      // TODO: improve description
+      description: 'Compose provided services remotely',
+      default: false,
+    }),
     unstable__forceLatest: Flags.boolean({
       hidden: true,
       description:
-        'Force the command to use the latest version of the CLI, not the latest composable version.',
+        'Force the command to use the latest version of the CLI, not the latest composable version. ',
       default: false,
+      dependsOn: ['remote'],
     }),
   };
 
@@ -169,6 +190,8 @@ export default class Dev extends Command {
       });
     }
 
+    const isRemote = flags.remote === true;
+
     const serviceInputs = flags.service.map((name, i) => {
       const url = flags.url[i];
       const sdl = flags.schema ? flags.schema[i] : undefined;
@@ -182,34 +205,105 @@ export default class Dev extends Command {
 
     if (flags.watch === true) {
       void this.watch(flags.watchInterval, serviceInputs, services =>
-        this.compose({
-          services,
-          registry,
-          token,
-          write: flags.write,
-          unstable__forceLatest,
-          onError: message => {
-            this.fail(message);
-          },
-        }),
+        isRemote
+          ? this.compose({
+              services,
+              registry,
+              token,
+              write: flags.write,
+              unstable__forceLatest,
+              onError: message => {
+                this.fail(message);
+              },
+            })
+          : this.composeLocally({
+              services,
+              write: flags.write,
+              onError: message => {
+                this.fail(message);
+              },
+            }),
       );
       return;
     }
 
     const services = await this.resolveServices(serviceInputs);
 
-    return this.compose({
-      services,
-      registry,
-      token,
-      write: flags.write,
-      unstable__forceLatest,
-      onError: message => {
-        this.error(message, {
-          exit: 1,
+    return isRemote
+      ? this.compose({
+          services,
+          registry,
+          token,
+          write: flags.write,
+          unstable__forceLatest,
+          onError: message => {
+            this.error(message, {
+              exit: 1,
+            });
+          },
+        })
+      : this.composeLocally({
+          services,
+          write: flags.write,
+          onError: message => {
+            this.error(message, {
+              exit: 1,
+            });
+          },
         });
-      },
+  }
+
+  private async composeLocally(input: {
+    services: Array<{
+      name: string;
+      url: string;
+      sdl: string;
+    }>;
+    write: string;
+    onError: (message: string) => void | never;
+  }) {
+    const compositionResult = await new Promise<CompositionResult>((resolve, reject) => {
+      try {
+        resolve(
+          composeServices(
+            input.services.map(service => ({
+              name: service.name,
+              url: service.url,
+              typeDefs: parse(service.sdl),
+            })),
+          ),
+        );
+      } catch (error) {
+        reject(error);
+      }
+    }).catch(error => {
+      this.handleFetchError(error);
     });
+
+    if (compositionHasErrors(compositionResult)) {
+      if (compositionResult.errors) {
+        renderErrors.call(this, {
+          total: compositionResult.errors.length,
+          nodes: compositionResult.errors.map(error => ({
+            message: error.message,
+          })),
+        });
+      }
+
+      input.onError('Composition failed');
+      return;
+    }
+
+    if (typeof compositionResult.supergraphSdl !== 'string') {
+      input.onError(
+        'Composition successful but failed to get supergraph schema. Please try again later or contact support',
+      );
+      return;
+    }
+
+    this.success('Composition successful');
+    this.log(`Saving supergraph schema to ${input.write}`);
+    await writeFile(resolve(process.cwd(), input.write), compositionResult.supergraphSdl, 'utf-8');
   }
 
   private async compose(input: {
