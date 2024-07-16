@@ -12,6 +12,14 @@ import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import {
@@ -27,7 +35,6 @@ import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
 import { Input } from '@/components/v2/input';
-import { DeleteTargetModal } from '@/components/v2/modals';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
 import { Tag } from '@/components/v2/tag';
@@ -37,6 +44,7 @@ import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import { TrashIcon } from '@radix-ui/react-icons';
 import { Link, useRouter } from '@tanstack/react-router';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1260,3 +1268,114 @@ export function TargetSettingsPage(props: {
     </>
   );
 }
+
+export const DeleteTargetMutation = graphql(`
+  mutation deleteTarget($selector: TargetSelectorInput!) {
+    deleteTarget(selector: $selector) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTarget {
+        __typename
+        id
+      }
+    }
+  }
+`);
+
+type DeleteTargetModalProps = {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+};
+
+export const DeleteTargetModal = ({ ...props }: DeleteTargetModalProps): ReactElement => {
+  const { organizationId, projectId, targetId } = props;
+  const [, mutate] = useMutation(DeleteTargetMutation);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      selector: {
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      },
+    });
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete target',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Target deleted',
+        description: 'The target has been successfully deleted.',
+      });
+      props.toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId/$projectId',
+        params: {
+          organizationId,
+          projectId,
+        },
+      });
+    }
+  };
+
+  return (
+    <DeleteTargetModalContent
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+};
+
+type DeleteTargetModalContentProps = {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+};
+
+export const DeleteTargetModalContent = ({
+  ...props
+}: DeleteTargetModalContentProps): ReactElement => {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
+        <DialogHeader>
+          <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
+          <DialogTitle>Delete target</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Are you sure you wish to delete this target? This action is irreversible!
+        </DialogDescription>
+        <DialogFooter className="flex w-full gap-2">
+          <Button
+            type="button"
+            size="lg"
+            onClick={props.toggleModalOpen}
+            className="w-full justify-center"
+          >
+            Cancel
+          </Button>
+          <Button
+            size="lg"
+            variant="destructive"
+            onClick={props.handleDelete}
+            className="w-full justify-center"
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
