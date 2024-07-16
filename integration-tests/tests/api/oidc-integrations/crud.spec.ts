@@ -877,7 +877,7 @@ describe('restrictions', () => {
     expect(
       orgAfterDisablingOidcRestrictions.organization?.organization.oidcIntegration
         ?.oidcUserAccessOnly,
-    ).toEqual(true);
+    ).toEqual(false);
 
     const invitation = await inviteMember('example@example.com');
     const invitationCode = invitation.ok?.code;
