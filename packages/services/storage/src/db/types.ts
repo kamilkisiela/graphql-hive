@@ -407,7 +407,6 @@ export interface DBTables {
   projects: projects;
   schema_change_approvals: schema_change_approvals;
   schema_checks: schema_checks;
-  schema_cleanup_tracker: schema_cleanup_tracker;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;
