@@ -1,13 +1,31 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useMemo, useState } from 'react';
 import { LinkIcon } from 'lucide-react';
-import { useQuery } from 'urql';
+import { useQuery, UseQueryState } from 'urql';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { DocsLink } from '@/components/ui/docs-note';
 import { HiveLink } from '@/components/ui/hive-link';
+import { Link as UiLink } from '@/components/ui/link';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
-import { ConnectSchemaModal } from '@/components/v2/modals';
+import { CopyValue, Tag } from '@/components/v2';
 import { Tabs } from '@/components/v2/tabs';
 import { graphql } from '@/gql';
+import { ProjectType, type ConnectSchemaModalQuery as ConnectSchemaModalType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
+import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { cn } from '@/lib/utils';
@@ -291,3 +309,252 @@ export const TargetLayout = ({
     </>
   );
 };
+
+const ConnectSchemaModalQuery = graphql(`
+  query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
+    target(selector: $targetSelector) {
+      id
+      project {
+        id
+        type
+      }
+      cdnUrl
+      activeContracts(first: 20) {
+        edges {
+          node {
+            id
+            contractName
+            cdnUrl
+          }
+        }
+      }
+    }
+  }
+`);
+
+type CdnArtifactType = 'sdl' | 'services' | 'supergraph' | 'metadata';
+
+const ArtifactToProjectTypeMapping: Record<ProjectType, CdnArtifactType[]> = {
+  [ProjectType.Single]: ['sdl', 'metadata'],
+  [ProjectType.Stitching]: ['sdl', 'services'],
+  [ProjectType.Federation]: ['sdl', 'services', 'supergraph'],
+};
+
+const ArtifactTypeToDisplayName: Record<CdnArtifactType, string> = {
+  sdl: 'GraphQL SDL',
+  services: 'Services Definition and SDL',
+  supergraph: 'Apollo Federation Supergraph',
+  metadata: 'Hive Schema Metadata',
+};
+
+function composeEndpoint(baseUrl: string, artifactType: CdnArtifactType): string {
+  return `${baseUrl}/${artifactType}`;
+}
+
+export function ConnectSchemaModal(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
+  const [query] = useQuery({
+    query: ConnectSchemaModalQuery,
+    variables: {
+      targetSelector: {
+        organization: props.organizationId,
+        project: props.projectId,
+        target: props.targetId,
+      },
+    },
+    requestPolicy: 'cache-and-network',
+    // we only need to fetch the data when the modal is open
+    pause: !props.isOpen,
+  });
+
+  return (
+    <ConnectSchemaModalContent
+      isOpen={props.isOpen}
+      organizationId={props.organizationId}
+      projectId={props.projectId}
+      targetId={props.targetId}
+      toggleModalOpen={props.toggleModalOpen}
+      query={query}
+    />
+  );
+}
+
+export function ConnectSchemaModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+  query: UseQueryState<
+    ConnectSchemaModalType,
+    {
+      targetSelector: {
+        organization: string;
+        project: string;
+        target: string;
+      };
+    }
+  >;
+}) {
+  const [selectedGraph, setSelectedGraph] = useState<string>('DEFAULT_GRAPH');
+  const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
+
+  const selectedContract = useMemo(() => {
+    if (selectedGraph === 'DEFAULT_GRAPH') {
+      return null;
+    }
+    return props.query.data?.target?.activeContracts.edges.find(
+      ({ node }) => node.contractName === selectedGraph,
+    )?.node;
+  }, [selectedGraph]);
+
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="container flex w-[600px] max-w-[700px] flex-col gap-5 md:w-3/5">
+        <DialogHeader>
+          <DialogTitle className="mb-3 text-center">Hive CDN Access</DialogTitle>
+          <DialogDescription>
+            Hive leverages the{' '}
+            <UiLink
+              as="a"
+              variant="primary"
+              className="font-bold underline"
+              href="https://www.cloudflare.com/network"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CloudFlare Global Network
+            </UiLink>{' '}
+            to deliver your GraphQL schema and schema metadata. This means that your schema will be
+            available from the nearest location to your GraphQL gateway, with 100% uptime,
+            regardless of Hive's status.
+          </DialogDescription>
+        </DialogHeader>
+        {props.query.data?.target && (
+          <>
+            <DialogDescription>
+              Based on your project type, you can access different artifacts from Hive's CDN:
+            </DialogDescription>
+            <div className="flex flex-row justify-start gap-3">
+              <Select
+                value={selectedGraph}
+                onValueChange={value => {
+                  if (
+                    value !== 'DEFAULT_GRAPH' &&
+                    selectedArtifact !== 'sdl' &&
+                    selectedArtifact !== 'supergraph'
+                  ) {
+                    setSelectedArtifact('sdl');
+                  }
+                  setSelectedGraph(value);
+                }}
+              >
+                <SelectTrigger className="w-[250px] max-w-[300px]">
+                  <SelectValue placeholder="Select Graph" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DEFAULT_GRAPH">Default Graph</SelectItem>
+                  {props.query.data.target.activeContracts.edges.map(({ node }) => (
+                    <SelectItem key={node.id} value={node.contractName}>
+                      {node.contractName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={selectedArtifact}
+                onValueChange={(value: CdnArtifactType) => setSelectedArtifact(value)}
+              >
+                <SelectTrigger className="w-[250px] max-w-[300px]">
+                  <SelectValue placeholder="Select Artifact" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ArtifactToProjectTypeMapping[props.query.data.target.project.type].map(t => (
+                    <SelectItem
+                      key={t}
+                      value={t}
+                      disabled={
+                        t !== 'supergraph' && t !== 'sdl' && selectedGraph !== 'DEFAULT_GRAPH'
+                      }
+                    >
+                      {ArtifactTypeToDisplayName[t]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogDescription>
+              To access your schema from Hive's CDN, use the following endpoint:
+            </DialogDescription>
+            <CopyValue
+              value={composeEndpoint(
+                selectedContract?.cdnUrl ?? props.query.data.target.cdnUrl,
+                selectedArtifact,
+              )}
+            />
+            <DialogDescription>
+              To authenticate,{' '}
+              <UiLink
+                as="a"
+                search={{
+                  page: 'cdn',
+                }}
+                variant="primary"
+                className="font-bold underline"
+                to="/$organizationId/$projectId/$targetId/settings"
+                params={{
+                  organizationId: props.organizationId,
+                  projectId: props.projectId,
+                  targetId: props.targetId,
+                }}
+                target="_blank"
+                rel="noreferrer"
+              >
+                create a CDN Access Token from your target's Settings page
+              </UiLink>{' '}
+              use the CDN access token in your HTTP headers:
+              <br />
+            </DialogDescription>
+            <DialogDescription>
+              <Tag className="relative w-full">
+                X-Hive-CDN-Key: {'<'}Your Access Token{'>'}
+              </Tag>
+            </DialogDescription>
+
+            <DocsLink href="/features/high-availability-cdn">
+              Learn more about Hive High-Availability CDN
+            </DocsLink>
+            {props.query.data.target.project.type === ProjectType.Federation ? (
+              <DialogDescription className="text-center">
+                Read the{' '}
+                <UiLink
+                  variant="primary"
+                  target="_blank"
+                  rel="noreferrer"
+                  to={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn')}
+                >
+                  Using the Registry with a Apollo Gateway
+                </UiLink>{' '}
+                chapter in our documentation.
+              </DialogDescription>
+            ) : null}
+          </>
+        )}
+        <Button
+          type="button"
+          variant="default"
+          size="lg"
+          onClick={props.toggleModalOpen}
+          className="self-end"
+        >
+          Close
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
