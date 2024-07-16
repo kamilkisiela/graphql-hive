@@ -26,12 +26,12 @@ import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
 import { useClipboard } from '@/lib/hooks';
 
-function CopyInput(props: { value: string }) {
+function CopyInput(props: { value: string; id?: string }) {
   const copy = useClipboard();
 
   return (
     <div className="flex space-x-2">
-      <Input value={props.value} readOnly />
+      <Input id={props.id} value={props.value} readOnly />
       <Button
         variant="secondary"
         className="shrink-0"
@@ -563,15 +563,19 @@ function UpdateOIDCIntegrationForm(props: {
                   <div className="space-y-2">
                     <div className="space-y-2">
                       <Label>Sign-in redirect URI</Label>
-                      <CopyInput value={`${env.appBaseUrl}/auth/callback/oidc`} />
+                      <CopyInput
+                        id="sing-in-redirect-uri"
+                        value={`${env.appBaseUrl}/auth/callback/oidc`}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Sign-out redirect URI</Label>
-                      <CopyInput value={`${env.appBaseUrl}/logout`} />
+                      <CopyInput id="sign-put-redirect-uri" value={`${env.appBaseUrl}/logout`} />
                     </div>
                     <div className="space-y-2">
                       <Label>Your users can login to the organization via </Label>
                       <CopyInput
+                        id="sign-in-uri"
                         value={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
                       />
                     </div>

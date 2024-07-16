@@ -42,7 +42,7 @@ Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
 
   return cy
     .get('div[role="dialog"]')
-    .find('code')
+    .find('[id="sign-in-uri"]')
     .last()
     .then($elem => $elem.text())
     .then(loginUrl => {
