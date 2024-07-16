@@ -10,6 +10,7 @@ import { OrganizationAccessScope } from '../../auth/providers/organization-acces
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { BillingProvider } from '../../billing/providers/billing.provider';
+import { OIDCIntegrationsProvider } from '../../oidc-integrations/providers/oidc-integrations.provider';
 import { Emails, mjml } from '../../shared/providers/emails';
 import { Logger } from '../../shared/providers/logger';
 import type { OrganizationSelector } from '../../shared/providers/storage';
@@ -21,7 +22,6 @@ import {
   organizationViewerScopes,
   reservedOrganizationNames,
 } from './organization-config';
-import { OIDCIntegrationsProvider } from '../../oidc-integrations/providers/oidc-integrations.provider';
 
 function ensureReadAccess(
   scopes: readonly (OrganizationAccessScope | ProjectAccessScope | TargetAccessScope)[],

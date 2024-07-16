@@ -4,7 +4,6 @@ import { useFormik } from 'formik';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { useClient, useMutation } from 'urql';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
 import { Input, Tag } from '@/components/v2';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
@@ -21,8 +23,6 @@ import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/components/ui/use-toast';
 
 const classes = {
   container: cn('flex flex-col items-stretch gap-2'),
