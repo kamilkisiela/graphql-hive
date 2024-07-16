@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DottedBackground } from '@/components/ui/dotted-background';
 import { Meta } from '@/components/ui/meta';
+import { useToast } from '@/components/ui/use-toast';
 import { DataWrapper } from '@/components/v2/data-wrapper';
 import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { Link, useRouter } from '@tanstack/react-router';
-import { useToast } from '@/components/ui/use-toast';
 
 const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
   mutation JoinOrganizationPage_JoinOrganizationMutation($code: String!) {

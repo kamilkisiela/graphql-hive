@@ -12,19 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { Tag } from '@/components/v2';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
+import { useClipboard } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
-import { useClipboard } from '@/lib/hooks';
 
 function CopyInput(props: { value: string; id?: string }) {
   const copy = useClipboard();
