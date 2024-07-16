@@ -261,15 +261,6 @@ export interface schema_checks {
   updated_at: Date;
 }
 
-export interface schema_cleanup_tracker {
-  coordinate: string;
-  created_at: Date;
-  created_in_version_id: string;
-  deprecated_at: Date | null;
-  deprecated_in_version_id: string | null;
-  target_id: string;
-}
-
 export interface schema_log {
   action: string;
   author: string;
