@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useMemo, useState } from 'react';
 import { LinkIcon } from 'lucide-react';
-import { useQuery } from 'urql';
+import { useQuery, UseQueryState } from 'urql';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
