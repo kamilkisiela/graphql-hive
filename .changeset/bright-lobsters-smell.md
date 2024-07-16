@@ -2,7 +2,7 @@
 '@graphql-hive/cli': minor
 ---
 
-Changes the default behavior of `hive dev` command where schema composition is done locally, without substituting subgraphs available in the registry.
+Changes the default behavior of `hive dev` command. Now schema composition is done locally, without substituting subgraphs available in the registry.
 
 We added `--remote` flag to the `hive dev` command to mimic the previous behavior.
 
