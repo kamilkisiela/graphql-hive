@@ -196,6 +196,7 @@ export function createAgent<TEvent>(
             },
             timeout: options.timeout,
             fetchImplementation: pluginOptions.__testing?.fetch,
+            logger: options.logger,
           })
           .catch(error => {
             debugLog(`Attempt ${attempt} failed: ${error.message}`);
@@ -218,7 +219,7 @@ export function createAgent<TEvent>(
 
       if (response.status < 200 || response.status >= 300) {
         throw new Error(
-          `[hive][${prefix}] Failed to send data (HTTP status ${response.status}): ${await response.text()}`,
+          `[hive][${prefix}] POST ${options.endpoint} failed with status code ${response.status}. ${await response.text()}`,
         );
       }
 
@@ -237,7 +238,9 @@ export function createAgent<TEvent>(
         throw error;
       }
 
-      options.logger.error(`[hive][${prefix}] Failed to send data: ${error.message}`);
+      options.logger.error(
+        `[hive][${prefix}] POST ${options.endpoint} failed with status ${error.message}`,
+      );
 
       return null;
     }

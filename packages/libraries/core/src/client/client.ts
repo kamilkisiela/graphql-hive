@@ -113,6 +113,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
               },
               timeout: 30_000,
               fetchImplementation: options?.agent?.__testing?.fetch,
+              logger,
             },
           );
 

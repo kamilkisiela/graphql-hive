@@ -1,5 +1,6 @@
 import asyncRetry from 'async-retry';
 import { fetch, URL } from '@whatwg-node/fetch';
+import type { Logger } from './types.js';
 
 type RetryOptions = Parameters<typeof asyncRetry>[1] & {
   retryWhen(response: Response): boolean;
@@ -13,6 +14,7 @@ function get(
     timeout?: number;
     fetchImplementation?: typeof fetch;
     retry?: RetryOptions;
+    logger?: Logger;
   },
 ) {
   return makeFetchCall(endpoint, {
@@ -21,6 +23,7 @@ function get(
     timeout: config.timeout,
     retry: config.retry,
     fetchImplementation: config.fetchImplementation,
+    logger: config.logger ?? console,
   });
 }
 
@@ -32,6 +35,7 @@ function post(
     timeout?: number;
     retry?: RetryOptions;
     fetchImplementation?: typeof fetch;
+    logger?: Logger;
   },
 ) {
   return makeFetchCall(endpoint, {
@@ -41,6 +45,7 @@ function post(
     timeout: config.timeout,
     retry: config.retry,
     fetchImplementation: config.fetchImplementation,
+    logger: config.logger ?? console,
   });
 }
 
@@ -58,6 +63,7 @@ async function makeFetchCall(
     timeout?: number;
     retry?: RetryOptions;
     fetchImplementation?: typeof fetch;
+    logger?: Logger;
   },
 ) {
   const controller = new AbortController();
@@ -92,17 +98,20 @@ async function makeFetchCall(
         }
 
         if (!retryOptions.retryWhen(res)) {
+          config.logger?.error(
+            `${config.method} ${endpoint} failed with status ${res.status}. ${res.statusText ?? 'Internal Server Error'}`,
+          );
           bail(
             new Error(
-              `Failed to fetch ${endpoint}, received: ${res.status} ${res.statusText ?? 'Internal Server Error'}`,
+              `${config.method} ${endpoint} failed with status ${res.status}. ${res.statusText ?? 'Internal Server Error'}`,
             ),
           );
           return;
         }
 
-        throw new Error(
-          `Failed to fetch ${endpoint}, received: ${res.status} ${res.statusText ?? 'Internal Server Error'}`,
-        );
+        const errorMessage = `${config.method} ${endpoint} failed with status ${res.status}. ${res.statusText ?? 'Internal Server Error'}`;
+        config.logger?.error(errorMessage);
+        throw new Error(errorMessage);
       },
       {
         ...retryOptions,
@@ -124,6 +133,10 @@ async function makeFetchCall(
         cause: error,
       });
     }
+
+    config.logger?.error(error);
+    config.logger?.error(`${config.method} ${endpoint} failed.`);
+
     throw error;
   } finally {
     if (timeoutId !== undefined) {
