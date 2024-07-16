@@ -230,7 +230,6 @@ const SettingsPageRenderer_OrganizationFragment = graphql(`
       ...CanAccessOrganization_MemberFragment
       isOwner
     }
-    ...DeleteOrganizationModal_OrganizationFragment
     ...TransferOrganizationOwnershipModal_OrganizationFragment
   }
 `);
