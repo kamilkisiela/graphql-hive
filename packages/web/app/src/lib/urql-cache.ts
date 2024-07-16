@@ -12,9 +12,9 @@ import type { DeleteCollectionMutationType } from '@/components/target/laborator
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/settings/registry-access-token';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
-import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
 import { graphql } from '@/gql';
 import type { CreateOrganizationMutation } from '@/pages/organization-new';
+import type { DeleteProjectMutation } from '@/pages/project-settings';
 import { CollectionsQuery } from '@/pages/target-laboratory';
 import {
   TokensDocument,

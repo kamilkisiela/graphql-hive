@@ -16,6 +16,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
 import { HiveLogo } from '@/components/ui/icon';
 import { Meta } from '@/components/ui/meta';
@@ -23,12 +31,12 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
 import { Input } from '@/components/v2/input';
-import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useToggle } from '@/lib/hooks';
+import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
@@ -431,3 +439,117 @@ export function ProjectSettingsPage(props: { organizationId: string; projectId: 
     </>
   );
 }
+
+export const DeleteProjectMutation = graphql(`
+  mutation deleteProject($selector: ProjectSelectorInput!) {
+    deleteProject(selector: $selector) {
+      selector {
+        organization
+        project
+      }
+      deletedProject {
+        __typename
+        id
+      }
+    }
+  }
+`);
+
+type DeleteProjectModalProps = {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+};
+
+export const DeleteProjectModal = ({
+  isOpen,
+  toggleModalOpen,
+  organizationId,
+  projectId,
+}: DeleteProjectModalProps): ReactElement => {
+  const [, mutate] = useMutation(DeleteProjectMutation);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      selector: {
+        organization: organizationId,
+        project: projectId,
+      },
+    });
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete project',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Project deleted',
+        description: 'The project has been successfully deleted.',
+      });
+      toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId',
+        params: {
+          organizationId,
+        },
+      });
+    }
+  };
+
+  return (
+    <DeleteProjectModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+};
+
+type DeleteProjectModalContentProps = {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+};
+
+export const DeleteProjectModalContent = ({
+  isOpen,
+  toggleModalOpen,
+  handleDelete,
+}: DeleteProjectModalContentProps): ReactElement => {
+  return (
+    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+      <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
+        <DialogHeader>
+          <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
+          <DialogTitle>Delete project</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Are you sure you wish to delete this project? This action is irreversible!
+        </DialogDescription>
+        <DialogFooter className="flex w-full gap-2">
+          <Button
+            type="button"
+            size="lg"
+            onClick={toggleModalOpen}
+            className="w-full justify-center"
+          >
+            Cancel
+          </Button>
+          <Button
+            size="lg"
+            variant="destructive"
+            onClick={handleDelete}
+            className="w-full justify-center"
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
