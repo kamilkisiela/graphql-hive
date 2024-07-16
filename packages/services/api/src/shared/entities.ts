@@ -216,6 +216,7 @@ export interface OIDCIntegration {
   tokenEndpoint: string;
   userinfoEndpoint: string;
   authorizationEndpoint: string;
+  oidcUserAccessOnly: boolean;
 }
 
 export interface CDNAccessToken {

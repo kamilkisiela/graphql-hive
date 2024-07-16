@@ -282,6 +282,36 @@ export class OIDCIntegrationsProvider {
     } as const;
   }
 
+  async updateOIDCRestrictions(args: { oidcIntegrationId: string; oidcUserAccessOnly: boolean }) {
+    if (this.isEnabled() === false) {
+      return {
+        type: 'error',
+        message: 'OIDC integrations are disabled.',
+      } as const;
+    }
+
+    const oidcIntegration = await this.storage.getOIDCIntegrationById({
+      oidcIntegrationId: args.oidcIntegrationId,
+    });
+
+    if (oidcIntegration === null) {
+      return {
+        type: 'error',
+        message: 'Integration not found.',
+      } as const;
+    }
+
+    await this.authManager.ensureOrganizationAccess({
+      organization: oidcIntegration.linkedOrganizationId,
+      scope: OrganizationAccessScope.INTEGRATIONS,
+    });
+
+    return {
+      type: 'ok',
+      oidcIntegration: await this.storage.updateOIDCRestrictions(args),
+    } as const;
+  }
+
   async getOIDCIntegrationById(args: { oidcIntegrationId: string }) {
     if (this.isEnabled() === false) {
       return {

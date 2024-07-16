@@ -4,6 +4,7 @@ import { useFormik } from 'formik';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { useClient, useMutation } from 'urql';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,8 @@ import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
 
 const classes = {
   container: cn('flex flex-col items-stretch gap-2'),
@@ -389,6 +392,7 @@ const UpdateOIDCIntegration_OIDCIntegrationFragment = graphql(`
     authorizationEndpoint
     clientId
     clientSecretPreview
+    oidcUserAccessOnly
   }
 `);
 
@@ -421,12 +425,36 @@ const UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation = graphql(`
   }
 `);
 
+const UpdateOIDCIntegrationForm_UpdateOIDCRestrictionsMutation = graphql(`
+  mutation UpdateOIDCIntegrationForm_UpdateOIDCRestrictionsMutation(
+    $input: UpdateOIDCRestrictionsInput!
+  ) {
+    updateOIDCRestrictions(input: $input) {
+      ok {
+        updatedOIDCIntegration {
+          id
+          oidcUserAccessOnly
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
 function UpdateOIDCIntegrationForm(props: {
   close: () => void;
   isOpen: boolean;
   oidcIntegration: DocumentType<typeof UpdateOIDCIntegration_OIDCIntegrationFragment>;
 }): ReactElement {
-  const [mutation, mutate] = useMutation(UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation);
+  const [oidcUpdateMutation, oidcUpdateMutate] = useMutation(
+    UpdateOIDCIntegrationForm_UpdateOIDCIntegrationMutation,
+  );
+  const [oidcRestrictionsMutation, oidcRestrictionsMutate] = useMutation(
+    UpdateOIDCIntegrationForm_UpdateOIDCRestrictionsMutation,
+  );
+  const { toast } = useToast();
 
   const formik = useFormik({
     initialValues: {
@@ -437,7 +465,7 @@ function UpdateOIDCIntegrationForm(props: {
       clientSecret: '',
     },
     async onSubmit(values) {
-      const result = await mutate({
+      const result = await oidcUpdateMutate({
         input: {
           oidcIntegrationId: props.oidcIntegration.id,
           tokenEndpoint: values.tokenEndpoint,
@@ -460,6 +488,46 @@ function UpdateOIDCIntegrationForm(props: {
     },
   });
 
+  const onOidcUserAccessOnlyChange = async (oidcUserAccessOnly: boolean) => {
+    if (oidcRestrictionsMutation.fetching) {
+      return;
+    }
+
+    try {
+      toast({
+        title: 'Updating OIDC restrictions...',
+        variant: 'default',
+      });
+      const result = await oidcRestrictionsMutate({
+        input: {
+          oidcIntegrationId: props.oidcIntegration.id,
+          oidcUserAccessOnly,
+        },
+      });
+
+      if (result.data?.updateOIDCRestrictions.ok) {
+        toast({
+          title: 'OIDC restrictions updated successfully',
+          description: oidcUserAccessOnly
+            ? 'Only OIDC users can now access the organization'
+            : 'Access to the organization is no longer restricted to OIDC users',
+        });
+      } else {
+        toast({
+          title: 'Failed to update OIDC restrictions',
+          description: result.data?.updateOIDCRestrictions.error?.message ?? result.error?.message,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Failed to update OIDC restrictions',
+        description: String(error),
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
     <Dialog open={props.isOpen} onOpenChange={props.close}>
       <DialogContent className="flex min-h-[600px] w-[960px] max-w-none">
@@ -468,27 +536,59 @@ function UpdateOIDCIntegrationForm(props: {
             <DialogTitle>Manage OpenID Connect Integration</DialogTitle>
           </DialogHeader>
 
-          <div className="flex">
-            <div className={cn(classes.container, 'flex flex-1 flex-col pr-5')}>
-              <DialogTitle>OIDC Provider Instructions</DialogTitle>
-              <ul className="flex flex-col gap-5">
-                <li>
-                  <div className="pb-1"> Set your OIDC Provider Sign-in redirect URI to </div>
-                  <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
-                </li>
-                <li>
-                  <div className="pb-1"> Set your OIDC Provider Sign-out redirect URI to </div>
-                  <InlineCode content={`${env.appBaseUrl}/logout`} />
-                </li>
-                <li>
-                  <div className="pb-1">Your users can login to the organization via </div>
-                  <InlineCode
-                    content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
-                  />
-                </li>
-              </ul>
+          <div className="flex gap-x-5">
+            <div className="flex-1">
+              <div className="flex flex-col gap-y-5">
+                <div className={cn(classes.container, 'flex flex-col')}>
+                  <DialogTitle>OIDC Provider Instructions</DialogTitle>
+                  <ul className="flex flex-col gap-5">
+                    <li>
+                      <div className="pb-1"> Set your OIDC Provider Sign-in redirect URI to </div>
+                      <InlineCode content={`${env.appBaseUrl}/auth/callback/oidc`} />
+                    </li>
+                    <li>
+                      <div className="pb-1"> Set your OIDC Provider Sign-out redirect URI to </div>
+                      <InlineCode content={`${env.appBaseUrl}/logout`} />
+                    </li>
+                    <li>
+                      <div className="pb-1">Your users can login to the organization via </div>
+                      <InlineCode
+                        content={`${env.appBaseUrl}/auth/oidc?id=${props.oidcIntegration.id}`}
+                      />
+                    </li>
+                  </ul>
+                </div>
+
+                <Separator orientation="horizontal" />
+
+                <div className="space-y-5">
+                  <DialogTitle>Restrictions</DialogTitle>
+                  <div>
+                    <div className="flex items-center justify-between space-x-4">
+                      <div className="flex flex-col space-y-1 text-sm font-medium leading-none">
+                        <p>OIDC-Only Access</p>
+                        <p className="text-muted-foreground text-xs font-normal leading-snug">
+                          Restricts organization access to only authenticated OIDC accounts.
+                          <br />
+                          <span className="font-medium">
+                            Existing non-OIDC members will keep their access.
+                          </span>
+                        </p>
+                      </div>
+                      <Switch
+                        checked={props.oidcIntegration.oidcUserAccessOnly}
+                        onCheckedChange={onOidcUserAccessOnlyChange}
+                        disabled={oidcRestrictionsMutation.fetching}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className={cn(classes.container, 'flex-1 pl-5')}>
+
+            <Separator orientation="vertical" />
+
+            <div className={cn(classes.container, 'flex-1')}>
               <DialogTitle>Properties</DialogTitle>
 
               <label className="text-sm font-semibold" htmlFor="tokenEndpoint">
@@ -500,9 +600,13 @@ function UpdateOIDCIntegrationForm(props: {
                 name="tokenEndpoint"
                 onChange={formik.handleChange}
                 value={formik.values.tokenEndpoint}
-                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}
+                isInvalid={
+                  !!oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint
+                }
               />
-              <div>{mutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}</div>
+              <div>
+                {oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.tokenEndpoint}
+              </div>
 
               <label className="text-sm font-semibold" htmlFor="userinfoEndpoint">
                 User Info Endpoint
@@ -513,9 +617,13 @@ function UpdateOIDCIntegrationForm(props: {
                 name="userinfoEndpoint"
                 onChange={formik.handleChange}
                 value={formik.values.userinfoEndpoint}
-                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}
+                isInvalid={
+                  !!oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint
+                }
               />
-              <div>{mutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}</div>
+              <div>
+                {oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.userinfoEndpoint}
+              </div>
 
               <label className="text-sm font-semibold" htmlFor="authorizationEndpoint">
                 Authorization Endpoint
@@ -527,10 +635,16 @@ function UpdateOIDCIntegrationForm(props: {
                 onChange={formik.handleChange}
                 value={formik.values.authorizationEndpoint}
                 isInvalid={
-                  !!mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint
+                  !!oidcUpdateMutation.data?.updateOIDCIntegration.error?.details
+                    .authorizationEndpoint
                 }
               />
-              <div>{mutation.data?.updateOIDCIntegration.error?.details.authorizationEndpoint}</div>
+              <div>
+                {
+                  oidcUpdateMutation.data?.updateOIDCIntegration.error?.details
+                    .authorizationEndpoint
+                }
+              </div>
 
               <label className="text-sm font-semibold" htmlFor="clientId">
                 Client ID
@@ -541,9 +655,9 @@ function UpdateOIDCIntegrationForm(props: {
                 name="clientId"
                 onChange={formik.handleChange}
                 value={formik.values.clientId}
-                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientId}
+                isInvalid={!!oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.clientId}
               />
-              <div>{mutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
+              <div>{oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.clientId}</div>
 
               <label className="text-sm font-semibold" htmlFor="clientSecret">
                 Client Secret
@@ -560,16 +674,20 @@ function UpdateOIDCIntegrationForm(props: {
                 name="clientSecret"
                 onChange={formik.handleChange}
                 value={formik.values.clientSecret}
-                isInvalid={!!mutation.data?.updateOIDCIntegration.error?.details.clientSecret}
+                isInvalid={
+                  !!oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.clientSecret
+                }
               />
-              <div>{mutation.data?.updateOIDCIntegration.error?.details.clientSecret}</div>
+              <div>
+                {oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.clientSecret}
+              </div>
             </div>
           </div>
           <DialogFooter className="space-x-2 text-right">
             <Button variant="outline" onClick={props.close} tabIndex={0}>
               Close
             </Button>
-            <Button type="submit" disabled={mutation.fetching}>
+            <Button type="submit" disabled={oidcUpdateMutation.fetching || !formik.dirty}>
               Save
             </Button>
           </DialogFooter>

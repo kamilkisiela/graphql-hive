@@ -3371,6 +3371,7 @@ export async function createStorage(
           , "token_endpoint"
           , "userinfo_endpoint"
           , "authorization_endpoint"
+          , "oidc_user_access_only"
         FROM
           "oidc_integrations"
         WHERE
@@ -3396,6 +3397,7 @@ export async function createStorage(
           , "token_endpoint"
           , "userinfo_endpoint"
           , "authorization_endpoint"
+          , "oidc_user_access_only"
         FROM
           "oidc_integrations"
         WHERE
@@ -3458,6 +3460,7 @@ export async function createStorage(
             , "token_endpoint"
             , "userinfo_endpoint"
             , "authorization_endpoint"
+            , "oidc_user_access_only"
         `);
 
         return {
@@ -3511,6 +3514,31 @@ export async function createStorage(
           , "token_endpoint"
           , "userinfo_endpoint"
           , "authorization_endpoint"
+          , "oidc_user_access_only"
+      `);
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async updateOIDCRestrictions(args) {
+      // args.oidcIntegrationId
+      // args.oidcUserAccessOnly
+      const result = await pool.one(sql`/* updateOIDCRestrictions */
+          UPDATE "oidc_integrations"
+          SET
+            "oidc_user_access_only" = ${args.oidcUserAccessOnly}
+          WHERE
+            "id" = ${args.oidcIntegrationId}
+          RETURNING
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
+          , "oidc_user_access_only"
       `);
 
       return decodeOktaIntegrationRecord(result);
@@ -4880,6 +4908,7 @@ const OktaIntegrationBaseModel = zod.object({
   linked_organization_id: zod.string(),
   client_id: zod.string(),
   client_secret: zod.string(),
+  oidc_user_access_only: zod.boolean(),
 });
 
 const OktaIntegrationLegacyModel = zod.intersection(
@@ -4913,6 +4942,7 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
       tokenEndpoint: `${rawRecord.oauth_api_url}/token`,
       userinfoEndpoint: `${rawRecord.oauth_api_url}/userinfo`,
       authorizationEndpoint: `${rawRecord.oauth_api_url}/authorize`,
+      oidcUserAccessOnly: rawRecord.oidc_user_access_only,
     };
   }
 
@@ -4924,6 +4954,7 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
     tokenEndpoint: rawRecord.token_endpoint,
     userinfoEndpoint: rawRecord.userinfo_endpoint,
     authorizationEndpoint: rawRecord.authorization_endpoint,
+    oidcUserAccessOnly: rawRecord.oidc_user_access_only,
   };
 };
 

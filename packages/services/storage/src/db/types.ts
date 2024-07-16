@@ -140,6 +140,7 @@ export interface oidc_integrations {
   id: string;
   linked_organization_id: string;
   oauth_api_url: string | null;
+  oidc_user_access_only: boolean;
   token_endpoint: string | null;
   updated_at: Date;
   userinfo_endpoint: string | null;
@@ -258,6 +259,15 @@ export interface schema_checks {
   supergraph_sdl_store_id: string | null;
   target_id: string;
   updated_at: Date;
+}
+
+export interface schema_cleanup_tracker {
+  coordinate: string;
+  created_at: Date;
+  created_in_version_id: string;
+  deprecated_at: Date | null;
+  deprecated_in_version_id: string | null;
+  target_id: string;
 }
 
 export interface schema_log {
@@ -406,6 +416,7 @@ export interface DBTables {
   projects: projects;
   schema_change_approvals: schema_change_approvals;
   schema_checks: schema_checks;
+  schema_cleanup_tracker: schema_cleanup_tracker;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;
