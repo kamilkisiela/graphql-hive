@@ -19,7 +19,6 @@ import { Tag } from '@/components/v2';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
-import { InlineCode } from '@/components/v2/inline-code';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
@@ -38,7 +37,7 @@ function CopyInput(props: { value: string }) {
         className="shrink-0"
         onClick={ev => {
           ev.preventDefault();
-          copy(props.value);
+          void copy(props.value);
         }}
       >
         Copy
@@ -550,12 +549,7 @@ function UpdateOIDCIntegrationForm(props: {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.close}>
       <DialogContent className="flex min-h-[600px] w-[960px] max-w-none">
-        <form className={cn(classes.container, 'flex-1')} onSubmit={formik.handleSubmit}>
-          {/* <DialogHeader>
-            <DialogTitle>OpenID Connect</DialogTitle>
-            <DialogDescription>Manage OpenID Connect Integration</DialogDescription>
-          </DialogHeader> */}
-
+        <div className={cn(classes.container, 'flex-1')}>
           <div className="flex gap-x-5">
             <div className="flex-1">
               <div className="flex flex-col gap-y-5">
@@ -613,7 +607,10 @@ function UpdateOIDCIntegrationForm(props: {
 
             <Separator orientation="vertical" />
 
-            <div className={cn(classes.container, 'flex flex-1 flex-col gap-y-4')}>
+            <form
+              className={cn(classes.container, 'flex flex-1 flex-col gap-y-4')}
+              onSubmit={formik.handleSubmit}
+            >
               <div>
                 <div className="text-lg font-medium">Properties</div>
                 <p className="text-muted-foreground text-sm">
@@ -700,18 +697,26 @@ function UpdateOIDCIntegrationForm(props: {
                     {oidcUpdateMutation.data?.updateOIDCIntegration.error?.details.clientSecret}
                   </FormError>
                 </div>
+                <div className="space-x-2 text-right">
+                  <Button
+                    variant="outline"
+                    onClick={ev => {
+                      ev.preventDefault();
+                      formik.resetForm();
+                      props.close();
+                    }}
+                    tabIndex={0}
+                  >
+                    Close
+                  </Button>
+                  <Button type="submit" disabled={oidcUpdateMutation.fetching}>
+                    Save
+                  </Button>
+                </div>
               </div>
-            </div>
+            </form>
           </div>
-          <DialogFooter className="space-x-2 text-right">
-            <Button variant="outline" onClick={props.close} tabIndex={0}>
-              Close
-            </Button>
-            <Button type="submit" disabled={oidcUpdateMutation.fetching || !formik.dirty}>
-              Save
-            </Button>
-          </DialogFooter>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
