@@ -14,6 +14,7 @@ import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/
 import { graphql } from '@/gql';
 import type { CreateOrganizationMutation } from '@/pages/organization-new';
 import type { DeleteProjectMutation } from '@/pages/project-settings';
+import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
 import { CollectionsQuery } from '@/pages/target-laboratory';
 import {
   TokensDocument,
@@ -22,7 +23,6 @@ import {
 } from '@/pages/target-settings';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
-import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
 
 const TargetsDocument = graphql(`
   query targets($selector: ProjectSelectorInput!) {

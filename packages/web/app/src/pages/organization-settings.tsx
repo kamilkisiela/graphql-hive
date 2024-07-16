@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
@@ -13,6 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { GitHubIcon, SlackIcon } from '@/components/ui/icon';
@@ -21,9 +29,7 @@ import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
-import {
-  TransferOrganizationOwnershipModal,
-} from '@/components/v2/modals';
+import { TransferOrganizationOwnershipModal } from '@/components/v2/modals';
 import { Tag } from '@/components/v2/tag';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -34,15 +40,6 @@ import {
 } from '@/lib/access/organization';
 import { useToggle } from '@/lib/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ReactElement } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 
@@ -561,7 +558,6 @@ const SettingsPageRenderer = (props: {
                   organizationId={props.organizationId}
                   isOpen={isDeleteModalOpen}
                   toggleModalOpen={toggleDeleteModalOpen}
-                  organization={organization}
                 />
               </CardContent>
             </Card>
@@ -623,7 +619,6 @@ export function OrganizationSettingsPage(props: { organizationId: string }) {
   );
 }
 
-
 export const DeleteOrganizationDocument = graphql(`
   mutation deleteOrganization($selector: OrganizationSelectorInput!) {
     deleteOrganization(selector: $selector) {
@@ -638,20 +633,17 @@ export const DeleteOrganizationDocument = graphql(`
   }
 `);
 
-const DeleteOrganizationModal_OrganizationFragment = graphql(`
-  fragment DeleteOrganizationModal_OrganizationFragment on Organization {
-    id
-    cleanId
-  }
-`);
-
 type DeleteOrganizationModalProps = {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organizationId: string;
 };
 
-export const DeleteOrganizationModal = ({ isOpen, toggleModalOpen, organizationId }: DeleteOrganizationModalProps) => {
+export const DeleteOrganizationModal = ({
+  isOpen,
+  toggleModalOpen,
+  organizationId,
+}: DeleteOrganizationModalProps) => {
   const [, mutate] = useMutation(DeleteOrganizationDocument);
   const { toast } = useToast();
   const router = useRouter();
@@ -695,7 +687,11 @@ type DeleteOrganizationModalContentProps = {
   handleDelete: () => void;
 };
 
-export const DeleteOrganizationModalContent = ({ isOpen, toggleModalOpen, handleDelete }: DeleteOrganizationModalContentProps): ReactElement => {
+export const DeleteOrganizationModalContent = ({
+  isOpen,
+  toggleModalOpen,
+  handleDelete,
+}: DeleteOrganizationModalContentProps): ReactElement => {
   return (
     <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
       <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
@@ -703,7 +699,7 @@ export const DeleteOrganizationModalContent = ({ isOpen, toggleModalOpen, handle
           <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
           <DialogTitle>Delete organization</DialogTitle>
         </DialogHeader>
-        <DialogDescription className='text-center'>
+        <DialogDescription className="text-center">
           Are you sure you wish to delete this organization? This action is irreversible!
         </DialogDescription>
         <DialogFooter className="flex w-full gap-2">
