@@ -22,7 +22,6 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  DeleteOrganizationModal,
   TransferOrganizationOwnershipModal,
 } from '@/components/v2/modals';
 import { Tag } from '@/components/v2/tag';
@@ -35,6 +34,16 @@ import {
 } from '@/lib/access/organization';
 import { useToggle } from '@/lib/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ReactElement } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
@@ -613,3 +622,109 @@ export function OrganizationSettingsPage(props: { organizationId: string }) {
     </>
   );
 }
+
+
+export const DeleteOrganizationDocument = graphql(`
+  mutation deleteOrganization($selector: OrganizationSelectorInput!) {
+    deleteOrganization(selector: $selector) {
+      selector {
+        organization
+      }
+      organization {
+        __typename
+        id
+      }
+    }
+  }
+`);
+
+const DeleteOrganizationModal_OrganizationFragment = graphql(`
+  fragment DeleteOrganizationModal_OrganizationFragment on Organization {
+    id
+    cleanId
+  }
+`);
+
+type DeleteOrganizationModalProps = {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+};
+
+export const DeleteOrganizationModal = ({ isOpen, toggleModalOpen, organizationId }: DeleteOrganizationModalProps) => {
+  const [, mutate] = useMutation(DeleteOrganizationDocument);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      selector: {
+        organization: organizationId,
+      },
+    });
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete organization',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Organization deleted',
+        description: 'The organization has been successfully deleted.',
+      });
+      toggleModalOpen();
+      void router.navigate({
+        to: '/',
+      });
+    }
+  };
+
+  return (
+    <DeleteOrganizationModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+};
+
+type DeleteOrganizationModalContentProps = {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+};
+
+export const DeleteOrganizationModalContent = ({ isOpen, toggleModalOpen, handleDelete }: DeleteOrganizationModalContentProps): ReactElement => {
+  return (
+    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+      <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
+        <DialogHeader>
+          <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
+          <DialogTitle>Delete organization</DialogTitle>
+        </DialogHeader>
+        <DialogDescription className='text-center'>
+          Are you sure you wish to delete this organization? This action is irreversible!
+        </DialogDescription>
+        <DialogFooter className="flex w-full gap-2">
+          <Button
+            type="button"
+            size="lg"
+            onClick={toggleModalOpen}
+            className="w-full justify-center"
+          >
+            Cancel
+          </Button>
+          <Button
+            size="lg"
+            variant="destructive"
+            onClick={handleDelete}
+            className="w-full justify-center"
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
