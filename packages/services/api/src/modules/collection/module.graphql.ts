@@ -7,7 +7,6 @@ export const typeDefs = gql`
     description: String
     createdAt: DateTime!
     updatedAt: DateTime!
-    createdBy: User!
     operations(first: Int = 100, after: String = null): DocumentCollectionOperationsConnection!
   }
 
