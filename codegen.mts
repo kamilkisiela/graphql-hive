@@ -25,7 +25,6 @@ const config: CodegenConfig = {
           'oidc-integrations',
           'operations',
           'organization',
-          'policy',
           'schema',
         ],
         scalarsOverrides: {
