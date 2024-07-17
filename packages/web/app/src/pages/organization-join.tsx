@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DottedBackground } from '@/components/ui/dotted-background';
 import { Meta } from '@/components/ui/meta';
+import { useToast } from '@/components/ui/use-toast';
 import { DataWrapper } from '@/components/v2/data-wrapper';
 import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
-import { useNotifications } from '@/lib/hooks/use-notifications';
 import { Link, useRouter } from '@tanstack/react-router';
 
 const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
@@ -48,7 +48,7 @@ const JoinOrganizationPage_OrganizationInvitationQuery = graphql(`
 
 export function JoinOrganizationPage(props: { inviteCode: string }) {
   const router = useRouter();
-  const notify = useNotifications();
+  const { toast } = useToast();
   const code = props.inviteCode;
   const [query] = useQuery({
     query: JoinOrganizationPage_OrganizationInvitationQuery,
@@ -59,17 +59,24 @@ export function JoinOrganizationPage(props: { inviteCode: string }) {
     const result = await mutate({ code });
     if (result.data) {
       if (result.data.joinOrganization.__typename === 'OrganizationInvitationError') {
-        notify(result.data.joinOrganization.message, 'error');
+        toast({
+          title: 'Failed to join organization',
+          description: result.data.joinOrganization.message,
+          variant: 'destructive',
+        });
       } else {
         const org = result.data.joinOrganization.organization;
-        notify(`You joined "${org.name}" organization`, 'success');
+        toast({
+          title: 'Joined organization',
+          description: `You are now a member of ${org.name}`,
+        });
         void router.navigate({
           to: '/$organizationId',
           params: { organizationId: org.cleanId },
         });
       }
     }
-  }, [mutate, code, router, notify]);
+  }, [mutate, code, router, toast]);
 
   const goBack = useCallback(() => {
     void router.navigate({

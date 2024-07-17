@@ -112,7 +112,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "code",
-          "expr": "sum by (path) (rate(tokens_http_requests[$__rate_interval]))",
+          "expr": "sum by (path) (rate(tokens_http_requests_total[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -175,7 +175,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(irate(tokens_http_requests[$__range]))",
+          "expr": "sum(irate(tokens_http_requests_total[$__range]))",
           "interval": "",
           "legendFormat": "Requests",
           "range": true,
@@ -360,7 +360,7 @@
             "uid": "grafanacloud-prom"
           },
           "exemplar": true,
-          "expr": "sum(rate(tokens_cache_hits[$__rate_interval]))",
+          "expr": "sum(rate(tokens_cache_hits_total[$__rate_interval]))",
           "interval": "",
           "legendFormat": "Hits",
           "refId": "A"
@@ -371,7 +371,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "code",
-          "expr": "sum(rate(tokens_cache_misses[$__rate_interval]))",
+          "expr": "sum(rate(tokens_cache_misses_total[$__rate_interval]))",
           "hide": false,
           "legendFormat": "Misses",
           "range": true,
@@ -435,7 +435,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(rate(tokens_cache_hits[$__rate_interval]))/ (sum(rate(tokens_cache_hits[$__rate_interval])) + sum(rate(tokens_cache_misses[$__rate_interval])))",
+          "expr": "sum(rate(tokens_cache_hits_total[$__rate_interval]))/ (sum(rate(tokens_cache_hits_total[$__rate_interval])) + sum(rate(tokens_cache_misses_total[$__rate_interval])))",
           "interval": "",
           "legendFormat": "Requests",
           "range": true,
@@ -525,7 +525,7 @@
             "uid": "grafanacloud-prom"
           },
           "exemplar": true,
-          "expr": "sum(rate(tokens_cache_fillups[$__rate_interval]))",
+          "expr": "sum(rate(tokens_cache_fillups_total[$__rate_interval]))",
           "interval": "",
           "legendFormat": "Fill ups",
           "refId": "A"
@@ -614,7 +614,7 @@
             "uid": "grafanacloud-prom"
           },
           "exemplar": true,
-          "expr": "sum(rate(tokens_cache_invalidations[$__rate_interval]))",
+          "expr": "sum(rate(tokens_cache_invalidations_total[$__rate_interval]))",
           "interval": "",
           "legendFormat": "Invalidations",
           "refId": "A"
