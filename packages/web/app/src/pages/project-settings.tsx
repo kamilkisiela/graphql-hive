@@ -462,12 +462,8 @@ type DeleteProjectModalProps = {
   projectId: string;
 };
 
-export const DeleteProjectModal = ({
-  isOpen,
-  toggleModalOpen,
-  organizationId,
-  projectId,
-}: DeleteProjectModalProps): ReactElement => {
+export const DeleteProjectModal = ({ ...props }: DeleteProjectModalProps): ReactElement => {
+  const { organizationId, projectId } = props;
   const [, mutate] = useMutation(DeleteProjectMutation);
   const { toast } = useToast();
   const router = useRouter();
@@ -491,7 +487,7 @@ export const DeleteProjectModal = ({
         title: 'Project deleted',
         description: 'The project has been successfully deleted.',
       });
-      toggleModalOpen();
+      props.toggleModalOpen();
       void router.navigate({
         to: '/$organizationId',
         params: {
@@ -503,8 +499,8 @@ export const DeleteProjectModal = ({
 
   return (
     <DeleteProjectModalContent
-      isOpen={isOpen}
-      toggleModalOpen={toggleModalOpen}
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
       handleDelete={handleDelete}
     />
   );
@@ -517,12 +513,10 @@ type DeleteProjectModalContentProps = {
 };
 
 export const DeleteProjectModalContent = ({
-  isOpen,
-  toggleModalOpen,
-  handleDelete,
+  ...props
 }: DeleteProjectModalContentProps): ReactElement => {
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
         <DialogHeader>
           <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
@@ -535,7 +529,7 @@ export const DeleteProjectModalContent = ({
           <Button
             type="button"
             size="lg"
-            onClick={toggleModalOpen}
+            onClick={props.toggleModalOpen}
             className="w-full justify-center"
           >
             Cancel
@@ -543,7 +537,7 @@ export const DeleteProjectModalContent = ({
           <Button
             size="lg"
             variant="destructive"
-            onClick={handleDelete}
+            onClick={props.handleDelete}
             className="w-full justify-center"
           >
             Delete
