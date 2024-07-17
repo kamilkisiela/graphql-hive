@@ -49,7 +49,6 @@ const JoinOrganizationPage_OrganizationInvitationQuery = graphql(`
 export function JoinOrganizationPage(props: { inviteCode: string }) {
   const router = useRouter();
   const { toast } = useToast();
-  // const notify = useNotifications();
   const code = props.inviteCode;
   const [query] = useQuery({
     query: JoinOrganizationPage_OrganizationInvitationQuery,

@@ -3521,8 +3521,6 @@ export async function createStorage(
     },
 
     async updateOIDCRestrictions(args) {
-      // args.oidcIntegrationId
-      // args.oidcUserAccessOnly
       const result = await pool.one(sql`/* updateOIDCRestrictions */
           UPDATE "oidc_integrations"
           SET
