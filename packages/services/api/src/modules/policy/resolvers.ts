@@ -8,13 +8,6 @@ import { SchemaPolicyProvider } from './providers/schema-policy.provider';
 import { formatTRPCErrors, policyInputToConfigObject } from './utils';
 
 export const resolvers: PolicyModule.Resolvers = {
-  SchemaPolicyRule: {
-    id: r => r.name,
-    description: r => r.description,
-    configJsonSchema: r => r.schema,
-    recommended: r => r.recommended,
-    documentationUrl: r => r.url ?? null,
-  },
   Query: {
     schemaPolicyRules: (_, args, { injector }) =>
       injector.get(SchemaPolicyApiProvider).listAvailableRules(),
