@@ -1,4 +1,11 @@
+import zod from 'zod';
 import { type ArtifactStorageReader } from './artifact-storage-reader';
+
+const AppDeploymentIsEnabledKeyModel = zod.tuple([
+  zod.string().uuid(),
+  zod.string().min(1),
+  zod.string().min(1),
+]);
 
 type GetCache = () => Promise<Cache | null>;
 type WaitUntil = (promise: Promise<void>) => void;
@@ -16,10 +23,9 @@ export function createIsAppDeploymentActive(deps: {
   getCache: null | GetCache;
 }): IsAppDeploymentActive {
   return async function isAppDeploymentActive(
-    targetId: string,
-    appName: string,
-    appVersion: string,
+    ...args: [targetId: string, appName: string, appVersion: string]
   ): Promise<boolean> {
+    const [targetId, appName, appVersion] = AppDeploymentIsEnabledKeyModel.parse(args);
     const cache = await (deps.getCache ? deps.getCache() : null);
     const cacheKey = new Request(
       [

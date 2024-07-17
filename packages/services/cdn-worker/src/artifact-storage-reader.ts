@@ -1,3 +1,4 @@
+import zod from 'zod';
 import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
 
@@ -20,23 +21,37 @@ type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 
 export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
 
-/** S3 key for stored operation body (used by CDN). */
+const OperationS3BucketKeyModel = zod.tuple([
+  zod.string().uuid(),
+  zod.string().min(1),
+  zod.string().min(1),
+  zod.string().min(1),
+]);
+
+/**
+ * S3 key for stored operation body (used by CDN).
+ * Note: we validate to avoid invalid keys / collisions that could be caused by type errors.
+ **/
 export function buildOperationS3BucketKey(
-  targetId: string,
-  appName: string,
-  appVersion: string,
-  hash: string,
+  ...args: [targetId: string, appName: string, appVersion: string, hash: string]
 ) {
-  return ['app', targetId, appName, appVersion, hash].join('/');
+  return ['app', ...OperationS3BucketKeyModel.parse(args)].join('/');
 }
 
-/** S3 key for determining whether app deployment is enabled or not. */
+const AppDeploymentIsEnabledKeyModel = zod.tuple([
+  zod.string().uuid(),
+  zod.string().min(1),
+  zod.string().min(1),
+]);
+
+/**
+ * S3 key for determining whether app deployment is enabled or not.
+ * Note: we validate to avoid invalid keys / collisions that could be caused by type errors.
+ **/
 export function buildAppDeploymentIsEnabledKey(
-  targetId: string,
-  appName: string,
-  appVersion: string,
+  ...args: [targetId: string, appName: string, appVersion: string]
 ) {
-  return ['apps-enabled', targetId, appName, appVersion].join('/');
+  return ['apps-enabled', ...AppDeploymentIsEnabledKeyModel.parse(args)].join('/');
 }
 
 /**
