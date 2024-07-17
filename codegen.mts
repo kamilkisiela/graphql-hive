@@ -20,9 +20,7 @@ const config: CodegenConfig = {
         blacklistedModules: [
           'billing',
           'collection',
-          'feedback',
           'lab',
-          'oidc-integrations',
           'operations',
           'organization',
           'policy',
