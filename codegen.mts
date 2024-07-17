@@ -28,7 +28,6 @@ const config: CodegenConfig = {
           'schema',
         ],
         scalarsOverrides: {
-          DateTime: { type: 'string' },
           Date: { type: 'string' },
           SafeInt: { type: 'number' },
           ID: { type: 'string' },
@@ -84,7 +83,7 @@ const config: CodegenConfig = {
           SupportTicketStatus: '../shared/entities#SupportTicketStatus',
         },
         scalars: {
-          DateTime: 'string',
+          DateTime: 'string | Date',
           Date: 'string',
           SafeInt: 'number',
           ID: 'string',
