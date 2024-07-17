@@ -1,5 +1,4 @@
 import { TRPCClientError } from '@trpc/client';
-import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { PolicyModule } from './__generated__/types';
@@ -9,38 +8,6 @@ import { formatTRPCErrors, policyInputToConfigObject } from './utils';
 
 export const resolvers: PolicyModule.Resolvers = {
   Mutation: {
-    updateSchemaPolicyForOrganization: async (
-      _,
-      { selector, policy, allowOverrides },
-      { injector },
-    ) => {
-      try {
-        const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
-        const config = policyInputToConfigObject(policy);
-        await injector.get(SchemaPolicyApiProvider).validateConfig({ config });
-        const updatedPolicy = await injector
-          .get(SchemaPolicyProvider)
-          .setOrganizationPolicy({ organization }, config, allowOverrides);
-
-        return {
-          ok: {
-            updatedPolicy,
-            organization: await injector.get(OrganizationManager).getOrganization({ organization }),
-          },
-        };
-      } catch (e) {
-        if (e instanceof TRPCClientError) {
-          return formatTRPCErrors(e);
-        }
-
-        return {
-          error: {
-            __typename: 'UpdateSchemaPolicyResultError',
-            message: (e as Error).message,
-          },
-        };
-      }
-    },
     updateSchemaPolicyForProject: async (_, { selector, policy }, { injector }) => {
       try {
         const translator = injector.get(IdTranslator);
