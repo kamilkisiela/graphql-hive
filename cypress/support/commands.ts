@@ -42,9 +42,20 @@ Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
 
   return cy
     .get('div[role="dialog"]')
-    .find('code')
-    .last()
-    .then($elem => $elem.text())
+    .find('input[id="sign-in-uri"]')
+    .then(async $elem => {
+      const url = $elem.val();
+
+      if (!url) {
+        throw new Error('Failed to resolve OIDC integration URL');
+      }
+
+      if (typeof url !== 'string') {
+        throw new Error('OIDC integration URL is not a string');
+      }
+
+      return url;
+    })
     .then(loginUrl => {
       return cy.url().then(url => {
         const organizationSlug = new URL(url).pathname.split('/')[1];
