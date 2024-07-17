@@ -2003,7 +2003,7 @@ export class SchemaPublisher {
       __typename: 'SchemaPublishSuccess' as const,
       initial: publishResult.state.initial,
       valid: publishResult.state.composable,
-      changes: modelVersion === 'legacy' ? publishResult.state.changes ?? [] : null,
+      changes: modelVersion === 'legacy' ? (publishResult.state.changes ?? []) : null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
     };
