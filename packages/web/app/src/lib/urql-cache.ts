@@ -10,7 +10,7 @@ import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/p
 import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
-import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
+import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/settings/registry-access-token';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
 import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
 import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
