@@ -101,6 +101,16 @@ Your login URL will look like this:
 https://app.graphql-hive.com/auth/oidc?id=xxxxxxxx-1234-1234-1234-xxxxxxxxxxxx
 ```
 
+You can also sign in by clicking the "Login with SSO" button on the login screen. Simply enter your
+organization's slug, and you will then be redirected to your OIDC provider.
+
+<Callout type="info">
+  **Access to the organization is restricted to the OIDC accounts by default.** If you want to allow
+  users to sign in with email and password, or any other auth provider, visit your organization
+  **Settings** page and in the **OpenID Connect** configuration disable the **OIDC-Only Access**
+  option.
+</Callout>
+
 </Steps>
 
 ## Integration Guides

@@ -99,6 +99,31 @@ describe('oidc', () => {
     });
   });
 
+  it('first time oidc login of non-admin user', () => {
+    const organizationAdminUser = getUser();
+    cy.visit('/');
+    cy.signup(organizationAdminUser);
+
+    cy.createOIDCIntegration('Bubatzbieber').then(({ organizationSlug }) => {
+      cy.visit('/logout');
+
+      cy.clearAllCookies();
+      cy.clearAllLocalStorage();
+      cy.clearAllSessionStorage();
+      cy.get('a[href^="/auth/sso"]').click();
+
+      // Select organization
+      cy.get('input[name="slug"]').type(organizationSlug);
+      cy.get('button[type="submit"]').click();
+
+      cy.get('input[id="Input_Username"]').type('test-user-2');
+      cy.get('input[id="Input_Password"]').type('password');
+      cy.get('button[value="login"]').click();
+
+      cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
+    });
+  });
+
   it('oidc login for invalid url shows correct error message', () => {
     cy.clearAllCookies();
     cy.clearAllLocalStorage();

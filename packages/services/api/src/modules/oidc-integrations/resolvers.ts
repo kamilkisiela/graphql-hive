@@ -95,6 +95,26 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
         },
       };
     },
+    async updateOIDCRestrictions(_, { input }, { injector }) {
+      const result = await injector.get(OIDCIntegrationsProvider).updateOIDCRestrictions({
+        oidcIntegrationId: input.oidcIntegrationId,
+        oidcUserAccessOnly: input.oidcUserAccessOnly,
+      });
+
+      if (result.type === 'ok') {
+        return {
+          ok: {
+            updatedOIDCIntegration: result.oidcIntegration,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: result.message,
+        },
+      };
+    },
   },
   Subscription: {
     oidcIntegrationLog: {

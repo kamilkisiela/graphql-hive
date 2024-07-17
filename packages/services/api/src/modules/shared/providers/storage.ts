@@ -639,6 +639,11 @@ export interface Storage {
 
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
 
+  updateOIDCRestrictions(_: {
+    oidcIntegrationId: string;
+    oidcUserAccessOnly: boolean;
+  }): Promise<OIDCIntegration>;
+
   createCDNAccessToken(_: {
     id: string;
     targetId: string;
