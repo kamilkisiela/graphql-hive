@@ -27,7 +27,6 @@ const config: CodegenConfig = {
           'operations',
           'organization',
           'policy',
-          'project',
           'schema',
         ],
         scalarsOverrides: {
