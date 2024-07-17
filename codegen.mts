@@ -18,14 +18,12 @@ const config: CodegenConfig = {
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
         blacklistedModules: [
-          'alerts',
           'billing',
           'collection',
           'lab',
           'operations',
           'organization',
           'policy',
-          'project',
           'schema',
         ],
         scalarsOverrides: {
