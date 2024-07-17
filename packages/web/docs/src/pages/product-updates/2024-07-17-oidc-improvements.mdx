@@ -1,0 +1,32 @@
+---
+title: Enhanced OpenID Connect (OIDC) Support
+description: Restrict organization access to OIDC users and improved sign-in flow.
+date: 2024-07-17
+authors: [kamil]
+---
+
+GraphQL Hive supports Single-Sign-On (SSO) via OpenID Connect (OIDC) for a long time now. We heard
+your feedback and added some improvements to make it even better.
+
+## Restricted Access for OIDC Users
+
+With this update, you can now restrict organization access exclusively to OIDC users. This ensures
+that only users authenticated via your OIDC provider can access your organization, providing an
+extra layer of security.
+
+![OIDC Configuration modal](/changelog/2024-07-17-oidc-improvements/restrictions.png)
+
+This restriction is enabled by default for all new and existing organizations, but you can disable
+it at any time in the organization's settings (see the screenshot above).
+
+## Improved Sign-In Flow
+
+You can now select the **Login with SSO** option and enter your organization's slug to log in to
+GraphQL Hive using your OIDC provider. We believe this change provides a more user-friendly
+experience. The existing method of logging in via a unique link is still available.
+
+![SSO Login page](/changelog/2024-07-17-oidc-improvements/sso-wide.png)
+
+Thank you for your continuous feedback and support. We hope these improvements make your experience
+with GraphQL Hive even better. If you have any questions or feedback, please don't hesitate to reach
+out to us.
