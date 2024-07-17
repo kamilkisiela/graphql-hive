@@ -8,12 +8,6 @@ import { SchemaPolicyProvider } from './providers/schema-policy.provider';
 import { formatTRPCErrors, policyInputToConfigObject, serializeSeverity } from './utils';
 
 export const resolvers: PolicyModule.Resolvers = {
-  Organization: {
-    schemaPolicy: async (org, _, { injector }) =>
-      injector.get(SchemaPolicyProvider).getOrganizationPolicy({
-        organization: org.id,
-      }),
-  },
   Project: {
     schemaPolicy: async (project, _, { injector }) =>
       injector.get(SchemaPolicyProvider).getProjectPolicy({
