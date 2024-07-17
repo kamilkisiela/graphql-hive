@@ -153,7 +153,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
   void hive.info();
 
   return {
-    async requestDidStart(context) {
+    requestDidStart(context) {
       // `overallCachePolicy` does not exist in v0
       const isLegacyV0 = !('overallCachePolicy' in context);
       // `context` does not exist in v4, it is `contextValue` instead
@@ -175,56 +175,6 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
         variableValues: context.request.variables,
       };
 
-      let persistedDocumentError: GraphQLError | null = null;
-      let persistedDocumentHash: string | undefined;
-
-      if (hive.experimental__persistedDocuments) {
-        if (
-          context.request.http?.body &&
-          typeof context.request.http.body === 'object' &&
-          'documentId' in context.request.http.body &&
-          typeof context.request.http.body.documentId === 'string'
-        ) {
-          persistedDocumentHash = context.request.http.body.documentId;
-          const document = await hive.experimental__persistedDocuments.resolve(
-            context.request.http.body.documentId,
-          );
-
-          if (document) {
-            context.request.query = document;
-          } else {
-            context.request.query = '{__typename}';
-            persistedDocumentError = new GraphQLError('Persisted document not found.', {
-              extensions: {
-                code: 'PERSISTED_DOCUMENT_NOT_FOUND',
-                http: {
-                  status: 400,
-                },
-              },
-            });
-          }
-        } else if (
-          false ===
-          (await hive.experimental__persistedDocuments.allowArbitraryDocuments({
-            headers: {
-              get(name: string) {
-                return context.request.http?.headers?.get(name) ?? null;
-              },
-            },
-          }))
-        ) {
-          context.request.query = '{__typename}';
-          persistedDocumentError = new GraphQLError('No persisted document provided.', {
-            extensions: {
-              code: 'PERSISTED_DOCUMENT_REQUIRED',
-              http: {
-                status: 400,
-              },
-            },
-          });
-        }
-      }
-
       if (isLegacyV0) {
         return {
           didResolveSource() {
@@ -232,19 +182,15 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
           },
           willSendResponse(ctx: any) {
             if (!didResolveSource) {
-              void complete(
-                args,
-                {
-                  action: 'abort',
-                  reason: 'Did not resolve source',
-                  logging: false,
-                },
-                persistedDocumentHash,
-              );
+              void complete(args, {
+                action: 'abort',
+                reason: 'Did not resolve source',
+                logging: false,
+              });
               return;
             }
             doc = ctx.document;
-            void complete(args, ctx.response, persistedDocumentHash);
+            void complete(args, ctx.response);
           },
         } as any;
       }
@@ -255,6 +201,114 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
             didResolveSource = true;
           },
           async willSendResponse(ctx) {
+            if (!didResolveSource) {
+              void complete(args, {
+                action: 'abort',
+                reason: 'Did not resolve source',
+                logging: false,
+              });
+              return;
+            }
+
+            if (!ctx.document) {
+              const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
+              void complete(args, {
+                action: 'abort',
+                reason: 'Document is not available' + (details ? ` (${details})` : ''),
+                logging: true,
+              });
+              return;
+            }
+
+            doc = ctx.document!;
+            void complete(args, ctx.response as any);
+          },
+        });
+      }
+
+      let didFailValidation = false;
+
+      return (async () => {
+        let persistedDocumentError: GraphQLError | null = null;
+        let persistedDocumentHash: string | undefined;
+
+        if (hive.experimental__persistedDocuments) {
+          if (
+            context.request.http?.body &&
+            typeof context.request.http.body === 'object' &&
+            'documentId' in context.request.http.body &&
+            typeof context.request.http.body.documentId === 'string'
+          ) {
+            persistedDocumentHash = context.request.http.body.documentId;
+            const document = await hive.experimental__persistedDocuments.resolve(
+              context.request.http.body.documentId,
+            );
+
+            if (document) {
+              context.request.query = document;
+            } else {
+              context.request.query = '{__typename}';
+              persistedDocumentError = new GraphQLError('Persisted document not found.', {
+                extensions: {
+                  code: 'PERSISTED_DOCUMENT_NOT_FOUND',
+                  http: {
+                    status: 400,
+                  },
+                },
+              });
+            }
+          } else if (
+            false ===
+            (await hive.experimental__persistedDocuments.allowArbitraryDocuments({
+              headers: {
+                get(name: string) {
+                  return context.request.http?.headers?.get(name) ?? null;
+                },
+              },
+            }))
+          ) {
+            context.request.query = '{__typename}';
+            persistedDocumentError = new GraphQLError('No persisted document provided.', {
+              extensions: {
+                code: 'PERSISTED_DOCUMENT_REQUIRED',
+                http: {
+                  status: 400,
+                },
+              },
+            });
+          }
+        }
+
+        // v4
+        return {
+          didResolveSource() {
+            didResolveSource = true;
+          },
+          async validationDidStart() {
+            return function onErrors(errors) {
+              if (errors?.length) {
+                didFailValidation = true;
+              }
+            };
+          },
+          didResolveOperation() {
+            if (persistedDocumentError) {
+              throw persistedDocumentError;
+            }
+          },
+          async willSendResponse(ctx) {
+            if (didFailValidation) {
+              void complete(
+                args,
+                {
+                  action: 'abort',
+                  reason: 'Validation failed',
+                  logging: false,
+                },
+                persistedDocumentHash,
+              );
+              return;
+            }
             if (!didResolveSource) {
               void complete(
                 args,
@@ -282,87 +336,23 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Apollo
               return;
             }
 
-            doc = ctx.document!;
-            void complete(args, ctx.response as any, persistedDocumentHash);
-          },
-        });
-      }
-
-      let didFailValidation = false;
-
-      // v4
-      return Promise.resolve({
-        didResolveSource() {
-          didResolveSource = true;
-        },
-        async validationDidStart() {
-          return function onErrors(errors) {
-            if (errors?.length) {
-              didFailValidation = true;
+            doc = ctx.document;
+            if (ctx.response.body.kind === 'incremental') {
+              void complete(
+                args,
+                {
+                  action: 'abort',
+                  reason: '@defer and @stream is not supported by Hive',
+                  logging: true,
+                },
+                persistedDocumentHash,
+              );
+            } else {
+              void complete(args, ctx.response.body.singleResult, persistedDocumentHash);
             }
-          };
-        },
-        didResolveOperation() {
-          if (persistedDocumentError) {
-            throw persistedDocumentError;
-          }
-        },
-        async willSendResponse(ctx) {
-          if (didFailValidation) {
-            void complete(
-              args,
-              {
-                action: 'abort',
-                reason: 'Validation failed',
-                logging: false,
-              },
-              persistedDocumentHash,
-            );
-            return;
-          }
-          if (!didResolveSource) {
-            void complete(
-              args,
-              {
-                action: 'abort',
-                reason: 'Did not resolve source',
-                logging: false,
-              },
-              persistedDocumentHash,
-            );
-            return;
-          }
-
-          if (!ctx.document) {
-            const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
-            void complete(
-              args,
-              {
-                action: 'abort',
-                reason: 'Document is not available' + (details ? ` (${details})` : ''),
-                logging: true,
-              },
-              persistedDocumentHash,
-            );
-            return;
-          }
-
-          doc = ctx.document;
-          if (ctx.response.body.kind === 'incremental') {
-            void complete(
-              args,
-              {
-                action: 'abort',
-                reason: '@defer and @stream is not supported by Hive',
-                logging: true,
-              },
-              persistedDocumentHash,
-            );
-          } else {
-            void complete(args, ctx.response.body.singleResult, persistedDocumentHash);
-          }
-        },
-      });
+          },
+        };
+      })();
     },
     serverWillStart(ctx) {
       // `engine` does not exist in v3
