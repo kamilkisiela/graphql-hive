@@ -8,18 +8,6 @@ import { SchemaPolicyProvider } from './providers/schema-policy.provider';
 import { formatTRPCErrors, policyInputToConfigObject, serializeSeverity } from './utils';
 
 export const resolvers: PolicyModule.Resolvers = {
-  Project: {
-    schemaPolicy: async (project, _, { injector }) =>
-      injector.get(SchemaPolicyProvider).getProjectPolicy({
-        project: project.id,
-        organization: project.orgId,
-      }),
-    parentSchemaPolicy: async (project, _, { injector }) =>
-      injector.get(SchemaPolicyProvider).getOrganizationPolicyForProject({
-        project: project.id,
-        organization: project.orgId,
-      }),
-  },
   Target: {
     schemaPolicy: async (target, _, { injector }) => {
       const { mergedPolicy, orgLevel, projectLevel } = await injector
