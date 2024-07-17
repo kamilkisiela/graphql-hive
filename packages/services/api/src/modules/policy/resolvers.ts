@@ -8,19 +8,6 @@ import { SchemaPolicyProvider } from './providers/schema-policy.provider';
 import { formatTRPCErrors, policyInputToConfigObject, serializeSeverity } from './utils';
 
 export const resolvers: PolicyModule.Resolvers = {
-  SchemaPolicy: {
-    id: policy => policy.id,
-    allowOverrides: policy => policy.allowOverrides,
-    rules: async (policy, _, { injector }) => {
-      const availableRules = await injector.get(SchemaPolicyApiProvider).listAvailableRules();
-
-      return Object.entries(policy.config).map(([ruleId, config]) => ({
-        rule: availableRules.find(r => r.name === ruleId)!,
-        severity: serializeSeverity(config[0]),
-        configuration: config[1] || null,
-      }));
-    },
-  },
   Organization: {
     schemaPolicy: async (org, _, { injector }) =>
       injector.get(SchemaPolicyProvider).getOrganizationPolicy({
