@@ -67,12 +67,8 @@ type CreateTargetModalProps = {
   projectId: string;
 };
 
-export const CreateTargetModal = ({
-  isOpen,
-  toggleModalOpen,
-  organizationId,
-  projectId,
-}: CreateTargetModalProps): ReactElement => {
+export const CreateTargetModal = ({ ...props }: CreateTargetModalProps): ReactElement => {
+  const { organizationId, projectId } = props;
   const [_, mutate] = useMutation(CreateTarget_CreateTargetMutation);
   const router = useRouter();
   const { toast } = useToast();
@@ -88,14 +84,14 @@ export const CreateTargetModal = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { data, error } = await mutate({
       input: {
-        project: projectId,
-        organization: organizationId,
+        project: props.projectId,
+        organization: props.organizationId,
         name: values.targetName,
       },
     });
 
     if (data?.createTarget.ok) {
-      toggleModalOpen();
+      props.toggleModalOpen();
       void router.navigate({
         to: '/$organizationId/$projectId/$targetId',
         params: {
@@ -125,9 +121,9 @@ export const CreateTargetModal = ({
   return (
     <CreateTargetModalContent
       form={form}
-      isOpen={isOpen}
+      isOpen={props.isOpen}
       onSubmit={onSubmit}
-      toggleModalOpen={toggleModalOpen}
+      toggleModalOpen={props.toggleModalOpen}
     />
   );
 };
@@ -140,16 +136,13 @@ type CreateTargetModalContentProps = {
 };
 
 export const CreateTargetModalContent = ({
-  isOpen,
-  toggleModalOpen,
-  onSubmit,
-  form,
+  ...props
 }: CreateTargetModalContentProps): ReactElement => {
   return (
-    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container w-4/5 max-w-[520px] md:w-3/5">
-        <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
             <DialogHeader>
               <DialogTitle>Create a new target</DialogTitle>
               <DialogDescription>
@@ -158,7 +151,7 @@ export const CreateTargetModalContent = ({
             </DialogHeader>
             <div className="space-y-8">
               <FormField
-                control={form.control}
+                control={props.form.control}
                 name="targetName"
                 render={({ field }) => {
                   return (
@@ -176,9 +169,9 @@ export const CreateTargetModalContent = ({
               <Button
                 className="w-full"
                 type="submit"
-                disabled={form.formState.isSubmitting || !form.formState.isValid}
+                disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
               >
-                {form.formState.isSubmitting ? 'Submitting...' : 'Create Target'}
+                {props.form.formState.isSubmitting ? 'Submitting...' : 'Create Target'}
               </Button>
             </DialogFooter>
           </form>
