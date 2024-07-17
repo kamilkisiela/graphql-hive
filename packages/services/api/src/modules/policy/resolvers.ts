@@ -8,10 +8,6 @@ import { SchemaPolicyProvider } from './providers/schema-policy.provider';
 import { formatTRPCErrors, policyInputToConfigObject } from './utils';
 
 export const resolvers: PolicyModule.Resolvers = {
-  Query: {
-    schemaPolicyRules: (_, args, { injector }) =>
-      injector.get(SchemaPolicyApiProvider).listAvailableRules(),
-  },
   Mutation: {
     updateSchemaPolicyForOrganization: async (
       _,
