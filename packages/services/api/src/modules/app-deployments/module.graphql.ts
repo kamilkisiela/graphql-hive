@@ -14,6 +14,10 @@ export default gql`
     lastUsed: DateTime
   }
 
+  extend type Organization {
+    isAppDeploymentsEnabled: Boolean!
+  }
+
   enum AppDeploymentStatus {
     pending
     active
