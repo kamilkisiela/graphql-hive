@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
@@ -75,7 +75,7 @@ export function ProjectLayout({
   projectId: string;
   className?: string;
   children: ReactNode;
-}): ReactElement | null {
+}) {
   const [isModalOpen, toggleModalOpen] = useToggle();
   const [query] = useQuery({
     query: ProjectLayoutQuery,
@@ -315,16 +315,12 @@ function CreateTargetModal(props: {
   );
 }
 
-type CreateTargetModalContentProps = {
+export function CreateTargetModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   onSubmit: (values: z.infer<typeof createProjectFormSchema>) => void | Promise<void>;
   form: UseFormReturn<z.infer<typeof createProjectFormSchema>>;
-};
-
-export const CreateTargetModalContent = ({
-  ...props
-}: CreateTargetModalContentProps): ReactElement => {
+}) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container w-4/5 max-w-[520px] md:w-3/5">
@@ -366,4 +362,4 @@ export const CreateTargetModalContent = ({
       </DialogContent>
     </Dialog>
   );
-};
+}
