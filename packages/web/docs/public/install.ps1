@@ -47,7 +47,25 @@ function Download($version) {
 
 function Invoke-Installer($exe, $install_args) {
   & "$exe" "install" "$install_args"
-  Remove-Item "$exe" -Recurse -Force
+  
+  try {
+    Remove-Item "$exe" -Force
+  } catch [System.Management.Automation.ItemNotFoundException] {
+    # ignore
+  } catch [System.UnauthorizedAccessException] {
+    $openProcesses = Get-Process -Name hive | Where-Object { $_.Path -eq "$exe" }
+    if ($openProcesses.Count -gt 0) {
+      Write-Output "Install Failed - An older installation exists and is open. Please close open Hive processes and try again."
+      return 1
+    }
+    Write-Output "Install Failed - An unknown error occurred while trying to remove the existing installation"
+    Write-Output $_
+    return 1
+  } catch {
+    Write-Output "Install Failed - An unknown error occurred while trying to remove the existing installation"
+    Write-Output $_
+    return 1
+  }
 }
 
 function Initialize-Environment() {
