@@ -155,7 +155,7 @@ export function authenticate(
   oidcIntegrationId?: string,
 ): Promise<{ access_token: string }>;
 export function authenticate(
-  email: string | string,
+  email: string,
   oidcIntegrationId?: string,
 ): Promise<{ access_token: string }> {
   if (!tokenResponsePromise[email]) {
