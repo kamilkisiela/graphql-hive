@@ -11,7 +11,6 @@ import { update } from 'slonik-utilities';
 import { TransactionFunction } from 'slonik/dist/src/types';
 import zod from 'zod';
 import type {
-  ActivityObject,
   Alert,
   AlertChannel,
   AuthProvider,
@@ -451,41 +450,6 @@ export async function createStorage(
           };
 
     return record;
-  }
-
-  function transformActivity(row: {
-    activity: [activities];
-    target: [Record<string, unknown>];
-    project: [projects];
-    organization: [organizations];
-    user: [users];
-  }): ActivityObject {
-    const activity = row.activity[0];
-    const target = row.target[0];
-    const project = row.project[0];
-    const organization = row.organization[0];
-    const user = row.user[0];
-
-    return {
-      id: activity.id,
-      type: activity.activity_type,
-      meta: activity.activity_metadata,
-      createdAt: activity.created_at,
-      target: target['id']
-        ? {
-            ...TargetModel.parse(target),
-            orgId: organization.id,
-          }
-        : undefined,
-      project: project ? transformProject(project) : undefined,
-      organization: transformOrganization(organization),
-      user: user
-        ? transformUser({
-            ...user,
-            provider: null, // we don't need this for activities
-          })
-        : undefined,
-    };
   }
 
   function transformTargetSettings(
@@ -2881,104 +2845,6 @@ export async function createStorage(
       await pool.query<Slonik<activities>>(
         sql`/* createActivity */ INSERT INTO activities (${identifiers}) VALUES (${values}) RETURNING *;`,
       );
-    },
-    async getActivities(selector) {
-      let query: TaggedTemplateLiteralInvocation;
-      if ('target' in selector) {
-        query = sql`/* getActivities (target) */
-          SELECT
-            jsonb_agg(a.*) as activity,
-            jsonb_agg(
-              json_build_object(
-                'id', t."id",
-                'cleanId', t."clean_id",
-                'name', t."name",
-                'projectId', t."project_id",
-                'graphqlEndpointUrl', t."graphql_endpoint_url"
-              )
-            ) as target,
-            jsonb_agg(p.*) as project,
-            jsonb_agg(o.*) as organization,
-            jsonb_agg(u.*) as user
-          FROM activities as a
-          LEFT JOIN targets as t ON (t.id = a.target_id)
-          LEFT JOIN projects as p ON (p.id = a.project_id)
-          LEFT JOIN organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN users as u ON (u.id = a.user_id)
-          WHERE
-            a.target_id = ${selector.target}
-            AND a.project_id = ${selector.project}
-            AND a.organization_id = ${selector.organization}
-            AND p.type != 'CUSTOM'
-          GROUP BY a.created_at
-          ORDER BY a.created_at DESC LIMIT ${selector.limit}
-        `;
-      } else if ('project' in selector) {
-        query = sql`/* getActivities (project) */
-          SELECT
-            jsonb_agg(a.*) as activity,
-            jsonb_agg(
-              json_build_object(
-                'id', t."id",
-                'cleanId', t."clean_id",
-                'name', t."name",
-                'projectId', t."project_id",
-                'graphqlEndpointUrl', t."graphql_endpoint_url"
-              )
-            ) as target,
-            jsonb_agg(p.*) as project,
-            jsonb_agg(o.*) as organization,
-            jsonb_agg(u.*) as user
-          FROM activities as a
-          LEFT JOIN targets as t ON (t.id = a.target_id)
-          LEFT JOIN projects as p ON (p.id = a.project_id)
-          LEFT JOIN organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN users as u ON (u.id = a.user_id)
-          WHERE
-            a.project_id = ${selector.project}
-            AND a.organization_id = ${selector.organization}
-            AND p.type != 'CUSTOM'
-          GROUP BY a.created_at
-          ORDER BY a.created_at DESC LIMIT ${selector.limit}
-        `;
-      } else {
-        query = sql`/* getActivities (organization) */
-          SELECT
-            jsonb_agg(a.*) as activity,
-            jsonb_agg(
-              json_build_object(
-                'id', t."id",
-                'cleanId', t."clean_id",
-                'name', t."name",
-                'projectId', t."project_id",
-                'graphqlEndpointUrl', t."graphql_endpoint_url"
-              )
-            ) as target,
-            jsonb_agg(p.*) as project,
-            jsonb_agg(o.*) as organization,
-            jsonb_agg(u.*) as user
-          FROM activities as a
-          LEFT JOIN targets as t ON (t.id = a.target_id)
-          LEFT JOIN projects as p ON (p.id = a.project_id)
-          LEFT JOIN organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN users as u ON (u.id = a.user_id)
-          WHERE a.organization_id = ${selector.organization} AND p.type != 'CUSTOM'
-          GROUP BY a.created_at
-          ORDER BY a.created_at DESC LIMIT ${selector.limit}
-        `;
-      }
-
-      const result = await pool.query<
-        Slonik<{
-          activity: [activities];
-          target: [Record<string, unknown>];
-          project: [projects];
-          organization: [organizations];
-          user: [users];
-        }>
-      >(query);
-
-      return result.rows.map(transformActivity);
     },
     async addSlackIntegration({ organization, token }) {
       await pool.query<Slonik<organizations>>(

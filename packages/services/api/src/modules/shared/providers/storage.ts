@@ -18,7 +18,6 @@ import type {
   SchemaChecksFilter,
 } from '../../../__generated__/types';
 import type {
-  ActivityObject,
   Alert,
   AlertChannel,
   CDNAccessToken,
@@ -522,12 +521,6 @@ export interface Storage {
     } & OrganizationSelector &
       Partial<Pick<TargetSelector, 'project' | 'target'>>,
   ): Promise<void>;
-
-  getActivities(
-    _: (OrganizationSelector | ProjectSelector | TargetSelector) & {
-      limit: number;
-    },
-  ): Promise<readonly ActivityObject[]>;
 
   addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
 
