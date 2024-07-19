@@ -1,29 +1,32 @@
 #!/usr/bin/env pwsh
 
-function Install-Binary($install_args) {
-  $old_erroractionpreference = $ErrorActionPreference
-  $ErrorActionPreference = 'stop'
-
-  Initialize-Environment
-
-  # If the HIVE_CLI_VERSION env var is set, we use it instead of the latest version
-  $version = if (Test-Path env:HIVE_CLI_VERSION) {
-    $Env:HIVE_CLI_VERSION
-  } else {
-    'latest'
-  }
-
-  $exe = Download($version)
-  Invoke-Installer "$exe" "$install_args"
-
-  $ErrorActionPreference = $old_erroractionpreference
+$version = if (Test-Path env:HIVE_CLI_VERSION) {
+  $Env:HIVE_CLI_VERSION
+} else {
+  'latest'
 }
 
-function Download($version) {
+function CreateWebClient {
+param (
+  [string]$url
+ )
+  $webClient = new-object System.Net.WebClient
+  return $webClient
+}
+
+function DownloadContent {
+param (
+  [string]$url
+ )
+  $webClient = CreateWebClient $url
+  return $webClient.DownloadString($url)
+}
+
+function ComputeDownloadLink() {
   $base_url = if ($version -eq 'latest') {
-    "https://cli.graphql-hive.com/channels/stable/hive-"
+    "https://cli.graphql-hive.com/channels/stable/hive-win32"
   } else {
-    "https://cli.graphql-hive.com/versions/$version/hive-v$version-"
+    "https://cli.graphql-hive.com/versions/$version/hive-v$version-win32"
   }
 
   # Detect if the system is x86 or x64
@@ -34,54 +37,78 @@ function Download($version) {
   }
 
   # append the arch to the url
-  $url = "$base_url$arch.exe"
-
-  "Downloading Hive CLI from $url" | Out-Host
-  $tmp = New-Temp-Dir
-  $dir_path = "$tmp\hive.exe"
-  $wc = New-Object Net.Webclient
-  $wc.downloadFile($url, $dir_path)
-  "Downloaded Hive CLI to $dir_path" | Out-Host
-  return "$dir_path"
+  return "$base_url-$arch.tar.gz"
 }
 
-function Invoke-Installer($exe, $install_args) {
-  & "$exe" "install" "$install_args"
-  
-  try {
-    Remove-Item "$exe" -Force
-  } catch [System.Management.Automation.ItemNotFoundException] {
-    # ignore
-  } catch [System.UnauthorizedAccessException] {
-    $openProcesses = Get-Process -Name hive | Where-Object { $_.Path -eq "$exe" }
-    if ($openProcesses.Count -gt 0) {
-      Write-Output "An older installation exists and is open. Please close open Hive processes and try again."
-    } else {
-      Write-Output "An unknown error occurred while trying to remove the existing installation"
-      Write-Output $_
-    }
-  } catch {
-    Write-Output "An unknown error occurred while trying to remove the existing installation"
-    Write-Output $_
-  }
+function DownloadFile {
+param (
+  [string]$url,
+  [string]$file
+ )
+  Write-Output "Downloading $url to $file"
+  $webClient = CreateWebClient $url
+  $webClient.DownloadFile($url, $file)
 }
 
-function Initialize-Environment() {
-  # show notification to change execution policy:
-  $allowedExecutionPolicy = @('Unrestricted', 'RemoteSigned', 'ByPass')
-  If ((Get-ExecutionPolicy).ToString() -notin $allowedExecutionPolicy) {
-    Write-Error "PowerShell requires an execution policy in [$($allowedExecutionPolicy -join ", ")] to run Hive CLI."
-    Write-Error "For example, to set the execution policy to 'RemoteSigned' please run :"
-    Write-Error "'Set-ExecutionPolicy RemoteSigned -scope CurrentUser'"
-    break
-  }
+Function DeGZip-File{
+    Param(
+        $infile,
+        $outfile = ($infile -replace '\.gz$','')
+        )
+    $input = New-Object System.IO.FileStream $inFile, ([IO.FileMode]::Open), ([IO.FileAccess]::Read), ([IO.FileShare]::Read)
+    $output = New-Object System.IO.FileStream $outFile, ([IO.FileMode]::Create), ([IO.FileAccess]::Write), ([IO.FileShare]::None)
+    $gzipStream = New-Object System.IO.Compression.GzipStream $input, ([IO.Compression.CompressionMode]::Decompress)
+    $buffer = New-Object byte[](1024)
+    while($true){
+        $read = $gzipstream.Read($buffer, 0, 1024)
+        if ($read -le 0){break}
+        $output.Write($buffer, 0, $read)
+        }
+    $gzipStream.Close()
+    $output.Close()
+    $input.Close()
 }
 
-function New-Temp-Dir() {
-  $parent = [System.IO.Path]::GetTempPath()
-  [string] $name = [System.Guid]::NewGuid()
-  $dir = New-Item -ItemType Directory -Path (Join-Path $parent $name)
-  return $dir.FullName
+# Grab link to install Hive CLI
+$urlContent = computeDownloadLink
+$finalLink = DownloadContent $urlContent
+
+# Create temporary directory for Hive CLI
+$hiveTmpDir = Join-Path $env:TEMP "hive"
+$cheTmpFile = Join-Path $hiveTmpDir "hive-tmp.tgz"
+if (![System.IO.Directory]::Exists($hiveTmpDir)) {[void][System.IO.Directory]::CreateDirectory($hiveTmpDir)}
+
+# Download the file to the tmp folder
+DownloadFile $finalLink $cheTmpFile
+
+# gunzip...
+$gunzippedfile = Join-Path $hiveTmpDir "hive-tmp.tar"
+DeGZip-File $cheTmpFile $gunzippedfile
+
+$hivePath = "$env:SYSTEMDRIVE\ProgramData\hive"
+if (![System.IO.Directory]::Exists($hivePath)) {[void][System.IO.Directory]::CreateDirectory($hivePath)}
+
+cd $hivePath
+Write-Output "Extracting hive to $hivePath..."
+$argumentList ="-xf $gunzippedfile"
+Start-Process -FilePath "tar.Exe" -NoNewWindow -Wait -RedirectStandardError "./NUL" -ArgumentList $argumentList 
+
+# delete hive temp directory
+Remove-Item -LiteralPath $hiveTmpDir -Force -Recurse
+
+$hiveInstalledFolderPath = Join-Path $hivePath 'hive'
+$hiveBinFolderPath = Join-Path $hiveInstalledFolderPath 'bin'
+
+# Add into path the hive bin folder for the user
+if ($($env:Path).ToLower().Contains($($hiveBinFolderPath).ToLower()) -eq $false) {
+  $currentPath = [Environment]::GetEnvironmentVariable('Path',[System.EnvironmentVariableTarget]::User);
+  $newPath = "$currentPath;$hiveBinFolderPath";
+  [System.Environment]::SetEnvironmentVariable('Path',$newPath,[System.EnvironmentVariableTarget]::User);
+  $env:Path = $newPath;
 }
 
-Install-Binary "$Args"
+
+# launch hive
+hive --version
+
+Write-Host "Hive CLI has been successfully installed" -ForegroundColor Green
