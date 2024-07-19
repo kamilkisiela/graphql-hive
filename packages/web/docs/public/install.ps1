@@ -70,8 +70,7 @@ Function DeGZip-File{
 }
 
 # Grab link to install Hive CLI
-$urlContent = computeDownloadLink
-$finalLink = DownloadContent $urlContent
+$finalLink = computeDownloadLink
 
 # Create temporary directory for Hive CLI
 $hiveTmpDir = Join-Path $env:TEMP "hive"
