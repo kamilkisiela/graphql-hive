@@ -1,6 +1,6 @@
 import { createContext, ReactElement, ReactNode, useState } from 'react';
 import clsx from 'clsx';
-import { XIcon } from '@/components/v2/icon';
+import { XIcon } from '@/components/ui/icon';
 import {
   Close,
   Content,

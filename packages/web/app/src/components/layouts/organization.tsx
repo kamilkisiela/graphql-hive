@@ -2,8 +2,6 @@ import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from '@/components/ui/user-menu';
-import { HiveLink } from '@/components/v2/hive-link';
-import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
 import { Tabs } from '@/components/v2/tabs';
 import { env } from '@/env/frontend';
@@ -19,6 +17,8 @@ import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { Link } from '@tanstack/react-router';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
+import { HiveLink } from '../ui/hive-link';
+import { PlusIcon } from '../ui/icon';
 import { QueryError } from '../ui/query-error';
 import { OrganizationSelector } from './organization-selectors';
 

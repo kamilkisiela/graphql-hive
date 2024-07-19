@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
-import { EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
+import { EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/ui/icon';
 import { DocumentType, graphql, useFragment } from '@/gql';
 import { Link } from './link';
 import { Subtitle, Title } from './page';

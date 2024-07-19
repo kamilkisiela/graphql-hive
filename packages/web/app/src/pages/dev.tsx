@@ -1,5 +1,5 @@
 import { GraphiQL } from 'graphiql';
-import { HiveLogo } from '@/components/v2/icon';
+import { HiveLogo } from '@/components/ui/icon';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import 'graphiql/graphiql.css';
 import { Helmet } from 'react-helmet-async';

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
+import { PackageIcon } from '@/components/ui/icon';
 import { Tooltip } from '@/components/v2';
-import { PackageIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { Link } from '@tanstack/react-router';

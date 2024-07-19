@@ -6,12 +6,12 @@ import {
   CompositionErrorsSection,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { DiffIcon } from '@/components/ui/icon';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DiffEditor } from '@/components/v2';
-import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/gql/graphql';
 import { cn } from '@/lib/utils';

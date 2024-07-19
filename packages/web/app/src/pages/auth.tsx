@@ -1,8 +1,8 @@
 import { BookIcon } from 'lucide-react';
 import { SiGithub } from 'react-icons/si';
 import { useSessionContext } from 'supertokens-auth-react/recipe/session';
+import { HiveLogo } from '@/components/ui/icon';
 import { Meta } from '@/components/ui/meta';
-import { HiveLogo } from '@/components/v2/icon';
 import { Outlet } from '@tanstack/react-router';
 
 function ExternalLink(props: { href: string; children: React.ReactNode }) {

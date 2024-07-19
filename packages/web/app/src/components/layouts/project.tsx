@@ -2,9 +2,6 @@ import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from '@/components/ui/user-menu';
-import { HiveLink } from '@/components/v2/hive-link';
-import { PlusIcon } from '@/components/v2/icon';
-import { CreateTargetModal } from '@/components/v2/modals';
 import { Tabs } from '@/components/v2/tabs';
 import { graphql } from '@/gql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
@@ -12,6 +9,9 @@ import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { Link } from '@tanstack/react-router';
 import { ProjectMigrationToast } from '../project/migration-toast';
+import { CreateTargetModal } from '../ui/create-target';
+import { HiveLink } from '../ui/hive-link';
+import { PlusIcon } from '../ui/icon';
 import { ProjectSelector } from './project-selector';
 
 export enum Page {

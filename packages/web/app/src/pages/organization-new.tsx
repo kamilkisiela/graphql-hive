@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/card';
 import { DottedBackground } from '@/components/ui/dotted-background';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { HiveLogo } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Meta } from '@/components/ui/meta';
 import { Spinner } from '@/components/ui/spinner';
 import { useToast } from '@/components/ui/use-toast';
-import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from '@tanstack/react-router';
