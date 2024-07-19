@@ -1,6 +1,7 @@
 import { UserInput } from 'supertokens-auth-react/lib/build/recipe/thirdpartyemailpassword/types';
 import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { env } from '@/env/frontend';
+import { updateLastAuthMethod } from './last-auth-method';
 
 export const createThirdPartyEmailPasswordReactOIDCProvider = () => ({
   id: 'oidc',
@@ -78,6 +79,8 @@ export const startAuthFlowForOIDCProvider = async (oidcId: string) => {
       oidcId,
     },
   });
+
+  updateLastAuthMethod('oidc');
 
   // Redirects to the OIDC provider
   window.location.assign(authUrl);
