@@ -55,16 +55,14 @@ function Invoke-Installer($exe, $install_args) {
   } catch [System.UnauthorizedAccessException] {
     $openProcesses = Get-Process -Name hive | Where-Object { $_.Path -eq "$exe" }
     if ($openProcesses.Count -gt 0) {
-      Write-Output "Install Failed - An older installation exists and is open. Please close open Hive processes and try again."
-      return 1
+      Write-Output "An older installation exists and is open. Please close open Hive processes and try again."
+    } else {
+      Write-Output "An unknown error occurred while trying to remove the existing installation"
+      Write-Output $_
     }
-    Write-Output "Install Failed - An unknown error occurred while trying to remove the existing installation"
-    Write-Output $_
-    return 1
   } catch {
-    Write-Output "Install Failed - An unknown error occurred while trying to remove the existing installation"
+    Write-Output "An unknown error occurred while trying to remove the existing installation"
     Write-Output $_
-    return 1
   }
 }
 
