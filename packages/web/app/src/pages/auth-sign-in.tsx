@@ -48,8 +48,8 @@ export function SignInButton(props: {
             className={cn(
               'animate-shimmer bg-[length:200%_100%] transition-colors',
               props.variant === 'outline'
-                ? `bg-[linear-gradient(110deg,transparent,48%,#202020,52%,transparent)]`
-                : `bg-[linear-gradient(110deg,transparent,30%,#a9a9a9,70%,transparent)]`,
+                ? 'bg-[linear-gradient(110deg,transparent,48%,#202020,52%,transparent)]'
+                : 'bg-[linear-gradient(110deg,transparent,30%,#a9a9a9,70%,transparent)]',
             )}
           >
             {props.children}

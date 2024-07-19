@@ -97,7 +97,6 @@ module.exports = {
       rules: {
         'no-process-env': 'error',
         'no-empty': ['error', { allowEmptyCatch: true }],
-        quotes: 'off',
         'import/no-absolute-path': 'error',
         'import/no-self-import': 'error',
         'import/no-extraneous-dependencies': [
