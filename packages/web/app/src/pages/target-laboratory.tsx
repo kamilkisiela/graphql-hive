@@ -362,6 +362,20 @@ function useOperationCollectionsPlugin(props: {
 
       useEffect(() => {
         if (!hasAllEditors || !currentOperation) {
+          const searchObj = router.latestLocation.search;
+          const operationString =
+            'operationString' in searchObj && typeof searchObj.operationString === 'string'
+              ? searchObj.operationString
+              : null;
+
+          // We provide an operation string when navigating to the laboratory from persisted documents
+          // in that case we want to show that operation within this tab.
+          if (operationString) {
+            editorContext.queryEditor?.setValue(operationString);
+            editorContext.variableEditor?.setValue('');
+            editorContext.headerEditor?.setValue('');
+          }
+
           return;
         }
 

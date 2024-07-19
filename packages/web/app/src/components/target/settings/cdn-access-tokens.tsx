@@ -370,7 +370,7 @@ export function CDNAccessTokens(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="CDN Access Token"
+        subPageTitle="CDN Access Token"
         description={
           <>
             <CardDescription>
