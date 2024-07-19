@@ -190,17 +190,22 @@ const authIndexRoute = createRoute({
 
 const AuthResetPasswordRouteSearch = AuthSharedSearch.extend({
   email: z.string().optional(),
+  token: z.string().optional(),
 });
 
 const authResetPasswordRoute = createRoute({
   getParentRoute: () => authRoute,
   path: 'reset-password',
-  validateSearch(search) {
-    return AuthResetPasswordRouteSearch.parse(search);
-  },
+  validateSearch: AuthResetPasswordRouteSearch.parse,
   component: function AuthResetPasswordRoute() {
-    const { email, redirectToPath } = authResetPasswordRoute.useSearch();
-    return <AuthResetPasswordPage email={email ?? null} redirectToPath={redirectToPath} />;
+    const { email, token, redirectToPath } = authResetPasswordRoute.useSearch();
+    return (
+      <AuthResetPasswordPage
+        email={email ?? null}
+        token={token ?? null}
+        redirectToPath={redirectToPath}
+      />
+    );
   },
 });
 
