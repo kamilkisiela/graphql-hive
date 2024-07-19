@@ -4,7 +4,6 @@ import {
   Interceptor,
   SerializableValue,
   sql,
-  TaggedTemplateLiteralInvocation,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
 import { update } from 'slonik-utilities';
