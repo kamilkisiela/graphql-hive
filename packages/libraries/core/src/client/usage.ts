@@ -207,7 +207,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           ttl: options.ttl,
           processVariables: options.processVariables ?? false,
         });
-        console.log('BURR', args);
+
         agent.capture(
           collect(document, args.args.variableValues ?? null).then(({ key, value: info }) => {
             return {
