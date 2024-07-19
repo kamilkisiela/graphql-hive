@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ghost from '../../public/images/figures/ghost.svg?url';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useClient, useQuery } from 'urql';
@@ -15,6 +15,7 @@ import { EmptyList } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { SubPageLayoutHeader } from '@/components/ui/page-content-layout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Table,
   TableBody,
@@ -24,20 +25,27 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsLink, Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { Link, useRouter } from '@tanstack/react-router';
 
 const TargetAppsVersionQuery = graphql(`
   query TargetAppsVersionQuery(
-    $targetSelector: TargetSelectorInput!
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
     $appName: String!
     $appVersion: String!
     $first: Int
     $after: String
   ) {
-    target(selector: $targetSelector) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        id
+        isAppDeploymentsEnabled
+      }
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       appDeployment(appName: $appName, appVersion: $appVersion) {
         id
@@ -72,11 +80,9 @@ export function TargetAppVersionPage(props: {
   const [data] = useQuery({
     query: TargetAppsVersionQuery,
     variables: {
-      targetSelector: {
-        organization: props.organizationId,
-        project: props.projectId,
-        target: props.targetId,
-      },
+      organizationId: props.organizationId,
+      projectId: props.projectId,
+      targetId: props.targetId,
       appName: props.appName,
       appVersion: props.appVersion,
       first: 20,
@@ -86,6 +92,23 @@ export function TargetAppVersionPage(props: {
   const router = useRouter();
   const client = useClient();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const isAppDeploymentsEnabled =
+    !data.fetching && !data.stale && !data.data?.organization?.organization.isAppDeploymentsEnabled;
+
+  useEffect(() => {
+    if (isAppDeploymentsEnabled) {
+      void router.navigate({
+        to: '/$organizationId/$projectId/$targetId',
+        params: {
+          organizationId: props.organizationId,
+          projectId: props.projectId,
+          targetId: props.targetId,
+        },
+        replace: true,
+      });
+    }
+  }, [isAppDeploymentsEnabled]);
 
   const title = data.data?.target?.appDeployment
     ? `${data.data.target.appDeployment.name}@${data.data.target.appDeployment.version}`
@@ -156,17 +179,17 @@ export function TargetAppVersionPage(props: {
             description={
               <>
                 <CardDescription>
-                  App deployments empower you to group your GraphQL operations by version and
-                  leverage granular app version statistics and persisted operations.
+                  Group your GraphQL operations by app version for app version statistics and
+                  persisted operations.
                 </CardDescription>
-                <CardDescription>
+                {/* <CardDescription>
                   <DocsLink
                     href="/management/targets#cdn-access-tokens"
                     className="text-gray-500 hover:text-gray-300"
                   >
                     Learn more about App Deployments
                   </DocsLink>
-                </CardDescription>
+                </CardDescription> */}
               </>
             }
           />
@@ -293,11 +316,9 @@ export function TargetAppVersionPage(props: {
                       setIsLoadingMore(true);
                       void client
                         .query(TargetAppsVersionQuery, {
-                          targetSelector: {
-                            organization: props.organizationId,
-                            project: props.projectId,
-                            target: props.targetId,
-                          },
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
                           appName: props.appName,
                           appVersion: props.appVersion,
                           first: 20,

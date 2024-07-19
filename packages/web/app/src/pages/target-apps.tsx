@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useClient, useQuery } from 'urql';
@@ -9,6 +9,7 @@ import { CardDescription } from '@/components/ui/card';
 import { EmptyList, noSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { SubPageLayoutHeader } from '@/components/ui/page-content-layout';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Table,
   TableBody,
@@ -18,10 +19,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsLink, Spinner, TimeAgo } from '@/components/v2';
+import { TimeAgo } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 
 const AppTableRow_AppDeploymentFragment = graphql(`
   fragment AppTableRow_AppDeploymentFragment on AppDeployment {
@@ -35,8 +36,14 @@ const AppTableRow_AppDeploymentFragment = graphql(`
 `);
 
 const TargetAppsViewQuery = graphql(`
-  query TargetAppsViewQuery($targetSelector: TargetSelectorInput!, $after: String) {
-    target(selector: $targetSelector) {
+  query TargetAppsViewQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!, $after: String) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        id
+        isAppDeploymentsEnabled
+      }
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       latestSchemaVersion {
         id
@@ -59,8 +66,13 @@ const TargetAppsViewQuery = graphql(`
 `);
 
 const TargetAppsViewFetchMoreQuery = graphql(`
-  query TargetAppsViewFetchMoreQuery($targetSelector: TargetSelectorInput!, $after: String!) {
-    target(selector: $targetSelector) {
+  query TargetAppsViewFetchMoreQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $after: String!
+  ) {
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       appDeployments(first: 20, after: $after) {
         pageInfo {
@@ -149,16 +161,31 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
   const [data] = useQuery({
     query: TargetAppsViewQuery,
     variables: {
-      targetSelector: {
-        organization: props.organizationId,
-        project: props.projectId,
-        target: props.targetId,
-      },
+      organizationId: props.organizationId,
+      projectId: props.projectId,
+      targetId: props.targetId,
     },
   });
   const client = useClient();
-
+  const router = useRouter();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const isAppDeploymentsEnabled =
+    !data.fetching && !data.stale && !data.data?.organization?.organization.isAppDeploymentsEnabled;
+
+  useEffect(() => {
+    if (isAppDeploymentsEnabled) {
+      void router.navigate({
+        to: '/$organizationId/$projectId/$targetId',
+        params: {
+          organizationId: props.organizationId,
+          projectId: props.projectId,
+          targetId: props.targetId,
+        },
+        replace: true,
+      });
+    }
+  }, [isAppDeploymentsEnabled]);
 
   return (
     <div className="flex flex-1 flex-col py-6">
@@ -167,17 +194,17 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
         description={
           <>
             <CardDescription>
-              App deployments empower you to group your GraphQL operations by version and leverage
-              granular app version statistics and persisted operations.
+              Group your GraphQL operations by app version for app version statistics and persisted
+              operations.
             </CardDescription>
-            <CardDescription>
+            {/* <CardDescription>
               <DocsLink
-                href="/management/targets#cdn-access-tokens"
+                 href="/management/app-deployments"
                 className="text-gray-500 hover:text-gray-300"
               >
                 Learn more about App Deployments
               </DocsLink>
-            </CardDescription>
+            </CardDescription> */}
           </>
         }
       />
@@ -247,11 +274,9 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
                   setIsLoadingMore(true);
                   void client
                     .query(TargetAppsViewFetchMoreQuery, {
-                      targetSelector: {
-                        organization: props.organizationId,
-                        project: props.projectId,
-                        target: props.targetId,
-                      },
+                      organizationId: props.organizationId,
+                      projectId: props.projectId,
+                      targetId: props.targetId,
                       after: data?.data?.target?.appDeployments?.pageInfo?.endCursor,
                     })
                     .toPromise()

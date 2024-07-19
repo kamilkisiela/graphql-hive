@@ -37,6 +37,7 @@ const TargetLayoutQuery = graphql(`
         id
         cleanId
         name
+        isAppDeploymentsEnabled
         me {
           id
           ...CanAccessTarget_MemberFragment
@@ -211,18 +212,20 @@ export const TargetLayout = ({
                         Insights
                       </Link>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.Apps} asChild>
-                      <Link
-                        to="/$organizationId/$projectId/$targetId/apps"
-                        params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
-                        }}
-                      >
-                        Apps
-                      </Link>
-                    </Tabs.Trigger>
+                    {currentOrganization.isAppDeploymentsEnabled && (
+                      <Tabs.Trigger value={Page.Apps} asChild>
+                        <Link
+                          to="/$organizationId/$projectId/$targetId/apps"
+                          params={{
+                            organizationId: props.organizationId,
+                            projectId: props.projectId,
+                            targetId: props.targetId,
+                          }}
+                        >
+                          Apps
+                        </Link>
+                      </Tabs.Trigger>
+                    )}
                     <Tabs.Trigger value={Page.Laboratory} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/laboratory"
