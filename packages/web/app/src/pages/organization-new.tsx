@@ -28,7 +28,7 @@ export function NewOrgPage(): ReactElement {
   return (
     <>
       <Meta title="Create Organization" />
-      <DottedBackground>
+      <DottedBackground className="min-h-[100vh]">
         <div className="flex h-full grow items-center">
           <Button
             variant="outline"

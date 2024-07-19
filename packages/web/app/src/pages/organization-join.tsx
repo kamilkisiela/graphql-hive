@@ -92,7 +92,7 @@ export function JoinOrganizationPage(props: { inviteCode: string }) {
   return (
     <>
       <Meta title={orgName ? `Invitation to ${orgName}` : 'Invitation'} />
-      <DottedBackground>
+      <DottedBackground className="min-h-[100vh]">
         <Button
           variant="outline"
           onClick={() => router.navigate({ to: '/logout' })}

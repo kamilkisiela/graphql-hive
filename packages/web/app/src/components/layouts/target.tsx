@@ -269,7 +269,9 @@ export const TargetLayout = ({
           ) : null}
         </div>
       </div>
-      <div className={cn('container pb-7', className)}>{children}</div>
+      <div className={cn('container min-h-[var(--content-height)] pb-7', className)}>
+        {children}
+      </div>
     </>
   );
 };

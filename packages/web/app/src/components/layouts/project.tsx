@@ -191,7 +191,7 @@ export function ProjectLayout({
           />
         </div>
       </div>
-      <div className="container h-full pb-7">
+      <div className="container min-h-[var(--content-height)] pb-7">
         <div className={className}>{children}</div>
       </div>
     </>
