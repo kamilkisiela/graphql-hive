@@ -126,9 +126,12 @@ impl HiveRegistry {
         // A hacky way to force the router to use GraphQL Hive CDN as the source of schema.
         // Our plugin does the polling and saves the supergraph to a file.
         // It also enables hot-reloading to makes sure Apollo Router watches the file.
-        let file_name = config
-            .schema_file_path
-            .unwrap_or("supergraph-schema.graphql".to_string());
+        let file_name = config.schema_file_path.unwrap_or(
+            env::temp_dir()
+                .with_file_name("supergraph-schema.graphql")
+                .to_string_lossy()
+                .to_string(),
+        );
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
 
