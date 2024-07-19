@@ -212,6 +212,8 @@ type Activity =
   | ProjectDeletedActivity
   | ProjectNameUpdatedActivity
   | ProjectIdUpdatedActivity
+  | PersistedOperationCreatedActivity
+  | PersistedOperationDeletedActivity
   | TargetCreatedActivity
   | TargetDeletedActivity
   | TargetNameUpdatedActivity
