@@ -1,3 +1,47 @@
+import { Injectable, Scope } from 'graphql-modules';
+import { AuthManager } from '../../auth/providers/auth-manager';
+import { Logger } from '../../shared/providers/logger';
+import { Storage } from '../../shared/providers/storage';
+
+@Injectable({
+  scope: Scope.Operation,
+  global: true,
+})
+export class ActivityManager {
+  private logger: Logger;
+
+  constructor(
+    logger: Logger,
+    private authManager: AuthManager,
+    private storage: Storage,
+  ) {
+    this.logger = logger.child({
+      source: 'ActivityManager',
+    });
+  }
+
+  async create(activity: Activity): Promise<void> {
+    try {
+      this.logger.debug('Creating an activity');
+
+      const user = activity.user ? activity.user.id : (await this.authManager.getCurrentUser()).id;
+
+      await this.storage.createActivity({
+        organization: activity.selector.organization,
+        project: 'project' in activity.selector ? activity.selector.project : undefined,
+        target: 'target' in activity.selector ? activity.selector.target : undefined,
+        user,
+        type: activity.type,
+        meta: 'meta' in activity ? activity.meta : {},
+      });
+
+      this.logger.debug(`Created activity ${activity.type}`);
+    } catch (error) {
+      this.logger.error(`Failed to create an activity: ${error}`, error);
+    }
+  }
+}
+
 interface User {
   id: string;
   superTokensUserId: string | null;
@@ -31,13 +75,13 @@ interface TargetSelector extends ProjectSelector {
   target: string;
 }
 
-export interface OrganizationCreatedActivity extends BaseActivity {
+interface OrganizationCreatedActivity extends BaseActivity {
   type: 'ORGANIZATION_CREATED';
   selector: OrganizationSelector;
   user: User;
 }
 
-export interface OrganizationNameUpdatedActivity extends BaseActivity {
+interface OrganizationNameUpdatedActivity extends BaseActivity {
   type: 'ORGANIZATION_NAME_UPDATED';
   selector: OrganizationSelector;
   meta: {
@@ -45,7 +89,7 @@ export interface OrganizationNameUpdatedActivity extends BaseActivity {
   };
 }
 
-export interface OrganizationIdUpdatedActivity extends BaseActivity {
+interface OrganizationIdUpdatedActivity extends BaseActivity {
   type: 'ORGANIZATION_ID_UPDATED';
   selector: OrganizationSelector;
   meta: {
@@ -66,7 +110,7 @@ export interface MemberDeletedActivity extends BaseActivity {
   };
 }
 
-export interface MemberLeftActivity extends BaseActivity {
+interface MemberLeftActivity extends BaseActivity {
   type: 'MEMBER_LEFT';
   selector: OrganizationSelector;
   meta: {
@@ -74,7 +118,7 @@ export interface MemberLeftActivity extends BaseActivity {
   };
 }
 
-export interface ProjectCreatedActivity extends BaseActivity {
+interface ProjectCreatedActivity extends BaseActivity {
   type: 'PROJECT_CREATED';
   selector: ProjectSelector;
   meta: {
@@ -82,7 +126,7 @@ export interface ProjectCreatedActivity extends BaseActivity {
   };
 }
 
-export interface ProjectDeletedActivity extends BaseActivity {
+interface ProjectDeletedActivity extends BaseActivity {
   type: 'PROJECT_DELETED';
   selector: OrganizationSelector;
   meta: {
@@ -91,7 +135,7 @@ export interface ProjectDeletedActivity extends BaseActivity {
   };
 }
 
-export interface ProjectNameUpdatedActivity extends BaseActivity {
+interface ProjectNameUpdatedActivity extends BaseActivity {
   type: 'PROJECT_NAME_UPDATED';
   selector: ProjectSelector;
   meta: {
@@ -99,7 +143,7 @@ export interface ProjectNameUpdatedActivity extends BaseActivity {
   };
 }
 
-export interface ProjectIdUpdatedActivity extends BaseActivity {
+interface ProjectIdUpdatedActivity extends BaseActivity {
   type: 'PROJECT_ID_UPDATED';
   selector: ProjectSelector;
   meta: {
@@ -107,22 +151,22 @@ export interface ProjectIdUpdatedActivity extends BaseActivity {
   };
 }
 
-export interface PersistedOperationCreatedActivity extends BaseActivity {
+interface PersistedOperationCreatedActivity extends BaseActivity {
   type: 'PERSISTED_OPERATION_CREATED';
   selector: PersistedOperationSelector;
 }
 
-export interface PersistedOperationDeletedActivity extends BaseActivity {
+interface PersistedOperationDeletedActivity extends BaseActivity {
   type: 'PERSISTED_OPERATION_DELETED';
   selector: PersistedOperationSelector;
 }
 
-export interface TargetCreatedActivity extends BaseActivity {
+interface TargetCreatedActivity extends BaseActivity {
   type: 'TARGET_CREATED';
   selector: TargetSelector;
 }
 
-export interface TargetDeletedActivity extends BaseActivity {
+interface TargetDeletedActivity extends BaseActivity {
   type: 'TARGET_DELETED';
   selector: ProjectSelector;
   meta: {
@@ -131,7 +175,7 @@ export interface TargetDeletedActivity extends BaseActivity {
   };
 }
 
-export interface TargetNameUpdatedActivity extends BaseActivity {
+interface TargetNameUpdatedActivity extends BaseActivity {
   type: 'TARGET_NAME_UPDATED';
   selector: TargetSelector;
   meta: {
@@ -139,7 +183,7 @@ export interface TargetNameUpdatedActivity extends BaseActivity {
   };
 }
 
-export interface TargetIdUpdatedActivity extends BaseActivity {
+interface TargetIdUpdatedActivity extends BaseActivity {
   type: 'TARGET_ID_UPDATED';
   selector: TargetSelector;
   meta: {
@@ -147,7 +191,7 @@ export interface TargetIdUpdatedActivity extends BaseActivity {
   };
 }
 
-export interface OrganizationPlanUpdated extends BaseActivity {
+interface OrganizationPlanUpdated extends BaseActivity {
   type: 'ORGANIZATION_PLAN_UPDATED';
   selector: OrganizationSelector;
   meta: {
@@ -156,7 +200,7 @@ export interface OrganizationPlanUpdated extends BaseActivity {
   };
 }
 
-export type Activity =
+type Activity =
   | OrganizationCreatedActivity
   | OrganizationNameUpdatedActivity
   | OrganizationIdUpdatedActivity
@@ -168,9 +212,9 @@ export type Activity =
   | ProjectDeletedActivity
   | ProjectNameUpdatedActivity
   | ProjectIdUpdatedActivity
+  | PersistedOperationCreatedActivity
+  | PersistedOperationDeletedActivity
   | TargetCreatedActivity
   | TargetDeletedActivity
   | TargetNameUpdatedActivity
   | TargetIdUpdatedActivity;
-
-export type ActivityTypes = Activity['type'];

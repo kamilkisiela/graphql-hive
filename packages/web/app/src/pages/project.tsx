@@ -6,7 +6,6 @@ import { Globe, History } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { Page, ProjectLayout } from '@/components/layouts/project';
-import { Activities } from '@/components/ui/activities';
 import { EmptyList } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -263,7 +262,7 @@ const ProjectsPageContent = (props: { organizationId: string; projectId: string 
         <div
           className={cn(
             'grow',
-            targets?.length === 0 ? '' : 'grid grid-cols-2 items-stretch gap-5',
+            targets?.length === 0 ? '' : 'grid grid-cols-2 items-stretch gap-5 xl:grid-cols-3',
           )}
         >
           {targets ? (
@@ -319,7 +318,6 @@ const ProjectsPageContent = (props: { organizationId: string; projectId: string 
           )}
         </div>
       </div>
-      <Activities organizationId={props.organizationId} />
     </ProjectLayout>
   );
 };

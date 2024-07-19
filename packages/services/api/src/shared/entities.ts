@@ -388,17 +388,6 @@ export interface Orchestrator {
   ): Promise<ComposeAndValidateResult>;
 }
 
-export interface ActivityObject {
-  id: string;
-  type: string;
-  meta: any;
-  createdAt: Date;
-  target?: Target;
-  project?: Project;
-  organization: Organization;
-  user?: User;
-}
-
 export interface AlertChannel {
   id: string;
   projectId: string;
