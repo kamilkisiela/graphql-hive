@@ -101,7 +101,6 @@ const config: CodegenConfig = {
           OrganizationConnection:
             '../modules/organization/module.graphql.mappers#OrganizationConnectionMapper',
           UserConnection: '../modules/auth/module.graphql.mappers#UserConnectionMapper',
-          ActivityConnection: '../modules/activity/module.graphql.mappers#ActivityConnectionMapper',
           MemberConnection: '../modules/auth/module.graphql.mappers#MemberConnectionMapper',
           ProjectConnection: '../modules/project/module.graphql.mappers#ProjectConnectionMapper',
           TargetConnection: '../modules/target/module.graphql.mappers#TargetConnectionMapper',
@@ -129,7 +128,6 @@ const config: CodegenConfig = {
           MemberRole: '../modules/organization/module.graphql.mappers#MemberRoleMapper',
           Token: '../modules/token/module.graphql.mappers#TokenMapper',
           TokenInfo: '../modules/token/module.graphql.mappers#TokenInfoMapper',
-          Activity: '../modules/activity/module.graphql.mappers#ActivityMapper',
           AlertChannel: '../modules/alerts/module.graphql.mappers#AlertChannelMapper',
           AlertSlackChannel: '../modules/alerts/module.graphql.mappers#AlertSlackChannelMapper',
           AlertWebhookChannel: '../modules/alerts/module.graphql.mappers#AlertWebhookChannelMapper',
