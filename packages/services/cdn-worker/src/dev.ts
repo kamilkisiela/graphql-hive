@@ -7,6 +7,7 @@ import { AwsClient } from './aws';
 import './dev-polyfill';
 import { env } from './dev-polyfill';
 import { createRequestHandler } from './handler';
+import { createIsAppDeploymentActive } from './is-app-deployment-active';
 import { createIsKeyValid } from './key-validation';
 
 const s3 = {
@@ -47,14 +48,12 @@ const handleRequest = createRequestHandler({
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
-  async getArtifactAction(targetId, contractName, artifactType, eTag) {
-    return artifactStorageReader.generateArtifactReadUrl(
-      targetId,
-      contractName,
-      artifactType,
-      eTag,
-    );
-  },
+  isAppDeploymentActive: createIsAppDeploymentActive({
+    artifactStorageReader,
+    getCache: null,
+    waitUntil: null,
+  }),
+  artifactStorageReader,
 });
 
 function main() {

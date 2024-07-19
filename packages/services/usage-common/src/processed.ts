@@ -32,3 +32,10 @@ export interface ProcessedRegistryRecord {
   expires_at: number;
   coordinates: string[];
 }
+
+export interface ProcessedAppDeploymentUsageRecord {
+  target: string;
+  appName: string;
+  appVersion: string;
+  lastRequestTimestamp: number;
+}

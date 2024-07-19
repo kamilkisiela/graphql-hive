@@ -1,16 +1,9 @@
-import { createHash } from 'node:crypto';
-import type {
-  DefinitionNode,
-  DocumentNode,
-  OperationDefinitionNode,
-  OperationTypeNode,
-} from 'graphql';
-import { Kind, parse } from 'graphql';
+import type { OperationTypeNode } from 'graphql';
 import LRU from 'tiny-lru';
-import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
 import type { ServiceLogger } from '@hive/service-common';
 import type {
   ProcessedOperation,
+  RawAppDeploymentUsageTimestampMap,
   RawOperation,
   RawOperationMap,
   RawOperationMapRecord,
@@ -25,7 +18,9 @@ import {
   schemaCoordinatesSize,
   totalOperations,
 } from './metrics';
+import { normalizeOperation } from './normalize-operation';
 import {
+  stringifyAppDeploymentUsageRecord,
   stringifyQueryOrMutationOperation,
   stringifyRegistryRecord,
   stringifySubscriptionOperation,
@@ -49,7 +44,14 @@ const RETENTION_FALLBACK = 365;
 export function createProcessor(config: { logger: ServiceLogger }) {
   const { logger } = config;
   const normalize = cache(
-    normalizeOperation,
+    (operation: RawOperationMapRecord) => {
+      normalizeCacheMisses.inc();
+      return normalizeOperation({
+        document: operation.operation,
+        fields: operation.fields,
+        operationName: operation.operationName ?? null,
+      });
+    },
     op => op.key,
     LRU<NormalizationResult>(10_000, 1_800_000 /* 30 minutes */),
   );
@@ -67,8 +69,22 @@ export function createProcessor(config: { logger: ServiceLogger }) {
       const serializedSubscriptionOperations: string[] = [];
       const serializedRegistryRecords: string[] = [];
 
+      const allAppDeploymentTimeStamps = new Map<
+        string,
+        Array<RawAppDeploymentUsageTimestampMap>
+      >();
+
       for (const rawReport of rawReports) {
         reportSize.observe(rawReport.size);
+
+        if (rawReport.appDeploymentUsageTimestamps) {
+          let targetRecords = allAppDeploymentTimeStamps.get(rawReport.target);
+          if (!targetRecords) {
+            targetRecords = [];
+            allAppDeploymentTimeStamps.set(rawReport.target, targetRecords);
+          }
+          targetRecords.push(rawReport.appDeploymentUsageTimestamps);
+        }
 
         const operationSample = new Map<
           string,
@@ -179,10 +195,39 @@ export function createProcessor(config: { logger: ServiceLogger }) {
         }
       }
 
+      const serializedAppDeploymentUsageRecords: string[] = [];
+
+      if (allAppDeploymentTimeStamps.size > 0) {
+        for (const [target, records] of allAppDeploymentTimeStamps) {
+          const max = new Map<string, number>();
+          for (const record of records) {
+            for (const key in record) {
+              let current = max.get(key);
+              if (!current || current < record[key]) {
+                max.set(key, record[key]);
+              }
+            }
+          }
+
+          for (const [key, timestamp] of max.entries()) {
+            const [appName, appVersion] = key.split('/');
+            serializedAppDeploymentUsageRecords.push(
+              stringifyAppDeploymentUsageRecord({
+                target,
+                appName,
+                appVersion,
+                lastRequestTimestamp: timestamp,
+              }),
+            );
+          }
+        }
+      }
+
       return {
         operations: serializedOperations,
         subscriptionOperations: serializedSubscriptionOperations,
         registryRecords: serializedRegistryRecords,
+        appDeploymentUsageRecords: serializedAppDeploymentUsageRecords,
       };
     },
   };
@@ -291,71 +336,4 @@ function processSubscriptionOperation(
     metadata,
     operationHash,
   };
-}
-
-function isOperationDef(def: DefinitionNode): def is OperationDefinitionNode {
-  return def.kind === Kind.OPERATION_DEFINITION;
-}
-
-function normalizeOperation(operation: RawOperationMapRecord) {
-  normalizeCacheMisses.inc();
-  let parsed: DocumentNode;
-  try {
-    parsed = parse(operation.operation);
-  } catch (error) {
-    // No need to log this, it's already logged by the usage service
-    // We do check for parse errors here (in addition to the usage service),
-    // because the usage service was not parsing the operations before and we got corrupted documents in the Kafka loop.
-    return null;
-  }
-
-  const body = coreNormalizeOperation({
-    document: parsed,
-    hideLiterals: true,
-    removeAliases: true,
-  });
-
-  // Two operations with the same hash has to be equal:
-  // 1. body is the same
-  // 2. name is the same
-  // 3. used schema coordinates are equal - this is important to assign schema coordinate to an operation
-
-  const uniqueCoordinatesSet = new Set<string>();
-  for (const field of operation.fields) {
-    uniqueCoordinatesSet.add(field);
-    // Add types as well:
-    // `Query.foo` -> `Query`
-    const at = field.indexOf('.');
-    if (at > -1) {
-      uniqueCoordinatesSet.add(field.substring(0, at));
-    }
-  }
-
-  const sortedCoordinates = Array.from(uniqueCoordinatesSet).sort();
-
-  const operationDefinition = findOperationDefinition(parsed);
-
-  if (!operationDefinition) {
-    return null;
-  }
-
-  const operationName = operation.operationName ?? operationDefinition.name?.value;
-
-  const hash = createHash('md5')
-    .update(body)
-    .update(operationName ?? '')
-    .update(sortedCoordinates.join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
-    .digest('hex');
-
-  return {
-    type: operationDefinition.operation,
-    hash,
-    body,
-    coordinates: sortedCoordinates,
-    name: operationName || null,
-  };
-}
-
-function findOperationDefinition(doc: DocumentNode) {
-  return doc.definitions.find(isOperationDef);
 }

@@ -4897,6 +4897,17 @@ export function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
   };
 }
 
+export function encodeHashBasedCursor(cursor: { id: string }) {
+  return Buffer.from(cursor.id).toString('base64');
+}
+
+export function decodeHashBasedCursor(cursor: string) {
+  const id = Buffer.from(cursor, 'base64').toString('utf8');
+  return {
+    id,
+  };
+}
+
 function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
 }
@@ -4984,6 +4995,8 @@ const FeatureFlagsModel = zod
   .object({
     compareToPreviousComposableVersion: zod.boolean().default(false),
     forceLegacyCompositionInTargets: zod.array(zod.string()).default([]),
+    /** whether app deployments are enabled for the given organization */
+    appDeployments: zod.boolean().default(false),
   })
   .optional()
   .nullable()
@@ -4993,6 +5006,7 @@ const FeatureFlagsModel = zod
       val ?? {
         compareToPreviousComposableVersion: false,
         forceLegacyCompositionInTargets: [],
+        appDeployments: false,
       },
   );
 
