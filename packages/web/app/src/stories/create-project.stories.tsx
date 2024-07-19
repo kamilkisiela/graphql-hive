@@ -1,34 +1,38 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { CreateTargetModalContent } from '@/components/layouts/project';
+import { CreateProjectModalContent } from '@/components/layouts/organization';
 import { Button } from '@/components/ui/button';
+import { ProjectType } from '@/gql/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Meta, StoryObj } from '@storybook/react';
 
-const meta: Meta<typeof CreateTargetModalContent> = {
-  title: 'Modals/Create Target Modal',
-  component: CreateTargetModalContent,
+const meta: Meta<typeof CreateProjectModalContent> = {
+  title: 'Modals/Create Project Modal',
+  component: CreateProjectModalContent,
 };
 
 export default meta;
-type Story = StoryObj<typeof CreateTargetModalContent>;
+type Story = StoryObj<typeof CreateProjectModalContent>;
 
 const formSchema = z.object({
-  targetName: z
+  projectName: z
     .string({
-      required_error: 'Target name is required',
+      required_error: 'Project name is required',
     })
     .min(2, {
-      message: 'Target name must be at least 2 characters long',
+      message: 'Project name must be at least 2 characters long',
     })
     .max(50, {
-      message: 'Target name must be at most 50 characters long',
+      message: 'Project name must be at most 50 characters long',
     })
     .regex(
       /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
-      'Target name restricted to alphanumerical characters, spaces and . , _ - / &',
+      'Project name restricted to alphanumerical characters, spaces and . , _ - / &',
     ),
+  projectType: z.nativeEnum(ProjectType, {
+    required_error: 'Project type is required',
+  }),
 });
 
 export const Default: Story = {
@@ -37,9 +41,11 @@ export const Default: Story = {
       mode: 'onChange',
       resolver: zodResolver(formSchema),
       defaultValues: {
-        targetName: '',
+        projectName: '',
+        projectType: ProjectType.Single,
       },
     });
+
     const [openModal, setOpenModal] = useState(false);
     const toggleModalOpen = () => setOpenModal(!openModal);
 
@@ -47,12 +53,12 @@ export const Default: Story = {
       <>
         <Button onClick={toggleModalOpen}>Open Modal</Button>
         {openModal && (
-          <CreateTargetModalContent
+          <CreateProjectModalContent
             isOpen={openModal}
+            toggleModalOpen={toggleModalOpen}
             form={form}
             onSubmit={() => console.log('Submit')}
-            toggleModalOpen={toggleModalOpen}
-            key="create-target-modal"
+            key="create-project-modal"
           />
         )}
       </>

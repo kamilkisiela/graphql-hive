@@ -1,11 +1,33 @@
-import { ReactElement, ReactNode } from 'react';
-import { useQuery } from 'urql';
+import { FunctionComponentElement, ReactElement, ReactNode } from 'react';
+import { BlocksIcon, BoxIcon, FoldVerticalIcon } from 'lucide-react';
+import { useForm, UseFormReturn } from 'react-hook-form';
+import { useMutation, useQuery } from 'urql';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useToast } from '@/components/ui/use-toast';
 import { UserMenu } from '@/components/ui/user-menu';
-import { CreateProjectModal } from '@/components/v2/modals';
 import { Tabs } from '@/components/v2/tabs';
 import { env } from '@/env/frontend';
 import { graphql, useFragment } from '@/gql';
+import { ProjectType } from '@/gql/graphql';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -14,7 +36,9 @@ import {
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
-import { Link } from '@tanstack/react-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Slot } from '@radix-ui/react-slot';
+import { Link, useRouter } from '@tanstack/react-router';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 import { HiveLink } from '../ui/hive-link';
@@ -217,5 +241,217 @@ export function OrganizationLayout({
         <div className={className}>{children}</div>
       </div>
     </>
+  );
+}
+
+export const CreateProjectMutation = graphql(`
+  mutation CreateProject_CreateProject($input: CreateProjectInput!) {
+    createProject(input: $input) {
+      ok {
+        createdProject {
+          id
+          name
+          cleanId
+        }
+        createdTargets {
+          id
+          name
+          cleanId
+        }
+        updatedOrganization {
+          id
+        }
+      }
+      error {
+        message
+        inputErrors {
+          name
+          buildUrl
+          validationUrl
+        }
+      }
+    }
+  }
+`);
+
+const createProjectFormSchema = z.object({
+  projectName: z
+    .string({
+      required_error: 'Project name is required',
+    })
+    .min(2, {
+      message: 'Project name must be at least 2 characters long',
+    })
+    .max(40, {
+      message: 'Project name must be at most 40 characters long',
+    }),
+  projectType: z.nativeEnum(ProjectType, {
+    required_error: 'Project type is required',
+  }),
+});
+
+function ProjectTypeCard(props: {
+  title: string;
+  description: string;
+  type: ProjectType;
+  icon: FunctionComponentElement<{ className: string }>;
+}) {
+  return (
+    <FormItem>
+      <FormLabel className="[&:has([data-state=checked])>div]:border-primary cursor-pointer">
+        <FormControl>
+          <RadioGroupItem value={props.type} className="sr-only" />
+        </FormControl>
+        <div className="border-muted hover:border-accent hover:bg-accent flex items-center gap-4 rounded-md border-2 p-4">
+          <Slot className="size-8 text-gray-400">{props.icon}</Slot>
+          <div>
+            <span className="text-sm font-medium">{props.title}</span>
+            <p className="text-sm text-gray-400">{props.description}</p>
+          </div>
+        </div>
+      </FormLabel>
+    </FormItem>
+  );
+}
+
+function CreateProjectModal(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+}) {
+  const [_, mutate] = useMutation(CreateProjectMutation);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof createProjectFormSchema>>({
+    mode: 'onChange',
+    resolver: zodResolver(createProjectFormSchema),
+    defaultValues: {
+      projectName: '',
+      projectType: ProjectType.Single,
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
+    const { data, error } = await mutate({
+      input: {
+        organization: props.organizationId,
+        name: values.projectName,
+        type: values.projectType,
+      },
+    });
+    if (data?.createProject.ok) {
+      props.toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId/$projectId',
+        params: {
+          organizationId: props.organizationId,
+          projectId: data.createProject.ok.createdProject.cleanId,
+        },
+      });
+    } else if (data?.createProject.error?.inputErrors.name) {
+      form.setError('projectName', {
+        message: data?.createProject.error?.inputErrors.name,
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to create project',
+        description: error?.message || data?.createProject.error?.message,
+      });
+    }
+  }
+
+  return (
+    <CreateProjectModalContent
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
+      form={form}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+export function CreateProjectModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  form: UseFormReturn<z.infer<typeof createProjectFormSchema>>;
+  onSubmit: (values: z.infer<typeof createProjectFormSchema>) => void | Promise<void>;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create a project</DialogTitle>
+              <DialogDescription>
+                A Hive <b>project</b> represents a <b>GraphQL API</b> running a GraphQL schema.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-8">
+              <FormField
+                control={props.form.control}
+                name="projectName"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Name of your project</FormLabel>
+                      <FormControl>
+                        <Input placeholder="My GraphQL API" autoComplete="off" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={props.form.control}
+                name="projectType"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="pt-2"
+                      >
+                        <ProjectTypeCard
+                          type={ProjectType.Single}
+                          title="Single"
+                          description="Monolithic GraphQL schema developed as a standalone"
+                          icon={<BoxIcon />}
+                        />
+                        <ProjectTypeCard
+                          type={ProjectType.Federation}
+                          title="Federation"
+                          description="Project developed according to Apollo Federation specification"
+                          icon={<BlocksIcon />}
+                        />
+                        <ProjectTypeCard
+                          type={ProjectType.Stitching}
+                          title="Stitching"
+                          description="Project that stitches together multiple GraphQL APIs"
+                          icon={<FoldVerticalIcon />}
+                        />
+                      </RadioGroup>
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
+              >
+                {props.form.formState.isSubmitting ? 'Submitting...' : 'Create Project'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
