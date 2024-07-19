@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { CreateProjectModalContent } from '@/components/layouts/organization';
 import { Button } from '@/components/ui/button';
-import { CreateProjectModal, CreateProjectModalContent } from '@/components/ui/create-project';
 import { ProjectType } from '@/gql/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Meta, StoryObj } from '@storybook/react';
 
-const meta: Meta<typeof CreateProjectModal> = {
+const meta: Meta<typeof CreateProjectModalContent> = {
   title: 'Modals/Create Project Modal',
-  component: CreateProjectModal,
+  component: CreateProjectModalContent,
 };
 
 export default meta;
-type Story = StoryObj<typeof CreateProjectModal>;
+type Story = StoryObj<typeof CreateProjectModalContent>;
 
 const formSchema = z.object({
   projectName: z

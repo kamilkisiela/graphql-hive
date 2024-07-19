@@ -1,6 +1,8 @@
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
+import type { CreateProjectMutation } from '@/components/layouts/organization';
+import type { CreateTarget_CreateTargetMutation } from '@/components/layouts/project';
 import type { CreateAlertModal_AddAlertMutation } from '@/components/project/alerts/create-alert';
 import type { CreateChannel_AddAlertChannelMutation } from '@/components/project/alerts/create-channel';
 import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
@@ -8,8 +10,6 @@ import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/p
 import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
-import type { CreateProjectMutation } from '@/components/ui/create-project';
-import type { CreateTarget_CreateTargetMutation } from '@/components/ui/create-target';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
 import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';

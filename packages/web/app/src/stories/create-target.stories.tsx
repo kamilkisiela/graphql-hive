@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { CreateTargetModalContent } from '@/components/layouts/project';
 import { Button } from '@/components/ui/button';
-import { CreateTargetModalContent } from '@/components/ui/create-target';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Meta, StoryObj } from '@storybook/react';
 
