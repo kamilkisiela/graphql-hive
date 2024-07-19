@@ -4,7 +4,7 @@ import { createHive } from '../src/client/client';
 import { atLeastOnceSampler } from '../src/client/samplers';
 import type { Report } from '../src/client/usage';
 import { version } from '../src/version';
-import { waitFor } from './test-utils';
+import { createHiveTestingLogger, waitFor } from './test-utils';
 
 const headers = {
   'Content-Type': 'application/json',
@@ -110,10 +110,7 @@ afterEach(() => {
 });
 
 test('should send data to Hive', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
 
@@ -167,9 +164,13 @@ test('should send data to Hive', async () => {
   await waitFor(30);
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Disposing
+    [INF] [hive][usage] Sending report (queue 1)
+    [INF] [hive][usage] POST http://localhost/200
+    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][usage] Report sent!
+  `);
 
   // Map
   expect(report.size).toEqual(1);
@@ -219,11 +220,7 @@ test('should send data to Hive', async () => {
 });
 
 test('should send data to Hive (deprecated endpoint)', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
-
+  const logger = createHiveTestingLogger();
   const token = 'Token';
 
   let report: Report = {
@@ -273,9 +270,13 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   await waitFor(50);
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Disposing
+    [INF] [hive][usage] Sending report (queue 1)
+    [INF] [hive][usage] POST http://localhost/200
+    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][usage] Report sent!
+  `);
 
   // Map
   expect(report.size).toEqual(1);
@@ -325,10 +326,7 @@ test('should send data to Hive (deprecated endpoint)', async () => {
 });
 
 test('should not leak the exception', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const hive = createHive({
     enabled: true,
@@ -358,22 +356,18 @@ test('should not leak the exception', async () => {
   await waitFor(50);
   await hive.dispose();
 
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][usage] Attempt 1 failed:`),
-  );
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 2)`);
-  expect(logger.error).toHaveBeenCalledTimes(1);
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][usage] Failed to send data`),
-  );
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Sending report (queue 1)
+    [INF] [hive][usage] POST http://404.localhost Attempt (1/2)
+    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost
+    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+    [ERR] [hive][usage] POST http://404.localhost failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [INF] [hive][usage] Disposing
+  `);
 });
 
 test('sendImmediately should not stop the schedule', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
 
@@ -414,8 +408,6 @@ test('sendImmediately should not stop the schedule', async () => {
 
   const collect = hive.collectUsage();
 
-  expect(logger.info).toHaveBeenCalledTimes(0);
-
   await collect(
     {
       schema,
@@ -427,44 +419,43 @@ test('sendImmediately should not stop the schedule', async () => {
   await waitFor(120);
   // Because maxSize is 2 and sendInterval is 50ms (+120ms buffer)
   // the scheduled send task should be done by now
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+
   // since we sent only 1 element, the buffer was not full,
-  // so we should not see the following log:
-  expect(logger.info).not.toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
-  expect(logger.info).toHaveBeenCalledTimes(2);
+  // so we should not see "Sending immediately"
+
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Sending report (queue 1)
+    [INF] [hive][usage] POST http://localhost/200
+    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][usage] Report sent!
+  `);
+  logger.clear();
 
   // Now we will hit the maxSize
   // We run collect two times
   await Promise.all([collect(args, {}), collect(args, {})]);
   await waitFor(1);
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledTimes(4);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 2) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
-  // we run setImmediate under the hood
-  // It should be sent already
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
-  expect(logger.info).toHaveBeenCalledTimes(4);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Sending immediately
+    [INF] [hive][usage] Sending report (queue 2)
+    [INF] [hive][usage] POST http://localhost/200
+  `);
+  logger.clear();
   await waitFor(100);
-  expect(logger.info).toHaveBeenCalledTimes(5);
   // Let's check if the scheduled send task is still running
   await collect(args, {});
   await waitFor(30);
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][usage] Report sent!
+  `);
 
   await hive.dispose();
   http.done();
 });
 
 test('should send data to Hive at least once when using atLeastOnceSampler', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
 
@@ -548,9 +539,13 @@ test('should send data to Hive at least once when using atLeastOnceSampler', asy
   await waitFor(50);
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 2) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Disposing
+    [INF] [hive][usage] Sending report (queue 2)
+    [INF] [hive][usage] POST http://localhost/200
+    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][usage] Report sent!
+  `);
 
   // Map
   expect(report.size).toEqual(2);
@@ -571,10 +566,7 @@ test('should send data to Hive at least once when using atLeastOnceSampler', asy
 });
 
 test('should not send excluded operation name data to Hive', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
 
@@ -651,9 +643,13 @@ test('should not send excluded operation name data to Hive', async () => {
   await waitFor(50);
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 2) (attempt 1)`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Disposing
+    [INF] [hive][usage] Sending report (queue 2)
+    [INF] [hive][usage] POST http://localhost/200
+    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][usage] Report sent!
+  `);
 
   // Map
   expect(report.size).toEqual(2);
@@ -703,11 +699,7 @@ test('should not send excluded operation name data to Hive', async () => {
 });
 
 test('retry on non-200', async () => {
-  const logSpy = vi.fn();
-  const logger = {
-    error: logSpy,
-    info: logSpy,
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
 
@@ -750,9 +742,10 @@ test('retry on non-200', async () => {
   await waitFor(50);
   await hive.dispose();
 
-  expect(logSpy).toHaveBeenCalledWith('[hive][usage] Sending (queue 1) (attempt 1)');
-  expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`[hive][usage] Attempt 1 failed`));
-  expect(logSpy).toHaveBeenCalledWith('[hive][usage] Sending (queue 1) (attempt 2)');
-  expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(`[hive][usage] Attempt 2 failed`));
-  expect(logSpy).not.toHaveBeenCalledWith('[hive][usage] Sending (queue 1) (attempt 3)');
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][usage] Sending report (queue 1)
+    [INF] [hive][usage] POST http://localhost/200 Attempt (1/2)
+    [ERR] [hive][usage] POST http://localhost/200 failed with status 500 (666ms): No no no
+    [INF] [hive][usage] Disposing
+  `);
 });

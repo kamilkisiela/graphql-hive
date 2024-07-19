@@ -11,6 +11,7 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Response } from '@whatwg-node/fetch';
+import { createLogger as createHiveTestingLogger } from '../../core/tests/test-utils';
 import { createHive, useHive } from '../src/index.js';
 
 beforeAll(() => {
@@ -52,10 +53,7 @@ function handleProcess() {
 }
 
 test('should not interrupt the process', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
   const clean = handleProcess();
   const hive = createHive({
     enabled: true,
@@ -104,36 +102,23 @@ test('should not interrupt the process', async () => {
 
   await waitFor(50);
 
-  expect(logger.error.mock.calls).toMatchInlineSnapshot(`
-    [
-      [
-        [Error: getaddrinfo ENOTFOUND 404.localhost],
-      ],
-      [
-        POST http://404.localhost/registry failed.,
-      ],
-      [
-        [hive][info] Error getaddrinfo ENOTFOUND 404.localhost,
-      ],
-      [
-        [Error: getaddrinfo ENOTFOUND 404.localhost],
-      ],
-      [
-        POST http://404.localhost/registry failed.,
-      ],
-      [
-        [hive][reporting] Failed to report schema: getaddrinfo ENOTFOUND 404.localhost,
-      ],
-      [
-        [Error: getaddrinfo ENOTFOUND 404.localhost],
-      ],
-      [
-        POST http://404.localhost/usage failed.,
-      ],
-      [
-        [hive][usage] POST http://404.localhost/usage failed with status getaddrinfo ENOTFOUND 404.localhost,
-      ],
-    ]
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][info] Fetching token details...
+    [INF] [hive][info] POST http://404.localhost/registry Attempt (1/6)
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://404.localhost/registry Attempt (1/6)
+    [ERR] [hive][info] Error: getaddrinfo ENOTFOUND 404.localhost
+    [ERR] [hive][info]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+    [ERR] [hive][info] POST http://404.localhost/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [ERR] [hive][reporting] Error: getaddrinfo ENOTFOUND 404.localhost
+    [ERR] [hive][reporting]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+    [ERR] [hive][reporting] POST http://404.localhost/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [INF] [hive][usage] Sending report (queue 1)
+    [INF] [hive][usage] POST http://404.localhost/usage
+    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost
+    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
+    [ERR] [hive][usage] POST http://404.localhost/usage failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [ERR] [hive][usage] Failed to send report.
   `);
 
   await hive.dispose();
@@ -1516,154 +1501,4 @@ describe('incremental delivery usage reporting', () => {
 
     graphqlScope.done();
   });
-});
-
-test('useful log information in case usage/registry endpoint sends unexpected status code', async () => {
-  const graphqlScope = nock('http://localhost')
-    .post('/registry', () => {
-      return true;
-    })
-    .reply(500);
-
-  const logger = createLogger('silent');
-  const d = createDeferred();
-  const yoga = createYoga({
-    schema: createSchema({
-      typeDefs: /* GraphQL */ `
-        type Query {
-          hi: String
-        }
-      `,
-    }),
-    plugins: [
-      useHive({
-        enabled: true,
-        debug: false,
-        token: 'brrrt',
-        selfHosting: {
-          applicationUrl: 'http://localhost/foo',
-          graphqlEndpoint: 'http://localhost/registry',
-          usageEndpoint: 'http://localhost/registry',
-        },
-        usage: {
-          endpoint: 'http://localhost/usage',
-        },
-        agent: {
-          maxSize: 1,
-          logger,
-          maxRetries: 0,
-        },
-      }),
-    ],
-  });
-
-  logger.error = err => {
-    expect(err).toEqual(
-      '[hive][usage] POST http://localhost/registry failed with status 500: Internal Server Error',
-    );
-    d.resolve();
-  };
-
-  const response = await yoga.fetch('http://localhost/graphql', {
-    body: JSON.stringify({
-      query: `{hi}`,
-    }),
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-  });
-  expect(response.status).toEqual(200);
-  expect(await response.json()).toMatchInlineSnapshot(`
-    {
-      data: {
-        hi: null,
-      },
-    }
-  `);
-
-  await d.promise;
-
-  graphqlScope.done();
-});
-
-const createDeferred = () => {
-  let resolve: () => void;
-  const promise = new Promise<void>(r => {
-    resolve = r;
-  });
-
-  return {
-    resolve: () => resolve(),
-    promise,
-  };
-};
-
-test('useful log information in case registry is not reachable', async () => {
-  const d = createDeferred();
-  const logger = createLogger('silent');
-
-  const yoga = createYoga({
-    schema: createSchema({
-      typeDefs: /* GraphQL */ `
-        type Query {
-          hi: String
-        }
-      `,
-    }),
-    plugins: [
-      useHive({
-        enabled: true,
-        debug: false,
-        token: 'brrrt',
-        selfHosting: {
-          applicationUrl: 'http://localhost/foo',
-          graphqlEndpoint: 'http://nope.localhost:1313',
-          usageEndpoint: 'http://nope.localhost:1313',
-        },
-        usage: {
-          endpoint: 'http://localhost/usage',
-        },
-        agent: {
-          maxSize: 1,
-          logger,
-        },
-      }),
-    ],
-  });
-
-  let logCounter = 0;
-  logger.error = err => {
-    console.log(err);
-    if (logCounter === 0) {
-      expect(err.code).toEqual('ENOTFOUND');
-      logCounter++;
-      return;
-    }
-    if (logCounter === 1) {
-      expect(err).toMatchInlineSnapshot(`POST http://nope.localhost:1313 failed.`);
-      d.resolve();
-      return;
-    }
-  };
-
-  const response = await yoga.fetch('http://localhost/graphql', {
-    body: JSON.stringify({
-      query: `{hi}`,
-    }),
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-  });
-  expect(response.status).toEqual(200);
-  expect(await response.json()).toMatchInlineSnapshot(`
-    {
-      data: {
-        hi: null,
-      },
-    }
-  `);
-
-  await d.promise;
 });

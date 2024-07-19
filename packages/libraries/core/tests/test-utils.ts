@@ -3,3 +3,31 @@ export function waitFor(ms: number) {
     setTimeout(resolve, ms);
   });
 }
+
+/** helper function to get log lines and replace milliseconds with static value. */
+function getLogLines(calls: Array<Array<unknown>>) {
+  return calls.map(log => {
+    let msg: string;
+    if (typeof log[1] === 'string') {
+      msg = log[1].replace(/\(\d{1,3}ms\)/, '(666ms)');
+    } else {
+      msg = String(log[1]);
+    }
+
+    return '[' + log[0] + ']' + ' ' + msg;
+  });
+}
+
+export function createHiveTestingLogger() {
+  let fn = vi.fn();
+  return {
+    error: (message: unknown) => fn('ERR', message),
+    info: (message: unknown) => fn('INF', message),
+    getLogs() {
+      return getLogLines(fn.mock.calls).join('\n');
+    },
+    clear() {
+      fn = vi.fn();
+    },
+  };
+}

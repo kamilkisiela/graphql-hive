@@ -10,19 +10,19 @@ import { createPersistedDocuments } from './persisted-documents.js';
 import { createReporting } from './reporting.js';
 import type { HiveClient, HivePluginOptions } from './types.js';
 import { createUsage } from './usage.js';
-import { logIf } from './utils.js';
+import { createHiveLogger, logIf } from './utils.js';
 
 export function createHive(options: HivePluginOptions): HiveClient {
-  const logger = options?.agent?.logger ?? console;
+  const logger = createHiveLogger(options?.agent?.logger ?? console, '[hive]');
   let enabled = options.enabled ?? true;
 
   if (enabled === false) {
-    logIf(options.debug === true, '[hive] is not enabled.', logger.info);
+    logIf(options.debug === true, 'plugin is not enabled.', logger.info);
   }
 
   if (!options.token && enabled) {
     enabled = false;
-    logger.info('[hive] Missing token, disabling.');
+    logger.info('Missing token, disabling.');
   }
 
   const mergedOptions: HivePluginOptions = { ...options, enabled } as HivePluginOptions;
@@ -50,6 +50,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
   const printTokenInfo = enabled
     ? options.printTokenInfo === true || (!!options.debug && options.printTokenInfo !== false)
     : false;
+  const infoLogger = createHiveLogger(logger, '[info]');
 
   const info = printTokenInfo
     ? async () => {
@@ -97,6 +98,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
             }
           `;
 
+          infoLogger.info('Fetching token details...');
+
           const response = await http.post(
             endpoint,
             JSON.stringify({
@@ -113,7 +116,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
               },
               timeout: 30_000,
               fetchImplementation: options?.agent?.__testing?.fetch,
-              logger,
+              logger: infoLogger,
             },
           );
 
@@ -145,9 +148,9 @@ export function createHive(options: HivePluginOptions): HiveClient {
               const projectUrl = `${organizationUrl}/${project.cleanId}`;
               const targetUrl = `${projectUrl}/${target.cleanId}`;
 
-              logger.info(
+              infoLogger.info(
                 [
-                  '[hive][info] Token details',
+                  'Token details',
                   '',
                   `Token name:            ${print(tokenInfo.token.name)}`,
                   `Organization:          ${print(organization.name, organizationUrl)}`,
@@ -161,23 +164,21 @@ export function createHive(options: HivePluginOptions): HiveClient {
                 ].join('\n'),
               );
             } else if (result.data?.tokenInfo.message) {
-              logger.error(
-                `[hive][info] Token not found. Reason: ${result.data?.tokenInfo.message}`,
-              );
-              logger.info(
-                `[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`,
+              infoLogger.error(`Token not found. Reason: ${result.data?.tokenInfo.message}`);
+              infoLogger.info(
+                `How to create a token? https://docs.graphql-hive.com/features/tokens`,
               );
             } else {
-              logger.error(`[hive][info] ${result.errors![0].message}`);
-              logger.info(
-                `[hive][info] How to create a token? https://docs.graphql-hive.com/features/tokens`,
+              infoLogger.error(`${result.errors![0].message}`);
+              infoLogger.info(
+                `How to create a token? https://docs.graphql-hive.com/features/tokens`,
               );
             }
           } else {
-            logger.error(`[hive][info] Error ${response.status}: ${response.statusText}`);
+            infoLogger.error(`Error ${response.status}: ${response.statusText}`);
           }
         } catch (error) {
-          logger.error(`[hive][info] Error ${(error as Error)?.message ?? error}`);
+          infoLogger.error(`Error ${(error as Error)?.message ?? error}`);
         }
       }
     : () => {};

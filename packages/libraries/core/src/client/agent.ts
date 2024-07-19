@@ -1,9 +1,8 @@
-import retry from 'async-retry';
 import { version } from '../version.js';
 import { http } from './http-client.js';
 import type { Logger } from './types.js';
 
-type ReadOnlyResponse = Pick<Response, 'status' | 'text' | 'json'>;
+type ReadOnlyResponse = Pick<Response, 'status' | 'text' | 'json' | 'statusText'>;
 
 export interface AgentOptions {
   enabled?: boolean;
@@ -55,12 +54,10 @@ export interface AgentOptions {
 export function createAgent<TEvent>(
   pluginOptions: AgentOptions,
   {
-    prefix,
     data,
     body,
     headers = () => ({}),
   }: {
-    prefix: string;
     data: {
       clear(): void;
       set(data: TEvent): void;
@@ -97,8 +94,12 @@ export function createAgent<TEvent>(
 
   function debugLog(msg: string) {
     if (options.debug) {
-      options.logger.info(`[hive][${prefix}]${enabled ? '' : '[DISABLED]'} ${msg}`);
+      options.logger.info(msg);
     }
+  }
+
+  function errorLog(msg: string) {
+    options.logger.error(msg);
   }
 
   let scheduled = false;
@@ -132,118 +133,59 @@ export function createAgent<TEvent>(
 
     if (data.size() >= options.maxSize) {
       debugLog('Sending immediately');
-      setImmediate(() => send({ runOnce: true, throwOnError: false }));
+      setImmediate(() => send({ throwOnError: false }));
     }
   }
 
   function sendImmediately(event: TEvent): Promise<ReadOnlyResponse | null> {
     data.set(event);
-
     debugLog('Sending immediately');
-    return send({ runOnce: true, throwOnError: true });
+    return send({ throwOnError: true });
   }
 
-  async function send(sendOptions: {
-    runOnce?: boolean;
-    throwOnError: true;
-  }): Promise<ReadOnlyResponse | null>;
-  async function send(sendOptions: {
-    runOnce?: boolean;
-    throwOnError: false;
-  }): Promise<ReadOnlyResponse | null>;
-  async function send(sendOptions?: {
-    runOnce?: boolean;
-    throwOnError: boolean;
-  }): Promise<ReadOnlyResponse | null> {
-    const runOnce = sendOptions?.runOnce ?? false;
-
-    if (!data.size()) {
-      if (!runOnce) {
-        schedule();
-      }
+  async function send(sendOptions?: { throwOnError?: boolean }): Promise<ReadOnlyResponse | null> {
+    if (!data.size() || !enabled) {
       return null;
     }
 
-    try {
-      const buffer = await body();
-      const dataToSend = data.size();
+    const buffer = await body();
+    const dataToSend = data.size();
 
-      data.clear();
+    data.clear();
 
-      const sendReport: retry.RetryFunction<{
-        status: number;
-        text(): Promise<string>;
-        json(): Promise<unknown>;
-      }> = async (_bail, attempt) => {
-        debugLog(`Sending (queue ${dataToSend}) (attempt ${attempt})`);
+    debugLog(`Sending report (queue ${dataToSend})`);
+    const response = await http
+      .post(options.endpoint, buffer, {
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          Authorization: `Bearer ${options.token}`,
+          'User-Agent': `${options.name}/${version}`,
+          ...headers(),
+        },
+        timeout: options.timeout,
+        retry: {
+          retries: options.maxRetries,
+          factor: 2,
+        },
+        logger: options.logger,
+        fetchImplementation: pluginOptions.__testing?.fetch,
+      })
+      .then(res => {
+        debugLog(`Report sent!`);
+        return res;
+      })
+      .catch(error => {
+        errorLog(`Failed to send report.`);
 
-        if (!enabled) {
-          return {
-            status: 200,
-            text: async () => 'OK',
-            json: async () => ({}),
-          };
+        if (sendOptions?.throwOnError) {
+          throw error;
         }
 
-        const response = await http
-          .post(options.endpoint, buffer, {
-            headers: {
-              accept: 'application/json',
-              'content-type': 'application/json',
-              Authorization: `Bearer ${options.token}`,
-              'User-Agent': `${options.name}/${version}`,
-              ...headers(),
-            },
-            timeout: options.timeout,
-            fetchImplementation: pluginOptions.__testing?.fetch,
-            logger: options.logger,
-          })
-          .catch(error => {
-            debugLog(`Attempt ${attempt} failed: ${error.message}`);
-            return Promise.reject(error);
-          });
-
-        if (response.status >= 200 && response.status < 300) {
-          return response;
-        }
-
-        debugLog(`Attempt ${attempt} failed: ${response.status}`);
-        throw new Error(`${response.status}: ${response.statusText} ${await response.text()}`);
-      };
-
-      const response = await retry(sendReport, {
-        retries: options.maxRetries,
-        minTimeout: options.minTimeout,
-        factor: 2,
+        return null;
       });
 
-      if (response.status < 200 || response.status >= 300) {
-        throw new Error(
-          `[hive][${prefix}] POST ${options.endpoint} failed with status code ${response.status}. ${await response.text()}`,
-        );
-      }
-
-      debugLog(`Sent!`);
-
-      if (!runOnce) {
-        schedule();
-      }
-      return response;
-    } catch (error: any) {
-      if (!runOnce) {
-        schedule();
-      }
-
-      if (sendOptions?.throwOnError) {
-        throw error;
-      }
-
-      options.logger.error(
-        `[hive][${prefix}] POST ${options.endpoint} failed with status ${error.message}`,
-      );
-
-      return null;
-    }
+    return response;
   }
 
   async function dispose() {
@@ -257,7 +199,6 @@ export function createAgent<TEvent>(
     }
 
     await send({
-      runOnce: true,
       throwOnError: false,
     });
   }
