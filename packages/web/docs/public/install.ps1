@@ -74,15 +74,15 @@ $finalLink = computeDownloadLink
 
 # Create temporary directory for Hive CLI
 $hiveTmpDir = Join-Path $env:TEMP "hive"
-$cheTmpFile = Join-Path $hiveTmpDir "hive-tmp.tgz"
+$hiveTmpFile = Join-Path $hiveTmpDir "hive-tmp.tgz"
 if (![System.IO.Directory]::Exists($hiveTmpDir)) {[void][System.IO.Directory]::CreateDirectory($hiveTmpDir)}
 
 # Download the file to the tmp folder
-DownloadFile $finalLink $cheTmpFile
+DownloadFile $finalLink $hiveTmpFile
 
 # gunzip...
 $gunzippedfile = Join-Path $hiveTmpDir "hive-tmp.tar"
-DeGZip-File $cheTmpFile $gunzippedfile
+DeGZip-File $hiveTmpFile $gunzippedfile
 
 $hivePath = "$env:SYSTEMDRIVE\ProgramData\hive"
 if (![System.IO.Directory]::Exists($hivePath)) {[void][System.IO.Directory]::CreateDirectory($hivePath)}
