@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSessionContext } from 'supertokens-auth-react/recipe/session';
-import { sendPasswordResetEmail } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import {
+  sendPasswordResetEmail,
+  submitNewPassword,
+} from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import z from 'zod';
 import { AuthCard, AuthCardContent, AuthCardHeader, AuthCardStack } from '@/components/auth';
 import { Button } from '@/components/ui/button';
@@ -31,7 +34,7 @@ const ResetPasswordFormSchema = z.object({
 
 type ResetPasswordFormValues = z.infer<typeof ResetPasswordFormSchema>;
 
-function AuthResetPassword(props: { email: string | null; redirectToPath: string }) {
+function AuthResetPasswordEmail(props: { email: string | null; redirectToPath: string }) {
   const initialEmail = props.email ?? '';
 
   const resetEmail = useMutation({
@@ -190,11 +193,163 @@ function AuthResetPassword(props: { email: string | null; redirectToPath: string
   );
 }
 
-export function AuthResetPasswordPage(props: { email: string | null; redirectToPath: string }) {
+const NewPasswordFormSchema = z.object({
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+type NewPasswordFormValues = z.infer<typeof NewPasswordFormSchema>;
+
+function AuthPasswordNew(props: { token: string; redirectToPath: string }) {
+  const changePassword = useMutation({
+    mutationFn: submitNewPassword,
+    onSuccess(data) {
+      const status = data.status;
+
+      switch (status) {
+        case 'OK': {
+          toast({
+            title: 'Password changed',
+            description: 'You can now sign in with your new password.',
+          });
+          break;
+        }
+        case 'FIELD_ERROR': {
+          for (const field of data.formFields) {
+            if (field.id === 'password') {
+              form.setError('newPassword', {
+                type: 'manual',
+                message: field.error,
+              });
+            } else {
+              toast({
+                title: 'Field error',
+                description: field.error,
+                variant: 'destructive',
+              });
+            }
+          }
+          break;
+        }
+        case 'RESET_PASSWORD_INVALID_TOKEN_ERROR': {
+          toast({
+            title: 'Link expired',
+            description: 'Please request a new password reset link.',
+            variant: 'destructive',
+          });
+          break;
+        }
+        default: {
+          exhaustiveGuard(status);
+        }
+      }
+    },
+    onError(error) {
+      console.error(error);
+      toast({
+        title: 'An error occurred',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+  const form = useForm({
+    mode: 'onSubmit',
+    resolver: zodResolver(NewPasswordFormSchema),
+    defaultValues: {
+      newPassword: '',
+    },
+    disabled: changePassword.isPending,
+  });
+  const { toast } = useToast();
+
+  const onSubmit = useCallback(
+    (data: NewPasswordFormValues) => {
+      console.log('onSubmit');
+      changePassword.reset();
+      changePassword.mutate({
+        formFields: [
+          {
+            id: 'password',
+            value: data.newPassword,
+          },
+        ],
+      });
+    },
+    [changePassword.mutate],
+  );
+
+  const session = useSessionContext();
+
+  if (session.loading) {
+    // AuthPage component already shows a loading state
+    return null;
+  }
+
+  const isSent = changePassword.isSuccess && changePassword.data.status === 'OK';
+
+  if (isSent) {
+    return <Navigate to="/auth/sign-in" search={{ redirectToPath: props.redirectToPath }} />;
+  }
+
+  return (
+    <AuthCard>
+      <AuthCardHeader title="Change your password" description="Enter your new password" />
+      <AuthCardContent>
+        <Form {...form}>
+          <form className="grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>New password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={changePassword.isPending}>
+              {changePassword.data?.status === 'OK'
+                ? 'Redirecting...'
+                : changePassword.isPending
+                  ? '...'
+                  : 'Change password'}
+            </Button>
+          </form>
+        </Form>
+
+        <div className="mt-4 text-center text-sm">
+          <Link
+            to="/auth/sign-in"
+            search={{
+              redirectToPath: props.redirectToPath,
+            }}
+            data-auth-link="sign-up"
+            className="underline"
+          >
+            Back to login
+          </Link>
+        </div>
+      </AuthCardContent>
+    </AuthCard>
+  );
+}
+
+export function AuthResetPasswordPage(props: {
+  email: string | null;
+  token: string | null;
+  redirectToPath: string;
+}) {
   return (
     <>
       <Meta title="Reset Password" />
-      <AuthResetPassword email={props.email} redirectToPath={props.redirectToPath} />
+      {props.token ? (
+        <AuthPasswordNew redirectToPath={props.redirectToPath} token={props.token} />
+      ) : (
+        <AuthResetPasswordEmail email={props.email} redirectToPath={props.redirectToPath} />
+      )}
     </>
   );
 }
