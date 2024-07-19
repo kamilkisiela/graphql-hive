@@ -1227,7 +1227,11 @@ function TargetSettingsContent(props: {
                   />
                 ) : null}
                 {props.page === 'schema-contracts' ? (
-                  <SchemaContracts organizationId="" projectId="" targetId="" />
+                  <SchemaContracts
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
               </div>
             ) : null}
