@@ -303,7 +303,12 @@ function OIDCMetadataFetcher(props: {
       if (!data.ok) {
         toast({
           title: data.error.message,
-          description: `Fetching metadata from ${data.error.details.url} failed with status ${data.error.details.status} ${data.error.details.statusText}: ${data.error.details.body}`,
+          description: (
+            <div>
+              <p>Status: {data.error.details.status}</p>
+              <p>Response: {data.error.details.body ?? data.error.details.statusText}</p>
+            </div>
+          ),
           variant: 'destructive',
         });
         return;
@@ -313,13 +318,19 @@ function OIDCMetadataFetcher(props: {
       if (!metadataResult.success) {
         toast({
           title: 'Failed to parse OIDC metadata',
-          description: [
-            metadataResult.error.formErrors.fieldErrors.authorization_endpoint?.[0],
-            metadataResult.error.formErrors.fieldErrors.token_endpoint?.[0],
-            metadataResult.error.formErrors.fieldErrors.userinfo_endpoint?.[0],
-          ]
-            .filter(Boolean)
-            .join(', '),
+          description: (
+            <>
+              {[
+                metadataResult.error.formErrors.fieldErrors.authorization_endpoint?.[0],
+                metadataResult.error.formErrors.fieldErrors.token_endpoint?.[0],
+                metadataResult.error.formErrors.fieldErrors.userinfo_endpoint?.[0],
+              ]
+                .filter(Boolean)
+                .map(msg => (
+                  <p>{msg}</p>
+                ))}
+            </>
+          ),
           variant: 'destructive',
         });
         return;
@@ -362,7 +373,6 @@ function OIDCMetadataFetcher(props: {
           render={({ field }) => {
             return (
               <FormItem>
-                <FormLabel>OIDC Metadata</FormLabel>
                 <div className="flex flex-row justify-center gap-x-4">
                   <FormControl>
                     <Input
