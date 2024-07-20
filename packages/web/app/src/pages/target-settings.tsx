@@ -505,6 +505,15 @@ const ConditionalBreakingChanges = (props: {
       period: Yup.number()
         .min(1)
         .max(targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30)
+        .test('double-precision', 'Invalid precision', num => {
+          if (typeof num !== 'number') {
+            return false;
+          }
+
+          // Round the number to two decimal places
+          // and check if it is equal to the original number
+          return Number(num.toFixed(2)) === num;
+        })
         .required(),
       targets: Yup.array().of(Yup.string()).min(1),
       excludedClients: Yup.array().of(Yup.string()),
@@ -591,6 +600,7 @@ const ConditionalBreakingChanges = (props: {
               type="number"
               min="0"
               max="100"
+              step={0.01}
               className="mx-2 !inline-flex !w-16"
             />
             % of traffic in the past
