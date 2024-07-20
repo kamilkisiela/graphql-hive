@@ -34,7 +34,7 @@ Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
   cy.get('input[id="clientId"]').type('implicit-mock-client');
   cy.get('input[id="clientSecret"]').type('client-credentials-mock-client-secret');
 
-  cy.get('div[role="dialog"]').find('button[type="submit"]').click();
+  cy.get('div[role="dialog"]').find('button[type="submit"]').last().click();
 
   cy.url().then(url => {
     return new URL(url).pathname.split('/')[0];

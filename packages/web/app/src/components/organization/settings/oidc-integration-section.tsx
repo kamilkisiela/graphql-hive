@@ -455,9 +455,9 @@ function CreateOIDCIntegrationForm(props: {
         <div className="bg-muted border-border rounded-md border p-3">
           <OIDCMetadataFetcher
             onEndpointChange={endpoints => {
-              formik.setFieldValue('tokenEndpoint', endpoints.token);
-              formik.setFieldValue('userinfoEndpoint', endpoints.userinfo);
-              formik.setFieldValue('authorizationEndpoint', endpoints.authorization);
+              void formik.setFieldValue('tokenEndpoint', endpoints.token);
+              void formik.setFieldValue('userinfoEndpoint', endpoints.userinfo);
+              void formik.setFieldValue('authorizationEndpoint', endpoints.authorization);
             }}
           />
         </div>
