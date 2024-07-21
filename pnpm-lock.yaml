@@ -294,8 +294,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       '@types/dockerode':
-        specifier: 3.3.29
-        version: 3.3.29
+        specifier: 3.3.30
+        version: 3.3.30
       '@types/ioredis':
         specifier: 5.0.0
         version: 5.0.0
@@ -7744,8 +7744,8 @@ packages:
   '@types/docker-modem@3.0.2':
     resolution: {integrity: sha512-qC7prjoEYR2QEe6SmCVfB1x3rfcQtUr1n4x89+3e0wSTMQ/KYCyf+/RAA9n2tllkkNc6//JMUZePdFRiGIWfaQ==}
 
-  '@types/dockerode@3.3.29':
-    resolution: {integrity: sha512-5PRRq/yt5OT/Jf77ltIdz4EiR9+VLnPF+HpU4xGFwUqmV24Co2HKBNW3w+slqZ1CYchbcDeqJASHDYWzZCcMiQ==}
+  '@types/dockerode@3.3.30':
+    resolution: {integrity: sha512-MuxQQ7yQ+VzLbrIV2D8K2YqOYBd5Mz4yGbauEipFcn894bLnGwewNKXGKLlb7wpXTG4dn+13lk51qPXmKJ2+YA==}
 
   '@types/doctrine@0.0.9':
     resolution: {integrity: sha512-eOIHzCUSH7SMfonMG1LsC2f8vxBFtho6NGBznK41R84YzPuvSBzrhEps33IsQiOW9+VL6NQ9DbjQJznk/S4uRA==}
@@ -24816,7 +24816,7 @@ snapshots:
       '@types/node': 20.14.10
       '@types/ssh2': 1.11.6
 
-  '@types/dockerode@3.3.29':
+  '@types/dockerode@3.3.30':
     dependencies:
       '@types/docker-modem': 3.0.2
       '@types/node': 20.14.10
