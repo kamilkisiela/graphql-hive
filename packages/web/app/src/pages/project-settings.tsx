@@ -455,14 +455,12 @@ export const DeleteProjectMutation = graphql(`
   }
 `);
 
-type DeleteProjectModalProps = {
+export function DeleteProjectModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organizationId: string;
   projectId: string;
-};
-
-export const DeleteProjectModal = ({ ...props }: DeleteProjectModalProps): ReactElement => {
+}) {
   const { organizationId, projectId } = props;
   const [, mutate] = useMutation(DeleteProjectMutation);
   const { toast } = useToast();
@@ -504,17 +502,13 @@ export const DeleteProjectModal = ({ ...props }: DeleteProjectModalProps): React
       handleDelete={handleDelete}
     />
   );
-};
+}
 
-type DeleteProjectModalContentProps = {
+export function DeleteProjectModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   handleDelete: () => void;
-};
-
-export const DeleteProjectModalContent = ({
-  ...props
-}: DeleteProjectModalContentProps): ReactElement => {
+}) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
@@ -546,4 +540,4 @@ export const DeleteProjectModalContent = ({
       </DialogContent>
     </Dialog>
   );
-};
+}
