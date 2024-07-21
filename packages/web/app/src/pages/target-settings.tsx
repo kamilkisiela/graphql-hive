@@ -1285,15 +1285,13 @@ export const DeleteTargetMutation = graphql(`
   }
 `);
 
-type DeleteTargetModalProps = {
+export function DeleteTargetModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organizationId: string;
   projectId: string;
   targetId: string;
-};
-
-export const DeleteTargetModal = ({ ...props }: DeleteTargetModalProps): ReactElement => {
+}) {
   const { organizationId, projectId, targetId } = props;
   const [, mutate] = useMutation(DeleteTargetMutation);
   const { toast } = useToast();
@@ -1336,17 +1334,13 @@ export const DeleteTargetModal = ({ ...props }: DeleteTargetModalProps): ReactEl
       handleDelete={handleDelete}
     />
   );
-};
+}
 
-type DeleteTargetModalContentProps = {
+export function DeleteTargetModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   handleDelete: () => void;
-};
-
-export const DeleteTargetModalContent = ({
-  ...props
-}: DeleteTargetModalContentProps): ReactElement => {
+}) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
@@ -1378,4 +1372,4 @@ export const DeleteTargetModalContent = ({
       </DialogContent>
     </Dialog>
   );
-};
+}
