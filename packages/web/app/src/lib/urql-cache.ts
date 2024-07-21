@@ -13,8 +13,8 @@ import type { DeleteOperationMutationType } from '@/components/target/laboratory
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/settings/registry-access-token';
 import { graphql } from '@/gql';
 import type { CreateOrganizationMutation } from '@/pages/organization-new';
-import type { DeleteProjectMutation } from '@/pages/project-settings';
 import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
+import type { DeleteProjectMutation } from '@/pages/project-settings';
 import { CollectionsQuery } from '@/pages/target-laboratory';
 import {
   TokensDocument,
