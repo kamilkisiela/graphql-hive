@@ -673,8 +673,7 @@ export function DeleteOrganizationModal(props: {
       handleDelete={handleDelete}
     />
   );
-};
-
+}
 
 export function DeleteOrganizationModalContent(props: {
   isOpen: boolean;
@@ -712,4 +711,4 @@ export function DeleteOrganizationModalContent(props: {
       </DialogContent>
     </Dialog>
   );
-};
+}
