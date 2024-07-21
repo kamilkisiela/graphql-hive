@@ -1,4 +1,4 @@
-import { ReactElement, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
@@ -632,13 +632,11 @@ export const DeleteOrganizationDocument = graphql(`
   }
 `);
 
-type DeleteOrganizationModalProps = {
+export function DeleteOrganizationModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organizationId: string;
-};
-
-export const DeleteOrganizationModal = ({ ...props }: DeleteOrganizationModalProps) => {
+}) {
   const { organizationId } = props;
   const [, mutate] = useMutation(DeleteOrganizationDocument);
   const { toast } = useToast();
@@ -677,15 +675,12 @@ export const DeleteOrganizationModal = ({ ...props }: DeleteOrganizationModalPro
   );
 };
 
-type DeleteOrganizationModalContentProps = {
+
+export function DeleteOrganizationModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   handleDelete: () => void;
-};
-
-export const DeleteOrganizationModalContent = ({
-  ...props
-}: DeleteOrganizationModalContentProps): ReactElement => {
+}) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
