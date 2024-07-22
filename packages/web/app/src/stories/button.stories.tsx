@@ -34,6 +34,7 @@ const meta: Meta<typeof Button> = {
   args: {
     variant: 'default',
     size: 'default',
+    asChild: false,
   },
 };
 
