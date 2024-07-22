@@ -104,7 +104,7 @@ const OPERATIONS_EXPLAINER = 'GraphQL operations reported to GraphQL Hive';
 
 export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
   return (
-    <div className="w-full">
+    <div className="w-full bg-neutral-900">
       <div className="mx-auto my-12 box-border w-full max-w-screen-lg px-6">
         <a id="pricing">
           <h2
