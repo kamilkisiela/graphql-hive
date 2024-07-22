@@ -40,7 +40,6 @@ const EnvironmentModel = zod.object({
   WEBHOOKS_ENDPOINT: zod.string().url(),
   SCHEMA_ENDPOINT: zod.string().url(),
   AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
-  GRAPHQL_PERSISTED_OPERATIONS_PATH: emptyString(zod.string().optional()),
   AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(
     zod.union([zod.literal('1'), zod.literal('0')]).optional(),
   ),
