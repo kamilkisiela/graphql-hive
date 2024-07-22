@@ -11,7 +11,7 @@
   "dependencies": {
     "@next/env": "14.2.4",
     "@radix-ui/react-tooltip": "1.1.2",
-    "@theguild/components": "6.5.3",
+    "@theguild/components": "6.6.3",
     "clsx": "2.1.1",
     "date-fns": "3.6.0",
     "gray-matter": "4.0.3",
