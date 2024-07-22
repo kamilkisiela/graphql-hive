@@ -1103,7 +1103,7 @@ function LaboratoryPageContent(props: {
       `}</style>
       </Helmet>
 
-      {!query.fetching && (
+      {!query.fetching && !query.stale && (
         <div
           className={clsx(
             'grow',

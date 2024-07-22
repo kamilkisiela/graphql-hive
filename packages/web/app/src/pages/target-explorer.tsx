@@ -213,7 +213,7 @@ function ExplorerPageContent(props: {
           )}
         </div>
       </div>
-      {!query.fetching && (
+      {!query.fetching && !query.stale && (
         <>
           {latestValidSchemaVersion?.explorer && latestSchemaVersion ? (
             <>

@@ -583,14 +583,15 @@ function ActiveSchemaVersion(props: {
 
   const { error } = query;
 
-  const isLoading = query.fetching;
+  const isLoading = query.fetching || query.stale;
   const schemaVersion = query?.data?.target?.schemaVersion;
   const projectType = query?.data?.project?.type;
 
   if (isLoading || !schemaVersion || !projectType) {
     return (
-      <div className="flex size-full items-center justify-center">
-        <Spinner />
+      <div className="flex size-full flex-col items-center justify-center self-center text-sm text-gray-500">
+        <Spinner className="mb-3 size-8" />
+        Loading schema version...
       </div>
     );
   }
