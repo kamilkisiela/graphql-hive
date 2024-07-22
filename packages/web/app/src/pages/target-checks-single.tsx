@@ -1049,9 +1049,9 @@ const ActiveSchemaCheck = (props: {
   if (query.fetching || query.stale) {
     return (
       <div className="flex h-fit flex-1 items-center justify-center self-center">
-        <div className="flex flex-col items-center">
-          <Spinner className="size-12" />
-          <div className="mt-3">Loading Schema Check...</div>
+        <div className="flex flex-col items-center text-sm text-gray-500">
+          <Spinner className="mb-3 size-8" />
+          Loading Schema Check...
         </div>
       </div>
     );

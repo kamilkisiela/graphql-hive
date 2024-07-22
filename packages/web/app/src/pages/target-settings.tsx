@@ -1070,24 +1070,24 @@ const subPages = [
     title: 'General',
   },
   {
-    key: 'cdn',
-    title: 'CDN Tokens',
-  },
-  {
     key: 'registry-token',
     title: 'Registry Tokens',
+  },
+  {
+    key: 'cdn',
+    title: 'CDN Tokens',
   },
   {
     key: 'breaking-changes',
     title: 'Breaking Changes',
   },
   {
-    key: 'base-schema',
-    title: 'Base Schema',
-  },
-  {
     key: 'schema-contracts',
     title: 'Schema Contracts',
+  },
+  {
+    key: 'base-schema',
+    title: 'Base Schema',
   },
 ] as const;
 
