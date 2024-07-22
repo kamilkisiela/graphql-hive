@@ -34,7 +34,7 @@ const meta: Meta<typeof Button> = {
   args: {
     variant: 'default',
     size: 'default',
-  }
+  },
 };
 
 export default meta;
