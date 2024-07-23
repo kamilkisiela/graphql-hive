@@ -34,7 +34,6 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { subDays } from '@/lib/date-time';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type * as Types from '../../__generated__/types';
 import { type DateRange } from '../../shared/entities';
