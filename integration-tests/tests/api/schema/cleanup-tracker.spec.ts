@@ -12,7 +12,7 @@ async function fetchCoordinates(db: CommonQueryMethods, target: { id: string }) 
     deprecated_in_version_id: string | null;
   }>(sql`
     SELECT coordinate, created_in_version_id, deprecated_in_version_id
-    FROM schema_cleanup_tracker WHERE target_id = ${target.id}
+    FROM schema_coordinate_status WHERE target_id = ${target.id}
   `);
 
   return result.rows;
