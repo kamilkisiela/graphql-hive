@@ -2,8 +2,8 @@ import { ReactElement, ReactNode } from 'react';
 import { LinkIcon } from 'lucide-react';
 import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
+import { HiveLink } from '@/components/ui/hive-link';
 import { UserMenu } from '@/components/ui/user-menu';
-import { HiveLink } from '@/components/v2/hive-link';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import { Tabs } from '@/components/v2/tabs';
 import { graphql } from '@/gql';
@@ -22,6 +22,7 @@ export enum Page {
   History = 'history',
   Insights = 'insights',
   Laboratory = 'laboratory',
+  Apps = 'apps',
   Settings = 'settings',
 }
 
@@ -36,6 +37,7 @@ const TargetLayoutQuery = graphql(`
         id
         cleanId
         name
+        isAppDeploymentsEnabled
         me {
           id
           ...CanAccessTarget_MemberFragment
@@ -210,6 +212,20 @@ export const TargetLayout = ({
                         Insights
                       </Link>
                     </Tabs.Trigger>
+                    {currentOrganization.isAppDeploymentsEnabled && (
+                      <Tabs.Trigger value={Page.Apps} asChild>
+                        <Link
+                          to="/$organizationId/$projectId/$targetId/apps"
+                          params={{
+                            organizationId: props.organizationId,
+                            projectId: props.projectId,
+                            targetId: props.targetId,
+                          }}
+                        >
+                          Apps
+                        </Link>
+                      </Tabs.Trigger>
+                    )}
                     <Tabs.Trigger value={Page.Laboratory} asChild>
                       <Link
                         to="/$organizationId/$projectId/$targetId/laboratory"
@@ -269,7 +285,9 @@ export const TargetLayout = ({
           ) : null}
         </div>
       </div>
-      <div className={cn('container pb-7', className)}>{children}</div>
+      <div className={cn('container min-h-[var(--content-height)] pb-7', className)}>
+        {children}
+      </div>
     </>
   );
 };

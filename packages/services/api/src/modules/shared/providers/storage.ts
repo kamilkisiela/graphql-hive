@@ -18,7 +18,6 @@ import type {
   SchemaChecksFilter,
 } from '../../../__generated__/types';
 import type {
-  ActivityObject,
   Alert,
   AlertChannel,
   CDNAccessToken,
@@ -95,7 +94,7 @@ export interface Storage {
   getOrganizationByGitHubInstallationId(_: {
     installationId: string;
   }): Promise<Organization | null>;
-  getOrganization(_: OrganizationSelector): Promise<Organization | never>;
+  getOrganization(_: { organization: string }): Promise<Organization | never>;
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
@@ -522,12 +521,6 @@ export interface Storage {
     } & OrganizationSelector &
       Partial<Pick<TargetSelector, 'project' | 'target'>>,
   ): Promise<void>;
-
-  getActivities(
-    _: (OrganizationSelector | ProjectSelector | TargetSelector) & {
-      limit: number;
-    },
-  ): Promise<readonly ActivityObject[]>;
 
   addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
 

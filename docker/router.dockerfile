@@ -2,7 +2,8 @@
 FROM scratch AS pkg
 FROM scratch AS config
 
-FROM rust:1.79 as build
+# Stick to v1.76 due to this issue: https://github.com/apollographql/router/issues/5084
+FROM rust:1.76 as build
 
 # Required by Apollo Router
 RUN apt-get update

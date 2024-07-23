@@ -69,6 +69,12 @@ jobs:
   static-analysis:
     uses: ./.github/workflows/codeql-analysis.yml
 
+  # GraphQL App Document Check
+  graphql-app-document-check:
+    uses: ./.github/workflows/graphql-app-document-check.yaml
+    secrets:
+      hiveToken: ${{ secrets.HIVE_TOKEN }}
+
   # TypeScript Typecheck and compiler checks
   typescript:
     uses: ./.github/workflows/typescript-typecheck.yaml

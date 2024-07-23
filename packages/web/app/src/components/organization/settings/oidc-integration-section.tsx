@@ -1,8 +1,10 @@
 import { ReactElement, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { useFormik } from 'formik';
+import { useForm } from 'react-hook-form';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { useClient, useMutation } from 'urql';
+import { z } from 'zod';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,18 +14,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
+import { AlertTriangleIcon, KeyIcon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { Tag } from '@/components/v2';
-import { AlertTriangleIcon, KeyIcon } from '@/components/v2/icon';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { useClipboard } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation as useRQMutation } from '@tanstack/react-query';
 import { Link, useRouter } from '@tanstack/react-router';
 
 function CopyInput(props: { value: string; id?: string }) {
@@ -227,6 +239,165 @@ function CreateOIDCIntegrationModal(props: {
   );
 }
 
+const OIDCMetadataSchema = z.object({
+  token_endpoint: z
+    .string({
+      required_error: 'Token endpoint not found',
+    })
+    .url('Token endpoint must be a valid URL'),
+  userinfo_endpoint: z
+    .string({
+      required_error: 'Userinfo endpoint not found',
+    })
+    .url('Userinfo endpoint must be a valid URL'),
+  authorization_endpoint: z
+    .string({
+      required_error: 'Authorization endpoint not found',
+    })
+    .url('Authorization endpoint must be a valid URL'),
+});
+
+async function fetchOIDCMetadata(url: string) {
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      error: {
+        message: 'Failed to fetch metadata',
+        details: {
+          url,
+          status: res.status,
+          statusText: res.statusText,
+          body: await res.text(),
+        },
+      },
+    } as const;
+  }
+
+  return {
+    ok: true,
+    metadata: await res.json(),
+  } as const;
+}
+
+const OIDCMetadataFormSchema = z.object({
+  url: z.string().url('Must be a valid URL'),
+});
+
+function OIDCMetadataFetcher(props: {
+  onEndpointChange(endpoints: { token: string; userinfo: string; authorization: string }): void;
+}) {
+  const { toast } = useToast();
+
+  const fetchMetadata = useRQMutation({
+    mutationFn: fetchOIDCMetadata,
+    onSuccess(data) {
+      if (!data.ok) {
+        toast({
+          title: data.error.message,
+          description: (
+            <div>
+              <p>Status: {data.error.details.status}</p>
+              <p>Response: {data.error.details.body ?? data.error.details.statusText}</p>
+            </div>
+          ),
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const metadataResult = OIDCMetadataSchema.safeParse(data.metadata);
+      if (!metadataResult.success) {
+        toast({
+          title: 'Failed to parse OIDC metadata',
+          description: (
+            <>
+              {[
+                metadataResult.error.formErrors.fieldErrors.authorization_endpoint?.[0],
+                metadataResult.error.formErrors.fieldErrors.token_endpoint?.[0],
+                metadataResult.error.formErrors.fieldErrors.userinfo_endpoint?.[0],
+              ]
+                .filter(Boolean)
+                .map(msg => (
+                  <p>{msg}</p>
+                ))}
+            </>
+          ),
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      props.onEndpointChange({
+        token: metadataResult.data.token_endpoint,
+        userinfo: metadataResult.data.userinfo_endpoint,
+        authorization: metadataResult.data.authorization_endpoint,
+      });
+    },
+    onError(error) {
+      console.error(error);
+      toast({
+        title: 'Failed to fetch OIDC metadata',
+        description: 'Provide the endpoints manually or try again later',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  function onSubmit(data: z.infer<typeof OIDCMetadataFormSchema>) {
+    fetchMetadata.mutate(data.url);
+  }
+
+  const form = useForm({
+    resolver: zodResolver(OIDCMetadataFormSchema),
+    defaultValues: {
+      url: '',
+    },
+    mode: 'onSubmit',
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <div className="flex flex-row justify-center gap-x-4">
+                  <FormControl>
+                    <Input
+                      disabled={fetchMetadata.isPending}
+                      placeholder="https://my.okta.com/.well-known/openid-configuration"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  <Button type="submit" className="w-48" disabled={fetchMetadata.isPending}>
+                    {fetchMetadata.isPending ? 'Fetching...' : 'Fetch endpoints'}
+                  </Button>
+                </div>
+                <FormDescription>
+                  Provide the OIDC metadata URL to automatically fill in the fields below.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+      </form>
+    </Form>
+  );
+}
+
 function CreateOIDCIntegrationForm(props: {
   organizationId: string;
   close: () => void;
@@ -267,7 +438,7 @@ function CreateOIDCIntegrationForm(props: {
   });
 
   return (
-    <form className={classes.container} onSubmit={formik.handleSubmit}>
+    <div className={classes.container}>
       <DialogHeader>
         <DialogTitle>Connect OpenID Connect Provider</DialogTitle>
         <DialogDescription>
@@ -279,82 +450,97 @@ function CreateOIDCIntegrationForm(props: {
           provider.
         </DialogDescription>
       </DialogHeader>
-      <div className="space-y-2 pt-4">
-        <div>
-          <Label htmlFor="tokenEndpoint">Token Endpoint</Label>
-
-          <Input
-            placeholder="OAuth Token Endpoint API"
-            id="tokenEndpoint"
-            name="tokenEndpoint"
-            onChange={formik.handleChange}
-            value={formik.values.tokenEndpoint}
+      <div className="space-y-2">
+        <div className="bg-muted border-border rounded-md border p-3">
+          <OIDCMetadataFetcher
+            onEndpointChange={endpoints => {
+              void formik.setFieldValue('tokenEndpoint', endpoints.token);
+              void formik.setFieldValue('userinfoEndpoint', endpoints.userinfo);
+              void formik.setFieldValue('authorizationEndpoint', endpoints.authorization);
+            }}
           />
-          <FormError>{mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}</FormError>
         </div>
+        <form className="space-y-2" onSubmit={formik.handleSubmit}>
+          <div>
+            <Label htmlFor="tokenEndpoint">Token Endpoint</Label>
 
-        <div>
-          <Label htmlFor="userinfoEndpoint">User Info Endpoint</Label>
-          <Input
-            placeholder="OAuth User Info Endpoint API"
-            id="userinfoEndpoint"
-            name="userinfoEndpoint"
-            onChange={formik.handleChange}
-            value={formik.values.userinfoEndpoint}
-          />
-          <FormError>
-            {mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}
-          </FormError>
-        </div>
+            <Input
+              placeholder="OAuth Token Endpoint API"
+              id="tokenEndpoint"
+              name="tokenEndpoint"
+              onChange={formik.handleChange}
+              value={formik.values.tokenEndpoint}
+            />
+            <FormError>
+              {mutation.data?.createOIDCIntegration.error?.details.tokenEndpoint}
+            </FormError>
+          </div>
 
-        <div>
-          <Label htmlFor="authorizationEndpoint">Authorization Endpoint</Label>
-          <Input
-            placeholder="OAuth Authorization Endpoint API"
-            id="authorizationEndpoint"
-            name="authorizationEndpoint"
-            onChange={formik.handleChange}
-            value={formik.values.authorizationEndpoint}
-          />
-          <FormError>
-            {mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}
-          </FormError>
-        </div>
+          <div>
+            <Label htmlFor="userinfoEndpoint">User Info Endpoint</Label>
+            <Input
+              placeholder="OAuth User Info Endpoint API"
+              id="userinfoEndpoint"
+              name="userinfoEndpoint"
+              onChange={formik.handleChange}
+              value={formik.values.userinfoEndpoint}
+            />
+            <FormError>
+              {mutation.data?.createOIDCIntegration.error?.details.userinfoEndpoint}
+            </FormError>
+          </div>
 
-        <div>
-          <Label htmlFor="clientId">Client ID</Label>
-          <Input
-            placeholder="Client ID"
-            id="clientId"
-            name="clientId"
-            onChange={formik.handleChange}
-            value={formik.values.clientId}
-          />
-          <FormError>{mutation.data?.createOIDCIntegration.error?.details.clientId}</FormError>
-        </div>
+          <div>
+            <Label htmlFor="authorizationEndpoint">Authorization Endpoint</Label>
+            <Input
+              placeholder="OAuth Authorization Endpoint API"
+              id="authorizationEndpoint"
+              name="authorizationEndpoint"
+              onChange={formik.handleChange}
+              value={formik.values.authorizationEndpoint}
+            />
+            <FormError>
+              {mutation.data?.createOIDCIntegration.error?.details.authorizationEndpoint}
+            </FormError>
+          </div>
 
-        <div>
-          <Label htmlFor="clientSecret">Client Secret</Label>
-          <Input
-            placeholder="Client Secret"
-            id="clientSecret"
-            name="clientSecret"
-            onChange={formik.handleChange}
-            value={formik.values.clientSecret}
-          />
-          <FormError>{mutation.data?.createOIDCIntegration.error?.details.clientSecret}</FormError>
-        </div>
+          <div>
+            <Label htmlFor="clientId">Client ID</Label>
+            <Input
+              placeholder="Client ID"
+              id="clientId"
+              name="clientId"
+              onChange={formik.handleChange}
+              value={formik.values.clientId}
+            />
+            <FormError>{mutation.data?.createOIDCIntegration.error?.details.clientId}</FormError>
+          </div>
 
-        <div className="flex w-full justify-end gap-x-2">
-          <Button variant="outline" disabled={mutation.fetching} onClick={props.close}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={mutation.fetching}>
-            Connect OIDC Provider
-          </Button>
-        </div>
+          <div>
+            <Label htmlFor="clientSecret">Client Secret</Label>
+            <Input
+              placeholder="Client Secret"
+              id="clientSecret"
+              name="clientSecret"
+              onChange={formik.handleChange}
+              value={formik.values.clientSecret}
+            />
+            <FormError>
+              {mutation.data?.createOIDCIntegration.error?.details.clientSecret}
+            </FormError>
+          </div>
+
+          <div className="flex w-full justify-end gap-x-2">
+            <Button variant="outline" disabled={mutation.fetching} onClick={props.close}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={mutation.fetching}>
+              Connect OIDC Provider
+            </Button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 }
 

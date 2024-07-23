@@ -15,12 +15,12 @@ import {
 } from '@/components/ui/card';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { GitHubIcon, SlackIcon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
-import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
   DeleteOrganizationModal,
   TransferOrganizationOwnershipModal,

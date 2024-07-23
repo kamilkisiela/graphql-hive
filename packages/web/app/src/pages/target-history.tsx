@@ -214,10 +214,10 @@ function HistoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.History}
-      className="h-[--content-height] overflow-scroll"
+      className="flex flex-row gap-x-6"
     >
       {hasVersions ? (
-        <div className="flex size-full flex-row gap-x-6">
+        <>
           <div>
             <div className="py-6">
               <Title>Versions</Title>
@@ -242,18 +242,16 @@ function HistoryPageContent(props: {
               </div>
             </div>
           </div>
-          <div className="grow">
-            <Outlet />
-          </div>
-        </div>
+          <Outlet />
+        </>
       ) : (
-        <>
+        <div className="w-full">
           <div className="py-6">
             <Title>Versions</Title>
             <Subtitle>Recently published schemas.</Subtitle>
           </div>
           {query.fetching ? null : noSchemaVersion}
-        </>
+        </div>
       )}
     </TargetLayout>
   );

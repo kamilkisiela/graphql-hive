@@ -29,12 +29,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PlusIcon, SaveIcon, ShareIcon } from '@/components/ui/icon';
 import { Link } from '@/components/ui/link';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -362,6 +362,20 @@ function useOperationCollectionsPlugin(props: {
 
       useEffect(() => {
         if (!hasAllEditors || !currentOperation) {
+          const searchObj = router.latestLocation.search;
+          const operationString =
+            'operationString' in searchObj && typeof searchObj.operationString === 'string'
+              ? searchObj.operationString
+              : null;
+
+          // We provide an operation string when navigating to the laboratory from persisted documents
+          // in that case we want to show that operation within this tab.
+          if (operationString) {
+            editorContext.queryEditor?.setValue(operationString);
+            editorContext.variableEditor?.setValue('');
+            editorContext.headerEditor?.setValue('');
+          }
+
           return;
         }
 
@@ -968,7 +982,7 @@ function LaboratoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Laboratory}
-      className="flex h-[--content-height] flex-col"
+      className="flex h-[--content-height] flex-col pb-0"
     >
       <div className="flex py-6">
         <div className="flex-1">
@@ -1089,7 +1103,7 @@ function LaboratoryPageContent(props: {
       `}</style>
       </Helmet>
 
-      {!query.fetching && (
+      {!query.fetching && !query.stale && (
         <div
           className={clsx(
             'grow',

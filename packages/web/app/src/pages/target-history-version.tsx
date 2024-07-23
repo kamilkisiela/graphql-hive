@@ -6,12 +6,12 @@ import {
   CompositionErrorsSection,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { DiffIcon } from '@/components/ui/icon';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DiffEditor } from '@/components/v2';
-import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/gql/graphql';
 import { cn } from '@/lib/utils';
@@ -75,7 +75,7 @@ function SchemaVersionView(props: {
   );
 
   return (
-    <div className="flex h-full grow flex-col">
+    <div className="flex w-full flex-col">
       <div className="py-6">
         <Title>Schema Version {schemaVersion.id}</Title>
         <Subtitle>Detailed view of the schema version</Subtitle>
@@ -310,7 +310,7 @@ function DefaultSchemaVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+      <div className="border-muted grow rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
           <div className="my-4 px-4">
             {schemaVersion.isFirstComposableVersion ? (
@@ -482,7 +482,7 @@ function ContractVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+      <div className="border-muted grow rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
           <div className="my-4 px-4">
             {contractVersion.isFirstComposableVersion ? (
@@ -583,14 +583,15 @@ function ActiveSchemaVersion(props: {
 
   const { error } = query;
 
-  const isLoading = query.fetching;
+  const isLoading = query.fetching || query.stale;
   const schemaVersion = query?.data?.target?.schemaVersion;
   const projectType = query?.data?.project?.type;
 
   if (isLoading || !schemaVersion || !projectType) {
     return (
-      <div className="flex size-full items-center justify-center">
-        <Spinner />
+      <div className="flex size-full flex-col items-center justify-center self-center text-sm text-gray-500">
+        <Spinner className="mb-3 size-8" />
+        Loading schema version...
       </div>
     );
   }
