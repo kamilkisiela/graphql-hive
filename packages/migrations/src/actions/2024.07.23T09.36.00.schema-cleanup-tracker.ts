@@ -17,7 +17,7 @@ export default {
   name: '2024.07.23T09.36.00.schema-cleanup-tracker.ts',
   async run({ connection }) {
     await connection.query(sql`
-      CREATE TABLE IF NOT EXISTS "schema_cleanup_tracker" (
+      CREATE TABLE IF NOT EXISTS "schema_coordinate_status" (
         coordinate text NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
         created_in_version_id UUID NOT NULL REFERENCES "schema_versions" ("id") ON DELETE CASCADE,
@@ -27,14 +27,14 @@ export default {
         PRIMARY KEY (coordinate, target_id)
       );
     
-      CREATE INDEX IF NOT EXISTS idx_schema_cleanup_tracker_by_target_timestamp
-      ON schema_cleanup_tracker(
+      CREATE INDEX IF NOT EXISTS idx_schema_coordinate_status_by_target_timestamp
+      ON schema_coordinate_status(
         target_id,
         created_at,
         deprecated_at
       );
-      CREATE INDEX IF NOT EXISTS idx_schema_cleanup_tracker_by_target_coordinate_timestamp
-      ON schema_cleanup_tracker(
+      CREATE INDEX IF NOT EXISTS idx_schema_coordinate_status_by_target_coordinate_timestamp
+      ON schema_coordinate_status(
         target_id,
         coordinate,
         created_at,
@@ -55,70 +55,7 @@ export default {
       return;
     }
 
-    // Fetch targets
-    const targetResult = await connection.query<{ id: string }>(sql`
-      SELECT id FROM targets
-    `);
-
-    console.log(`Found ${targetResult.rowCount} targets`);
-
-    let i = 0;
-    for await (const target of targetResult.rows) {
-      console.log(`Processing target (${i++}/${targetResult.rowCount}) - ${target.id}`);
-
-      const latestSchema = await connection.maybeOne<{
-        id: string;
-        created_at: number;
-        is_composable: boolean;
-        sdl?: string;
-        previous_schema_version_id?: string;
-      }>(sql`
-        SELECT
-          id,
-          created_at,
-          is_composable,
-          previous_schema_version_id,
-          composite_schema_sdl as sdl
-        FROM schema_versions
-        WHERE target_id = ${target.id} AND is_composable = true
-        ORDER BY created_at DESC
-        LIMIT 1
-      `);
-
-      if (!latestSchema) {
-        console.log('[SKIPPING] No latest composable schema found for target %s', target.id);
-        continue;
-      }
-
-      if (!latestSchema.sdl) {
-        console.warn(
-          `[SKIPPING] No latest, composable schema with non-empty sdl found for target ${target.id}.`,
-        );
-        continue;
-      }
-
-      const schema = buildSchema(latestSchema.sdl, {
-        assumeValid: true,
-        assumeValidSDL: true,
-      });
-      const targetCoordinates = getSchemaCoordinates(schema);
-
-      // The idea here is to
-      // 1. start from the latest composable version.
-      // 2. create a list of coordinates that are in the latest version, all and deprecated.
-      // 3. navigate to the previous version and compare the coordinates.
-      // 4. if a coordinate is added, upsert it into the schema_cleanup_tracker and remove it from the list.
-      // 5. if a coordinate is deprecated, upsert it into the schema_cleanup_tracker and remove it from the list of deprecated coordinates.
-      // 6. if the list of coordinates is empty, stop the process.
-      // 7. if the previous version is not composable, skip it and continue with the next previous version.
-      // 8. if the previous version is not found, insert all remaining coordinates and stop the process. This step might create incorrect dates!
-      await processVersion(1, connection, targetCoordinates, target.id, {
-        schema,
-        versionId: latestSchema.id,
-        createdAt: latestSchema.created_at,
-        previousVersionId: latestSchema.previous_schema_version_id ?? null,
-      });
-    }
+    await schemaCleanupTrackerMigration(connection);
   },
 } satisfies MigrationExecutor;
 
@@ -147,6 +84,78 @@ function diffSchemaCoordinates(
     added,
     deprecated,
   };
+}
+
+export async function schemaCleanupTrackerMigration(connection: CommonQueryMethods) {
+  // Fetch targets
+  const targetResult = await connection.query<{ id: string }>(sql`
+    SELECT id FROM targets WHERE ID NOT IN (SELECT target_id FROM schema_coordinate_status)
+  `);
+
+  console.log(`Found ${targetResult.rowCount} targets`);
+
+  let i = 0;
+  for await (const target of targetResult.rows) {
+    try {
+      console.log(`Processing target (${i++}/${targetResult.rowCount}) - ${target.id}`);
+
+      const latestSchema = await connection.maybeOne<{
+        id: string;
+        created_at: number;
+        is_composable: boolean;
+        sdl?: string;
+        previous_schema_version_id?: string;
+      }>(sql`
+      SELECT
+        id,
+        created_at,
+        is_composable,
+        previous_schema_version_id,
+        composite_schema_sdl as sdl
+      FROM schema_versions
+      WHERE target_id = ${target.id} AND is_composable = true
+      ORDER BY created_at DESC
+      LIMIT 1
+    `);
+
+      if (!latestSchema) {
+        console.log('[SKIPPING] No latest composable schema found for target %s', target.id);
+        continue;
+      }
+
+      if (!latestSchema.sdl) {
+        console.warn(
+          `[SKIPPING] No latest, composable schema with non-empty sdl found for target ${target.id}.`,
+        );
+        continue;
+      }
+
+      const schema = buildSchema(latestSchema.sdl, {
+        assumeValid: true,
+        assumeValidSDL: true,
+      });
+      const targetCoordinates = getSchemaCoordinates(schema);
+
+      // The idea here is to
+      // 1. start from the latest composable version.
+      // 2. create a list of coordinates that are in the latest version, all and deprecated.
+      // 3. navigate to the previous version and compare the coordinates.
+      // 4. if a coordinate is added, upsert it into the schema_coordinate_status and remove it from the list.
+      // 5. if a coordinate is deprecated, upsert it into the schema_coordinate_status and remove it from the list of deprecated coordinates.
+      // 6. if the list of coordinates is empty, stop the process.
+      // 7. if the previous version is not composable, skip it and continue with the next previous version.
+      // 8. if the previous version is not found, insert all remaining coordinates and stop the process. This step might create incorrect dates!
+      await processVersion(1, connection, targetCoordinates, target.id, {
+        schema,
+        versionId: latestSchema.id,
+        createdAt: latestSchema.created_at,
+        previousVersionId: latestSchema.previous_schema_version_id ?? null,
+      });
+    } catch (error) {
+      console.error(`Error processing target ${target.id}`);
+      console.error(error);
+    }
+  }
 }
 
 function getSchemaCoordinates(schema: GraphQLSchema): {
@@ -257,7 +266,7 @@ async function insertRemainingCoordinates(
     `Adding remaining ${targetCoordinates.coordinates.size} coordinates for target ${targetId}`,
   );
   await connection.query(sql`
-      INSERT INTO schema_cleanup_tracker
+      INSERT INTO schema_coordinate_status
       ( target_id, coordinate, created_at, created_in_version_id )
       SELECT * FROM ${sql.unnest(
         Array.from(targetCoordinates.coordinates).map(coordinate => [
@@ -277,7 +286,7 @@ async function insertRemainingCoordinates(
       `Deprecating remaining ${remainingDeprecated.size} coordinates for target ${targetId}`,
     );
     await connection.query(sql`
-      INSERT INTO schema_cleanup_tracker
+      INSERT INTO schema_coordinate_status
       ( target_id, coordinate, created_at, created_in_version_id, deprecated_at, deprecated_in_version_id )
       SELECT * FROM ${sql.unnest(
         Array.from(remainingDeprecated).map(coordinate => [
@@ -427,7 +436,7 @@ async function processVersion(
   if (added.length) {
     console.log(`Adding ${added.length} coordinates for target ${targetId}`, added);
     await connection.query(sql`
-      INSERT INTO schema_cleanup_tracker
+      INSERT INTO schema_coordinate_status
       ( target_id, coordinate, created_at, created_in_version_id )
       SELECT * FROM ${sql.unnest(
         added.map(coordinate => [targetId, coordinate, datePG, after.versionId]),
@@ -443,7 +452,7 @@ async function processVersion(
     console.log(`deprecating ${deprecated.length} coordinates for target ${targetId}`, deprecated);
 
     await connection.query(sql`
-      INSERT INTO schema_cleanup_tracker
+      INSERT INTO schema_coordinate_status
       ( target_id, coordinate, created_at, created_in_version_id, deprecated_at, deprecated_in_version_id )
       SELECT * FROM ${sql.unnest(
         deprecated.map(coordinate => [

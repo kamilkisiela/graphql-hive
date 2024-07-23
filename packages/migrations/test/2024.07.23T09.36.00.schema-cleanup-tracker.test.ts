@@ -193,7 +193,7 @@ await describe('migration: schema-cleanup-tracker', async () => {
         created_in_version_id: string;
         deprecated_in_version_id: string | null;
       }>(sql`
-        SELECT * FROM schema_cleanup_tracker WHERE target_id = ${target.id}
+        SELECT * FROM schema_coordinate_status WHERE target_id = ${target.id}
       `);
 
       assert.strictEqual(versions.length, 6);

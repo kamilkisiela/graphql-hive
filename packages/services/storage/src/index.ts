@@ -2646,7 +2646,7 @@ export async function createStorage(
         }
 
         if (args.coordinatesDiff) {
-          await updateSchemaCleanupTracker(trx, {
+          await updateSchemaCoordinateStatus(trx, {
             targetId: args.target,
             versionId: newVersion.id,
             coordinatesDiff: args.coordinatesDiff,
@@ -2766,7 +2766,7 @@ export async function createStorage(
         }
 
         if (input.coordinatesDiff) {
-          await updateSchemaCleanupTracker(trx, {
+          await updateSchemaCoordinateStatus(trx, {
             targetId: input.target,
             versionId: version.id,
             coordinatesDiff: input.coordinatesDiff,
@@ -5154,7 +5154,7 @@ async function insertSchemaVersionContract(
   return zod.string().parse(id);
 }
 
-async function updateSchemaCleanupTracker(
+async function updateSchemaCoordinateStatus(
   trx: DatabaseTransactionConnection,
   args: {
     targetId: string;
@@ -5166,8 +5166,8 @@ async function updateSchemaCleanupTracker(
 
   if (args.coordinatesDiff.deleted) {
     actions.push(
-      trx.query(sql`/* schema_cleanup_tracker_deleted */
-      DELETE FROM schema_cleanup_tracker
+      trx.query(sql`/* schema_coordinate_status_deleted */
+      DELETE FROM schema_coordinate_status
       WHERE
         target_id = ${args.targetId}
         AND
@@ -5180,8 +5180,8 @@ async function updateSchemaCleanupTracker(
 
   if (args.coordinatesDiff.added) {
     actions.push(
-      trx.query(sql`/* schema_cleanup_tracker_inserted */
-        INSERT INTO schema_cleanup_tracker
+      trx.query(sql`/* schema_coordinate_status_inserted */
+        INSERT INTO schema_coordinate_status
         ( target_id, coordinate, created_in_version_id, deprecated_at, deprecated_in_version_id )
         SELECT * FROM ${sql.unnest(
           Array.from(args.coordinatesDiff.added).map(coordinate => {
@@ -5203,8 +5203,8 @@ async function updateSchemaCleanupTracker(
 
   if (args.coordinatesDiff.undeprecated) {
     actions.push(
-      trx.query(sql`/* schema_cleanup_tracker_undeprecated */
-      UPDATE schema_cleanup_tracker
+      trx.query(sql`/* schema_coordinate_status_undeprecated */
+      UPDATE schema_coordinate_status
       SET deprecated_at = NULL, deprecated_in_version_id = NULL
       WHERE 
         target_id = ${args.targetId}
@@ -5217,8 +5217,8 @@ async function updateSchemaCleanupTracker(
   await Promise.all(actions);
 
   if (args.coordinatesDiff.deprecated) {
-    await trx.query(sql`/* schema_cleanup_tracker_deprecated */
-      UPDATE schema_cleanup_tracker
+    await trx.query(sql`/* schema_coordinate_status_deprecated */
+      UPDATE schema_coordinate_status
       SET deprecated_at = NOW(), deprecated_in_version_id = ${args.versionId}
       WHERE 
         target_id = ${args.targetId}
