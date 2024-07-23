@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-import * as fs from 'fs';
 import got from 'got';
-import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import supertokens from 'supertokens-node';
 import {
   errorHandler as supertokensErrorHandler,
@@ -380,13 +379,6 @@ export async function main() {
       pubSub,
     });
 
-    let persistedOperations: Record<string, DocumentNode | string> | null = null;
-    if (env.graphql.persistedOperationsPath) {
-      persistedOperations = JSON.parse(
-        fs.readFileSync(env.graphql.persistedOperationsPath, 'utf-8'),
-      );
-    }
-
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -401,9 +393,9 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
+      hivePersistedDocumentsConfig: env.hivePersistedDocuments,
       tracing,
       logger: logger as any,
-      persistedOperations,
     });
 
     server.route({

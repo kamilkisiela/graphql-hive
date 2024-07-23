@@ -166,7 +166,8 @@ function buildConfig() {
     environment: base.ENVIRONMENT,
     nodeEnv: base.NODE_ENV,
     graphql: {
-      persistedOperations: base.GRAPHQL_PERSISTED_OPERATIONS === '1',
+      persistedOperationsPrefix:
+        base.GRAPHQL_PERSISTED_OPERATIONS === '1' ? `hive-app/${base.RELEASE}/` : null,
     },
     zendeskSupport: base.ZENDESK_SUPPORT === '1',
     migrations: {
