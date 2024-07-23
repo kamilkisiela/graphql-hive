@@ -5162,10 +5162,6 @@ async function updateSchemaCleanupTracker(
     coordinatesDiff: SchemaCoordinatesDiffResult;
   },
 ) {
-  const sid = Math.random().toString(36).substring(2);
-  const log = (msg: string) => {
-    console.log(`[${sid}] ${msg}`);
-  };
   const actions: Promise<unknown>[] = [];
 
   if (args.coordinatesDiff.deleted) {
