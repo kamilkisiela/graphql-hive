@@ -6,13 +6,15 @@ import {
   CompositionErrorsSection,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { DiffIcon } from '@/components/ui/icon';
 import { Subtitle, Title } from '@/components/ui/page';
+import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DiffEditor, Spinner } from '@/components/v2';
-import { DiffIcon } from '@/components/v2/icon';
+import { DiffEditor } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/gql/graphql';
+import { cn } from '@/lib/utils';
 import {
   CheckCircledIcon,
   CrossCircledIcon,
@@ -73,7 +75,7 @@ function SchemaVersionView(props: {
   );
 
   return (
-    <div className="flex h-full grow flex-col">
+    <div className="flex w-full flex-col">
       <div className="py-6">
         <Title>Schema Version {schemaVersion.id}</Title>
         <Subtitle>Detailed view of the schema version</Subtitle>
@@ -168,6 +170,7 @@ function SchemaVersionView(props: {
           targetId={props.targetId}
           schemaVersion={schemaVersion}
           projectType={props.projectType}
+          hasContracts={!!schemaVersion.contractVersions?.edges}
         />
       )}
     </div>
@@ -222,6 +225,7 @@ function DefaultSchemaVersionView(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
+  hasContracts: boolean;
 }) {
   const schemaVersion = useFragment(
     DefaultSchemaVersionView_SchemaVersionFragment,
@@ -280,13 +284,20 @@ function DefaultSchemaVersionView(props: {
     <>
       <TooltipProvider>
         <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
-          <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
+          <TabsList
+            className={cn(
+              'bg-background border-muted w-full justify-start rounded-none border-x border-b',
+              !props.hasContracts && 'rounded-t border-t',
+            )}
+          >
             {availableViews.map(item => (
               <Tooltip key={item.value}>
                 <TooltipTrigger>
-                  <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
-                    {item.icon}
-                    <span className="ml-2">{item.label}</span>
+                  <TabsTrigger value={item.value} disabled={!!item.disabledReason} asChild>
+                    <span>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </span>
                   </TabsTrigger>
                 </TooltipTrigger>
                 {item.disabledReason && (
@@ -299,7 +310,7 @@ function DefaultSchemaVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+      <div className="border-muted grow rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
           <div className="my-4 px-4">
             {schemaVersion.isFirstComposableVersion ? (
@@ -454,9 +465,11 @@ function ContractVersionView(props: {
             {availableViews.map(item => (
               <Tooltip key={item.value}>
                 <TooltipTrigger>
-                  <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
-                    {item.icon}
-                    <span className="ml-2">{item.label}</span>
+                  <TabsTrigger value={item.value} disabled={!!item.disabledReason} asChild>
+                    <span>
+                      {item.icon}
+                      <span className="ml-2">{item.label}</span>
+                    </span>
                   </TabsTrigger>
                 </TooltipTrigger>
                 {item.disabledReason && (
@@ -469,7 +482,7 @@ function ContractVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+      <div className="border-muted grow rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
           <div className="my-4 px-4">
             {contractVersion.isFirstComposableVersion ? (
@@ -570,14 +583,15 @@ function ActiveSchemaVersion(props: {
 
   const { error } = query;
 
-  const isLoading = query.fetching;
+  const isLoading = query.fetching || query.stale;
   const schemaVersion = query?.data?.target?.schemaVersion;
   const projectType = query?.data?.project?.type;
 
   if (isLoading || !schemaVersion || !projectType) {
     return (
-      <div className="flex size-full items-center justify-center">
-        <Spinner />
+      <div className="flex size-full flex-col items-center justify-center self-center text-sm text-gray-500">
+        <Spinner className="mb-3 size-8" />
+        Loading schema version...
       </div>
     );
   }

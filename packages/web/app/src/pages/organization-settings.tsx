@@ -1,6 +1,7 @@
-import { useFormik } from 'formik';
+import { useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button } from '@/components/ui/button';
@@ -13,12 +14,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { DocsLink } from '@/components/ui/docs-note';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { GitHubIcon, SlackIcon } from '@/components/ui/icon';
+import { Input } from '@/components/ui/input';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
-import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
-import { Input } from '@/components/v2/input';
 import {
   DeleteOrganizationModal,
   TransferOrganizationOwnershipModal,
@@ -32,6 +34,7 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useToggle } from '@/lib/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from '@tanstack/react-router';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
@@ -41,7 +44,6 @@ const Integrations_CheckIntegrationsQuery = graphql(`
         id
         viewerCanManageOIDCIntegration
         ...OIDCIntegrationSection_OrganizationFragment
-        id
         hasSlackIntegration
         hasGitHubIntegration
       }
@@ -192,9 +194,31 @@ const UpdateOrganizationNameMutation = graphql(`
   }
 `);
 
+const UpdateOrganizationSlugMutation = graphql(`
+  mutation Settings_UpdateOrganizationSlug($input: UpdateOrganizationSlugInput!) {
+    updateOrganizationSlug(input: $input) {
+      ok {
+        updatedOrganizationPayload {
+          selector {
+            organization
+          }
+          organization {
+            id
+            cleanId
+          }
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
 const SettingsPageRenderer_OrganizationFragment = graphql(`
   fragment SettingsPageRenderer_OrganizationFragment on Organization {
     id
+    cleanId
     name
     me {
       ...CanAccessOrganization_MemberFragment
@@ -204,6 +228,29 @@ const SettingsPageRenderer_OrganizationFragment = graphql(`
     ...TransferOrganizationOwnershipModal_OrganizationFragment
   }
 `);
+
+const SlugFormSchema = z.object({
+  slug: z
+    .string({
+      required_error: 'Organization slug is required',
+    })
+    .min(1, 'Organization slug is required')
+    .max(50, 'Slug must be less than 50 characters')
+    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers and dashes'),
+});
+
+type SlugFormValues = z.infer<typeof SlugFormSchema>;
+
+const NameFormSchema = z.object({
+  name: z
+    .string({
+      required_error: 'Name is required',
+    })
+    .min(1, 'Name is required')
+    .max(50, 'Name must be less than 50 characters'),
+});
+
+type NameFormValues = z.infer<typeof NameFormSchema>;
 
 const SettingsPageRenderer = (props: {
   organization: FragmentType<typeof SettingsPageRenderer_OrganizationFragment>;
@@ -221,50 +268,98 @@ const SettingsPageRenderer = (props: {
   const [isTransferModalOpen, toggleTransferModalOpen] = useToggle();
   const { toast } = useToast();
 
-  const [mutation, mutate] = useMutation(UpdateOrganizationNameMutation);
+  const [_nameMutation, nameMutate] = useMutation(UpdateOrganizationNameMutation);
+  const [_slugMutation, slugMutate] = useMutation(UpdateOrganizationSlugMutation);
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
-      enableReinitialize: true,
-      initialValues: {
-        name: organization?.name,
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Organization name is required'),
-      }),
-      onSubmit: values =>
-        mutate({
+  const nameForm = useForm({
+    mode: 'all',
+    resolver: zodResolver(NameFormSchema),
+    defaultValues: {
+      name: organization.name,
+    },
+  });
+
+  const onNameFormSubmit = useCallback(
+    async (data: NameFormValues) => {
+      try {
+        const result = await nameMutate({
           input: {
             organization: props.organizationId,
-            name: values.name,
+            name: data.name,
           },
-        }).then(result => {
-          if (result.data?.updateOrganizationName?.ok) {
-            toast({
-              variant: 'default',
-              title: 'Success',
-              description: 'Organization name updated',
-            });
+        });
 
-            const newOrgId =
-              result.data?.updateOrganizationName?.ok.updatedOrganizationPayload.selector
-                .organization;
-            void router.navigate({
-              to: '/$organizationId/view/settings',
-              params: {
-                organizationId: newOrgId,
-              },
-            });
-          } else if (result.error || result.data?.updateOrganizationName.error) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description:
-                result.data?.updateOrganizationName.error?.message || result.error?.message,
-            });
-          }
-        }),
-    });
+        const error = result.error || result.data?.updateOrganizationName.error;
+
+        if (result.data?.updateOrganizationName?.ok) {
+          toast({
+            variant: 'default',
+            title: 'Success',
+            description: 'Organization name updated',
+          });
+        } else if (error) {
+          nameForm.setError('name', error);
+        }
+      } catch (error) {
+        console.error('error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to update organization name',
+        });
+      }
+    },
+    [nameMutate, props.organizationId],
+  );
+
+  const slugForm = useForm({
+    mode: 'all',
+    resolver: zodResolver(SlugFormSchema),
+    defaultValues: {
+      slug: organization.cleanId,
+    },
+  });
+
+  const onSlugFormSubmit = useCallback(
+    async (data: SlugFormValues) => {
+      try {
+        const result = await slugMutate({
+          input: {
+            organization: props.organizationId,
+            slug: data.slug,
+          },
+        });
+
+        const error = result.error || result.data?.updateOrganizationSlug.error;
+
+        if (result.data?.updateOrganizationSlug?.ok) {
+          toast({
+            variant: 'default',
+            title: 'Success',
+            description: 'Organization slug updated',
+          });
+          void router.navigate({
+            to: '/$organizationId/view/settings',
+            params: {
+              organizationId:
+                result.data.updateOrganizationSlug.ok.updatedOrganizationPayload.organization
+                  .cleanId,
+            },
+          });
+        } else if (error) {
+          slugForm.setError('slug', error);
+        }
+      } catch (error) {
+        console.error('error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to update organization slug',
+        });
+      }
+    },
+    [slugMutate, props.organizationId],
+  );
 
   return (
     <div>
@@ -275,54 +370,100 @@ const SettingsPageRenderer = (props: {
 
       {hasAccess ? (
         <div className="flex flex-col gap-y-4">
-          <form onSubmit={handleSubmit}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Organization Name</CardTitle>
-                <CardDescription>
-                  Changing the name of your organization will also change the slug of your
-                  organization URL, and will invalidate any existing links to your organization.
-                  <br />
-                  <DocsLink
-                    className="text-muted-foreground text-sm"
-                    href="/management/organizations#rename-an-organization"
-                  >
-                    You can read more about it in the documentation
-                  </DocsLink>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="flex gap-x-2">
-                  <Input
-                    placeholder="Organization name"
+          <Form {...nameForm}>
+            <form onSubmit={nameForm.handleSubmit(onNameFormSubmit)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Organization Name</CardTitle>
+                  <CardDescription>
+                    Changing the name of your organization <span className="font-bold">won't</span>{' '}
+                    change the slug of your organization URL, and will invalidate any existing links
+                    to your organization.
+                    <br />
+                    <DocsLink
+                      className="text-muted-foreground text-sm"
+                      href="/management/organizations#rename-an-organization"
+                    >
+                      You can read more about it in the documentation
+                    </DocsLink>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4">
+                  <FormField
+                    control={nameForm.control}
                     name="name"
-                    value={values.name}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    disabled={isSubmitting}
-                    isInvalid={touched.name && !!errors.name}
-                    className="w-96"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Name" className="w-80" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                {touched.name && (errors.name || mutation.error) && (
-                  <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
-                )}
-                {mutation.data?.updateOrganizationName?.error && (
-                  <div className="mt-2 text-red-500">
-                    {mutation.data?.updateOrganizationName.error.message}
-                  </div>
-                )}
-                {mutation.error && (
-                  <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button disabled={isSubmitting} className="px-10" type="submit">
-                  Save
-                </Button>
-              </CardFooter>
-            </Card>
-          </form>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button
+                    disabled={nameForm.formState.isSubmitting}
+                    className="px-10"
+                    type="submit"
+                  >
+                    Save
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </Form>
+
+          <Form {...slugForm}>
+            <form onSubmit={slugForm.handleSubmit(onSlugFormSubmit)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Organization Slug</CardTitle>
+                  <CardDescription>
+                    This is your organization's URL namespace on GraphQL Hive. Changing it{' '}
+                    <span className="font-bold">will</span> invalidate any existing links to your
+                    organization.
+                    <br />
+                    <DocsLink
+                      className="text-muted-foreground text-sm"
+                      href="/management/organizations#change-slug-of-organization"
+                    >
+                      You can read more about it in the documentation
+                    </DocsLink>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4">
+                  <FormField
+                    control={slugForm.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="flex items-center">
+                            <div className="border-input text-muted-foreground h-10 rounded-md rounded-r-none border-y border-l bg-gray-900 px-3 py-2 text-sm">
+                              {env.appBaseUrl.replace(/https?:\/\//i, '')}/
+                            </div>
+                            <Input placeholder="slug" className="w-48 rounded-l-none" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button
+                    disabled={slugForm.formState.isSubmitting}
+                    className="px-10"
+                    type="submit"
+                  >
+                    Save
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </Form>
 
           {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
             <Card>

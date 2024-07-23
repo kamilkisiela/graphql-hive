@@ -3,13 +3,14 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import { Organization, OrganizationMemberRole } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { cache, diffArrays, share, uuid } from '../../../shared/helpers';
-import { ActivityManager } from '../../activity/providers/activity-manager';
+import { cache, diffArrays, share } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { BillingProvider } from '../../billing/providers/billing.provider';
+import { OIDCIntegrationsProvider } from '../../oidc-integrations/providers/oidc-integrations.provider';
+import { ActivityManager } from '../../shared/providers/activity-manager';
 import { Emails, mjml } from '../../shared/providers/emails';
 import { Logger } from '../../shared/providers/logger';
 import type { OrganizationSelector } from '../../shared/providers/storage';
@@ -63,6 +64,7 @@ export class OrganizationManager {
     private tokenStorage: TokenStorage,
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
+    private oidcIntegrationProvider: OIDCIntegrationsProvider,
     private emails: Emails,
     @Inject(WEB_APP_URL) private appBaseUrl: string,
   ) {
@@ -418,15 +420,12 @@ export class OrganizationManager {
       }),
     ]);
 
-    let cleanId = paramCase(name);
-
-    if (await this.storage.getOrganizationByCleanId({ cleanId })) {
-      cleanId = paramCase(`${name}-${uuid(4)}`);
+    if (organization.name === name) {
+      return organization;
     }
 
     const result = await this.storage.updateOrganizationName({
       name,
-      cleanId,
       organization: organization.id,
       user: user.id,
     });
@@ -440,6 +439,53 @@ export class OrganizationManager {
         value: result.name,
       },
     });
+
+    return result;
+  }
+
+  async updateSlug(
+    input: {
+      slug: string;
+    } & OrganizationSelector,
+  ) {
+    const { slug } = input;
+    this.logger.info('Updating an organization clean id (input=%o)', input);
+    await this.authManager.ensureOrganizationAccess({
+      ...input,
+      scope: OrganizationAccessScope.SETTINGS,
+    });
+    const [user, organization] = await Promise.all([
+      this.authManager.getCurrentUser(),
+      this.getOrganization({
+        organization: input.organization,
+      }),
+    ]);
+
+    if (organization.cleanId === slug) {
+      return {
+        ok: true,
+        organization,
+      } as const;
+    }
+
+    const result = await this.storage.updateOrganizationCleanId({
+      cleanId: slug,
+      organization: organization.id,
+      user: user.id,
+      reservedNames: reservedOrganizationNames,
+    });
+
+    if (result.ok) {
+      await this.activityManager.create({
+        type: 'ORGANIZATION_ID_UPDATED',
+        selector: {
+          organization: organization.id,
+        },
+        meta: {
+          value: result.organization.cleanId,
+        },
+      });
+    }
 
     return result;
   }
@@ -570,8 +616,9 @@ export class OrganizationManager {
     this.logger.info('Joining an organization (code=%s)', code);
 
     const user = await this.authManager.getCurrentUser();
+    const isOIDCUser = user.oidcIntegrationId !== null;
 
-    if (user.oidcIntegrationId !== null) {
+    if (isOIDCUser) {
       return {
         message: `You cannot join an organization with an OIDC account.`,
       };
@@ -583,6 +630,18 @@ export class OrganizationManager {
 
     if ('message' in organization) {
       return organization;
+    }
+
+    if (this.oidcIntegrationProvider.isEnabled()) {
+      const oidcIntegration = await this.storage.getOIDCIntegrationForOrganization({
+        organizationId: organization.id,
+      });
+
+      if (oidcIntegration?.oidcUserAccessOnly && !isOIDCUser) {
+        return {
+          message: 'Non-OIDC users are not allowed to join this organization.',
+        };
+      }
     }
 
     this.logger.debug('Adding member (organization=%s, code=%s)', organization.id, code);

@@ -2,10 +2,21 @@ export interface RawReport {
   id: string;
   size: number;
   target: string;
-  organization?: string | null;
+  organization: string;
   map: RawOperationMap;
   operations: RawOperation[];
   subscriptionOperations?: RawSubscriptionOperation[];
+  appDeploymentUsageTimestamps?: RawAppDeploymentUsageTimestampMap;
+}
+
+export interface RawAppDeploymentUsageTimestampMap {
+  /** key is `${appName}/${appVersion}` */
+  [key: string]: number;
+}
+
+export interface ClientMetadata {
+  name?: string;
+  version?: string;
 }
 
 export interface RawOperation {
@@ -18,10 +29,7 @@ export interface RawOperation {
     errorsTotal: number;
   };
   metadata?: {
-    client?: {
-      name?: string;
-      version?: string;
-    };
+    client?: ClientMetadata;
   };
 }
 
@@ -30,10 +38,7 @@ export type RawSubscriptionOperation = {
   timestamp: number;
   expiresAt?: number;
   metadata?: {
-    client?: {
-      name?: string;
-      version?: string;
-    };
+    client?: ClientMetadata;
   };
 };
 

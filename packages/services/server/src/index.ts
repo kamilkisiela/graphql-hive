@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-import * as fs from 'fs';
 import got from 'got';
-import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import supertokens from 'supertokens-node';
 import {
   errorHandler as supertokensErrorHandler,
@@ -13,6 +12,7 @@ import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import 'reflect-metadata';
 import { hostname } from 'os';
 import { createPubSub } from 'graphql-yoga';
+import { z } from 'zod';
 import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { HivePubSub } from '@hive/api/src/modules/shared/providers/pub-sub';
@@ -20,6 +20,7 @@ import { createRedisClient } from '@hive/api/src/modules/shared/providers/redis'
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
+import { createIsAppDeploymentActive } from '@hive/cdn-script/is-app-deployment-active';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   configureTracing,
@@ -50,7 +51,7 @@ import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
-import { initSupertokens } from './supertokens';
+import { initSupertokens, oidcIdLookup } from './supertokens';
 
 export async function main() {
   let tracing: TracingInstance | undefined;
@@ -378,13 +379,6 @@ export async function main() {
       pubSub,
     });
 
-    let persistedOperations: Record<string, DocumentNode | string> | null = null;
-    if (env.graphql.persistedOperationsPath) {
-      persistedOperations = JSON.parse(
-        fs.readFileSync(env.graphql.persistedOperationsPath, 'utf-8'),
-      );
-    }
-
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -399,9 +393,9 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
+      hivePersistedDocumentsConfig: env.hivePersistedDocuments,
       tracing,
       logger: logger as any,
-      persistedOperations,
     });
 
     server.route({
@@ -491,6 +485,41 @@ export async function main() {
       },
     });
 
+    const oidcIdLookupSchema = z.object({
+      slug: z.string({
+        required_error: 'Slug is required',
+      }),
+    });
+    server.post('/auth-api/oidc-id-lookup', async (req, res) => {
+      const inputResult = oidcIdLookupSchema.safeParse(req.body);
+
+      if (!inputResult.success) {
+        captureException(inputResult.error, {
+          extra: {
+            path: '/auth-api/oidc-id-lookup',
+            body: req.body,
+          },
+        });
+        void res.status(400).send({
+          ok: false,
+          title: 'Invalid input',
+          description: 'Failed to resolve SSO information due to invalid input.',
+          status: 400,
+        } satisfies Awaited<ReturnType<typeof oidcIdLookup>>);
+        return;
+      }
+
+      const result = await oidcIdLookup(inputResult.data.slug, storage, req.log);
+
+      if (result.ok) {
+        void res.status(200).send(result);
+        return;
+      }
+
+      void res.status(result.status).send(result);
+      return;
+    });
+
     if (env.cdn.providers.api !== null) {
       const s3 = {
         client: new AwsClient({
@@ -506,14 +535,12 @@ export async function main() {
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
-        async getArtifactAction(targetId, contractName, artifactType, eTag) {
-          return artifactStorageReader.generateArtifactReadUrl(
-            targetId,
-            contractName,
-            artifactType,
-            eTag,
-          );
-        },
+        artifactStorageReader,
+        isAppDeploymentActive: createIsAppDeploymentActive({
+          artifactStorageReader,
+          getCache: null,
+          waitUntil: null,
+        }),
       });
       const artifactRouteHandler = createServerAdapter(
         // TODO: remove `as any` once the fallback logic in packages/services/cdn-worker/src/artifact-handler.ts is removed

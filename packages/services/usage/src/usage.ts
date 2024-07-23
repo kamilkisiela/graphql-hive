@@ -62,6 +62,7 @@ export function splitReport(report: RawReport, numOfChunks: number) {
       id: `${report.id}--chunk-${chunkIndex}`,
       size: 0,
       target: report.target,
+      organization: report.organization,
       map: operationMap,
       operations: [],
     });

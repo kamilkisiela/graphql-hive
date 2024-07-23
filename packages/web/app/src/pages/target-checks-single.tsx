@@ -13,17 +13,17 @@ import { Button } from '@/components/ui/button';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';
 import { Heading } from '@/components/ui/heading';
+import { AlertTriangleIcon, DiffIcon } from '@/components/ui/icon';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DiffEditor } from '@/components/v2/diff-editor';
-import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
-import { Spinner } from '@/components/v2/spinner';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/gql/graphql';
 import { cn } from '@/lib/utils';
@@ -1046,12 +1046,12 @@ const ActiveSchemaCheck = (props: {
     return null;
   }
 
-  if (query.fetching) {
+  if (query.fetching || query.stale) {
     return (
       <div className="flex h-fit flex-1 items-center justify-center self-center">
-        <div className="flex flex-col items-center">
-          <Spinner className="size-12" />
-          <div className="mt-3">Loading Schema Check...</div>
+        <div className="flex flex-col items-center text-sm text-gray-500">
+          <Spinner className="mb-3 size-8" />
+          Loading Schema Check...
         </div>
       </div>
     );

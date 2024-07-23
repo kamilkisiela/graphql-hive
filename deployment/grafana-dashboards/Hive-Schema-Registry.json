@@ -127,7 +127,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "code",
-          "expr": "sum by (conclusion) (rate(registry_publish_count[$__rate_interval]))",
+          "expr": "sum by (conclusion) (rate(registry_publish_count_total[$__rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -221,7 +221,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model) (rate(registry_publish_count[$__rate_interval]))",
+          "expr": "sum by(model) (rate(registry_publish_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{model}}",
           "range": true,
@@ -288,7 +288,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model) (rate(registry_publish_count[$__rate_interval]))",
+          "expr": "sum by(model) (rate(registry_publish_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{model}}",
           "range": true,
@@ -382,7 +382,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model, projectType) (rate(registry_publish_count[$__rate_interval]))",
+          "expr": "sum by(model, projectType) (rate(registry_publish_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}} ({{model}})",
           "range": true,
@@ -449,7 +449,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(projectType) (rate(registry_publish_count[$__rate_interval]))",
+          "expr": "sum by(projectType) (rate(registry_publish_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}}",
           "range": true,
@@ -516,7 +516,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model, projectType) (rate(registry_publish_count[$__rate_interval]))",
+          "expr": "sum by(model, projectType) (rate(registry_publish_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}} ({{model}})",
           "range": true,
@@ -625,7 +625,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "code",
-          "expr": "sum by (conclusion) (rate(registry_check_count[$__rate_interval]))",
+          "expr": "sum by (conclusion) (rate(registry_check_count_total[$__rate_interval]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -719,7 +719,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model) (rate(registry_check_count[$__rate_interval]))",
+          "expr": "sum by(model) (rate(registry_check_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{model}}",
           "range": true,
@@ -786,7 +786,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model) (rate(registry_check_count[$__rate_interval]))",
+          "expr": "sum by(model) (rate(registry_check_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{model}}",
           "range": true,
@@ -880,7 +880,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model, projectType) (rate(registry_check_count[$__rate_interval]))",
+          "expr": "sum by(model, projectType) (rate(registry_check_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}} ({{model}})",
           "range": true,
@@ -947,7 +947,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(projectType) (rate(registry_check_count[$__rate_interval]))",
+          "expr": "sum by(projectType) (rate(registry_check_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}}",
           "range": true,
@@ -1014,7 +1014,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model, projectType) (rate(registry_check_count[$__rate_interval]))",
+          "expr": "sum by(model, projectType) (rate(registry_check_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}} ({{model}})",
           "range": true,
@@ -1121,7 +1121,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model) (rate(registry_delete_count[$__rate_interval]))",
+          "expr": "sum by(model) (rate(registry_delete_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{model}}",
           "range": true,
@@ -1188,7 +1188,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model) (rate(registry_delete_count[$__rate_interval]))",
+          "expr": "sum by(model) (rate(registry_delete_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{model}}",
           "range": true,
@@ -1279,7 +1279,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model, projectType) (rate(registry_delete_count[$__rate_interval]))",
+          "expr": "sum by(model, projectType) (rate(registry_delete_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}} ({{model}})",
           "range": true,
@@ -1346,7 +1346,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(projectType) (rate(registry_delete_count[$__rate_interval]))",
+          "expr": "sum by(projectType) (rate(registry_delete_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}}",
           "range": true,
@@ -1413,7 +1413,7 @@
             "uid": "grafanacloud-prom"
           },
           "editorMode": "builder",
-          "expr": "sum by(model, projectType) (rate(registry_delete_count[$__rate_interval]))",
+          "expr": "sum by(model, projectType) (rate(registry_delete_count_total[$__rate_interval]))",
           "key": "Q-e9e747e0-79b0-4f48-8ae5-49b5e2055f2b-0",
           "legendFormat": "{{projectType}} ({{model}})",
           "range": true,

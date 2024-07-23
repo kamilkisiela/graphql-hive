@@ -5,8 +5,8 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
+import { ArrowDownIcon, CheckIcon } from '@/components/ui/icon';
 import { Input, Modal } from '@/components/v2';
-import { ArrowDownIcon, CheckIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
 import { Combobox as HeadlessCombobox, Transition as HeadlessTransition } from '@headlessui/react';
@@ -184,9 +184,7 @@ export const TransferOrganizationOwnershipModal = ({
               .includes(normalizedSearchPhrase) ||
             member.user.email.toLowerCase().replace(/\s+/g, '').includes(normalizedSearchPhrase),
         )
-  )
-    .map(m => m.user)
-    .slice(0, 5);
+  ).slice(0, 5);
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} size="lg" className="flex flex-col gap-5">
@@ -209,7 +207,7 @@ export const TransferOrganizationOwnershipModal = ({
               <Combobox.Input
                 className="w-full bg-transparent placeholder:text-gray-500 disabled:cursor-not-allowed"
                 name="newOwner"
-                displayValue={(member: Member['user'] | null) => member?.displayName}
+                displayValue={(member: Member | null) => member?.user.displayName}
                 onChange={(event: any) => setSearchPhrase(event.target.value)}
                 onBlur={handleBlur}
               />
@@ -232,7 +230,7 @@ export const TransferOrganizationOwnershipModal = ({
                 ) : (
                   filteredMembers.map(member => (
                     <Combobox.Option
-                      key={member.id}
+                      key={member.user.id}
                       className={({ active, selected }: { active?: boolean; selected?: boolean }) =>
                         clsx(
                           'relative cursor-pointer select-none p-2 font-medium text-gray-300',
@@ -247,8 +245,10 @@ export const TransferOrganizationOwnershipModal = ({
                             <img src={member.image} className="block h-full w-full" />
                           </div> */}
                           <div className="ml-2 flex flex-1 flex-col gap-x-2">
-                            <div className="block truncate text-sm">{member.displayName}</div>
-                            <div className="text-xs font-normal text-gray-400">{member.email}</div>
+                            <div className="block truncate text-sm">{member.user.displayName}</div>
+                            <div className="text-xs font-normal text-gray-400">
+                              {member.user.email}
+                            </div>
                           </div>
                           {selected ? <CheckIcon /> : null}
                         </div>

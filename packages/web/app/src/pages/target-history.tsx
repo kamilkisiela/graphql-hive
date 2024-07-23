@@ -1,13 +1,13 @@
 import { ReactElement, useEffect, useState } from 'react';
 import { useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { BadgeRounded } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { noSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { TimeAgo } from '@/components/ui/time-ago';
-import { Badge } from '@/components/v2/badge';
 import { graphql } from '@/gql';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
@@ -114,8 +114,10 @@ function ListPage(props: {
               </div>
             ) : null}
             <div className="mb-1.5 mt-2.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-              <div className={cn(!version.valid && 'text-red-500')}>
-                <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
+              <div
+                className={cn(!version.valid && 'text-red-500', 'flex flex-row items-center gap-1')}
+              >
+                <BadgeRounded color={version.valid ? 'green' : 'red'} /> Published
                 <TimeAgo date={version.date} />
               </div>
 
@@ -212,10 +214,10 @@ function HistoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.History}
-      className="h-full"
+      className="flex flex-row gap-x-6"
     >
       {hasVersions ? (
-        <div className="flex size-full flex-row gap-x-6">
+        <>
           <div>
             <div className="py-6">
               <Title>Versions</Title>
@@ -240,18 +242,16 @@ function HistoryPageContent(props: {
               </div>
             </div>
           </div>
-          <div className="grow">
-            <Outlet />
-          </div>
-        </div>
+          <Outlet />
+        </>
       ) : (
-        <>
+        <div className="w-full">
           <div className="py-6">
             <Title>Versions</Title>
             <Subtitle>Recently published schemas.</Subtitle>
           </div>
           {query.fetching ? null : noSchemaVersion}
-        </>
+        </div>
       )}
     </TargetLayout>
   );

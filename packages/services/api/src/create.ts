@@ -1,10 +1,10 @@
 import { createApplication, Scope } from 'graphql-modules';
 import { Redis } from 'ioredis';
 import { AwsClient } from '@hive/cdn-script/aws';
-import { activityModule } from './modules/activity';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
 import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
+import { appDeploymentsModule } from './modules/app-deployments';
 import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
@@ -43,6 +43,7 @@ import {
   SchemaServiceConfig,
 } from './modules/schema/providers/orchestrators/tokens';
 import { sharedModule } from './modules/shared';
+import { ActivityManager } from './modules/shared/providers/activity-manager';
 import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
 import { DistributedCache } from './modules/shared/providers/distributed-cache';
 import { Emails, EMAILS_ENDPOINT } from './modules/shared/providers/emails';
@@ -74,7 +75,6 @@ const modules = [
   projectModule,
   targetModule,
   schemaModule,
-  activityModule,
   operationsModule,
   tokenModule,
   labModule,
@@ -89,6 +89,7 @@ const modules = [
   oidcIntegrationsModule,
   schemaPolicyModule,
   collectionModule,
+  appDeploymentsModule,
 ];
 
 export function createRegistry({
@@ -163,6 +164,7 @@ export function createRegistry({
   const artifactStorageWriter = new ArtifactStorageWriter(s3Config, logger);
 
   const providers = [
+    ActivityManager,
     HttpClient,
     IdTranslator,
     Mutex,

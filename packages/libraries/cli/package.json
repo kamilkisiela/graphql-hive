@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.38.3",
+  "version": "0.38.5",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -31,8 +31,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz && pnpm oclif pack win",
-    "oclif:upload": "pnpm oclif upload tarballs --no-xz && pnpm oclif upload win",
+    "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz",
+    "oclif:upload": "pnpm oclif upload tarballs --no-xz",
     "postpack": "rm -f oclif.manifest.json",
     "prebuild": "rimraf dist",
     "prepack": "node scripts/replace-workspace.mjs rimraf lib && tsc -b && oclif manifest && oclif readme",
@@ -52,12 +52,11 @@
     "@graphql-tools/json-file-loader": "~8.0.0",
     "@graphql-tools/load": "~8.0.0",
     "@graphql-tools/url-loader": "~8.0.0",
-    "@graphql-tools/utils": "10.2.1",
+    "@graphql-tools/utils": "10.3.2",
     "@graphql-typed-document-node/core": "3.2.0",
     "@oclif/core": "^3.26.6",
     "@oclif/plugin-help": "6.0.22",
     "@oclif/plugin-update": "4.2.13",
-    "@whatwg-node/fetch": "0.9.18",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
     "graphql": "^16.8.1",
@@ -69,10 +68,11 @@
   "devDependencies": {
     "@types/env-ci": "3.1.4",
     "@types/mkdirp": "2.0.0",
-    "graphql": "16.8.1",
+    "graphql": "16.9.0",
     "oclif": "4.13.6",
     "rimraf": "4.4.1",
-    "tsx": "4.14.0"
+    "tsx": "4.16.2",
+    "typescript": "5.5.3"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

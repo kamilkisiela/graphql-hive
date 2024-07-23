@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
+import { CreateAccessTokenModal } from '@/components/target/settings/registry-access-token';
 import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
@@ -21,12 +22,12 @@ import {
   SubPageLayoutHeader,
 } from '@/components/ui/page-content-layout';
 import { QueryError } from '@/components/ui/query-error';
+import { Spinner } from '@/components/ui/spinner';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
 import { Input } from '@/components/v2/input';
-import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
-import { Spinner } from '@/components/v2/spinner';
+import { DeleteTargetModal } from '@/components/v2/modals';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
 import { Tag } from '@/components/v2/tag';
@@ -139,7 +140,7 @@ function RegistryAccessTokens(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Registry Access Tokens"
+        subPageTitle="Registry Access Tokens"
         description={
           <>
             <CardDescription>
@@ -244,7 +245,7 @@ const ExtendBaseSchema = (props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Extend Your Schema"
+        subPageTitle="Extend Your Schema"
         description={
           <>
             <CardDescription>
@@ -504,6 +505,15 @@ const ConditionalBreakingChanges = (props: {
       period: Yup.number()
         .min(1)
         .max(targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30)
+        .test('double-precision', 'Invalid precision', num => {
+          if (typeof num !== 'number') {
+            return false;
+          }
+
+          // Round the number to two decimal places
+          // and check if it is equal to the original number
+          return Number(num.toFixed(2)) === num;
+        })
         .required(),
       targets: Yup.array().of(Yup.string()).min(1),
       excludedClients: Yup.array().of(Yup.string()),
@@ -538,7 +548,7 @@ const ConditionalBreakingChanges = (props: {
     <form onSubmit={handleSubmit}>
       <SubPageLayout>
         <SubPageLayoutHeader
-          title="Conditional Breaking Changes"
+          subPageTitle="Conditional Breaking Changes"
           description={
             <>
               <CardDescription>
@@ -590,6 +600,7 @@ const ConditionalBreakingChanges = (props: {
               type="number"
               min="0"
               max="100"
+              step={0.01}
               className="mx-2 !inline-flex !w-16"
             />
             % of traffic in the past
@@ -784,7 +795,7 @@ function TargetName(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Target Name"
+        subPageTitle="Target Name"
         description={
           <>
             <CardDescription>
@@ -901,7 +912,7 @@ function GraphQLEndpointUrl(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="GraphQL Endpoint URL"
+        subPageTitle="GraphQL Endpoint URL"
         description={
           <>
             <CardDescription>
@@ -1003,7 +1014,7 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Delete Target"
+        subPageTitle="Delete Target"
         description={
           <>
             <CardDescription>
@@ -1069,24 +1080,24 @@ const subPages = [
     title: 'General',
   },
   {
-    key: 'cdn',
-    title: 'CDN Tokens',
-  },
-  {
     key: 'registry-token',
     title: 'Registry Tokens',
+  },
+  {
+    key: 'cdn',
+    title: 'CDN Tokens',
   },
   {
     key: 'breaking-changes',
     title: 'Breaking Changes',
   },
   {
-    key: 'base-schema',
-    title: 'Base Schema',
-  },
-  {
     key: 'schema-contracts',
     title: 'Schema Contracts',
+  },
+  {
+    key: 'base-schema',
+    title: 'Base Schema',
   },
 ] as const;
 
@@ -1226,7 +1237,11 @@ function TargetSettingsContent(props: {
                   />
                 ) : null}
                 {props.page === 'schema-contracts' ? (
-                  <SchemaContracts organizationId="" projectId="" targetId="" />
+                  <SchemaContracts
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
               </div>
             ) : null}

@@ -171,7 +171,7 @@ export function SchemaContracts(props: {
     <>
       <SubPageLayout>
         <SubPageLayoutHeader
-          title="Schema Contracts"
+          subPageTitle="Schema Contracts"
           description={
             <>
               <CardDescription>

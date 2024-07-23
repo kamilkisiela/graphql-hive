@@ -37,6 +37,8 @@ export const internalApiRouter = t.router({
           superTokensUserId: z.string().min(1),
           email: z.string().min(1),
           oidcIntegrationId: z.union([z.string(), z.null()]),
+          firstName: z.string().min(1).nullable(),
+          lastName: z.string().min(1).nullable(),
         })
         .required(),
     )

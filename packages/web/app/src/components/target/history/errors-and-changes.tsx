@@ -7,11 +7,13 @@ import { Label, Label as LegacyLabel } from '@/components/common';
 import {
   Accordion,
   AccordionContent,
+  AccordionHeader,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
+import { PulseIcon } from '@/components/ui/icon';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
@@ -23,7 +25,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PulseIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
@@ -186,44 +187,48 @@ function ChangeItem(props: {
   return (
     <Accordion type="single" collapsible>
       <AccordionItem value="item-1">
-        <AccordionTrigger className="py-3 hover:no-underline">
-          <div
-            className={clsx(
-              (!!change.approval && 'text-orange-500') ||
-                (criticalityLevelMapping[change.criticality] ?? 'text-red-400'),
-            )}
-          >
-            <div className="inline-flex justify-start space-x-2">
-              <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
-              {change.isSafeBasedOnUsage && (
-                <span className="cursor-pointer text-yellow-500">
-                  {' '}
-                  <CheckIcon className="inline size-3" /> Safe based on usage data
-                </span>
+        <AccordionHeader className="flex">
+          <AccordionTrigger className="py-3 hover:no-underline">
+            <div
+              className={clsx(
+                (change.approval && 'text-orange-500') ||
+                  (criticalityLevelMapping[change.criticality] ?? 'text-red-400'),
               )}
-              {'usageStatistics' in change && change.usageStatistics && (
-                <span className="flex items-center space-x-1 rounded-sm bg-gray-800 px-2 font-bold">
-                  <PulseIcon className="h-6 stroke-[1px]" />
-                  <span className="text-xs">
-                    {change.usageStatistics.topAffectedOperations.length}
-                    {change.usageStatistics.topAffectedOperations.length > 10 ? '+' : ''}{' '}
-                    {change.usageStatistics.topAffectedOperations.length === 1
-                      ? 'operation'
-                      : 'operations'}{' '}
-                    by {change.usageStatistics.topAffectedClients.length}{' '}
-                    {change.usageStatistics.topAffectedClients.length === 1 ? 'client' : 'clients'}{' '}
-                    affected
+            >
+              <div className="inline-flex justify-start space-x-2">
+                <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+                {change.isSafeBasedOnUsage && (
+                  <span className="cursor-pointer text-yellow-500">
+                    {' '}
+                    <CheckIcon className="inline size-3" /> Safe based on usage data
                   </span>
-                </span>
-              )}
-              {change.approval ? (
-                <div className="self-end">
-                  <ApprovedByBadge approval={change.approval} />
-                </div>
-              ) : null}
+                )}
+                {'usageStatistics' in change && change.usageStatistics && (
+                  <span className="flex items-center space-x-1 rounded-sm bg-gray-800 px-2 font-bold">
+                    <PulseIcon className="h-6 stroke-[1px]" />
+                    <span className="text-xs">
+                      {change.usageStatistics.topAffectedOperations.length}
+                      {change.usageStatistics.topAffectedOperations.length > 10 ? '+' : ''}{' '}
+                      {change.usageStatistics.topAffectedOperations.length === 1
+                        ? 'operation'
+                        : 'operations'}{' '}
+                      by {change.usageStatistics.topAffectedClients.length}{' '}
+                      {change.usageStatistics.topAffectedClients.length === 1
+                        ? 'client'
+                        : 'clients'}{' '}
+                      affected
+                    </span>
+                  </span>
+                )}
+                {change.approval ? (
+                  <div className="self-end">
+                    <ApprovedByBadge approval={change.approval} />
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </AccordionTrigger>
+          </AccordionTrigger>
+        </AccordionHeader>
         <AccordionContent className="pb-8 pt-4">
           {change.approval && (
             <SchemaChangeApproval

@@ -1,5 +1,5 @@
+import { http, URL } from '@graphql-hive/core';
 import { Flags } from '@oclif/core';
-import { fetch, URL } from '@whatwg-node/fetch';
 import Command from '../../base-command';
 
 export default class ArtifactsFetch extends Command {
@@ -40,10 +40,16 @@ export default class ArtifactsFetch extends Command {
 
     const url = new URL(`${cdnEndpoint}/${artifactType}`);
 
-    const response = await fetch(url.toString(), {
+    const response = await http.get(url.toString(), {
       headers: {
         'x-hive-cdn-key': token,
         'User-Agent': `hive-cli/${this.config.version}`,
+      },
+      retry: {
+        retries: 3,
+        retryWhen(response) {
+          return response.status >= 500;
+        },
       },
     });
 

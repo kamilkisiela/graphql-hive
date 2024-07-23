@@ -11,7 +11,44 @@ function getDockerConnection() {
   return docker;
 }
 
-export async function getServiceHost(serviceName: string, servicePort: number): Promise<string> {
+const LOCAL_SERVICES = {
+  server: 3001,
+  clickhouse: 8123,
+  emails: 6260,
+  composition_federation_2: 3069,
+  usage: 4001,
+  schema: 6500,
+  external_composition: 3012,
+} as const;
+
+export type KnownServices = keyof typeof LOCAL_SERVICES;
+
+export function getCDNPort() {
+  if (process.env.RUN_AGAINST_LOCAL_SERVICES === '1') {
+    return 9000;
+  }
+
+  return 8083;
+}
+
+export function getAppBaseUrl() {
+  if (process.env.RUN_AGAINST_LOCAL_SERVICES === '1') {
+    return 'localhost:3000';
+  }
+
+  return 'localhost:8080';
+}
+
+export async function getServiceHost(
+  serviceName: KnownServices,
+  servicePort: number,
+  localhost = true,
+): Promise<string> {
+  if (process.env.RUN_AGAINST_LOCAL_SERVICES === '1') {
+    return `localhost:${LOCAL_SERVICES[serviceName]}`;
+  }
+
+  const actualHost = localhost ? 'localhost' : serviceName;
   const docker = getDockerConnection();
   const containers = await docker.listContainers({
     filters: JSON.stringify({
@@ -42,7 +79,7 @@ export async function getServiceHost(serviceName: string, servicePort: number): 
   }
 
   if (publicPort) {
-    return `localhost:${publicPort.PublicPort}`;
+    return `${actualHost}:${publicPort.PublicPort}`;
   }
 
   if (privatePort) {
@@ -50,10 +87,10 @@ export async function getServiceHost(serviceName: string, servicePort: number): 
       `Container "${container.Id}" (service: "${serviceName}") expose port "${servicePort}" as "${privatePort.PublicPort}", please consider to update your setup!`,
     );
 
-    return `localhost:${privatePort.PublicPort}`;
+    return `${actualHost}:${privatePort.PublicPort}`;
   }
 
-  return `localhost:${servicePort}`;
+  return `${actualHost}:${servicePort}`;
 }
 
 export function generateUnique() {

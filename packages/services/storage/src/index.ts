@@ -4,14 +4,12 @@ import {
   Interceptor,
   SerializableValue,
   sql,
-  TaggedTemplateLiteralInvocation,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
 import { update } from 'slonik-utilities';
 import { TransactionFunction } from 'slonik/dist/src/types';
 import zod from 'zod';
 import type {
-  ActivityObject,
   Alert,
   AlertChannel,
   AuthProvider,
@@ -99,6 +97,10 @@ const organizationGetStartedMapping: Record<
   enablingUsageBasedBreakingChanges: 'get_started_usage_breaking',
 };
 
+function addRandomHashToId(id: string) {
+  return `${id}-${Math.random().toString(16).substring(2, 6)}`;
+}
+
 function ensureDefined<T>(value: T | null | undefined, propertyName: string): T {
   if (value == null) {
     throw new Error(`${propertyName} is null or undefined`);
@@ -139,6 +141,37 @@ async function tracedTransaction<T>(
       span.end();
     }
   });
+}
+
+async function ensureFreeOrganizationCleanId(
+  newCleanId: string,
+  currentCleanId: string | null,
+  connection: Connection,
+  reservedNames: string[],
+): Promise<string> {
+  if (reservedNames.includes(newCleanId)) {
+    return ensureFreeOrganizationCleanId(
+      addRandomHashToId(newCleanId),
+      currentCleanId,
+      connection,
+      reservedNames,
+    );
+  }
+
+  const orgCleanIdExists = await connection.exists(
+    sql`/* orgCleanIdExistsGlobally */ SELECT 1 FROM organizations WHERE clean_id = ${newCleanId} LIMIT 1`,
+  );
+
+  if (orgCleanIdExists) {
+    return ensureFreeOrganizationCleanId(
+      addRandomHashToId(newCleanId),
+      currentCleanId,
+      connection,
+      reservedNames,
+    );
+  }
+
+  return newCleanId;
 }
 
 function resolveAuthProviderOfUser(
@@ -418,41 +451,6 @@ export async function createStorage(
     return record;
   }
 
-  function transformActivity(row: {
-    activity: [activities];
-    target: [Record<string, unknown>];
-    project: [projects];
-    organization: [organizations];
-    user: [users];
-  }): ActivityObject {
-    const activity = row.activity[0];
-    const target = row.target[0];
-    const project = row.project[0];
-    const organization = row.organization[0];
-    const user = row.user[0];
-
-    return {
-      id: activity.id,
-      type: activity.activity_type,
-      meta: activity.activity_metadata,
-      createdAt: activity.created_at,
-      target: target['id']
-        ? {
-            ...TargetModel.parse(target),
-            orgId: organization.id,
-          }
-        : undefined,
-      project: project ? transformProject(project) : undefined,
-      organization: transformOrganization(organization),
-      user: user
-        ? transformUser({
-            ...user,
-            provider: null, // we don't need this for activities
-          })
-        : undefined,
-    };
-  }
-
   function transformTargetSettings(
     row: Pick<
       targets,
@@ -593,27 +591,12 @@ export async function createStorage(
       },
       connection: Connection,
     ) {
-      function addRandomHashToId(id: string) {
-        return `${id}-${Math.random().toString(16).substring(2, 6)}`;
-      }
-
-      async function ensureFreeCleanId(id: string, originalId: string | null): Promise<string> {
-        if (reservedNames.includes(id)) {
-          return ensureFreeCleanId(addRandomHashToId(id), originalId);
-        }
-
-        const orgCleanIdExists = await connection.exists(
-          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${id} LIMIT 1`,
-        );
-
-        if (orgCleanIdExists) {
-          return ensureFreeCleanId(addRandomHashToId(id), originalId);
-        }
-
-        return id;
-      }
-      const availableCleanId = await ensureFreeCleanId(cleanId, null);
-
+      const availableCleanId = await ensureFreeOrganizationCleanId(
+        cleanId,
+        null,
+        connection,
+        reservedNames,
+      );
       const org = await connection.one<Slonik<organizations>>(
         sql`/* createOrganization */
           INSERT INTO organizations
@@ -731,15 +714,20 @@ export async function createStorage(
     email: string;
     externalAuthUserId: string | null;
     oidcIntegrationId: string | null;
+    firstName: string | null;
+    lastName: string | null;
   }) {
-    const displayName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
-    const fullName = input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
+    const { firstName, lastName } = input;
+    const name =
+      firstName && lastName
+        ? `${firstName} ${lastName}`
+        : input.email.split('@')[0].slice(0, 25).padEnd(2, '1');
 
     return {
       superTokensUserId: input.superTokensUserId,
       email: input.email,
-      displayName,
-      fullName,
+      displayName: name,
+      fullName: name,
       externalAuthUserId: input.externalAuthUserId,
       oidcIntegrationId: input.oidcIntegrationId,
     };
@@ -762,9 +750,13 @@ export async function createStorage(
       externalAuthUserId,
       email,
       oidcIntegration,
+      firstName,
+      lastName,
     }: {
       superTokensUserId: string;
       externalAuthUserId?: string | null;
+      firstName: string | null;
+      lastName: string | null;
       email: string;
       oidcIntegration: null | {
         id: string;
@@ -781,6 +773,8 @@ export async function createStorage(
               email,
               externalAuthUserId: externalAuthUserId ?? null,
               oidcIntegrationId: oidcIntegration?.id ?? null,
+              firstName,
+              lastName,
             }),
             t,
           );
@@ -1283,16 +1277,50 @@ export async function createStorage(
         ),
       );
     },
-    async updateOrganizationName({ name, cleanId, organization }) {
+    async updateOrganizationName({ name, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`/* updateOrganizationName */
           UPDATE organizations
-          SET name = ${name}, clean_id = ${cleanId}
+          SET name = ${name}
           WHERE id = ${organization}
           RETURNING *
         `),
       );
     },
+    async updateOrganizationCleanId({ cleanId, organization, reservedNames }) {
+      return pool.transaction(async t => {
+        if (reservedNames.includes(cleanId)) {
+          return {
+            ok: false,
+            message: 'Provided organization slug is not allowed',
+          };
+        }
+
+        const orgCleanIdExists = await t.exists(
+          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${cleanId} AND id != ${organization} LIMIT 1`,
+        );
+
+        if (orgCleanIdExists) {
+          return {
+            ok: false,
+            message: 'Organization slug is already taken',
+          };
+        }
+
+        return {
+          ok: true,
+          organization: transformOrganization(
+            await pool.one<Slonik<organizations>>(sql`/* updateOrganizationSlug */
+              UPDATE organizations
+              SET clean_id = ${cleanId}
+              WHERE id = ${organization}
+              RETURNING *
+            `),
+          ),
+        };
+      });
+    },
+
     async updateOrganizationPlan({ billingPlan, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`/* updateOrganizationPlan */
@@ -2817,104 +2845,6 @@ export async function createStorage(
         sql`/* createActivity */ INSERT INTO activities (${identifiers}) VALUES (${values}) RETURNING *;`,
       );
     },
-    async getActivities(selector) {
-      let query: TaggedTemplateLiteralInvocation;
-      if ('target' in selector) {
-        query = sql`/* getActivities (target) */
-          SELECT
-            jsonb_agg(a.*) as activity,
-            jsonb_agg(
-              json_build_object(
-                'id', t."id",
-                'cleanId', t."clean_id",
-                'name', t."name",
-                'projectId', t."project_id",
-                'graphqlEndpointUrl', t."graphql_endpoint_url"
-              )
-            ) as target,
-            jsonb_agg(p.*) as project,
-            jsonb_agg(o.*) as organization,
-            jsonb_agg(u.*) as user
-          FROM activities as a
-          LEFT JOIN targets as t ON (t.id = a.target_id)
-          LEFT JOIN projects as p ON (p.id = a.project_id)
-          LEFT JOIN organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN users as u ON (u.id = a.user_id)
-          WHERE
-            a.target_id = ${selector.target}
-            AND a.project_id = ${selector.project}
-            AND a.organization_id = ${selector.organization}
-            AND p.type != 'CUSTOM'
-          GROUP BY a.created_at
-          ORDER BY a.created_at DESC LIMIT ${selector.limit}
-        `;
-      } else if ('project' in selector) {
-        query = sql`/* getActivities (project) */
-          SELECT
-            jsonb_agg(a.*) as activity,
-            jsonb_agg(
-              json_build_object(
-                'id', t."id",
-                'cleanId', t."clean_id",
-                'name', t."name",
-                'projectId', t."project_id",
-                'graphqlEndpointUrl', t."graphql_endpoint_url"
-              )
-            ) as target,
-            jsonb_agg(p.*) as project,
-            jsonb_agg(o.*) as organization,
-            jsonb_agg(u.*) as user
-          FROM activities as a
-          LEFT JOIN targets as t ON (t.id = a.target_id)
-          LEFT JOIN projects as p ON (p.id = a.project_id)
-          LEFT JOIN organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN users as u ON (u.id = a.user_id)
-          WHERE
-            a.project_id = ${selector.project}
-            AND a.organization_id = ${selector.organization}
-            AND p.type != 'CUSTOM'
-          GROUP BY a.created_at
-          ORDER BY a.created_at DESC LIMIT ${selector.limit}
-        `;
-      } else {
-        query = sql`/* getActivities (organization) */
-          SELECT
-            jsonb_agg(a.*) as activity,
-            jsonb_agg(
-              json_build_object(
-                'id', t."id",
-                'cleanId', t."clean_id",
-                'name', t."name",
-                'projectId', t."project_id",
-                'graphqlEndpointUrl', t."graphql_endpoint_url"
-              )
-            ) as target,
-            jsonb_agg(p.*) as project,
-            jsonb_agg(o.*) as organization,
-            jsonb_agg(u.*) as user
-          FROM activities as a
-          LEFT JOIN targets as t ON (t.id = a.target_id)
-          LEFT JOIN projects as p ON (p.id = a.project_id)
-          LEFT JOIN organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN users as u ON (u.id = a.user_id)
-          WHERE a.organization_id = ${selector.organization} AND p.type != 'CUSTOM'
-          GROUP BY a.created_at
-          ORDER BY a.created_at DESC LIMIT ${selector.limit}
-        `;
-      }
-
-      const result = await pool.query<
-        Slonik<{
-          activity: [activities];
-          target: [Record<string, unknown>];
-          project: [projects];
-          organization: [organizations];
-          user: [users];
-        }>
-      >(query);
-
-      return result.rows.map(transformActivity);
-    },
     async addSlackIntegration({ organization, token }) {
       await pool.query<Slonik<organizations>>(
         sql`/* addSlackIntegration */
@@ -3306,6 +3236,7 @@ export async function createStorage(
           , "token_endpoint"
           , "userinfo_endpoint"
           , "authorization_endpoint"
+          , "oidc_user_access_only"
         FROM
           "oidc_integrations"
         WHERE
@@ -3331,6 +3262,7 @@ export async function createStorage(
           , "token_endpoint"
           , "userinfo_endpoint"
           , "authorization_endpoint"
+          , "oidc_user_access_only"
         FROM
           "oidc_integrations"
         WHERE
@@ -3343,6 +3275,26 @@ export async function createStorage(
       }
 
       return decodeOktaIntegrationRecord(result);
+    },
+
+    async getOIDCIntegrationIdForOrganizationCleanId({ cleanId }) {
+      const id =
+        await pool.maybeOneFirst<string>(sql`/* getOIDCIntegrationIdForOrganizationCleanId */
+        SELECT
+          "id"
+        FROM
+          "oidc_integrations"
+        WHERE
+          "linked_organization_id" = (
+            SELECT "id"
+            FROM "organizations"
+            WHERE "clean_id" = ${cleanId}
+            LIMIT 1
+          )
+        LIMIT 1
+      `);
+
+      return id;
     },
 
     async createOIDCIntegrationForOrganization(args) {
@@ -3373,6 +3325,7 @@ export async function createStorage(
             , "token_endpoint"
             , "userinfo_endpoint"
             , "authorization_endpoint"
+            , "oidc_user_access_only"
         `);
 
         return {
@@ -3426,6 +3379,29 @@ export async function createStorage(
           , "token_endpoint"
           , "userinfo_endpoint"
           , "authorization_endpoint"
+          , "oidc_user_access_only"
+      `);
+
+      return decodeOktaIntegrationRecord(result);
+    },
+
+    async updateOIDCRestrictions(args) {
+      const result = await pool.one(sql`/* updateOIDCRestrictions */
+          UPDATE "oidc_integrations"
+          SET
+            "oidc_user_access_only" = ${args.oidcUserAccessOnly}
+          WHERE
+            "id" = ${args.oidcIntegrationId}
+          RETURNING
+          "id"
+          , "linked_organization_id"
+          , "client_id"
+          , "client_secret"
+          , "oauth_api_url"
+          , "token_endpoint"
+          , "userinfo_endpoint"
+          , "authorization_endpoint"
+          , "oidc_user_access_only"
       `);
 
       return decodeOktaIntegrationRecord(result);
@@ -4786,6 +4762,17 @@ export function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
   };
 }
 
+export function encodeHashBasedCursor(cursor: { id: string }) {
+  return Buffer.from(cursor.id).toString('base64');
+}
+
+export function decodeHashBasedCursor(cursor: string) {
+  const id = Buffer.from(cursor, 'base64').toString('utf8');
+  return {
+    id,
+  };
+}
+
 function isDefined<T>(val: T | undefined | null): val is T {
   return val !== undefined && val !== null;
 }
@@ -4795,6 +4782,7 @@ const OktaIntegrationBaseModel = zod.object({
   linked_organization_id: zod.string(),
   client_id: zod.string(),
   client_secret: zod.string(),
+  oidc_user_access_only: zod.boolean(),
 });
 
 const OktaIntegrationLegacyModel = zod.intersection(
@@ -4828,6 +4816,7 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
       tokenEndpoint: `${rawRecord.oauth_api_url}/token`,
       userinfoEndpoint: `${rawRecord.oauth_api_url}/userinfo`,
       authorizationEndpoint: `${rawRecord.oauth_api_url}/authorize`,
+      oidcUserAccessOnly: rawRecord.oidc_user_access_only,
     };
   }
 
@@ -4839,6 +4828,7 @@ const decodeOktaIntegrationRecord = (result: unknown): OIDCIntegration => {
     tokenEndpoint: rawRecord.token_endpoint,
     userinfoEndpoint: rawRecord.userinfo_endpoint,
     authorizationEndpoint: rawRecord.authorization_endpoint,
+    oidcUserAccessOnly: rawRecord.oidc_user_access_only,
   };
 };
 
@@ -4870,6 +4860,8 @@ const FeatureFlagsModel = zod
   .object({
     compareToPreviousComposableVersion: zod.boolean().default(false),
     forceLegacyCompositionInTargets: zod.array(zod.string()).default([]),
+    /** whether app deployments are enabled for the given organization */
+    appDeployments: zod.boolean().default(false),
   })
   .optional()
   .nullable()
@@ -4879,6 +4871,7 @@ const FeatureFlagsModel = zod
       val ?? {
         compareToPreviousComposableVersion: false,
         forceLegacyCompositionInTargets: [],
+        appDeployments: false,
       },
   );
 

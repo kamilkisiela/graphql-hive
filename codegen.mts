@@ -10,29 +10,21 @@ const config: CodegenConfig = {
     './packages/services/api/src': defineConfig(
       {
         typeDefsFilePath: false,
+        mergeSchema: {
+          path: '../../../../schema.graphql',
+          config: { includeDirectives: true },
+        },
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
         blacklistedModules: [
-          'activity',
-          'admin',
-          'alerts',
-          'auth',
           'billing',
-          'cdn',
           'collection',
-          'feedback',
-          'integrations',
           'lab',
-          'oidc-integrations',
           'operations',
           'organization',
           'policy',
-          'project',
           'schema',
-          'shared',
-          'support',
-          'target',
         ],
         scalarsOverrides: {
           DateTime: { type: 'string' },
@@ -109,7 +101,6 @@ const config: CodegenConfig = {
           OrganizationConnection:
             '../modules/organization/module.graphql.mappers#OrganizationConnectionMapper',
           UserConnection: '../modules/auth/module.graphql.mappers#UserConnectionMapper',
-          ActivityConnection: '../modules/activity/module.graphql.mappers#ActivityConnectionMapper',
           MemberConnection: '../modules/auth/module.graphql.mappers#MemberConnectionMapper',
           ProjectConnection: '../modules/project/module.graphql.mappers#ProjectConnectionMapper',
           TargetConnection: '../modules/target/module.graphql.mappers#TargetConnectionMapper',
@@ -137,10 +128,10 @@ const config: CodegenConfig = {
           MemberRole: '../modules/organization/module.graphql.mappers#MemberRoleMapper',
           Token: '../modules/token/module.graphql.mappers#TokenMapper',
           TokenInfo: '../modules/token/module.graphql.mappers#TokenInfoMapper',
-          Activity: '../modules/activity/module.graphql.mappers#ActivityMapper',
           AlertChannel: '../modules/alerts/module.graphql.mappers#AlertChannelMapper',
           AlertSlackChannel: '../modules/alerts/module.graphql.mappers#AlertSlackChannelMapper',
           AlertWebhookChannel: '../modules/alerts/module.graphql.mappers#AlertWebhookChannelMapper',
+          TeamsWebhookChannel: '../modules/alerts/module.graphql.mappers#TeamsWebhookChannelMapper',
           Alert: '../modules/alerts/module.graphql.mappers#AlertMapper',
           AdminQuery: '../modules/admin/module.graphql.mappers#AdminQueryMapper',
           AdminStats: '../modules/admin/module.graphql.mappers#AdminStatsMapper',
@@ -200,13 +191,15 @@ const config: CodegenConfig = {
           ContractVersion: '../modules/schema/module.graphql.mappers#ContractVersionMapper',
           BreakingChangeMetadataTarget:
             '../modules/schema/module.graphql.mappers#BreakingChangeMetadataTargetMapper',
+          AppDeployment: '../modules/app-deployments/module.graphql.mappers#AppDeploymentMapper',
+          AppDeploymentStatus:
+            '../modules/app-deployments/module.graphql.mappers#AppDeploymentStatusMapper',
         },
       },
     },
     './packages/web/app/src/gql/': {
       documents: [
         './packages/web/app/src/(components|lib|pages)/**/*.ts(x)?',
-        './packages/web/app/src/graphql',
         '!./packages/web/app/src/server/**/*.ts',
       ],
       preset: 'client',
@@ -260,12 +253,6 @@ const config: CodegenConfig = {
           Date: 'string',
           SafeInt: 'number',
         },
-      },
-    },
-    './schema.graphql': {
-      plugins: ['schema-ast'],
-      config: {
-        includeDirectives: true,
       },
     },
   },

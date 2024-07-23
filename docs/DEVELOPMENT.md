@@ -5,8 +5,9 @@
 Developing Hive locally requires you to have the following software installed locally:
 
 - Node.js 21 (or `nvm` or `fnm`)
-- pnpm v8
-- Docker
+- pnpm v9
+- Docker version 26.1.1 or later(previous versions will not work correctly on arm64)
+- make sure these ports are free: 5432, 6379, 9000, 9001, 8123, 9092, 8081, 8082, 9644, 3567, 7043
 
 ## Setup Instructions
 
@@ -119,7 +120,7 @@ We recommend the following flow if you are having issues with running Hive local
 
 1. Server: Set the following env variables in `packages/services/server/.env`:
 
-   ```
+   ```dotenv
    INTEGRATION_GITHUB=1
    INTEGRATION_GITHUB_GITHUB_APP_ID=<your-github-app-id>
    ```
@@ -130,7 +131,7 @@ We recommend the following flow if you are having issues with running Hive local
    (`packages/services/server/github-app.pem`)
 
 2. Web App: Set the following in `packages/web/app/.env`:
-   ```
+   ```dotenv
    INTEGRATION_GITHUB_APP_NAME=<your-github-app-name>
    ```
 

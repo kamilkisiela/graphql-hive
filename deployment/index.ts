@@ -40,6 +40,15 @@ const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
 if (!imagesTag) {
   throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
 }
+// eslint-disable-next-line no-process-env
+let HIVE_APP_USE_PERSISTED_DOCUMENTS = process.env.HIVE_APP_USE_PERSISTED_DOCUMENTS;
+
+if (!HIVE_APP_USE_PERSISTED_DOCUMENTS) {
+  console.warn(
+    'HIVE_APP_USE_PERSISTED_DOCUMENTS env variable is not set, defaulting to "0" (disabled).',
+  );
+  HIVE_APP_USE_PERSISTED_DOCUMENTS = '0';
+}
 
 optimizeAzureCluster();
 
@@ -237,6 +246,7 @@ const app = deployApp({
   github: githubApp,
   slackApp,
   sentry,
+  usePersistedDocuments: HIVE_APP_USE_PERSISTED_DOCUMENTS === '1',
 });
 
 const proxy = deployProxy({

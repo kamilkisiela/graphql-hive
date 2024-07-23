@@ -33,45 +33,38 @@ function createFetcher(options: SchemaFetcherOptions & ServicesFetcherOptions) {
       headers['If-None-Match'] = cacheETag;
     }
 
-    let retryCount = 0;
+    return http
+      .get(endpoint, {
+        headers,
+        retry: {
+          retryWhen: response => response.status >= 500,
+          okWhen: response => response.status === 304,
+          retries: 10,
+          maxTimeout: 200,
+          minTimeout: 1,
+        },
+      })
+      .then(async response => {
+        if (response.ok) {
+          const result = await response.json();
 
-    const retry = (status: number) => {
-      if (retryCount >= 10 || status < 499) {
-        return Promise.reject(new Error(`Failed to fetch [${status}]`));
-      }
-
-      retryCount = retryCount + 1;
-
-      return fetchWithRetry();
-    };
-
-    const fetchWithRetry = (): Promise<readonly Schema[] | Schema> => {
-      return http
-        .get(endpoint, {
-          headers,
-        })
-        .then(async response => {
-          if (response.ok) {
-            const result = await response.json();
-
-            const etag = response.headers.get('etag');
-            if (etag) {
-              cached = result;
-              cacheETag = etag;
-            }
-
-            return result;
+          const etag = response.headers.get('etag');
+          if (etag) {
+            cached = result;
+            cacheETag = etag;
           }
 
-          if (response.status === 304 && cached !== null) {
-            return cached;
-          }
+          return result;
+        }
 
-          return retry(response.status);
-        });
-    };
+        if (response.status === 304 && cached !== null) {
+          return cached;
+        }
 
-    return fetchWithRetry();
+        throw new Error(
+          `Failed to GET ${endpoint}, received: ${response.status} ${response.statusText ?? 'Internal Server Error'}`,
+        );
+      });
   };
 }
 

@@ -6,9 +6,9 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
 import { Heading } from '@/components/ui/heading';
+import { AlertTriangleIcon, TrashIcon } from '@/components/ui/icon';
 import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
 import { DocsLink, Input, Modal, Table, Tag, TBody, Td, TimeAgo, Tr } from '@/components/v2';
-import { AlertTriangleIcon, TrashIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -370,7 +370,7 @@ export function CDNAccessTokens(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="CDN Access Token"
+        subPageTitle="CDN Access Token"
         description={
           <>
             <CardDescription>
