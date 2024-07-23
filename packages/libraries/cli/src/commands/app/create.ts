@@ -80,7 +80,7 @@ export default class AppCreate extends Command {
 
     if (result.createAppDeployment.ok.createdAppDeployment.status !== AppDeploymentStatus.Pending) {
       this.log(
-        `App deployment "${flags['name']}@${flags['version']}" is "${result.createAppDeployment.ok.createdAppDeployment.status}". Skip publishing documents.`,
+        `App deployment "${flags['name']}@${flags['version']}" is "${result.createAppDeployment.ok.createdAppDeployment.status}". Skip uploading documents...`,
       );
       return;
     }
