@@ -525,7 +525,6 @@ export interface Storage {
   }): Promise<
     ReadonlyArray<{
       coordinate: string;
-      timestamp: number;
     }>
   >;
 

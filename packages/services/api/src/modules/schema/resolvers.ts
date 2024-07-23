@@ -758,8 +758,8 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      const createdBefore = filter?.schema?.createdBefore
-        ? new Date(filter.schema.createdBefore)
+      const createdBefore = filter?.schema?.createdBeforeDate
+        ? new Date(filter.schema.createdBeforeDate)
         : null;
 
       const [usedCoordinates, oldEnoughCoordinates] = await Promise.all([

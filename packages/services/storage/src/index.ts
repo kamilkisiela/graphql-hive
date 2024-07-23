@@ -2865,7 +2865,13 @@ export async function createStorage(
         `,
       );
 
-      return SchemaCleanupTrackerModel.parseAsync(dbResult.rows);
+      return zod
+        .array(
+          zod.object({
+            coordinate: zod.string(),
+          }),
+        )
+        .parseAsync(dbResult.rows);
     },
     async createActivity({ organization, project, target, user, type, meta }) {
       const { identifiers, values } = objectToParams<Omit<activities, 'id' | 'created_at'>>({

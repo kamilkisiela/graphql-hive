@@ -73,7 +73,7 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
 
   function onReset() {
     form.reset();
-    router.navigate({
+    void router.navigate({
       search(params) {
         return {
           ...params,
@@ -90,7 +90,7 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
     const age = values.age;
 
     if (date) {
-      router.navigate({
+      void router.navigate({
         search(params) {
           return {
             ...params,
@@ -100,7 +100,7 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
         },
       });
     } else if (age) {
-      router.navigate({
+      void router.navigate({
         search(params) {
           return {
             ...params,
@@ -110,7 +110,7 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
         },
       });
     } else {
-      router.navigate({
+      void router.navigate({
         search(params) {
           return {
             ...params,
@@ -200,14 +200,14 @@ function AgeFilter(props: { createdBefore: string | null; olderThan: number | nu
                       >
                         <FormControl>
                           <Button
-                            variant={'outline'}
+                            variant="outline"
                             className={cn(
                               'w-[240px] pl-3 text-left font-normal',
                               !field.value && 'text-muted-foreground',
                             )}
                           >
                             {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto size-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -311,7 +311,7 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
 
   useEffect(() => {
     if (!props.letter && letters.length > 0) {
-      router.navigate({
+      void router.navigate({
         search(params) {
           return {
             ...params,
