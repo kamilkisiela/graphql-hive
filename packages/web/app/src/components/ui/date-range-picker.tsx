@@ -10,11 +10,14 @@ import {
   Cross1Icon,
   MagnifyingGlassIcon,
 } from '@radix-ui/react-icons';
+import { Badge } from './badge';
 import { Button } from './button';
 import { Calendar } from './calendar';
 import { Input } from './input';
 import { Label } from './label';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { Separator } from './separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
 
 export interface DateRangePickerProps {
   presets?: Preset[];
@@ -30,6 +33,8 @@ export interface DateRangePickerProps {
   startDate?: Date;
   /** valid units allowed */
   validUnits?: DurationUnit[];
+  label?: string;
+  tooltip?: React.ReactNode;
 }
 
 const formatDate = (date: Date, locale = 'en-us'): string => {
@@ -302,14 +307,33 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
         setIsOpen(open);
       }}
     >
-      <PopoverTrigger asChild>
-        <Button variant="outline">
-          {activePreset?.label}
-          <div className="-mr-2 scale-125 pl-1 opacity-60">
-            {isOpen ? <ChevronUpIcon width={24} /> : <ChevronDownIcon width={24} />}
-          </div>
-        </Button>
-      </PopoverTrigger>
+      <TooltipProvider>
+        <Tooltip open={!props.tooltip ? false : undefined}>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button variant="outline">
+                {props.label ? (
+                  <>
+                    {props.label}
+                    <Separator orientation="vertical" className="mx-2 h-4" />
+                    <Badge variant="gray" className="rounded-sm px-1 font-normal">
+                      {activePreset?.label}
+                    </Badge>
+                  </>
+                ) : (
+                  <>
+                    {activePreset?.label}
+                    <div className="-mr-2 scale-125 pl-1 opacity-60">
+                      {isOpen ? <ChevronUpIcon width={24} /> : <ChevronDownIcon width={24} />}
+                    </div>
+                  </>
+                )}
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>{props.tooltip}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <PopoverContent align={props.align} className="mt-1 flex h-[380px] w-auto p-0">
         <div className="flex flex-col py-4">
           <div className="flex flex-col items-center justify-end gap-2 lg:flex-row lg:items-start">

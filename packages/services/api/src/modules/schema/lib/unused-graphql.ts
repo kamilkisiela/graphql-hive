@@ -1,9 +1,9 @@
 import { DocumentNode, Kind, visit } from 'graphql';
 import { TypeNodeInfo, visitWithTypeNodeInfo } from './ast-visitor';
 
-export function stripUsedSchemaCoordinatesFromDocumentNode(
+export function stripSchemaCoordinatesFromDocumentNode(
   doc: DocumentNode,
-  usedCoordinates: Set<string>,
+  coordinatesToRemove: Set<string>,
 ): DocumentNode {
   const typeNodeInfo = new TypeNodeInfo();
 
@@ -11,12 +11,12 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
     doc,
     visitWithTypeNodeInfo(typeNodeInfo, {
       ScalarTypeDefinition(node) {
-        if (usedCoordinates.has(node.name.value)) {
+        if (coordinatesToRemove.has(node.name.value)) {
           return null;
         }
       },
       ScalarTypeExtension(node) {
-        if (usedCoordinates.has(node.name.value)) {
+        if (coordinatesToRemove.has(node.name.value)) {
           return null;
         }
       },
@@ -31,7 +31,7 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
 
           // if a field is used but some of it's arguments is not used, we cannot remove the field
           // we can simply check if some of the arguments are used, if not we can remove the field
-          if (!node.arguments?.length && usedCoordinates.has(`${typeName}.${fieldName}`)) {
+          if (!node.arguments?.length && coordinatesToRemove.has(`${typeName}.${fieldName}`)) {
             return null;
           }
         },
@@ -51,7 +51,7 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
               ? `${typeName}.${fieldName}.${node.name.value}`
               : `${typeName}.${fieldName}`;
 
-          if (usedCoordinates.has(coordinate)) {
+          if (coordinatesToRemove.has(coordinate)) {
             return null;
           }
         },
@@ -102,14 +102,14 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
 
       EnumTypeDefinition: {
         enter(node) {
-          if (usedCoordinates.has(node.name.value)) {
+          if (coordinatesToRemove.has(node.name.value)) {
             return null;
           }
         },
       },
       EnumTypeExtension: {
         enter(node) {
-          if (usedCoordinates.has(node.name.value)) {
+          if (coordinatesToRemove.has(node.name.value)) {
             return null;
           }
         },
@@ -117,14 +117,14 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
 
       UnionTypeDefinition: {
         enter(node) {
-          if (usedCoordinates.has(node.name.value)) {
+          if (coordinatesToRemove.has(node.name.value)) {
             return null;
           }
         },
       },
       UnionTypeExtension: {
         enter(node) {
-          if (usedCoordinates.has(node.name.value)) {
+          if (coordinatesToRemove.has(node.name.value)) {
             return null;
           }
         },

@@ -49,9 +49,10 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { onlyDeprecatedDocumentNode } from './lib/deprecated-graphql';
 import { extractSuperGraphInformation, SuperGraphInformation } from './lib/federation-super-graph';
-import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
+import { stripSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
 import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-changes-helper';
 import { ContractsManager } from './providers/contracts-manager';
+import { getSchemaCoordinates } from './providers/inspector';
 import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -746,7 +747,7 @@ export const resolvers: SchemaModule.Resolvers = {
         supergraph,
       };
     },
-    async unusedSchema(version, { usage }, { injector }) {
+    async unusedSchema(version, { filter }, { injector }) {
       const [schemaAst, supergraphAst] = await Promise.all([
         injector.get(SchemaVersionHelper).getCompositeSchemaAst(version),
         injector.get(SchemaVersionHelper).getSupergraphAst(version),
@@ -756,19 +757,55 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      const usedCoordinates = await injector.get(OperationsManager).getReportedSchemaCoordinates({
-        targetId: version.target,
-        projectId: version.project,
-        organizationId: version.organization,
-        period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
-      });
+      const createdBefore = filter?.schema?.createdBeforeDate
+        ? new Date(filter.schema.createdBeforeDate)
+        : null;
+
+      const [usedCoordinates, oldEnoughCoordinates] = await Promise.all([
+        injector.get(OperationsManager).getReportedSchemaCoordinates({
+          targetId: version.target,
+          projectId: version.project,
+          organizationId: version.organization,
+          period: filter?.usage ? parseDateRangeInput(filter.usage) : createPeriod('30d'),
+        }),
+        createdBefore
+          ? injector.get(SchemaManager).getSchemaCoordinatesOlderThanDate({
+              organizationId: version.organization,
+              projectId: version.project,
+              targetId: version.target,
+              date: createdBefore,
+            })
+          : Promise.resolve(null),
+      ]);
+
+      const coordinatesToRemove = new Set(usedCoordinates);
+
+      if (oldEnoughCoordinates !== null) {
+        const schemaObject = buildASTSchema(schemaAst, {
+          assumeValid: true,
+          assumeValidSDL: true,
+        });
+
+        const allCoordinates = getSchemaCoordinates(schemaObject);
+        const oldCoordinates = new Set<string>();
+
+        for (const { coordinate } of oldEnoughCoordinates) {
+          oldCoordinates.add(coordinate);
+        }
+
+        const youngCoordinates = allCoordinates.coordinates.difference(oldCoordinates);
+
+        for (const coordinate of youngCoordinates) {
+          coordinatesToRemove.add(coordinate);
+        }
+      }
 
       const supergraph = supergraphAst ? extractSuperGraphInformation(supergraphAst) : null;
 
       return {
-        sdl: stripUsedSchemaCoordinatesFromDocumentNode(schemaAst, usedCoordinates),
+        sdl: stripSchemaCoordinatesFromDocumentNode(schemaAst, coordinatesToRemove),
         usage: {
-          period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
+          period: filter?.usage ? parseDateRangeInput(filter.usage) : createPeriod('30d'),
           organization: version.organization,
           project: version.project,
           target: version.target,
