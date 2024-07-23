@@ -2708,3 +2708,139 @@ test.concurrent(
     });
   },
 );
+
+test.concurrent('ensure percentage precision up to 2 decimal places', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { project, target, createToken } = await createProject(ProjectType.Single);
+  const token = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.Settings,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
+
+  const schemaPublishResult = await token
+    .publishSchema({
+      author: 'Kamil',
+      commit: 'abc123',
+      sdl: `type Query { ping: String pong: String }`,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
+
+  await token.collectLegacyOperations(
+    prepareBatch(9801, {
+      operation: 'query ping { ping }',
+      operationName: 'ping',
+      fields: ['Query', 'Query.ping'],
+      execution: {
+        ok: true,
+        duration: 200_000_000,
+        errorsTotal: 0,
+      },
+    }),
+  );
+  await token.collectLegacyOperations(
+    prepareBatch(199, {
+      operation: 'query pong { pong }',
+      operationName: 'pong',
+      fields: ['Query', 'Query.pong'],
+      execution: {
+        ok: true,
+        duration: 100_000_000,
+        errorsTotal: 0,
+      },
+    }),
+  );
+
+  await waitFor(10000);
+
+  const result = await clickHouseQuery<{
+    target: string;
+    client_name: string | null;
+    hash: string;
+    total: number;
+  }>(`
+    SELECT
+      target, sum(total) as total
+    FROM clients_daily
+    WHERE
+      timestamp >= subtractDays(now(), 30)
+      AND timestamp <= now()
+      AND target = '${target.id}'
+    GROUP BY target
+  `);
+
+  expect(result.rows).toEqual(1);
+  expect(result.data).toContainEqual(
+    expect.objectContaining({
+      target: target.id,
+      total: expect.stringMatching('10000'),
+    }),
+  );
+
+  const targetValidationResult = await token.toggleTargetValidation(true);
+  expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
+
+  // should accept a breaking change when percentage is 2%
+  let updateValidationResult = await updateTargetValidationSettings(
+    {
+      organization: organization.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      percentage: 2,
+      period: 2,
+      targets: [target.id],
+      excludedClients: [],
+    },
+    {
+      token: token.secret,
+    },
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok?.target.validationSettings.enabled,
+  ).toBe(true);
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok?.target.validationSettings.percentage,
+  ).toBe(2);
+
+  const unusedCheckResult2 = await token
+    .checkSchema(`type Query { ping: String }`)
+    .then(r => r.expectNoGraphQLErrors());
+  expect(unusedCheckResult2.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
+
+  // should reject a breaking change when percentage is 1.99%
+  updateValidationResult = await updateTargetValidationSettings(
+    {
+      organization: organization.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      percentage: 1.99,
+      period: 2,
+      targets: [target.id],
+      excludedClients: [],
+    },
+    {
+      token: token.secret,
+    },
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok?.target.validationSettings.enabled,
+  ).toBe(true);
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok?.target.validationSettings.percentage,
+  ).toBe(1.99);
+
+  const unusedCheckResult199 = await token
+    .checkSchema(`type Query { ping: String }`)
+    .then(r => r.expectNoGraphQLErrors());
+  expect(unusedCheckResult199.schemaCheck.__typename).toEqual('SchemaCheckError');
+});

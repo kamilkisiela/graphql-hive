@@ -218,7 +218,8 @@ function buildConfig() {
     sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
     stripePublicKey: base.STRIPE_PUBLIC_KEY ?? null,
     graphql: {
-      persistedOperations: base.GRAPHQL_PERSISTED_OPERATIONS === '1',
+      persistedOperationsPrefix:
+        base.GRAPHQL_PERSISTED_OPERATIONS === '1' ? `hive-app/${base.RELEASE}/` : null,
     },
     zendeskSupport: base.ZENDESK_SUPPORT === '1',
     migrations: {
