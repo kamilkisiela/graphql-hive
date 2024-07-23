@@ -1808,9 +1808,6 @@ importers:
       '@urql/exchange-graphcache':
         specifier: 7.1.0
         version: 7.1.0(@urql/core@5.0.3(graphql@16.9.0))(graphql@16.9.0)
-      '@urql/exchange-persisted':
-        specifier: 4.3.0
-        version: 4.3.0(@urql/core@5.0.3(graphql@16.9.0))
       '@vitejs/plugin-react':
         specifier: 4.3.1
         version: 4.3.1(vite@5.3.3(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1))
@@ -8123,11 +8120,6 @@ packages:
 
   '@urql/exchange-graphcache@7.1.0':
     resolution: {integrity: sha512-fwvDSJ1qlFd10RmPuy0sPOS14JB5jQ77hALNfLyP6XoOAXW2VgUYDd2g4ATMoYcrQEOvdjtGBD8xJpxcYganTQ==}
-    peerDependencies:
-      '@urql/core': ^5.0.0
-
-  '@urql/exchange-persisted@4.3.0':
-    resolution: {integrity: sha512-gI3i5uA9K/f0z5VLqKL5SGJpTrPjsN+BOMvAGJj13Bg4JUmJCaqYYHKetay27q4K2GDZIMGDoeytR7XkpP5ftg==}
     peerDependencies:
       '@urql/core': ^5.0.0
 
@@ -17174,28 +17166,28 @@ snapshots:
       '@aws-sdk/util-endpoints': 3.587.0
       '@aws-sdk/util-user-agent-browser': 3.577.0
       '@aws-sdk/util-user-agent-node': 3.587.0
-      '@smithy/config-resolver': 3.0.4
-      '@smithy/core': 2.2.4
-      '@smithy/fetch-http-handler': 3.2.0
+      '@smithy/config-resolver': 3.0.5
+      '@smithy/core': 2.2.6
+      '@smithy/fetch-http-handler': 3.2.1
       '@smithy/hash-node': 3.0.3
       '@smithy/invalid-dependency': 3.0.3
       '@smithy/middleware-content-length': 3.0.3
-      '@smithy/middleware-endpoint': 3.0.4
-      '@smithy/middleware-retry': 3.0.7
+      '@smithy/middleware-endpoint': 3.0.5
+      '@smithy/middleware-retry': 3.0.9
       '@smithy/middleware-serde': 3.0.3
       '@smithy/middleware-stack': 3.0.3
-      '@smithy/node-config-provider': 3.1.3
-      '@smithy/node-http-handler': 3.1.1
+      '@smithy/node-config-provider': 3.1.4
+      '@smithy/node-http-handler': 3.1.2
       '@smithy/protocol-http': 4.0.3
-      '@smithy/smithy-client': 3.1.5
+      '@smithy/smithy-client': 3.1.7
       '@smithy/types': 3.3.0
       '@smithy/url-parser': 3.0.3
       '@smithy/util-base64': 3.0.0
       '@smithy/util-body-length-browser': 3.0.0
       '@smithy/util-body-length-node': 3.0.0
-      '@smithy/util-defaults-mode-browser': 3.0.7
-      '@smithy/util-defaults-mode-node': 3.0.7
-      '@smithy/util-endpoints': 2.0.4
+      '@smithy/util-defaults-mode-browser': 3.0.9
+      '@smithy/util-defaults-mode-node': 3.0.9
+      '@smithy/util-endpoints': 2.0.5
       '@smithy/util-middleware': 3.0.3
       '@smithy/util-retry': 3.0.3
       '@smithy/util-utf8': 3.0.0
@@ -17373,11 +17365,11 @@ snapshots:
   '@aws-sdk/credential-provider-http@3.596.0':
     dependencies:
       '@aws-sdk/types': 3.577.0
-      '@smithy/fetch-http-handler': 3.2.0
-      '@smithy/node-http-handler': 3.1.1
+      '@smithy/fetch-http-handler': 3.2.1
+      '@smithy/node-http-handler': 3.1.2
       '@smithy/property-provider': 3.1.3
       '@smithy/protocol-http': 4.0.3
-      '@smithy/smithy-client': 3.1.5
+      '@smithy/smithy-client': 3.1.7
       '@smithy/types': 3.3.0
       '@smithy/util-stream': 3.0.5
       tslib: 2.6.3
@@ -23730,7 +23722,7 @@ snapshots:
 
   '@smithy/credential-provider-imds@3.1.3':
     dependencies:
-      '@smithy/node-config-provider': 3.1.3
+      '@smithy/node-config-provider': 3.1.4
       '@smithy/property-provider': 3.1.3
       '@smithy/types': 3.3.0
       '@smithy/url-parser': 3.0.3
@@ -25258,11 +25250,6 @@ snapshots:
       wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
-
-  '@urql/exchange-persisted@4.3.0(@urql/core@5.0.3(graphql@16.9.0))':
-    dependencies:
-      '@urql/core': 5.0.3(graphql@16.9.0)
-      wonka: 6.3.4
 
   '@urql/introspection@0.3.3(graphql@16.9.0)':
     dependencies:

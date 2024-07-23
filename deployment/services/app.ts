@@ -25,6 +25,7 @@ export function deployApp({
   billing,
   sentry,
   environment,
+  usePersistedDocuments,
 }: {
   environment: Environment;
   image: string;
@@ -36,6 +37,7 @@ export function deployApp({
   slackApp: SlackApp;
   billing: StripeBilling;
   sentry: Sentry;
+  usePersistedDocuments: boolean;
 }) {
   const appConfig = new pulumi.Config('app');
   const appEnv = appConfig.requireObject<Record<string, string>>('env');
@@ -62,7 +64,7 @@ export function deployApp({
         INTEGRATION_GITHUB_APP_NAME: github.name,
         GA_TRACKING_ID: appEnv.GA_TRACKING_ID,
         DOCS_URL: 'https://the-guild.dev/graphql/hive/docs',
-        GRAPHQL_PERSISTED_OPERATIONS: '1',
+        GRAPHQL_PERSISTED_OPERATIONS: usePersistedDocuments ? '1' : '0',
         ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
         AUTH_GITHUB: '1',
         AUTH_GOOGLE: '1',
