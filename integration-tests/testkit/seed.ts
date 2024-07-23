@@ -92,12 +92,12 @@ export function initSeed() {
 
           return {
             organization,
-            async setFeatureFlag(name: string, enabled: boolean) {
+            async setFeatureFlag(name: string, value: boolean | string[]) {
               const pool = await createConnectionPool();
 
               await pool.query(sql`
                 UPDATE organizations SET feature_flags = ${sql.jsonb({
-                  [name]: enabled,
+                  [name]: value,
                 })}
                 WHERE id = ${organization.id}
               `);
@@ -169,7 +169,7 @@ export function initSeed() {
               return members;
             },
             async createProject(
-              projectType: ProjectType,
+              projectType: ProjectType = ProjectType.Single,
               options?: {
                 useLegacyRegistryModels?: boolean;
               },
@@ -399,21 +399,29 @@ export function initSeed() {
                   targetScopes = [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
                   projectScopes = [],
                   organizationScopes = [],
-                  targetId = target.cleanId,
+                  target: forTarget = {
+                    cleanId: target.cleanId,
+                    id: target.id,
+                  },
                   actorToken = ownerToken,
                 }: {
                   targetScopes?: TargetAccessScope[];
                   projectScopes?: ProjectAccessScope[];
                   organizationScopes?: OrganizationAccessScope[];
-                  targetId?: string;
+                  target?: {
+                    cleanId: string;
+                    id: string;
+                  };
                   actorToken?: string;
                 }) {
+                  const target = forTarget;
+
                   const tokenResult = await createToken(
                     {
                       name: generateUnique(),
                       organization: organization.cleanId,
                       project: project.cleanId,
-                      target: targetId,
+                      target: target.cleanId,
                       organizationScopes: organizationScopes,
                       projectScopes: projectScopes,
                       targetScopes: targetScopes,

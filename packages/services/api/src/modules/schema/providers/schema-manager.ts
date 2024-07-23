@@ -159,7 +159,11 @@ export class SchemaManager {
 
     const compositionResult = await orchestrator.composeAndValidate(services, {
       external: project.externalComposition,
-      native: this.checkProjectNativeFederationSupport({ project, organization }),
+      native: this.checkProjectNativeFederationSupport({
+        project,
+        organization,
+        targetId: input.target,
+      }),
       contracts: null,
     });
 
@@ -523,6 +527,7 @@ export class SchemaManager {
           native: this.checkProjectNativeFederationSupport({
             project,
             organization,
+            targetId: null,
           }),
           contracts: null,
         },
@@ -1070,8 +1075,7 @@ export class SchemaManager {
       target: args.target,
       beforeVersionId: args.beforeVersionId,
       beforeVersionCreatedAt: args.beforeVersionCreatedAt,
-      onlyComposable:
-        organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation,
+      onlyComposable: shouldUseLatestComposableVersion(args.target, project, organization),
     });
 
     if (!schemaVersion) {
@@ -1113,6 +1117,7 @@ export class SchemaManager {
   }
 
   checkProjectNativeFederationSupport(input: {
+    targetId: string | null;
     project: Pick<Project, 'id' | 'legacyRegistryModel' | 'nativeFederation'>;
     organization: Pick<Organization, 'id' | 'featureFlags'>;
   }) {
@@ -1125,6 +1130,19 @@ export class SchemaManager {
         'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
         input.organization.id,
         input.project.id,
+      );
+      return false;
+    }
+
+    if (
+      input.targetId &&
+      input.organization.featureFlags.forceLegacyCompositionInTargets.includes(input.targetId)
+    ) {
+      this.logger.warn(
+        'Native Federation support is disabled for this target (organization=%s, project=%s, target=%s)',
+        input.organization.id,
+        input.project.id,
+        input.targetId,
       );
       return false;
     }
@@ -1311,4 +1329,18 @@ export class SchemaManager {
     this.logger.info('User not found. (userId=%s)', input.userId);
     return null;
   }
+}
+
+export function shouldUseLatestComposableVersion(
+  targetId: string,
+  project: Project,
+  organization: Organization,
+) {
+  return (
+    organization.featureFlags.compareToPreviousComposableVersion ||
+    // If the project is a native federation project, we should compare to the latest composable version
+    (project.nativeFederation &&
+      // but only if the target is not forced to use the legacy composition
+      !organization.featureFlags.forceLegacyCompositionInTargets.includes(targetId))
+  );
 }

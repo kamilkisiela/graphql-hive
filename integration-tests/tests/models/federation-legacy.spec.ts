@@ -1,4 +1,5 @@
 import { ProjectType, RegistryModel } from 'testkit/gql/graphql';
+import { normalizeCliOutput } from '../../../scripts/serializers/cli-output';
 import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
@@ -267,48 +268,47 @@ describe('publish', () => {
       serviceUrl: 'http://products:3000/graphql',
     };
 
-    await expect(
-      publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            topProduct: Product
-          }
+    const out = publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProduct: Product
+        }
 
-          type Product {
-            id: ID!
-            name: String!
-          }
-        `,
-        ...service,
-        expect: 'latest-composable',
-      }),
-    ).resolves.toMatchInlineSnapshot(`
+        type Product {
+          id: ID!
+          name: String!
+        }
+      `,
+      ...service,
+      expect: 'latest-composable',
+    }).then(normalizeCliOutput);
+
+    await expect(out).resolves.toMatchInlineSnapshot(`
       v Published initial schema.
-      i Available at http://localhost:8080/$organization/$project/production
+      i Available at $appUrl/$organization/$project/$target
     `);
 
-    await expect(
-      publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            topProduct: Product
-          }
+    const out2 = publish({
+      sdl: /* GraphQL */ `
+        type Query {
+          topProduct: Product
+        }
 
-          type Product {
-            id: ID!
-            name: String!
-            price: Int!
-          }
-        `,
-        ...service,
-        expect: 'latest-composable',
-      }),
-    ).resolves.toMatchInlineSnapshot(`
+        type Product {
+          id: ID!
+          name: String!
+          price: Int!
+        }
+      `,
+      ...service,
+      expect: 'latest-composable',
+    }).then(normalizeCliOutput);
+    await expect(out2).resolves.toMatchInlineSnapshot(`
       i Detected 1 change
       Safe changes:
       - Field price was added to object type Product
       v Schema published
-      i Available at http://localhost:8080/$organization/$project/production/history/$version
+      i Available at $appUrl/$organization/$project/$target/history/$version
     `);
   });
 });

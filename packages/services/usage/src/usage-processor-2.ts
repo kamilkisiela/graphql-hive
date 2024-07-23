@@ -1,6 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { ServiceLogger as Logger } from '@hive/service-common';
-import { RawOperation, RawReport, RawSubscriptionOperation } from '@hive/usage-common';
+import {
+  type ClientMetadata,
+  type RawOperation,
+  type RawReport,
+  type RawSubscriptionOperation,
+} from '@hive/usage-common';
 import * as tb from '@sinclair/typebox';
 import * as tc from '@sinclair/typebox/compiler';
 import { invalidRawOperations, rawOperationsSize, totalOperations, totalReports } from './metrics';
@@ -42,6 +47,20 @@ export function usageProcessorV2(
 
   const rawOperations: RawOperation[] = [];
   const rawSubscriptionOperations: RawSubscriptionOperation[] = [];
+
+  const lastAppDeploymentUsage = new Map<`${string}/${string}`, number>();
+
+  function upsertClientUsageTimestamp(
+    clientName: string,
+    clientVersion: string,
+    timestamp: number,
+  ) {
+    const key = `${clientName}/${clientVersion}` as const;
+    let latestTimestamp = lastAppDeploymentUsage.get(key);
+    if (!latestTimestamp || timestamp > latestTimestamp) {
+      lastAppDeploymentUsage.set(key, timestamp);
+    }
+  }
 
   const report: RawReport = {
     id: randomUUID(),
@@ -104,6 +123,18 @@ export function usageProcessorV2(
       continue;
     }
 
+    let client: ClientMetadata | undefined;
+    if (operation.persistedDocumentHash) {
+      const [name, version] = operation.persistedDocumentHash.split('/');
+      client = {
+        name,
+        version,
+      };
+      upsertClientUsageTimestamp(name, version, operation.timestamp);
+    } else {
+      client = operation.metadata?.client;
+    }
+
     report.size += 1;
     rawOperations.push({
       operationMapKey,
@@ -117,10 +148,7 @@ export function usageProcessorV2(
         errorsTotal: operation.execution.errorsTotal,
       },
       metadata: {
-        client: {
-          name: operation.metadata?.client?.name,
-          version: operation.metadata?.client?.version,
-        },
+        client,
       },
     });
   }
@@ -143,6 +171,18 @@ export function usageProcessorV2(
       continue;
     }
 
+    let client: ClientMetadata | undefined;
+    if (operation.persistedDocumentHash) {
+      const [name, version] = operation.persistedDocumentHash.split('/');
+      client = {
+        name,
+        version,
+      };
+      upsertClientUsageTimestamp(name, version, operation.timestamp);
+    } else {
+      client = operation.metadata?.client;
+    }
+
     report.size += 1;
     rawSubscriptionOperations.push({
       operationMapKey,
@@ -151,12 +191,13 @@ export function usageProcessorV2(
         ? operation.timestamp + targetRetentionInDays * DAY_IN_MS
         : undefined,
       metadata: {
-        client: {
-          name: operation.metadata?.client?.name,
-          version: operation.metadata?.client?.version,
-        },
+        client,
       },
     });
+  }
+
+  if (lastAppDeploymentUsage.size) {
+    report.appDeploymentUsageTimestamps = Object.fromEntries(lastAppDeploymentUsage);
   }
 
   return {
@@ -215,6 +256,12 @@ const MetadataSchema = tb.Type.Object(
   },
 );
 
+const PersistedDocumentHash = tb.Type.String({
+  title: 'PersistedDocumentHash',
+  // appName/appVersion/hash
+  pattern: '^[a-zA-Z0-9_-]{1,64}\\/[a-zA-Z0-9._-]{1,64}\\/([A-Za-z]|[0-9]|_){1,128}$',
+});
+
 /** Query + Mutation */
 const RequestOperationSchema = tb.Type.Object(
   {
@@ -222,6 +269,7 @@ const RequestOperationSchema = tb.Type.Object(
     operationMapKey: tb.Type.String(),
     execution: ExecutionSchema,
     metadata: tb.Type.Optional(MetadataSchema),
+    persistedDocumentHash: tb.Type.Optional(PersistedDocumentHash),
   },
   {
     title: 'RequestOperation',
@@ -235,6 +283,7 @@ const SubscriptionOperationSchema = tb.Type.Object(
     timestamp: tb.Type.Integer(),
     operationMapKey: tb.Type.String(),
     metadata: tb.Type.Optional(MetadataSchema),
+    persistedDocumentHash: tb.Type.Optional(PersistedDocumentHash),
   },
   {
     title: 'SubscriptionOperation',
@@ -262,13 +311,11 @@ const ReportModel = tc.TypeCompiler.Compile(ReportSchema);
 function decodeReport(
   report: unknown,
 ): { success: true; report: ReportType } | { success: false; errors: tc.ValueError[] } {
-  const errors = ReportModel.Errors(report);
-  if (errors.First()) {
-    const truncatedErrors = getFirstN(errors, 5);
-
+  const errors = getFirstN(ReportModel.Errors(report), 5);
+  if (errors.length) {
     return {
       success: false,
-      errors: truncatedErrors,
+      errors,
     };
   }
 

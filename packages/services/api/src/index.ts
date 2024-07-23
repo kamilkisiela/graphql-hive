@@ -4,7 +4,6 @@ export { createRegistry } from './create';
 export type { LogFn, Logger } from './modules/shared/providers/logger';
 export type { Storage } from './modules/shared/providers/storage';
 export type {
-  ActivityObject,
   Member,
   Organization,
   Project,

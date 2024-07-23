@@ -11,6 +11,7 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { http } from '@graphql-hive/core';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { createHive, createSupergraphSDLFetcher, useHive } from '../src';
 import { version } from '../src/version';
@@ -139,21 +140,23 @@ test('should capture client name and version headers', async () => {
 
   await startStandaloneServer(apollo);
 
-  await fetch('http://localhost:4000/graphql', {
-    method: 'POST',
-    body: JSON.stringify({
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
       query: /* GraphQL */ `
         {
           hello
         }
       `,
     }),
-    headers: {
-      'content-type': 'application/json',
-      'x-graphql-client-name': 'vitest',
-      'x-graphql-client-version': '1.0.0',
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '1.0.0',
+      },
     },
-  });
+  );
 
   await waitFor(50);
   await apollo.stop();
@@ -295,7 +298,9 @@ describe('supergraph SDL fetcher', async () => {
     try {
       await fetcher();
     } catch (err) {
-      expect(err).toMatchInlineSnapshot(`[Error: Failed to fetch [500]]`);
+      expect(err).toMatchInlineSnapshot(
+        `[Error: Failed to fetch http://localhost/supergraph, received: 500 Internal Server Error]`,
+      );
     }
   });
 });
@@ -667,17 +672,19 @@ describe('built-in HTTP usage reporting', async () => {
       });
 
       (async () => {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-graphql-client-version': '4.2.0',
-            'x-graphql-client-name': 'apollo-client',
-          },
-          body: JSON.stringify({
+        const response = await http.post(
+          url,
+          JSON.stringify({
             query: '{hi}',
           }),
-        });
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-graphql-client-version': '4.2.0',
+              'x-graphql-client-name': 'apollo-client',
+            },
+          },
+        );
 
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({

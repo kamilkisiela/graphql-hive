@@ -125,6 +125,8 @@ module.exports = {
         'sonarjs/no-unused-collection': 'error',
         'sonarjs/no-inverted-boolean-check': 'error',
         ...rulesToExtends,
+        'no-lonely-if': 'off',
+        'object-shorthand': 'off',
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
         'prefer-destructuring': 'off',
         'prefer-const': 'off',

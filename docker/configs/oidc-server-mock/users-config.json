@@ -15,5 +15,22 @@
         "ValueType": "string"
       }
     ]
+  },
+  {
+    "SubjectId": "2",
+    "Username": "test-user-2",
+    "Password": "password",
+    "Claims": [
+      {
+        "Type": "name",
+        "Value": "Tom Sailor",
+        "ValueType": "string"
+      },
+      {
+        "Type": "email",
+        "Value": "tom.sailor@gmail.com",
+        "ValueType": "string"
+      }
+    ]
   }
 ]

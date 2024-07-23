@@ -1,5 +1,26 @@
 # @graphql-hive/cli
 
+## 0.38.5
+
+### Patch Changes
+
+- Updated dependencies
+  [[`f1e43c6`](https://github.com/kamilkisiela/graphql-hive/commit/f1e43c641f3ebac931839c7dfbdcb3a885167562)]:
+  - @graphql-hive/core@0.5.0
+
+## 0.38.4
+
+### Patch Changes
+
+- [#5097](https://github.com/kamilkisiela/graphql-hive/pull/5097)
+  [`b8998e7`](https://github.com/kamilkisiela/graphql-hive/commit/b8998e7ead84a2714d13678aaf1e349e648eb90a)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Retry up to 3 times a GET request in
+  the artifact:fetch command
+
+- Updated dependencies
+  [[`b8998e7`](https://github.com/kamilkisiela/graphql-hive/commit/b8998e7ead84a2714d13678aaf1e349e648eb90a)]:
+  - @graphql-hive/core@0.4.0
+
 ## 0.38.3
 
 ### Patch Changes

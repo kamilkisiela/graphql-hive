@@ -1,5 +1,22 @@
 # @graphql-hive/core
 
+## 0.5.0
+
+### Minor Changes
+
+- [#5116](https://github.com/kamilkisiela/graphql-hive/pull/5116)
+  [`f1e43c6`](https://github.com/kamilkisiela/graphql-hive/commit/f1e43c641f3ebac931839c7dfbdcb3a885167562)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Added `collectRawUsage` to Hive Client core
+  package
+
+## 0.4.0
+
+### Minor Changes
+
+- [#5097](https://github.com/kamilkisiela/graphql-hive/pull/5097)
+  [`b8998e7`](https://github.com/kamilkisiela/graphql-hive/commit/b8998e7ead84a2714d13678aaf1e349e648eb90a)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add retry mechanism to the http client
+
 ## 0.3.1
 
 ### Patch Changes

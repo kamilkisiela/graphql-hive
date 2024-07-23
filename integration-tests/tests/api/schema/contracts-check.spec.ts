@@ -393,7 +393,7 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
 
 test.concurrent(
   'approve failed schema check that has breaking change in contract check -> updates the status to successful and attaches meta information to the breaking change',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization, setFeatureFlag } = await createOrg();
     const { createToken, project, target, setNativeFederation } = await createProject(
@@ -566,7 +566,7 @@ test.concurrent(
 
 test.concurrent(
   'approving a schema check with contextId containing breaking changes allows the changes for subsequent checks with the same contextId',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization, setFeatureFlag } = await createOrg();
     const { createToken, project, target, setNativeFederation } = await createProject(
@@ -771,7 +771,7 @@ test.concurrent(
 
 test.concurrent(
   'approving a schema check with contextId containing breaking changes does not allow the changes for subsequent checks with a different contextId',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization, setFeatureFlag } = await createOrg();
     const { createToken, project, target, setNativeFederation } = await createProject(
@@ -969,7 +969,7 @@ test.concurrent(
 
 test.concurrent(
   'subsequent schema check with shared contextId that contains new breaking changes that have not been approved fails',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization, setFeatureFlag } = await createOrg();
     const { createToken, project, target, setNativeFederation } = await createProject(
@@ -1178,7 +1178,7 @@ test.concurrent(
 
 test.concurrent(
   'schema check that has no composition errors in contract check -> can be approved',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization, setFeatureFlag } = await createOrg();
     const { createToken, project, target, setNativeFederation } = await createProject(
@@ -1296,7 +1296,7 @@ test.concurrent(
 
 test.concurrent(
   'schema check that has composition errors in contract check -> can not be approved',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization, setFeatureFlag } = await createOrg();
     const { createToken, project, target, setNativeFederation } = await createProject(

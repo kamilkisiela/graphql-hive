@@ -4,6 +4,7 @@ import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
 import { RegistryChecks, type ConditionalBreakingChangeDiffConfig } from '../registry-checks';
 import { swapServices } from '../schema-helper';
+import { shouldUseLatestComposableVersion } from '../schema-manager';
 import type { PublishInput } from '../schema-publisher';
 import type {
   DeletedCompositeSchema,
@@ -144,8 +145,11 @@ export class CompositeModel {
     const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
-    const compareToPreviousComposableVersion =
-      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToPreviousComposableVersion = shouldUseLatestComposableVersion(
+      selector.target,
+      project,
+      organization,
+    );
     const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumCheck = await this.checks.checksum({
@@ -174,6 +178,7 @@ export class CompositeModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
+      targetId: selector.target,
       project,
       organization,
       schemas,
@@ -195,6 +200,7 @@ export class CompositeModel {
       version: comparedVersion,
       organization,
       project,
+      targetId: selector.target,
     });
 
     const contractChecks = await this.getContractChecks({
@@ -318,8 +324,11 @@ export class CompositeModel {
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
-    const compareToLatestComposable =
-      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToLatestComposable = shouldUseLatestComposableVersion(
+      target.id,
+      project,
+      organization,
+    );
     const schemaVersionToCompareAgainst = compareToLatestComposable ? latestComposable : latest;
 
     const [serviceNameCheck, serviceUrlCheck] = await Promise.all([
@@ -399,6 +408,7 @@ export class CompositeModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
+      targetId: target.id,
       project,
       organization,
       schemas,
@@ -436,6 +446,7 @@ export class CompositeModel {
       version: schemaVersionToCompareAgainst,
       organization,
       project,
+      targetId: target.id,
     });
 
     const diffCheck = await this.checks.diff({
@@ -543,8 +554,11 @@ export class CompositeModel {
     };
 
     const latestVersion = latest;
-    const compareToLatestComposable =
-      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToLatestComposable = shouldUseLatestComposableVersion(
+      selector.target,
+      project,
+      organization,
+    );
 
     const serviceNameCheck = await this.checks.serviceName({
       name: incoming.service_name,
@@ -570,6 +584,7 @@ export class CompositeModel {
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
+      targetId: selector.target,
       project,
       organization,
       schemas,
@@ -591,6 +606,7 @@ export class CompositeModel {
       version: compareToLatestComposable ? latestComposable : latest,
       organization,
       project,
+      targetId: selector.target,
     });
 
     const diffCheck = await this.checks.diff({

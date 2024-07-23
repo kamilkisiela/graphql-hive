@@ -10,6 +10,7 @@ import type {
   DeleteMemberRoleInput,
   DeleteTokensInput,
   EnableExternalSchemaCompositionInput,
+  Experimental__UpdateTargetSchemaCompositionInput,
   InviteToOrganizationByEmailInput,
   OperationsStatsSelectorInput,
   OrganizationSelectorInput,
@@ -25,6 +26,7 @@ import type {
   UpdateBaseSchemaInput,
   UpdateMemberRoleInput,
   UpdateOrganizationNameInput,
+  UpdateOrganizationSlugInput,
   UpdateProjectNameInput,
   UpdateProjectRegistryModelInput,
   UpdateTargetNameInput,
@@ -138,6 +140,36 @@ export function renameOrganization(input: UpdateOrganizationNameInput, authToken
     document: graphql(`
       mutation updateOrganizationName($input: UpdateOrganizationNameInput!) {
         updateOrganizationName(input: $input) {
+          ok {
+            updatedOrganizationPayload {
+              selector {
+                organization
+              }
+              organization {
+                id
+                name
+                cleanId
+              }
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    authToken,
+  });
+}
+
+export function changeOrganizationSlug(input: UpdateOrganizationSlugInput, authToken: string) {
+  return execute({
+    document: graphql(`
+      mutation updateOrganizationSlug($input: UpdateOrganizationSlugInput!) {
+        updateOrganizationSlug(input: $input) {
           ok {
             updatedOrganizationPayload {
               selector {
@@ -1324,6 +1356,27 @@ export async function enableExternalSchemaComposition(
               secret
             }
           }
+        }
+      }
+    `),
+    variables: {
+      input,
+    },
+    token,
+  });
+}
+
+export async function updateTargetSchemaComposition(
+  input: Experimental__UpdateTargetSchemaCompositionInput,
+  token: string,
+) {
+  return execute({
+    document: graphql(`
+      mutation experimental__updateTargetSchemaComposition(
+        $input: Experimental__UpdateTargetSchemaCompositionInput!
+      ) {
+        experimental__updateTargetSchemaComposition(input: $input) {
+          id
         }
       }
     `),

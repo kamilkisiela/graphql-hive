@@ -4,7 +4,7 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
-import { Input, Modal } from '@/components/v2';
+import { Callout, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 
 const CollectionQuery = graphql(`
@@ -174,7 +174,6 @@ export function CreateCollectionModal(props: {
             },
             input: {
               collectionId,
-
               name: values.name,
               description: values.description,
             },
@@ -234,6 +233,9 @@ export function CreateCollectionModal(props: {
             {touched.description && errors.description && (
               <div className="text-sm text-red-500">{errors.description}</div>
             )}
+            <Callout type="info" className="mt-0">
+              This collection will be available to everyone in the organization
+            </Callout>
           </div>
 
           {error && <div className="text-sm text-red-500">{error.message}</div>}

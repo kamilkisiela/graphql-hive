@@ -57,7 +57,7 @@ test('rate limit approaching and reached for organization', async () => {
   const collectResult = await collectOperations(new Array(10).fill(op));
   expect(collectResult.status).toEqual(200);
 
-  await waitFor(5000);
+  await waitFor(8000);
 
   let sent = await emails.history();
   expect(sent).toContainEqual({

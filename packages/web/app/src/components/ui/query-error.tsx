@@ -61,7 +61,7 @@ export function QueryError({
                     </Button>
                   ) : (
                     <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
-                      <a href="emailto:support@graphql-hive.com">you can use the support</a>
+                      <a href="mailto:support@graphql-hive.com">you can use the support</a>
                     </Button>
                   )}
                   .

@@ -6,6 +6,7 @@ import {
 } from 'graphql';
 import { version } from '../version.js';
 import { http } from './http-client.js';
+import { createPersistedDocuments } from './persisted-documents.js';
 import { createReporting } from './reporting.js';
 import type { HiveClient, HivePluginOptions } from './types.js';
 import { createUsage } from './usage.js';
@@ -35,6 +36,10 @@ export function createHive(options: HivePluginOptions): HiveClient {
 
   function collectUsage() {
     return usage.collect();
+  }
+
+  function collectRequest(...args: Parameters<typeof usage.collectRequest>) {
+    return usage.collectRequest(...args);
   }
 
   async function dispose() {
@@ -207,10 +212,14 @@ export function createHive(options: HivePluginOptions): HiveClient {
     info,
     reportSchema,
     collectUsage,
+    collectRequest,
     dispose,
     collectSubscriptionUsage: usage.collectSubscription,
     createInstrumentedSubscribe,
     createInstrumentedExecute,
+    experimental__persistedDocuments: options.experimental__persistedDocuments
+      ? createPersistedDocuments(options.experimental__persistedDocuments)
+      : null,
   };
 }
 

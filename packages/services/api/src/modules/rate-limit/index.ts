@@ -1,7 +1,7 @@
 import { createModule } from 'graphql-modules';
 import { InMemoryRateLimiter, InMemoryRateLimitStore } from './providers/in-memory-rate-limiter';
 import { RateLimitProvider } from './providers/rate-limit.provider';
-import { resolvers } from './resolvers';
+import { resolvers } from './resolvers.generated';
 import typeDefs from './module.graphql';
 
 export const rateLimitModule = createModule({

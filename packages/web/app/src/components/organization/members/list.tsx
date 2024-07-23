@@ -528,7 +528,7 @@ export function OrganizationMembers(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="List of organization members"
+        subPageTitle="List of organization members"
         description="Manage the members of your organization and their permissions."
       >
         <MemberInvitationButton

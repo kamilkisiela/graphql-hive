@@ -3,7 +3,7 @@ import { initSeed } from '../../../testkit/seed';
 
 test.concurrent(
   'setting no scopes equals to readonly for organization, project, target',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
@@ -43,22 +43,25 @@ test.concurrent(
   },
 );
 
-test.concurrent('cannot set a scope on a token if user has no access to that scope', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject, inviteAndJoinMember } = await createOrg();
-  const { createToken, target } = await createProject(ProjectType.Single);
-  const { memberToken } = await inviteAndJoinMember();
+test.concurrent(
+  'cannot set a scope on a token if user has no access to that scope',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, inviteAndJoinMember } = await createOrg();
+    const { createToken, target } = await createProject(ProjectType.Single);
+    const { memberToken } = await inviteAndJoinMember();
 
-  // member should not have access to target:registry:write (as it's only a Viewer)
-  const tokenResult = createToken({
-    targetScopes: [TargetAccessScope.RegistryWrite],
-    projectScopes: [],
-    organizationScopes: [],
-    targetId: target.cleanId,
-    actorToken: memberToken,
-  });
+    // member should not have access to target:registry:write (as it's only a Viewer)
+    const tokenResult = createToken({
+      targetScopes: [TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+      target,
+      actorToken: memberToken,
+    });
 
-  await expect(tokenResult).rejects.toThrowError(
-    'No access (reason: "Missing target:tokens:write permission")',
-  );
-});
+    await expect(tokenResult).rejects.toThrowError(
+      'No access (reason: "Missing target:tokens:write permission")',
+    );
+  },
+);

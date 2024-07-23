@@ -896,7 +896,7 @@ export function OrganizationMemberRoles(props: {
       </AlertDialog>
       <SubPageLayout>
         <SubPageLayoutHeader
-          title="List of roles"
+          subPageTitle="List of roles"
           description="Manage the roles that can be assigned to members of this organization."
         >
           <OrganizationMemberRoleCreateButton

@@ -199,7 +199,7 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { registryRecords, operations, subscriptionOperations } =
+  const { registryRecords, operations, subscriptionOperations, appDeploymentUsageRecords } =
     await processor.processReports(rawReports);
 
   try {
@@ -245,6 +245,7 @@ async function processMessage({
           error[retryOnFailureSymbol] = true;
           return Promise.reject(error);
         }),
+      writer.writeAppDeploymentUsage(appDeploymentUsageRecords),
     ]);
   } catch (error) {
     logger.error(error);

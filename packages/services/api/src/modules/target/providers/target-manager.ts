@@ -3,10 +3,10 @@ import { paramCase } from 'param-case';
 import * as zod from 'zod';
 import type { Target, TargetSettings } from '../../../shared/entities';
 import { share, uuid } from '../../../shared/helpers';
-import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { ActivityManager } from '../../shared/providers/activity-manager';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers/storage';
@@ -313,6 +313,38 @@ export class TargetManager {
       project: projectId,
       target: args.targetId,
     });
+  }
+
+  /**
+   * @deprecated It's a temporary method to force legacy composition in targets, when native composition is enabled for a project.
+   */
+  async updateTargetSchemaComposition(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    nativeComposition: boolean;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    this.logger.info(
+      `Updating target schema composition (targetId=%s, nativeComposition=%s)`,
+      args.targetId,
+      args.nativeComposition,
+    );
+
+    const target = await this.storage.updateTargetSchemaComposition({
+      organizationId: args.organizationId,
+      projectId: args.projectId,
+      targetId: args.targetId,
+      nativeComposition: args.nativeComposition,
+    });
+
+    return target;
   }
 }
 

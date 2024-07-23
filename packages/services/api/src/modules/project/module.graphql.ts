@@ -88,6 +88,7 @@ export default gql`
     type: ProjectType!
     buildUrl: String
     validationUrl: String
+    experimental_nativeCompositionPerTarget: Boolean!
   }
 
   type ProjectConnection {

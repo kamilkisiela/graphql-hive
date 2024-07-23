@@ -18,7 +18,6 @@ import type {
   SchemaChecksFilter,
 } from '../../../__generated__/types';
 import type {
-  ActivityObject,
   Alert,
   AlertChannel,
   CDNAccessToken,
@@ -80,6 +79,8 @@ export interface Storage {
       id: string;
       defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     };
+    firstName: string | null;
+    lastName: string | null;
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
@@ -93,7 +94,7 @@ export interface Storage {
   getOrganizationByGitHubInstallationId(_: {
     installationId: string;
   }): Promise<Organization | null>;
-  getOrganization(_: OrganizationSelector): Promise<Organization | never>;
+  getOrganization(_: { organization: string }): Promise<Organization | never>;
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
@@ -113,8 +114,21 @@ export interface Storage {
   >;
 
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
+    _: OrganizationSelector & Pick<Organization, 'name'> & { user: string },
   ): Promise<Organization | never>;
+  updateOrganizationCleanId(
+    _: OrganizationSelector &
+      Pick<Organization, 'cleanId'> & { user: string; reservedNames: string[] },
+  ): Promise<
+    | {
+        ok: true;
+        organization: Organization;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  >;
 
   updateOrganizationPlan(
     _: OrganizationSelector & Pick<Organization, 'billingPlan'>,
@@ -508,12 +522,6 @@ export interface Storage {
       Partial<Pick<TargetSelector, 'project' | 'target'>>,
   ): Promise<void>;
 
-  getActivities(
-    _: (OrganizationSelector | ProjectSelector | TargetSelector) & {
-      limit: number;
-    },
-  ): Promise<readonly ActivityObject[]>;
-
   addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
 
   deleteSlackIntegration(_: OrganizationSelector): Promise<void>;
@@ -600,6 +608,7 @@ export interface Storage {
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+  getOIDCIntegrationIdForOrganizationCleanId(_: { cleanId: string }): Promise<string | null>;
 
   getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
 
@@ -622,6 +631,11 @@ export interface Storage {
   }): Promise<OIDCIntegration>;
 
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
+
+  updateOIDCRestrictions(_: {
+    oidcIntegrationId: string;
+    oidcUserAccessOnly: boolean;
+  }): Promise<OIDCIntegration>;
 
   createCDNAccessToken(_: {
     id: string;
@@ -814,6 +828,16 @@ export interface Storage {
     userId: string;
     organizationId: string;
   }): Promise<void>;
+
+  /**
+   * @deprecated It's a temporary method to force legacy composition in targets, when native composition is enabled for a project.
+   */
+  updateTargetSchemaComposition(_: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    nativeComposition: boolean;
+  }): Promise<Target>;
 }
 
 @Injectable()

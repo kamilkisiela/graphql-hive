@@ -4,23 +4,23 @@ import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
 
+type FFValue = boolean | string[];
+type FeatureFlags = [string, FFValue][];
+
 const cases = [
-  ['default' as const, [] as [string, boolean][]],
+  ['default' as const, [] as FeatureFlags],
   [
     'compareToPreviousComposableVersion' as const,
-    [['compareToPreviousComposableVersion', true]] as [string, boolean][],
+    [['compareToPreviousComposableVersion', true]] as FeatureFlags,
   ],
-  ['@apollo/federation' as const, [] as [string, boolean][]],
-] as Array<
-  [
-    'default' | 'compareToPreviousComposableVersion' | '@apollo/federation',
-    Array<[string, boolean]>,
-  ]
->;
+  ['@apollo/federation' as const, [] as FeatureFlags],
+] as const;
+
+const isLegacyComposition = (caseName: string) => caseName === '@apollo/federation';
 
 describe('publish', () => {
   describe.concurrent.each(cases)('%s', (caseName, ffs) => {
-    const legacyComposition = caseName === '@apollo/federation';
+    const legacyComposition = isLegacyComposition(caseName);
 
     test.concurrent('accepted: composable', async () => {
       const {
@@ -62,7 +62,7 @@ describe('publish', () => {
     });
 
     test.concurrent(
-      `${caseName === '@apollo/federation' ? 'rejected' : 'accepted'}: not composable (graphql errors)`,
+      `${legacyComposition ? 'rejected' : 'accepted'}: not composable (graphql errors)`,
       async () => {
         const {
           cli: { publish },
@@ -77,7 +77,7 @@ describe('publish', () => {
           `,
           serviceName: 'products',
           serviceUrl: 'http://products:3000/graphql',
-          expect: caseName === '@apollo/federation' ? 'rejected' : 'latest',
+          expect: legacyComposition ? 'rejected' : 'latest',
         });
       },
     );
@@ -307,9 +307,7 @@ describe('publish', () => {
 
       expect(output).toEqual(expect.stringContaining(`v Published initial schema.`));
       expect(output).toEqual(
-        expect.stringContaining(
-          `i Available at http://localhost:8080/$organization/$project/production`,
-        ),
+        expect.stringContaining(`i Available at $appUrl/$organization/$project/$target`),
       );
 
       output = normalizeCliOutput(
@@ -333,7 +331,7 @@ describe('publish', () => {
       expect(output).toEqual(expect.stringContaining(`v Schema published`));
       expect(output).toEqual(
         expect.stringContaining(
-          `i Available at http://localhost:8080/$organization/$project/production/history/$version`,
+          `i Available at $appUrl/$organization/$project/$target/history/$version`,
         ),
       );
     });
@@ -342,7 +340,7 @@ describe('publish', () => {
 
 describe('check', () => {
   describe.concurrent.each(cases)('%s', (caseName, ffs) => {
-    const legacyComposition = caseName === '@apollo/federation';
+    const legacyComposition = isLegacyComposition(caseName);
 
     test.concurrent('accepted: composable, no breaking changes', async () => {
       const {
@@ -563,7 +561,7 @@ describe('check', () => {
 
 describe('delete', () => {
   describe.concurrent.each(cases)('%s', (caseName, ffs) => {
-    const legacyComposition = caseName === '@apollo/federation';
+    const legacyComposition = isLegacyComposition(caseName);
 
     test.concurrent('accepted: composable before and after', async () => {
       const { cli } = await prepare(ffs, legacyComposition);
@@ -905,13 +903,13 @@ describe('other', () => {
   });
 });
 
-async function prepare(featureFlags: Array<[string, boolean]> = [], legacyComposition = false) {
+async function prepare(featureFlags: Array<[string, FFValue]> = [], legacyComposition = false) {
   const { tokens, setFeatureFlag, setNativeFederation, cdn } = await prepareProject(
     ProjectType.Federation,
   );
 
-  for await (const [name, enabled] of featureFlags) {
-    await setFeatureFlag(name, enabled);
+  for await (const [name, value] of featureFlags) {
+    await setFeatureFlag(name, value);
   }
 
   if (legacyComposition === true) {

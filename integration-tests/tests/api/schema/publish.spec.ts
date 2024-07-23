@@ -4,6 +4,7 @@ import { graphql } from 'testkit/gql';
 /* eslint-disable no-process-env */
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { execute } from 'testkit/graphql';
+import { getServiceHost } from 'testkit/utils';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createStorage } from '@hive/storage';
 import {
@@ -13,31 +14,34 @@ import {
 } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
-test.concurrent('cannot publish a schema without target:registry:write access', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
-  const { createToken } = await createProject(ProjectType.Federation);
-  const readToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead],
-    projectScopes: [],
-    organizationScopes: [],
-  });
+test.concurrent(
+  'cannot publish a schema without target:registry:write access',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
-  const resultErrors = await readToken
-    .publishSchema({
-      sdl: /* GraphQL */ `
-        type Query {
-          ping: String
-        }
-      `,
-    })
-    .then(r => r.expectGraphQLErrors());
+    const resultErrors = await readToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+      })
+      .then(r => r.expectGraphQLErrors());
 
-  expect(resultErrors).toHaveLength(1);
-  expect(resultErrors[0].message).toMatch('target:registry:write');
-});
+    expect(resultErrors).toHaveLength(1);
+    expect(resultErrors[0].message).toMatch('target:registry:write');
+  },
+);
 
-test.concurrent('can publish a schema with target:registry:write access', async () => {
+test.concurrent('can publish a schema with target:registry:write access', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
@@ -76,63 +80,66 @@ test.concurrent('can publish a schema with target:registry:write access', async 
   expect(versionsResult).toHaveLength(2);
 });
 
-test.concurrent('base schema should not affect the output schema persisted in db', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
-  const { createToken } = await createProject(ProjectType.Single);
-  const readWriteToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    projectScopes: [],
-    organizationScopes: [],
-  });
+test.concurrent(
+  'base schema should not affect the output schema persisted in db',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Single);
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
-  // Publish schema with write rights
-  const publishResult = await readWriteToken
-    .publishSchema({
-      commit: '1',
-      sdl: `type Query { ping: String }`,
-    })
-    .then(r => r.expectNoGraphQLErrors());
+    // Publish schema with write rights
+    const publishResult = await readWriteToken
+      .publishSchema({
+        commit: '1',
+        sdl: `type Query { ping: String }`,
+      })
+      .then(r => r.expectNoGraphQLErrors());
 
-  // Schema publish should be successful
-  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    // Schema publish should be successful
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
-  await readWriteToken.updateBaseSchema(`
+    await readWriteToken.updateBaseSchema(`
     directive @auth on OBJECT | FIELD_DEFINITION
   `);
 
-  const extendedPublishResult = await readWriteToken
-    .publishSchema({
-      commit: '2',
-      sdl: `type Query { ping: String @auth pong: String }`,
-    })
-    .then(r => r.expectNoGraphQLErrors());
-  expect(extendedPublishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    const extendedPublishResult = await readWriteToken
+      .publishSchema({
+        commit: '2',
+        sdl: `type Query { ping: String @auth pong: String }`,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+    expect(extendedPublishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
-  const versionsResult = await readWriteToken.fetchVersions(5);
-  expect(versionsResult).toHaveLength(2);
+    const versionsResult = await readWriteToken.fetchVersions(5);
+    expect(versionsResult).toHaveLength(2);
 
-  const latestResult = await readWriteToken.latestSchema();
-  expect(latestResult.latestVersion?.schemas.total).toBe(1);
+    const latestResult = await readWriteToken.latestSchema();
+    expect(latestResult.latestVersion?.schemas.total).toBe(1);
 
-  const firstNode = latestResult.latestVersion?.schemas.nodes[0];
+    const firstNode = latestResult.latestVersion?.schemas.nodes[0];
 
-  expect(firstNode).toEqual(
-    expect.objectContaining({
-      commit: '2',
-      source: expect.stringContaining('type Query { ping: String @auth pong: String }'),
-    }),
-  );
-  expect(firstNode).not.toEqual(
-    expect.objectContaining({
-      source: expect.stringContaining('directive'),
-    }),
-  );
+    expect(firstNode).toEqual(
+      expect.objectContaining({
+        commit: '2',
+        source: expect.stringContaining('type Query { ping: String @auth pong: String }'),
+      }),
+    );
+    expect(firstNode).not.toEqual(
+      expect.objectContaining({
+        source: expect.stringContaining('directive'),
+      }),
+    );
 
-  expect(latestResult.latestVersion?.baseSchema).toMatch(
-    'directive @auth on OBJECT | FIELD_DEFINITION',
-  );
-});
+    expect(latestResult.latestVersion?.baseSchema).toMatch(
+      'directive @auth on OBJECT | FIELD_DEFINITION',
+    );
+  },
+);
 
 test.concurrent.each(['legacy', 'modern'])(
   'directives should not be removed (federation %s)',
@@ -266,7 +273,7 @@ test.concurrent.each(['legacy', 'modern'])(
   },
 );
 
-test.concurrent('share publication of schema using redis', async () => {
+test.concurrent('share publication of schema using redis', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Federation);
@@ -318,7 +325,7 @@ test.concurrent('share publication of schema using redis', async () => {
   await expect(readWriteToken.fetchVersions(3)).resolves.toHaveLength(2);
 });
 
-test.concurrent('CDN data can not be fetched with an invalid access token', async () => {
+test.concurrent('CDN data can not be fetched with an invalid access token', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
@@ -351,7 +358,7 @@ test.concurrent('CDN data can not be fetched with an invalid access token', asyn
   expect(res.status).toEqual(403);
 });
 
-test.concurrent('CDN data can be fetched with an valid access token', async () => {
+test.concurrent('CDN data can be fetched with an valid access token', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
@@ -386,7 +393,7 @@ test.concurrent('CDN data can be fetched with an valid access token', async () =
   expect(cdnResult.status).toEqual(200);
 });
 
-test.concurrent('cannot do API request with invalid access token', async () => {
+test.concurrent('cannot do API request with invalid access token', async ({ expect }) => {
   const errors = await publishSchema(
     {
       commit: '1',
@@ -407,7 +414,7 @@ test.concurrent('cannot do API request with invalid access token', async () => {
 
 test.concurrent(
   'should publish only one schema if multiple same publishes are started in parallel',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Single);
@@ -457,43 +464,46 @@ describe.each`
         };
   const serviceUrl = projectType === ProjectType.Single ? {} : { url: 'http://localhost:4000' };
 
-  test.concurrent('linkToWebsite should be available when publishing initial schema', async () => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject, organization } = await createOrg();
-    const { project, target, createToken } = await createProject(projectType, {
-      useLegacyRegistryModels: model === 'legacy',
-    });
-    const readWriteToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-    });
+  test.concurrent(
+    'linkToWebsite should be available when publishing initial schema',
+    async ({ expect }) => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject, organization } = await createOrg();
+      const { project, target, createToken } = await createProject(projectType, {
+        useLegacyRegistryModels: model === 'legacy',
+      });
+      const readWriteToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        projectScopes: [],
+        organizationScopes: [],
+      });
 
-    const result = await readWriteToken
-      .publishSchema({
-        author: 'Kamil',
-        commit: 'abc123',
-        sdl: `type Query { ping: String }`,
-        ...serviceName,
-        ...serviceUrl,
-      })
-      .then(r => r.expectNoGraphQLErrors());
+      const result = await readWriteToken
+        .publishSchema({
+          author: 'Kamil',
+          commit: 'abc123',
+          sdl: `type Query { ping: String }`,
+          ...serviceName,
+          ...serviceUrl,
+        })
+        .then(r => r.expectNoGraphQLErrors());
 
-    expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+      expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
-    const linkToWebsite =
-      result.schemaPublish.__typename === 'SchemaPublishSuccess'
-        ? result.schemaPublish.linkToWebsite
-        : null;
+      const linkToWebsite =
+        result.schemaPublish.__typename === 'SchemaPublishSuccess'
+          ? result.schemaPublish.linkToWebsite
+          : null;
 
-    expect(linkToWebsite).toEqual(
-      `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
-    );
-  });
+      expect(linkToWebsite).toEqual(
+        `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
+      );
+    },
+  );
 
   test.concurrent(
     'linkToWebsite should be available when publishing non-initial schema',
-    async () => {
+    async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject, organization } = await createOrg();
       const { createToken, project, target } = await createProject(projectType, {
@@ -576,7 +586,7 @@ describe.each`
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       projectScopes: [],
       organizationScopes: [],
-      targetId: target2.cleanId,
+      target: target2,
     });
     const publishResult2 = await writeTokenResult2
       .publishSchema({
@@ -635,7 +645,7 @@ describe('schema publishing changes are persisted', () => {
     /** Only provide if you want to test a service url change */
     serviceUrlAfter?: string;
   }) {
-    test.concurrent(`[Schema change] ${args.name}`, async () => {
+    test.concurrent(`[Schema change] ${args.name}`, async ({ expect }) => {
       const serviceName = {
         service: 'test',
       };
@@ -2819,7 +2829,7 @@ test('Target.schemaVersion: result is read from the database', async () => {
 
 test('Composition Error (Federation 2) can be served from the database', async () => {
   const storage = await createStorage(connectionString(), 1);
-  const dockerAddress = `composition_federation_2:3069`;
+  const serviceAddress = await getServiceHost('composition_federation_2', 3069, false);
 
   try {
     const initialSchema = /* GraphQL */ `
@@ -2880,7 +2890,7 @@ test('Composition Error (Federation 2) can be served from the database', async (
 
     await enableExternalSchemaComposition(
       {
-        endpoint: `http://${dockerAddress}/compose`,
+        endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
@@ -2949,7 +2959,7 @@ test('Composition Error (Federation 2) can be served from the database', async (
 
 test('Composition Network Failure (Federation 2)', async () => {
   const storage = await createStorage(connectionString(), 1);
-  const dockerAddress = `composition_federation_2:3069`;
+  const serviceAddress = await getServiceHost('composition_federation_2', 3069, false);
 
   try {
     const initialSchema = /* GraphQL */ `
@@ -3009,7 +3019,7 @@ test('Composition Network Failure (Federation 2)', async () => {
 
     await enableExternalSchemaComposition(
       {
-        endpoint: `http://${dockerAddress}/compose`,
+        endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
@@ -3050,7 +3060,7 @@ test('Composition Network Failure (Federation 2)', async () => {
 
     await enableExternalSchemaComposition(
       {
-        endpoint: `http://${dockerAddress}/no_compose`,
+        endpoint: `http://${serviceAddress}/no_compose`,
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
         organization: organization.cleanId,
@@ -3574,7 +3584,7 @@ test.concurrent(
 
 test.concurrent(
   'publishing Federation schema results in tags stored on the schema version',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject, setFeatureFlag } = await createOrg();
     const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
@@ -3609,7 +3619,7 @@ test.concurrent(
   },
 );
 
-test.concurrent('CDN services are published in alphanumeric order', async () => {
+test.concurrent('CDN services are published in alphanumeric order', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Stitching);
@@ -3670,7 +3680,7 @@ test.concurrent('CDN services are published in alphanumeric order', async () => 
 
 test.concurrent(
   'Composite schema project publish without service name results in error',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
@@ -3701,7 +3711,7 @@ test.concurrent(
 
 test.concurrent(
   'Composite schema project publish without service url results in error',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);

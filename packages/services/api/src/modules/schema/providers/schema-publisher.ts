@@ -58,7 +58,7 @@ import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import type { ConditionalBreakingChangeDiffConfig } from './registry-checks';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
-import { SchemaManager } from './schema-manager';
+import { SchemaManager, shouldUseLatestComposableVersion } from './schema-manager';
 import { SchemaVersionHelper } from './schema-version-helper';
 
 const schemaCheckCount = new promClient.Counter({
@@ -509,8 +509,11 @@ export class SchemaPublisher {
       );
     });
 
-    const compareToPreviousComposableVersion =
-      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToPreviousComposableVersion = shouldUseLatestComposableVersion(
+      target.id,
+      project,
+      organization,
+    );
 
     const comparedVersion = compareToPreviousComposableVersion
       ? latestComposableVersion
@@ -1119,6 +1122,7 @@ export class SchemaPublisher {
           native: this.schemaManager.checkProjectNativeFederationSupport({
             project,
             organization,
+            targetId: target.id,
           }),
           contracts: null,
         });
@@ -1211,8 +1215,11 @@ export class SchemaPublisher {
           }),
         ]);
 
-        const compareToPreviousComposableVersion =
-          organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+        const compareToPreviousComposableVersion = shouldUseLatestComposableVersion(
+          input.target.id,
+          project,
+          organization,
+        );
 
         const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -1270,6 +1277,14 @@ export class SchemaPublisher {
                 targetId: input.target.id,
               })
             : null;
+
+        const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
+        for (const contract of contracts ?? []) {
+          contractIdToLatestValidContractVersionId.set(
+            contract.contract.id,
+            contract.latestValidVersion?.id ?? null,
+          );
+        }
 
         const deleteResult = await this.models[project.type][modelVersion].delete({
           input: {
@@ -1608,8 +1623,19 @@ export class SchemaPublisher {
           })
         : null;
 
-    const compareToPreviousComposableVersion =
-      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
+    for (const contract of contracts ?? []) {
+      contractIdToLatestValidContractVersionId.set(
+        contract.contract.id,
+        contract.latestValidVersion?.id ?? null,
+      );
+    }
+
+    const compareToPreviousComposableVersion = shouldUseLatestComposableVersion(
+      target.id,
+      project,
+      organization,
+    );
     const comparedSchemaVersion = compareToPreviousComposableVersion
       ? latestComposableSchemaVersion
       : latestSchemaVersion;
@@ -1977,7 +2003,7 @@ export class SchemaPublisher {
       __typename: 'SchemaPublishSuccess' as const,
       initial: publishResult.state.initial,
       valid: publishResult.state.composable,
-      changes: modelVersion === 'legacy' ? publishResult.state.changes ?? [] : null,
+      changes: modelVersion === 'legacy' ? (publishResult.state.changes ?? []) : null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
     };

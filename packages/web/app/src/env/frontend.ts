@@ -153,7 +153,7 @@ function buildConfig() {
       google: authGoogle.AUTH_GOOGLE === '1',
       okta: authOkta.AUTH_OKTA === '1' ? { hidden: authOkta.AUTH_OKTA_HIDDEN === '1' } : null,
       requireEmailVerification: base.AUTH_REQUIRE_EMAIL_VERIFICATION === '1',
-      organizationOIDC: authOktaMultiTenant.AUTH_ORGANIZATION_OIDC === '1',
+      oidc: authOktaMultiTenant.AUTH_ORGANIZATION_OIDC === '1',
     },
     analytics: {
       googleAnalyticsTrackingId: base.GA_TRACKING_ID,
@@ -166,7 +166,8 @@ function buildConfig() {
     environment: base.ENVIRONMENT,
     nodeEnv: base.NODE_ENV,
     graphql: {
-      persistedOperations: base.GRAPHQL_PERSISTED_OPERATIONS === '1',
+      persistedOperationsPrefix:
+        base.GRAPHQL_PERSISTED_OPERATIONS === '1' ? `hive-app/${base.RELEASE}/` : null,
     },
     zendeskSupport: base.ZENDESK_SUPPORT === '1',
     migrations: {

@@ -1,0 +1,381 @@
+diff --git a/lib/commands/pack/macos.js b/lib/commands/pack/macos.js
+index 2d571cac7e01f4e89bf516f44419439b6ab689a3..381b2287767a61e4fa09d8340e6eedefac078075 100644
+--- a/lib/commands/pack/macos.js
++++ b/lib/commands/pack/macos.js
+@@ -202,7 +202,6 @@ the CLI should already exist in a directory named after the CLI that is the root
+             const templateKey = (0, upload_util_1.templateShortKey)('macos', {
+                 arch,
+                 bin: config.bin,
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+             });
+             const dist = buildConfig.dist(`macos/${templateKey}`);
+diff --git a/lib/commands/pack/win.js b/lib/commands/pack/win.js
+index ef7f90ef1cc4b166d3d1df74228e92b86ad9234e..2ed38f1971727530243b412d3af87fe337307c4d 100644
+--- a/lib/commands/pack/win.js
++++ b/lib/commands/pack/win.js
+@@ -310,7 +310,6 @@ the CLI should already exist in a directory named after the CLI that is the root
+             const templateKey = (0, upload_util_1.templateShortKey)('win32', {
+                 arch,
+                 bin: config.bin,
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+             });
+             const o = buildConfig.dist(`win32/${templateKey}`);
+diff --git a/lib/commands/promote.js b/lib/commands/promote.js
+index 0ea8c249f1b2fa889671c66b401862f24cf6680b..79ef2f2d2667fb8d376aada327e1e31193749209 100644
+--- a/lib/commands/promote.js
++++ b/lib/commands/promote.js
+@@ -66,7 +66,7 @@ class Promote extends core_1.Command {
+             CacheControl: indexDefaults.maxAge,
+             MetadataDirective: client_s3_1.MetadataDirective.REPLACE,
+         };
+-        const cloudBucketCommitKey = (shortKey) => path.join(s3Config.bucket, (0, upload_util_1.commitAWSDir)(flags.version, flags.sha, s3Config), shortKey);
++        const cloudBucketCommitKey = (shortKey) => path.join(s3Config.bucket, (0, upload_util_1.commitAWSDir)(flags.version, s3Config), shortKey);
+         const cloudChannelKey = (shortKey) => path.join((0, upload_util_1.channelAWSDir)(flags.channel, s3Config), shortKey);
+         // copy tarballs manifests
+         if (buildConfig.targets.length > 0)
+@@ -76,11 +76,10 @@ class Promote extends core_1.Command {
+                 arch: target.arch,
+                 bin: config.bin,
+                 platform: target.platform,
+-                sha: flags.sha,
+                 version: flags.version,
+             });
+             // strip version & sha so update/scripts can point to a static channel manifest
+-            const unversionedManifest = manifest.replace(`-v${flags.version}-${flags.sha}`, '');
++            const unversionedManifest = manifest.replace(`-v${flags.version}`, '');
+             await aws_1.default.s3.copyObject({
+                 ...awsDefaults,
+                 CopySource: cloudBucketCommitKey(manifest),
+@@ -93,12 +92,11 @@ class Promote extends core_1.Command {
+                 bin: config.bin,
+                 ext: '.tar.gz',
+                 platform: target.platform,
+-                sha: flags.sha,
+                 version: flags.version,
+             });
+             const versionedTarGzKey = cloudBucketCommitKey(versionedTarGzName);
+             // strip version & sha so update/scripts can point to a static channel tarball
+-            const unversionedTarGzName = versionedTarGzName.replace(`-v${flags.version}-${flags.sha}`, '');
++            const unversionedTarGzName = versionedTarGzName.replace(`-v${flags.version}`, '');
+             const unversionedTarGzKey = cloudChannelKey(unversionedTarGzName);
+             await Promise.all([
+                 aws_1.default.s3.copyObject({
+@@ -117,12 +115,11 @@ class Promote extends core_1.Command {
+                 bin: config.bin,
+                 ext: '.tar.xz',
+                 platform: target.platform,
+-                sha: flags.sha,
+                 version: flags.version,
+             });
+             const versionedTarXzKey = cloudBucketCommitKey(versionedTarXzName);
+             // strip version & sha so update/scripts can point to a static channel tarball
+-            const unversionedTarXzName = versionedTarXzName.replace(`-v${flags.version}-${flags.sha}`, '');
++            const unversionedTarXzName = versionedTarXzName.replace(`-v${flags.version}`, '');
+             const unversionedTarXzKey = cloudChannelKey(unversionedTarXzName);
+             await Promise.all([
+                 aws_1.default.s3.copyObject({
+@@ -139,10 +136,10 @@ class Promote extends core_1.Command {
+             this.log(`Promoting macos pkgs to ${flags.channel}`);
+             const arches = (0, util_1.uniq)(buildConfig.targets.filter((t) => t.platform === 'darwin').map((t) => t.arch));
+             await Promise.all(arches.map(async (arch) => {
+-                const darwinPkg = (0, upload_util_1.templateShortKey)('macos', { arch, bin: config.bin, sha: flags.sha, version: flags.version });
++                const darwinPkg = (0, upload_util_1.templateShortKey)('macos', { arch, bin: config.bin, version: flags.version });
+                 const darwinCopySource = cloudBucketCommitKey(darwinPkg);
+                 // strip version & sha so scripts can point to a static channel pkg
+-                const unversionedPkg = darwinPkg.replace(`-v${flags.version}-${flags.sha}`, '');
++                const unversionedPkg = darwinPkg.replace(`-v${flags.version}`, '');
+                 await Promise.all([
+                     aws_1.default.s3.copyObject({
+                         ...awsDefaults,
+@@ -160,10 +157,10 @@ class Promote extends core_1.Command {
+             this.log(`Promoting windows exe to ${flags.channel}`);
+             const arches = buildConfig.targets.filter((t) => t.platform === 'win32').map((t) => t.arch);
+             await Promise.all(arches.map(async (arch) => {
+-                const winPkg = (0, upload_util_1.templateShortKey)('win32', { arch, bin: config.bin, sha: flags.sha, version: flags.version });
++                const winPkg = (0, upload_util_1.templateShortKey)('win32', { arch, bin: config.bin, version: flags.version });
+                 const winCopySource = cloudBucketCommitKey(winPkg);
+                 // strip version & sha so scripts can point to a static channel exe
+-                const unversionedExe = winPkg.replace(`-v${flags.version}-${flags.sha}`, '');
++                const unversionedExe = winPkg.replace(`-v${flags.version}`, '');
+                 await Promise.all([
+                     aws_1.default.s3.copyObject({
+                         ...awsDefaults,
+diff --git a/lib/commands/upload/deb.js b/lib/commands/upload/deb.js
+index b9aaf097275cc8caa13603d7bd09e41e9bea7dee..d375d11272bf8ff3e2a32fcbd5bb86ce548c40b4 100644
+--- a/lib/commands/upload/deb.js
++++ b/lib/commands/upload/deb.js
+@@ -51,7 +51,7 @@ class UploadDeb extends core_1.Command {
+             this.error('Cannot find debian artifacts', {
+                 suggestions: ['Run "oclif pack deb" before uploading'],
+             });
+-        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, buildConfig.gitSha, s3Config);
++        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, s3Config);
+         const upload = (file) => {
+             const cloudKey = `${cloudKeyBase}/apt/${file}`;
+             return aws_1.default.s3.uploadFile(dist(file), { ...S3Options, CacheControl: 'max-age=86400', Key: cloudKey });
+@@ -88,7 +88,7 @@ class UploadDeb extends core_1.Command {
+             ...(fs.existsSync(dist('InRelease')) ? [upload('InRelease'), uploadWorkaround('InRelease')] : []),
+             ...(fs.existsSync(dist('Release.gpg')) ? [upload('Release.gpg'), uploadWorkaround('Release.gpg')] : []),
+         ]);
+-        (0, log_1.log)(`done uploading deb artifacts for v${config.version}-${buildConfig.gitSha}`);
++        (0, log_1.log)(`done uploading deb artifacts for v${config.version}`);
+     }
+ }
+ exports.default = UploadDeb;
+diff --git a/lib/commands/upload/macos.js b/lib/commands/upload/macos.js
+index fb271df255f5df66401a7a172e7f49d23d3742e3..ff042ee310dd691625b7a95a7462ba0363576de4 100644
+--- a/lib/commands/upload/macos.js
++++ b/lib/commands/upload/macos.js
+@@ -50,12 +50,11 @@ class UploadMacos extends core_1.Command {
+             ACL: s3Config.acl || 'public-read',
+             Bucket: s3Config.bucket,
+         };
+-        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.version, buildConfig.gitSha, s3Config);
++        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.version, s3Config);
+         const upload = async (arch) => {
+             const templateKey = (0, upload_util_1.templateShortKey)('macos', {
+                 arch,
+                 bin: config.bin,
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+             });
+             const cloudKey = `${cloudKeyBase}/${templateKey}`;
+@@ -69,7 +68,7 @@ class UploadMacos extends core_1.Command {
+         };
+         const arches = (0, util_1.uniq)(buildConfig.targets.filter((t) => t.platform === 'darwin').map((t) => t.arch));
+         await Promise.all(arches.map((a) => upload(a)));
+-        (0, log_1.log)(`done uploading macos pkgs for v${config.version}-${buildConfig.gitSha}`);
++        (0, log_1.log)(`done uploading macos pkgs for v${config.version}`);
+     }
+ }
+ exports.default = UploadMacos;
+diff --git a/lib/commands/upload/tarballs.js b/lib/commands/upload/tarballs.js
+index dd732e93883a61dd491f797e2576eea432500b51..4e9f087de4e52c5777a80b42f5b45bfcde9a9bc7 100644
+--- a/lib/commands/upload/tarballs.js
++++ b/lib/commands/upload/tarballs.js
+@@ -50,7 +50,6 @@ class UploadTarballs extends core_1.Command {
+             const tarball = dist((0, upload_util_1.templateShortKey)('versioned', {
+                 bin: config.bin,
+                 ext: '.tar.gz',
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+                 ...target,
+             }));
+@@ -75,7 +74,7 @@ class UploadTarballs extends core_1.Command {
+             };
+             const releaseTarballs = async (ext) => {
+                 const localKey = (0, upload_util_1.templateShortKey)('versioned', { ...shortKeyInputs, ext });
+-                const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, buildConfig.gitSha, s3Config)}/${localKey}`;
++                const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, s3Config)}/${localKey}`;
+                 await aws_1.default.s3.uploadFile(dist(localKey), {
+                     ...S3Options,
+                     CacheControl: 'max-age=604800',
+@@ -84,7 +83,7 @@ class UploadTarballs extends core_1.Command {
+                 });
+             };
+             const manifest = (0, upload_util_1.templateShortKey)('manifest', shortKeyInputs);
+-            const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, buildConfig.gitSha, s3Config)}/${manifest}`;
++            const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, s3Config)}/${manifest}`;
+             await Promise.all([
+                 releaseTarballs('.tar.gz'),
+                 aws_1.default.s3.uploadFile(dist(manifest), {
+@@ -99,7 +98,7 @@ class UploadTarballs extends core_1.Command {
+         if (buildConfig.targets.length > 0)
+             (0, log_1.log)('uploading targets');
+         await Promise.all(buildConfig.targets.map((t) => uploadTarball(t)));
+-        (0, log_1.log)(`done uploading tarballs & manifests for v${config.version}-${buildConfig.gitSha}`);
++        (0, log_1.log)(`done uploading tarballs & manifests for v${config.version}`);
+     }
+ }
+ exports.default = UploadTarballs;
+diff --git a/lib/commands/upload/win.js b/lib/commands/upload/win.js
+index 2769337ddf0effe5f397300972b989db20616b4a..d725cd670207e4c8b125eef8d74d0a5d43672905 100644
+--- a/lib/commands/upload/win.js
++++ b/lib/commands/upload/win.js
+@@ -51,7 +51,6 @@ class UploadWin extends core_1.Command {
+             const templateKey = (0, upload_util_1.templateShortKey)('win32', {
+                 arch,
+                 bin: config.bin,
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+             });
+             const localKey = dist(`win32/${templateKey}`);
+@@ -60,12 +59,11 @@ class UploadWin extends core_1.Command {
+                     suggestions: ['Run "oclif pack win" before uploading'],
+                 });
+         }
+-        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, buildConfig.gitSha, s3Config);
++        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, s3Config);
+         const uploadWin = async (arch) => {
+             const templateKey = (0, upload_util_1.templateShortKey)('win32', {
+                 arch,
+                 bin: config.bin,
+-                sha: buildConfig.gitSha,
+                 version: config.version,
+             });
+             const localExe = dist(`win32/${templateKey}`);
+@@ -74,7 +72,7 @@ class UploadWin extends core_1.Command {
+                 await aws_1.default.s3.uploadFile(localExe, { ...S3Options, CacheControl: 'max-age=86400', Key: cloudKey });
+         };
+         await Promise.all([uploadWin('x64'), uploadWin('x86')]);
+-        (0, log_1.log)(`done uploading windows executables for v${config.version}-${buildConfig.gitSha}`);
++        (0, log_1.log)(`done uploading windows executables for v${config.version}`);
+     }
+ }
+ exports.default = UploadWin;
+diff --git a/lib/tarballs/bin.js b/lib/tarballs/bin.js
+index 5740bb13522fdad4c65554534bfa286b6dd94f11..619b510d75605a28de2063df316fcbd0890935c6 100644
+--- a/lib/tarballs/bin.js
++++ b/lib/tarballs/bin.js
+@@ -30,77 +30,38 @@ const path = __importStar(require("node:path"));
+ const node_util_1 = require("node:util");
+ const exec = (0, node_util_1.promisify)(node_child_process_1.exec);
+ async function writeBinScripts({ baseWorkspace, config, nodeOptions, nodeVersion, }) {
+-    const binPathEnvVar = config.scopedEnvVarKey('BINPATH');
+-    const redirectedEnvVar = config.scopedEnvVarKey('REDIRECTED');
+-    const clientHomeEnvVar = config.scopedEnvVarKey('OCLIF_CLIENT_HOME');
+     const writeWin32 = async (bin) => {
+         await fs.promises.writeFile(path.join(baseWorkspace, 'bin', `${bin}.cmd`), `@echo off
+ setlocal enableextensions
+ 
+-if not "%${redirectedEnvVar}%"=="1" if exist "%LOCALAPPDATA%\\${bin}\\client\\bin\\${bin}.cmd" (
+-  set ${redirectedEnvVar}=1
+-  "%LOCALAPPDATA%\\${bin}\\client\\bin\\${bin}.cmd" %*
+-  goto:EOF
+-)
+-
+-if not defined ${binPathEnvVar} set ${binPathEnvVar}="%~dp0${bin}.cmd"
+-
+-if exist "%~dp0..\\bin\\node.exe" (
+-  "%~dp0..\\bin\\node.exe" ${`${nodeOptions.join(' ')} `}"%~dp0..\\bin\\run" %*
+-) else if exist "%LOCALAPPDATA%\\oclif\\node\\node-${nodeVersion}.exe" (
+-  "%LOCALAPPDATA%\\oclif\\node\\node-${nodeVersion}.exe" ${`${nodeOptions.join(' ')} `}"%~dp0..\\bin\\run" %*
+-) else (
+-  node ${`${nodeOptions.join(' ')} `}"%~dp0..\\bin\\run" %*
+-)
++"%~dp0..\\bin\\node.exe" ${`${nodeOptions.join(' ')} `}"%~dp0..\\bin\\run" %*
+ `);
+     };
+     const writeUnix = async () => {
+         const bin = path.join(baseWorkspace, 'bin', config.bin);
+-        await fs.promises.writeFile(bin, `#!/usr/bin/env bash
++        await fs.promises.writeFile(bin, `#!/usr/bin/env sh
+ set -e
+-echoerr() { echo "$@" 1>&2; }
+ 
+ get_script_dir () {
+-  SOURCE="\${BASH_SOURCE[0]}"
++  SOURCE="\$0"
+   # While \$SOURCE is a symlink, resolve it
+   while [ -h "\$SOURCE" ]; do
+     DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
+     SOURCE="\$( readlink "\$SOURCE" )"
+     # If \$SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+-    [[ \$SOURCE != /* ]] && SOURCE="\$DIR/\$SOURCE"
++    if echo "\$SOURCE" | grep -q '^/*\$'; then
++      SOURCE="\$DIR/\$SOURCE"
++    fi
+   done
+   DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
+   echo "\$DIR"
+ }
+ DIR=\$(get_script_dir)
+-CLI_HOME=\$(cd && pwd)
+-XDG_DATA_HOME=\${XDG_DATA_HOME:="\$CLI_HOME/.local/share"}
+-CLIENT_HOME=\${${clientHomeEnvVar}:=$XDG_DATA_HOME/${config.dirname}/client}
+-BIN_PATH="\$CLIENT_HOME/bin/${config.bin}"
+-if [ -z "\$${redirectedEnvVar}" ] && [ -x "\$BIN_PATH" ] && [[ ! "\$DIR/${config.bin}" -ef "\$BIN_PATH" ]]; then
+-  if [ "\$DEBUG" == "*" ]; then
+-    echoerr "\$BIN_PATH" "\$@"
+-  fi
+-  ${binPathEnvVar}="\$BIN_PATH" ${redirectedEnvVar}=1 "\$BIN_PATH" "\$@"
+-else
+-  export ${binPathEnvVar}=\${${binPathEnvVar}:="\$DIR/${config.bin}"}
+-  if [ -x "$(command -v "\$XDG_DATA_HOME/oclif/node/node-custom")" ]; then
+-    NODE="\$XDG_DATA_HOME/oclif/node/node-custom"
+-  elif [ -x "$(command -v "\$DIR/node")" ]; then
+-    NODE="\$DIR/node"
+-  elif [ -x "$(command -v "\$XDG_DATA_HOME/oclif/node/node-${nodeVersion}")" ]; then
+-    NODE="\$XDG_DATA_HOME/oclif/node/node-${nodeVersion}"
+-  elif [ -x "$(command -v node)" ]; then
+-    NODE=node
+-  else
+-    echoerr 'Error: node is not installed.' >&2
+-    exit 1
+-  fi
+-  if [ "\$DEBUG" == "*" ]; then
+-    echoerr ${binPathEnvVar}="\$${binPathEnvVar}" "\$NODE" ${`${nodeOptions.join(' ')} `}"\$DIR/run" "\$@"
+-  fi
+-  "\$NODE" ${`${nodeOptions.join(' ')} `}"\$DIR/run" "\$@"
++NODE="\$DIR/node"
++if [ "\$DEBUG" = "1" ]; then
++  echo "script_dir: \$DIR"
+ fi
++"\$NODE" ${`${nodeOptions.join(' ')} `}"\$DIR/run" "\$@"
+ `, { mode: 0o755 });
+     };
+     await Promise.all([
+diff --git a/lib/tarballs/build.js b/lib/tarballs/build.js
+index 81ad0929e112195135c32f4d757fb5f68126ba92..cdc8c2152b5ee061ec5830da1d8cb2283e0e778d 100644
+--- a/lib/tarballs/build.js
++++ b/lib/tarballs/build.js
+@@ -174,8 +174,10 @@ const addDependencies = async (c) => {
+     else {
+         const lockpath = (0, node_fs_1.existsSync)(path.join(c.root, 'package-lock.json'))
+             ? path.join(c.root, 'package-lock.json')
+-            : path.join(c.root, 'npm-shrinkwrap.json');
+-        await (0, fs_extra_1.copy)(lockpath, path.join(c.workspace(), path.basename(lockpath)));
++            : null;
++        if (lockpath) {
++            await (0, fs_extra_1.copy)(lockpath, path.join(c.workspace(), path.basename(lockpath)));
++        }
+         await exec('npm install --production', { cwd: c.workspace() });
+     }
+ };
+@@ -230,8 +232,8 @@ const buildTarget = async (target, c, options) => {
+     if (!c.updateConfig.s3?.host)
+         return;
+     const rollout = typeof c.updateConfig.autoupdate === 'object' && c.updateConfig.autoupdate.rollout;
+-    const gzCloudKey = `${(0, upload_util_1.commitAWSDir)(version, sha, c.updateConfig.s3)}/${gzLocalKey}`;
+-    const xzCloudKey = `${(0, upload_util_1.commitAWSDir)(version, sha, c.updateConfig.s3)}/${xzLocalKey}`;
++    const gzCloudKey = `${(0, upload_util_1.commitAWSDir)(version, c.updateConfig.s3)}/${gzLocalKey}`;
++    const xzCloudKey = `${(0, upload_util_1.commitAWSDir)(version, c.updateConfig.s3)}/${xzLocalKey}`;
+     const [sha256gz, sha256xz] = await Promise.all([
+         (0, util_1.hash)('sha256', c.dist(gzLocalKey)),
+         ...(c.xz ? [(0, util_1.hash)('sha256', c.dist(xzLocalKey))] : []),
+diff --git a/lib/upload-util.js b/lib/upload-util.js
+index 19298c77a203e70f451d31c70c92442a8a3d5137..905230e5f605346ae6a65e617230ef84fce73c0b 100644
+--- a/lib/upload-util.js
++++ b/lib/upload-util.js
+@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.debVersion = exports.debArch = exports.templateShortKey = exports.channelAWSDir = exports.commitAWSDir = void 0;
+ const ejs_1 = require("ejs");
+ const node_path_1 = require("node:path");
+-function commitAWSDir(version, sha, s3Config) {
++function commitAWSDir(version, s3Config) {
+     let s3SubDir = s3Config.folder || '';
+     if (s3SubDir !== '' && s3SubDir.slice(-1) !== '/')
+         s3SubDir = `${s3SubDir}/`;
+-    return (0, node_path_1.join)(s3SubDir, 'versions', version, sha);
++    return (0, node_path_1.join)(s3SubDir, 'versions', version);
+ }
+ exports.commitAWSDir = commitAWSDir;
+ function channelAWSDir(channel, s3Config) {
+@@ -26,11 +26,11 @@ function templateShortKey(type, options) {
+     const templates = {
+         baseDir: '<%- bin %>',
+         deb: '<%- bin %>_<%- versionShaRevision %>_<%- arch %>.deb',
+-        macos: '<%- bin %>-v<%- version %>-<%- sha %>-<%- arch %>.pkg',
+-        manifest: '<%- bin %>-v<%- version %>-<%- sha %>-<%- platform %>-<%- arch %>-buildmanifest',
++        macos: '<%- bin %>-v<%- version %>-<%- arch %>.pkg',
++        manifest: '<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %>-buildmanifest',
+         unversioned: '<%- bin %>-<%- platform %>-<%- arch %><%- ext %>',
+-        versioned: '<%- bin %>-v<%- version %>-<%- sha %>-<%- platform %>-<%- arch %><%- ext %>',
+-        win32: '<%- bin %>-v<%- version %>-<%- sha %>-<%- arch %>.exe',
++        versioned: '<%- bin %>-v<%- version %>-<%- platform %>-<%- arch %><%- ext %>',
++        win32: '<%- bin %>-v<%- version %>-<%- arch %>.exe',
+     };
+     return (0, ejs_1.render)(templates[type], { ...options });
+ }

@@ -77,7 +77,9 @@ export interface ContourValues {
       runAsGroup?: number;
       runAsNonRoot?: boolean;
       runAsUser?: number;
-      seLinuxOptions?: string;
+      seLinuxOptions?: {
+        [k: string]: unknown;
+      };
       seccompProfile?: {
         type?: string;
         [k: string]: unknown;
@@ -277,7 +279,9 @@ export interface ContourValues {
       runAsGroup?: number;
       runAsNonRoot?: boolean;
       runAsUser?: number;
-      seLinuxOptions?: string;
+      seLinuxOptions?: {
+        [k: string]: unknown;
+      };
       seccompProfile?: {
         type?: string;
         [k: string]: unknown;
@@ -457,7 +461,9 @@ export interface ContourValues {
       runAsGroup?: number;
       runAsNonRoot?: boolean;
       runAsUser?: number;
-      seLinuxOptions?: string;
+      seLinuxOptions?: {
+        [k: string]: unknown;
+      };
       seccompProfile?: {
         type?: string;
         [k: string]: unknown;
@@ -517,7 +523,9 @@ export interface ContourValues {
         runAsGroup?: number;
         runAsNonRoot?: boolean;
         runAsUser?: number;
-        seLinuxOptions?: string;
+        seLinuxOptions?: {
+          [k: string]: unknown;
+        };
         seccompProfile?: {
           type?: string;
           [k: string]: unknown;
@@ -656,6 +664,10 @@ export interface ContourValues {
       [k: string]: unknown;
     };
     shutdownManager?: {
+      containerPorts?: {
+        http?: number;
+        [k: string]: unknown;
+      };
       containerSecurityContext?: {
         allowPrivilegeEscalation?: boolean;
         capabilities?: {
@@ -668,20 +680,57 @@ export interface ContourValues {
         runAsGroup?: number;
         runAsNonRoot?: boolean;
         runAsUser?: number;
-        seLinuxOptions?: string;
+        seLinuxOptions?: {
+          [k: string]: unknown;
+        };
         seccompProfile?: {
           type?: string;
           [k: string]: unknown;
         };
         [k: string]: unknown;
       };
+      customLivenessProbe?: {
+        [k: string]: unknown;
+      };
+      customReadinessProbe?: {
+        [k: string]: unknown;
+      };
+      customStartupProbe?: {
+        [k: string]: unknown;
+      };
       enabled?: boolean;
       extraArgs?: unknown[];
-      port?: string;
+      livenessProbe?: {
+        enabled?: boolean;
+        failureThreshold?: number;
+        initialDelaySeconds?: number;
+        periodSeconds?: number;
+        successThreshold?: number;
+        timeoutSeconds?: number;
+        [k: string]: unknown;
+      };
+      readinessProbe?: {
+        enabled?: boolean;
+        failureThreshold?: number;
+        initialDelaySeconds?: number;
+        periodSeconds?: number;
+        successThreshold?: number;
+        timeoutSeconds?: number;
+        [k: string]: unknown;
+      };
       resources?: {
         [k: string]: unknown;
       };
       resourcesPreset?: string;
+      startupProbe?: {
+        enabled?: boolean;
+        failureThreshold?: number;
+        initialDelaySeconds?: number;
+        periodSeconds?: number;
+        successThreshold?: number;
+        timeoutSeconds?: number;
+        [k: string]: unknown;
+      };
       [k: string]: unknown;
     };
     sidecars?: unknown[];

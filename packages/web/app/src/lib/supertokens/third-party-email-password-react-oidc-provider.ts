@@ -79,5 +79,6 @@ export const startAuthFlowForOIDCProvider = async (oidcId: string) => {
     },
   });
 
+  // Redirects to the OIDC provider
   window.location.assign(authUrl);
 };

@@ -1,6 +1,6 @@
 import { ComponentProps, ReactElement } from 'react';
 import clsx from 'clsx';
-import { ArrowDownIcon } from '@/components/v2/icon';
+import { ArrowDownIcon } from '@/components/ui/icon';
 
 export function Select({
   options,
