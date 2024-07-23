@@ -56,6 +56,7 @@ export default class AppPublish extends Command {
 
       if (result.activateAppDeployment.ok.isSkipped) {
         this.warn(`App deployment "${name}" is already published. Skipping...`);
+        return;
       }
       this.log(`App deployment "${name}" published successfully.`);
     }
