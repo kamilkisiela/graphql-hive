@@ -23,6 +23,7 @@ export const activateAppDeployment: NonNullable<
   return {
     error: null,
     ok: {
+      isSkipped: result.isSkipped,
       activatedAppDeployment: result.appDeployment,
     },
   };

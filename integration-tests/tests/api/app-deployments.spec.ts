@@ -55,7 +55,6 @@ const AddDocumentsToAppDeployment = graphql(`
           message
         }
       }
-
       ok {
         appDeployment {
           id
@@ -75,6 +74,7 @@ const ActivateAppDeployment = graphql(`
         message
       }
       ok {
+        isSkipped
         activatedAppDeployment {
           id
           name
@@ -224,6 +224,7 @@ test('create app deployment, add operations, publish, access via CDN (happy path
         version: '1.0.0',
         status: 'active',
       },
+      isSkipped: false,
     },
   });
 
@@ -353,6 +354,7 @@ test('create app deployment with same name and version does not fail if deployme
         version: '1.0.0',
         status: 'active',
       },
+      isSkipped: false,
     },
   });
 
@@ -1046,6 +1048,169 @@ test('activate app deployment fails if app deployment does not exist', async () 
       message: 'App deployment not found',
     },
     ok: null,
+  });
+});
+
+test('activate app deployment succeeds if app deployment is already active', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
+  const { createToken, target } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  let activateResult = await execute({
+    document: ActivateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(activateResult).toEqual({
+    activateAppDeployment: {
+      error: null,
+      ok: {
+        activatedAppDeployment: {
+          id: expect.any(String),
+          name: 'my-app',
+          status: 'active',
+          version: '1.0.0',
+        },
+        isSkipped: false,
+      },
+    },
+  });
+
+  activateResult = await execute({
+    document: ActivateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  expect(activateResult).toEqual({
+    activateAppDeployment: {
+      error: null,
+      ok: {
+        activatedAppDeployment: {
+          id: expect.any(String),
+          name: 'my-app',
+          status: 'active',
+          version: '1.0.0',
+        },
+        isSkipped: true,
+      },
+    },
+  });
+});
+
+test('activate app deployment fails if app deployment is retired', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  await setFeatureFlag('appDeployments', true);
+  const { createToken, target } = await createProject();
+  const token = await createToken({
+    targetScopes: [TargetAccessScope.RegistryWrite, TargetAccessScope.RegistryRead],
+  });
+
+  await execute({
+    document: CreateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+
+  let activateResult = await execute({
+    document: ActivateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(activateResult).toEqual({
+    activateAppDeployment: {
+      error: null,
+      ok: {
+        activatedAppDeployment: {
+          id: expect.any(String),
+          name: 'my-app',
+          status: 'active',
+          version: '1.0.0',
+        },
+        isSkipped: false,
+      },
+    },
+  });
+
+  const retireResult = await execute({
+    document: RetireAppDeployment,
+    variables: {
+      input: {
+        targetId: target.id,
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(retireResult).toEqual({
+    retireAppDeployment: {
+      error: null,
+      ok: {
+        retiredAppDeployment: {
+          id: expect.any(String),
+          name: 'my-app',
+          status: 'active',
+          version: '1.0.0',
+        },
+      },
+    },
+  });
+
+  activateResult = await execute({
+    document: ActivateAppDeployment,
+    variables: {
+      input: {
+        appName: 'my-app',
+        appVersion: '1.0.0',
+      },
+    },
+    authToken: token.secret,
+  }).then(res => res.expectNoGraphQLErrors());
+  expect(activateResult).toEqual({
+    activateAppDeployment: {
+      error: {
+        message: 'App deployment is retired',
+      },
+      ok: null,
+    },
   });
 });
 
