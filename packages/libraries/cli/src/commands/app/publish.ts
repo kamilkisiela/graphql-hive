@@ -52,7 +52,12 @@ export default class AppPublish extends Command {
     }
 
     if (result.activateAppDeployment.ok) {
-      console.log('App deployment published successfully.');
+      const name = `${result.activateAppDeployment.ok.activatedAppDeployment.name}@${result.activateAppDeployment.ok.activatedAppDeployment.version}`;
+
+      if (result.activateAppDeployment.ok.isSkipped) {
+        this.warn(`App deployment "${name}" is already published. Skipping...`);
+      }
+      this.log(`App deployment "${name}" published successfully.`);
     }
   }
 }
@@ -67,6 +72,7 @@ const ActivateAppDeploymentMutation = graphql(/* GraphQL */ `
           version
           status
         }
+        isSkipped
       }
       error {
         message
