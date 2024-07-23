@@ -81,7 +81,7 @@ const config: CodegenConfig = {
           SupportTicketStatus: '../shared/entities#SupportTicketStatus',
         },
         scalars: {
-          DateTime: 'string | Date',
+          DateTime: 'string',
           Date: 'string',
           SafeInt: 'number',
           ID: 'string',
