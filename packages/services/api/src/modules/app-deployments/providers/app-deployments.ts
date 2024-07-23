@@ -365,13 +365,26 @@ export class AppDeployments {
       };
     }
 
-    if (appDeployment.activatedAt !== null) {
+    if (appDeployment.retiredAt !== null) {
       this.logger.debug(
-        'activate app deployment failed as it is already active. (targetId=%s, appName=%s, appVersion=%s)',
+        'app deployment is already retired. (targetId=%s, appName=%s, appVersion=%s)',
       );
+
       return {
         type: 'error' as const,
-        message: 'App deployment is already active',
+        message: 'App deployment is retired',
+      };
+    }
+
+    if (appDeployment.activatedAt !== null) {
+      this.logger.debug(
+        'app deployment is already active. (targetId=%s, appName=%s, appVersion=%s)',
+      );
+
+      return {
+        type: 'success' as const,
+        isSkipped: true,
+        appDeployment,
       };
     }
 
@@ -443,6 +456,7 @@ export class AppDeployments {
 
     return {
       type: 'success' as const,
+      isSkipped: false,
       appDeployment: updatedAppDeployment,
     };
   }

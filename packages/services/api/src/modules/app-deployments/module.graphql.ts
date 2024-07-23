@@ -196,6 +196,10 @@ export default gql`
 
   type ActivateAppDeploymentOk {
     activatedAppDeployment: AppDeployment!
+    """
+    Whether the app deployment activation was skipped because it is already activated.
+    """
+    isSkipped: Boolean!
   }
 
   type ActivateAppDeploymentResult {
