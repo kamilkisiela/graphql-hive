@@ -70,17 +70,15 @@ import { TargetInsightsOperationPage } from './pages/target-insights-operation';
 import { TargetLaboratoryPage } from './pages/target-laboratory';
 import { TargetSettingsPage } from './pages/target-settings';
 
-if (globalThis.window) {
-  SuperTokens.init(frontendConfig());
-  if (env.sentry) {
-    init({
-      dsn: env.sentry.dsn,
-      enabled: true,
-      dist: 'webapp',
-      release: env.release,
-      environment: env.environment,
-    });
-  }
+SuperTokens.init(frontendConfig());
+if (env.sentry) {
+  init({
+    dsn: env.sentry.dsn,
+    enabled: true,
+    dist: 'webapp',
+    release: env.release,
+    environment: env.environment,
+  });
 }
 
 const queryClient = new QueryClient();
