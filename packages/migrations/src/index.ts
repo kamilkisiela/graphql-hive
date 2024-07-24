@@ -16,7 +16,7 @@ const slonik = await createPool(createConnectionString(env.postgres), {
 
 // This is only used for GraphQL Hive Cloud to perform a long running migration.
 // eslint-disable-next-line no-process-env
-if (env.isHiveCloud && process.env.SCHEMA_COORDINATE_STATUS_MIGRATION === '1') {
+if (process.env.SCHEMA_COORDINATE_STATUS_MIGRATION === '1') {
   try {
     console.log('Running the SCHEMA_COORDINATE_STATUS_MIGRATION');
     await schemaCoordinateStatusMigration(slonik);
