@@ -4,7 +4,7 @@ on:
 jobs:
   # Release alpha version on NPM for Hive libraries
   npm:
-    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@feat-export-outputs
     with:
       npmTag: alpha
       buildScript: build:libraries
@@ -108,3 +108,34 @@ jobs:
           tar -xzf *.tar.gz
           # Expect the command to succeed
           ./hive/bin/hive --version || exit 1
+
+  extract-cli-version:
+    needs: [npm]
+    runs-on: ubuntu-22.04
+    name: Extract CLI version
+    outputs:
+      published: ${{ steps.cli.outputs.publish }}
+      version: ${{ steps.cli.outputs.version }}
+    steps:
+      - name: Extract published version
+        if:
+          needs.npm.outputs.published && contains(needs.npm.outputs.publishedPackages,
+          '"@graphql-hive/cli"')
+        id: cli
+        run: |
+          echo '${{needs.npm.outputs.publishedPackages}}' > cli-ver.json
+          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
+          echo "version=$VERSION" >> $GITHUB_ENV
+          echo "publish=true" >> $GITHUB_ENV
+
+  publish_docker:
+    needs: [extract-cli-version]
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      imageTag: ${{ needs.extract-cli-version.outputs.version }}
+      publishSourceMaps: false
+      publishLatest: true
+      publishPrComment: false
+      targets: cli
+      uploadJavaScriptArtifacts: false
+    secrets: inherit
