@@ -125,8 +125,8 @@ jobs:
         run: |
           echo '${{needs.npm.outputs.publishedPackages}}' > cli-ver.json
           VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
-          echo "version=$VERSION" >> $GITHUB_ENV
-          echo "published=true" >> $GITHUB_ENV
+          echo "version=$VERSION" >> "$GITHUB_ENV"
+          echo "published=true" >> "$GITHUB_ENV"
 
   publish_docker:
     needs: [extract-cli-version]
