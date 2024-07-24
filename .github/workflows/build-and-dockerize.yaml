@@ -55,6 +55,10 @@ jobs:
         if: ${{ inputs.build }}
         run: pnpm build
 
+      - name: CLI prepack
+        if: ${{ inputs.build }}
+        run: pnpm run --filter @graphql-hive/cli workspace-fix
+
       - name: test ESM & CJS exports integrity
         if: ${{ inputs.build }}
         run: pnpm turbo check:build
