@@ -128,6 +128,15 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_ENV"
           echo "published=true" >> "$GITHUB_ENV"
 
+  log:
+    runs-on: ubuntu-22.04
+    needs: [extract-cli-version]
+    steps:
+      - name: Log version
+        run: |
+          echo "versions be like"
+          echo "HM? ${{ needs.extract-cli-version.outputs.published }} ${{ needs.extract-cli-version.outputs.version }}"
+
   publish_docker:
     needs: [extract-cli-version]
     uses: ./.github/workflows/build-and-dockerize.yaml
