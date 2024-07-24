@@ -21,9 +21,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PlusIcon } from '@/components/ui/icon';
+import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Link, Spinner } from '@/components/v2';
-import { PlusIcon } from '@/components/v2/icon';
+import { Link } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
@@ -142,6 +143,20 @@ export function useOperationCollectionsPlugin(props: {
 
       useEffect(() => {
         if (!hasAllEditors || !currentOperation) {
+          const searchObj = router.latestLocation.search;
+          const operationString =
+            'operationString' in searchObj && typeof searchObj.operationString === 'string'
+              ? searchObj.operationString
+              : null;
+
+          // We provide an operation string when navigating to the laboratory from persisted documents
+          // in that case we want to show that operation within this tab.
+          if (operationString) {
+            queryEditor?.setValue(operationString);
+            variableEditor?.setValue('');
+            headerEditor?.setValue('');
+          }
+
           return;
         }
 
