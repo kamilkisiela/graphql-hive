@@ -55,7 +55,7 @@ export default {
       return;
     }
 
-    await schemaCleanupTrackerMigration(connection);
+    await schemaCoordinateStatusMigration(connection);
   },
 } satisfies MigrationExecutor;
 
@@ -86,7 +86,7 @@ function diffSchemaCoordinates(
   };
 }
 
-export async function schemaCleanupTrackerMigration(connection: CommonQueryMethods) {
+export async function schemaCoordinateStatusMigration(connection: CommonQueryMethods) {
   // Fetch targets
   const targetResult = await connection.query<{ id: string }>(sql`
     SELECT id FROM targets WHERE ID NOT IN (SELECT target_id FROM schema_coordinate_status)
