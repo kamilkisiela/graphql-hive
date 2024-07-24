@@ -8,6 +8,7 @@ export function publishGraphQLSchema(args: {
   version: {
     commit: string;
   };
+  schemaPath: string;
 }) {
   const command =
     `schema:publish` +
@@ -18,7 +19,7 @@ export function publishGraphQLSchema(args: {
     'publish-graphql-schema',
     {
       create:
-        `docker run --name "publish-graphql-schema" -v ./schema.graphqls:/usr/src/app/schema.graphqls ghcr.io/kamilkisiela/graphql-hive/cli:0.36.0 ` +
+        `docker run --name "publish-graphql-schema" -v ${args.schemaPath}:/usr/src/app/schema.graphqls ghcr.io/kamilkisiela/graphql-hive/cli:0.36.0 ` +
         command,
     },
     {

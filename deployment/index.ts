@@ -41,6 +41,14 @@ const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
 if (!imagesTag) {
   throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
 }
+
+// eslint-disable-next-line no-process-env
+const graphqlSchemaAbsolutePath = process.env.GRAPHQL_SCHEMA_ABSOLUTE_PATH as string;
+
+if (!graphqlSchemaAbsolutePath) {
+  throw new Error(`GRAPHQL_SCHEMA_ABSOLUTE_PATH env variable is not set.`);
+}
+
 // eslint-disable-next-line no-process-env
 let HIVE_APP_USE_PERSISTED_DOCUMENTS = process.env.HIVE_APP_USE_PERSISTED_DOCUMENTS;
 
@@ -248,6 +256,7 @@ publishGraphQLSchema({
   version: {
     commit: imagesTag,
   },
+  schemaPath: graphqlSchemaAbsolutePath,
 });
 
 const app = deployApp({
