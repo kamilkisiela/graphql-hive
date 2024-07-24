@@ -1,5 +1,6 @@
 import { getAuthorisationURLWithQueryParamsAndSetState } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { env } from '@/env/frontend';
+import { updateLastAuthMethod } from './last-auth-method';
 
 /**
  * utility for starting the login flow manually without clicking a button
@@ -24,6 +25,8 @@ export const startAuthFlowForProvider = async (
     thirdPartyId,
     frontendRedirectURI: `${env.appBaseUrl}/auth/callback/${thirdPartyId}${redirectPart}`,
   });
+
+  updateLastAuthMethod(thirdPartyId);
 
   window.location.assign(authUrl);
 };
