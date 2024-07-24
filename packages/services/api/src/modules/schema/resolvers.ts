@@ -38,8 +38,6 @@ import { type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import { buildASTSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { OperationsManager } from '../operations/providers/operations-manager';
-import { OrganizationManager } from '../organization/providers/organization-manager';
-import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
@@ -138,37 +136,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async schemaCompose(_, { input }, { injector }) {
-      const [organization, project, target] = await Promise.all([
-        injector.get(OrganizationManager).getOrganizationIdByToken(),
-        injector.get(ProjectManager).getProjectIdByToken(),
-        injector.get(TargetManager).getTargetIdByToken(),
-      ]);
-
-      const result = await injector.get(SchemaManager).compose({
-        onlyComposable: input.useLatestComposableVersion === true,
-        services: input.services,
-        organization,
-        project,
-        target,
-      });
-
-      if (result.kind === 'error') {
-        return {
-          __typename: 'SchemaComposeError',
-          message: result.message,
-        };
-      }
-
-      return {
-        __typename: 'SchemaComposeSuccess',
-        valid: 'supergraphSDL' in result && result.supergraphSDL !== null,
-        compositionResult: {
-          errors: result.errors,
-          supergraphSdl: result.supergraphSDL,
-        },
-      };
-    },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
