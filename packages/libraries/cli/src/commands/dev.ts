@@ -169,19 +169,6 @@ export default class Dev extends Command {
   async run() {
     const { flags } = await this.parse(Dev);
 
-    const registry = this.ensure({
-      key: 'registry.endpoint',
-      legacyFlagName: 'registry',
-      args: flags,
-      defaultValue: graphqlEndpoint,
-      env: 'HIVE_REGISTRY',
-    });
-    const token = this.ensure({
-      key: 'registry.accessToken',
-      legacyFlagName: 'token',
-      args: flags,
-      env: 'HIVE_TOKEN',
-    });
     const { unstable__forceLatest } = flags;
 
     if (flags.service.length !== flags.url.length) {
@@ -204,53 +191,89 @@ export default class Dev extends Command {
     });
 
     if (flags.watch === true) {
+      if (isRemote) {
+        const registry = this.ensure({
+          key: 'registry.endpoint',
+          legacyFlagName: 'registry',
+          args: flags,
+          defaultValue: graphqlEndpoint,
+          env: 'HIVE_REGISTRY',
+        });
+        const token = this.ensure({
+          key: 'registry.accessToken',
+          legacyFlagName: 'token',
+          args: flags,
+          env: 'HIVE_TOKEN',
+        });
+
+        void this.watch(flags.watchInterval, serviceInputs, services =>
+          this.compose({
+            services,
+            registry,
+            token,
+            write: flags.write,
+            unstable__forceLatest,
+            onError: message => {
+              this.fail(message);
+            },
+          }),
+        );
+
+        return;
+      }
+
       void this.watch(flags.watchInterval, serviceInputs, services =>
-        isRemote
-          ? this.compose({
-              services,
-              registry,
-              token,
-              write: flags.write,
-              unstable__forceLatest,
-              onError: message => {
-                this.fail(message);
-              },
-            })
-          : this.composeLocally({
-              services,
-              write: flags.write,
-              onError: message => {
-                this.fail(message);
-              },
-            }),
+        this.composeLocally({
+          services,
+          write: flags.write,
+          onError: message => {
+            this.fail(message);
+          },
+        }),
       );
       return;
     }
 
     const services = await this.resolveServices(serviceInputs);
 
-    return isRemote
-      ? this.compose({
-          services,
-          registry,
-          token,
-          write: flags.write,
-          unstable__forceLatest,
-          onError: message => {
-            this.error(message, {
-              exit: 1,
-            });
-          },
-        })
-      : this.composeLocally({
-          services,
-          write: flags.write,
-          onError: message => {
-            this.error(message, {
-              exit: 1,
-            });
-          },
+    if (isRemote) {
+      const registry = this.ensure({
+        key: 'registry.endpoint',
+        legacyFlagName: 'registry',
+        args: flags,
+        defaultValue: graphqlEndpoint,
+        env: 'HIVE_REGISTRY',
+      });
+      const token = this.ensure({
+        key: 'registry.accessToken',
+        legacyFlagName: 'token',
+        args: flags,
+        env: 'HIVE_TOKEN',
+      });
+
+      return this.compose({
+        services,
+        registry,
+        token,
+        write: flags.write,
+        unstable__forceLatest,
+        onError: message => {
+          this.error(message, {
+            exit: 1,
+          });
+        },
+      });
+    }
+
+    return this.composeLocally({
+      services,
+      write: flags.write,
+      onError: message => {
+        this.error(message, {
+          exit: 1,
         });
+      },
+    });
   }
 
   private async composeLocally(input: {
