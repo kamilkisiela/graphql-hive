@@ -131,7 +131,7 @@ jobs:
   publish_docker:
     needs: [extract-cli-version]
     uses: ./.github/workflows/build-and-dockerize.yaml
-    if: needs.extract-cli-version.outputs.published
+    if: needs.extract-cli-version.outputs.published == 'true'
     with:
       imageTag: ${{ needs.extract-cli-version.outputs.version }}
       publishSourceMaps: false
