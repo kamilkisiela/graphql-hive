@@ -49,7 +49,6 @@ import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-cha
 import { ContractsManager } from './providers/contracts-manager';
 import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
-import { SchemaPublisher } from './providers/schema-publisher';
 import { SchemaVersionHelper } from './providers/schema-version-helper';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
 
@@ -136,22 +135,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async updateSchemaVersionStatus(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      return injector.get(SchemaPublisher).updateVersionStatus({
-        version: input.version,
-        valid: input.valid,
-        organization,
-        project,
-        target,
-      });
-    },
     async updateBaseSchema(_, { input }, { injector }) {
       const UpdateBaseSchemaModel = z.object({
         newBase: MaybeModel(GraphQLSchemaStringModel),
