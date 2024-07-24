@@ -4,7 +4,7 @@ on:
 jobs:
   # Release alpha version on NPM for Hive libraries
   npm:
-    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@feat-export-outputs
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
     with:
       npmTag: alpha
       buildScript: build:libraries
