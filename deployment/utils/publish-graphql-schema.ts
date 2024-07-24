@@ -10,14 +10,15 @@ export function publishGraphQLSchema(args: {
   };
 }) {
   const command =
+    `schema:publish` +
     ` --registry.endpoint ${args.registry.endpoint} --registry.accessToken ${args.registry.accessToken}` +
-    ` schema:publish --commit ${args.version.commit} --author "Hive CD" ./schema.graphql`;
+    ` --commit ${args.version.commit} --author "Hive CD" /schema.graphqls`;
 
   return new local.Command(
     'publish-graphql-schema',
     {
       create:
-        `docker run --name "publish-graphql-schema" ghcr.io/kamilkisiela/graphql-hive/cli:0.36.0 ` +
+        `docker run --name "publish-graphql-schema" -v ./schema.graphqls:/schema.graphqls ghcr.io/kamilkisiela/graphql-hive/cli:0.36.0 ` +
         command,
     },
     {
