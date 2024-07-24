@@ -37,7 +37,6 @@ import { type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import { buildASTSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { OperationsManager } from '../operations/providers/operations-manager';
-import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
@@ -131,32 +130,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Query: {
-    async testExternalSchemaComposition(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organizationId, projectId] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-      ]);
-
-      const schemaManager = injector.get(SchemaManager);
-
-      const result = await schemaManager.testExternalSchemaComposition({
-        organizationId,
-        projectId,
-      });
-
-      if (result.kind === 'success') {
-        return {
-          ok: result.project,
-        };
-      }
-
-      return {
-        error: {
-          message: result.error,
-        },
-      };
-    },
     async schemaVersionForActionId(_, { actionId }, { injector }) {
       return injector.get(SchemaManager).getSchemaVersionByActionId({
         actionId,
