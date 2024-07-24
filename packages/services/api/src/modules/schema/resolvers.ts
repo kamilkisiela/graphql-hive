@@ -130,27 +130,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  Mutation: {
-    async disableContract(_, args, context) {
-      const result = await context.injector.get(ContractsManager).disableContract({
-        contractId: args.input.contractId,
-      });
-
-      if (result.type === 'success') {
-        return {
-          ok: {
-            disabledContract: result.contract,
-          },
-        };
-      }
-
-      return {
-        error: {
-          message: result.message,
-        },
-      };
-    },
-  },
   Query: {
     async latestVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
