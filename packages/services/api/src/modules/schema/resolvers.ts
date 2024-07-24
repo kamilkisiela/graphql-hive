@@ -131,20 +131,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async enableExternalSchemaComposition(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-      ]);
-
-      return injector.get(SchemaManager).enableExternalSchemaComposition({
-        project,
-        organization,
-        endpoint: input.endpoint,
-        secret: input.secret,
-      });
-    },
     async updateNativeFederation(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
