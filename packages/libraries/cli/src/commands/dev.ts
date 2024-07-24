@@ -101,7 +101,7 @@ export default class Dev extends Command {
     }),
     /** @deprecated */
     registry: Flags.string({
-      description: 'registry address',
+      description: 'registry address (deprecated in favor of --registry.endpoint)',
       deprecated: {
         message: 'use --registry.endpoint instead',
         version: '0.21.0',
@@ -114,7 +114,7 @@ export default class Dev extends Command {
     }),
     /** @deprecated */
     token: Flags.string({
-      description: 'api token',
+      description: 'api token (deprecated in favor of --registry.accessToken)',
       deprecated: {
         message: 'use --registry.accessToken instead',
         version: '0.21.0',
