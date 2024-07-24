@@ -1,5 +1,4 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Observability } from '../services/observability';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBilling } from './billing';
