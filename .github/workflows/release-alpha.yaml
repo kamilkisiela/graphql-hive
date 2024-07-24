@@ -130,13 +130,8 @@ jobs:
 
   publish_docker:
     needs: [extract-cli-version]
-    uses: ./.github/workflows/build-and-dockerize.yaml
+    uses: ./.github/workflows/dockerize-cli.yaml
     if: ${{ needs.extract-cli-version.outputs.published == 'true' }}
     with:
-      imageTag: ${{ needs.extract-cli-version.outputs.version }}
-      publishSourceMaps: false
-      publishLatest: false
-      publishPrComment: false
-      targets: cli
-      uploadJavaScriptArtifacts: false
+      cliVersion: ${{ needs.extract-cli-version.outputs.version }}
     secrets: inherit
