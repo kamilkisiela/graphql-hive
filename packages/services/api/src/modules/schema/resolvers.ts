@@ -141,41 +141,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async approveFailedSchemaCheck(_, { input }, { injector }) {
-      const [organizationId, projectId, targetId] = await Promise.all([
-        injector.get(IdTranslator).translateOrganizationId(input),
-        injector.get(IdTranslator).translateProjectId(input),
-        injector.get(IdTranslator).translateTargetId(input),
-      ]);
-
-      const result = await injector.get(SchemaManager).approveFailedSchemaCheck({
-        organizationId,
-        projectId,
-        targetId,
-        schemaCheckId: input.schemaCheckId,
-        comment: input.comment,
-      });
-
-      if (result.type === 'error') {
-        return {
-          error: {
-            message: result.reason,
-          },
-        };
-      }
-
-      return {
-        ok: {
-          schemaCheck: toGraphQLSchemaCheck(
-            {
-              organizationId,
-              projectId,
-            },
-            result.schemaCheck,
-          ),
-        },
-      };
-    },
     async schemaPublish(_, { input }, { injector, request }, info) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
