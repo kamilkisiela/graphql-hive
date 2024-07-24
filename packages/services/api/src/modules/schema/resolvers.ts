@@ -31,7 +31,6 @@ import {
   Kind,
   print,
 } from 'graphql';
-import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type * as Types from '../../__generated__/types';
 import { type DateRange } from '../../shared/entities';
@@ -51,9 +50,6 @@ import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaVersionHelper } from './providers/schema-version-helper';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
-
-const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
-const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 
 function isSchemaCoordinateUsageForUnusedExplorer(
   value: unknown,
@@ -135,43 +131,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async updateBaseSchema(_, { input }, { injector }) {
-      const UpdateBaseSchemaModel = z.object({
-        newBase: MaybeModel(GraphQLSchemaStringModel),
-      });
-
-      const result = UpdateBaseSchemaModel.safeParse(input);
-
-      if (!result.success) {
-        return {
-          error: {
-            message:
-              result.error.formErrors.fieldErrors?.newBase?.[0] ?? 'Please check your input.',
-          },
-        };
-      }
-
-      const schemaManager = injector.get(SchemaManager);
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      const selector = { organization, project, target };
-      await schemaManager.updateBaseSchema(selector, input.newBase ? input.newBase : null);
-
-      return {
-        ok: {
-          updatedTarget: await injector.get(TargetManager).getTarget({
-            organization,
-            target,
-            project,
-          }),
-        },
-      };
-    },
     async disableExternalSchemaComposition(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
