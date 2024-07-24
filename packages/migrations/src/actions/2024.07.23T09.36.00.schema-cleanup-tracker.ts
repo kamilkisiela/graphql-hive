@@ -11,6 +11,7 @@ import {
   isUnionType,
 } from 'graphql';
 import { sql, type CommonQueryMethods } from 'slonik';
+import { env } from '../environment';
 import type { MigrationExecutor } from '../pg-migrator';
 
 export default {
@@ -41,7 +42,11 @@ export default {
         deprecated_at
       );  
     `);
-    console.log('Schema cleanup tracker table created');
+
+    if (env.isHiveCloud) {
+      console.log('Skipping schema coordinate status migration for hive cloud');
+      return;
+    }
 
     const schemaVersionsTotal = await connection.oneFirst<number>(sql`
       SELECT count(*) as total FROM schema_versions
