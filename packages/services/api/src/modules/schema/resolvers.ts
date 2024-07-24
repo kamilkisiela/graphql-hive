@@ -131,15 +131,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Query: {
-    async latestValidVersion(_, __, { injector }) {
-      const target = await injector.get(TargetManager).getTargetFromToken();
-
-      return injector.get(SchemaManager).getMaybeLatestValidVersion({
-        organization: target.orgId,
-        project: target.projectId,
-        target: target.id,
-      });
-    },
     async testExternalSchemaComposition(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organizationId, projectId] = await Promise.all([
