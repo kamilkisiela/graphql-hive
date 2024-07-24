@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import type {
   GraphQLEnumTypeMapper,
   GraphQLInputObjectTypeMapper,
@@ -38,7 +37,6 @@ import type * as Types from '../../__generated__/types';
 import { type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import { buildASTSchema, createConnection, createDummyConnection } from '../../shared/schema';
-import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
@@ -140,46 +138,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async schemaDelete(_, { input }, { injector, request }) {
-      const [organization, project, target] = await Promise.all([
-        injector.get(OrganizationManager).getOrganizationIdByToken(),
-        injector.get(ProjectManager).getProjectIdByToken(),
-        injector.get(TargetManager).getTargetFromToken(),
-      ]);
-
-      const token = injector.get(AuthManager).ensureApiToken();
-
-      const checksum = createHash('md5')
-        .update(
-          stringify({
-            ...input,
-            serviceName: input.serviceName.toLowerCase(),
-          }),
-        )
-        .update(token)
-        .digest('base64');
-
-      const result = await injector.get(SchemaPublisher).delete(
-        {
-          dryRun: input.dryRun,
-          serviceName: input.serviceName.toLowerCase(),
-          organization,
-          project,
-          target,
-          checksum,
-        },
-        request.signal,
-      );
-
-      return {
-        ...result,
-        changes: result.changes,
-        errors: result.errors?.map(error => ({
-          ...error,
-          path: 'path' in error ? error.path?.split('.') : null,
-        })),
-      };
-    },
     async schemaCompose(_, { input }, { injector }) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
