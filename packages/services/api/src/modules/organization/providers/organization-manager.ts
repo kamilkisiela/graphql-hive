@@ -4,12 +4,13 @@ import { paramCase } from 'param-case';
 import { Organization, OrganizationMemberRole } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { cache, diffArrays, share } from '../../../shared/helpers';
-import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { BillingProvider } from '../../billing/providers/billing.provider';
+import { OIDCIntegrationsProvider } from '../../oidc-integrations/providers/oidc-integrations.provider';
+import { ActivityManager } from '../../shared/providers/activity-manager';
 import { Emails, mjml } from '../../shared/providers/emails';
 import { Logger } from '../../shared/providers/logger';
 import type { OrganizationSelector } from '../../shared/providers/storage';
@@ -63,6 +64,7 @@ export class OrganizationManager {
     private tokenStorage: TokenStorage,
     private activityManager: ActivityManager,
     private billingProvider: BillingProvider,
+    private oidcIntegrationProvider: OIDCIntegrationsProvider,
     private emails: Emails,
     @Inject(WEB_APP_URL) private appBaseUrl: string,
   ) {
@@ -614,8 +616,9 @@ export class OrganizationManager {
     this.logger.info('Joining an organization (code=%s)', code);
 
     const user = await this.authManager.getCurrentUser();
+    const isOIDCUser = user.oidcIntegrationId !== null;
 
-    if (user.oidcIntegrationId !== null) {
+    if (isOIDCUser) {
       return {
         message: `You cannot join an organization with an OIDC account.`,
       };
@@ -627,6 +630,18 @@ export class OrganizationManager {
 
     if ('message' in organization) {
       return organization;
+    }
+
+    if (this.oidcIntegrationProvider.isEnabled()) {
+      const oidcIntegration = await this.storage.getOIDCIntegrationForOrganization({
+        organizationId: organization.id,
+      });
+
+      if (oidcIntegration?.oidcUserAccessOnly && !isOIDCUser) {
+        return {
+          message: 'Non-OIDC users are not allowed to join this organization.',
+        };
+      }
     }
 
     this.logger.debug('Adding member (organization=%s, code=%s)', organization.id, code);

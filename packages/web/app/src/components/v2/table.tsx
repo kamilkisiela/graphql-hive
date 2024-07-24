@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 function Table({ children, className, ...props }: ComponentProps<'table'>): ReactElement {
   return (
-    <table className={cn('w-full', className)} {...props}>
+    <table className={cn('w-full overflow-hidden', className)} {...props}>
       {children}
     </table>
   );

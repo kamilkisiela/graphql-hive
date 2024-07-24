@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-import * as fs from 'fs';
 import got from 'got';
-import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
+import { GraphQLError, stripIgnoredCharacters } from 'graphql';
 import supertokens from 'supertokens-node';
 import {
   errorHandler as supertokensErrorHandler,
@@ -21,6 +20,7 @@ import { createRedisClient } from '@hive/api/src/modules/shared/providers/redis'
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
+import { createIsAppDeploymentActive } from '@hive/cdn-script/is-app-deployment-active';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
   configureTracing,
@@ -379,13 +379,6 @@ export async function main() {
       pubSub,
     });
 
-    let persistedOperations: Record<string, DocumentNode | string> | null = null;
-    if (env.graphql.persistedOperationsPath) {
-      persistedOperations = JSON.parse(
-        fs.readFileSync(env.graphql.persistedOperationsPath, 'utf-8'),
-      );
-    }
-
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -400,9 +393,9 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
+      hivePersistedDocumentsConfig: env.hivePersistedDocuments,
       tracing,
       logger: logger as any,
-      persistedOperations,
     });
 
     server.route({
@@ -542,14 +535,12 @@ export async function main() {
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
-        async getArtifactAction(targetId, contractName, artifactType, eTag) {
-          return artifactStorageReader.generateArtifactReadUrl(
-            targetId,
-            contractName,
-            artifactType,
-            eTag,
-          );
-        },
+        artifactStorageReader,
+        isAppDeploymentActive: createIsAppDeploymentActive({
+          artifactStorageReader,
+          getCache: null,
+          waitUntil: null,
+        }),
       });
       const artifactRouteHandler = createServerAdapter(
         // TODO: remove `as any` once the fallback logic in packages/services/cdn-worker/src/artifact-handler.ts is removed

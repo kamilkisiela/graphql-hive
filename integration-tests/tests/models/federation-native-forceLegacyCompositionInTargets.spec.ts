@@ -301,9 +301,7 @@ describe('publish', () => {
 
       expect(output).toEqual(expect.stringContaining(`v Published initial schema.`));
       expect(output).toEqual(
-        expect.stringContaining(
-          `i Available at http://localhost:8080/$organization/$project/$target`,
-        ),
+        expect.stringContaining(`i Available at $appUrl/$organization/$project/$target`),
       );
 
       output = normalizeCliOutput(
@@ -327,7 +325,7 @@ describe('publish', () => {
       expect(output).toEqual(expect.stringContaining(`v Schema published`));
       expect(output).toEqual(
         expect.stringContaining(
-          `i Available at http://localhost:8080/$organization/$project/$target/history/$version`,
+          `i Available at $appUrl/$organization/$project/$target/history/$version`,
         ),
       );
     });

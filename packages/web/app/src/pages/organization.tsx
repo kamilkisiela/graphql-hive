@@ -6,7 +6,6 @@ import { Globe, History } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
-import { Activities } from '@/components/ui/activities';
 import { Card } from '@/components/ui/card';
 import { EmptyList } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
@@ -309,7 +308,7 @@ function OrganizationPageContent(props: { organizationId: string }) {
                 docsUrl="/management/projects#create-a-new-project"
               />
             ) : (
-              <div className="grid grid-cols-2 items-stretch gap-5">
+              <div className="grid grid-cols-2 items-stretch gap-5 xl:grid-cols-3">
                 {projects.nodes
                   .sort((a, b) => {
                     const diffOperations = b.totalRequests - a.totalRequests;
@@ -338,7 +337,7 @@ function OrganizationPageContent(props: { organizationId: string }) {
               </div>
             )
           ) : (
-            <div className="grid grid-cols-2 items-stretch gap-5">
+            <div className="grid grid-cols-2 items-stretch gap-5 xl:grid-cols-3">
               {Array.from({ length: 4 }).map((_, index) => (
                 <ProjectCard
                   key={index}
@@ -353,7 +352,6 @@ function OrganizationPageContent(props: { organizationId: string }) {
             </div>
           )}
         </div>
-        <Activities organizationId={props.organizationId} />
       </>
     </OrganizationLayout>
   );

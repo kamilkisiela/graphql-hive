@@ -77,7 +77,7 @@ jobs:
         working-directory: packages/libraries/cli
         env:
           VERSION: ${{ steps.cli.outputs.version }}
-        run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION --win
+        run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION
 
   publish_docker:
     needs: publish

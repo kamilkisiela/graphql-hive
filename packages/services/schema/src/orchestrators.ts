@@ -362,10 +362,13 @@ async function callExternalService(
         }
 
         logger.info(
-          'Network error so return failure (status=%s, message=%s)',
+          'Network error so return failure (url=%s, status=%s, message=%s)',
+          input.url,
           error.response.statusCode,
           error.message,
         );
+
+        logger.error(error);
 
         span.setAttribute('error.message', error.message || '');
         span.setAttribute('error.type', error.name);

@@ -1,4 +1,4 @@
-import { Callout } from '@theguild/components'
+import { Callout, Tabs } from '@theguild/components'
 
 # Hive CLI (Command Line Interface)
 
@@ -25,22 +25,42 @@ npm i -D @graphql-hive/cli
 If you are running a non-JavaScript project, you can download the prebuilt binary of Hive CLI using
 the following command:
 
-```sh
-curl -sSL https://graphql-hive.com/install.sh | sh
-```
+<Tabs items={['MacOS / Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```sh
+    curl -sSL https://graphql-hive.com/install.sh | sh
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ```sh
+    powershell -c "irm https://graphql-hive.com/install.ps1 | iex"
+    ```
+  </Tabs.Tab>
+</Tabs>
 
 #### Specific version
 
 You can also download a specific version of the binary:
 
-```sh
-curl -sSL https://graphql-hive.com/install.sh | sh -s "0.31.0"
-# or
-curl -sSL https://graphql-hive.com/install.sh | HIVE_CLI_VERSION="0.31.0" sh
-# or
-export HIVE_CLI_VERSION="0.31.0"
-curl -sSL https://graphql-hive.com/install.sh | sh
-```
+<Tabs items={['MacOS / Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```sh
+    curl -sSL https://graphql-hive.com/install.sh | sh -s "0.31.0"
+    # or
+    curl -sSL https://graphql-hive.com/install.sh | HIVE_CLI_VERSION="0.31.0" sh
+    # or
+    export HIVE_CLI_VERSION="0.31.0"
+    curl -sSL https://graphql-hive.com/install.sh | sh
+    ```
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+    ```sh
+    $env:HIVE_CLI_VERSION="0.31.0"; powershell -c "irm https://graphql-hive.com/install.ps1 | iex"
+    ```
+  </Tabs.Tab>
+</Tabs>
 
 ## Usage
 
@@ -189,14 +209,21 @@ In case you want to confirm deletion of the service without typing anything in t
 
 ### Develop schema locally
 
-<Callout type="info" emoji="🔑">
-  This CLI command requires an active registry token with **Read** permissions to the target and the
-  project.
-</Callout>
+When developing subgraphs locally, you might want to compose a supergraph with your local subgraph
+changes. GraphQL Hive helps you to do that with the `hive dev` command.
 
 <Callout type="info">This action is only available for Apollo Federation projects.</Callout>
 
-This command enables you to replace the subgraph(s) available in the Registry with your local
+<details>
+
+<summary>Remote mode</summary>
+
+<Callout type="info" emoji="🔑">
+  This CLI command requires an active registry token with **Read** permissions to the target and the
+  project, to preform a composition according to your project configuration.
+</Callout>
+
+This mode enables you to replace the subgraph(s) available in the Registry with your local
 subgraph(s) and compose a Supergraph.
 
 ```mermaid
@@ -231,6 +258,59 @@ the gateway.
 
 ```bash
 # Introspect the SDL of the local service
+hive dev --remote --service reviews --url http://localhost:3001/graphql
+
+# Watch mode
+hive dev --remote --watch --service reviews --url http://localhost:3001/graphql
+
+# Provide the SDL of the local service
+hive dev --remote --service reviews --url http://localhost:3001/graphql --schema reviews.graphql
+
+# or with multiple services
+hive dev \
+  --remote \
+  --service reviews --url http://localhost:3001/graphql \
+  --service products --url http://localhost:3002/graphql --schema products.graphql
+
+# Custom output file (default: supergraph.graphql)
+hive dev --remote --service reviews --url http://localhost:3001/graphql --write local-supergraph.graphql
+```
+
+**Usage example**
+
+Let's say you have two subgraphs, `reviews` and `products`, and you want to test the `reviews`
+service.
+
+First, you need to start the `reviews` service locally and then run the following command:
+
+```bash
+hive dev --remote --watch --service reviews --url http://localhost:3001/graphql
+```
+
+This command will fetch subgraph's schema from the provided URL, replace the original `reviews`
+subgraph from the Registry with the local one, and compose a supergraph. The outcome will be saved
+in the `supergraph.graphql` file.
+
+The `products` subgraph will stay untoched, meaing that the gateway will route requests to its
+remote endpoint.
+
+> The `--watch` flag will keep the process running and update the supergraph whenever the local
+> schema changes.
+
+Now you're ready to use the `supergraph.graphql` file in your gateway and execute queries.
+
+</details>
+
+This mode enables you to compose a Supergraph with your local subgraph(s).
+
+Rather than uploading your local schema to the registry and retrieving the supergraph from the CDN,
+you can integrate your local modifications directly into the supergraph.
+
+The result of executing this command is a file containing the Supergraph SDL, which can be feed into
+the gateway.
+
+```bash
+# Introspect the SDL of the local service
 hive dev --service reviews --url http://localhost:3001/graphql
 
 # Watch mode
@@ -248,7 +328,7 @@ hive dev \
 hive dev --service reviews --url http://localhost:3001/graphql --write local-supergraph.graphql
 ```
 
-#### Usage example
+**Usage example**
 
 Let's say you have two subgraphs, `reviews` and `products`, and you want to test the `reviews`
 service.
@@ -259,12 +339,10 @@ First, you need to start the `reviews` service locally and then run the followin
 hive dev --watch --service reviews --url http://localhost:3001/graphql
 ```
 
-This command will fetch subgraph's schema from the provided URL, replace the original `reviews`
-subgraph from the Registry with the local one, and compose a supergraph. The outcome will be saved
-in the `supergraph.graphql` file.
+This command will fetch subgraph's schema from the provided URL and compose a supergraph. The
+outcome will be saved in the `supergraph.graphql` file.
 
-The `products` subgraph will stay untoched, meaing that the gateway will route requests to its
-remote endpoint.
+The `products` subgraph will be omitted from the supergraph.
 
 > The `--watch` flag will keep the process running and update the supergraph whenever the local
 > schema changes.

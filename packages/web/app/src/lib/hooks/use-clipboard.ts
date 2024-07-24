@@ -1,22 +1,31 @@
 import { useCallback } from 'react';
-import { useNotifications } from './use-notifications';
+import { useToast } from '@/components/ui/use-toast';
 
 export function useClipboard() {
-  const notify = useNotifications();
+  const { toast } = useToast();
 
   return useCallback(
     async (text: string): Promise<void> => {
       if (!navigator?.clipboard) {
-        notify('Access to clipboard rejected!', 'error');
+        toast({
+          title: 'Clipboard not supported',
+          description: 'Your browser does not support clipboard operations.',
+          variant: 'destructive',
+        });
         return;
       }
       try {
         await navigator.clipboard.writeText(text);
-        notify('Copied to clipboard!', 'success');
+        toast({
+          title: 'Copied to clipboard',
+        });
       } catch {
-        notify('Failed to copy!', 'error');
+        toast({
+          title: 'Failed to copy',
+          variant: 'destructive',
+        });
       }
     },
-    [notify],
+    [toast],
   );
 }

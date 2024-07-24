@@ -84,11 +84,6 @@
     @apply border-border;
   }
 
-  html,
-  body {
-    height: 100%;
-  }
-
   body {
     @apply text-foreground bg-[#030711];
     font-feature-settings:

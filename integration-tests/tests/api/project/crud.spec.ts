@@ -4,7 +4,7 @@ import { initSeed } from '../../../testkit/seed';
 
 test.concurrent(
   'creating a project should result in creating the development, staging and production targets',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { targets } = await createProject(ProjectType.Single);
@@ -31,7 +31,7 @@ test.concurrent(
   },
 );
 
-test.concurrent('renaming a project should result changing its cleanId', async () => {
+test.concurrent('renaming a project should result changing its cleanId', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { project } = await createProject(ProjectType.Single);

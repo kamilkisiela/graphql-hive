@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery } from 'urql';
+import { HiveLogo } from '@/components/ui/icon';
 import { Meta } from '@/components/ui/meta';
 import { QueryError } from '@/components/ui/query-error';
-import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import {
   useLastVisitedOrganizationReader,
@@ -55,7 +55,7 @@ export function IndexPage() {
   return (
     <>
       <Meta title="Welcome" />
-      <div className="flex size-full flex-row items-center justify-center">
+      <div className="flex size-full h-[100vh] flex-row items-center justify-center">
         <HiveLogo animated={false} className="size-16 animate-pulse" />
       </div>
     </>

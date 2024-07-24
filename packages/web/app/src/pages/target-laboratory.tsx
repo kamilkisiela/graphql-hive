@@ -333,7 +333,7 @@ function LaboratoryPageContent(props: {
       projectId={props.projectId}
       targetId={props.targetId}
       page={Page.Laboratory}
-      className="flex h-[--content-height] flex-col"
+      className="flex h-[--content-height] flex-col pb-0"
     >
       <div className="flex py-6">
         <div className="flex-1">
@@ -429,7 +429,7 @@ function LaboratoryPageContent(props: {
         `}</style>
       </Helmet>
 
-      {!query.fetching && (
+      {!query.fetching && !query.stale && (
         <GraphiQL
           fetcher={fetcher}
           toolbar={{

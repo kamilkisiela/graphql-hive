@@ -189,6 +189,7 @@ export interface Organization {
      * @deprecated This feature flag should be removed once no longer needed.
      */
     forceLegacyCompositionInTargets: string[];
+    appDeployments: boolean;
   };
   zendeskId: string | null;
 }
@@ -216,6 +217,7 @@ export interface OIDCIntegration {
   tokenEndpoint: string;
   userinfoEndpoint: string;
   authorizationEndpoint: string;
+  oidcUserAccessOnly: boolean;
 }
 
 export interface CDNAccessToken {
@@ -384,17 +386,6 @@ export interface Orchestrator {
       contracts: ContractsInputType | null;
     },
   ): Promise<ComposeAndValidateResult>;
-}
-
-export interface ActivityObject {
-  id: string;
-  type: string;
-  meta: any;
-  createdAt: Date;
-  target?: Target;
-  project?: Project;
-  organization: Organization;
-  user?: User;
 }
 
 export interface AlertChannel {

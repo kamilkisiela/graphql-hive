@@ -259,14 +259,20 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
       url: string;
       sdl: string;
     }>;
+    remote: boolean;
     write?: string;
     useLatestVersion?: boolean;
   }) {
     return dev([
-      '--registry.accessToken',
-      tokens.readonly,
+      ...(input.remote
+        ? [
+            '--remote',
+            '--registry.accessToken',
+            tokens.readonly,
+            input.useLatestVersion ? '--unstable__forceLatest' : '',
+          ]
+        : []),
       input.write ? `--write ${input.write}` : '',
-      input.useLatestVersion ? '--unstable__forceLatest' : '',
       ...(await Promise.all(
         input.services.map(async ({ name, url, sdl }) => {
           return [

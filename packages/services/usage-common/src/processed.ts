@@ -4,7 +4,7 @@ export type ProcessedReport = ProcessedOperation[];
 
 export interface ProcessedOperation {
   target: string;
-  organization: string | null;
+  organization: string;
   operationHash: string;
   timestamp: number;
   expiresAt: number;
@@ -14,7 +14,7 @@ export interface ProcessedOperation {
 
 export interface ProcessedSubscriptionOperation {
   target: string;
-  organization: string | null;
+  organization: string;
   operationHash: string;
   timestamp: number;
   expiresAt: number;
@@ -31,4 +31,11 @@ export interface ProcessedRegistryRecord {
   timestamp: number;
   expires_at: number;
   coordinates: string[];
+}
+
+export interface ProcessedAppDeploymentUsageRecord {
+  target: string;
+  appName: string;
+  appVersion: string;
+  lastRequestTimestamp: number;
 }

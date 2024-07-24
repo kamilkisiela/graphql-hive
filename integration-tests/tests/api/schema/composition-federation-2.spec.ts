@@ -1,13 +1,13 @@
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { enableExternalSchemaComposition } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
-import { generateUnique } from '../../../testkit/utils';
+import { generateUnique, getServiceHost } from '../../../testkit/utils';
 
 // We do not resolve this to a host address, because we are calling this through a different flow:
 // GraphQL API -> Schema service -> Composition service
-const dockerAddress = `composition_federation_2:3069`;
+const dockerAddress = await getServiceHost('composition_federation_2', 3069, false);
 
-test.concurrent('call an external service to compose and validate services', async () => {
+test.concurrent('call an external service to compose and validate services', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, setNativeFederation } = await createProject(ProjectType.Federation);

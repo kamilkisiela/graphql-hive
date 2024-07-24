@@ -5,6 +5,7 @@ import { compress } from '@hive/usage-common';
 import * as Sentry from '@sentry/node';
 import { writeDuration } from './metrics';
 import {
+  appDeploymentUsageOrder,
   joinIntoSingleMessage,
   operationsOrder,
   registryOrder,
@@ -24,6 +25,7 @@ export interface ClickHouseConfig {
 const operationsFields = operationsOrder.join(', ');
 const subscriptionOperationsFields = subscriptionOperationsOrder.join(', ');
 const registryFields = registryOrder.join(', ');
+const appDeploymentUsageFields = appDeploymentUsageOrder.join(', ');
 
 const agentConfig: Agent.HttpOptions = {
   // Keep sockets around in a pool to be used by other requests in the future
@@ -101,6 +103,23 @@ export function createWriter({
         clickhouse,
         agents,
         `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
+        compressed,
+        logger,
+        3,
+      );
+    },
+    async writeAppDeploymentUsage(records: string[]) {
+      if (records.length === 0) {
+        return;
+      }
+
+      const csv = joinIntoSingleMessage(records);
+      const compressed = await compress(csv);
+
+      await writeCsv(
+        clickhouse,
+        agents,
+        `INSERT INTO "app_deployment_usage" (${appDeploymentUsageFields}) FORMAT CSV`,
         compressed,
         logger,
         3,

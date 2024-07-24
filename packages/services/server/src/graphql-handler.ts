@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { FastifyBaseLogger, FastifyReply, FastifyRequest, RouteHandlerMethod } from 'fastify';
 import {
-  DocumentNode,
   GraphQLError,
   Kind,
   print,
@@ -19,13 +18,12 @@ import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useSentry } from '@envelop/sentry';
 import { useHive } from '@graphql-hive/yoga';
-import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId, type TracingInstance } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
 import { asyncStorage } from './async-storage';
-import type { HiveConfig } from './environment';
+import type { HiveConfig, HivePersistedDocumentsConfig } from './environment';
 import { resolveUser, type SupertokensSession } from './supertokens';
 import { useArmor } from './use-armor';
 import { extractUserId, useSentryUser } from './use-sentry-user';
@@ -47,9 +45,9 @@ export interface GraphQLHandlerOptions {
   };
   isProduction: boolean;
   hiveConfig: HiveConfig;
+  hivePersistedDocumentsConfig: HivePersistedDocumentsConfig;
   release: string;
   logger: FastifyBaseLogger;
-  persistedOperations: Record<string, DocumentNode | string> | null;
 }
 
 interface Context extends RegistryContext {
@@ -92,20 +90,9 @@ function useNoIntrospection(params: {
 }
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
-  const { persistedOperations } = options;
   const server = createYoga<Context>({
     logging: options.logger,
     plugins: [
-      persistedOperations
-        ? usePersistedOperations({
-            allowArbitraryOperations: true,
-            skipDocumentValidation: true,
-            getPersistedOperation(key) {
-              const document = persistedOperations[key] ?? null;
-              return document;
-            },
-          })
-        : {},
       useArmor(),
       useSentry({
         startTransaction: false,
@@ -194,11 +181,16 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           },
           exclude: ['readiness'],
         },
-        reporting: {
-          endpoint: options.hiveConfig?.reporting?.endpoint ?? undefined,
-          author: 'Hive API',
-          commit: options.release,
-        },
+        experimental__persistedDocuments: options.hivePersistedDocumentsConfig
+          ? {
+              cdn: {
+                endpoint: options.hivePersistedDocumentsConfig.cdnEndpoint,
+                accessToken: options.hivePersistedDocumentsConfig.cdnAccessKeyId,
+              },
+              allowArbitraryDocuments: true,
+              cache: 50_000,
+            }
+          : undefined,
       }),
       useResponseCache({
         session: request => {

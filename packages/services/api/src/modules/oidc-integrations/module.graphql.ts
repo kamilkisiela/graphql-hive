@@ -18,12 +18,14 @@ export default gql`
     userinfoEndpoint: String!
     authorizationEndpoint: String!
     organization: Organization!
+    oidcUserAccessOnly: Boolean!
   }
 
   extend type Mutation {
     createOIDCIntegration(input: CreateOIDCIntegrationInput!): CreateOIDCIntegrationResult!
     updateOIDCIntegration(input: UpdateOIDCIntegrationInput!): UpdateOIDCIntegrationResult!
     deleteOIDCIntegration(input: DeleteOIDCIntegrationInput!): DeleteOIDCIntegrationResult!
+    updateOIDCRestrictions(input: UpdateOIDCRestrictionsInput!): UpdateOIDCRestrictionsResult!
   }
 
   type Subscription {
@@ -120,6 +122,31 @@ export default gql`
   }
 
   type DeleteOIDCIntegrationError implements Error {
+    message: String!
+  }
+
+  input UpdateOIDCRestrictionsInput {
+    oidcIntegrationId: ID!
+    """
+    Applies only to newly invited members.
+    Existing members are not affected.
+    """
+    oidcUserAccessOnly: Boolean!
+  }
+
+  """
+  @oneOf
+  """
+  type UpdateOIDCRestrictionsResult {
+    ok: UpdateOIDCRestrictionsOk
+    error: UpdateOIDCRestrictionsError
+  }
+
+  type UpdateOIDCRestrictionsOk {
+    updatedOIDCIntegration: OIDCIntegration!
+  }
+
+  type UpdateOIDCRestrictionsError implements Error {
     message: String!
   }
 `;

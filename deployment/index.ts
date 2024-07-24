@@ -33,12 +33,30 @@ import { deployWebhooks } from './services/webhooks';
 import { configureZendesk } from './services/zendesk';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { isDefined } from './utils/helpers';
+import { publishGraphQLSchema } from './utils/publish-graphql-schema';
 
 // eslint-disable-next-line no-process-env
 const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
 
 if (!imagesTag) {
   throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
+}
+
+// eslint-disable-next-line no-process-env
+const graphqlSchemaAbsolutePath = process.env.GRAPHQL_SCHEMA_ABSOLUTE_PATH as string;
+
+if (!graphqlSchemaAbsolutePath) {
+  throw new Error(`GRAPHQL_SCHEMA_ABSOLUTE_PATH env variable is not set.`);
+}
+
+// eslint-disable-next-line no-process-env
+let HIVE_APP_USE_PERSISTED_DOCUMENTS = process.env.HIVE_APP_USE_PERSISTED_DOCUMENTS;
+
+if (!HIVE_APP_USE_PERSISTED_DOCUMENTS) {
+  console.warn(
+    'HIVE_APP_USE_PERSISTED_DOCUMENTS env variable is not set, defaulting to "0" (disabled).',
+  );
+  HIVE_APP_USE_PERSISTED_DOCUMENTS = '0';
 }
 
 optimizeAzureCluster();
@@ -226,6 +244,21 @@ const graphql = deployGraphQL({
   observability,
 });
 
+const apiConfig = new pulumi.Config('api');
+const apiEnv = apiConfig.requireObject<Record<string, string>>('env');
+
+publishGraphQLSchema({
+  graphql,
+  registry: {
+    endpoint: `https://${environment.appDns}/registry`,
+    accessToken: apiEnv.HIVE_API_TOKEN,
+  },
+  version: {
+    commit: imagesTag,
+  },
+  schemaPath: graphqlSchemaAbsolutePath,
+});
+
 const app = deployApp({
   environment,
   graphql,
@@ -237,6 +270,7 @@ const app = deployApp({
   github: githubApp,
   slackApp,
   sentry,
+  usePersistedDocuments: HIVE_APP_USE_PERSISTED_DOCUMENTS === '1',
 });
 
 const proxy = deployProxy({
