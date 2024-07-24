@@ -33,6 +33,7 @@ import { deployWebhooks } from './services/webhooks';
 import { configureZendesk } from './services/zendesk';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { isDefined } from './utils/helpers';
+import { publishGraphQLSchema } from './utils/publish-graphql-schema';
 
 // eslint-disable-next-line no-process-env
 const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
@@ -233,6 +234,20 @@ const graphql = deployGraphQL({
   githubApp,
   sentry,
   observability,
+});
+
+const apiConfig = new pulumi.Config('api');
+const apiEnv = apiConfig.requireObject<Record<string, string>>('env');
+
+publishGraphQLSchema({
+  graphql,
+  registry: {
+    endpoint: `https://${environment.appDns}/registry`,
+    accessToken: apiEnv.HIVE_API_TOKEN,
+  },
+  version: {
+    commit: imagesTag,
+  },
 });
 
 const app = deployApp({
