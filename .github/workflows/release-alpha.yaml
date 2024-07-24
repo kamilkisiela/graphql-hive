@@ -108,3 +108,30 @@ jobs:
           tar -xzf *.tar.gz
           # Expect the command to succeed
           ./hive/bin/hive --version || exit 1
+
+  extract-cli-version:
+    needs: [npm]
+    runs-on: ubuntu-22.04
+    name: Extract CLI version
+    outputs:
+      published: ${{ steps.cli.outputs.published }}
+      version: ${{ steps.cli.outputs.version }}
+    steps:
+      - name: Extract published version
+        if:
+          needs.npm.outputs.published && contains(needs.npm.outputs.publishedPackages,
+          '"@graphql-hive/cli"')
+        id: cli
+        run: |
+          echo '${{needs.npm.outputs.publishedPackages}}' > cli-ver.json
+          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+  publish_docker:
+    needs: [extract-cli-version]
+    uses: ./.github/workflows/dockerize-cli.yaml
+    if: ${{ needs.extract-cli-version.outputs.published == 'true' }}
+    with:
+      cliVersion: ${{ needs.extract-cli-version.outputs.version }}
+    secrets: inherit
