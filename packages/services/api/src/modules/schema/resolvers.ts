@@ -131,21 +131,6 @@ function __isTypeOf<
 
 export const resolvers: SchemaModule.Resolvers = {
   Mutation: {
-    async updateProjectRegistryModel(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-      ]);
-
-      return {
-        ok: await injector.get(SchemaManager).updateRegistryModel({
-          project,
-          organization,
-          model: input.model,
-        }),
-      };
-    },
     async createContract(_, args, context) {
       const result = await context.injector.get(ContractsManager).createContract({
         contract: {
