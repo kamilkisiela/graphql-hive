@@ -1,0 +1,1510 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 1067638914cde7cfa48d1ed3ddcf68a550c04644..4eb2e6ed45a781ed0ed2f6ca38a30e83934f6213 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,8 +1,8 @@
+ var cn = Object.defineProperty;
+ var s = (e, t) => cn(e, "name", { value: t, configurable: !0 });
+-import { jsx as o, jsxs as T, Fragment as z } from "react/jsx-runtime";
++import { jsx as o, jsxs as T, Fragment as U } from "react/jsx-runtime";
+ import * as c from "react";
+-import { createContext as un, useContext as dn, useRef as B, useState as I, useEffect as R, forwardRef as K, useCallback as N, useMemo as G, useLayoutEffect as Je } from "react";
++import { createContext as un, useContext as dn, useRef as B, useState as I, useEffect as q, forwardRef as J, useCallback as S, useMemo as G, useLayoutEffect as Je } from "react";
+ import { clsx as Q } from "clsx";
+ import { print as Ie, astFromValue as hn, isSchema as ht, buildClientSchema as mn, validateSchema as pn, getIntrospectionQuery as fn, isNamedType as Nt, isObjectType as xe, isInputObjectType as Oe, isScalarType as gn, isEnumType as kt, isInterfaceType as Ee, isUnionType as Cn, isNonNullType as Tt, isListType as Mt, isAbstractType as vn, isType as yn, parse as Vt, visit as bn } from "graphql";
+ import { StorageAPI as Ye, HistoryStore as wn, formatResult as Xe, isObservable as xn, formatError as ve, isAsyncIterable as En, fetcherReturnToPromise as mt, isPromise as pt, mergeAst as Ln, fillLeafs as Sn, getSelectedOperationName as Nn } from "@graphiql/toolkit";
+@@ -40,7 +40,7 @@ s(ce, "createContextHook");
+ const At = ae("StorageContext");
+ function On(e) {
+   const t = B(!0), [n, r] = I(new Ye(e.storage));
+-  return R(() => {
++  return q(() => {
+     t.current ? t.current = !1 : r(new Ye(e.storage));
+   }, [e.storage]), /* @__PURE__ */ o(At.Provider, { value: n, children: e.children });
+ }
+@@ -171,15 +171,15 @@ const ue = ce(At), Fn = /* @__PURE__ */ s(({
+   title: e,
+   titleId: t,
+   ...n
+-}) => /* @__PURE__ */ c.createElement("svg", { height: "1em", viewBox: "0 0 13 13", fill: "none", xmlns: "http://www.w3.org/2000/svg", "aria-labelledby": t, ...n }, e ? /* @__PURE__ */ c.createElement("title", { id: t }, e) : null, /* @__PURE__ */ c.createElement("rect", { x: 0.6, y: 0.6, width: 11.8, height: 11.8, rx: 5.9, stroke: "currentColor", strokeWidth: 1.2 }), /* @__PURE__ */ c.createElement("rect", { x: 5.5, y: 5.5, width: 2, height: 2, rx: 1, fill: "currentColor" })), "SvgType"), gr = D(Fn), Uo = D(Bn), Cr = D(Wn), Ko = D(_n), st = D($n), Jo = D(Zn), vr = D(Gn), yr = D(Qn), br = D(jn), wr = D(zn), xr = D(Un, "filled docs icon"), Er = D(Kn), Lr = D(Jn), Sr = D(Yn), Nr = D(Xn), kr = D(er), Yo = D(tr), Tr = D(nr), Xo = D(rr), Mr = D(or), Vr = D(lr), el = D(ir), tl = D(sr), nl = D(ar), Hr = D(cr), rl = D(ur), Ar = D(dr, "filled star icon"), qr = D(hr), Rr = D(mr), Dr = D(pr, "trash icon"), Ne = D(fr);
+-function D(e, t = e.name.replace("Svg", "").replaceAll(/([A-Z])/g, " $1").trimStart().toLowerCase() + " icon") {
++}) => /* @__PURE__ */ c.createElement("svg", { height: "1em", viewBox: "0 0 13 13", fill: "none", xmlns: "http://www.w3.org/2000/svg", "aria-labelledby": t, ...n }, e ? /* @__PURE__ */ c.createElement("title", { id: t }, e) : null, /* @__PURE__ */ c.createElement("rect", { x: 0.6, y: 0.6, width: 11.8, height: 11.8, rx: 5.9, stroke: "currentColor", strokeWidth: 1.2 }), /* @__PURE__ */ c.createElement("rect", { x: 5.5, y: 5.5, width: 2, height: 2, rx: 1, fill: "currentColor" })), "SvgType"), gr = R(Fn), Uo = R(Bn), Cr = R(Wn), Ko = R(_n), st = R($n), Jo = R(Zn), vr = R(Gn), yr = R(Qn), br = R(jn), wr = R(zn), xr = R(Un, "filled docs icon"), Er = R(Kn), Lr = R(Jn), Sr = R(Yn), Nr = R(Xn), kr = R(er), Yo = R(tr), Tr = R(nr), Xo = R(rr), Mr = R(or), Vr = R(lr), el = R(ir), tl = R(sr), nl = R(ar), Hr = R(cr), rl = R(ur), Ar = R(dr, "filled star icon"), qr = R(hr), Rr = R(mr), Dr = R(pr, "trash icon"), Ne = R(fr);
++function R(e, t = e.name.replace("Svg", "").replaceAll(/([A-Z])/g, " $1").trimStart().toLowerCase() + " icon") {
+   function n(r) {
+     return /* @__PURE__ */ o(e, { title: t, ...r });
+   }
+   return s(n, "IconComponent"), n.displayName = e.name, n;
+ }
+-s(D, "generateIcon");
+-const J = K((e, t) => /* @__PURE__ */ o(
++s(R, "generateIcon");
++const Y = J((e, t) => /* @__PURE__ */ o(
+   "button",
+   {
+     ...e,
+@@ -187,8 +187,8 @@ const J = K((e, t) => /* @__PURE__ */ o(
+     className: Q("graphiql-un-styled", e.className)
+   }
+ ));
+-J.displayName = "UnStyledButton";
+-const Le = K((e, t) => /* @__PURE__ */ o(
++Y.displayName = "UnStyledButton";
++const Le = J((e, t) => /* @__PURE__ */ o(
+   "button",
+   {
+     ...e,
+@@ -204,7 +204,7 @@ const Le = K((e, t) => /* @__PURE__ */ o(
+   }
+ ));
+ Le.displayName = "Button";
+-const Pr = K((e, t) => /* @__PURE__ */ o(
++const Pr = J((e, t) => /* @__PURE__ */ o(
+   "div",
+   {
+     ...e,
+@@ -214,8 +214,8 @@ const Pr = K((e, t) => /* @__PURE__ */ o(
+ ));
+ Pr.displayName = "ButtonGroup";
+ const Fe = /* @__PURE__ */ s((e, t) => Object.entries(t).reduce((n, [r, l]) => (n[r] = l, n), e), "createComponentGroup");
+-const qt = K((e, t) => /* @__PURE__ */ o(oe.Close, { asChild: !0, children: /* @__PURE__ */ T(
+-  J,
++const qt = J((e, t) => /* @__PURE__ */ o(oe.Close, { asChild: !0, children: /* @__PURE__ */ T(
++  Y,
+   {
+     ...e,
+     ref: t,
+@@ -244,7 +244,7 @@ const ol = Fe(Ir, {
+   Trigger: oe.Trigger,
+   Description: oe.Description
+ });
+-const Rt = K(
++const Rt = J(
+   (e, t) => /* @__PURE__ */ o(An, { asChild: !0, children: /* @__PURE__ */ o(
+     "button",
+     {
+@@ -282,7 +282,7 @@ const Fr = /* @__PURE__ */ s(({ className: e, children: t, ...n }) => /* @__PURE
+   breaks: !0,
+   linkify: !0
+ });
+-const te = K(({ children: e, onlyShowFirstChild: t, type: n, ...r }, l) => /* @__PURE__ */ o(
++const te = J(({ children: e, onlyShowFirstChild: t, type: n, ...r }, l) => /* @__PURE__ */ o(
+   "div",
+   {
+     ...r,
+@@ -296,7 +296,7 @@ const te = K(({ children: e, onlyShowFirstChild: t, type: n, ...r }, l) => /* @_
+   }
+ ));
+ te.displayName = "MarkdownContent";
+-const Dt = K(
++const Dt = J(
+   (e, t) => /* @__PURE__ */ o(
+     "div",
+     {
+@@ -332,7 +332,7 @@ s(Br, "TooltipRoot");
+ const ne = Fe(Br, {
+   Provider: ge.Provider
+ });
+-const Pt = K(
++const Pt = J(
+   ({ isActive: e, value: t, children: n, className: r, ...l }, a) => /* @__PURE__ */ o(
+     Ht.Item,
+     {
+@@ -351,8 +351,8 @@ const Pt = K(
+   )
+ );
+ Pt.displayName = "Tab";
+-const It = K(({ children: e, className: t, ...n }, r) => /* @__PURE__ */ o(
+-  J,
++const It = J(({ children: e, className: t, ...n }, r) => /* @__PURE__ */ o(
++  Y,
+   {
+     ...n,
+     ref: r,
+@@ -362,9 +362,9 @@ const It = K(({ children: e, className: t, ...n }, r) => /* @__PURE__ */ o(
+   }
+ ));
+ It.displayName = "Tab.Button";
+-const Ot = K(
++const Ot = J(
+   (e, t) => /* @__PURE__ */ o(ne, { label: "Close Tab", children: /* @__PURE__ */ o(
+-    J,
++    Y,
+     {
+       "aria-label": "Close Tab",
+       ...e,
+@@ -379,7 +379,7 @@ Ot.displayName = "Tab.Close";
+ const ll = Object.assign(Pt, {
+   Button: It,
+   Close: Ot
+-}), Wr = K(
++}), Wr = J(
+   ({ values: e, onReorder: t, children: n, className: r, ...l }, a) => /* @__PURE__ */ o(
+     Ht.Group,
+     {
+@@ -404,26 +404,26 @@ function _r(e) {
+       t || new Ye(null),
+       e.maxHistoryLength || $r
+     )
+-  ), [r, l] = I(((y = n.current) == null ? void 0 : y.queries) || []), a = N(
++  ), [r, l] = I(((y = n.current) == null ? void 0 : y.queries) || []), a = S(
+     (d) => {
+       var g;
+       (g = n.current) == null || g.updateHistory(d), l(n.current.queries);
+     },
+     []
+-  ), i = N(
++  ), i = S(
+     (d, g) => {
+       n.current.editLabel(d, g), l(n.current.queries);
+     },
+     []
+-  ), u = N(
++  ), u = S(
+     (d) => {
+       n.current.toggleFavorite(d), l(n.current.queries);
+     },
+     []
+-  ), f = N(
++  ), f = S(
+     (d) => d,
+     []
+-  ), h = N((d, g = !1) => {
++  ), h = S((d, g = !1) => {
+     n.current.deleteHistory(d, g), l(n.current.queries);
+   }, []), p = G(
+     () => ({
+@@ -457,12 +457,12 @@ function Zr() {
+   const [l, a] = I(
+     null
+   );
+-  R(() => {
++  q(() => {
+     l && setTimeout(() => {
+       a(null);
+     }, 2e3);
+   }, [l]);
+-  const i = N(() => {
++  const i = S(() => {
+     try {
+       for (const u of n)
+         t(u, !0);
+@@ -498,41 +498,41 @@ function qe(e) {
+   const { editLabel: t, toggleFavorite: n, deleteFromHistory: r, setActive: l } = Be({
+     nonNull: !0,
+     caller: qe
+-  }), { headerEditor: a, queryEditor: i, variableEditor: u } = j({
++  }), { headerEditor: a, queryEditor: i, variableEditor: u } = z({
+     nonNull: !0,
+     caller: qe
+   }), f = B(null), h = B(null), [p, y] = I(!1);
+-  R(() => {
++  q(() => {
+     var b;
+     p && ((b = f.current) == null || b.focus());
+   }, [p]);
+-  const d = e.item.label || e.item.operationName || Gr(e.item.query), g = N(() => {
++  const d = e.item.label || e.item.operationName || Gr(e.item.query), g = S(() => {
+     var V;
+     y(!1);
+     const { index: b, ...w } = e.item;
+     t({ ...w, label: (V = f.current) == null ? void 0 : V.value }, b);
+-  }, [t, e.item]), m = N(() => {
++  }, [t, e.item]), m = S(() => {
+     y(!1);
+-  }, []), C = N(
++  }, []), C = S(
+     (b) => {
+       b.stopPropagation(), y(!0);
+     },
+     []
+-  ), x = N(() => {
++  ), x = S(() => {
+     const { query: b, variables: w, headers: V } = e.item;
+     i == null || i.setValue(b ?? ""), u == null || u.setValue(w ?? ""), a == null || a.setValue(V ?? ""), l(e.item);
+-  }, [a, e.item, i, l, u]), k = N(
++  }, [a, e.item, i, l, u]), N = S(
+     (b) => {
+       b.stopPropagation(), r(e.item);
+     },
+     [e.item, r]
+-  ), L = N(
++  ), L = S(
+     (b) => {
+       b.stopPropagation(), n(e.item);
+     },
+     [e.item, n]
+   );
+-  return /* @__PURE__ */ o("li", { className: Q("graphiql-history-item", p && "editable"), children: p ? /* @__PURE__ */ T(z, { children: [
++  return /* @__PURE__ */ o("li", { className: Q("graphiql-history-item", p && "editable"), children: p ? /* @__PURE__ */ T(U, { children: [
+     /* @__PURE__ */ o(
+       "input",
+       {
+@@ -545,11 +545,11 @@ function qe(e) {
+         placeholder: "Type a label"
+       }
+     ),
+-    /* @__PURE__ */ o(J, { type: "button", ref: h, onClick: g, children: "Save" }),
+-    /* @__PURE__ */ o(J, { type: "button", ref: h, onClick: m, children: /* @__PURE__ */ o(st, {}) })
+-  ] }) : /* @__PURE__ */ T(z, { children: [
++    /* @__PURE__ */ o(Y, { type: "button", ref: h, onClick: g, children: "Save" }),
++    /* @__PURE__ */ o(Y, { type: "button", ref: h, onClick: m, children: /* @__PURE__ */ o(st, {}) })
++  ] }) : /* @__PURE__ */ T(U, { children: [
+     /* @__PURE__ */ o(ne, { label: "Set active", children: /* @__PURE__ */ o(
+-      J,
++      Y,
+       {
+         type: "button",
+         className: "graphiql-history-item-label",
+@@ -559,7 +559,7 @@ function qe(e) {
+       }
+     ) }),
+     /* @__PURE__ */ o(ne, { label: "Edit label", children: /* @__PURE__ */ o(
+-      J,
++      Y,
+       {
+         type: "button",
+         className: "graphiql-history-item-action",
+@@ -573,7 +573,7 @@ function qe(e) {
+       {
+         label: e.item.favorite ? "Remove favorite" : "Add favorite",
+         children: /* @__PURE__ */ o(
+-          J,
++          Y,
+           {
+             type: "button",
+             className: "graphiql-history-item-action",
+@@ -585,11 +585,11 @@ function qe(e) {
+       }
+     ),
+     /* @__PURE__ */ o(ne, { label: "Delete from history", children: /* @__PURE__ */ o(
+-      J,
++      Y,
+       {
+         type: "button",
+         className: "graphiql-history-item-action",
+-        onClick: k,
++        onClick: N,
+         "aria-label": "Delete from history",
+         children: /* @__PURE__ */ o(Dr, { "aria-hidden": "true" })
+       }
+@@ -620,16 +620,16 @@ function et({
+     responseEditor: u,
+     variableEditor: f,
+     updateActiveTabValues: h
+-  } = j({ nonNull: !0, caller: et }), p = Be(), y = ot({
++  } = z({ nonNull: !0, caller: et }), p = Be(), y = ot({
+     getDefaultFieldNames: t,
+     caller: et
+-  }), [d, g] = I(!1), [m, C] = I(null), x = B(0), k = N(() => {
++  }), [d, g] = I(!1), [m, C] = I(null), x = B(0), N = S(() => {
+     m == null || m.unsubscribe(), g(!1), C(null);
+-  }, [m]), L = N(async () => {
++  }, [m]), L = S(async () => {
+     if (!i || !u)
+       return;
+     if (m) {
+-      k();
++      N();
+       return;
+     }
+     const V = /* @__PURE__ */ s((M) => {
+@@ -683,14 +683,14 @@ function et({
+       const M = {}, H = /* @__PURE__ */ s((v) => {
+         if (W !== x.current)
+           return;
+-        let S = Array.isArray(v) ? v : !1;
+-        if (!S && typeof v == "object" && v !== null && "hasNext" in v && (S = [v]), S) {
+-          for (const q of S)
+-            Wt(M, q);
++        let k = Array.isArray(v) ? v : !1;
++        if (!k && typeof v == "object" && v !== null && "hasNext" in v && (k = [v]), k) {
++          for (const D of k)
++            Wt(M, D);
+           g(!1), V(Xe(M));
+         } else {
+-          const q = Xe(v);
+-          g(!1), V(q);
++          const D = Xe(v);
++          g(!1), V(D);
+         }
+       }, "handleResponse"), E = e(
+         {
+@@ -720,8 +720,8 @@ function et({
+       else if (En(Z)) {
+         C({
+           unsubscribe: () => {
+-            var v, S;
+-            return (S = (v = Z[Symbol.asyncIterator]()).return) == null ? void 0 : S.call(v);
++            var v, k;
++            return (k = (v = Z[Symbol.asyncIterator]()).return) == null ? void 0 : k.call(v);
+           }
+         });
+         for await (const v of Z)
+@@ -741,7 +741,7 @@ function et({
+     r,
+     i,
+     u,
+-    k,
++    N,
+     m,
+     h,
+     f
+@@ -751,9 +751,9 @@ function et({
+       isSubscribed: b,
+       operationName: r ?? null,
+       run: L,
+-      stop: k
++      stop: N
+     }),
+-    [d, b, r, L, k]
++    [d, b, r, L, N]
+   );
+   return /* @__PURE__ */ o(Bt.Provider, { value: w, children: n });
+ }
+@@ -839,7 +839,7 @@ function $t({ field: e }) {
+   if (!("defaultValue" in e) || e.defaultValue === void 0)
+     return null;
+   const t = hn(e.defaultValue, e.type);
+-  return t ? /* @__PURE__ */ T(z, { children: [
++  return t ? /* @__PURE__ */ T(U, { children: [
+     " = ",
+     /* @__PURE__ */ o("span", { className: "graphiql-doc-explorer-default-value", children: Qr(t) })
+   ] }) : null;
+@@ -851,17 +851,17 @@ function Gt(e) {
+     throw new TypeError(
+       "The `SchemaContextProvider` component requires a `fetcher` function to be passed as prop."
+     );
+-  const { initialHeaders: t, headerEditor: n } = j({
++  const { initialHeaders: t, headerEditor: n } = z({
+     nonNull: !0,
+     caller: Gt
+   }), [r, l] = I(), [a, i] = I(!1), [u, f] = I(null), h = B(0);
+-  R(() => {
++  q(() => {
+     l(
+       ht(e.schema) || e.schema === null || e.schema === void 0 ? e.schema : void 0
+     ), h.current++;
+   }, [e.schema]);
+   const p = B(t);
+-  R(() => {
++  q(() => {
+     n && (p.current = n.getValue());
+   });
+   const {
+@@ -872,7 +872,7 @@ function Gt(e) {
+     inputValueDeprecation: e.inputValueDeprecation,
+     introspectionQueryName: e.introspectionQueryName,
+     schemaDescription: e.schemaDescription
+-  }), { fetcher: m, onSchemaChange: C, dangerouslyAssumeSchemaIsValid: x, children: k } = e, L = N(() => {
++  }), { fetcher: m, onSchemaChange: C, dangerouslyAssumeSchemaIsValid: x, children: N } = e, L = S(() => {
+     if (ht(e.schema) || e.schema === null)
+       return;
+     const V = ++h.current, W = e.schema;
+@@ -939,9 +939,9 @@ function Gt(e) {
+     C,
+     e.schema
+   ]);
+-  R(() => {
++  q(() => {
+     L();
+-  }, [L]), R(() => {
++  }, [L]), q(() => {
+     function V(W) {
+       W.ctrlKey && W.key === "R" && L();
+     }
+@@ -957,7 +957,7 @@ function Gt(e) {
+     }),
+     [u, L, a, r, b]
+   );
+-  return /* @__PURE__ */ o(Zt.Provider, { value: w, children: k });
++  return /* @__PURE__ */ o(Zt.Provider, { value: w, children: N });
+ }
+ s(Gt, "SchemaContextProvider");
+ const re = ce(Zt);
+@@ -1002,21 +1002,21 @@ function jt(e) {
+     caller: jt
+   }), [r, l] = I([
+     ke
+-  ]), a = N((h) => {
++  ]), a = S((h) => {
+     l((p) => p.at(-1).def === h.def ? (
+       // Avoid pushing duplicate items
+       p
+     ) : [...p, h]);
+-  }, []), i = N(() => {
++  }, []), i = S(() => {
+     l(
+       (h) => h.length > 1 ? h.slice(0, -1) : h
+     );
+-  }, []), u = N(() => {
++  }, []), u = S(() => {
+     l(
+       (h) => h.length === 1 ? h : [ke]
+     );
+   }, []);
+-  R(() => {
++  q(() => {
+     t == null || n.length > 0 ? u() : l((h) => {
+       if (h.length === 1)
+         return h;
+@@ -1075,10 +1075,10 @@ function jt(e) {
+ s(jt, "ExplorerContextProvider");
+ const ie = ce(Qt);
+ function Re(e, t) {
+-  return Tt(e) ? /* @__PURE__ */ T(z, { children: [
++  return Tt(e) ? /* @__PURE__ */ T(U, { children: [
+     Re(e.ofType, t),
+     "!"
+-  ] }) : Mt(e) ? /* @__PURE__ */ T(z, { children: [
++  ] }) : Mt(e) ? /* @__PURE__ */ T(U, { children: [
+     "[",
+     Re(e.ofType, t),
+     "]"
+@@ -1138,7 +1138,7 @@ function Ur({ directive: e }) {
+   ] });
+ }
+ s(Ur, "Directive");
+-function U(e) {
++function K(e) {
+   const t = Kr[e.title];
+   return /* @__PURE__ */ T("div", { children: [
+     /* @__PURE__ */ T("div", { className: "graphiql-doc-explorer-section-title", children: [
+@@ -1148,7 +1148,7 @@ function U(e) {
+     /* @__PURE__ */ o("div", { className: "graphiql-doc-explorer-section-content", children: e.children })
+   ] });
+ }
+-s(U, "ExplorerSection");
++s(K, "ExplorerSection");
+ const Kr = {
+   Arguments: gr,
+   "Deprecated Arguments": vr,
+@@ -1165,17 +1165,17 @@ const Kr = {
+   "All Schema Types": Ne
+ };
+ function Jr(e) {
+-  return /* @__PURE__ */ T(z, { children: [
++  return /* @__PURE__ */ T(U, { children: [
+     e.field.description ? /* @__PURE__ */ o(te, { type: "description", children: e.field.description }) : null,
+     /* @__PURE__ */ o(zt, { preview: !1, children: e.field.deprecationReason }),
+-    /* @__PURE__ */ o(U, { title: "Type", children: /* @__PURE__ */ o(X, { type: e.field.type }) }),
++    /* @__PURE__ */ o(K, { title: "Type", children: /* @__PURE__ */ o(X, { type: e.field.type }) }),
+     /* @__PURE__ */ o(Yr, { field: e.field }),
+     /* @__PURE__ */ o(Xr, { field: e.field })
+   ] });
+ }
+ s(Jr, "FieldDocumentation");
+ function Yr({ field: e }) {
+-  const [t, n] = I(!1), r = N(() => {
++  const [t, n] = I(!1), r = S(() => {
+     n(!0);
+   }, []);
+   if (!("args" in e))
+@@ -1183,16 +1183,16 @@ function Yr({ field: e }) {
+   const l = [], a = [];
+   for (const i of e.args)
+     i.deprecationReason ? a.push(i) : l.push(i);
+-  return /* @__PURE__ */ T(z, { children: [
+-    l.length > 0 ? /* @__PURE__ */ o(U, { title: "Arguments", children: l.map((i) => /* @__PURE__ */ o(De, { arg: i }, i.name)) }) : null,
+-    a.length > 0 ? t || l.length === 0 ? /* @__PURE__ */ o(U, { title: "Deprecated Arguments", children: a.map((i) => /* @__PURE__ */ o(De, { arg: i }, i.name)) }) : /* @__PURE__ */ o(Le, { type: "button", onClick: r, children: "Show Deprecated Arguments" }) : null
++  return /* @__PURE__ */ T(U, { children: [
++    l.length > 0 ? /* @__PURE__ */ o(K, { title: "Arguments", children: l.map((i) => /* @__PURE__ */ o(De, { arg: i }, i.name)) }) : null,
++    a.length > 0 ? t || l.length === 0 ? /* @__PURE__ */ o(K, { title: "Deprecated Arguments", children: a.map((i) => /* @__PURE__ */ o(De, { arg: i }, i.name)) }) : /* @__PURE__ */ o(Le, { type: "button", onClick: r, children: "Show Deprecated Arguments" }) : null
+   ] });
+ }
+ s(Yr, "Arguments");
+ function Xr({ field: e }) {
+   var n;
+   const t = ((n = e.astNode) == null ? void 0 : n.directives) || [];
+-  return !t || t.length === 0 ? null : /* @__PURE__ */ o(U, { title: "Directives", children: t.map((r) => /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(Ur, { directive: r }) }, r.name.value)) });
++  return !t || t.length === 0 ? null : /* @__PURE__ */ o(K, { title: "Directives", children: t.map((r) => /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(Ur, { directive: r }) }, r.name.value)) });
+ }
+ s(Xr, "Directives");
+ function eo(e) {
+@@ -1202,9 +1202,9 @@ function eo(e) {
+     n == null ? void 0 : n.name,
+     r == null ? void 0 : r.name
+   ];
+-  return /* @__PURE__ */ T(z, { children: [
++  return /* @__PURE__ */ T(U, { children: [
+     /* @__PURE__ */ o(te, { type: "description", children: e.schema.description || "A GraphQL schema provides a root type for each kind of operation." }),
+-    /* @__PURE__ */ T(U, { title: "Root Types", children: [
++    /* @__PURE__ */ T(K, { title: "Root Types", children: [
+       t ? /* @__PURE__ */ T("div", { children: [
+         /* @__PURE__ */ o("span", { className: "graphiql-doc-explorer-root-type", children: "query" }),
+         ": ",
+@@ -1221,7 +1221,7 @@ function eo(e) {
+         /* @__PURE__ */ o(X, { type: r })
+       ] })
+     ] }),
+-    /* @__PURE__ */ o(U, { title: "All Schema Types", children: l && /* @__PURE__ */ o("div", { children: Object.values(l).map((p) => a.includes(p.name) || p.name.startsWith("__") ? null : /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(X, { type: p }) }, p.name)) }) })
++    /* @__PURE__ */ o(K, { title: "All Schema Types", children: l && /* @__PURE__ */ o("div", { children: Object.values(l).map((p) => a.includes(p.name) || p.name.startsWith("__") ? null : /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(X, { type: p }) }, p.name)) }) })
+   ] });
+ }
+ s(eo, "SchemaDocumentation");
+@@ -1244,23 +1244,23 @@ function Ut() {
+     }),
+     [r]
+   );
+-  R(() => {
++  q(() => {
+     f(l);
+-  }, [f, l]), R(() => {
++  }, [f, l]), q(() => {
+     function m(C) {
+       var x;
+       C.metaKey && C.key === "k" && ((x = n.current) == null || x.focus());
+     }
+     return s(m, "handleKeyDown"), window.addEventListener("keydown", m), () => window.removeEventListener("keydown", m);
+   }, []);
+-  const h = e.at(-1), p = N(
++  const h = e.at(-1), p = S(
+     (m) => {
+       t(
+         "field" in m ? { name: m.field.name, def: m.field } : { name: m.type.name, def: m.type }
+       );
+     },
+     [t]
+-  ), y = B(!1), d = N((m) => {
++  ), y = B(!1), d = S((m) => {
+     y.current = m.type === "focus";
+   }, []);
+   return e.length === 1 || xe(h.def) || Ee(h.def) || Oe(h.def) ? /* @__PURE__ */ T(
+@@ -1345,7 +1345,7 @@ function tt(e) {
+     nonNull: !0,
+     caller: e || tt
+   }), r = t.at(-1);
+-  return N(
++  return S(
+     (l) => {
+       const a = {
+         within: [],
+@@ -1400,9 +1400,9 @@ function nt(e) {
+ }
+ s(nt, "Type");
+ function Ct({ field: e, argument: t }) {
+-  return /* @__PURE__ */ T(z, { children: [
++  return /* @__PURE__ */ T(U, { children: [
+     /* @__PURE__ */ o("span", { className: "graphiql-doc-explorer-search-field", children: e.name }),
+-    t ? /* @__PURE__ */ T(z, { children: [
++    t ? /* @__PURE__ */ T(U, { children: [
+       "(",
+       /* @__PURE__ */ o("span", { className: "graphiql-doc-explorer-search-argument", children: t.name }),
+       ":",
+@@ -1429,7 +1429,7 @@ function to(e) {
+ }
+ s(to, "FieldLink");
+ function no(e) {
+-  return Nt(e.type) ? /* @__PURE__ */ T(z, { children: [
++  return Nt(e.type) ? /* @__PURE__ */ T(U, { children: [
+     e.type.description ? /* @__PURE__ */ o(te, { type: "description", children: e.type.description }) : null,
+     /* @__PURE__ */ o(ro, { type: e.type }),
+     /* @__PURE__ */ o(oo, { type: e.type }),
+@@ -1439,11 +1439,11 @@ function no(e) {
+ }
+ s(no, "TypeDocumentation");
+ function ro({ type: e }) {
+-  return xe(e) && e.getInterfaces().length > 0 ? /* @__PURE__ */ o(U, { title: "Implements", children: e.getInterfaces().map((n) => /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(X, { type: n }) }, n.name)) }) : null;
++  return xe(e) && e.getInterfaces().length > 0 ? /* @__PURE__ */ o(K, { title: "Implements", children: e.getInterfaces().map((n) => /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(X, { type: n }) }, n.name)) }) : null;
+ }
+ s(ro, "ImplementsInterfaces");
+ function oo({ type: e }) {
+-  const [t, n] = I(!1), r = N(() => {
++  const [t, n] = I(!1), r = S(() => {
+     n(!0);
+   }, []);
+   if (!xe(e) && !Ee(e) && !Oe(e))
+@@ -1451,9 +1451,9 @@ function oo({ type: e }) {
+   const l = e.getFields(), a = [], i = [];
+   for (const u of Object.keys(l).map((f) => l[f]))
+     u.deprecationReason ? i.push(u) : a.push(u);
+-  return /* @__PURE__ */ T(z, { children: [
+-    a.length > 0 ? /* @__PURE__ */ o(U, { title: "Fields", children: a.map((u) => /* @__PURE__ */ o(vt, { field: u }, u.name)) }) : null,
+-    i.length > 0 ? t || a.length === 0 ? /* @__PURE__ */ o(U, { title: "Deprecated Fields", children: i.map((u) => /* @__PURE__ */ o(vt, { field: u }, u.name)) }) : /* @__PURE__ */ o(Le, { type: "button", onClick: r, children: "Show Deprecated Fields" }) : null
++  return /* @__PURE__ */ T(U, { children: [
++    a.length > 0 ? /* @__PURE__ */ o(K, { title: "Fields", children: a.map((u) => /* @__PURE__ */ o(vt, { field: u }, u.name)) }) : null,
++    i.length > 0 ? t || a.length === 0 ? /* @__PURE__ */ o(K, { title: "Deprecated Fields", children: i.map((u) => /* @__PURE__ */ o(vt, { field: u }, u.name)) }) : /* @__PURE__ */ o(Le, { type: "button", onClick: r, children: "Show Deprecated Fields" }) : null
+   ] });
+ }
+ s(oo, "Fields");
+@@ -1462,7 +1462,7 @@ function vt({ field: e }) {
+   return /* @__PURE__ */ T("div", { className: "graphiql-doc-explorer-item", children: [
+     /* @__PURE__ */ T("div", { children: [
+       /* @__PURE__ */ o(to, { field: e }),
+-      t.length > 0 ? /* @__PURE__ */ T(z, { children: [
++      t.length > 0 ? /* @__PURE__ */ T(U, { children: [
+         "(",
+         /* @__PURE__ */ o("span", { children: t.map(
+           (n) => t.length === 1 ? /* @__PURE__ */ o(De, { arg: n, inline: !0 }, n.name) : /* @__PURE__ */ o(
+@@ -1486,7 +1486,7 @@ function vt({ field: e }) {
+ }
+ s(vt, "Field");
+ function lo({ type: e }) {
+-  const [t, n] = I(!1), r = N(() => {
++  const [t, n] = I(!1), r = S(() => {
+     n(!0);
+   }, []);
+   if (!kt(e))
+@@ -1494,9 +1494,9 @@ function lo({ type: e }) {
+   const l = [], a = [];
+   for (const i of e.getValues())
+     i.deprecationReason ? a.push(i) : l.push(i);
+-  return /* @__PURE__ */ T(z, { children: [
+-    l.length > 0 ? /* @__PURE__ */ o(U, { title: "Enum Values", children: l.map((i) => /* @__PURE__ */ o(yt, { value: i }, i.name)) }) : null,
+-    a.length > 0 ? t || l.length === 0 ? /* @__PURE__ */ o(U, { title: "Deprecated Enum Values", children: a.map((i) => /* @__PURE__ */ o(yt, { value: i }, i.name)) }) : /* @__PURE__ */ o(Le, { type: "button", onClick: r, children: "Show Deprecated Values" }) : null
++  return /* @__PURE__ */ T(U, { children: [
++    l.length > 0 ? /* @__PURE__ */ o(K, { title: "Enum Values", children: l.map((i) => /* @__PURE__ */ o(yt, { value: i }, i.name)) }) : null,
++    a.length > 0 ? t || l.length === 0 ? /* @__PURE__ */ o(K, { title: "Deprecated Enum Values", children: a.map((i) => /* @__PURE__ */ o(yt, { value: i }, i.name)) }) : /* @__PURE__ */ o(Le, { type: "button", onClick: r, children: "Show Deprecated Values" }) : null
+   ] });
+ }
+ s(lo, "EnumValues");
+@@ -1511,7 +1511,7 @@ s(yt, "EnumValue");
+ function io({ type: e }) {
+   const { schema: t } = re({ nonNull: !0 });
+   return !t || !vn(e) ? null : /* @__PURE__ */ o(
+-    U,
++    K,
+     {
+       title: Ee(e) ? "Implementations" : "Possible Types",
+       children: t.getPossibleTypes(e).map((n) => /* @__PURE__ */ o("div", { children: /* @__PURE__ */ o(X, { type: n }) }, n.name))
+@@ -1598,7 +1598,7 @@ function so(e) {
+     return m || (g && (t == null || t.set(wt, "")), e.visiblePlugin && i.find(
+       (C) => (typeof e.visiblePlugin == "string" ? C.title : C) === e.visiblePlugin
+     ) || null);
+-  }), { onTogglePluginVisibility: h, children: p } = e, y = N(
++  }), { onTogglePluginVisibility: h, children: p } = e, y = S(
+     (g) => {
+       const m = g && i.find(
+         (C) => (typeof g == "string" ? C.title : C) === g
+@@ -1607,7 +1607,7 @@ function so(e) {
+     },
+     [h, i]
+   );
+-  R(() => {
++  q(() => {
+     e.visiblePlugin && y(e.visiblePlugin);
+   }, [i, e.visiblePlugin, y]);
+   const d = G(
+@@ -1625,7 +1625,7 @@ function ao(e, t, n, r, l, a) {
+       t,
+       "select",
+       // @ts-expect-error
+-      (k, L) => {
++      (N, L) => {
+         if (!f) {
+           const b = L.parentNode;
+           f = document.createElement("div"), f.className = "CodeMirror-hint-information", b.append(f);
+@@ -1654,17 +1654,17 @@ function ao(e, t, n, r, l, a) {
+             }, "onRemoveFn")
+           );
+         }
+-        if (h && (h.textContent = k.text), p && y && d && g)
+-          if (k.type) {
++        if (h && (h.textContent = N.text), p && y && d && g)
++          if (N.type) {
+             p.style.display = "inline";
+             const b = /* @__PURE__ */ s((w) => {
+               Tt(w) ? (g.textContent = "!" + g.textContent, b(w.ofType)) : Mt(w) ? (y.textContent += "[", g.textContent = "]" + g.textContent, b(w.ofType)) : d.textContent = w.name;
+             }, "renderType");
+-            y.textContent = "", g.textContent = "", b(k.type);
++            y.textContent = "", g.textContent = "", b(N.type);
+           } else
+             y.textContent = "", d.textContent = "", g.textContent = "", p.style.display = "none";
+-        m && (k.description ? (m.style.display = "block", m.innerHTML = Ae.render(k.description)) : (m.style.display = "none", m.innerHTML = "")), C && x && (k.deprecationReason ? (C.style.display = "block", x.innerHTML = Ae.render(
+-          k.deprecationReason
++        m && (N.description ? (m.style.display = "block", m.innerHTML = Ae.render(N.description)) : (m.style.display = "none", m.innerHTML = "")), C && x && (N.deprecationReason ? (C.style.display = "block", x.innerHTML = Ae.render(
++          N.deprecationReason
+         )) : (C.style.display = "none", x.innerHTML = ""));
+       }
+     );
+@@ -1679,20 +1679,20 @@ function ao(e, t, n, r, l, a) {
+ }
+ s(ao, "onHasCompletion");
+ function Te(e, t) {
+-  R(() => {
++  q(() => {
+     e && typeof t == "string" && t !== e.getValue() && e.setValue(t);
+   }, [e, t]);
+ }
+ s(Te, "useSynchronizeValue");
+ function Ge(e, t, n) {
+-  R(() => {
++  q(() => {
+     e && e.setOption(t, n);
+   }, [e, t, n]);
+ }
+ s(Ge, "useSynchronizeOption");
+ function Jt(e, t, n, r, l) {
+-  const { updateActiveTabValues: a } = j({ nonNull: !0, caller: l }), i = ue();
+-  R(() => {
++  const { updateActiveTabValues: a } = z({ nonNull: !0, caller: l }), i = ue();
++  q(() => {
+     if (!e)
+       return;
+     const u = pe(500, (p) => {
+@@ -1718,7 +1718,7 @@ function Jt(e, t, n, r, l) {
+ s(Jt, "useChangeHandler");
+ function Yt(e, t, n) {
+   const { schema: r } = re({ nonNull: !0, caller: n }), l = ie(), a = at();
+-  R(() => {
++  q(() => {
+     if (!e)
+       return;
+     const i = /* @__PURE__ */ s((u, f) => {
+@@ -1739,7 +1739,7 @@ function Yt(e, t, n) {
+ }
+ s(Yt, "useCompletion");
+ function ee(e, t, n) {
+-  R(() => {
++  q(() => {
+     if (e) {
+       for (const r of t)
+         e.removeKeyMap(r);
+@@ -1754,11 +1754,11 @@ function ee(e, t, n) {
+ }
+ s(ee, "useKeyMap");
+ function Xt({ caller: e, onCopyQuery: t } = {}) {
+-  const { queryEditor: n } = j({
++  const { queryEditor: n } = z({
+     nonNull: !0,
+     caller: e || Xt
+   });
+-  return N(() => {
++  return S(() => {
+     if (!n)
+       return;
+     const r = n.getValue();
+@@ -1767,22 +1767,22 @@ function Xt({ caller: e, onCopyQuery: t } = {}) {
+ }
+ s(Xt, "useCopyQuery");
+ function be({ caller: e } = {}) {
+-  const { queryEditor: t } = j({
++  const { queryEditor: t } = z({
+     nonNull: !0,
+     caller: e || be
+   }), { schema: n } = re({ nonNull: !0, caller: be });
+-  return N(() => {
++  return S(() => {
+     const r = t == null ? void 0 : t.documentAST, l = t == null ? void 0 : t.getValue();
+     !r || !l || t.setValue(Ie(Ln(r, n)));
+   }, [t, n]);
+ }
+ s(be, "useMergeQuery");
+ function Qe({ caller: e } = {}) {
+-  const { queryEditor: t, headerEditor: n, variableEditor: r } = j({
++  const { queryEditor: t, headerEditor: n, variableEditor: r } = z({
+     nonNull: !0,
+     caller: e || Qe
+   });
+-  return N(() => {
++  return S(() => {
+     if (r) {
+       const l = r.getValue();
+       try {
+@@ -1821,11 +1821,11 @@ function ot({
+   const { schema: n } = re({
+     nonNull: !0,
+     caller: t || ot
+-  }), { queryEditor: r } = j({
++  }), { queryEditor: r } = z({
+     nonNull: !0,
+     caller: t || ot
+   });
+-  return N(() => {
++  return S(() => {
+     if (!r)
+       return;
+     const l = r.getValue(), { insertions: a, result: i } = Sn(
+@@ -1861,13 +1861,13 @@ function ot({
+ }
+ s(ot, "useAutoCompleteLeafs");
+ const ct = /* @__PURE__ */ s((e) => {
+-  const n = j({
++  const n = z({
+     nonNull: !0
+   })[`${e}Editor`];
+   let r = "";
+   const l = (n == null ? void 0 : n.getValue()) ?? !1;
+   l && l.length > 0 && (r = l);
+-  const a = N(
++  const a = S(
+     (i) => n == null ? void 0 : n.setValue(i),
+     [n]
+   );
+@@ -1886,10 +1886,10 @@ function cl([
+     /** The last thing we received from upstream */
+     last: e
+   }), [r, l] = I(e);
+-  R(() => {
++  q(() => {
+     n.current.last === e || (n.current.last = e, n.current.pending === null ? l(e) : n.current.pending === e ? (n.current.pending = null, e !== r && (n.current.pending = r, t(r))) : (n.current.pending = null, l(e)));
+   }, [e, r, t]);
+-  const a = N(
++  const a = S(
+     (i) => {
+       l(i), n.current.pending === null && n.current.last !== i && (n.current.pending = i, t(i));
+     },
+@@ -1909,11 +1909,11 @@ function Ce({
+     headerEditor: i,
+     setHeaderEditor: u,
+     shouldPersistHeaders: f
+-  } = j({
++  } = z({
+     nonNull: !0,
+     caller: l || Ce
+   }), h = We(), p = be({ caller: l || Ce }), y = Qe({ caller: l || Ce }), d = B(null);
+-  return R(() => {
++  return q(() => {
+     let g = !0;
+     return Se([
+       // @ts-expect-error
+@@ -1951,9 +1951,9 @@ function Ce({
+         "Shift-Space"() {
+           x.showHint({ completeSingle: !1, container: C });
+         }
+-      }), x.on("keyup", (k, L) => {
++      }), x.on("keyup", (N, L) => {
+         const { code: b, key: w, shiftKey: V } = L, W = b.startsWith("Key"), $ = !V && b.startsWith("Digit");
+-        (W || $ || w === "_" || w === '"') && k.execCommand("autocomplete");
++        (W || $ || w === "_" || w === '"') && N.execCommand("autocomplete");
+       }), u(x);
+     }), () => {
+       g = !1;
+@@ -1992,12 +1992,12 @@ function se({
+     validationRules: g,
+     variableEditor: m,
+     updateActiveTabValues: C
+-  } = j({
++  } = z({
+     nonNull: !0,
+     caller: i || se
+-  }), x = We(), k = ue(), L = ie(), b = at(), w = Xt({ caller: i || se, onCopyQuery: r }), V = be({ caller: i || se }), W = Qe({ caller: i || se }), $ = B(null), P = B(), O = B(() => {
++  }), x = We(), N = ue(), L = ie(), b = at(), w = Xt({ caller: i || se, onCopyQuery: r }), V = be({ caller: i || se }), W = Qe({ caller: i || se }), $ = B(null), P = B(), O = B(() => {
+   });
+-  R(() => {
++  q(() => {
+     O.current = (A) => {
+       if (!(!L || !b)) {
+         switch (b.setVisiblePlugin(ye), A.kind) {
+@@ -2021,7 +2021,7 @@ function se({
+         n == null || n(A);
+       }
+     };
+-  }, [L, n, b]), R(() => {
++  }, [L, n, b]), q(() => {
+     let A = !0;
+     return Se([
+       import("./comment.es.js").then((M) => M.c),
+@@ -2106,27 +2106,27 @@ function se({
+         "Shift-Alt-Space"() {
+           E.showHint({ completeSingle: !0, container: H });
+         }
+-      }), E.on("keyup", (v, S) => {
+-        go.test(S.key) && v.execCommand("autocomplete");
++      }), E.on("keyup", (v, k) => {
++        go.test(k.key) && v.execCommand("autocomplete");
+       });
+       let Z = !1;
+       E.on("startCompletion", () => {
+         Z = !0;
+       }), E.on("endCompletion", () => {
+         Z = !1;
+-      }), E.on("keydown", (v, S) => {
+-        S.key === "Escape" && Z && S.stopPropagation();
+-      }), E.on("beforeChange", (v, S) => {
+-        var q;
+-        if (S.origin === "paste") {
+-          const Y = S.text.map(ho);
+-          (q = S.update) == null || q.call(S, S.from, S.to, Y);
++      }), E.on("keydown", (v, k) => {
++        k.key === "Escape" && Z && k.stopPropagation();
++      }), E.on("beforeChange", (v, k) => {
++        var D;
++        if (k.origin === "paste") {
++          const j = k.text.map(ho);
++          (D = k.update) == null || D.call(k, k.from, k.to, j);
+         }
+       }), E.documentAST = null, E.operationName = null, E.operations = null, E.variableToType = null, d(E);
+     }), () => {
+       A = !1;
+     };
+-  }, [e, h, a, d]), Ge(p, "keyMap", t), R(() => {
++  }, [e, h, a, d]), Ge(p, "keyMap", t), q(() => {
+     if (!p)
+       return;
+     function A(H) {
+@@ -2146,9 +2146,9 @@ function se({
+       100,
+       (H) => {
+         const E = H.getValue();
+-        k == null || k.set(en, E);
++        N == null || N.set(en, E);
+         const Z = H.operationName, v = A(H);
+-        (v == null ? void 0 : v.operationName) !== void 0 && (k == null || k.set(
++        (v == null ? void 0 : v.operationName) !== void 0 && (N == null || N.set(
+           Co,
+           v.operationName
+         )), l == null || l(E, v == null ? void 0 : v.documentAST), v != null && v.operationName && Z !== v.operationName && y(v.operationName), C({
+@@ -2163,7 +2163,7 @@ function se({
+     p,
+     u,
+     y,
+-    k,
++    N,
+     m,
+     C
+   ]), mo(p, u ?? null, P), po(
+@@ -2175,7 +2175,7 @@ function se({
+     f,
+     P
+   ), Yt(p, n || null, se);
+-  const _ = x == null ? void 0 : x.run, F = N(() => {
++  const _ = x == null ? void 0 : x.run, F = S(() => {
+     var H;
+     if (!_ || !p || !p.operations || !p.hasFocus()) {
+       _ == null || _();
+@@ -2199,7 +2199,7 @@ function se({
+ }
+ s(se, "useQueryEditor");
+ function mo(e, t, n) {
+-  R(() => {
++  q(() => {
+     if (!e)
+       return;
+     const r = e.options.lint.schema !== t;
+@@ -2208,7 +2208,7 @@ function mo(e, t, n) {
+ }
+ s(mo, "useSynchronizeSchema");
+ function po(e, t, n) {
+-  R(() => {
++  q(() => {
+     if (!e)
+       return;
+     const r = e.options.lint.validationRules !== t;
+@@ -2221,7 +2221,7 @@ function fo(e, t, n) {
+     () => [...t.values()],
+     [t]
+   );
+-  R(() => {
++  q(() => {
+     if (!e)
+       return;
+     const l = e.options.lint.externalFragments !== r;
+@@ -2318,7 +2318,7 @@ function xo({
+   headerEditor: n,
+   responseEditor: r
+ }) {
+-  return N(
++  return S(
+     (l) => {
+       const a = (e == null ? void 0 : e.getValue()) ?? null, i = (t == null ? void 0 : t.getValue()) ?? null, u = (n == null ? void 0 : n.getValue()) ?? null, f = (e == null ? void 0 : e.operationName) ?? null, h = (r == null ? void 0 : r.getValue()) ?? null;
+       return rn(l, {
+@@ -2350,7 +2350,7 @@ function Eo({
+     }),
+     [e]
+   );
+-  return N(
++  return S(
+     (r) => {
+       n(tn(r, t));
+     },
+@@ -2364,7 +2364,7 @@ function Lo({
+   headerEditor: n,
+   responseEditor: r
+ }) {
+-  return N(
++  return S(
+     ({
+       query: l,
+       variables: a,
+@@ -2378,17 +2378,18 @@ function Lo({
+ }
+ s(Lo, "useSetEditorValues");
+ function nn({
+-  query: e = null,
+-  variables: t = null,
+-  headers: n = null
+-} = {}) {
++  id: e,
++  query: t = null,
++  variables: n = null,
++  headers: r = null
++}) {
+   return {
+-    id: on(),
+-    hash: Pe({ query: e, variables: t, headers: n }),
+-    title: e && ut(e) || dt,
+-    query: e,
+-    variables: t,
+-    headers: n,
++    id: e || on(),
++    hash: Pe({ query: t, variables: n, headers: r }),
++    title: t && ut(t) || dt,
++    query: t,
++    variables: n,
++    headers: r,
+     operationName: null,
+     response: null
+   };
+@@ -2446,11 +2447,11 @@ function me({
+   onEdit: r,
+   readOnly: l = !1
+ } = {}, a) {
+-  const { initialVariables: i, variableEditor: u, setVariableEditor: f } = j({
++  const { initialVariables: i, variableEditor: u, setVariableEditor: f } = z({
+     nonNull: !0,
+     caller: a || me
+   }), h = We(), p = be({ caller: a || me }), y = Qe({ caller: a || me }), d = B(null), g = B();
+-  return R(() => {
++  return q(() => {
+     let m = !0;
+     return Se([
+       import("./hint.es2.js"),
+@@ -2463,7 +2464,7 @@ function me({
+       const x = d.current;
+       if (!x)
+         return;
+-      const k = C(x, {
++      const N = C(x, {
+         value: i,
+         lineNumbers: !0,
+         tabSize: 2,
+@@ -2488,23 +2489,23 @@ function me({
+         gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+         extraKeys: Ze
+       });
+-      k.addKeyMap({
++      N.addKeyMap({
+         "Cmd-Space"() {
+-          k.showHint({ completeSingle: !1, container: x });
++          N.showHint({ completeSingle: !1, container: x });
+         },
+         "Ctrl-Space"() {
+-          k.showHint({ completeSingle: !1, container: x });
++          N.showHint({ completeSingle: !1, container: x });
+         },
+         "Alt-Space"() {
+-          k.showHint({ completeSingle: !1, container: x });
++          N.showHint({ completeSingle: !1, container: x });
+         },
+         "Shift-Space"() {
+-          k.showHint({ completeSingle: !1, container: x });
++          N.showHint({ completeSingle: !1, container: x });
+         }
+-      }), k.on("keyup", (L, b) => {
++      }), N.on("keyup", (L, b) => {
+         const { code: w, key: V, shiftKey: W } = b, $ = w.startsWith("Key"), P = !W && w.startsWith("Digit");
+         ($ || P || V === "_" || V === '"') && L.execCommand("autocomplete");
+-      }), f(k);
++      }), f(N);
+     }), () => {
+       m = !1;
+     };
+@@ -2536,10 +2537,10 @@ function No(e) {
+     storage: t,
+     shouldPersistHeaders: p
+   }), [g] = I(() => {
+-    const v = e.query ?? (t == null ? void 0 : t.get(en)) ?? null, S = e.variables ?? (t == null ? void 0 : t.get(ln)) ?? null, q = e.headers ?? (t == null ? void 0 : t.get(He)) ?? null, Y = e.response ?? "", de = vo({
++    const v = e.query ?? (t == null ? void 0 : t.get(en)) ?? null, k = e.variables ?? (t == null ? void 0 : t.get(ln)) ?? null, D = e.headers ?? (t == null ? void 0 : t.get(He)) ?? null, j = e.response ?? "", de = vo({
+       query: v,
+-      variables: S,
+-      headers: q,
++      variables: k,
++      headers: D,
+       defaultTabs: e.defaultTabs,
+       defaultQuery: e.defaultQuery || ko,
+       defaultHeaders: e.defaultHeaders,
+@@ -2548,26 +2549,26 @@ function No(e) {
+     });
+     return d(de), {
+       query: v ?? (de.activeTabIndex === 0 ? de.tabs[0].query : null) ?? "",
+-      variables: S ?? "",
+-      headers: q ?? e.defaultHeaders ?? "",
+-      response: Y,
++      variables: k ?? "",
++      headers: D ?? e.defaultHeaders ?? "",
++      response: j,
+       tabState: de
+     };
+-  }), [m, C] = I(g.tabState), x = N(
++  }), [m, C] = I(g.tabState), x = S(
+     (v) => {
+       if (v) {
+         t == null || t.set(He, (n == null ? void 0 : n.getValue()) ?? "");
+-        const S = tn(m, !0);
+-        t == null || t.set(we, S);
++        const k = tn(m, !0);
++        t == null || t.set(we, k);
+       } else
+         t == null || t.set(He, ""), So(t);
+       y(v), t == null || t.set(Ue, v.toString());
+     },
+     [t, m, n]
+-  ), k = B();
+-  R(() => {
++  ), N = B();
++  q(() => {
+     const v = !!e.shouldPersistHeaders;
+-    (k == null ? void 0 : k.current) !== v && (x(v), k.current = v);
++    (N == null ? void 0 : N.current) !== v && (x(v), N.current = v);
+   }, [e.shouldPersistHeaders, x]);
+   const L = xo({
+     queryEditor: l,
+@@ -2579,13 +2580,13 @@ function No(e) {
+     variableEditor: f,
+     headerEditor: n,
+     responseEditor: i
+-  }), { onTabChange: w, defaultHeaders: V, children: W } = e, $ = N(() => {
+-    C((v) => {
+-      const S = L(v), q = {
+-        tabs: [...S.tabs, nn({ headers: V })],
+-        activeTabIndex: S.tabs.length
++  }), { onTabChange: w, defaultHeaders: V, children: W } = e, $ = S((v) => {
++    C((k) => {
++      const D = L(k), j = {
++        tabs: [...D.tabs, nn({ ...v, headers: V })],
++        activeTabIndex: D.tabs.length
+       };
+-      return d(q), b(q.tabs[q.activeTabIndex]), w == null || w(q), q;
++      return d(j), b(j.tabs[j.activeTabIndex]), w == null || w(j), j;
+     });
+   }, [
+     V,
+@@ -2593,48 +2594,48 @@ function No(e) {
+     b,
+     d,
+     L
+-  ]), P = N(
++  ]), P = S(
+     (v) => {
+-      C((S) => {
+-        const q = {
+-          ...S,
++      C((k) => {
++        const D = {
++          ...k,
+           activeTabIndex: v
+         };
+-        return d(q), b(q.tabs[q.activeTabIndex]), w == null || w(q), q;
++        return d(D), b(D.tabs[D.activeTabIndex]), w == null || w(D), D;
+       });
+     },
+     [w, b, d]
+-  ), O = N(
++  ), O = S(
+     (v) => {
+-      C((S) => {
+-        const q = S.tabs[S.activeTabIndex], Y = {
++      C((k) => {
++        const D = k.tabs[k.activeTabIndex], j = {
+           tabs: v,
+-          activeTabIndex: v.indexOf(q)
++          activeTabIndex: v.indexOf(D)
+         };
+-        return d(Y), b(Y.tabs[Y.activeTabIndex]), w == null || w(Y), Y;
++        return d(j), b(j.tabs[j.activeTabIndex]), w == null || w(j), j;
+       });
+     },
+     [w, b, d]
+-  ), _ = N(
++  ), _ = S(
+     (v) => {
+-      C((S) => {
+-        const q = {
+-          tabs: S.tabs.filter((Y, de) => v !== de),
+-          activeTabIndex: Math.max(S.activeTabIndex - 1, 0)
++      C((k) => {
++        const D = {
++          tabs: k.tabs.filter((j, de) => v !== de),
++          activeTabIndex: Math.max(k.activeTabIndex - 1, 0)
+         };
+-        return d(q), b(q.tabs[q.activeTabIndex]), w == null || w(q), q;
++        return d(D), b(D.tabs[D.activeTabIndex]), w == null || w(D), D;
+       });
+     },
+     [w, b, d]
+-  ), F = N(
++  ), F = S(
+     (v) => {
+-      C((S) => {
+-        const q = rn(S, v);
+-        return d(q), w == null || w(q), q;
++      C((k) => {
++        const D = rn(k, v);
++        return d(D), w == null || w(D), D;
+       });
+     },
+     [w, d]
+-  ), { onEditOperationName: A } = e, M = N(
++  ), { onEditOperationName: A } = e, M = S(
+     (v) => {
+       l && (l.operationName = v, F({ operationName: v }), A == null || A(v));
+     },
+@@ -2642,12 +2643,12 @@ function No(e) {
+   ), H = G(() => {
+     const v = /* @__PURE__ */ new Map();
+     if (Array.isArray(e.externalFragments))
+-      for (const S of e.externalFragments)
+-        v.set(S.name.value, S);
++      for (const k of e.externalFragments)
++        v.set(k.name.value, k);
+     else if (typeof e.externalFragments == "string")
+       bn(Vt(e.externalFragments, {}), {
+-        FragmentDefinition(S) {
+-          v.set(S.name.value, S);
++        FragmentDefinition(k) {
++          v.set(k.name.value, k);
+         }
+       });
+     else if (e.externalFragments)
+@@ -2706,7 +2707,7 @@ function No(e) {
+   return /* @__PURE__ */ o(sn.Provider, { value: Z, children: W });
+ }
+ s(No, "EditorContextProvider");
+-const j = ce(sn), Ue = "shouldPersistHeaders", ko = `# Welcome to GraphiQL
++const z = ce(sn), Ue = "shouldPersistHeaders", ko = `# Welcome to GraphiQL
+ #
+ # GraphiQL is an in-browser tool for writing, validating, and
+ # testing GraphQL queries.
+@@ -2739,11 +2740,11 @@ const j = ce(sn), Ue = "shouldPersistHeaders", ko = `# Welcome to GraphiQL
+ 
+ `;
+ function Et({ isHidden: e, ...t }) {
+-  const { headerEditor: n } = j({
++  const { headerEditor: n } = z({
+     nonNull: !0,
+     caller: Et
+   }), r = Ce(t, Et);
+-  return R(() => {
++  return q(() => {
+     e || n == null || n.refresh();
+   }, [n, e]), /* @__PURE__ */ o("div", { className: Q("graphiql-editor", e && "hidden"), ref: r });
+ }
+@@ -2754,7 +2755,7 @@ function lt(e) {
+     width: null,
+     height: null
+   }), [r, l] = I(null), a = B(null), i = (f = an(e.token)) == null ? void 0 : f.href;
+-  R(() => {
++  q(() => {
+     if (a.current) {
+       if (!i) {
+         n({ width: null, height: null }), l(null);
+@@ -2825,15 +2826,15 @@ function it({
+   const { fetchError: l, validationErrors: a } = re({
+     nonNull: !0,
+     caller: r || it
+-  }), { initialResponse: i, responseEditor: u, setResponseEditor: f } = j({
++  }), { initialResponse: i, responseEditor: u, setResponseEditor: f } = z({
+     nonNull: !0,
+     caller: r || it
+   }), h = B(null), p = B(
+     e
+   );
+-  return R(() => {
++  return q(() => {
+     p.current = e;
+-  }, [e]), R(() => {
++  }, [e]), q(() => {
+     let y = !0;
+     return Se(
+       [
+@@ -2856,7 +2857,7 @@ function it({
+       d.registerHelper(
+         "info",
+         "graphql-results",
+-        (x, k, L, b) => {
++        (x, N, L, b) => {
+           const w = [], V = p.current;
+           return V && w.push(
+             /* @__PURE__ */ o(V, { pos: b, token: x })
+@@ -2884,7 +2885,7 @@ function it({
+     }), () => {
+       y = !1;
+     };
+-  }, [t, i, f]), Ge(u, "keyMap", n), R(() => {
++  }, [t, i, f]), Ge(u, "keyMap", n), q(() => {
+     l && (u == null || u.setValue(l)), a.length > 0 && (u == null || u.setValue(ve(a)));
+   }, [u, l, a]), h;
+ }
+@@ -2904,11 +2905,11 @@ function Vo(e) {
+ }
+ s(Vo, "ResponseEditor");
+ function Lt({ isHidden: e, ...t }) {
+-  const { variableEditor: n } = j({
++  const { variableEditor: n } = z({
+     nonNull: !0,
+     caller: Lt
+   }), r = me(t, Lt);
+-  return R(() => {
++  return q(() => {
+     n && !e && n.refresh();
+   }, [n, e]), /* @__PURE__ */ o("div", { className: Q("graphiql-editor", e && "hidden"), ref: r });
+ }
+@@ -2931,7 +2932,7 @@ function ul({
+   onTabChange: m,
+   onTogglePluginVisibility: C,
+   operationName: x,
+-  plugins: k,
++  plugins: N,
+   query: L,
+   response: b,
+   schema: w,
+@@ -2977,7 +2978,7 @@ function ul({
+                 so,
+                 {
+                   onTogglePluginVisibility: C,
+-                  plugins: k,
++                  plugins: N,
+                   visiblePlugin: _,
+                   children: e
+                 }
+@@ -3007,7 +3008,7 @@ function dl() {
+   Je(() => {
+     typeof window > "u" || (document.body.classList.remove("graphiql-light", "graphiql-dark"), t && document.body.classList.add(`graphiql-${t}`));
+   }, [t]);
+-  const r = N(
++  const r = S(
+     (l) => {
+       e == null || e.set(Ke, l || ""), n(l);
+     },
+@@ -3036,7 +3037,7 @@ function hl({
+       const L = i && (u == null ? void 0 : u.get(i));
+       return L === Me || n === "first" ? "first" : L === Ve || n === "second" ? "second" : null;
+     }
+-  ), y = N(
++  ), y = S(
+     (L) => {
+       L !== h && (p(L), r == null || r(L));
+     },
+@@ -3046,13 +3047,13 @@ function hl({
+     const L = i && (u == null ? void 0 : u.get(i)) || C.current;
+     d.current && (d.current.style.display = "flex", d.current.style.flex = L === Me || L === Ve ? C.current : L), m.current && (m.current.style.display = "flex", m.current.style.flex = "1"), g.current && (g.current.style.display = "flex");
+   }, [t, u, i]);
+-  const x = N((L) => {
++  const x = S((L) => {
+     const b = L === "first" ? d.current : m.current;
+     if (b && (b.style.left = "-1000px", b.style.position = "absolute", b.style.opacity = "0", b.style.height = "500px", b.style.width = "500px", d.current)) {
+       const w = parseFloat(d.current.style.flex);
+       (!Number.isFinite(w) || w < 1) && (d.current.style.flex = "1");
+     }
+-  }, []), k = N(
++  }, []), N = S(
+     (L) => {
+       const b = L === "first" ? d.current : m.current;
+       if (b && (b.style.width = "", b.style.height = "", b.style.opacity = "", b.style.position = "", b.style.left = "", u && i)) {
+@@ -3063,8 +3064,8 @@ function hl({
+     [u, i]
+   );
+   return Je(() => {
+-    h === "first" ? x("first") : k("first"), h === "second" ? x("second") : k("second");
+-  }, [h, x, k]), R(() => {
++    h === "first" ? x("first") : N("first"), h === "second" ? x("second") : N("second");
++  }, [h, x, N]), q(() => {
+     if (!g.current || !d.current || !m.current)
+       return;
+     const L = g.current, b = d.current, w = b.parentElement, V = t === "horizontal" ? "clientX" : "clientY", W = t === "horizontal" ? "left" : "top", $ = t === "horizontal" ? "right" : "bottom", P = t === "horizontal" ? "clientWidth" : "clientHeight";
+@@ -3081,8 +3082,8 @@ function hl({
+           y("second"), f(Ve);
+         else {
+           y(null);
+-          const S = `${Z / v}`;
+-          b.style.flex = S, f(S);
++          const k = `${Z / v}`;
++          b.style.flex = k, f(k);
+         }
+       }
+       s(M, "handleMouseMove");
+@@ -3117,8 +3118,8 @@ function hl({
+ }
+ s(hl, "useDragResize");
+ const Ho = 1, Me = "hide-first", Ve = "hide-second";
+-const Ao = K(({ label: e, onClick: t, ...n }, r) => {
+-  const [l, a] = I(null), i = N(
++const Ao = J(({ label: e, onClick: t, ...n }, r) => {
++  const [l, a] = I(null), i = S(
+     (u) => {
+       try {
+         t == null || t(u), a(null);
+@@ -3131,7 +3132,7 @@ const Ao = K(({ label: e, onClick: t, ...n }, r) => {
+     [t]
+   );
+   return /* @__PURE__ */ o(ne, { label: e, children: /* @__PURE__ */ o(
+-    J,
++    Y,
+     {
+       ...n,
+       ref: r,
+@@ -3149,7 +3150,7 @@ const Ao = K(({ label: e, onClick: t, ...n }, r) => {
+ });
+ Ao.displayName = "ToolbarButton";
+ function St() {
+-  const { queryEditor: e, setOperationName: t } = j({
++  const { queryEditor: e, setOperationName: t } = z({
+     nonNull: !0,
+     caller: St
+   }), { isFetching: n, isSubscribed: r, operationName: l, run: a, stop: i } = We({
+@@ -3242,7 +3243,7 @@ export {
+   et as ExecutionContextProvider,
+   Qt as ExplorerContext,
+   jt as ExplorerContextProvider,
+-  U as ExplorerSection,
++  K as ExplorerSection,
+   Jr as FieldDocumentation,
+   Sr as FieldIcon,
+   to as FieldLink,
+@@ -3290,12 +3291,12 @@ export {
+   no as TypeDocumentation,
+   Ne as TypeIcon,
+   X as TypeLink,
+-  J as UnStyledButton,
++  Y as UnStyledButton,
+   Lt as VariableEditor,
+   ot as useAutoCompleteLeafs,
+   Xt as useCopyQuery,
+   hl as useDragResize,
+-  j as useEditorContext,
++  z as useEditorContext,
+   ct as useEditorState,
+   We as useExecutionContext,
+   ie as useExplorerContext,
+diff --git a/types/.DS_Store b/types/.DS_Store
+new file mode 100644
+index 0000000000000000000000000000000000000000..ff70508e195a6bd0020e7a2d6ba3da3444951b87
+--- /dev/null
++++ b/types/.DS_Store
+@@ -0,0 +1 @@
++   Bud1            �                                                           o rdsclbool                                           e d i t o rdsclbool                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @      �                                        @      �                                          @      �                                          @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   E   �                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       DSDB                                 `      �                                               @      �                                          @      �                                          @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+\ No newline at end of file
+diff --git a/types/editor/context.d.ts b/types/editor/context.d.ts
+index 84b8cfc95addce217179d531a0504be8e0ca19ea..5c5226c4ac04b1e8e04e61e96ceb7849210c0034 100644
+--- a/types/editor/context.d.ts
++++ b/types/editor/context.d.ts
+@@ -13,7 +13,7 @@ export declare type EditorContextType = TabsState & {
+     /**
+      * Add a new tab.
+      */
+-    addTab(): void;
++    addTab(tabState?: Pick<TabState, 'id' | 'query' | 'variables' | 'headers'>): void;
+     /**
+      * Switch to a different tab.
+      * @param index The index of the tab that should be switched to.
+diff --git a/types/editor/tabs.d.ts b/types/editor/tabs.d.ts
+index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..5375833b997e61397d2677a230023e323580a122 100644
+--- a/types/editor/tabs.d.ts
++++ b/types/editor/tabs.d.ts
+@@ -42,6 +42,7 @@ export declare type TabState = TabDefinition & {
+      * The contents of the response editor of this tab.
+      */
+     response: string | null;
++    className?: string;
+ };
+ /**
+  * This object describes the state of all tabs.
+@@ -89,7 +90,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
+     headers?: string | null | undefined;
+     response: string | null;
+ }) => void;
+-export declare function createTab({ query, variables, headers, }?: Partial<TabDefinition>): TabState;
++export declare function createTab({ id, query, variables, headers, }: Partial<TabDefinition & Pick<TabState, 'id'>>): TabState;
+ export declare function setPropertiesInActiveTab(state: TabsState, partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): TabsState;
+ export declare function fuzzyExtractOperationName(str: string): string | null;
+ export declare function clearHeadersFromTabs(storage: StorageAPI | null): void;

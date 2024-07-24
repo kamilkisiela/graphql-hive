@@ -426,6 +426,9 @@ function LaboratoryPageContent(props: {
           .CodeMirror-lint-tooltip {
             background: #030711;
           }
+          .graphiql-logo {
+            margin-left: auto;
+          }
         `}</style>
       </Helmet>
 

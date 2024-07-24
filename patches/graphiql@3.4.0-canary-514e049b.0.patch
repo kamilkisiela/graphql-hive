@@ -1,0 +1,85 @@
+diff --git a/esm/components/GraphiQL.js b/esm/components/GraphiQL.js
+index 4ac09e11700efcc05253adf732c701cf7d8eb064..13d23b070ca6b14934dfe8245879cf7eff887808 100644
+--- a/esm/components/GraphiQL.js
++++ b/esm/components/GraphiQL.js
+@@ -37,7 +37,7 @@ var __read = (this && this.__read) || function (o, n) {
+     return ar;
+ };
+ import React, { Fragment, useCallback, useState, useEffect, useMemo, } from 'react';
+-import { Button, ButtonGroup, ChevronDownIcon, ChevronUpIcon, CopyIcon, Dialog, ExecuteButton, GraphiQLProvider, HeaderEditor, KeyboardShortcutIcon, MergeIcon, PlusIcon, PrettifyIcon, QueryEditor, ReloadIcon, ResponseEditor, SettingsIcon, Spinner, Tab, Tabs, ToolbarButton, Tooltip, UnStyledButton, useCopyQuery, useDragResize, useEditorContext, useExecutionContext, useMergeQuery, usePluginContext, usePrettifyEditors, useSchemaContext, useStorageContext, useTheme, VariableEditor, } from '@graphiql/react';
++import { Button, ButtonGroup, ChevronDownIcon, ChevronUpIcon, Dialog, ExecuteButton, GraphiQLProvider, HeaderEditor, KeyboardShortcutIcon, PrettifyIcon, QueryEditor, ReloadIcon, ResponseEditor, SettingsIcon, Spinner, Tab, Tabs, ToolbarButton, Tooltip, UnStyledButton, useDragResize, useEditorContext, useExecutionContext, usePluginContext, usePrettifyEditors, useSchemaContext, useStorageContext, useTheme, VariableEditor, } from '@graphiql/react';
+ var majorVersion = parseInt(React.version.slice(0, 2), 10);
+ if (majorVersion < 16) {
+     throw new Error([
+@@ -72,8 +72,6 @@ export function GraphiQLInterface(props) {
+             ? props.forcedTheme
+             : undefined;
+     }, [props.forcedTheme]);
+-    var copy = useCopyQuery({ onCopyQuery: props.onCopyQuery });
+-    var merge = useMergeQuery();
+     var prettify = usePrettifyEditors();
+     var _e = useTheme(), theme = _e.theme, setTheme = _e.setTheme;
+     useEffect(function () {
+@@ -138,15 +136,11 @@ export function GraphiQLInterface(props) {
+     }) || React.createElement(GraphiQL.Logo, null);
+     var toolbar = children.find(function (child) {
+         return isChildComponentType(child, GraphiQL.Toolbar);
+-    }) || (React.createElement(React.Fragment, null,
+-        React.createElement(ToolbarButton, { onClick: prettify, label: "Prettify query (Shift-Ctrl-P)" },
+-            React.createElement(PrettifyIcon, { className: "graphiql-toolbar-icon", "aria-hidden": "true" })),
+-        React.createElement(ToolbarButton, { onClick: merge, label: "Merge fragments into query (Shift-Ctrl-M)" },
+-            React.createElement(MergeIcon, { className: "graphiql-toolbar-icon", "aria-hidden": "true" })),
+-        React.createElement(ToolbarButton, { onClick: copy, label: "Copy query (Shift-Ctrl-C)" },
+-            React.createElement(CopyIcon, { className: "graphiql-toolbar-icon", "aria-hidden": "true" })), (_c = props.toolbar) === null || _c === void 0 ? void 0 :
++    }) || (React.createElement(React.Fragment, null, (_c = props.toolbar) === null || _c === void 0 ? void 0 :
+         _c.additionalContent,
+-        ((_d = props.toolbar) === null || _d === void 0 ? void 0 : _d.additionalComponent) && (React.createElement(props.toolbar.additionalComponent, null))));
++        ((_d = props.toolbar) === null || _d === void 0 ? void 0 : _d.additionalComponent) && (React.createElement(props.toolbar.additionalComponent, null)),
++        React.createElement(ToolbarButton, { onClick: prettify, label: "Prettify query (Shift-Ctrl-P)" },
++            React.createElement(PrettifyIcon, { className: "graphiql-toolbar-icon", "aria-hidden": "true" }))));
+     var footer = children.find(function (child) {
+         return isChildComponentType(child, GraphiQL.Footer);
+     });
+@@ -171,7 +165,6 @@ export function GraphiQLInterface(props) {
+         var selectedTheme = event.currentTarget.dataset.theme;
+         setTheme(selectedTheme || null);
+     }, [setTheme]);
+-    var handleAddTab = editorContext.addTab;
+     var handleRefetchSchema = schemaContext.introspect;
+     var handleReorder = editorContext.moveTab;
+     var handleShowDialog = useCallback(function (event) {
+@@ -242,21 +235,17 @@ export function GraphiQLInterface(props) {
+                 (pluginContext === null || pluginContext === void 0 ? void 0 : pluginContext.visiblePlugin) && (React.createElement("div", { className: "graphiql-horizontal-drag-bar", ref: pluginResize.dragBarRef })),
+                 React.createElement("div", { ref: pluginResize.secondRef, className: "graphiql-sessions" },
+                     React.createElement("div", { className: "graphiql-session-header" },
+-                        !props.disableTabs && (React.createElement(React.Fragment, null,
+-                            hasMultipleTabs && (React.createElement(Tabs, { values: editorContext.tabs, onReorder: handleReorder, "aria-label": "Select active operation" }, editorContext.tabs.map(function (tab, index) { return (React.createElement(Tab, { key: tab.id, value: tab, isActive: index === editorContext.activeTabIndex },
+-                                React.createElement(Tab.Button, { "aria-controls": "graphiql-session", id: "graphiql-session-tab-".concat(index), onClick: function () {
++                        !props.disableTabs && (React.createElement(React.Fragment, null, hasMultipleTabs && (React.createElement(Tabs, { values: editorContext.tabs, onReorder: handleReorder, "aria-label": "Select active operation" }, editorContext.tabs.map(function (tab, index) { return (React.createElement(Tab, { key: tab.id, value: tab, isActive: index === editorContext.activeTabIndex, className: tab.className },
++                            React.createElement(Tab.Button, { "aria-controls": "graphiql-session", id: "graphiql-session-tab-".concat(index), onClick: function () {
++                                    executionContext.stop();
++                                    editorContext.changeTab(index);
++                                } }, tab.title),
++                            React.createElement(Tab.Close, { onClick: function () {
++                                    if (editorContext.activeTabIndex === index) {
+                                         executionContext.stop();
+-                                        editorContext.changeTab(index);
+-                                    } }, tab.title),
+-                                React.createElement(Tab.Close, { onClick: function () {
+-                                        if (editorContext.activeTabIndex === index) {
+-                                            executionContext.stop();
+-                                        }
+-                                        editorContext.closeTab(index);
+-                                    } }))); }))),
+-                            React.createElement(Tooltip, { label: "Add tab" },
+-                                React.createElement(UnStyledButton, { type: "button", className: "graphiql-tab-add", onClick: handleAddTab, "aria-label": "Add tab" },
+-                                    React.createElement(PlusIcon, { "aria-hidden": "true" }))))),
++                                    }
++                                    editorContext.closeTab(index);
++                                } }))); }))))),
+                         logo),
+                     React.createElement("div", { role: "tabpanel", id: "graphiql-session", className: "graphiql-session", "aria-labelledby": "graphiql-session-tab-".concat(editorContext.activeTabIndex) },
+                         React.createElement("div", { ref: editorResize.firstRef },
+diff --git a/graphiql.js b/graphiql.js
+deleted file mode 100644
+index f016b71de5d46f8aed60c990c8d272b4448b4a25..0000000000000000000000000000000000000000
