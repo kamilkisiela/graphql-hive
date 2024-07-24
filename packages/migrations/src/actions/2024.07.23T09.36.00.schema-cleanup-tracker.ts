@@ -439,7 +439,7 @@ async function processVersion(
   const datePG = new Date(after.createdAt).toISOString();
 
   if (added.length) {
-    console.log(`Adding ${added.length} coordinates for target ${targetId}`, added);
+    console.log(`Adding ${added.length} coordinates for target ${targetId}`);
     await connection.query(sql`
       INSERT INTO schema_coordinate_status
       ( target_id, coordinate, created_at, created_in_version_id )
@@ -454,7 +454,7 @@ async function processVersion(
   }
 
   if (deprecated.length) {
-    console.log(`deprecating ${deprecated.length} coordinates for target ${targetId}`, deprecated);
+    console.log(`deprecating ${deprecated.length} coordinates for target ${targetId}`);
 
     await connection.query(sql`
       INSERT INTO schema_coordinate_status
