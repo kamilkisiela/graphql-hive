@@ -409,6 +409,9 @@ importers:
       '@oclif/plugin-update':
         specifier: 4.2.13
         version: 4.2.13
+      '@theguild/federation-composition':
+        specifier: 0.12.1
+        version: 0.12.1(graphql@16.9.0)
       colors:
         specifier: 1.4.0
         version: 1.4.0

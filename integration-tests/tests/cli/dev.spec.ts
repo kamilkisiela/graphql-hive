@@ -21,6 +21,40 @@ function tmpFile(extension: string) {
 }
 
 describe('dev', () => {
+  test('composes only the locally provided service', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const { secret } = await createToken({});
+    const cli = createCLI({ readwrite: secret, readonly: secret });
+
+    await cli.publish({
+      sdl: 'type Query { foo: String }',
+      serviceName: 'foo',
+      serviceUrl: 'http://localhost/foo',
+      expect: 'latest-composable',
+    });
+
+    const supergraph = tmpFile('graphql');
+    const cmd = cli.dev({
+      remote: false,
+      services: [
+        {
+          name: 'bar',
+          url: 'http://localhost/bar',
+          sdl: 'type Query { bar: String }',
+        },
+      ],
+      write: supergraph.filepath,
+    });
+
+    await expect(cmd).resolves.toMatch(supergraph.filepath);
+    await expect(supergraph.read()).resolves.toMatch('http://localhost/bar');
+    await expect(supergraph.read()).resolves.not.toMatch('http://localhost/foo');
+  });
+});
+
+describe('dev --remote', () => {
   test('not available for SINGLE project', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
@@ -29,6 +63,7 @@ describe('dev', () => {
     const cli = createCLI({ readwrite: secret, readonly: secret });
 
     const cmd = cli.dev({
+      remote: true,
       services: [
         {
           name: 'foo',
@@ -49,6 +84,7 @@ describe('dev', () => {
     const cli = createCLI({ readwrite: secret, readonly: secret });
 
     const cmd = cli.dev({
+      remote: true,
       services: [
         {
           name: 'foo',
@@ -77,6 +113,7 @@ describe('dev', () => {
 
     const supergraph = tmpFile('graphql');
     const cmd = cli.dev({
+      remote: true,
       services: [
         {
           name: 'bar',
@@ -114,6 +151,7 @@ describe('dev', () => {
 
     const supergraph = tmpFile('graphql');
     const cmd = cli.dev({
+      remote: true,
       services: [
         {
           name: 'bar',
@@ -178,6 +216,7 @@ describe('dev', () => {
 
     const supergraph = tmpFile('graphql');
     const cmd = cli.dev({
+      remote: true,
       services: [
         {
           name: 'baz',
@@ -255,6 +294,7 @@ describe('dev', () => {
 
     const supergraph = tmpFile('graphql');
     const cmd = cli.dev({
+      remote: true,
       useLatestVersion: true,
       services: [
         {

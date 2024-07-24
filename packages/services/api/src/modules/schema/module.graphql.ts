@@ -16,6 +16,9 @@ export default gql`
     schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
     """
     Requires API Token
+
+    Publish a schema of a single or multiple services and compose a supergraph schema,
+    including the rest of the services in the project.
     """
     schemaCompose(input: SchemaComposeInput!): SchemaComposePayload!
 
