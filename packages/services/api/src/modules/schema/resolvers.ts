@@ -129,13 +129,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  Query: {
-    async schemaVersionForActionId(_, { actionId }, { injector }) {
-      return injector.get(SchemaManager).getSchemaVersionByActionId({
-        actionId,
-      });
-    },
-  },
   Target: {
     async schemaVersions(target, args, { injector }) {
       return injector.get(SchemaManager).getPaginatedSchemaVersionsForTargetId({
