@@ -42,7 +42,8 @@
     "schema:check:stitching": "pnpm start schema:check --service posts examples/stitching.posts.graphql",
     "schema:publish:federation": "pnpm start schema:publish --service reviews --url reviews.com/graphql examples/federation.reviews.graphql",
     "start": "./bin/dev",
-    "version": "oclif readme && git add README.md"
+    "version": "oclif readme && git add README.md",
+    "workspace-fix": "node scripts/replace-workspace.mjs"
   },
   "dependencies": {
     "@graphql-hive/core": "workspace:*",
