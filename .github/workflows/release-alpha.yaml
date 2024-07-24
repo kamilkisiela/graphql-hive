@@ -125,16 +125,19 @@ jobs:
         run: |
           echo '${{needs.npm.outputs.publishedPackages}}' > cli-ver.json
           VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
+          echo "version=$VERSION"
+          echo "publish=true"
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "publish=true" >> $GITHUB_ENV
 
   publish_docker:
     needs: [extract-cli-version]
     uses: ./.github/workflows/build-and-dockerize.yaml
+    if: needs.extract-cli-version.outputs.published == 'true'
     with:
       imageTag: ${{ needs.extract-cli-version.outputs.version }}
       publishSourceMaps: false
-      publishLatest: true
+      publishLatest: false
       publishPrComment: false
       targets: cli
       uploadJavaScriptArtifacts: false
