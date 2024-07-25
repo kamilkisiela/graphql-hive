@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { MoreHorizontalIcon, MoveDownIcon, MoveUpIcon, SettingsIcon } from 'lucide-react';
 import type { IconType } from 'react-icons';
 import { FaGithub, FaGoogle, FaOpenid, FaUserLock } from 'react-icons/fa';
@@ -620,7 +620,7 @@ export function ChangePermissionsModal(props: {
   toggleModalOpen: () => void;
   organizationFragment: FragmentType<typeof ChangePermissionsModal_OrganizationFragment>;
   memberFragment: FragmentType<typeof ChangePermissionsModal_MemberFragment>;
-}): ReactElement {
+}) {
   const organization = useFragment(
     ChangePermissionsModal_OrganizationFragment,
     props.organizationFragment,
@@ -663,8 +663,8 @@ export function ChangePermissionsModalContent(props: {
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
-      <DialogContent className="container flex w-4/5 max-w-[750px] flex-col items-center gap-5 md:w-3/5">
-        <form className="flex w-full flex-col items-center gap-5" onSubmit={props.onSubmit}>
+      <DialogContent className="w-4/5 max-w-[750px] md:w-3/5">
+        <form className="flex w-full flex-col gap-5" onSubmit={props.onSubmit}>
           <DialogHeader>
             <DialogTitle>Permissions (legacy)</DialogTitle>
           </DialogHeader>
@@ -699,18 +699,17 @@ export function ChangePermissionsModalContent(props: {
               checkAccess={props.manager.canAccessTarget}
             />
           </Tabs>
-          <DialogFooter className="flex w-full gap-2">
+          <DialogFooter className="gap-2">
             <Button
-              type="button"
-              size="lg"
-              className="w-full justify-center"
-              onClick={props.toggleModalOpen}
+              variant="outline"
+              onClick={ev => {
+                ev.preventDefault();
+                props.toggleModalOpen();
+              }}
             >
               Cancel
             </Button>
-            <Button type="submit" size="lg" className="w-full justify-center" variant="primary">
-              Save permissions
-            </Button>
+            <Button type="submit">Save permissions</Button>
           </DialogFooter>
         </form>
       </DialogContent>
