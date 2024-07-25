@@ -405,6 +405,8 @@ target "cli" {
   args = {
     IMAGE_TITLE = "graphql-hive/cli"
     IMAGE_DESCRIPTION = "GraphQL Hive CLI"
+    # note that for CLI we always pass the npm version ! ! !
+    CLI_VERSION = "${COMMIT_SHA}"
   }
   tags = [
     local_image_tag("cli"),

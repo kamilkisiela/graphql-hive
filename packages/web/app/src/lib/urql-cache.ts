@@ -11,13 +11,16 @@ import type { CreateOperationMutationType } from '@/components/target/laboratory
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/settings/registry-access-token';
-import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
-import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
-import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
 import { graphql } from '@/gql';
 import { CollectionsQuery } from '@/lib/hooks/laboratory/use-collections';
 import type { CreateOrganizationMutation } from '@/pages/organization-new';
-import { TokensDocument, type DeleteTokensDocument } from '@/pages/target-settings';
+import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
+import type { DeleteProjectMutation } from '@/pages/project-settings';
+import {
+  TokensDocument,
+  type DeleteTargetMutation,
+  type DeleteTokensDocument,
+} from '@/pages/target-settings';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 
