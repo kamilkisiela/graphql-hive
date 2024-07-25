@@ -513,12 +513,12 @@ export function DeleteProjectModalContent(props: {
       <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
           <DialogTitle>Delete project</DialogTitle>
+          <DialogDescription>
+            Every target and its published schema, reported data, and settings associated with this
+            project will be permanently deleted.
+          </DialogDescription>
+          <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
         </DialogHeader>
-        <DialogDescription>
-          Every target and its published schema, reported data, and settings associated with this
-          project will be permanently deleted.
-        </DialogDescription>
-        <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={props.toggleModalOpen}>
             Cancel
