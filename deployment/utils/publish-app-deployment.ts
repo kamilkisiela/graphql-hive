@@ -19,8 +19,8 @@ export function publishAppDeployment(args: {
     `create-app-deployment-${args.appName}`,
     {
       create:
-        `docker run --name "publish-app-deployment-${args.appName}"` +
-        ` -v ${args.persistedDocumentsPath}:/usr/src/app/persisted-documents.json` +
+        `docker run --name "create-app-deployment-${args.appName}"` +
+        ` --rm -v ${args.persistedDocumentsPath}:/usr/src/app/persisted-documents.json` +
         ` ${dockerImage}` +
         ` app:create` +
         ` --registry.endpoint ${args.registry.endpoint} --registry.accessToken ${args.registry.accessToken}` +
@@ -36,7 +36,7 @@ export function publishAppDeployment(args: {
     `publish-app-deployment-${args.appName}`,
     {
       create:
-        `docker run --name "publish-app-deployment-${args.appName}"` +
+        `docker run --rm --name "publish-app-deployment-${args.appName}"` +
         ` ${dockerImage}` +
         ` app:publish` +
         ` --registry.endpoint ${args.registry.endpoint} --registry.accessToken ${args.registry.accessToken}` +
