@@ -36,7 +36,6 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useToggle } from '@/lib/hooks';
-import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
@@ -511,29 +510,20 @@ export function DeleteProjectModalContent(props: {
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
-      <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
-          <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
           <DialogTitle>Delete project</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          Are you sure you wish to delete this project? This action is irreversible!
+          Every target and its published schema, reported data, and settings associated with this
+          project will be permanently deleted.
         </DialogDescription>
-        <DialogFooter className="flex w-full gap-2">
-          <Button
-            type="button"
-            size="lg"
-            onClick={props.toggleModalOpen}
-            className="w-full justify-center"
-          >
+        <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={props.toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            size="lg"
-            variant="destructive"
-            onClick={props.handleDelete}
-            className="w-full justify-center"
-          >
+          <Button variant="destructive" onClick={props.handleDelete}>
             Delete
           </Button>
         </DialogFooter>
