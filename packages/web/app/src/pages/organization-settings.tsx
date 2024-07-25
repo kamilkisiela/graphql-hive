@@ -40,7 +40,6 @@ import {
 } from '@/lib/access/organization';
 import { useToggle } from '@/lib/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { TrashIcon } from '@radix-ui/react-icons';
 import { useRouter } from '@tanstack/react-router';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
