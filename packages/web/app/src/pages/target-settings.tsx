@@ -12,6 +12,14 @@ import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import {
@@ -27,7 +35,6 @@ import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
 import { Input } from '@/components/v2/input';
-import { DeleteTargetModal } from '@/components/v2/modals';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
 import { Tag } from '@/components/v2/tag';
@@ -1268,5 +1275,103 @@ export function TargetSettingsPage(props: {
         page={props.page}
       />
     </>
+  );
+}
+
+export const DeleteTargetMutation = graphql(`
+  mutation deleteTarget($selector: TargetSelectorInput!) {
+    deleteTarget(selector: $selector) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTarget {
+        __typename
+        id
+      }
+    }
+  }
+`);
+
+export function DeleteTargetModal(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
+  const { organizationId, projectId, targetId } = props;
+  const [, mutate] = useMutation(DeleteTargetMutation);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      selector: {
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      },
+    });
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete target',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Target deleted',
+        description: 'The target has been successfully deleted.',
+      });
+      props.toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId/$projectId',
+        params: {
+          organizationId,
+          projectId,
+        },
+      });
+    }
+  };
+
+  return (
+    <DeleteTargetModalContent
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+}
+
+export function DeleteTargetModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
+        <DialogHeader>
+          <DialogTitle>Delete target</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Every published schema, reported data, and settings associated with this target will be
+          permanently deleted.
+        </DialogDescription>
+        <DialogDescription>
+          <span className="font-bold">This action is irreversible!</span>
+        </DialogDescription>
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={props.toggleModalOpen}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={props.handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
