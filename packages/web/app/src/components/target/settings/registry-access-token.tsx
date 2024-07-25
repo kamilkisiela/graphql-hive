@@ -302,7 +302,14 @@ export function GenerateTokenContent(props: {
             </Accordion>
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" onClick={props.toggleModalOpen}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={ev => {
+                ev.preventDefault();
+                props.toggleModalOpen();
+              }}
+            >
               Cancel
             </Button>
             <Button

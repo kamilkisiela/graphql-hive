@@ -147,7 +147,6 @@ export function deployGraphQL({
           AUTH_ORGANIZATION_OIDC: '1',
           AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
           // Traces (OTLP)
-          OPENTELEMETRY_CONSOLE_EXPORTER: '1',
           OPENTELEMETRY_COLLECTOR_ENDPOINT:
             observability.enabled && observability.tracingEndpoint
               ? observability.tracingEndpoint

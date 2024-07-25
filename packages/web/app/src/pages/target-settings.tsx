@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useState } from 'react';
+import { ComponentProps, PropsWithoutRef, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO } from 'date-fns';
 import { useFormik } from 'formik';
@@ -12,6 +12,14 @@ import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import {
@@ -27,7 +35,6 @@ import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
 import { Input } from '@/components/v2/input';
-import { DeleteTargetModal } from '@/components/v2/modals';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
 import { Tag } from '@/components/v2/tag';
@@ -104,7 +111,7 @@ function RegistryAccessTokens(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
   const me = useFragment(RegistryAccessTokens_MeFragment, props.me);
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -235,7 +242,7 @@ const ExtendBaseSchema = (props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement => {
+}) => {
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const [baseSchema, setBaseSchema] = useState(props.baseSchema);
   const { toast } = useToast();
@@ -335,14 +342,14 @@ const ClientExclusion_AvailableClientNamesQuery = graphql(`
 `);
 
 function ClientExclusion(
-  props: React.PropsWithoutRef<
+  props: PropsWithoutRef<
     {
       organizationId: string;
       projectId: string;
       selectedTargets: string[];
       clientsFromSettings: string[];
       value: string[];
-    } & Pick<React.ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
+    } & Pick<ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
   >,
 ) {
   const now = floorDate(new Date());
@@ -454,7 +461,7 @@ const ConditionalBreakingChanges = (props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement => {
+}) => {
   const [targetValidation, setValidation] = useMutation(SetTargetValidationMutation);
   const [mutation, updateValidation] = useMutation(
     TargetSettingsPage_UpdateTargetValidationSettingsMutation,
@@ -868,7 +875,7 @@ function GraphQLEndpointUrl(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
   const { toast } = useToast();
   const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetGraphQLEndpointUrl);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -1268,5 +1275,109 @@ export function TargetSettingsPage(props: {
         page={props.page}
       />
     </>
+  );
+}
+
+export const DeleteTargetMutation = graphql(`
+  mutation deleteTarget($selector: TargetSelectorInput!) {
+    deleteTarget(selector: $selector) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTarget {
+        __typename
+        id
+      }
+    }
+  }
+`);
+
+export function DeleteTargetModal(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
+  const { organizationId, projectId, targetId } = props;
+  const [, mutate] = useMutation(DeleteTargetMutation);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      selector: {
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      },
+    });
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete target',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Target deleted',
+        description: 'The target has been successfully deleted.',
+      });
+      props.toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId/$projectId',
+        params: {
+          organizationId,
+          projectId,
+        },
+      });
+    }
+  };
+
+  return (
+    <DeleteTargetModalContent
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+}
+
+export function DeleteTargetModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
+        <DialogHeader>
+          <DialogTitle>Delete target</DialogTitle>
+          <DialogDescription>
+            Every published schema, reported data, and settings associated with this target will be
+            permanently deleted.
+          </DialogDescription>
+          <DialogDescription>
+            <span className="font-bold">This action is irreversible!</span>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={props.handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

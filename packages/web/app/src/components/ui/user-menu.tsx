@@ -1,5 +1,16 @@
+import cookies from 'js-cookie';
 import { LifeBuoyIcon } from 'lucide-react';
 import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
+import { useMutation } from 'urql';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +34,13 @@ import {
   TrendingUpIcon,
 } from '@/components/ui/icon';
 import { Avatar } from '@/components/v2';
-import { LeaveOrganizationModal } from '@/components/v2/modals/leave-organization';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AuthProvider } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
+import { useNotifications } from '@/lib/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
 import { GetStartedProgress } from '../get-started/trigger';
@@ -259,5 +271,97 @@ export function UserMenu(props: {
         </DropdownMenu>
       </div>
     </>
+  );
+}
+
+const LeaveOrganizationModal_LeaveOrganizationMutation = graphql(`
+  mutation LeaveOrganizationModal_LeaveOrganizationMutation($input: OrganizationSelectorInput!) {
+    leaveOrganization(input: $input) {
+      ok {
+        organizationId
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+export function LeaveOrganizationModal(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  organizationName: string;
+}) {
+  const { organizationId, organizationName } = props;
+  const [, mutate] = useMutation(LeaveOrganizationModal_LeaveOrganizationMutation);
+  const notify = useNotifications();
+
+  async function onSubmit() {
+    const result = await mutate({
+      input: {
+        organization: organizationId,
+      },
+    });
+
+    if (result.error) {
+      notify("Couldn't leave organization. Please try again.", 'error');
+    }
+
+    if (result.data?.leaveOrganization.error) {
+      notify(result.data.leaveOrganization.error.message, 'error');
+    }
+
+    if (result.data?.leaveOrganization.ok) {
+      props.toggleModalOpen();
+      cookies.remove(LAST_VISITED_ORG_KEY);
+      window.location.href = '/';
+    }
+  }
+
+  return (
+    <LeaveOrganizationModalContent
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
+      organizationName={organizationName}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+export function LeaveOrganizationModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationName: string;
+  onSubmit: () => void;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
+        <DialogHeader>
+          <DialogTitle>Leave {props.organizationName}?</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to leave this organization?
+            <br />
+            You will lose access to{' '}
+            <span className="font-semibold text-white">{props.organizationName}</span>.
+          </DialogDescription>
+          <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2">
+          <Button
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={props.onSubmit}>
+            Leave organization
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

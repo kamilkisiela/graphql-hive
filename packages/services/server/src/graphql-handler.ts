@@ -181,11 +181,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           },
           exclude: ['readiness'],
         },
-        reporting: {
-          endpoint: options.hiveConfig?.reporting?.endpoint ?? undefined,
-          author: 'Hive API',
-          commit: options.release,
-        },
         experimental__persistedDocuments: options.hivePersistedDocumentsConfig
           ? {
               cdn: {
