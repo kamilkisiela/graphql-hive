@@ -1,4 +1,5 @@
 import NextImage from 'next/image'
+import { Tabs } from '@theguild/components'
 
 # App Deployments
 
@@ -64,6 +65,9 @@ GraphQL API.
 As long as the app is using these persisted documents is active, any change of the GraphQL API that
 alters the GraphQL schema as used by any of the persisted documents would break that specific app
 version and therefore be an unsafe/breaking change.
+
+> **Note:** The GraphQL operations being uploaded must pass validation against the target schema.
+> Otherwise, the app deployment creation will fail.
 
 Once these pre-requisites are met, you can create an app deployment by running the following
 command:
@@ -136,19 +140,122 @@ import activeAppImage from '../../../../public/docs/pages/features/app-deploymen
   className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
-## Persisted Documents with GraphQL Yoga
+## Persisted Documents on GraphQL Server and Gateway
 
-TODO
+Persisted documents can be used on your GraphQL server or Gateway to reduce the payload size of your
+GraphQL requests and secure your GraphQL API by only allowing operations that are known and trusted
+by your Gateway.
 
-## Persisted Documents with Apollo Server
+Hive serves as the source of truth for the allowed persisted documents and provides a CDN for
+fetching these documents as they are requested.
 
-TODO
+<Tabs items={['GraphQL Yoga', 'Apollo Server', 'GraphQL Mesh', 'Custom Third-Party Integration']}>
 
-## Persisted Documents with GraphQL Mesh
+{/* GraphQL Yoga */}
 
-TODO
+<Tabs.Tab>
 
-## Third-Party Integration of Persisted Documents (Raw Fetch from CDN)
+For GraphQL Yoga you can use the Hive CDN for resolving persisted documents via the Hive SDK.
+
+```sh npm2yarn
+npm i -D @graphql-hive/yoga
+```
+
+```typescript filename="Persisted Documents with GraphQL Yoga" {10-16}
+import { createYoga } from 'graphql-hive'
+import { useHive } from '@graphql-hive/yoga'
+import schema from './schema.js'
+
+const yoga = createYoga({
+  schema,
+  plugins: [
+    useHive({
+      enabled: false
+      experimental__persistedDocuments: {
+        cdn: {
+          // replace <target_id> and <cdn_access_token> with your values
+          endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+          accessToken: '<cdn_access_token>'
+        }
+      }
+    })
+  ]
+})
+```
+
+For further configuration options, please refer to the [Hive Client API reference].
+
+</Tabs.Tab>
+
+{/* Apollo Server */}
+
+<Tabs.Tab>
+
+For Apollo Server you can use the Hive CDN for resolving persisted documents via the Hive SDK.
+
+```sh npm2yarn
+npm i -D @graphql-hive/apollo
+```
+
+```typescript filename="Persisted Documents with Apollo Server" {10-16}
+import { ApolloServer } from '@apollo/server'
+import { useHive } from '@graphql-hive/apollo'
+import schema from './schema.js'
+
+const server = new ApolloServer({
+  schema,
+  plugins: [
+    useHive({
+      experimental__persistedDocuments: {
+        cdn: {
+          // replace <target_id> and <cdn_access_token> with your values
+          endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+          accessToken: '<cdn_access_token>'
+        }
+      }
+    })
+  ]
+})
+```
+
+For further configuration options, please refer to the
+[Hive Client API reference](/docs/api-reference/client).
+
+</Tabs.Tab>
+
+{/* GraphQL Mesh */}
+
+<Tabs.Tab>
+
+For GraphQL Mesh you can use the Hive configuration for resolving persisted documents. Adjust your
+`mesh.config.ts` file as follows.
+
+```typescript filename="mesh.config.ts" {7-13}
+import { defineConfig } from '@graphql-mesh/serve-cli'
+
+export default defineConfig({
+  hive: {
+    // The endpoint of CDN
+    endpoint: 'https://cdn.graphql-hive.com/<target_id>/supergraph',
+    experimental__persistedDocuments: {
+      cdn: {
+        // replace <target_id> and <cdn_access_token> with your values
+        endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+        accessToken: '<cdn_access_token>'
+      }
+    }
+  }
+})
+```
+
+For further configuration options, please refer to the
+[Hive Client API reference](/docs/api-reference/client).
+
+</Tabs.Tab>
+
+{/* Custom Third Party */}
+
+<Tabs.Tab>
 
 Any published app deployment is available via the Hive CDN. You can fetch a the persisted documents
 by doing a HTTP GET request.
@@ -164,7 +271,7 @@ GET https://cdn.graphql-hive.com/<target_id>/apps/<app_name>/<app_version>/<docu
 | `app_version`   | The version of the app deployment.                                      |
 | `document_hash` | The hash of the persisted document.                                     |
 
-Example curl request:
+**Example curl request:**
 
 ```bash filename="Example curl request"
 curl \
@@ -173,10 +280,70 @@ curl \
   https://cdn.graphql-hive.com/<target_id>/apps/<app_name>/<app_version>/<document_hash>
 ```
 
-Expected responses.
+**Expected responses:**
 
 | Response Status | Description                                                             |
 | --------------- | ----------------------------------------------------------------------- |
 | 200             | The persisted document was found and is returned in the response body.  |
 | 404             | The persisted document does not exist.                                  |
 | 401             | The request is unauthorized. A valid CDN access token must be provided. |
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Sending Persisted Document Requests from your App
+
+Once you have the persisted documents available on your GraphQL server or Gateway, you can send a
+GraphQL request with the persisted document ID following the GraphQL over HTTP specification.
+
+```text filename="GraphQL Request with Persisted Document"
+POST /graphql
+Content-Type: application/json
+{
+  "documentId": "<app_name>/<app_version>/<document_hash>",
+}
+```
+
+| Parameter       | Description                         |
+| --------------- | ----------------------------------- |
+| `app_name`      | The name of the app deployment.     |
+| `app_version`   | The version of the app deployment.  |
+| `document_hash` | The hash of the persisted document. |
+
+**Example curl request:**
+
+```bash filename="Example curl request"
+curl \
+  -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"documentId": "<app_name>/<app_version>/<document_hash>"}' \
+  http://localhost:4000/graphql
+```
+
+## CD Integration
+
+We recommend integrating the app deployment creation and publishing into your CD pipeline for
+automating the creationg and publishing of app deployments.
+
+Usually the following steps are performed.
+
+```mermaid
+
+graph TD
+    A[Extract Persisted Documents from App] --> B[Create App Deployment via Hive CLI]
+    B --> C[Publish App Deployment via Hive CLI]
+    C --> D[Deploy Application]
+```
+
+Since the application will be configured to send requests with the persisted document ID, we need to
+ensure that these documents are available on the Hive CDN before deploying the application.
+
+Extracting the persisted documents usually happens during the build step of your application. E.g.
+if you are using GraphQL Code Generator with the client preset or Relay, the persisted document JSON
+mapping is generated as an artifact.
+
+In your CLI pipeline, you can then use the Hive CLI (or Hive CLI docker container) to create and
+publish the app deployment.
+
+After that, you can deploy your application with confidence.
