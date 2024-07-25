@@ -1,4 +1,7 @@
-#!/usr/bin/env tsx --no-deprecation
+#!/usr/bin/env tsx
+
+// Suppress warnings from the CLI
+process.removeAllListeners('warning');
 
 const oclif = require('@oclif/core');
 
