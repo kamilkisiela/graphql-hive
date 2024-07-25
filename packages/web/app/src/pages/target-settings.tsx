@@ -1355,14 +1355,14 @@ export function DeleteTargetModalContent(props: {
       <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
           <DialogTitle>Delete target</DialogTitle>
+          <DialogDescription>
+            Every published schema, reported data, and settings associated with this target will be
+            permanently deleted.
+          </DialogDescription>
+          <DialogDescription>
+            <span className="font-bold">This action is irreversible!</span>
+          </DialogDescription>
         </DialogHeader>
-        <DialogDescription>
-          Every published schema, reported data, and settings associated with this target will be
-          permanently deleted.
-        </DialogDescription>
-        <DialogDescription>
-          <span className="font-bold">This action is irreversible!</span>
-        </DialogDescription>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={props.toggleModalOpen}>
             Cancel

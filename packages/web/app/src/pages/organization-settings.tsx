@@ -682,29 +682,21 @@ export function DeleteOrganizationModalContent(props: {
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
-      <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
-          <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
           <DialogTitle>Delete organization</DialogTitle>
+          <DialogDescription>
+            Every project created under this organization will be deleted as well.
+          </DialogDescription>
+          <DialogDescription>
+            <span className="font-bold">This action is irreversible!</span>
+          </DialogDescription>
         </DialogHeader>
-        <DialogDescription className="text-center">
-          Are you sure you wish to delete this organization? This action is irreversible!
-        </DialogDescription>
-        <DialogFooter className="flex w-full gap-2">
-          <Button
-            type="button"
-            size="lg"
-            onClick={props.toggleModalOpen}
-            className="w-full justify-center"
-          >
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={props.toggleModalOpen}>
             Cancel
           </Button>
-          <Button
-            size="lg"
-            variant="destructive"
-            onClick={props.handleDelete}
-            className="w-full justify-center"
-          >
+          <Button variant="destructive" onClick={props.handleDelete}>
             Delete
           </Button>
         </DialogFooter>
