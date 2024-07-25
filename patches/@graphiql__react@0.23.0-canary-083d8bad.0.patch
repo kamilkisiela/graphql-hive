@@ -1,0 +1,68 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 0b7ee7080fef92d698a154899945e71788d8a1e3..c2ffda95b1f0ac641a08525c0592452e5f99e7ab 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -3009,12 +3009,13 @@ function useSetEditorValues({
+   );
+ }
+ function createTab({
++  id,
+   query = null,
+   variables = null,
+   headers = null
+-} = {}) {
++}) {
+   return {
+-    id: guid(),
++    id: id || guid(),
+     hash: hashFromTabContents({ query, variables, headers }),
+     title: query && fuzzyExtractOperationName(query) || DEFAULT_TITLE,
+     query,
+@@ -3256,11 +3257,11 @@ function EditorContextProvider(props) {
+     responseEditor
+   });
+   const { onTabChange, defaultHeaders, children } = props;
+-  const addTab = useCallback(() => {
++  const addTab = useCallback((_tabState) => {
+     setTabState((current) => {
+       const updatedValues = synchronizeActiveTabValues(current);
+       const updated = {
+-        tabs: [...updatedValues.tabs, createTab({ headers: defaultHeaders })],
++        tabs: [...updatedValues.tabs, createTab({ ..._tabState, headers: defaultHeaders })],
+         activeTabIndex: updatedValues.tabs.length
+       };
+       storeTabs(updated);
+diff --git a/types/editor/context.d.ts b/types/editor/context.d.ts
+index 84b8cfc95addce217179d531a0504be8e0ca19ea..5c5226c4ac04b1e8e04e61e96ceb7849210c0034 100644
+--- a/types/editor/context.d.ts
++++ b/types/editor/context.d.ts
+@@ -13,7 +13,7 @@ export declare type EditorContextType = TabsState & {
+     /**
+      * Add a new tab.
+      */
+-    addTab(): void;
++    addTab(tabState?: Pick<TabState, 'id' | 'query' | 'variables' | 'headers'>): void;
+     /**
+      * Switch to a different tab.
+      * @param index The index of the tab that should be switched to.
+diff --git a/types/editor/tabs.d.ts b/types/editor/tabs.d.ts
+index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..5375833b997e61397d2677a230023e323580a122 100644
+--- a/types/editor/tabs.d.ts
++++ b/types/editor/tabs.d.ts
+@@ -42,6 +42,7 @@ export declare type TabState = TabDefinition & {
+      * The contents of the response editor of this tab.
+      */
+     response: string | null;
++    className?: string;
+ };
+ /**
+  * This object describes the state of all tabs.
+@@ -89,7 +90,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
+     headers?: string | null | undefined;
+     response: string | null;
+ }) => void;
+-export declare function createTab({ query, variables, headers, }?: Partial<TabDefinition>): TabState;
++export declare function createTab({ id, query, variables, headers, }: Partial<TabDefinition & Pick<TabState, 'id'>>): TabState;
+ export declare function setPropertiesInActiveTab(state: TabsState, partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): TabsState;
+ export declare function fuzzyExtractOperationName(str: string): string | null;
+ export declare function clearHeadersFromTabs(storage: StorageAPI | null): void;
