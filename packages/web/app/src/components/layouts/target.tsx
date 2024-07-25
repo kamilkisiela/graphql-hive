@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useMemo, useState } from 'react';
 import { LinkIcon } from 'lucide-react';
-import { useQuery, UseQueryState } from 'urql';
+import { useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,7 +24,7 @@ import { UserMenu } from '@/components/ui/user-menu';
 import { CopyValue, Tag } from '@/components/v2';
 import { Tabs } from '@/components/v2/tabs';
 import { graphql } from '@/gql';
-import { ProjectType, type ConnectSchemaModalQuery as ConnectSchemaModalType } from '@/gql/graphql';
+import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
