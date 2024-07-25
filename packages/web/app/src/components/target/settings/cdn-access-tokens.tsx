@@ -104,7 +104,14 @@ function CreateCDNAccessTokenModal(props: {
       </div>
 
       <div className="mt-auto flex w-full gap-2 self-end">
-        <Button variant="secondary" className="ml-auto" onClick={props.onClose}>
+        <Button
+          variant="secondary"
+          className="ml-auto"
+          onClick={ev => {
+            ev.preventDefault();
+            props.onClose();
+          }}
+        >
           Cancel
         </Button>
 

@@ -520,7 +520,13 @@ export function DeleteProjectModalContent(props: {
           <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={props.toggleModalOpen}>
+          <Button
+            variant="outline"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
             Cancel
           </Button>
           <Button variant="destructive" onClick={props.handleDelete}>

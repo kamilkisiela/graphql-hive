@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useState } from 'react';
+import { ComponentProps, PropsWithoutRef, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO } from 'date-fns';
 import { useFormik } from 'formik';
@@ -111,7 +111,7 @@ function RegistryAccessTokens(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
   const me = useFragment(RegistryAccessTokens_MeFragment, props.me);
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -242,7 +242,7 @@ const ExtendBaseSchema = (props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement => {
+}) => {
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const [baseSchema, setBaseSchema] = useState(props.baseSchema);
   const { toast } = useToast();
@@ -342,14 +342,14 @@ const ClientExclusion_AvailableClientNamesQuery = graphql(`
 `);
 
 function ClientExclusion(
-  props: React.PropsWithoutRef<
+  props: PropsWithoutRef<
     {
       organizationId: string;
       projectId: string;
       selectedTargets: string[];
       clientsFromSettings: string[];
       value: string[];
-    } & Pick<React.ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
+    } & Pick<ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
   >,
 ) {
   const now = floorDate(new Date());
@@ -461,7 +461,7 @@ const ConditionalBreakingChanges = (props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement => {
+}) => {
   const [targetValidation, setValidation] = useMutation(SetTargetValidationMutation);
   const [mutation, updateValidation] = useMutation(
     TargetSettingsPage_UpdateTargetValidationSettingsMutation,
@@ -875,7 +875,7 @@ function GraphQLEndpointUrl(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
   const { toast } = useToast();
   const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetGraphQLEndpointUrl);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -1364,7 +1364,13 @@ export function DeleteTargetModalContent(props: {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={props.toggleModalOpen}>
+          <Button
+            variant="outline"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
             Cancel
           </Button>
           <Button variant="destructive" onClick={props.handleDelete}>
