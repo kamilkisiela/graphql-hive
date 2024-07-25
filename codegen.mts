@@ -200,6 +200,7 @@ const config: CodegenConfig = {
     './packages/web/app/src/gql/': {
       documents: [
         './packages/web/app/src/(components|lib|pages)/**/*.ts(x)?',
+        './packages/web/app/src/graphql',
         '!./packages/web/app/src/server/**/*.ts',
       ],
       preset: 'client',
