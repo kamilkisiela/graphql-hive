@@ -40,7 +40,7 @@ export function publishAppDeployment(args: {
         ` ${dockerImage}` +
         ` app:publish` +
         ` --registry.endpoint ${args.registry.endpoint} --registry.accessToken ${args.registry.accessToken}` +
-        ` --name ${args.appName} --version ${args.version}`,
+        ` --name ${args.appName} --version ${args.version.commit}`,
     },
     {
       dependsOn: createCommand,
