@@ -125,20 +125,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  CompositeSchema: {
-    __isTypeOf(obj) {
-      return obj.kind === 'composite' && obj.action === 'PUSH';
-    },
-    service(schema) {
-      return schema.service_name;
-    },
-    source(schema) {
-      return schema.sdl;
-    },
-    url(schema) {
-      return schema.service_url;
-    },
-  },
   SchemaConnection: createConnection(),
   SchemaChangeConnection: createConnection(),
   SchemaChange: {
