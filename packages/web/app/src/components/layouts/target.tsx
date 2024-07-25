@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -372,35 +373,6 @@ export function ConnectSchemaModal(props: {
     pause: !props.isOpen,
   });
 
-  return (
-    <ConnectSchemaModalContent
-      isOpen={props.isOpen}
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
-      toggleModalOpen={props.toggleModalOpen}
-      query={query}
-    />
-  );
-}
-
-export function ConnectSchemaModalContent(props: {
-  isOpen: boolean;
-  toggleModalOpen: () => void;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-  query: UseQueryState<
-    ConnectSchemaModalType,
-    {
-      targetSelector: {
-        organization: string;
-        project: string;
-        target: string;
-      };
-    }
-  >;
-}) {
   const [selectedGraph, setSelectedGraph] = useState<string>('DEFAULT_GRAPH');
   const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
 
@@ -408,16 +380,16 @@ export function ConnectSchemaModalContent(props: {
     if (selectedGraph === 'DEFAULT_GRAPH') {
       return null;
     }
-    return props.query.data?.target?.activeContracts.edges.find(
+    return query.data?.target?.activeContracts.edges.find(
       ({ node }) => node.contractName === selectedGraph,
     )?.node;
   }, [selectedGraph]);
 
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
-      <DialogContent className="container flex w-[600px] max-w-[700px] flex-col gap-5 md:w-3/5">
+      <DialogContent className="w-[600px] max-w-[700px] gap-5 md:w-3/5">
         <DialogHeader>
-          <DialogTitle className="mb-3 text-center">Hive CDN Access</DialogTitle>
+          <DialogTitle>Hive CDN Access</DialogTitle>
           <DialogDescription>
             Hive leverages the{' '}
             <UiLink
@@ -435,7 +407,7 @@ export function ConnectSchemaModalContent(props: {
             regardless of Hive's status.
           </DialogDescription>
         </DialogHeader>
-        {props.query.data?.target && (
+        {query.data?.target && (
           <>
             <DialogDescription>
               Based on your project type, you can access different artifacts from Hive's CDN:
@@ -459,7 +431,7 @@ export function ConnectSchemaModalContent(props: {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DEFAULT_GRAPH">Default Graph</SelectItem>
-                  {props.query.data.target.activeContracts.edges.map(({ node }) => (
+                  {query.data.target.activeContracts.edges.map(({ node }) => (
                     <SelectItem key={node.id} value={node.contractName}>
                       {node.contractName}
                     </SelectItem>
@@ -474,7 +446,7 @@ export function ConnectSchemaModalContent(props: {
                   <SelectValue placeholder="Select Artifact" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ArtifactToProjectTypeMapping[props.query.data.target.project.type].map(t => (
+                  {ArtifactToProjectTypeMapping[query.data.target.project.type].map(t => (
                     <SelectItem
                       key={t}
                       value={t}
@@ -493,7 +465,7 @@ export function ConnectSchemaModalContent(props: {
             </DialogDescription>
             <CopyValue
               value={composeEndpoint(
-                selectedContract?.cdnUrl ?? props.query.data.target.cdnUrl,
+                selectedContract?.cdnUrl ?? query.data.target.cdnUrl,
                 selectedArtifact,
               )}
             />
@@ -529,7 +501,7 @@ export function ConnectSchemaModalContent(props: {
             <DocsLink href="/features/high-availability-cdn">
               Learn more about Hive High-Availability CDN
             </DocsLink>
-            {props.query.data.target.project.type === ProjectType.Federation ? (
+            {query.data.target.project.type === ProjectType.Federation ? (
               <DialogDescription className="text-center">
                 Read the{' '}
                 <UiLink
@@ -545,15 +517,11 @@ export function ConnectSchemaModalContent(props: {
             ) : null}
           </>
         )}
-        <Button
-          type="button"
-          variant="default"
-          size="lg"
-          onClick={props.toggleModalOpen}
-          className="self-end"
-        >
-          Close
-        </Button>
+        <DialogFooter>
+          <Button type="button" onClick={props.toggleModalOpen}>
+            Close
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

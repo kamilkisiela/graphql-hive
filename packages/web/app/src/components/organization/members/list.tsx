@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { MoreHorizontalIcon, MoveDownIcon, MoveUpIcon, SettingsIcon } from 'lucide-react';
 import type { IconType } from 'react-icons';
 import { FaGithub, FaGoogle, FaOpenid, FaUserLock } from 'react-icons/fa';
