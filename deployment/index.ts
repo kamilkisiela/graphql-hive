@@ -265,7 +265,7 @@ let publishAppDeploymentCommand: pulumi.Resource | undefined;
 
 if (hiveAppPersistedDocumentsAbsolutePath) {
   publishAppDeploymentCommand = publishAppDeployment({
-    appName: 'app',
+    appName: 'hive-app',
     registry: {
       endpoint: `https://${environment.appDns}/registry`,
       accessToken: apiEnv.HIVE_API_TOKEN,
