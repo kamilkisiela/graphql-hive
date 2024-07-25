@@ -1,4 +1,3 @@
-import { ReactElement } from 'react';
 import cookies from 'js-cookie';
 import { LifeBuoyIcon } from 'lucide-react';
 import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
@@ -338,32 +337,27 @@ export function LeaveOrganizationModalContent(props: {
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
-      <DialogContent className="container flex w-4/5 max-w-[520px] flex-col items-center gap-5 md:w-3/5">
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
-          <FaUsersSlash className="h-16 w-auto text-red-500 opacity-70" />
           <DialogTitle>Leave {props.organizationName}?</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to leave this organization?
+            <br />
+            You will lose access to{' '}
+            <span className="font-semibold text-white">{props.organizationName}</span>.
+          </DialogDescription>
+          <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
         </DialogHeader>
-        <DialogDescription>
-          Are you sure you want to leave this organization? You will lose access to{' '}
-          <span className="font-semibold text-white">{props.organizationName}</span>. This action is
-          irreversible!
-        </DialogDescription>
-        <DialogFooter className="flex w-full gap-2">
+        <DialogFooter className="gap-2">
           <Button
-            type="button"
-            size="lg"
-            onClick={props.toggleModalOpen}
-            className="w-full justify-center"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
           >
             Cancel
           </Button>
-          <Button
-            size="lg"
-            type="button"
-            variant="destructive"
-            className="w-full justify-center"
-            onClick={props.onSubmit}
-          >
+          <Button variant="destructive" onClick={props.onSubmit}>
             Leave organization
           </Button>
         </DialogFooter>
