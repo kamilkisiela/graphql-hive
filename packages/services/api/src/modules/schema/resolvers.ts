@@ -125,14 +125,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SingleSchema: {
-    __isTypeOf(obj) {
-      return obj.kind === 'single';
-    },
-    source(schema) {
-      return schema.sdl;
-    },
-  },
   CompositeSchema: {
     __isTypeOf(obj) {
       return obj.kind === 'composite' && obj.action === 'PUSH';
