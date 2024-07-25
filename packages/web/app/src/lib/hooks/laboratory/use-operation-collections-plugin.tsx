@@ -22,9 +22,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PlusIcon } from '@/components/ui/icon';
+import { Link } from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Link } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
