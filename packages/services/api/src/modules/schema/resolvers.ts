@@ -1,20 +1,7 @@
-import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { ContractsManager } from './providers/contracts-manager';
 
 export const resolvers: SchemaModule.Resolvers = {
-  Contract: {
-    target(contract, _, context) {
-      return context.injector.get(TargetManager).getTargetById({
-        targetId: contract.targetId,
-      });
-    },
-    viewerCanDisableContract(contract, _, context) {
-      return context.injector
-        .get(ContractsManager)
-        .getViewerCanDisableContractForContract(contract);
-    },
-  },
   ContractCheck: {
     contractVersion(contractCheck, _, context) {
       return context.injector
