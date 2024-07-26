@@ -100,23 +100,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  UnusedSchemaExplorer: {
-    types({ sdl, supergraph, usage }) {
-      const unused = () =>
-        ({
-          isUsed: false,
-          usedCoordinates: usage.usedCoordinates,
-          period: usage.period,
-          organization: usage.organization,
-          project: usage.project,
-          target: usage.target,
-        }) as const;
-
-      return buildGraphQLTypesFromSDL(sdl, unused, supergraph).sort((a, b) =>
-        a.entity.name.localeCompare(b.entity.name),
-      );
-    },
-  },
   GraphQLObjectType: {
     __isTypeOf: __isTypeOf(Kind.OBJECT_TYPE_DEFINITION),
     name: t => t.entity.name,
