@@ -2,28 +2,6 @@ import type { SchemaModule } from './__generated__/types';
 import { ContractsManager } from './providers/contracts-manager';
 
 export const resolvers: SchemaModule.Resolvers = {
-  ContractCheck: {
-    contractVersion(contractCheck, _, context) {
-      return context.injector
-        .get(ContractsManager)
-        .getContractVersionForContractCheck(contractCheck);
-    },
-    compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
-    supergraphSDL: contractCheck => contractCheck.supergraphSdl,
-    hasSchemaCompositionErrors(contractCheck, _, { injector }) {
-      return injector
-        .get(ContractsManager)
-        .getHasSchemaCompositionErrorsForContractCheck(contractCheck);
-    },
-    hasUnapprovedBreakingChanges(contractCheck, _, { injector }) {
-      return injector
-        .get(ContractsManager)
-        .getHasUnapprovedBreakingChangesForContractCheck(contractCheck);
-    },
-    hasSchemaChanges(contractCheck, _, { injector }) {
-      return injector.get(ContractsManager).getHasSchemaChangesForContractCheck(contractCheck);
-    },
-  },
   ContractVersion: {
     isComposable(contractVersion) {
       return contractVersion.schemaCompositionErrors === null;
