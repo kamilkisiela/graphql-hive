@@ -4,14 +4,6 @@ import type { SchemaModule } from './__generated__/types';
 import { ContractsManager } from './providers/contracts-manager';
 
 export const resolvers: SchemaModule.Resolvers = {
-  BreakingChangeMetadataTarget: {
-    target(record, _, { injector }) {
-      return injector
-        .get(TargetManager)
-        .getTargetById({ targetId: record.id })
-        .catch(() => null);
-    },
-  },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
     ...warning,
     start: {
