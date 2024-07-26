@@ -1,23 +1,8 @@
-import { createDummyConnection } from '../../shared/schema';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { ContractsManager } from './providers/contracts-manager';
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaPolicyWarningConnection: createDummyConnection(warning => ({
-    ...warning,
-    start: {
-      column: warning.column,
-      line: warning.line,
-    },
-    end:
-      warning.endColumn && warning.endLine
-        ? {
-            column: warning.endColumn,
-            line: warning.endLine,
-          }
-        : null,
-  })),
   Contract: {
     target(contract, _, context) {
       return context.injector.get(TargetManager).getTargetById({
