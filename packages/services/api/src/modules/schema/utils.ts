@@ -2,9 +2,14 @@ import {
   GraphQLEnumTypeMapper,
   GraphQLInputObjectTypeMapper,
   GraphQLInterfaceTypeMapper,
+  GraphQLNamedTypeMapper,
   GraphQLObjectTypeMapper,
   GraphQLScalarTypeMapper,
   GraphQLUnionTypeMapper,
+  SchemaCoordinateUsageForUnusedExplorer,
+  SchemaCoordinateUsageMapper,
+  WithGraphQLParentInfo,
+  WithSchemaCoordinatesUsage,
 } from './module.graphql.mappers';
 import { ConstDirectiveNode, DEFAULT_DEPRECATION_REASON, DocumentNode, Kind, print } from 'graphql';
 import type { DateRange } from '../../shared/entities';
@@ -285,4 +290,82 @@ export function buildGraphQLTypesFromSDL(
   }
 
   return types;
+}
+
+export function __isTypeOf<
+  T extends GraphQLNamedTypeMapper,
+  K extends GraphQLNamedTypeMapper['entity']['kind'],
+>(kind: K): (type: T) => boolean {
+  return ({ entity }: { entity: GraphQLNamedTypeMapper['entity'] }) => entity.kind === kind;
+}
+
+function isSchemaCoordinateUsageForUnusedExplorer(
+  value: unknown,
+): value is SchemaCoordinateUsageForUnusedExplorer {
+  return 'isUsed' in (value as any);
+}
+
+export function usage(
+  source:
+    | WithSchemaCoordinatesUsage<{
+        entity: {
+          name: string;
+        };
+      }>
+    | WithGraphQLParentInfo<
+        WithSchemaCoordinatesUsage<{
+          entity: {
+            name: string;
+          };
+        }>
+      >,
+  _: unknown,
+): Promise<SchemaCoordinateUsageMapper> | SchemaCoordinateUsageMapper {
+  const coordinate =
+    'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
+
+  const usage = source.usage();
+
+  if (isSchemaCoordinateUsageForUnusedExplorer(usage)) {
+    if (usage.usedCoordinates.has(coordinate)) {
+      return {
+        // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
+        total: 1,
+        isUsed: true,
+        usedByClients: () => [],
+        period: usage.period,
+        organization: usage.organization,
+        project: usage.project,
+        target: usage.target,
+        coordinate: coordinate,
+      };
+    }
+
+    return {
+      total: 0,
+      isUsed: false,
+      usedByClients: () => [],
+    };
+  }
+
+  return Promise.resolve(usage).then(usage => {
+    const coordinateUsage = usage[coordinate];
+
+    return coordinateUsage && coordinateUsage.total > 0
+      ? {
+          total: coordinateUsage.total,
+          isUsed: true,
+          usedByClients: coordinateUsage.usedByClients,
+          period: coordinateUsage.period,
+          organization: coordinateUsage.organization,
+          project: coordinateUsage.project,
+          target: coordinateUsage.target,
+          coordinate: coordinate,
+        }
+      : {
+          total: 0,
+          isUsed: false,
+          usedByClients: () => [],
+        };
+  });
 }
