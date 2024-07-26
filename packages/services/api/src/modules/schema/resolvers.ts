@@ -31,8 +31,6 @@ import {
   Kind,
   print,
 } from 'graphql';
-import { CriticalityLevel } from '@graphql-inspector/core';
-import type * as Types from '../../__generated__/types';
 import { type DateRange } from '../../shared/entities';
 import { parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import { createConnection, createDummyConnection } from '../../shared/schema';
@@ -41,7 +39,6 @@ import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { SuperGraphInformation } from './lib/federation-super-graph';
-import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-changes-helper';
 import { ContractsManager } from './providers/contracts-manager';
 import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
@@ -125,20 +122,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaChange: {
-    message: (change, args) => {
-      return args.withSafeBasedOnUsageNote && change.isSafeBasedOnUsage === true
-        ? `${change.message} (non-breaking based on usage)`
-        : change.message;
-    },
-    path: change => change.path?.split('.') ?? null,
-    criticality: change => criticalityMap[change.criticality],
-    criticalityReason: change => change.reason,
-    approval: change => change.approvalMetadata,
-    isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
-    usageStatistics: (change, _, { injector }) =>
-      injector.get(BreakingSchemaChangeUsageHelper).getUsageDataForBreakingSchemaChange(change),
-  },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>
       injector.get(SchemaManager).getUserForSchemaChangeById({ userId: approval.userId }),
@@ -1161,12 +1144,6 @@ function transformGraphQLScalarType(entity: GraphQLScalarType): GraphQLScalarTyp
     description: entity.description,
   };
 }
-
-const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {
-  [CriticalityLevel.Breaking]: 'Breaking',
-  [CriticalityLevel.NonBreaking]: 'Safe',
-  [CriticalityLevel.Dangerous]: 'Dangerous',
-};
 
 function deprecationReasonFromDirectives(directives: readonly ConstDirectiveNode[] | undefined) {
   if (!directives) {
