@@ -93,29 +93,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLEnumType: {
-    __isTypeOf: __isTypeOf(Kind.ENUM_TYPE_DEFINITION),
-    name: t => t.entity.name,
-    description: t => t.entity.description ?? null,
-    values: t =>
-      t.entity.values.map(v => ({
-        entity: v,
-        parent: {
-          coordinate: t.entity.name,
-        },
-        usage: t.usage,
-        supergraph: t.supergraph
-          ? { ownedByServiceNames: t.supergraph.getEnumValueOwnedByServices(v.name) }
-          : null,
-      })),
-    usage,
-    supergraphMetadata: t =>
-      t.supergraph
-        ? {
-            ownedByServiceNames: t.supergraph.ownedByServiceNames,
-          }
-        : null,
-  },
   GraphQLInputObjectType: {
     __isTypeOf: __isTypeOf(Kind.INPUT_OBJECT_TYPE_DEFINITION),
     name: t => t.entity.name,
