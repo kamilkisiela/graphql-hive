@@ -13,11 +13,7 @@ import type {
 } from './module.graphql.mappers';
 import stringify from 'fast-json-stable-stringify';
 import { ConstDirectiveNode, DEFAULT_DEPRECATION_REASON, DocumentNode, Kind, print } from 'graphql';
-import { type DateRange } from '../../shared/entities';
-import { PromiseOrValue } from '../../shared/helpers';
 import { createDummyConnection } from '../../shared/schema';
-import { OperationsManager } from '../operations/providers/operations-manager';
-import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { SuperGraphInformation } from './lib/federation-super-graph';
@@ -104,31 +100,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  DeprecatedSchemaExplorer: {
-    types({ sdl, supergraph, usage }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
-
-      async function getStats(typename: string) {
-        const stats = await operationsManager.countCoordinatesOfTarget({
-          target: usage.target,
-          organization: usage.organization,
-          project: usage.project,
-          period: usage.period,
-        });
-
-        return withUsedByClients(stats, {
-          selector: usage,
-          period: usage.period,
-          operationsManager,
-          typename,
-        });
-      }
-
-      return buildGraphQLTypesFromSDL(sdl, getStats, supergraph).sort((a, b) =>
-        a.entity.name.localeCompare(b.entity.name),
-      );
-    },
-  },
   UnusedSchemaExplorer: {
     types({ sdl, supergraph, usage }) {
       const unused = () =>
@@ -528,58 +499,6 @@ function stringifyDefaultValue(value: unknown): string | null {
     return stringify(value);
   }
   return null;
-}
-
-function withUsedByClients<
-  T extends {
-    isUsed: boolean;
-  },
->(
-  input: Record<string, T>,
-  deps: {
-    operationsManager: OperationsManager;
-    selector: TargetSelector;
-    period: DateRange;
-    typename: string;
-  },
-): Record<
-  string,
-  T & {
-    usedByClients: () => PromiseOrValue<Array<string>>;
-    period: DateRange;
-    organization: string;
-    project: string;
-    target: string;
-    typename: string;
-  }
-> {
-  return Object.fromEntries(
-    Object.entries(input).map(([schemaCoordinate, record]) => [
-      schemaCoordinate,
-      {
-        selector: deps.selector,
-        period: deps.period,
-        typename: deps.typename,
-        organization: deps.selector.organization,
-        project: deps.selector.project,
-        target: deps.selector.target,
-        ...record,
-        usedByClients() {
-          if (record.isUsed === false) {
-            return [];
-          }
-
-          // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
-          return deps.operationsManager.getClientNamesPerCoordinateOfType({
-            ...deps.selector,
-            period: deps.period,
-            typename: deps.typename,
-            schemaCoordinate,
-          });
-        },
-      },
-    ]),
-  );
 }
 
 function deprecationReasonFromDirectives(directives: readonly ConstDirectiveNode[] | undefined) {
