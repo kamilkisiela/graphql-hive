@@ -125,7 +125,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaConnection: createConnection(),
   SchemaChange: {
     message: (change, args) => {
       return args.withSafeBasedOnUsageNote && change.isSafeBasedOnUsage === true

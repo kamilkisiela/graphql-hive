@@ -45,6 +45,7 @@ const config: CodegenConfig = {
               'TokenInfoPayload',
               'OrganizationByInviteCodePayload',
               'JoinOrganizationPayload',
+              'Schema',
             ],
           },
         },
