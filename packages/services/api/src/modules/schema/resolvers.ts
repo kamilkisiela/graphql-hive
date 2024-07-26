@@ -1,11 +1,3 @@
-import type {
-  GraphQLNamedTypeMapper,
-  SchemaCoordinateUsageForUnusedExplorer,
-  SchemaCoordinateUsageMapper,
-  WithGraphQLParentInfo,
-  WithSchemaCoordinatesUsage,
-} from './module.graphql.mappers';
-import stringify from 'fast-json-stable-stringify';
 import { createDummyConnection } from '../../shared/schema';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
@@ -13,94 +5,7 @@ import { ContractsManager } from './providers/contracts-manager';
 import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
 
-function isSchemaCoordinateUsageForUnusedExplorer(
-  value: unknown,
-): value is SchemaCoordinateUsageForUnusedExplorer {
-  return 'isUsed' in (value as any);
-}
-
-function usage(
-  source:
-    | WithSchemaCoordinatesUsage<{
-        entity: {
-          name: string;
-        };
-      }>
-    | WithGraphQLParentInfo<
-        WithSchemaCoordinatesUsage<{
-          entity: {
-            name: string;
-          };
-        }>
-      >,
-  _: unknown,
-): Promise<SchemaCoordinateUsageMapper> | SchemaCoordinateUsageMapper {
-  const coordinate =
-    'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
-
-  const usage = source.usage();
-
-  if (isSchemaCoordinateUsageForUnusedExplorer(usage)) {
-    if (usage.usedCoordinates.has(coordinate)) {
-      return {
-        // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
-        total: 1,
-        isUsed: true,
-        usedByClients: () => [],
-        period: usage.period,
-        organization: usage.organization,
-        project: usage.project,
-        target: usage.target,
-        coordinate: coordinate,
-      };
-    }
-
-    return {
-      total: 0,
-      isUsed: false,
-      usedByClients: () => [],
-    };
-  }
-
-  return Promise.resolve(usage).then(usage => {
-    const coordinateUsage = usage[coordinate];
-
-    return coordinateUsage && coordinateUsage.total > 0
-      ? {
-          total: coordinateUsage.total,
-          isUsed: true,
-          usedByClients: coordinateUsage.usedByClients,
-          period: coordinateUsage.period,
-          organization: coordinateUsage.organization,
-          project: coordinateUsage.project,
-          target: coordinateUsage.target,
-          coordinate: coordinate,
-        }
-      : {
-          total: 0,
-          isUsed: false,
-          usedByClients: () => [],
-        };
-  });
-}
-
-function __isTypeOf<
-  T extends GraphQLNamedTypeMapper,
-  K extends GraphQLNamedTypeMapper['entity']['kind'],
->(kind: K): (type: T) => boolean {
-  return ({ entity }: { entity: GraphQLNamedTypeMapper['entity'] }) => entity.kind === kind;
-}
-
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLArgument: {
-    name: a => a.entity.name,
-    description: a => a.entity.description ?? null,
-    type: a => a.entity.type,
-    defaultValue: a => stringifyDefaultValue(a.entity.defaultValue),
-    deprecationReason: a => a.entity.deprecationReason ?? null,
-    isDeprecated: a => typeof a.entity.deprecationReason === 'string',
-    usage,
-  },
   SuccessfulSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
       return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
@@ -285,10 +190,3 @@ export const resolvers: SchemaModule.Resolvers = {
         .getIsFirstComposableVersionForContractVersion(contractVersion),
   },
 };
-
-function stringifyDefaultValue(value: unknown): string | null {
-  if (typeof value !== 'undefined') {
-    return stringify(value);
-  }
-  return null;
-}
