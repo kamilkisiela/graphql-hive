@@ -6,7 +6,6 @@ import type {
   WithSchemaCoordinatesUsage,
 } from './module.graphql.mappers';
 import stringify from 'fast-json-stable-stringify';
-import { Kind } from 'graphql';
 import { createDummyConnection } from '../../shared/schema';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
@@ -93,21 +92,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLInputField: {
-    name: f => f.entity.name,
-    description: f => f.entity.description ?? null,
-    type: f => f.entity.type,
-    defaultValue: f => stringifyDefaultValue(f.entity.defaultValue),
-    isDeprecated: f => typeof f.entity.deprecationReason === 'string',
-    deprecationReason: f => f.entity.deprecationReason ?? null,
-    usage,
-    supergraphMetadata: f =>
-      f.supergraph
-        ? {
-            ownedByServiceNames: f.supergraph.ownedByServiceNames,
-          }
-        : null,
-  },
   GraphQLArgument: {
     name: a => a.entity.name,
     description: a => a.entity.description ?? null,

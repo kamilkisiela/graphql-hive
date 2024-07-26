@@ -11,6 +11,7 @@ import {
   WithGraphQLParentInfo,
   WithSchemaCoordinatesUsage,
 } from './module.graphql.mappers';
+import stringify from 'fast-json-stable-stringify';
 import { ConstDirectiveNode, DEFAULT_DEPRECATION_REASON, DocumentNode, Kind, print } from 'graphql';
 import type { DateRange } from '../../shared/entities';
 import type { PromiseOrValue } from '../../shared/helpers';
@@ -368,4 +369,11 @@ export function usage(
           usedByClients: () => [],
         };
   });
+}
+
+export function stringifyDefaultValue(value: unknown): string | null {
+  if (typeof value !== 'undefined') {
+    return stringify(value);
+  }
+  return null;
 }
