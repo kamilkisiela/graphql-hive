@@ -46,6 +46,7 @@ const config: CodegenConfig = {
               'OrganizationByInviteCodePayload',
               'JoinOrganizationPayload',
               'Schema',
+              'GraphQLNamedType',
             ],
           },
         },
