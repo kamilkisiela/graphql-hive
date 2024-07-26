@@ -87,6 +87,11 @@
       "@oclif/plugin-update"
     ],
     "update": {
+      "node": {
+        "options": [
+          "--no-deprecation"
+        ]
+      },
       "s3": {
         "host": "https://cli.graphql-hive.com/",
         "bucket": "graphql-hive-cli"

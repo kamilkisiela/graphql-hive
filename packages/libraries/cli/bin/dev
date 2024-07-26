@@ -1,5 +1,8 @@
 #!/usr/bin/env tsx
 
+// Suppress warnings from the CLI
+process.removeAllListeners('warning');
+
 const oclif = require('@oclif/core');
 
 // In dev mode -> use ts-node and dev plugins
