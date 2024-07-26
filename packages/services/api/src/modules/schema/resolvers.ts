@@ -32,8 +32,8 @@ import {
   print,
 } from 'graphql';
 import { type DateRange } from '../../shared/entities';
-import { parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
-import { createConnection, createDummyConnection } from '../../shared/schema';
+import { PromiseOrValue } from '../../shared/helpers';
+import { createDummyConnection } from '../../shared/schema';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
@@ -122,33 +122,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  Project: {
-    externalSchemaComposition(project) {
-      if (project.externalComposition.enabled && project.externalComposition.endpoint) {
-        return {
-          endpoint: project.externalComposition.endpoint,
-        };
-      }
-
-      return null;
-    },
-    registryModel(project) {
-      return project.legacyRegistryModel ? 'LEGACY' : 'MODERN';
-    },
-    schemaVersionsCount(project, { period }, { injector }) {
-      return injector.get(SchemaManager).countSchemaVersionsOfProject({
-        organization: project.orgId,
-        project: project.id,
-        period: period ? parseDateRangeInput(period) : null,
-      });
-    },
-    isNativeFederationEnabled(project) {
-      return project.nativeFederation === true;
-    },
-    nativeFederationCompatibility(project, _, { injector }) {
-      return injector.get(SchemaManager).getNativeFederationCompatibilityStatus(project);
-    },
-  },
   SchemaCoordinateUsage: {
     topOperations(source, { limit }, { injector }) {
       if (!source.isUsed) {
