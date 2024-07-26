@@ -93,12 +93,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLUnionTypeMember: {
-    name: m => m.entity.name,
-    usage,
-    supergraphMetadata: m =>
-      m.supergraph ? { ownedByServiceNames: m.supergraph.ownedByServiceNames } : null,
-  },
   GraphQLField: {
     name: f => f.entity.name,
     description: f => f.entity.description ?? null,
