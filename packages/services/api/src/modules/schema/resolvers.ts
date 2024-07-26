@@ -93,33 +93,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLUnionType: {
-    __isTypeOf: __isTypeOf(Kind.UNION_TYPE_DEFINITION),
-    name: t => t.entity.name,
-    description: t => t.entity.description ?? null,
-    members: t =>
-      t.entity.members.map(i => {
-        return {
-          entity: i,
-          usage: t.usage,
-          parent: {
-            coordinate: t.entity.name,
-          },
-          supergraph: t.supergraph
-            ? {
-                ownedByServiceNames: t.supergraph.getUnionMemberOwnedByServices(i.name),
-              }
-            : null,
-        };
-      }),
-    usage,
-    supergraphMetadata: t =>
-      t.supergraph
-        ? {
-            ownedByServiceNames: t.supergraph.ownedByServiceNames,
-          }
-        : null,
-  },
   GraphQLEnumType: {
     __isTypeOf: __isTypeOf(Kind.ENUM_TYPE_DEFINITION),
     name: t => t.entity.name,
