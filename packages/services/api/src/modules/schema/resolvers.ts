@@ -93,15 +93,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLEnumValue: {
-    name: v => v.entity.name,
-    description: v => v.entity.description ?? null,
-    isDeprecated: v => typeof v.entity.deprecationReason === 'string',
-    deprecationReason: v => v.entity.deprecationReason ?? null,
-    usage,
-    supergraphMetadata: v =>
-      v.supergraph ? { ownedByServiceNames: v.supergraph.ownedByServiceNames } : null,
-  },
   GraphQLUnionTypeMember: {
     name: m => m.entity.name,
     usage,
