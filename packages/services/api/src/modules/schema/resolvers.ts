@@ -122,11 +122,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaChangeApproval: {
-    approvedBy: (approval, _, { injector }) =>
-      injector.get(SchemaManager).getUserForSchemaChangeById({ userId: approval.userId }),
-    approvedAt: approval => approval.date,
-  },
   SchemaErrorConnection: createConnection(),
   SchemaWarningConnection: createConnection(),
   SchemaCheckSuccess: {
