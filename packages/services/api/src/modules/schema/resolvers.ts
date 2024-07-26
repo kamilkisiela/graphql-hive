@@ -122,11 +122,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaCheckError: {
-    __isTypeOf(obj) {
-      return !obj.valid;
-    },
-  },
   Project: {
     externalSchemaComposition(project) {
       if (project.externalComposition.enabled && project.externalComposition.endpoint) {
