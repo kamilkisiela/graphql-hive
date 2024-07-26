@@ -122,11 +122,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaCheckSuccess: {
-    __isTypeOf(obj) {
-      return obj.valid;
-    },
-  },
   SchemaCheckError: {
     __isTypeOf(obj) {
       return !obj.valid;
