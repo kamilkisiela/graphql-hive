@@ -122,7 +122,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  SchemaWarningConnection: createConnection(),
   SchemaCheckSuccess: {
     __isTypeOf(obj) {
       return obj.valid;
