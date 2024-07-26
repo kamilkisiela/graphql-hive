@@ -93,14 +93,6 @@ function __isTypeOf<
 }
 
 export const resolvers: SchemaModule.Resolvers = {
-  GraphQLScalarType: {
-    __isTypeOf: __isTypeOf(Kind.SCALAR_TYPE_DEFINITION),
-    name: t => t.entity.name,
-    description: t => t.entity.description ?? null,
-    usage,
-    supergraphMetadata: t =>
-      t.supergraph ? { ownedByServiceNames: t.supergraph.ownedByServiceNames } : null,
-  },
   GraphQLEnumValue: {
     name: v => v.entity.name,
     description: v => v.entity.description ?? null,
