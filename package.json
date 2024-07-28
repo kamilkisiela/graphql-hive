@@ -128,6 +128,9 @@
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
       "graphiql@3.3.2": "patches/graphiql@3.3.0.patch"
+    },
+    "overrides": {
+      "@graphql-codegen/client-preset": "4.4.0-alpha-20240728125032-e57eefd1f8d246a233a7b267f2a6a9f2861c7485"
     }
   }
 }
