@@ -172,7 +172,7 @@ const ProjectCard = (props: {
                   </div>
                 ) : (
                   <div>
-                    <div className="mb-4 size-48 animate-pulse rounded-full bg-gray-800 py-2" />
+                    <div className="mb-4 h-4 w-48 animate-pulse rounded-full bg-gray-800 py-2" />
                     <div className="h-2 w-24 animate-pulse rounded-full bg-gray-800" />
                   </div>
                 )}

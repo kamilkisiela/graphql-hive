@@ -48,7 +48,7 @@ import { OrganizationSubscriptionManagePage } from './pages/organization-subscri
 import { OrganizationSupportPage } from './pages/organization-support';
 import { OrganizationSupportTicketPage } from './pages/organization-support-ticket';
 import { OrganizationTransferPage } from './pages/organization-transfer';
-import { ProjectPage } from './pages/project';
+import { ProjectIndexRouteSearch, ProjectPage } from './pages/project';
 import { ProjectAlertsPage } from './pages/project-alerts';
 import { ProjectPolicyPage } from './pages/project-policy';
 import { ProjectSettingsPage } from './pages/project-settings';
@@ -466,9 +466,19 @@ const projectRoute = createRoute({
 const projectIndexRoute = createRoute({
   getParentRoute: () => projectRoute,
   path: '/',
+  validateSearch: ProjectIndexRouteSearch.parse,
   component: function ProjectRoute() {
     const { organizationId, projectId } = projectIndexRoute.useParams();
-    return <ProjectPage organizationId={organizationId} projectId={projectId} />;
+    const { search, sortBy, sortOrder } = projectIndexRoute.useSearch();
+    return (
+      <ProjectPage
+        organizationId={organizationId}
+        projectId={projectId}
+        search={search}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+    );
   },
 });
 
