@@ -23,10 +23,6 @@ const config: CodegenConfig = {
           SafeInt: { type: 'number' },
           ID: { type: 'string' },
         },
-        externalResolvers: {
-          SchemaPolicyWarningConnection:
-            'resolvers/SchemaPolicyWarningConnection#SchemaPolicyWarningConnection',
-        },
         typesPluginsConfig: {
           immutableTypes: true,
           namingConvention: 'change-case-all#pascalCase', // TODO: This is triggering a warning about type name not working 100% of the time. eddeee888 to fix in Server Preset by using `meta` field.
