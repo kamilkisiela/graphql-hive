@@ -374,7 +374,7 @@ function OrganizationPageContent(
                     placeholder="Search..."
                     value={props.search}
                     onChange={event => {
-                      router.navigate({
+                      void router.navigate({
                         search(params) {
                           return {
                             ...params,
