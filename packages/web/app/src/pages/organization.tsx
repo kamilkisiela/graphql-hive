@@ -172,7 +172,7 @@ const ProjectCard = (props: {
                   </div>
                 ) : (
                   <div>
-                    <div className="mb-4 h-4 w-48 animate-pulse rounded-full bg-gray-800 py-2" />
+                    <div className="mb-4 size-48 animate-pulse rounded-full bg-gray-800 py-2" />
                     <div className="h-2 w-24 animate-pulse rounded-full bg-gray-800" />
                   </div>
                 )}
@@ -331,16 +331,12 @@ function OrganizationPageContent(
       const diffRequests = b.totalRequests - a.totalRequests;
       const diffVersions = b.schemaVersionsCount - a.schemaVersionsCount;
 
-      if (sortKey === 'requests') {
-        if (diffRequests !== 0) {
-          return diffRequests * sortOrder;
-        }
+      if (sortKey === 'requests' && diffRequests !== 0) {
+        return diffRequests * sortOrder;
       }
 
-      if (sortKey === 'versions') {
-        if (diffVersions !== 0) {
-          return diffVersions * sortOrder;
-        }
+      if (sortKey === 'versions' && diffVersions !== 0) {
+        return diffVersions * sortOrder;
       }
 
       if (sortKey === 'name') {
@@ -370,30 +366,9 @@ function OrganizationPageContent(
               <Subtitle>A list of available project in your organization.</Subtitle>
             </div>
             <div>
-              {/* <div className="relative">
-                <SearchIcon className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  value={props.search}
-                  onChange={event => {
-                    router.navigate({
-                      search(params) {
-                        return {
-                          ...params,
-                          search: event.target.value,
-                        };
-                      },
-                    });
-                  }}
-                  className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[336px]"
-                />
-              </div> */}
-            </div>
-            <div>
               <div className="flex flex-row items-center gap-x-2">
-                {/* <div className="relative">
-                  <SearchIcon className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
+                <div className="relative">
+                  <SearchIcon className="text-muted-foreground absolute left-2.5 top-2.5 size-4" />
                   <Input
                     type="search"
                     placeholder="Search..."
@@ -411,11 +386,11 @@ function OrganizationPageContent(
                     className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[336px]"
                   />
                 </div>
-                <Separator orientation="vertical" className="mx-4 h-8" /> */}
+                <Separator orientation="vertical" className="mx-4 h-8" />
                 <Select
                   value={props.sortBy ?? 'requests'}
                   onValueChange={value => {
-                    router.navigate({
+                    void router.navigate({
                       search(params) {
                         return {
                           ...params,
@@ -456,7 +431,7 @@ function OrganizationPageContent(
                   variant="outline"
                   size="icon"
                   onClick={() => {
-                    router.navigate({
+                    void router.navigate({
                       search(params) {
                         return {
                           ...params,
@@ -467,9 +442,9 @@ function OrganizationPageContent(
                   }}
                 >
                   {props.sortOrder === 'asc' ? (
-                    <MoveUpIcon className="h-4 w-4" />
+                    <MoveUpIcon className="size-4" />
                   ) : (
-                    <MoveDownIcon className="h-4 w-4" />
+                    <MoveDownIcon className="size-4" />
                   )}
                 </Button>
               </div>
@@ -483,65 +458,33 @@ function OrganizationPageContent(
                 docsUrl="/management/projects#create-a-new-project"
               />
             ) : (
-              <div className="space-y-4">
-                <div className="relative">
-                  <SearchIcon className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
-                  <Input
-                    type="search"
-                    placeholder="Search..."
-                    value={props.search}
-                    onChange={event => {
-                      router.navigate({
-                        search(params) {
-                          return {
-                            ...params,
-                            search: event.target.value,
-                          };
-                        },
-                      });
-                    }}
-                    className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[336px]"
-                  />
-                </div>
-                <div className="grid grid-cols-2 items-stretch gap-5 xl:grid-cols-3">
-                  {projects.map(project => (
-                    <ProjectCard
-                      key={project.id}
-                      cleanOrganizationId={currentOrganization.cleanId}
-                      days={days}
-                      highestNumberOfRequests={highestNumberOfRequests}
-                      project={project}
-                      requestsOverTime={project.requestsOverTime}
-                      schemaVersionsCount={project.schemaVersionsCount}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          ) : (
-            <div className="space-y-4">
-              <div className="relative">
-                <SearchIcon className="text-muted-foreground absolute left-2.5 top-2.5 h-4 w-4" />
-                <Input
-                  disabled
-                  type="search"
-                  placeholder="Search..."
-                  className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[336px]"
-                />
-              </div>
               <div className="grid grid-cols-2 items-stretch gap-5 xl:grid-cols-3">
-                {Array.from({ length: 4 }).map((_, index) => (
+                {projects.map(project => (
                   <ProjectCard
-                    key={index}
+                    key={project.id}
+                    cleanOrganizationId={currentOrganization.cleanId}
                     days={days}
                     highestNumberOfRequests={highestNumberOfRequests}
-                    project={null}
-                    cleanOrganizationId={null}
-                    requestsOverTime={null}
-                    schemaVersionsCount={null}
+                    project={project}
+                    requestsOverTime={project.requestsOverTime}
+                    schemaVersionsCount={project.schemaVersionsCount}
                   />
                 ))}
               </div>
+            )
+          ) : (
+            <div className="grid grid-cols-2 items-stretch gap-5 xl:grid-cols-3">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <ProjectCard
+                  key={index}
+                  days={days}
+                  highestNumberOfRequests={highestNumberOfRequests}
+                  project={null}
+                  cleanOrganizationId={null}
+                  requestsOverTime={null}
+                  schemaVersionsCount={null}
+                />
+              ))}
             </div>
           )}
         </div>
