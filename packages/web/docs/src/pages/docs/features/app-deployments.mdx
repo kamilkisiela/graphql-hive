@@ -46,15 +46,15 @@ persisted queries) on your GraphQL Gateway or server, which provides the followi
 
 ```mermaid
 flowchart LR
-    C["GraphQL Gateway
-(Mesh, Apollo Router)"]
-    B["Hive Registry / CDN"]
+    C["GraphQL API or Gateway
+(Yoga, Apollo Server, Mesh, Apollo Router)"]
+    B["Hive CDN"]
     D["App"]
 
-    C-- "Load persisted
- documents" -->B
-    B-- "Report persisted
- document usage" -->C
+    B-- "Load persisted
+ documents" -->C
+    C-- "Report persisted
+ document usage" -->B
     D-- "Send persisted
  document request" -->C
 ```
