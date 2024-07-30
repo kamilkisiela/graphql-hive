@@ -1,7 +1,24 @@
 import NextImage from 'next/image'
-import { Tabs } from '@theguild/components'
+import { Callout, Tabs } from '@theguild/components'
 
 # App Deployments
+
+<Callout>
+  <div>
+    App deployments are currently in preview. If you would like to try them out, please{' '}
+    <a
+      href="#"
+      className="inline-block underline"
+      onClick={() => {
+        window?.$crisp?.push(['do', 'chat:open'])
+      }}
+    >
+      reach out to us
+    </a>
+    {/* If we move the dot out of the quotations/brackets, it will be a new paragraph... */}
+    {'.'}
+  </div>
+</Callout>
 
 App deployments are a way to group and publish your GraphQL operations as a single app version to
 the Hive Registry. This allows you to keep track of your different app versions, their operations
