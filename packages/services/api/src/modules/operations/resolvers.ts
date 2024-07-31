@@ -1,23 +1,9 @@
-import { nsToMs, parseDateRangeInput } from '../../shared/helpers';
+import { parseDateRangeInput } from '../../shared/helpers';
 import { createConnection } from '../../shared/schema';
 import { OperationsModule } from './__generated__/types';
 import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
-  DurationValues: {
-    p75(value) {
-      return transformPercentile(value.p75);
-    },
-    p90(value) {
-      return transformPercentile(value.p90);
-    },
-    p95(value) {
-      return transformPercentile(value.p95);
-    },
-    p99(value) {
-      return transformPercentile(value.p99);
-    },
-  },
   OperationStatsValuesConnection: createConnection(),
   ClientStatsValuesConnection: createConnection(),
   OrganizationGetStarted: {
@@ -78,7 +64,3 @@ export const resolvers: OperationsModule.Resolvers = {
     },
   },
 };
-
-function transformPercentile(value: number | null): number {
-  return value ? Math.round(nsToMs(value)) : 0;
-}
