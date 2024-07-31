@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import {
@@ -15,7 +14,6 @@ import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
-const OrganizationNameModel = NameModel.min(2).max(50);
 const OrganizationSlugModel = z
   .string({
     required_error: 'Organization slug is required',
@@ -48,37 +46,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async updateOrganizationName(_, { input }, { injector }) {
-      const result = OrganizationNameModel.safeParse(input.name?.trim());
-
-      if (!result.success) {
-        return {
-          error: {
-            message:
-              result.error.formErrors.fieldErrors?.[0]?.[0] ??
-              'Changing the organization name failed.',
-          },
-        };
-      }
-
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      const organization = await injector.get(OrganizationManager).updateName({
-        name: input.name,
-        organization: organizationId,
-      });
-
-      return {
-        ok: {
-          updatedOrganizationPayload: {
-            selector: {
-              organization: organization.cleanId,
-            },
-            organization,
-          },
-        },
-      };
-    },
     async updateOrganizationSlug(_, { input }, { injector }) {
       const parsedInput = OrganizationSlugModel.safeParse(input.slug.trim());
 
