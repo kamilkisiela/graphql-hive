@@ -27,19 +27,6 @@ const USAGE_DEFAULT_LIMITATIONS: Record<
 
 export const resolvers: BillingModule.Resolvers = {
   Mutation: {
-    generateStripePortalLink: async (_, args, { injector }) => {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
-        organization: args.selector.organization,
-      });
-      const organization = await injector.get(OrganizationManager).getOrganization(
-        {
-          organization: organizationId,
-        },
-        OrganizationAccessScope.SETTINGS,
-      );
-
-      return injector.get(BillingProvider).generateStripePortalLink(organization.id);
-    },
     updateOrgRateLimit: async (_, args, { injector }) => {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId({
         organization: args.selector.organization,
