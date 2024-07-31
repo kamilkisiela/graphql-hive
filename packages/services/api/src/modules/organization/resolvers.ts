@@ -7,14 +7,6 @@ import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
-  OrganizationInvitationPayload: {
-    __isTypeOf(organization) {
-      return !!organization.name;
-    },
-    name(organization) {
-      return organization.name;
-    },
-  },
   Member: {
     async canLeaveOrganization(member, _, { injector }) {
       const { result } = await injector.get(OrganizationManager).canLeaveOrganization({
