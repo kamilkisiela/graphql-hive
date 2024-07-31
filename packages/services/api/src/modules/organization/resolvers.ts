@@ -48,36 +48,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async createOrganization(_, { input }, { injector }) {
-      const organizationNameResult = OrganizationNameModel.safeParse(input.name.trim());
-      if (!organizationNameResult.success) {
-        return {
-          error: {
-            message: 'Please check your input.',
-            inputErrors: {
-              name: organizationNameResult.error.issues[0].message ?? null,
-            },
-          },
-        };
-      }
-
-      const user = await injector.get(AuthManager).getCurrentUser();
-      const organization = await injector.get(OrganizationManager).createOrganization({
-        name: input.name,
-        user,
-      });
-
-      return {
-        ok: {
-          createdOrganizationPayload: {
-            selector: {
-              organization: organization.cleanId,
-            },
-            organization,
-          },
-        },
-      };
-    },
     async deleteOrganization(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const organizationId = await translator.translateOrganizationId({
