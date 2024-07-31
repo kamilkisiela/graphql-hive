@@ -41,7 +41,7 @@ const config: CodegenConfig = {
           resolversNonOptionalTypename: {
             interfaceImplementingType: true,
             unionMember: true,
-            excludeTypes: ['TokenInfoPayload'],
+            excludeTypes: ['TokenInfoPayload', 'OrganizationByInviteCodePayload'],
           },
         },
       },
