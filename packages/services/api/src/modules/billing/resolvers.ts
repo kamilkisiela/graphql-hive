@@ -26,12 +26,6 @@ const USAGE_DEFAULT_LIMITATIONS: Record<
 };
 
 export const resolvers: BillingModule.Resolvers = {
-  BillingPaymentMethod: {
-    brand: bpm => bpm.brand,
-    last4: bpm => bpm.last4,
-    expMonth: bpm => bpm.exp_month,
-    expYear: bpm => bpm.exp_year,
-  },
   BillingDetails: {
     city: bd => bd.address?.city || null,
     country: bd => bd.address?.country || null,
