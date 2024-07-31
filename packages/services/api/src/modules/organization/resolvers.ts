@@ -49,9 +49,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Query: {
-    async organizations(_, __, { injector }) {
-      return injector.get(OrganizationManager).getOrganizations();
-    },
     async myDefaultOrganization(_, { previouslyVisitedOrganizationId }, { injector }) {
       const user = await injector.get(AuthManager).getCurrentUser();
       const organizationManager = injector.get(OrganizationManager);
