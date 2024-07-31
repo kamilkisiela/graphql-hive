@@ -13,14 +13,6 @@ import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async deleteMemberRole(_, { input }, { injector }) {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).deleteMemberRole({
-        organizationId,
-        roleId: input.role,
-      });
-    },
     async assignMemberRole(_, { input }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
 
