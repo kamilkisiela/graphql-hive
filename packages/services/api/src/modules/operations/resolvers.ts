@@ -3,23 +3,6 @@ import { OperationsModule } from './__generated__/types';
 import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
-  Project: {
-    totalRequests(project, { period }, { injector }) {
-      return injector.get(OperationsManager).countRequestsOfProject({
-        project: project.id,
-        organization: project.orgId,
-        period: parseDateRangeInput(period),
-      });
-    },
-    requestsOverTime(project, { resolution, period }, { injector }) {
-      return injector.get(OperationsManager).readRequestsOverTimeOfProject({
-        project: project.id,
-        organization: project.orgId,
-        period: parseDateRangeInput(period),
-        resolution,
-      });
-    },
-  },
   Target: {
     totalRequests(target, { period }, { injector }) {
       return injector.get(OperationsManager).countRequests({
