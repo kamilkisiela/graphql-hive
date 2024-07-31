@@ -6,24 +6,6 @@ import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
   Query: {
-    async fieldStats(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      return injector.get(OperationsManager).readFieldStats({
-        organization,
-        project,
-        target,
-        type: selector.type,
-        field: selector.field,
-        argument: selector.argument ?? undefined,
-        period: parseDateRangeInput(selector.period),
-      });
-    },
     async fieldListStats(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
