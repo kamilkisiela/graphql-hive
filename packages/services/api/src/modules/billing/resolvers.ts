@@ -26,14 +26,6 @@ const USAGE_DEFAULT_LIMITATIONS: Record<
 };
 
 export const resolvers: BillingModule.Resolvers = {
-  BillingDetails: {
-    city: bd => bd.address?.city || null,
-    country: bd => bd.address?.country || null,
-    line1: bd => bd.address?.line1 || null,
-    line2: bd => bd.address?.line2 || null,
-    postalCode: bd => bd.address?.postal_code ?? null,
-    state: bd => bd.address?.state || null,
-  },
   Query: {
     billingPlans: async (root, args, { injector }) => {
       const availablePrices = await injector.get(BillingProvider).getAvailablePrices();
