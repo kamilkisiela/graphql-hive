@@ -7,35 +7,10 @@ import {
 } from '../auth/providers/organization-access';
 import { isProjectScope, ProjectAccessScope } from '../auth/providers/project-access';
 import { isTargetScope, TargetAccessScope } from '../auth/providers/target-access';
-import { IdTranslator } from '../shared/providers/id-translator';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
-  Mutation: {
-    async migrateUnassignedMembers(_, { input }, { injector }) {
-      const organizationIdFromInput =
-        input.assignRole?.organization ?? input.createRole?.organization;
-
-      if (!organizationIdFromInput) {
-        return {
-          error: {
-            message: 'Assign a role or create a new one',
-          },
-        };
-      }
-
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
-        organization: organizationIdFromInput,
-      });
-
-      return injector.get(OrganizationManager).migrateUnassignedMembers({
-        organizationId,
-        assignRole: input.assignRole,
-        createRole: input.createRole,
-      });
-    },
-  },
   Organization: {
     __isTypeOf(organization) {
       return !!organization.id;
