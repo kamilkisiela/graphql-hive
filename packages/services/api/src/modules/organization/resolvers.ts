@@ -7,19 +7,6 @@ import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
-  Member: {
-    async canLeaveOrganization(member, _, { injector }) {
-      const { result } = await injector.get(OrganizationManager).canLeaveOrganization({
-        organizationId: member.organization,
-        userId: member.user.id,
-      });
-
-      return result;
-    },
-    isAdmin(member, _, { injector }) {
-      return member.isOwner || injector.get(OrganizationManager).isAdminRole(member.role);
-    },
-  },
   MemberRole: {
     organizationAccessScopes(role) {
       return role.scopes.filter(isOrganizationScope);
