@@ -27,16 +27,6 @@ const USAGE_DEFAULT_LIMITATIONS: Record<
 };
 
 export const resolvers: BillingModule.Resolvers = {
-  BillingInvoice: {
-    id: i => (i && 'id' in i ? i.id : 'upcoming'),
-    amount: i => parseFloat((i.total / 100).toFixed(2)),
-    pdfLink: i => i.invoice_pdf || null,
-    date: i => new Date(i.created * 1000).toISOString(),
-    periodStart: i => new Date(i.period_start * 1000).toISOString(),
-    periodEnd: i => new Date(i.period_end * 1000).toISOString(),
-    status: i =>
-      i.status ? (i.status.toUpperCase() as BillingModule.BillingInvoiceStatus) : 'DRAFT',
-  },
   Organization: {
     plan: org => (org.billingPlan || 'HOBBY') as BillingPlanType,
     billingConfiguration: async (org, _args, { injector }) => {
