@@ -1,10 +1,8 @@
 import { parseDateRangeInput } from '../../shared/helpers';
-import { createConnection } from '../../shared/schema';
 import { OperationsModule } from './__generated__/types';
 import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
-  ClientStatsValuesConnection: createConnection(),
   OrganizationGetStarted: {
     async reportingOperations(organization, _, { injector }) {
       if (organization.reportingOperations === true) {
