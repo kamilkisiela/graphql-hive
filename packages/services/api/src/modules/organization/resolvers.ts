@@ -13,15 +13,6 @@ import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async assignMemberRole(_, { input }, { injector }) {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).assignMemberRole({
-        organizationId,
-        userId: input.user,
-        roleId: input.role,
-      });
-    },
     async migrateUnassignedMembers(_, { input }, { injector }) {
       const organizationIdFromInput =
         input.assignRole?.organization ?? input.createRole?.organization;
