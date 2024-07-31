@@ -9,7 +9,6 @@ import {
 } from '../auth/providers/organization-access';
 import { isProjectScope, ProjectAccessScope } from '../auth/providers/project-access';
 import { isTargetScope, TargetAccessScope } from '../auth/providers/target-access';
-import { OIDCIntegrationsProvider } from '../oidc-integrations/providers/oidc-integrations.provider';
 import { InMemoryRateLimiter } from '../rate-limit/providers/in-memory-rate-limiter';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { Logger } from '../shared/providers/logger';
@@ -49,20 +48,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Query: {
-    async organizationByInviteCode(_, { code }, { injector }) {
-      const organization = await injector.get(OrganizationManager).getOrganizationByInviteCode({
-        code,
-      });
-
-      if ('message' in organization) {
-        return organization;
-      }
-
-      return {
-        __typename: 'OrganizationInvitationPayload',
-        name: organization.name,
-      };
-    },
     async organizationTransferRequest(_, { selector }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
       const organizationManager = injector.get(OrganizationManager);
