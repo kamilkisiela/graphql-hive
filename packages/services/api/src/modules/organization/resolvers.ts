@@ -38,22 +38,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async updateOrganizationMemberAccess(_, { input }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return {
-        selector: {
-          organization: input.organization,
-        },
-        organization: await injector.get(OrganizationManager).updateMemberAccess({
-          organization,
-          user: input.user,
-          organizationScopes: input.organizationScopes,
-          projectScopes: input.projectScopes,
-          targetScopes: input.targetScopes,
-        }),
-      };
-    },
     async inviteToOrganizationByEmail(_, { input }, { injector }) {
       await injector.get(InMemoryRateLimiter).check(
         'inviteToOrganizationByEmail',
