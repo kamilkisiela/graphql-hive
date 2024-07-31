@@ -22,7 +22,6 @@ const config: CodegenConfig = {
           'collection',
           'lab',
           'operations',
-          'organization',
           'policy',
           'schema',
         ],
