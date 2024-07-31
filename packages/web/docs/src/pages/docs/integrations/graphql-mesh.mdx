@@ -1,17 +1,79 @@
-import { Callout } from '@theguild/components'
+import { Callout, Tabs } from '@theguild/components'
 
 # GraphQL Mesh
 
-[GraphQL Mesh](https://the-guild.dev/graphql/mesh) is a framework that helps shape and build an
-executable GraphQL schema from multiple data sources.
+[GraphQL Mesh](https://the-guild.dev/graphql/mesh) is a GraphQL Gateway with support for Apollo
+Federation and the GraphQL Hive platform.
 
-GraphQL Mesh supports Hive natively with a plugin.
+## Running GraphQL Mesh with Hive
 
-## Installation
+You can run GraphQL Mesh in multiple ways, as a CLI tool, binary or Docker image.
+
+<Tabs items={['Docker', 'Node.js Package']}>
+  {/* Docker */}
+  <Tabs.Tab>
+
+The Docker image for GraphQL Mesh is published to the GitHub docker registry. You can simply run the
+following command to start a GraphQL Mesh gateway instance from your existing Hive target.
+
+```sh
+docker run \
+  -p 4000:4000 \
+  -e HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
+  -e HIVE_CDN_KEY="<hive_cdn_access_key>" \
+  -e HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
+  ghcr.io/ardatan/mesh-serve
+```
+
+| Parameter             | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target            |
+| `hive_cdn_access_key` | The Hive CDN access key                     |
+| `hive_registry_token` | The Hive registry token for usage reporting |
+
+Further configuration are possible via a Mesh configuration file. In that case it is necessary to
+mount that file into the container.
+
+```sh filename="Run Mesh Gateway with Configuration File"
+docker run \
+  -p 4000:4000 \
+  -e HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
+  -e HIVE_CDN_KEY="<hive_cdn_access_key>" \
+  -e HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
+  -v "$(pwd)/mesh.config.ts:/serve/mesh.config.ts" \
+  ghcr.io/ardatan/mesh-serve
+```
+
+  </Tabs.Tab>
+
+{/* Node.js Package */}
+
+  <Tabs.Tab>
+
+The Mesh CLI is available as a Node.js package. You can install it using your favorite package
+manager.
 
 ```sh npm2yarn
-npm i @graphql-mesh/plugin-hive
+npm install @graphql-mesh/serve-cli
 ```
+
+You can then run the Mesh CLI from your existing Hive target using the following command.
+
+```sh filename="Run Mesh Gateway"
+HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
+  HIVE_CDN_KEY="<hive_cdn_access_key>" \
+  HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
+  npx mesh-serve
+```
+
+| Parameter             | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target            |
+| `hive_cdn_access_key` | The Hive CDN access key                     |
+| `hive_registry_token` | The Hive registry token for usage reporting |
+
+  </Tabs.Tab>
+</Tabs>
 
 ## Integration Guide
 

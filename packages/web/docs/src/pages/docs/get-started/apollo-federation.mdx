@@ -7,7 +7,7 @@ import federationSchemaImage from '../../../../public/docs/pages/guides/federati
 import historyImage from '../../../../public/docs/pages/guides/history.png'
 import tokenImage from '../../../../public/docs/pages/guides/token.png'
 
-# Guide: Apollo Federation Project
+# Apollo Federation Project
 
 Once you've created a Hive project of type **Apollo Federation**, you can simply push your GraphQL
 schema to the registry. This guide will guide you through the basics of schema pushing, checking and
@@ -477,9 +477,83 @@ flowchart LR
 
 ```
 
-For an Apollo Federation gateway you may use **Apollo Gateway** (JS) or **Apollo Router** (Rust)
-depending on your needs. You can use the following guides to deploy a gateway based on your
-technical preference:
+#### GraphQL Mesh
+
+Our recommended gateway for Federation is **GraphQL Mesh**. You can run GraphQL Mesh either as a
+Docker image or CLI tool.
+
+<Tabs items={['Docker', 'Node.js Package']}>
+  {/* Docker */}
+  <Tabs.Tab>
+
+The Docker image for GraphQL Mesh is published to the GitHub docker registry. You can simply run the
+following command to start a GraphQL Mesh gateway instance from your existing Hive target.
+
+```sh
+docker run \
+  -p 4000:4000 \
+  -e HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
+  -e HIVE_CDN_KEY="<hive_cdn_access_key>" \
+  -e HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
+  ghcr.io/ardatan/mesh-serve
+```
+
+| Parameter             | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target            |
+| `hive_cdn_access_key` | The Hive CDN access key                     |
+| `hive_registry_token` | The Hive registry token for usage reporting |
+
+  </Tabs.Tab>
+
+{/* Node.js Package */}
+
+  <Tabs.Tab>
+
+The Mesh CLI is available as a Node.js package. You can install it using your favorite package
+manager.
+
+```sh npm2yarn
+npm install @graphql-mesh/serve-cli
+```
+
+You can then run the Mesh CLI from your existing Hive target using the following command.
+
+```sh filename="Run Mesh Gateway"
+HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
+  HIVE_CDN_KEY="<hive_cdn_access_key>" \
+  HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
+  npx mesh-serve
+```
+
+| Parameter             | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target            |
+| `hive_cdn_access_key` | The Hive CDN access key                     |
+| `hive_registry_token` | The Hive registry token for usage reporting |
+
+  </Tabs.Tab>
+</Tabs>
+
+If you now navigate to `http://localhost:4000`, you should see the GraphQL Mesh page with
+information about the supergraph and subgraphs.
+
+import MeshLandingPageImage from '../../../../public/docs/pages/get-started/apollo-federation/mesh-landing-page.png'
+
+<NextImage
+  alt="GraphQL Mesh Landing Page"
+  src={MeshLandingPageImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+Now, if you navigate to `http://localhost:4000/graphql`, you should see the GrapihQL interface where
+you can write and execute queries against the supergraph.
+
+#### Other Gateways
+
+You can also use alternative gateways such as **Apollo Gateway** (JS) or **Apollo Router** (Rust)
+depending on your needs. Check out these guides to deploy a gateway based on your technical
+preference.
 
 <Cards>
   <Cards.Card arrow title="Apollo Gateway (JS)" href="/docs/integrations/apollo-gateway" />
