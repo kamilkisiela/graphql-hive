@@ -7,11 +7,6 @@ import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
-  OrganizationInvitationError: {
-    __isTypeOf(obj) {
-      return !!obj.message;
-    },
-  },
   OrganizationInvitationPayload: {
     __isTypeOf(organization) {
       return !!organization.name;
