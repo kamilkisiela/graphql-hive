@@ -4,7 +4,6 @@ import { OperationsModule } from './__generated__/types';
 import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
-  OperationStatsValuesConnection: createConnection(),
   ClientStatsValuesConnection: createConnection(),
   OrganizationGetStarted: {
     async reportingOperations(organization, _, { injector }) {
