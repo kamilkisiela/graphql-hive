@@ -6,28 +6,6 @@ import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
   Query: {
-    async operationsStats(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      const operations = selector.operations ?? [];
-
-      return {
-        period: parseDateRangeInput(selector.period),
-        organization,
-        project,
-        target,
-        operations,
-        clients:
-          // TODO: figure out if the mapping should actually happen here :thinking:
-          selector.clientNames?.map(clientName => (clientName === 'unknown' ? '' : clientName)) ??
-          [],
-      };
-    },
     async clientStatsByTargets(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
