@@ -7,19 +7,6 @@ import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 export const resolvers: OrganizationModule.Resolvers = {
-  OrganizationInvitation: {
-    id(invitation) {
-      return Buffer.from(
-        [invitation.organization_id, invitation.email, invitation.code].join(':'),
-      ).toString('hex');
-    },
-    createdAt(invitation) {
-      return invitation.created_at;
-    },
-    expiresAt(invitation) {
-      return invitation.expires_at;
-    },
-  },
   OrganizationInvitationError: {
     __isTypeOf(obj) {
       return !!obj.message;
