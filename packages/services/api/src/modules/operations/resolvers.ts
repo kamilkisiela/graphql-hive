@@ -3,17 +3,6 @@ import { OperationsModule } from './__generated__/types';
 import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
-  OrganizationGetStarted: {
-    async reportingOperations(organization, _, { injector }) {
-      if (organization.reportingOperations === true) {
-        return organization.reportingOperations;
-      }
-
-      return injector.get(OperationsManager).hasOperationsForOrganization({
-        organization: organization.id,
-      });
-    },
-  },
   Project: {
     totalRequests(project, { period }, { injector }) {
       return injector.get(OperationsManager).countRequestsOfProject({
