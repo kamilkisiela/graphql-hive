@@ -3,6 +3,7 @@
 const guildConfig = require('@theguild/eslint-config/base');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
+const path = require('node:path');
 
 const SCHEMA_PATH = './packages/services/api/src/modules/*/module.graphql.ts';
 const OPERATIONS_PATHS = [
@@ -214,7 +215,7 @@ module.exports = {
           rootDir: 'packages/web/docs',
         },
         tailwindcss: {
-          config: 'packages/web/docs/tailwind.config.cjs',
+          config: path.join(process.cwd(), 'packages', 'web', 'docs', 'tailwind.config.cjs'),
         },
       },
     },
