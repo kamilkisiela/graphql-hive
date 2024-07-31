@@ -6,22 +6,6 @@ import { OperationsManager } from './providers/operations-manager';
 
 export const resolvers: OperationsModule.Resolvers = {
   Query: {
-    async schemaCoordinateStats(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      return {
-        period: parseDateRangeInput(selector.period),
-        organization,
-        project,
-        target,
-        schemaCoordinate: selector.schemaCoordinate,
-      };
-    },
     async clientStats(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
