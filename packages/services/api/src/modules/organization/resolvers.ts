@@ -9,7 +9,6 @@ import {
 import { isProjectScope, ProjectAccessScope } from '../auth/providers/project-access';
 import { isTargetScope, TargetAccessScope } from '../auth/providers/target-access';
 import { IdTranslator } from '../shared/providers/id-translator';
-import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
@@ -37,31 +36,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async answerOrganizationTransferRequest(_, { input }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      try {
-        await injector.get(OrganizationManager).answerOwnershipTransferRequest({
-          organization,
-          code: input.code,
-          accept: input.accept,
-        });
-
-        return {
-          ok: {
-            accepted: input.accept,
-          },
-        };
-      } catch (error) {
-        injector.get(Logger).error(error as any);
-
-        return {
-          error: {
-            message: 'Failed to answer the request',
-          },
-        };
-      }
-    },
     async createMemberRole(_, { input }, { injector }) {
       const inputValidation = createOrUpdateMemberRoleInputSchema.safeParse({
         name: input.name,
