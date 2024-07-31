@@ -38,21 +38,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async joinOrganization(_, { code }, { injector }) {
-      const organization = await injector.get(OrganizationManager).joinOrganization({ code });
-
-      if ('message' in organization) {
-        return organization;
-      }
-
-      return {
-        __typename: 'OrganizationPayload',
-        selector: {
-          organization: organization.cleanId,
-        },
-        organization,
-      };
-    },
     async deleteOrganizationMember(_, { input }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
       const organization = await injector
