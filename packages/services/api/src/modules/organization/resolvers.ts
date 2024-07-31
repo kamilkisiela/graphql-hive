@@ -47,27 +47,6 @@ const createOrUpdateMemberRoleInputSchema = z.object({
 });
 
 export const resolvers: OrganizationModule.Resolvers = {
-  Query: {
-    async organizationTransferRequest(_, { selector }, { injector }) {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
-      const organizationManager = injector.get(OrganizationManager);
-
-      const transferRequest = await organizationManager.getOwnershipTransferRequest({
-        organization: organizationId,
-        code: selector.code,
-      });
-
-      if (!transferRequest) {
-        return null;
-      }
-
-      return {
-        organization: await organizationManager.getOrganization({
-          organization: organizationId,
-        }),
-      };
-    },
-  },
   Mutation: {
     async createOrganization(_, { input }, { injector }) {
       const organizationNameResult = OrganizationNameModel.safeParse(input.name.trim());
