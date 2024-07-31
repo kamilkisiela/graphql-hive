@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import {
@@ -12,59 +11,8 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
-const createOrUpdateMemberRoleInputSchema = z.object({
-  name: z
-    .string({
-      required_error: 'Please enter role name',
-    })
-    .trim()
-    .min(2, 'Role name must be at least 2 characters long')
-    .max(64, 'Role name must be at most 64 characters long')
-    .refine(
-      val => typeof val === 'string' && val.length > 0 && val[0] === val[0].toUpperCase(),
-      'Must start with a capital letter',
-    )
-    .refine(val => val !== 'Viewer' && val !== 'Admin', 'Viewer and Admin are reserved'),
-  description: z
-    .string({
-      required_error: 'Please enter role description',
-    })
-    .trim()
-    .min(2, 'Role description must be at least 2 characters long')
-    .max(256, 'Role description must be at most 256 characters long'),
-});
-
 export const resolvers: OrganizationModule.Resolvers = {
   Mutation: {
-    async updateMemberRole(_, { input }, { injector }) {
-      const inputValidation = createOrUpdateMemberRoleInputSchema.safeParse({
-        name: input.name,
-        description: input.description,
-      });
-
-      if (!inputValidation.success) {
-        return {
-          error: {
-            message: 'Please check your input.',
-            inputErrors: {
-              name: inputValidation.error.formErrors.fieldErrors.name?.[0],
-              description: inputValidation.error.formErrors.fieldErrors.description?.[0],
-            },
-          },
-        };
-      }
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).updateMemberRole({
-        organizationId,
-        roleId: input.role,
-        name: inputValidation.data.name,
-        description: inputValidation.data.description,
-        organizationAccessScopes: input.organizationAccessScopes,
-        projectAccessScopes: input.projectAccessScopes,
-        targetAccessScopes: input.targetAccessScopes,
-      });
-    },
     async deleteMemberRole(_, { input }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
 
