@@ -175,6 +175,7 @@ export default abstract class extends Command {
           {
             logger: {
               info: (...args) => {
+                // eslint-disable-next-line no-process-env
                 if (process.env.NODE_ENV === 'development') {
                   console.info(...args);
                 }
