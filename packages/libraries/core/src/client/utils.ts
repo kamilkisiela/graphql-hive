@@ -194,7 +194,7 @@ export function createHiveLogger(baseLogger: Logger, prefix: string): HiveLogger
   const context: HiveLogger[typeof hiveSymbol] = {
     path: '',
     logger: baseLogger,
-    // @ts-ignore
+    // @ts-expect-error internal stuff
     ...baseLogger?.[hiveSymbol],
   };
   context.path = context.path + prefix;
@@ -208,7 +208,7 @@ export function createHiveLogger(baseLogger: Logger, prefix: string): HiveLogger
     },
     error: (error: any, ...data: any[]) => {
       if (error.stack) {
-        for (const stack of error.stack?.split('\n')) {
+        for (const stack of error.stack.split('\n')) {
           logger.error(`${path} ${stack}`);
         }
       } else {

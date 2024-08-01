@@ -1,6 +1,6 @@
 import { version } from '../version.js';
 import { http } from './http-client.js';
-import type { Logger, SchemaFetcherOptions, ServicesFetcherOptions } from './types.js';
+import type { SchemaFetcherOptions, ServicesFetcherOptions } from './types.js';
 import { createHash, joinUrl } from './utils.js';
 
 interface Schema {
