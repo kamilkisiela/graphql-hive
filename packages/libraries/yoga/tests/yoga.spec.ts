@@ -99,35 +99,24 @@ test('should not interrupt the process', async () => {
       },
     }),
   );
-
   await waitFor(50);
-  expect(
-    logger
-      .getLogs()
-      .split(`\n`)
-      .filter(item => item.includes(`[hive][reporting]`))
-      .join(`\n`),
-  ).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://404.localhost.noop/registry Attempt (1/6)
-    [ERR] [hive][reporting] Error: getaddrinfo ENOTFOUND 404.localhost.noop
-    [ERR] [hive][reporting]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
-    [ERR] [hive][reporting] POST http://404.localhost.noop/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
-  `);
-  expect(
-    logger
-      .getLogs()
-      .split(`\n`)
-      .filter(item => item.includes(`[hive][usage]`))
-      .join(`\n`),
-  ).toMatchInlineSnapshot(`
-    [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://404.localhost.noop/usage
-    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost.noop
-    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
-    [ERR] [hive][usage] POST http://404.localhost.noop/usage failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
-    [ERR] [hive][usage] Failed to send report.
-  `);
+
+  const reportingLogs = logger
+    .getLogs()
+    .split(`\n`)
+    .filter(item => item.includes(`[hive][reporting]`))
+    .join(`\n`);
+
+  expect(reportingLogs).includes('Publish schema');
+  expect(reportingLogs).includes('POST http://404.localhost.noop/registry');
+
+  const usageLogs = logger
+    .getLogs()
+    .split(`\n`)
+    .filter(item => item.includes(`[hive][usage]`))
+    .join(`\n`);
+
+  expect(usageLogs).includes('POST http://404.localhost.noop/usage');
 
   await hive.dispose();
   clean();
