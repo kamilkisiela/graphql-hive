@@ -1,5 +1,20 @@
 # @graphql-hive/cli
 
+## 0.40.0
+
+### Minor Changes
+
+- [#5234](https://github.com/kamilkisiela/graphql-hive/pull/5234)
+  [`e6dc5c9`](https://github.com/kamilkisiela/graphql-hive/commit/e6dc5c9df34c30c52555b27b0bca50e0be75480b)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Provide debug logging for HTTP requests when
+  providing the `--debug` flag.
+
+### Patch Changes
+
+- Updated dependencies
+  [[`e6dc5c9`](https://github.com/kamilkisiela/graphql-hive/commit/e6dc5c9df34c30c52555b27b0bca50e0be75480b)]:
+  - @graphql-hive/core@0.6.0
+
 ## 0.39.0
 
 ### Minor Changes
