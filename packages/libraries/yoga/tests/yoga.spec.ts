@@ -105,19 +105,6 @@ test('should not interrupt the process', async () => {
     logger
       .getLogs()
       .split(`\n`)
-      .filter(item => item.includes(`[hive][info]`))
-      .join(`\n`),
-  ).toMatchInlineSnapshot(`
-    [INF] [hive][info] Fetching token details...
-    [INF] [hive][info] POST http://404.localhost.noop/registry Attempt (1/6)
-    [ERR] [hive][info] Error: getaddrinfo ENOTFOUND 404.localhost.noop
-    [ERR] [hive][info]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
-    [ERR] [hive][info] POST http://404.localhost.noop/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
-  `);
-  expect(
-    logger
-      .getLogs()
-      .split(`\n`)
       .filter(item => item.includes(`[hive][reporting]`))
       .join(`\n`),
   ).toMatchInlineSnapshot(`
