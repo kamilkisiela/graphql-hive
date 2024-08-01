@@ -4,7 +4,7 @@ import { buildSubgraphSchema as buildSubgraphSchemaV1 } from '@apollo/federation
 import { buildSubgraphSchema as buildSubgraphSchemaV2 } from '@apollo/subgraph';
 import { createHive } from '../src/client/client';
 import { version } from '../src/version';
-import { waitFor } from './test-utils';
+import { createHiveTestingLogger, waitFor } from './test-utils';
 
 afterEach(() => {
   nock.cleanAll();
@@ -17,10 +17,7 @@ const headers = {
 };
 
 test('should not leak the exception', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const hive = createHive({
     enabled: true,
@@ -51,24 +48,17 @@ test('should not leak the exception', async () => {
   await waitFor(50);
   await hive.dispose();
 
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.info).toHaveBeenCalledWith(
-    expect.stringContaining('[hive][reporting] Attempt 1 failed:'),
-  );
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
-  expect(logger.error).toHaveBeenCalledTimes(1);
-  expect(logger.error).toHaveBeenCalledWith(
-    expect.stringContaining(
-      `[hive][reporting] Failed to report schema: connect ECONNREFUSED 127.0.0.1:55404`,
-    ),
-  );
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://127.0.0.1:55404 Attempt (1/6)
+    [ERR] [hive][reporting] Error: connect ECONNREFUSED 127.0.0.1:55404
+    [ERR] [hive][reporting]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:666:666)
+    [ERR] [hive][reporting] POST http://127.0.0.1:55404 failed (666ms). connect ECONNREFUSED 127.0.0.1:55404
+  `);
 });
 
 test('should send data to Hive', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const author = 'Test';
   const commit = 'Commit';
@@ -76,7 +66,6 @@ test('should send data to Hive', async () => {
   const serviceUrl = 'https://api.com';
   const serviceName = 'my-api';
 
-  let body: any = {};
   const http = nock('http://localhost')
     .post('/200')
     .matchHeader('Authorization', `Bearer ${token}`)
@@ -85,7 +74,6 @@ test('should send data to Hive', async () => {
     .matchHeader('graphql-client-version', headers['graphql-client-version'])
     .once()
     .reply((_, _body) => {
-      body = _body;
       return [
         200,
         {
@@ -135,23 +123,16 @@ test('should send data to Hive', async () => {
   await hive.dispose();
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
-
-  expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
-  expect(body.variables.input.author).toBe(author);
-  expect(body.variables.input.commit).toBe(commit);
-  expect(body.variables.input.service).toBe(serviceName);
-  expect(body.variables.input.url).toBe(serviceUrl);
-  expect(body.variables.input.force).toBe(true);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
 });
 
 test('should send data to Hive (deprecated endpoint)', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const author = 'Test';
   const commit = 'Commit';
@@ -215,9 +196,12 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   await hive.dispose();
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
 
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
   expect(body.variables.input.author).toBe(author);
@@ -228,10 +212,7 @@ test('should send data to Hive (deprecated endpoint)', async () => {
 });
 
 test('should send data to app.graphql-hive.com/graphql by default', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const author = 'Test';
   const commit = 'Commit';
@@ -290,9 +271,12 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
   await hive.dispose();
   http.done();
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST https://app.graphql-hive.com/graphql Attempt (1/6)
+    [INF] [hive][reporting] POST https://app.graphql-hive.com/graphql succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
 
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
   expect(body.variables.input.author).toBe(author);
@@ -301,10 +285,7 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
 });
 
 test('should send data to Hive immediately', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const author = 'Test';
   const commit = 'Commit';
@@ -364,16 +345,14 @@ test('should send data to Hive immediately', async () => {
     `),
   });
 
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending immediately');
-  expect(logger.info).toHaveBeenCalledTimes(1);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`[INF] [hive][reporting] Publish schema`);
+  logger.clear();
   await waitFor(50);
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.error).not.toHaveBeenCalled();
-  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Sent!`);
-  expect(logger.info).toHaveBeenCalledWith(`[hive][reporting] Successfully published schema`);
-  expect(logger.info).toHaveBeenCalledTimes(4);
-
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Successfully published schema
+  `);
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
   expect(body.variables.input.author).toBe(author);
   expect(body.variables.input.commit).toBe(commit);
@@ -382,17 +361,18 @@ test('should send data to Hive immediately', async () => {
   expect(body.variables.input.force).toBe(true);
 
   await waitFor(100);
-  expect(logger.info).toHaveBeenCalledTimes(4);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Successfully published schema
+  `);
 
   await hive.dispose();
   http.done();
 });
 
 test('should send original schema of a federated (v1) service', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const author = 'Test';
   const commit = 'Commit';
@@ -434,7 +414,7 @@ test('should send original schema of a federated (v1) service', async () => {
       expect(body.variables.input.service).toBe(serviceName);
       expect(body.variables.input.url).toBe(serviceUrl);
       expect(body.variables.input.force).toBe(true);
-      return [200];
+      return [200, '{"data":{"schemaPublish":{"__typename":"SchemaPublishSuccess"}}}'];
     });
 
   hive.reportSchema({
@@ -447,15 +427,21 @@ test('should send original schema of a federated (v1) service', async () => {
     ),
   });
 
+  await waitFor(50);
+
   await hive.dispose();
+  const logs = logger.getLogs();
+  expect(logs).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
   http.done();
 });
 
 test('should send original schema of a federated (v2) service', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const author = 'Test';
   const commit = 'Commit';
@@ -497,7 +483,7 @@ test('should send original schema of a federated (v2) service', async () => {
       expect(body.variables.input.service).toBe(serviceName);
       expect(body.variables.input.url).toBe(serviceUrl);
       expect(body.variables.input.force).toBe(true);
-      return [200];
+      return [200, '{"data":{"schemaPublish":{"__typename":"SchemaPublishSuccess"}}}'];
     });
 
   hive.reportSchema({
@@ -510,16 +496,21 @@ test('should send original schema of a federated (v2) service', async () => {
     ),
   });
 
+  await waitFor(50);
+
   await hive.dispose();
+  const logs = logger.getLogs();
+  expect(logs).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
   http.done();
 });
 
 test('should display SchemaPublishMissingServiceError', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
-
+  const logger = createHiveTestingLogger();
   const token = 'Token';
   const http = nock('http://localhost')
     .post('/200')
@@ -570,17 +561,16 @@ test('should display SchemaPublishMissingServiceError', async () => {
   await hive.dispose();
   http.done();
 
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.error).toHaveBeenCalledWith(
-    `[hive][reporting] Failed to report schema: Service name is not defined`,
-  );
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [ERR] [hive][reporting] Failed to report schema: Service name is not defined
+  `);
 });
 
 test('should display SchemaPublishMissingUrlError', async () => {
-  const logger = {
-    error: vi.fn(),
-    info: vi.fn(),
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
   const http = nock('http://localhost')
@@ -632,18 +622,19 @@ test('should display SchemaPublishMissingUrlError', async () => {
   await hive.dispose();
   http.done();
 
-  expect(logger.info).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logger.error).toHaveBeenCalledWith(
-    `[hive][reporting] Failed to report schema: Service url is not defined`,
-  );
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [ERR] [hive][reporting] Failed to report schema: Service url is not defined
+  `);
+
+  expect(logger.getLogs()).toContain('POST http://localhost/200 Attempt (1/6)');
+  expect(logger.getLogs()).toContain('Service url is not defined');
 });
 
 test('retry on non-200', async () => {
-  const logSpy = vi.fn();
-  const logger = {
-    error: logSpy,
-    info: logSpy,
-  };
+  const logger = createHiveTestingLogger();
 
   const token = 'Token';
 
@@ -684,13 +675,15 @@ test('retry on non-200', async () => {
   await waitFor(50);
   await hive.dispose();
 
-  expect(logSpy).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 1)');
-  expect(logSpy).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][reporting] Attempt 1 failed`),
-  );
-  expect(logSpy).toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 2)');
-  expect(logSpy).toHaveBeenCalledWith(
-    expect.stringContaining(`[hive][reporting] Attempt 2 failed`),
-  );
-  expect(logSpy).not.toHaveBeenCalledWith('[hive][reporting] Sending (queue 1) (attempt 3)');
+  expect(logger.getLogs()).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/registry Attempt (1/6)
+    [ERR] [hive][reporting] Error: connect ECONNREFUSED ::1:80
+    [ERR] [hive][reporting]     at createConnectionError (node:net:666:666)
+    [ERR] [hive][reporting]     at afterConnectMultiple (node:net:666:666)
+    [ERR] [hive][reporting] Error: connect ECONNREFUSED 127.0.0.1:80
+    [ERR] [hive][reporting]     at createConnectionError (node:net:666:666)
+    [ERR] [hive][reporting]     at afterConnectMultiple (node:net:666:666)
+    [ERR] [hive][reporting] POST http://localhost/registry failed (666ms).
+  `);
 });
