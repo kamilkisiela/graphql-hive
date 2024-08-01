@@ -1,5 +1,5 @@
-import { createHiveTestingLogger } from 'test-utils';
 import { makeFetchCall } from '../src/client/http-client';
+import { createHiveTestingLogger } from './test-utils';
 
 test('HTTP call without retries and system level error', async () => {
   const logger = createHiveTestingLogger();
