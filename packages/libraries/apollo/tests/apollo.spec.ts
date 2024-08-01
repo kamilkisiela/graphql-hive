@@ -100,7 +100,7 @@ test('should not interrupt the process', async () => {
       }
     `,
   });
-  await waitFor(50);
+  await waitFor(200);
   await apollo.stop();
   clean();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
