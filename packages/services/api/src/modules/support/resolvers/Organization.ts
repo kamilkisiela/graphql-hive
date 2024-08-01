@@ -1,7 +1,10 @@
 import { SupportManager } from '../providers/support-manager';
 import type { OrganizationResolvers } from './../../../__generated__/types.next';
 
-export const Organization: Pick<OrganizationResolvers, 'supportTicket' | 'supportTickets'> = {
+export const Organization: Pick<
+  OrganizationResolvers,
+  'supportTicket' | 'supportTickets' | '__isTypeOf'
+> = {
   supportTickets: async (org, args, { injector }) => {
     const response = await injector.get(SupportManager).getTickets(org.id);
 
