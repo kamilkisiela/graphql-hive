@@ -340,7 +340,7 @@ test('should not leak the exception', async () => {
     },
     token: 'Token',
     usage: {
-      endpoint: 'http://404.localhost',
+      endpoint: 'http://404.localhost.noop',
     },
   });
 
@@ -358,10 +358,10 @@ test('should not leak the exception', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://404.localhost Attempt (1/2)
-    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost
-    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
-    [ERR] [hive][usage] POST http://404.localhost failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [INF] [hive][usage] POST http://404.localhost.noop Attempt (1/2)
+    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost.noop
+    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
+    [ERR] [hive][usage] POST http://404.localhost.noop failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
     [INF] [hive][usage] Disposing
   `);
 });

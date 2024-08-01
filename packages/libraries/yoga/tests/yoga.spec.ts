@@ -66,12 +66,12 @@ test('should not interrupt the process', async () => {
       logger,
     },
     reporting: {
-      endpoint: 'http://404.localhost/registry',
+      endpoint: 'http://404.localhost.noop/registry',
       author: 'jest',
       commit: 'js',
     },
     usage: {
-      endpoint: 'http://404.localhost/usage',
+      endpoint: 'http://404.localhost.noop/usage',
     },
   });
 
@@ -109,10 +109,10 @@ test('should not interrupt the process', async () => {
       .join(`\n`),
   ).toMatchInlineSnapshot(`
     [INF] [hive][info] Fetching token details...
-    [INF] [hive][info] POST http://404.localhost/registry Attempt (1/6)
-    [ERR] [hive][info] Error: getaddrinfo ENOTFOUND 404.localhost
-    [ERR] [hive][info]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
-    [ERR] [hive][info] POST http://404.localhost/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [INF] [hive][info] POST http://404.localhost.noop/registry Attempt (1/6)
+    [ERR] [hive][info] Error: getaddrinfo ENOTFOUND 404.localhost.noop
+    [ERR] [hive][info]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
+    [ERR] [hive][info] POST http://404.localhost.noop/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
   `);
   expect(
     logger
@@ -122,10 +122,10 @@ test('should not interrupt the process', async () => {
       .join(`\n`),
   ).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://404.localhost/registry Attempt (1/6)
-    [ERR] [hive][reporting] Error: getaddrinfo ENOTFOUND 404.localhost
-    [ERR] [hive][reporting]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
-    [ERR] [hive][reporting] POST http://404.localhost/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [INF] [hive][reporting] POST http://404.localhost.noop/registry Attempt (1/6)
+    [ERR] [hive][reporting] Error: getaddrinfo ENOTFOUND 404.localhost.noop
+    [ERR] [hive][reporting]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
+    [ERR] [hive][reporting] POST http://404.localhost.noop/registry failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
   `);
   expect(
     logger
@@ -135,10 +135,10 @@ test('should not interrupt the process', async () => {
       .join(`\n`),
   ).toMatchInlineSnapshot(`
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://404.localhost/usage
-    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost
-    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:120:26)
-    [ERR] [hive][usage] POST http://404.localhost/usage failed (666ms). getaddrinfo ENOTFOUND 404.localhost
+    [INF] [hive][usage] POST http://404.localhost.noop/usage
+    [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost.noop
+    [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
+    [ERR] [hive][usage] POST http://404.localhost.noop/usage failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
     [ERR] [hive][usage] Failed to send report.
   `);
 

@@ -82,12 +82,12 @@ test('should not interrupt the process', async () => {
           logger,
         },
         reporting: {
-          endpoint: 'http://404.localhost/registry',
+          endpoint: 'http://404.localhost.noop/registry',
           author: 'jest',
           commit: 'js',
         },
         usage: {
-          endpoint: 'http://404.localhost/usage',
+          endpoint: 'http://404.localhost.noop/usage',
         },
       }),
     ],

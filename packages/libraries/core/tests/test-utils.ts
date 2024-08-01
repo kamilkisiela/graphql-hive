@@ -13,7 +13,8 @@ function getLogLines(calls: Array<Array<unknown>>) {
         // Replace milliseconds with static value
         .replace(/\(\d{1,3}ms\)/, '(666ms)')
         // Replace stack trace line numbers with static value
-        .replace(/\(node:net:\d+:\d+\)/, '(node:net:666:666)');
+        .replace(/\(node:net:\d+:\d+\)/, '(node:net:666:666)')
+        .replace(/\(node:dns:\d+:\d+\)/, '(node:dns:666:666)');
     } else {
       msg = String(log[1]);
     }

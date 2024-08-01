@@ -3,7 +3,7 @@ import { makeFetchCall } from '../src/client/http-client';
 
 test('HTTP call without retries and system level error', async () => {
   const logger = createHiveTestingLogger();
-  const response = await makeFetchCall('https://ap.localhost', {
+  const response = await makeFetchCall('https://ap.localhost.noop', {
     method: 'GET',
     retry: false,
     headers: {},
@@ -15,15 +15,15 @@ test('HTTP call without retries and system level error', async () => {
   }
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] GET https://ap.localhost
-    [ERR] Error: getaddrinfo ENOTFOUND ap.localhost
-    [ERR] GET https://ap.localhost failed (666ms). getaddrinfo ENOTFOUND ap.localhost
+    [INF] GET https://ap.localhost.noop
+    [ERR] Error: getaddrinfo ENOTFOUND ap.localhost.noop
+    [ERR] GET https://ap.localhost.noop failed (666ms). getaddrinfo ENOTFOUND ap.localhost.noop
   `);
 });
 
 test('HTTP with retries and system', async () => {
   const logger = createHiveTestingLogger();
-  await makeFetchCall('https://ap.localhost', {
+  await makeFetchCall('https://ap.localhost.noop', {
     method: 'GET',
     retry: {
       retries: 1,
@@ -33,18 +33,18 @@ test('HTTP with retries and system', async () => {
   }).catch(_ => {});
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] GET https://ap.localhost Attempt (1/2)
-    [ERR] Error: getaddrinfo ENOTFOUND ap.localhost
-    [ERR] GET https://ap.localhost failed (666ms). getaddrinfo ENOTFOUND ap.localhost
-    [INF] GET https://ap.localhost Attempt (2/2)
-    [ERR] Error: getaddrinfo ENOTFOUND ap.localhost
-    [ERR] GET https://ap.localhost failed (666ms). getaddrinfo ENOTFOUND ap.localhost
+    [INF] GET https://ap.localhost.noop Attempt (1/2)
+    [ERR] Error: getaddrinfo ENOTFOUND ap.localhost.noop
+    [ERR] GET https://ap.localhost.noop failed (666ms). getaddrinfo ENOTFOUND ap.localhost.noop
+    [INF] GET https://ap.localhost.noop Attempt (2/2)
+    [ERR] Error: getaddrinfo ENOTFOUND ap.localhost.noop
+    [ERR] GET https://ap.localhost.noop failed (666ms). getaddrinfo ENOTFOUND ap.localhost.noop
   `);
 });
 
 test('HTTP with 4xx status code will not be retried', async () => {
   const logger = createHiveTestingLogger();
-  await makeFetchCall('https://ap.localhost', {
+  await makeFetchCall('https://ap.localhost.noop', {
     method: 'GET',
     retry: {
       retries: 1,
@@ -60,8 +60,8 @@ test('HTTP with 4xx status code will not be retried', async () => {
   }).catch(_ => {});
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] GET https://ap.localhost Attempt (1/2)
-    [ERR] GET https://ap.localhost failed with status 404 (666ms): Bubatzbieber
+    [INF] GET https://ap.localhost.noop Attempt (1/2)
+    [ERR] GET https://ap.localhost.noop failed with status 404 (666ms): Bubatzbieber
     [ERR] Abort retry because of status code 404.
   `);
 });
@@ -69,7 +69,7 @@ test('HTTP with 4xx status code will not be retried', async () => {
 test('HTTP with 5xx status code will be retried', async () => {
   const logger = createHiveTestingLogger();
 
-  await makeFetchCall('https://ap.localhost', {
+  await makeFetchCall('https://ap.localhost.noop', {
     method: 'GET',
     retry: {
       retries: 1,
@@ -85,18 +85,18 @@ test('HTTP with 5xx status code will be retried', async () => {
   }).catch(_ => {});
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] GET https://ap.localhost Attempt (1/2)
-    [ERR] GET https://ap.localhost failed with status 500 (666ms): Bubatzbieber
-    [INF] GET https://ap.localhost Attempt (2/2)
-    [ERR] GET https://ap.localhost failed with status 500 (666ms): Bubatzbieber
-    [ERR] GET https://ap.localhost retry limit exceeded after 2 attempts.
+    [INF] GET https://ap.localhost.noop Attempt (1/2)
+    [ERR] GET https://ap.localhost.noop failed with status 500 (666ms): Bubatzbieber
+    [INF] GET https://ap.localhost.noop Attempt (2/2)
+    [ERR] GET https://ap.localhost.noop failed with status 500 (666ms): Bubatzbieber
+    [ERR] GET https://ap.localhost.noop retry limit exceeded after 2 attempts.
   `);
 });
 
 test('HTTP with status 3xx will be retried', async () => {
   const logger = createHiveTestingLogger();
 
-  await makeFetchCall('https://ap.localhost', {
+  await makeFetchCall('https://ap.localhost.noop', {
     method: 'GET',
     retry: {
       retries: 1,
@@ -112,18 +112,18 @@ test('HTTP with status 3xx will be retried', async () => {
   }).catch(_ => {});
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] GET https://ap.localhost Attempt (1/2)
-    [ERR] GET https://ap.localhost failed with status 302 (666ms): Bubatzbieber
-    [INF] GET https://ap.localhost Attempt (2/2)
-    [ERR] GET https://ap.localhost failed with status 302 (666ms): Bubatzbieber
-    [ERR] GET https://ap.localhost retry limit exceeded after 2 attempts.
+    [INF] GET https://ap.localhost.noop Attempt (1/2)
+    [ERR] GET https://ap.localhost.noop failed with status 302 (666ms): Bubatzbieber
+    [INF] GET https://ap.localhost.noop Attempt (2/2)
+    [ERR] GET https://ap.localhost.noop failed with status 302 (666ms): Bubatzbieber
+    [ERR] GET https://ap.localhost.noop retry limit exceeded after 2 attempts.
   `);
 });
 
 test('HTTP with status 3xx will not be retried with custom "isRequestOk" implementation', async () => {
   const logger = createHiveTestingLogger();
 
-  await makeFetchCall('https://ap.localhost', {
+  await makeFetchCall('https://ap.localhost.noop', {
     method: 'GET',
     retry: {
       retries: 1,
@@ -140,7 +140,7 @@ test('HTTP with status 3xx will not be retried with custom "isRequestOk" impleme
   }).catch(_ => {});
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] GET https://ap.localhost Attempt (1/2)
-    [INF] GET https://ap.localhost succeeded with status 302 (666ms).
+    [INF] GET https://ap.localhost.noop Attempt (1/2)
+    [INF] GET https://ap.localhost.noop succeeded with status 302 (666ms).
   `);
 });
