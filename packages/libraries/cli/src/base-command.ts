@@ -3,22 +3,53 @@ import { print, type GraphQLError } from 'graphql';
 import type { ExecutionResult } from 'graphql';
 import { http } from '@graphql-hive/core';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { Command, Errors, Config as OclifConfig } from '@oclif/core';
+import { Command, Errors, Flags, Interfaces, Config as OclifConfig } from '@oclif/core';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
+
+export type Flags<T extends typeof Command> = Interfaces.InferredFlags<
+  (typeof BaseCommand)['baseFlags'] & T['flags']
+>;
+export type Args<T extends typeof Command> = Interfaces.InferredArgs<T['args']>;
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
 
-export default abstract class extends Command {
-  protected _userConfig: Config;
+export default abstract class BaseCommand<T extends typeof Command> extends Command {
+  protected _userConfig: Config | undefined;
 
-  protected constructor(argv: string[], config: OclifConfig) {
-    super(argv, config);
+  static baseFlags = {
+    debug: Flags.boolean({
+      default: false,
+      summary: 'Whether debug output for HTTP calls and similar should be enabled.',
+    }),
+  };
+
+  protected flags!: Flags<T>;
+  protected args!: Args<T>;
+
+  protected get userConfig(): Config {
+    if (!this._userConfig) {
+      throw new Error('User config is not initialized');
+    }
+    return this._userConfig!;
+  }
+
+  public async init(): Promise<void> {
+    await super.init();
 
     this._userConfig = new Config({
       // eslint-disable-next-line no-process-env
       filepath: process.env.HIVE_CONFIG,
       rootDir: process.cwd(),
     });
+
+    const { args, flags } = await this.parse({
+      flags: this.ctor.flags,
+      baseFlags: (super.ctor as typeof BaseCommand).baseFlags,
+      args: this.ctor.args,
+      strict: this.ctor.strict,
+    });
+    this.flags = flags as Flags<T>;
+    this.args = args as Args<T>;
   }
 
   success(...args: any[]) {
@@ -122,7 +153,7 @@ export default abstract class extends Command {
       return process.env[env] as TArgs[keyof TArgs] as NonNullable<GetConfigurationValueType<TKey>>;
     }
 
-    const userConfigValue = this._userConfig.get(key);
+    const userConfigValue = this._userConfig!.get(key);
 
     if (userConfigValue != null) {
       return userConfigValue;
@@ -161,6 +192,8 @@ export default abstract class extends Command {
       ...additionalHeaders,
     };
 
+    const isDebug = this.flags.debug;
+
     return {
       async request<TResult, TVariables>(
         operation: TypedDocumentNode<TResult, TVariables>,
@@ -175,8 +208,7 @@ export default abstract class extends Command {
           {
             logger: {
               info: (...args) => {
-                // eslint-disable-next-line no-process-env
-                if (process.env.NODE_ENV === 'development') {
+                if (isDebug) {
                   console.info(...args);
                 }
               },

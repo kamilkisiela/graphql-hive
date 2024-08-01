@@ -2,7 +2,7 @@ import { Args } from '@oclif/core';
 import Command from '../../base-command';
 import { allowedKeys, ValidConfigurationKeys } from '../../helpers/config';
 
-export default class SetConfig extends Command {
+export default class SetConfig extends Command<typeof SetConfig> {
   static description = 'updates specific cli configuration';
   static args = {
     key: Args.string({
@@ -20,7 +20,7 @@ export default class SetConfig extends Command {
 
   async run() {
     const { args } = await this.parse(SetConfig);
-    this._userConfig.set(args.key as ValidConfigurationKeys, args.value);
+    this.userConfig.set(args.key as ValidConfigurationKeys, args.value);
     this.success(this.bolderize(`Config flag "${args.key}" was set to "${args.value}"`));
   }
 }
