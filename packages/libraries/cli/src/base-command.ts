@@ -173,6 +173,16 @@ export default abstract class extends Command {
             variables,
           }),
           {
+            logger: {
+              info: (...args) => {
+                if (process.env.NODE_ENV === 'development') {
+                  console.info(...args);
+                }
+              },
+              error: (...args) => {
+                console.error(...args);
+              },
+            },
             headers: requestHeaders,
           },
         );
