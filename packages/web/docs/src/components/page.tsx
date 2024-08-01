@@ -1,5 +1,4 @@
 import { ReactElement, ReactNode, useCallback, useState } from 'react';
-import Head from 'next/head';
 import { useMounted } from '@theguild/components';
 
 const CookiesConsent = (): ReactElement => {
@@ -43,10 +42,6 @@ export function Page(props: { children: ReactNode }) {
 
   return (
     <>
-      <Head>
-        <link rel="preconnect" href="https://rsms.me/" />
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-      </Head>
       <div className="flex h-full flex-col">{props.children}</div>
       {mounted && <CookiesConsent />}
     </>

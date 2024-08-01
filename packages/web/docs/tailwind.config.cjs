@@ -8,13 +8,8 @@ module.exports = {
     extend: {
       ...config.theme.extend,
       fontFamily: {
-        display: [
-          'Inter var,' + fontFamily.sans.join(','),
-          {
-            fontFeatureSettings: 'normal',
-            fontVariationSettings: '"opsz" 32',
-          },
-        ],
+        sans: ['var(--font-sans)', ...fontFamily.sans],
+        display: ['var(--font-sans)', ...fontFamily.sans],
       },
     },
   },
