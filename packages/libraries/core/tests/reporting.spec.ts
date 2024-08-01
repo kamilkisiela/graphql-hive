@@ -52,7 +52,7 @@ test('should not leak the exception', async () => {
     [INF] [hive][reporting] Publish schema
     [INF] [hive][reporting] POST http://127.0.0.1:55404 Attempt (1/6)
     [ERR] [hive][reporting] Error: connect ECONNREFUSED 127.0.0.1:55404
-    [ERR] [hive][reporting]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1607:16)
+    [ERR] [hive][reporting]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:666:666)
     [ERR] [hive][reporting] POST http://127.0.0.1:55404 failed (666ms). connect ECONNREFUSED 127.0.0.1:55404
   `);
 });
@@ -681,11 +681,11 @@ test('retry on non-200', async () => {
     [INF] [hive][reporting] Publish schema
     [INF] [hive][reporting] POST http://localhost/registry Attempt (1/6)
     [ERR] [hive][reporting] Error: connect ECONNREFUSED ::1:80
-    [ERR] [hive][reporting]     at createConnectionError (node:net:1648:14)
-    [ERR] [hive][reporting]     at afterConnectMultiple (node:net:1678:16)
+    [ERR] [hive][reporting]     at createConnectionError (node:net:666:666)
+    [ERR] [hive][reporting]     at afterConnectMultiple (node:net:666:666)
     [ERR] [hive][reporting] Error: connect ECONNREFUSED 127.0.0.1:80
-    [ERR] [hive][reporting]     at createConnectionError (node:net:1648:14)
-    [ERR] [hive][reporting]     at afterConnectMultiple (node:net:1678:16)
+    [ERR] [hive][reporting]     at createConnectionError (node:net:666:666)
+    [ERR] [hive][reporting]     at afterConnectMultiple (node:net:666:666)
     [ERR] [hive][reporting] POST http://localhost/registry failed (666ms).
   `);
 });
