@@ -77,6 +77,8 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
             headers: {
               'graphql-client-name': 'Hive Client',
               'graphql-client-version': version,
+              authorization: `Bearer ${token}`,
+              'content-type': 'application/json',
             },
             logger,
           },

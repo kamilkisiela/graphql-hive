@@ -11,7 +11,7 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Response } from '@whatwg-node/fetch';
-import { createLogger as createHiveTestingLogger } from '../../core/tests/test-utils';
+import { createHiveTestingLogger } from '../../core/tests/test-utils';
 import { createHive, useHive } from '../src/index.js';
 
 beforeAll(() => {

@@ -47,9 +47,6 @@ export default class ArtifactsFetch extends Command {
       },
       retry: {
         retries: 3,
-        retryWhen(response) {
-          return response.status >= 500;
-        },
       },
     });
 

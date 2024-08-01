@@ -38,6 +38,7 @@ function get(endpoint: string, config: SharedConfig) {
     retry: config.retry,
     fetchImplementation: config.fetchImplementation,
     logger: config.logger ?? console,
+    isRequestOk: config.isRequestOk,
   });
 }
 

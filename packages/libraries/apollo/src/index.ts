@@ -44,9 +44,8 @@ export function createSupergraphSDLFetcher(options: SupergraphSDLFetcherOptions)
     return http
       .get(endpoint, {
         headers,
+        isRequestOk: response => response.status === 304 || response.ok,
         retry: {
-          retryWhen: response => response.status >= 500,
-          okWhen: response => response.status === 304,
           retries: 10,
           maxTimeout: 200,
           minTimeout: 1,

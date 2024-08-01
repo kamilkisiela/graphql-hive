@@ -298,9 +298,7 @@ describe('supergraph SDL fetcher', async () => {
     try {
       await fetcher();
     } catch (err) {
-      expect(err).toMatchInlineSnapshot(
-        `[Error: Failed to fetch http://localhost/supergraph, received: 500 Internal Server Error]`,
-      );
+      expect(err).toMatchInlineSnapshot(`[Error: GET http://localhost/supergraph failed with status 500.]`);
     }
   });
 });

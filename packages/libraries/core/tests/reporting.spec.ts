@@ -126,13 +126,10 @@ test('should send data to Hive', async () => {
   http.done();
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Sending immediately
-    [INF] [hive][reporting] Sending report (queue 1)
-    [INF] POST http://localhost/200
-    [INF] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Report sent!
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
-    [INF] [hive][reporting] Disposing
   `);
 });
 
@@ -202,13 +199,10 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   http.done();
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Sending immediately
-    [INF] [hive][reporting] Sending report (queue 1)
-    [INF] POST http://localhost/200
-    [INF] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Report sent!
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
-    [INF] [hive][reporting] Disposing
   `);
 
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
@@ -280,13 +274,10 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
   http.done();
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Sending immediately
-    [INF] [hive][reporting] Sending report (queue 1)
-    [INF] POST https://app.graphql-hive.com/graphql
-    [INF] POST https://app.graphql-hive.com/graphql succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Report sent!
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST https://app.graphql-hive.com/graphql Attempt (1/6)
+    [INF] [hive][reporting] POST https://app.graphql-hive.com/graphql succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
-    [INF] [hive][reporting] Disposing
   `);
 
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
@@ -361,37 +352,8 @@ test('should send data to Hive immediately', async () => {
   await waitFor(50);
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [ERR] [hive][reporting] Error: Nock: No match for request {
-    [ERR] [hive][reporting]   "method": "POST",
-    [ERR] [hive][reporting]   "url": "http://localhost/200",
-    [ERR] [hive][reporting]   "headers": {
-    [ERR] [hive][reporting]     "graphql-client-name": "Hive Client",
-    [ERR] [hive][reporting]     "graphql-client-version": "0.5.0",
-    [ERR] [hive][reporting]     "content-type": "text/plain;charset=UTF-8",
-    [ERR] [hive][reporting]     "content-length": "530"
-    [ERR] [hive][reporting]   },
-    [ERR] [hive][reporting]   "body": "{\\"query\\":\\"mutation schemaPublish($input:SchemaPublishInput!){schemaPublish(input:$input){__typename ...on SchemaPublishSuccess{initial valid successMessage:message}...on SchemaPublishError{valid errors{nodes{message}total}}...on SchemaPublishMissingServiceError{missingServiceError:message}...on SchemaPublishMissingUrlError{missingUrlError:message}}}\\",\\"operationName\\":\\"schemaPublish\\",\\"variables\\":{\\"input\\":{\\"sdl\\":\\"type Query{foo:String}\\",\\"author\\":\\"Test\\",\\"commit\\":\\"Commit\\",\\"service\\":\\"my-api\\",\\"url\\":\\"https://api.com\\",\\"force\\":true}}}"
-    [ERR] [hive][reporting] }
-    [ERR] [hive][reporting]     at InterceptedRequestRouter.startPlayback (/Users/laurinquast/Projects/graphql-hive-3/node_modules/.pnpm/nock@14.0.0-beta.7/node_modules/nock/lib/intercepted_request_router.js:346:21)
-    [ERR] [hive][reporting]     at InterceptedRequestRouter.maybeStartPlayback (/Users/laurinquast/Projects/graphql-hive-3/node_modules/.pnpm/nock@14.0.0-beta.7/node_modules/nock/lib/intercepted_request_router.js:268:12)
-    [ERR] [hive][reporting]     at InterceptedRequestRouter.handleEnd (/Users/laurinquast/Projects/graphql-hive-3/node_modules/.pnpm/nock@14.0.0-beta.7/node_modules/nock/lib/intercepted_request_router.js:216:10)
-    [ERR] [hive][reporting]     at OverriddenClientRequest.req.end (/Users/laurinquast/Projects/graphql-hive-3/node_modules/.pnpm/nock@14.0.0-beta.7/node_modules/nock/lib/intercepted_request_router.js:100:33)
-    [ERR] [hive][reporting]     at Readable.onend (node:internal/streams/readable:946:10)
-    [ERR] [hive][reporting]     at Object.onceWrapper (node:events:634:28)
-    [ERR] [hive][reporting]     at Readable.emit (node:events:520:28)
-    [ERR] [hive][reporting]     at endReadableNT (node:internal/streams/readable:1696:12)
-    [ERR] [hive][reporting]     at processTicksAndRejections (node:internal/process/task_queues:82:21)
-    [ERR] [hive][reporting] POST http://localhost/200 failed (666ms). Nock: No match for request {
-      "method": "POST",
-      "url": "http://localhost/200",
-      "headers": {
-        "graphql-client-name": "Hive Client",
-        "graphql-client-version": "0.5.0",
-        "content-type": "text/plain;charset=UTF-8",
-        "content-length": "530"
-      },
-      "body": "{\\"query\\":\\"mutation schemaPublish($input:SchemaPublishInput!){schemaPublish(input:$input){__typename ...on SchemaPublishSuccess{initial valid successMessage:message}...on SchemaPublishError{valid errors{nodes{message}total}}...on SchemaPublishMissingServiceError{missingServiceError:message}...on SchemaPublishMissingUrlError{missingUrlError:message}}}\\",\\"operationName\\":\\"schemaPublish\\",\\"variables\\":{\\"input\\":{\\"sdl\\":\\"type Query{foo:String}\\",\\"author\\":\\"Test\\",\\"commit\\":\\"Commit\\",\\"service\\":\\"my-api\\",\\"url\\":\\"https://api.com\\",\\"force\\":true}}}"
-    }
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Successfully published schema
   `);
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
   expect(body.variables.input.author).toBe(author);
@@ -402,10 +364,8 @@ test('should send data to Hive immediately', async () => {
 
   await waitFor(100);
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Sending report (queue 1)
-    [INF] POST http://localhost/200
-    [INF] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Report sent!
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Successfully published schema
   `);
 
@@ -456,7 +416,7 @@ test('should send original schema of a federated (v1) service', async () => {
       expect(body.variables.input.service).toBe(serviceName);
       expect(body.variables.input.url).toBe(serviceUrl);
       expect(body.variables.input.force).toBe(true);
-      return [200];
+      return [200, '{"data":{"schemaPublish":{"__typename":"SchemaPublishSuccess"}}}'];
     });
 
   hive.reportSchema({
@@ -469,7 +429,16 @@ test('should send original schema of a federated (v1) service', async () => {
     ),
   });
 
+  await waitFor(50);
+
   await hive.dispose();
+  const logs = logger.getLogs();
+  expect(logs).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
   http.done();
 });
 
@@ -516,7 +485,7 @@ test('should send original schema of a federated (v2) service', async () => {
       expect(body.variables.input.service).toBe(serviceName);
       expect(body.variables.input.url).toBe(serviceUrl);
       expect(body.variables.input.force).toBe(true);
-      return [200];
+      return [200, '{"data":{"schemaPublish":{"__typename":"SchemaPublishSuccess"}}}'];
     });
 
   hive.reportSchema({
@@ -529,7 +498,16 @@ test('should send original schema of a federated (v2) service', async () => {
     ),
   });
 
+  await waitFor(50);
+
   await hive.dispose();
+  const logs = logger.getLogs();
+  expect(logs).toMatchInlineSnapshot(`
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
+    [INF] [hive][reporting] Published schema
+  `);
   http.done();
 });
 
@@ -586,13 +564,10 @@ test('should display SchemaPublishMissingServiceError', async () => {
   http.done();
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Sending immediately
-    [INF] [hive][reporting] Sending report (queue 1)
-    [INF] POST http://localhost/200 Attempt (1/2)
-    [INF] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Report sent!
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [ERR] [hive][reporting] Failed to report schema: Service name is not defined
-    [INF] [hive][reporting] Disposing
   `);
 });
 
@@ -650,16 +625,13 @@ test('should display SchemaPublishMissingUrlError', async () => {
   http.done();
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] Sending immediately
-    [INF] [hive][reporting] Sending report (queue 1)
-    [INF] POST http://localhost/200 Attempt (1/2)
-    [INF] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Report sent!
+    [INF] [hive][reporting] Publish schema
+    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
+    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [ERR] [hive][reporting] Failed to report schema: Service url is not defined
-    [INF] [hive][reporting] Disposing
   `);
 
-  expect(logger.getLogs()).toContain('[hive][reporting] Sending report (queue 1)');
+  expect(logger.getLogs()).toContain('POST http://localhost/200 Attempt (1/6)');
   expect(logger.getLogs()).toContain('Service url is not defined');
 });
 
