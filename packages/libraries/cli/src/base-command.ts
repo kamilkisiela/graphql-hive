@@ -3,7 +3,7 @@ import { print, type GraphQLError } from 'graphql';
 import type { ExecutionResult } from 'graphql';
 import { http } from '@graphql-hive/core';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { Command, Errors, Flags, Interfaces, Config as OclifConfig } from '@oclif/core';
+import { Command, Errors, Flags, Interfaces } from '@oclif/core';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
 
 export type Flags<T extends typeof Command> = Interfaces.InferredFlags<
