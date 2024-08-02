@@ -18,7 +18,7 @@ interface SharedConfig {
   /**
    * Function for determining whether the request response is okay.
    * You can override it if you want to accept other status codes as well.
-   * @default {response => response.ok}
+   * @default (response) => response.ok
    **/
   isRequestOk?: ResponseAssertFunction;
 }
@@ -75,7 +75,7 @@ export async function makeFetchCall(
     /**
      * Function for determining whether the request response is okay.
      * You can override it if you want to accept other status codes as well.
-     * @default {response => response.ok}
+     * @default (response) => response.ok
      **/
     isRequestOk?: ResponseAssertFunction;
   },
@@ -96,11 +96,6 @@ export async function makeFetchCall(
 
   return await asyncRetry(
     async (bail, attempt) => {
-      logger.info(
-        `${config.method} ${endpoint}` +
-          (retries > 0 ? ' ' + getAttemptMessagePart(attempt, retries + 1) : ''),
-      );
-
       const getDuration = measureTime();
       const signal = AbortSignal.timeout(config.timeout ?? 20_000);
 
@@ -130,10 +125,6 @@ export async function makeFetchCall(
       });
 
       if (isRequestOk(response)) {
-        logger.info(
-          `${config.method} ${endpoint} succeeded with status ${response.status} ${getDuration()}.`,
-        );
-
         return response;
       }
 
