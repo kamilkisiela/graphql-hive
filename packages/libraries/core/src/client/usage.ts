@@ -20,7 +20,14 @@ import type {
   HivePluginOptions,
   HiveUsagePluginOptions,
 } from './types.js';
-import { cache, cacheDocumentKey, logIf, measureDuration, memo } from './utils.js';
+import {
+  cache,
+  cacheDocumentKey,
+  createHiveLogger,
+  logIf,
+  measureDuration,
+  memo,
+} from './utils.js';
 
 interface UsageCollector {
   collect(): CollectUsageCallback;
@@ -64,15 +71,16 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
   const options =
     typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
   const selfHostingOptions = pluginOptions.selfHosting;
-  const logger = pluginOptions.agent?.logger ?? console;
+  const logger = createHiveLogger(pluginOptions.agent?.logger ?? console, '[hive][usage]');
   const collector = memo(createCollector, arg => arg.schema);
   const excludeSet = new Set(options.exclude ?? []);
+
   const agent = createAgent<AgentAction>(
     {
-      logger,
       ...(pluginOptions.agent ?? {
         maxSize: 1500,
       }),
+      logger,
       endpoint:
         selfHostingOptions?.usageEndpoint ??
         options.endpoint ??
@@ -83,7 +91,6 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       __testing: pluginOptions.agent?.__testing,
     },
     {
-      prefix: 'usage',
       data: {
         set(action) {
           if (action.type === 'request') {
@@ -156,7 +163,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
 
   logIf(
     typeof pluginOptions.token !== 'string' || pluginOptions.token.length === 0,
-    '[hive][usage] token is missing',
+    'token is missing',
     logger.error,
   );
 

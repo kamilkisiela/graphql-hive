@@ -5,7 +5,7 @@ import { Args, Flags } from '@oclif/core';
 import Command from '../base-command';
 import { loadSchema } from '../helpers/schema';
 
-export default class Introspect extends Command {
+export default class Introspect extends Command<typeof Introspect> {
   static description = 'introspects a GraphQL Schema';
   static flags = {
     write: Flags.string({

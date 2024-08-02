@@ -63,7 +63,7 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
   }
 `);
 
-export default class SchemaPublish extends Command {
+export default class SchemaPublish extends Command<typeof SchemaPublish> {
   static description = 'publishes schema';
   static flags = {
     service: Flags.string({

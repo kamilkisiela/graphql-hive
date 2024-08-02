@@ -82,12 +82,12 @@ test('should not interrupt the process', async () => {
           logger,
         },
         reporting: {
-          endpoint: 'http://404.localhost/registry',
+          endpoint: 'http://404.localhost.noop/registry',
           author: 'jest',
           commit: 'js',
         },
         usage: {
-          endpoint: 'http://404.localhost/usage',
+          endpoint: 'http://404.localhost.noop/usage',
         },
       }),
     ],
@@ -100,7 +100,7 @@ test('should not interrupt the process', async () => {
       }
     `,
   });
-  await waitFor(50);
+  await waitFor(200);
   await apollo.stop();
   clean();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
@@ -299,7 +299,7 @@ describe('supergraph SDL fetcher', async () => {
       await fetcher();
     } catch (err) {
       expect(err).toMatchInlineSnapshot(
-        `[Error: Failed to fetch http://localhost/supergraph, received: 500 Internal Server Error]`,
+        `[Error: GET http://localhost/supergraph failed with status 500.]`,
       );
     }
   });
