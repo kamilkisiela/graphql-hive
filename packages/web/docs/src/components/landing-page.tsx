@@ -1,12 +1,15 @@
-import { ReactElement, ReactNode, useState } from 'react';
+import { ComponentPropsWithoutRef, ReactElement, ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
+import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
+import { ArrowIcon } from './arrow-icon';
 import { BookIcon } from './book-icon';
-import { CheckIcon, Heading, Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
+import { CallToAction } from './call-to-action';
+import { CheckIcon, Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { Highlights, HighlightTextLink } from './highlights';
 import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
@@ -20,7 +23,6 @@ import registrySchemaChecksImage from '../../public/features/registry/schema-che
 import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.png';
 
 const classes = {
-  feature: cn('w-full', 'even:bg-gray-50', 'odd:bg-white'),
   root: cn('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
   content: cn('flex flex-col text-black'),
   title: cn('text-xl font-semibold'),
@@ -34,16 +36,6 @@ const gradients: [string, string][] = [
   ['#4ac29a', '#bdfff3'],
   ['#00c6ff', '#0072ff'],
 ];
-
-function pickGradient(i: number): [string, string] {
-  const gradient = gradients[i % gradients.length];
-
-  if (!gradient) {
-    throw new Error('No gradient found');
-  }
-
-  return gradient;
-}
 
 const renderFeatures = ({
   title,
@@ -73,103 +65,19 @@ const renderFeatures = ({
   </div>
 );
 
-function Highlight(
-  props: {
-    title: string;
-    description: ReactNode;
-    documentationLink?: string;
-    startColor: string;
-    endColor: string;
-  } & (
-    | {
-        active: boolean;
-        index: number;
-        onClick(i: number): void;
-      }
-    | {}
-  ),
-) {
-  return (
-    <div
-      className={cn(
-        classes.root,
-        'relative p-2 transition lg:p-8',
-        'onClick' in props ? 'cursor-pointer' : '',
-      )}
-      onClick={'onClick' in props ? () => props.onClick(props.index) : () => {}}
-    >
-      {props.documentationLink ? null : (
-        <div
-          className={cn(
-            'absolute inset-0 border-b-2 lg:border-b-0 lg:border-l-4',
-            'active' in props && props.active ? 'opacity-100' : 'opacity-0 hover:opacity-50',
-          )}
-          style={{
-            borderColor: props.startColor,
-          }}
-        />
-      )}
-      <div
-        className={cn(
-          classes.content,
-          'w-full lg:w-auto',
-          'onClick' in props ? 'gap-y-2' : 'gap-y-4',
-        )}
-      >
-        <h3
-          className={cn(
-            classes.title,
-            'text-base lg:text-lg',
-            'onClick' in props ? 'text-center lg:text-left' : '',
-          )}
-        >
-          {props.title}
-        </h3>
-        <p
-          className={cn(
-            classes.description,
-            'text-sm',
-            'onClick' in props ? 'hidden lg:block' : '',
-          )}
-        >
-          {props.description}
-        </p>
-        {props.documentationLink ? (
-          <Link
-            href={props.documentationLink}
-            className="group mt-2 inline-flex items-center gap-x-2 text-sm underline-offset-8 transition hover:underline"
-          >
-            <div>
-              <BookIcon size={16} />
-            </div>
-            <div>Learn more</div>
-          </Link>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 function Feature(props: {
+  icon: ReactNode;
   title: string;
-  description: ReactNode;
-  highlights?: {
+  description: string;
+  highlights: {
     title: string;
     description: string;
     image: StaticImageData;
   }[];
-  imagelessHighlights?: {
-    title: string;
-    description: string;
-    documentationLink: string;
-  }[];
-  gradient: number;
   documentationLink?: string;
 }) {
   const [activeHighlight, setActiveHighlight] = useState(0);
-  const { title, description, gradient, documentationLink, highlights, imagelessHighlights } =
-    props;
-  const [start, end] = pickGradient(gradient);
+  const { icon, title, description, documentationLink, highlights } = props;
 
   return (
     <>
@@ -180,108 +88,55 @@ function Feature(props: {
             ))
           : null}
       </Head>
-      <div className={cn(classes.feature, 'relative overflow-hidden')}>
-        <div>
-          <div
-            className="absolute top-0 h-px w-full opacity-25"
-            style={{
-              backgroundImage: `linear-gradient(90deg, ${end}, ${start})`,
-            }}
-          />
-          <div
-            className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-            style={{
-              backgroundImage: `linear-gradient(180deg, ${end}, ${start})`,
-            }}
-          />
-          <div
-            className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-            style={{
-              backgroundImage: `linear-gradient(180deg, ${start}, ${end})`,
-            }}
-          />
-        </div>
-        <div className="pb-28 pt-20 sm:py-32">
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl md:mx-auto md:text-center xl:max-w-none">
-              <h2
-                className="bg-clip-text text-4xl font-semibold leading-normal tracking-tight text-transparent"
-                style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
-              >
-                {title}
-              </h2>
-              <div className="mt-6 text-lg tracking-tight text-gray-600">{description}</div>
-              {documentationLink ? (
-                <div className="pt-12">
-                  <Link
-                    href={documentationLink}
-                    className="group inline-flex items-center gap-x-2 font-semibold underline-offset-8 transition hover:underline"
-                    style={{
-                      color: start,
-                    }}
-                  >
-                    <div>
-                      <BookIcon size={16} />
-                    </div>
-                    <div>Learn more</div>
-                  </Link>
-                </div>
-              ) : null}
+      <article className="grid grid-cols-1 lg:grid-cols-2">
+        <div className="flex flex-col gap-6 px-4 md:gap-12 md:pl-12 md:pr-16">
+          <header className="flex flex-col gap-4 md:gap-6">
+            <div className="w-fit rounded-lg bg-[linear-gradient(135deg,#68A8B6,#3B736A)] p-[9px] text-white">
+              {icon}
             </div>
-            {imagelessHighlights ? (
-              <div className="mt-16 flex flex-col justify-center pt-10 sm:gap-y-6 md:mt-20 lg:flex-row lg:pt-0">
-                {imagelessHighlights.map(highlight => (
-                  <Highlight
-                    {...highlight}
-                    endColor={end}
-                    startColor={start}
-                    key={highlight.title}
-                  />
-                ))}
-              </div>
-            ) : null}
-            {highlights ? (
-              <div className="mt-0 grid grid-cols-1 items-center gap-y-2 pt-10 sm:gap-y-6 md:mt-20 lg:mt-16 lg:grid-cols-12 lg:pt-0">
-                <div className="flex w-full overflow-x-auto pb-4 sm:mx-0 sm:overflow-visible sm:pb-0 lg:col-span-5 lg:w-auto">
-                  <div className="w-full">
-                    <div className="flex flex-row justify-evenly gap-x-0 lg:flex-col lg:gap-y-12">
-                      {highlights.map((highlight, i) => (
-                        <Highlight
-                          {...highlight}
-                          endColor={end}
-                          startColor={start}
-                          key={highlight.title}
-                          index={i}
-                          active={activeHighlight === i}
-                          onClick={setActiveHighlight}
-                        />
-                      ))}
-                    </div>
-                  </div>
+            <Heading as="h2" size="md" className="text-green-1000">
+              {title}
+            </Heading>
+            <p className="leading-6 text-green-800">{description}</p>
+          </header>
+          <dl className="grid grid-cols-2 gap-4 md:gap-12">
+            {highlights.map((highlight, i) => {
+              return (
+                <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
+                  <dt className="text-green-1000 font-medium">{highlight.title}</dt>
+                  <dd className="mt-2 text-sm leading-[20px] text-green-800">
+                    {highlight.description}
+                  </dd>
                 </div>
-                <div className="hidden lg:block" />
-                <div className="lg:col-span-6">
-                  {highlights.map((highlight, i) => (
-                    <div key={i} className={cn(activeHighlight === i ? 'block' : 'hidden')}>
-                      <div className="relative sm:px-6 lg:hidden">
-                        <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
-                          {highlight.description}
-                        </p>
-                      </div>
-                      <div
-                        className="mt-10 w-[45rem] rounded-lg p-4 sm:w-auto lg:mt-0 lg:w-[67.8125rem] lg:p-12"
-                        style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
-                      >
-                        <Image src={highlight.image} className="rounded-xl" alt={title} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
+              );
+            })}
+          </dl>
+          <CallToAction variant="primary" href={documentationLink}>
+            Learn more
+            <ArrowIcon />
+          </CallToAction>
         </div>
-      </div>
+        {highlights.map((highlight, i) => (
+          <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
+            <div className="relative px-4 sm:px-6 lg:hidden">
+              <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
+                {highlight.description}
+              </p>
+            </div>
+            <div className="relative ml-6 h-full flex-1 overflow-hidden rounded-3xl bg-blue-400">
+              {/* TODO: Use cropped images so we don't load too much without need. */}
+              <Image
+                width={925}
+                height={578}
+                src={highlight.image}
+                className="absolute left-[55px] top-[108px] rounded-3xl object-cover"
+                role="presentation"
+                alt=""
+              />
+            </div>
+          </div>
+        ))}
+      </article>
     </>
   );
 }
@@ -291,10 +146,14 @@ export function IndexPage(): ReactElement {
     <Tooltip.Provider>
       <Page>
         <Hero>
-          <Heading as="h1" size="xl" className="mx-auto max-w-3xl text-balance text-center">
+          <Heading
+            as="h1"
+            size="xl"
+            className="mx-auto max-w-3xl text-balance text-center text-white"
+          >
             Open-source GraphQL management platform
           </Heading>
-          <p className="mx-auto max-w-[512px] text-center font-medium leading-6 text-white/80">
+          <p className="mx-auto w-[512px] max-w-[80%] text-center font-medium leading-6 text-white/80">
             Your GraphQL API stack in one place: seamlessly integrate, customize, and secure all API
             environments without vendor lock-in.
           </p>
@@ -313,20 +172,15 @@ export function IndexPage(): ReactElement {
             </li>
           </HeroFeatures>
           <HeroLinks>
-            <a
-              href="https://app.graphql-hive.com"
-              className="bg-primary text-green-1000 rounded-lg border border-green-800 px-6 py-3 font-medium leading-6"
-            >
+            <CallToAction variant="primary-inverted" href="https://app.graphql-hive.com">
               Get started for free
-            </a>
-            <Link
-              className="text-green-1000 rounded-lg border border-green-800 bg-green-300 px-6 py-3 font-medium leading-6"
-              href="/docs"
-            >
+            </CallToAction>
+            <CallToAction variant="secondary" href="/docs">
               View Pricing
-            </Link>
+            </CallToAction>
           </HeroLinks>
         </Hero>
+        <FeatureTabs className="relative top-[-68px]" />
         <div className="relative even:bg-gray-50">
           <StatsList>
             <StatsItem label="Happy users" value={5.7} suffix="K" decimal />
@@ -358,38 +212,7 @@ export function IndexPage(): ReactElement {
           />
         </TrustedBy>
         <div className="flex flex-col">
-          <Feature
-            title="Schema Registry"
-            documentationLink="/docs/features/schema-registry"
-            description={
-              <>
-                <p>Push GraphQL schema to the registry and track the history of changes.</p>
-                <p>All your GraphQL services in one place.</p>
-              </>
-            }
-            highlights={[
-              {
-                title: 'Version Control System',
-                description:
-                  'Track every modification of your GraphQL API across different environments, such as staging and production.',
-                image: registryVersionControlSystemImage,
-              },
-              {
-                title: 'Schema checks',
-                description:
-                  'Detect breaking changes and composition errors, prevent them from being deployed.',
-                image: registrySchemaChecksImage,
-              },
-              {
-                title: 'Schema explorer',
-                description:
-                  'Navigate through your GraphQL schema and understand which types and fields are referenced from which subgraphs.',
-                image: registryExplorerImage,
-              },
-            ]}
-            gradient={0}
-          />
-          <div className={cn(classes.feature, 'relative overflow-hidden')}>
+          <div className={cn('relative overflow-hidden')}>
             <div>
               <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
               <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-50 to-gray-300 opacity-15 blur-3xl" />
@@ -440,60 +263,7 @@ export function IndexPage(): ReactElement {
               />
             </div>
           </div>
-          <Feature
-            title="GraphQL Observability"
-            documentationLink="/docs/features/usage-reporting"
-            description={
-              <p>
-                Be aware of how your GraphQL API is used and what is the experience of its final
-                users.
-              </p>
-            }
-            highlights={[
-              {
-                title: 'GraphQL consumers',
-                description:
-                  'Track every source of GraphQL requests and see how the API is consumed.',
-                image: observabilityClientsImage,
-              },
-              {
-                title: 'Overall performance',
-                description: 'Get a global overview of the usage of GraphQL API.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Query performance',
-                description: 'Detect slow GraphQL Operations and identify the culprits.',
-                image: observabilityOperationsImage,
-              },
-            ]}
-            gradient={1}
-          />
-          <Feature
-            title="Schema Management"
-            description={<p>Maintain GraphQL API across many teams without concerns.</p>}
-            gradient={2}
-            imagelessHighlights={[
-              {
-                title: 'Prevent breaking changes',
-                description:
-                  'Combination of Schema Registry and GraphQL Monitoring helps you evolve GraphQL API with confidence.',
-                documentationLink: '/docs/management/targets#conditional-breaking-changes',
-              },
-              {
-                title: 'Detect unused fields',
-                description:
-                  'Helps you understand the coverage of GraphQL schema and safely remove the unused part.',
-                documentationLink: '/docs/features/usage-reporting',
-              },
-              {
-                title: 'Schema Policy',
-                description:
-                  'Lint, verify, and enforce best practices across the entire federated graph.',
-                documentationLink: '/docs/features/schema-policy',
-              },
-            ]}
-          />
+
           <div
             className="relative overflow-hidden"
             style={{
@@ -525,7 +295,7 @@ export function IndexPage(): ReactElement {
               </div>
             </div>
           </div>
-          <div className={cn(classes.feature, 'relative overflow-hidden')}>
+          <div className={cn('relative overflow-hidden')}>
             <div>
               <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
               <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-600 to-gray-900 opacity-15 blur-3xl" />
@@ -560,7 +330,7 @@ export function IndexPage(): ReactElement {
               />
             </div>
           </div>
-          <div className={cn(classes.feature, 'relative overflow-hidden')}>
+          <div className={cn('relative overflow-hidden')}>
             <div>
               <div
                 className="absolute top-0 h-px w-full opacity-25"
@@ -621,5 +391,167 @@ export function IndexPage(): ReactElement {
         <Pricing gradient={gradients[4]} />
       </Page>
     </Tooltip.Provider>
+  );
+}
+
+function FeatureTabs({ className }: { className?: string }) {
+  const tabs = ['Schema Registry', 'GraphQL Observability', 'Schema Management'];
+  const icons = [<SchemaRegistryIcon />, <GraphQLObservabilityIcon />, <SchemaManagementIcon />];
+
+  return (
+    <section className={cn('mx-auto w-[1200px] max-w-full rounded-3xl bg-white md:p-6', className)}>
+      <Tabs.Root defaultValue={tabs[0]}>
+        <Tabs.List className="bg-beige-200 mb-12 flex flex-row rounded-2xl">
+          {tabs.map((tab, i) => (
+            <Tabs.Trigger
+              key={tab}
+              value={tab}
+              className={
+                "data-[state='active']:text-green-1000 data-[state='active']:border-beige-600 data-[state='active']:bg-white" +
+                ' border border-transparent font-medium leading-6 text-green-800' +
+                ' flex flex-1 justify-center gap-2.5 rounded-[15px] p-2 md:p-4'
+              }
+            >
+              {icons[i]}
+              {tab}
+            </Tabs.Trigger>
+          ))}
+        </Tabs.List>
+        <Tabs.Content value="Schema Registry" tabIndex={-1}>
+          <Feature
+            title="Schema Registry"
+            icon={<SchemaRegistryIcon />}
+            documentationLink="/docs/features/schema-registry"
+            description="A comprehensive Schema Registry to track and manage all changes in your GraphQL schemas."
+            highlights={[
+              {
+                title: 'Version Control System',
+                description:
+                  'Track modifications precisely across multiple environments from staging to production.',
+                image: registryVersionControlSystemImage,
+              },
+              {
+                title: 'Schema Checks',
+                description:
+                  'Enhance reliability in consumer apps with proactive detection for smooth API evolution.',
+                image: registrySchemaChecksImage,
+              },
+              {
+                title: 'Composition Error Prevention',
+                description:
+                  'Safeguard your gateway’s operation, preventing systemic failures that could halt your enterprise processes.',
+                image: registrySchemaChecksImage, // TODO: Replace with correct image
+              },
+              {
+                title: 'Schema Explorer',
+                description: 'Navigate and analyze the connections within your GraphQL schema.',
+                image: registryExplorerImage,
+              },
+            ]}
+          />
+        </Tabs.Content>
+        <Tabs.Content value="GraphQL Observability" tabIndex={-1}>
+          <Feature
+            title="GraphQL Observability"
+            icon={<GraphQLObservabilityIcon />}
+            documentationLink="/docs/features/usage-reporting"
+            description="Enhanced GraphQL Observability tools provide insights into API usage and user experience metrics."
+            highlights={[
+              {
+                title: 'GraphQL consumers',
+                description:
+                  'Track each GraphQL request source to monitor how the APIs are utilized, optimizing resource management.',
+                image: observabilityClientsImage,
+              },
+              {
+                title: 'Overall performance',
+                description: 'Global dashboard for an overarching view of your GraphQL API usage.',
+                image: observabilityOverallImage,
+              },
+              {
+                title: 'Query performance',
+                description:
+                  'Identify and analyze slow GraphQL operations to pinpoint performance bottlenecks.',
+                image: observabilityOperationsImage,
+              },
+            ]}
+          />
+        </Tabs.Content>
+        <Tabs.Content value="Schema Management" tabIndex={-1}>
+          <Feature
+            title="Schema Management"
+            icon={<SchemaManagementIcon />}
+            description="Optimize your GraphQL APIs for clear visibility and control over team modifications, ensuring cohesive and efficient evolution."
+            highlights={[
+              {
+                title: 'Prevent breaking changes',
+                description:
+                  'Integrated Schema Registry with GraphQL Monitoring for confident API evolution.',
+                image: observabilityOverallImage,
+              },
+              {
+                title: 'Detect unused fields',
+                description:
+                  'Hive detects and removes unused fields in your GraphQL schema for efficiency and tidiness.',
+                image: observabilityOverallImage,
+              },
+              {
+                title: 'Schema Policy',
+                description:
+                  'Hive provides tools to lint, verify, and enforce coding best practices across your federated GraphQL architecture.',
+                image: observabilityOverallImage,
+              },
+            ]}
+          />
+        </Tabs.Content>
+      </Tabs.Root>
+    </section>
+  );
+}
+
+interface HeadingProps extends ComponentPropsWithoutRef<'h1'> {
+  as: 'h1' | 'h2' | 'h3';
+  size: 'xl' | 'md' | 'sm';
+}
+function Heading({ as: _as, size, className, ...rest }: HeadingProps) {
+  const Level = _as || 'h2';
+
+  let sizeStyle = '';
+  switch (size) {
+    case 'xl':
+      sizeStyle = 'text-4xl leading-[1.2] md:text-6xl md:leading-[1.1875]';
+      break;
+    case 'md':
+      sizeStyle = 'text-4xl leading-[1.2] md:text-5xl md:leading-[1.16667]';
+      break;
+    case 'sm':
+      sizeStyle = 'text-xl leading-[1.2]';
+      break;
+  }
+
+  return <Level className={cn(sizeStyle, 'tracking-[-0.64px]', className)} {...rest} />;
+}
+
+function SchemaRegistryIcon() {
+  return (
+    <svg width="24" height="24" fill="currentColor">
+      <path d="M5.25 7.5a2.25 2.25 0 1 1 3 2.122v4.756a2.251 2.251 0 1 1-1.5 0V9.622A2.25 2.25 0 0 1 5.25 7.5Zm9.22-2.03a.75.75 0 0 1 1.06 0l.97.97.97-.97a.75.75 0 1 1 1.06 1.06l-.97.97.97.97a.75.75 0 0 1-1.06 1.06l-.97-.97-.97.97a.75.75 0 1 1-1.06-1.06l.97-.97-.97-.97a.75.75 0 0 1 0-1.06Zm2.03 5.03a.75.75 0 0 1 .75.75v3.128a2.251 2.251 0 1 1-1.5 0V11.25a.75.75 0 0 1 .75-.75Z" />
+    </svg>
+  );
+}
+
+function GraphQLObservabilityIcon() {
+  return (
+    <svg width="24" height="24" fill="currentColor">
+      <path d="M11.1 19.2v-6.3H9.3v-2.7h5.4v2.7h-1.8v6.3h4.5V21H6.6v-1.8h4.5Zm-.9-16V2.1h3.6v1.1a8.102 8.102 0 0 1 2.694 14.64l-1-1.497a6.3 6.3 0 1 0-6.99 0l-.998 1.497A8.103 8.103 0 0 1 10.2 3.2Z" />
+    </svg>
+  );
+}
+
+function SchemaManagementIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor">
+      <path d="M7.761 9.111a2.701 2.701 0 0 0 2.606 1.989h3.6a4.5 4.5 0 0 1 4.434 3.731 2.7 2.7 0 1 1-3.489 3.075 2.7 2.7 0 0 1 1.66-3.017 2.702 2.702 0 0 0-2.605-1.989h-3.6a4.48 4.48 0 0 1-2.7-.9v2.853a2.701 2.701 0 1 1-1.8 0V9.147a2.7 2.7 0 1 1 1.894-.036ZM6.767 7.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Zm0 10.8a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Zm10.8 0a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z" />
+    </svg>
   );
 }
