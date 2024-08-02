@@ -1,5 +1,19 @@
 # @graphql-hive/cli
 
+## 0.40.1
+
+### Patch Changes
+
+- [#5304](https://github.com/kamilkisiela/graphql-hive/pull/5304)
+  [`f2fef08`](https://github.com/kamilkisiela/graphql-hive/commit/f2fef08e9d1e13cb4a89d3882922db6dc822542e)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fixed a logging issue where both
+  initiated requests and successful responses were being recorded. This was causing the logs to be
+  filled with unnecessary information and affected `hive artifact:fetch --artifact` command.
+
+- Updated dependencies
+  [[`f2fef08`](https://github.com/kamilkisiela/graphql-hive/commit/f2fef08e9d1e13cb4a89d3882922db6dc822542e)]:
+  - @graphql-hive/core@0.6.1
+
 ## 0.40.0
 
 ### Minor Changes
