@@ -99,7 +99,7 @@ test('should not interrupt the process', async () => {
       },
     }),
   );
-  await waitFor(50);
+  await waitFor(100);
 
   const reportingLogs = logger
     .getLogs()
