@@ -107,8 +107,6 @@ test('should not interrupt the process', async () => {
     .filter(item => item.includes(`[hive][reporting]`))
     .join(`\n`);
 
-  console.log('reportingLogs', reportingLogs);
-
   expect(reportingLogs).includes('Publish schema');
   expect(reportingLogs).includes('POST http://404.localhost.noop/registry');
 
