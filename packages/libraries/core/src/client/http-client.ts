@@ -167,10 +167,6 @@ function getErrorMessage(error: unknown): string {
   return '<no error message>';
 }
 
-function getAttemptMessagePart(attempt: number, retry: number): string {
-  return `Attempt (${attempt}/${retry})`;
-}
-
 function measureTime() {
   const start = Date.now();
   return () => '(' + formatTimestamp(Date.now() - start) + ')';
