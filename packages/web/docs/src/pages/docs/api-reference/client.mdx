@@ -313,6 +313,82 @@ useHive({
 
 </Tabs>
 
+#### Persisted Documents
+
+Hive client supports resolving persisted documents. For getting started please refer to our
+[App Deployments (Persisted Documents) documentation](/docs/features/app-deployments).
+
+##### Basic Configuration
+
+For enabling you need to provide the `experimental__persistedDocuments` as follows.
+
+```ts filename="Hive Persisted Documents Basic Configuration"
+useHive({
+  experimental__persistedDocuments: {
+    cdn: {
+      // replace <target_id> and <cdn_access_token> with your values
+      endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+      accessToken: '<cdn_access_token>'
+    }
+  }
+})
+```
+
+##### Allow arbitrary documents
+
+By default, Hive client plugins will only allow executing documents that are registered in the
+Schema Registry. If you want to allow arbitrary documents to be executed, you can set the
+`allowArbitraryDocuments` option to `true`.
+
+```typescript filename="Hive Persisted Documents Allow Arbitrary Documents" {8}
+useHive({
+  experimental__persistedDocuments: {
+    cdn: {
+      // replace <target_id> and <cdn_access_token> with your values
+      endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+      accessToken: '<cdn_access_token>'
+    },
+    allowArbitraryDocuments: true
+  }
+})
+```
+
+Furthermore, you can also allow arbitraty documents based on the incoming HTTP request.
+
+```typescript filename="Hive Persisted Documents Allow Arbitrary Documents Based on Request" {8-9}
+useHive({
+  experimental__persistedDocuments: {
+    cdn: {
+      // replace <target_id> and <cdn_access_token> with your values
+      endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+      accessToken: '<cdn_access_token>'
+    },
+    allowArbitraryDocuments: context =>
+      context.headers.get('x-arbitrary-documents') === '<my-secret-key>'
+  }
+})
+```
+
+##### Cache size
+
+By default, the client will cache up to 10.000 documents loaded from the CDN in memory to avoid
+redundant lookups and speedup reoccuring document executions. You can change this value by setting
+the `cache` option.
+
+```typescript filename="Hive Persisted Documents Cache Size" {8-9}
+useHive({
+  experimental__persistedDocuments: {
+    cdn: {
+      // replace <target_id> and <cdn_access_token> with your values
+      endpoint: 'https://cdn.graphql-hive.com/<target_id>',
+      accessToken: '<cdn_access_token>'
+    },
+    // Cache up to 50.000 documents
+    cache: 50_000
+  }
+})
+```
+
 #### Custom Integration
 
 If your GraphQL server is not listed above, you can implement a custom integration. Start by

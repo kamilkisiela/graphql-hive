@@ -10,6 +10,7 @@ interface Schema {
 }
 
 function createFetcher(options: SchemaFetcherOptions & ServicesFetcherOptions) {
+  const logger = options.logger ?? console;
   let cacheETag: string | null = null;
   let cached: {
     id: string;
@@ -37,12 +38,12 @@ function createFetcher(options: SchemaFetcherOptions & ServicesFetcherOptions) {
       .get(endpoint, {
         headers,
         retry: {
-          retryWhen: response => response.status >= 500,
-          okWhen: response => response.status === 304,
           retries: 10,
           maxTimeout: 200,
           minTimeout: 1,
         },
+        isRequestOk: response => response.ok || response.status === 304,
+        logger,
       })
       .then(async response => {
         if (response.ok) {
@@ -61,9 +62,7 @@ function createFetcher(options: SchemaFetcherOptions & ServicesFetcherOptions) {
           return cached;
         }
 
-        throw new Error(
-          `Failed to GET ${endpoint}, received: ${response.status} ${response.statusText ?? 'Internal Server Error'}`,
-        );
+        throw new Error(`Unexpected error.`);
       });
   };
 }

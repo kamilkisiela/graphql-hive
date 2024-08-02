@@ -1,7 +1,7 @@
 import { Args } from '@oclif/core';
 import Command from '../../base-command';
 
-export default class DeleteConfig extends Command {
+export default class DeleteConfig extends Command<typeof DeleteConfig> {
   static description = 'deletes specific cli configuration';
   static args = {
     key: Args.string({
@@ -13,7 +13,7 @@ export default class DeleteConfig extends Command {
 
   async run() {
     const { args } = await this.parse(DeleteConfig);
-    this._userConfig.delete(args.key);
+    this._userConfig!.delete(args.key);
     this.success(this.bolderize(`Config flag "${args.key}" was deleted`));
   }
 }

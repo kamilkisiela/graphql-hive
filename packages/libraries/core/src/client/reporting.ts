@@ -10,9 +10,9 @@ import {
 import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
 import { version } from '../version.js';
 import type { SchemaPublishMutation } from './__generated__/types.js';
-import { createAgent } from './agent.js';
+import { http } from './http-client.js';
 import type { HivePluginOptions } from './types.js';
-import { logIf } from './utils.js';
+import { createHiveLogger, logIf } from './utils.js';
 
 export interface SchemaReporter {
   report(args: { schema: GraphQLSchema }): void;
@@ -30,7 +30,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
   const token = pluginOptions.token;
   const selfHostingOptions = pluginOptions.selfHosting;
   const reportingOptions = pluginOptions.reporting;
-  const logger = pluginOptions.agent?.logger ?? console;
+  const logger = createHiveLogger(pluginOptions.agent?.logger ?? console, '[hive][reporting]');
 
   logIf(
     typeof reportingOptions.author !== 'string' || reportingOptions.author.length === 0,
@@ -48,62 +48,41 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
     logger.error,
   );
 
-  let currentSchema: GraphQLSchema | null = null;
-  const agent = createAgent<GraphQLSchema>(
-    {
-      logger,
-      ...pluginOptions.agent,
-      endpoint:
-        selfHostingOptions?.graphqlEndpoint ??
-        reportingOptions.endpoint ??
-        'https://app.graphql-hive.com/graphql',
-      token,
-      enabled: pluginOptions.enabled,
-      debug: pluginOptions.debug,
-      __testing: pluginOptions.agent?.__testing,
-    },
-    {
-      prefix: 'reporting',
-      data: {
-        set(incomingSchema) {
-          currentSchema = incomingSchema;
-        },
-        size() {
-          return currentSchema ? 1 : 0;
-        },
-        clear() {
-          currentSchema = null;
-        },
-      },
-      headers() {
-        return {
-          'graphql-client-name': 'Hive Client',
-          'graphql-client-version': version,
-        };
-      },
-      async body() {
-        return JSON.stringify({
-          query,
-          operationName: 'schemaPublish',
-          variables: {
-            input: {
-              sdl: await printToSDL(currentSchema!),
-              author: reportingOptions.author,
-              commit: reportingOptions.commit,
-              service: reportingOptions.serviceName ?? null,
-              url: reportingOptions.serviceUrl ?? null,
-              force: true,
-            },
-          },
-        });
-      },
-    },
-  );
+  const endpoint =
+    selfHostingOptions?.graphqlEndpoint ??
+    reportingOptions.endpoint ??
+    'https://app.graphql-hive.com/graphql';
 
   return {
     async report({ schema }) {
+      logger.info(`Publish schema`);
       try {
-        const response = await agent.sendImmediately(schema);
+        const response = await http.post(
+          endpoint,
+          JSON.stringify({
+            query,
+            operationName: 'schemaPublish',
+            variables: {
+              input: {
+                sdl: await printToSDL(schema),
+                author: reportingOptions.author,
+                commit: reportingOptions.commit,
+                service: reportingOptions.serviceName ?? null,
+                url: reportingOptions.serviceUrl ?? null,
+                force: true,
+              },
+            },
+          }),
+          {
+            headers: {
+              'graphql-client-name': 'Hive Client',
+              'graphql-client-version': version,
+              authorization: `Bearer ${token}`,
+              'content-type': 'application/json',
+            },
+            logger,
+          },
+        );
 
         if (response === null) {
           throw new Error('Empty response');
@@ -119,7 +98,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
 
         switch (data.__typename) {
           case 'SchemaPublishSuccess': {
-            logger.info(`[hive][reporting] ${data.successMessage ?? 'Published schema'}`);
+            logger.info(`${data.successMessage ?? 'Published schema'}`);
             return;
           }
           case 'SchemaPublishMissingServiceError': {
@@ -129,9 +108,7 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
             throw new Error('Service url is not defined');
           }
           case 'SchemaPublishError': {
-            logger.info(
-              `[hive][reporting] Published schema (forced with ${data.errors.total} errors)`,
-            );
+            logger.info(`Published schema (forced with ${data.errors.total} errors)`);
             data.errors.nodes.slice(0, 5).forEach(error => {
               logger.info(` - ${error.message}`);
             });
@@ -140,13 +117,15 @@ export function createReporting(pluginOptions: HivePluginOptions): SchemaReporte
         }
       } catch (error) {
         logger.error(
-          `[hive][reporting] Failed to report schema: ${
+          `Failed to report schema: ${
             error instanceof Error && 'message' in error ? error.message : error
           }`,
         );
       }
     },
-    dispose: agent.dispose,
+    dispose() {
+      return Promise.resolve();
+    },
   };
 }
 

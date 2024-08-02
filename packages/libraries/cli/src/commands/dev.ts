@@ -83,7 +83,7 @@ type ServiceWithSource = {
       };
 };
 
-export default class Dev extends Command {
+export default class Dev extends Command<typeof Dev> {
   static description = [
     'Develop and compose Supergraph with your local services.',
     'Only available for Federation projects.',
