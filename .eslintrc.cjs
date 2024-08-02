@@ -14,7 +14,6 @@ const OPERATIONS_PATHS = [
 const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
     [
-      'no-implicit-coercion',
       'import/first',
       'no-restricted-globals',
       '@typescript-eslint/no-unused-vars',
@@ -189,6 +188,7 @@ module.exports = {
         'jsx-a11y/no-static-element-interactions': 'off',
         '@next/next/no-html-link-for-pages': 'off',
         'unicorn/no-negated-condition': 'off',
+        'no-implicit-coercion': 'off',
       },
     },
     {

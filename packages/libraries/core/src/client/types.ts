@@ -259,6 +259,7 @@ export interface GraphQLErrorsResult {
 export interface SchemaFetcherOptions {
   endpoint: string;
   key: string;
+  logger?: Logger;
 }
 
 export interface ServicesFetcherOptions {

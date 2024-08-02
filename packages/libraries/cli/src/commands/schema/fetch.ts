@@ -20,7 +20,7 @@ const SchemaVersionForActionIdQuery = graphql(/* GraphQL */ `
   }
 `);
 
-export default class SchemaFetch extends Command {
+export default class SchemaFetch extends Command<typeof SchemaFetch> {
   static description = 'fetch schema or supergraph from the Hive API';
   static flags = {
     /** @deprecated */

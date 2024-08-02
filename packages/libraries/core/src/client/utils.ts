@@ -1,6 +1,6 @@
 import { crypto, TextEncoder } from '@whatwg-node/fetch';
 import { hiveClientSymbol } from './client.js';
-import type { HiveClient, HivePluginOptions } from './types.js';
+import type { HiveClient, HivePluginOptions, Logger } from './types.js';
 
 export const isCloudflareWorker =
   typeof caches !== 'undefined' && 'default' in caches && !!caches.default;
@@ -177,4 +177,43 @@ export function joinUrl(url: string, subdirectory: string) {
     : subdirectory;
 
   return normalizedUrl + '/' + normalizedSubdirectory;
+}
+
+const hiveSymbol = Symbol('hive-logger');
+
+type HiveLogger = {
+  info(message: string): void;
+  error(error: any, ...data: any[]): void;
+  [hiveSymbol]: {
+    path: string;
+    logger: Logger;
+  };
+};
+
+export function createHiveLogger(baseLogger: Logger, prefix: string): HiveLogger {
+  const context: HiveLogger[typeof hiveSymbol] = {
+    path: '',
+    logger: baseLogger,
+    // @ts-expect-error internal stuff
+    ...baseLogger?.[hiveSymbol],
+  };
+  context.path = context.path + prefix;
+
+  const { logger, path } = context;
+
+  return {
+    [hiveSymbol]: context,
+    info: (message: string) => {
+      logger.info(`${path} ${message}`);
+    },
+    error: (error: any, ...data: any[]) => {
+      if (error.stack) {
+        for (const stack of error.stack.split('\n')) {
+          logger.error(`${path} ${stack}`);
+        }
+      } else {
+        logger.error(`${path} ${String(error)}`, ...data);
+      }
+    },
+  };
 }

@@ -37,7 +37,7 @@ const schemaDeleteMutation = graphql(/* GraphQL */ `
   }
 `);
 
-export default class SchemaDelete extends Command {
+export default class SchemaDelete extends Command<typeof SchemaDelete> {
   static description = 'deletes a schema';
   static flags = {
     'registry.endpoint': Flags.string({

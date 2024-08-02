@@ -4,4 +4,5 @@ export default {
   'high-availability-cdn': 'High-Availability CDN',
   'schema-policy': 'Schema Policies',
   laboratory: 'Laboratory',
+  'app-deployments': 'App Deployments (Persisted Documents)',
 };

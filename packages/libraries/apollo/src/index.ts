@@ -9,6 +9,7 @@ import {
   http,
   isHiveClient,
   joinUrl,
+  Logger,
 } from '@graphql-hive/core';
 import { version } from './version.js';
 
@@ -17,6 +18,7 @@ export { atLeastOnceSampler, createSchemaFetcher, createServicesFetcher } from '
 export interface SupergraphSDLFetcherOptions {
   endpoint: string;
   key: string;
+  logger?: Logger;
 }
 
 export function createSupergraphSDLFetcher(options: SupergraphSDLFetcherOptions) {
@@ -44,13 +46,13 @@ export function createSupergraphSDLFetcher(options: SupergraphSDLFetcherOptions)
     return http
       .get(endpoint, {
         headers,
+        isRequestOk: response => response.status === 304 || response.ok,
         retry: {
-          retryWhen: response => response.status >= 500,
-          okWhen: response => response.status === 304,
           retries: 10,
           maxTimeout: 200,
           minTimeout: 1,
         },
+        logger: options.logger,
       })
       .then(async response => {
         if (response.ok) {
@@ -87,6 +89,7 @@ export function createSupergraphManager(
   const fetchSupergraph = createSupergraphSDLFetcher({
     endpoint: options.endpoint,
     key: options.key,
+    logger: options.logger,
   });
   let timer: ReturnType<typeof setTimeout> | null = null;
 
