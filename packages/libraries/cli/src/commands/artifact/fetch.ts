@@ -48,6 +48,18 @@ export default class ArtifactsFetch extends Command<typeof ArtifactsFetch> {
       retry: {
         retries: 3,
       },
+      logger: {
+        info: (...args) => {
+          // Note:
+          // We log to std:error here to avoid piped stdout from being polluted.
+          if (this.flags.debug) {
+            console.error(...args);
+          }
+        },
+        error: (...args) => {
+          console.error(...args);
+        },
+      },
     });
 
     if (response.status >= 300) {
