@@ -9,7 +9,7 @@ patchedDependencies:
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
   '@graphiql/react@0.24.0-canary-869419d9.0':
-    hash: ta44p5kemld4y55kkax5o5aev4
+    hash: vvqvx7f6f73j5723gsvqbt7mue
     path: patches/@graphiql__react@0.24.0-canary-869419d9.0.patch
   '@graphql-eslint/eslint-plugin@3.20.1':
     hash: n437g5o7zq7pnxdxldn52uql2q
@@ -1642,7 +1642,7 @@ importers:
         version: 6.0.7(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)
       '@graphiql/react':
         specifier: 0.24.0-canary-869419d9.0
-        version: 0.24.0-canary-869419d9.0(patch_hash=ta44p5kemld4y55kkax5o5aev4)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 0.24.0-canary-869419d9.0(patch_hash=vvqvx7f6f73j5723gsvqbt7mue)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit':
         specifier: 0.9.1
         version: 0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
@@ -19629,7 +19629,7 @@ snapshots:
       graphql: 16.9.0
       typescript: 5.5.3
 
-  '@graphiql/react@0.24.0-canary-869419d9.0(patch_hash=ta44p5kemld4y55kkax5o5aev4)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/react@0.24.0-canary-869419d9.0(patch_hash=vvqvx7f6f73j5723gsvqbt7mue)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@graphiql/toolkit': 0.9.2(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
       '@headlessui/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -28666,7 +28666,7 @@ snapshots:
 
   graphiql@3.5.0-canary-869419d9.0(patch_hash=lrhfdnfw462iuju56c5bfes2sy)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@graphiql/react': 0.24.0-canary-869419d9.0(patch_hash=ta44p5kemld4y55kkax5o5aev4)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@graphiql/react': 0.24.0-canary-869419d9.0(patch_hash=vvqvx7f6f73j5723gsvqbt7mue)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql: 16.9.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
