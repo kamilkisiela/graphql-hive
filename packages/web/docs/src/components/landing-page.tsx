@@ -129,7 +129,7 @@ function Feature(props: {
                 width={925}
                 height={578}
                 src={highlight.image}
-                className="absolute left-[55px] top-[8px] h-[calc(100%-8px)] rounded-tl-3xl object-cover object-left lg:top-[108px] lg:h-[calc(100%-108px)]"
+                className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
                 role="presentation"
                 alt=""
               />
