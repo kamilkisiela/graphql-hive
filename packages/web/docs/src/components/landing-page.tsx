@@ -1,4 +1,4 @@
-import { ComponentPropsWithoutRef, ReactElement, ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
@@ -9,7 +9,10 @@ import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
 import { BookIcon } from './book-icon';
 import { CallToAction } from './call-to-action';
-import { CheckIcon, Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
+import { CheckIcon } from './CheckIcon';
+import { EcosystemManagementSection } from './ecosystem-management-section';
+import { Heading } from './heading';
+import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { Highlights, HighlightTextLink } from './highlights';
 import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
@@ -188,6 +191,7 @@ export function IndexPage(): ReactElement {
           <AligentLogo title="Aligent" height={32} />
           <SoundYXZLogo title="SoundXYZ" height={32} />
         </TrustedBy>
+        <EcosystemManagementSection />
         <div className="relative even:bg-gray-50">
           <StatsList>
             <StatsItem label="Happy users" value={5.7} suffix="K" decimal />
@@ -492,29 +496,6 @@ function FeatureTabs({ className }: { className?: string }) {
       </Tabs.Root>
     </section>
   );
-}
-
-interface HeadingProps extends ComponentPropsWithoutRef<'h1'> {
-  as: 'h1' | 'h2' | 'h3';
-  size: 'xl' | 'md' | 'sm';
-}
-function Heading({ as: _as, size, className, ...rest }: HeadingProps) {
-  const Level = _as || 'h2';
-
-  let sizeStyle = '';
-  switch (size) {
-    case 'xl':
-      sizeStyle = 'text-4xl leading-[1.2] md:text-6xl md:leading-[1.1875]';
-      break;
-    case 'md':
-      sizeStyle = 'text-4xl leading-[1.2] md:text-5xl md:leading-[1.16667]';
-      break;
-    case 'sm':
-      sizeStyle = 'text-xl leading-[1.2]';
-      break;
-  }
-
-  return <Level className={cn(sizeStyle, 'tracking-[-0.64px]', className)} {...rest} />;
 }
 
 function SchemaRegistryIcon() {
