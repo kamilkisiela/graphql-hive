@@ -89,7 +89,7 @@ function Feature(props: {
           : null}
       </Head>
       <article className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="flex flex-col gap-6 px-4 md:gap-12 md:pl-12 md:pr-16">
+        <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
           <header className="flex flex-col gap-4 md:gap-6">
             <div className="w-fit rounded-lg bg-[linear-gradient(135deg,#68A8B6,#3B736A)] p-[9px] text-white">
               {icon}
@@ -123,13 +123,13 @@ function Feature(props: {
                 {highlight.description}
               </p>
             </div>
-            <div className="relative ml-6 h-full flex-1 overflow-hidden rounded-3xl bg-blue-400">
+            <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
               {/* TODO: Use cropped images so we don't load too much without need. */}
               <Image
                 width={925}
                 height={578}
                 src={highlight.image}
-                className="absolute left-[55px] top-[108px] h-[calc(100%-108px)] rounded-tl-3xl object-cover object-left"
+                className="absolute left-[55px] top-[8px] h-[calc(100%-8px)] rounded-tl-3xl object-cover object-left lg:top-[108px] lg:h-[calc(100%-108px)]"
                 role="presentation"
                 alt=""
               />
@@ -182,7 +182,7 @@ export function IndexPage(): ReactElement {
         </Hero>
         <FeatureTabs className="relative top-[-68px]" />
         <TrustedBy className="mg:my-16 mx-auto my-8 lg:my-24">
-          <MeetupLogo title="Meetup" height={32} />
+          <MeetupLogo title="Meetup" height={32} className="translate-y-[5px]" />
           <LinktreeLogo title="Linktree" height={22} />
           <KarrotLogo title="Karrot" height={28} />
           <AligentLogo title="Aligent" height={32} />
