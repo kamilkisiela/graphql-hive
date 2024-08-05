@@ -50,10 +50,8 @@ export default class ArtifactsFetch extends Command<typeof ArtifactsFetch> {
       },
       logger: {
         info: (...args) => {
-          // Note:
-          // We log to std:error here to avoid piped stdout from being polluted.
           if (this.flags.debug) {
-            console.error(...args);
+            console.info(...args);
           }
         },
         error: (...args) => {
