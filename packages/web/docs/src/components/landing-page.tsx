@@ -129,7 +129,7 @@ function Feature(props: {
                 width={925}
                 height={578}
                 src={highlight.image}
-                className="absolute left-[55px] top-[108px] rounded-3xl object-cover"
+                className="absolute left-[55px] top-[108px] h-[calc(100%-108px)] rounded-tl-3xl object-cover object-left"
                 role="presentation"
                 alt=""
               />
@@ -181,6 +181,13 @@ export function IndexPage(): ReactElement {
           </HeroLinks>
         </Hero>
         <FeatureTabs className="relative top-[-68px]" />
+        <TrustedBy className="mg:my-16 mx-auto my-8 lg:my-24">
+          <MeetupLogo title="Meetup" height={32} />
+          <LinktreeLogo title="Linktree" height={22} />
+          <KarrotLogo title="Karrot" height={28} />
+          <AligentLogo title="Aligent" height={32} />
+          <SoundYXZLogo title="SoundXYZ" height={32} />
+        </TrustedBy>
         <div className="relative even:bg-gray-50">
           <StatsList>
             <StatsItem label="Happy users" value={5.7} suffix="K" decimal />
@@ -189,28 +196,6 @@ export function IndexPage(): ReactElement {
             <StatsItem label="GitHub Commits" value={6.2} suffix="K" decimal />
           </StatsList>
         </div>
-        <TrustedBy>
-          <MeetupLogo
-            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-            height={32}
-          />
-          <LinktreeLogo
-            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-            height={22}
-          />
-          <KarrotLogo
-            height={28}
-            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-          />
-          <AligentLogo
-            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-            height={32}
-          />
-          <SoundYXZLogo
-            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-            height={32}
-          />
-        </TrustedBy>
         <div className="flex flex-col">
           <div className={cn('relative overflow-hidden')}>
             <div>
