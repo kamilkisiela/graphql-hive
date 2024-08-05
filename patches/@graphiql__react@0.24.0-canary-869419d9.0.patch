@@ -55,7 +55,7 @@ index 10032c731fbfc99696d1dd3400329d13f3a90a76..a15448260b5f293d33c2620a972d6130
        changeTab,
        moveTab,
 diff --git a/types/editor/context.d.ts b/types/editor/context.d.ts
-index 84b8cfc95addce217179d531a0504be8e0ca19ea..69c4feba60514e1727bb0a9b7a6ea6f39e912ee3 100644
+index 84b8cfc95addce217179d531a0504be8e0ca19ea..72db57881396d4543498f2c9e7a75a27568cea48 100644
 --- a/types/editor/context.d.ts
 +++ b/types/editor/context.d.ts
 @@ -1,6 +1,6 @@
@@ -75,12 +75,12 @@ index 84b8cfc95addce217179d531a0504be8e0ca19ea..69c4feba60514e1727bb0a9b7a6ea6f3
       * Add a new tab.
       */
 -    addTab(): void;
-+    addTab(tabState?: Pick<TabState, 'id' | 'query' | 'variables' | 'headers'>): void;
++    addTab(tabState?: Pick<TabState, 'id' | 'query' | 'variables' | 'headers' | 'title'>): void;
      /**
       * Switch to a different tab.
       * @param index The index of the tab that should be switched to.
 diff --git a/types/editor/tabs.d.ts b/types/editor/tabs.d.ts
-index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..fdc7e16f95750d676c3556bec14262562255f473 100644
+index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..a53dd7436e046fe871f163abe29dffc7881c9ab2 100644
 --- a/types/editor/tabs.d.ts
 +++ b/types/editor/tabs.d.ts
 @@ -42,6 +42,7 @@ export declare type TabState = TabDefinition & {
@@ -96,7 +96,7 @@ index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..fdc7e16f95750d676c3556bec1426256
      response: string | null;
  }) => void;
 -export declare function createTab({ query, variables, headers, }?: Partial<TabDefinition>): TabState;
-+export declare function createTab({ id, query, variables, headers, title, }: Partial<TabDefinition & Pick<TabState, 'id' | 'title'>>): TabState;
++export declare function createTab({ id, title, query, variables, headers, }: Partial<TabDefinition & Pick<TabState, 'id' | 'title'>>): TabState;
  export declare function setPropertiesInActiveTab(state: TabsState, partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): TabsState;
  export declare function fuzzyExtractOperationName(str: string): string | null;
  export declare function clearHeadersFromTabs(storage: StorageAPI | null): void;
