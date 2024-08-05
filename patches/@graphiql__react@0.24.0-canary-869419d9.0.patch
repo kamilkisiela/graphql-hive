@@ -1,12 +1,13 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 0b7ee7080fef92d698a154899945e71788d8a1e3..c2ffda95b1f0ac641a08525c0592452e5f99e7ab 100644
+index 10032c731fbfc99696d1dd3400329d13f3a90a76..a15448260b5f293d33c2620a972d6130332dc8ef 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -3009,12 +3009,13 @@ function useSetEditorValues({
+@@ -3009,14 +3009,16 @@ function useSetEditorValues({
    );
  }
  function createTab({
 +  id,
++  title,
    query = null,
    variables = null,
    headers = null
@@ -16,8 +17,21 @@ index 0b7ee7080fef92d698a154899945e71788d8a1e3..c2ffda95b1f0ac641a08525c0592452e
 -    id: guid(),
 +    id: id || guid(),
      hash: hashFromTabContents({ query, variables, headers }),
-     title: query && fuzzyExtractOperationName(query) || DEFAULT_TITLE,
+-    title: query && fuzzyExtractOperationName(query) || DEFAULT_TITLE,
++    title: title || query && fuzzyExtractOperationName(query) || DEFAULT_TITLE,
      query,
+     variables,
+     headers,
+@@ -3034,8 +3036,7 @@ function setPropertiesInActiveTab(state, partialTab) {
+       const newTab = { ...tab, ...partialTab };
+       return {
+         ...newTab,
+-        hash: hashFromTabContents(newTab),
+-        title: newTab.operationName || (newTab.query ? fuzzyExtractOperationName(newTab.query) : void 0) || DEFAULT_TITLE
++        hash: hashFromTabContents(newTab)
+       };
+     })
+   };
 @@ -3256,11 +3257,11 @@ function EditorContextProvider(props) {
      responseEditor
    });
@@ -32,11 +46,31 @@ index 0b7ee7080fef92d698a154899945e71788d8a1e3..c2ffda95b1f0ac641a08525c0592452e
          activeTabIndex: updatedValues.tabs.length
        };
        storeTabs(updated);
+@@ -3370,6 +3371,7 @@ function EditorContextProvider(props) {
+   const value = useMemo(
+     () => ({
+       ...tabState,
++      setTabState,
+       addTab,
+       changeTab,
+       moveTab,
 diff --git a/types/editor/context.d.ts b/types/editor/context.d.ts
-index 84b8cfc95addce217179d531a0504be8e0ca19ea..5c5226c4ac04b1e8e04e61e96ceb7849210c0034 100644
+index 84b8cfc95addce217179d531a0504be8e0ca19ea..69c4feba60514e1727bb0a9b7a6ea6f39e912ee3 100644
 --- a/types/editor/context.d.ts
 +++ b/types/editor/context.d.ts
-@@ -13,7 +13,7 @@ export declare type EditorContextType = TabsState & {
+@@ -1,6 +1,6 @@
+ import { DocumentNode, FragmentDefinitionNode, OperationDefinitionNode, ValidationRule } from 'graphql';
+ import { VariableToType } from 'graphql-language-service';
+-import { ReactNode } from 'react';
++import { Dispatch, ReactNode, SetStateAction } from 'react';
+ import { TabDefinition, TabsState, TabState } from './tabs';
+ import { CodeMirrorEditor } from './types';
+ export declare type CodeMirrorEditorWithOperationFacts = CodeMirrorEditor & {
+@@ -10,10 +10,11 @@ export declare type CodeMirrorEditorWithOperationFacts = CodeMirrorEditor & {
+     variableToType: VariableToType | null;
+ };
+ export declare type EditorContextType = TabsState & {
++    setTabState: Dispatch<SetStateAction<TabsState>>;
      /**
       * Add a new tab.
       */
@@ -46,7 +80,7 @@ index 84b8cfc95addce217179d531a0504be8e0ca19ea..5c5226c4ac04b1e8e04e61e96ceb7849
       * Switch to a different tab.
       * @param index The index of the tab that should be switched to.
 diff --git a/types/editor/tabs.d.ts b/types/editor/tabs.d.ts
-index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..5375833b997e61397d2677a230023e323580a122 100644
+index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..fdc7e16f95750d676c3556bec14262562255f473 100644
 --- a/types/editor/tabs.d.ts
 +++ b/types/editor/tabs.d.ts
 @@ -42,6 +42,7 @@ export declare type TabState = TabDefinition & {
@@ -62,7 +96,7 @@ index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..5375833b997e61397d2677a230023e32
      response: string | null;
  }) => void;
 -export declare function createTab({ query, variables, headers, }?: Partial<TabDefinition>): TabState;
-+export declare function createTab({ id, query, variables, headers, }: Partial<TabDefinition & Pick<TabState, 'id'>>): TabState;
++export declare function createTab({ id, query, variables, headers, title, }: Partial<TabDefinition & Pick<TabState, 'id' | 'title'>>): TabState;
  export declare function setPropertiesInActiveTab(state: TabsState, partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): TabsState;
  export declare function fuzzyExtractOperationName(str: string): string | null;
  export declare function clearHeadersFromTabs(storage: StorageAPI | null): void;

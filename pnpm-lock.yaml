@@ -8,9 +8,9 @@ patchedDependencies:
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
-  '@graphiql/react@0.23.0-canary-083d8bad.0':
-    hash: kvxknm7ffl3iumevmltgk7wg7i
-    path: patches/@graphiql__react@0.23.0-canary-083d8bad.0.patch
+  '@graphiql/react@0.24.0-canary-869419d9.0':
+    hash: ta44p5kemld4y55kkax5o5aev4
+    path: patches/@graphiql__react@0.24.0-canary-869419d9.0.patch
   '@graphql-eslint/eslint-plugin@3.20.1':
     hash: n437g5o7zq7pnxdxldn52uql2q
     path: patches/@graphql-eslint__eslint-plugin@3.20.1.patch
@@ -29,9 +29,9 @@ patchedDependencies:
   got@14.4.1:
     hash: b6pwqmrs3qqykctltsasvrfwti
     path: patches/got@14.4.1.patch
-  graphiql@3.4.0-canary-083d8bad.0:
-    hash: 5yfz3gguejfncoxswzvliett3i
-    path: patches/graphiql@3.4.0-canary-514e049b.0.patch
+  graphiql@3.5.0-canary-869419d9.0:
+    hash: lrhfdnfw462iuju56c5bfes2sy
+    path: patches/graphiql@3.5.0-canary-869419d9.0.patch
   mjml-core@4.14.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.14.0.patch
@@ -1641,8 +1641,8 @@ importers:
         specifier: 6.0.7
         version: 6.0.7(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)
       '@graphiql/react':
-        specifier: 0.23.0-canary-083d8bad.0
-        version: 0.23.0-canary-083d8bad.0(patch_hash=kvxknm7ffl3iumevmltgk7wg7i)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.24.0-canary-869419d9.0
+        version: 0.24.0-canary-869419d9.0(patch_hash=ta44p5kemld4y55kkax5o5aev4)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit':
         specifier: 0.9.1
         version: 0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
@@ -1854,8 +1854,8 @@ importers:
         specifier: 11.3.2
         version: 11.3.2(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphiql:
-        specifier: 3.4.0-canary-083d8bad.0
-        version: 3.4.0-canary-083d8bad.0(patch_hash=5yfz3gguejfncoxswzvliett3i)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 3.5.0-canary-869419d9.0
+        version: 3.5.0-canary-869419d9.0(patch_hash=lrhfdnfw462iuju56c5bfes2sy)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql:
         specifier: 16.9.0
         version: 16.9.0
@@ -4053,8 +4053,8 @@ packages:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
 
-  '@graphiql/react@0.23.0-canary-083d8bad.0':
-    resolution: {integrity: sha512-TTbuAU0XrAQ/YdqHt1dA6MbF6fKj/Yt5EttWZDuIuYpsHT/wCYMc65aRVv2BbzQ56xKl6kkX5KYPmw2ZScTrww==}
+  '@graphiql/react@0.24.0-canary-869419d9.0':
+    resolution: {integrity: sha512-AUPEuB1YsllqWX1LxvEr9FT06f3unZhmAUbhOoXrabEwP8gqxW2ZGr6QFCP1FMQ8HKWyTr6tshu3lDuwi6ZzHA==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       react: ^16.8.0 || ^17 || ^18
@@ -4062,6 +4062,15 @@ packages:
 
   '@graphiql/toolkit@0.9.1':
     resolution: {integrity: sha512-LVt9pdk0830so50ZnU2Znb2rclcoWznG8r8asqAENzV0U1FM1kuY0sdPpc/rBc9MmmNgnB6A+WZzDhq6dbhTHA==}
+    peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0
+      graphql-ws: '>= 4.5.0'
+    peerDependenciesMeta:
+      graphql-ws:
+        optional: true
+
+  '@graphiql/toolkit@0.9.2':
+    resolution: {integrity: sha512-QLPhwx9+E4JfGY+0iwFwa85OBjCJ7GHNypkQoz3pCOwAAlIpFBtXDOuLF1eH9Z08WNZSjRLL7VYW4Ci3hfTqxg==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       graphql-ws: '>= 4.5.0'
@@ -9067,8 +9076,8 @@ packages:
   code-block-writer@13.0.1:
     resolution: {integrity: sha512-c5or4P6erEA69TxaxTNcHUNcIn+oyxSRTOWV+pSYF+z4epXqNvwvJ70XPGjPNgue83oAFAPBRQYwpAJ/Hpe/Sg==}
 
-  codemirror-graphql@2.0.12:
-    resolution: {integrity: sha512-5UCqhWzck1jClCmRewFb8aSiabnAqiaRfsvIPfmbf6WJvOb8oiefJeHilclPPiZBzY8v/Et6EBMtOeKnWCoyng==}
+  codemirror-graphql@2.0.13:
+    resolution: {integrity: sha512-MBx8BtfqpacLUwcx0smI0JLq7uR6ssKvdF0ENz0yV1w1xqKmFcZ29uHh11LMWdeLL0j14KXGSIDl97fovfdszQ==}
     peerDependencies:
       '@codemirror/language': 6.0.0
       codemirror: ^5.65.3
@@ -9546,6 +9555,9 @@ packages:
 
   dayjs@1.11.7:
     resolution: {integrity: sha512-+Yw9U6YO5TQohxLcIkrXBeY73WP3ejHWVvx8XCk3gxvQDCTEmS48ZrSZCKciI7Bhl/uCMyxYtE9UqRILmFphkQ==}
+
+  debounce-promise@3.1.2:
+    resolution: {integrity: sha512-rZHcgBkbYavBeD9ej6sP56XfG53d51CD4dnaw989YX/nZ/ZJfgRx/9ePKmTNiUiyQvh4mtrMoS3OAWW+yoYtpg==}
 
   debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
@@ -10895,8 +10907,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  graphiql@3.4.0-canary-083d8bad.0:
-    resolution: {integrity: sha512-Szb4TSqk60eTsTqc9xvX1jeh5cb5JiN9TShg/Uf0tpf3Lnir21TRoFOeVZPcmAcFPd9v9iRjQ/MehYIix1IBww==}
+  graphiql@3.5.0-canary-869419d9.0:
+    resolution: {integrity: sha512-sFnshM/mMWvGwYRvvOjSYH5VFX5gGyj5CzSDQWLj13tl/6IMTuE1kjTywwoXuzrR0EKS2BbAvPNX5vei5Ro4rA==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       react: ^16.8.0 || ^17 || ^18
@@ -10963,8 +10975,8 @@ packages:
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
 
-  graphql-language-service@5.2.1:
-    resolution: {integrity: sha512-8ewD6otGO43vg2TiEGjoLz3CweTwfaf4ZnqfNREqZXS2JSJGXtsRBOMMknCxMfFVh4x14ql3jyDrXcyAAtbmkQ==}
+  graphql-language-service@5.2.2:
+    resolution: {integrity: sha512-ulIM1xE2eyEk8/QKg7I9QCGQWijNNZVwQ/dpm0B1XwD9AfYzeaGkipcsxW3JPmurt/d/ZMYRxK5Y0d2amrXEtQ==}
     hasBin: true
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
@@ -19435,7 +19447,7 @@ snapshots:
 
   '@escape.tech/graphql-armor-types@0.6.0':
     dependencies:
-      graphql: 16.9.0
+      graphql: link:../graphiql/node_modules/graphql
     optional: true
 
   '@eslint-community/eslint-utils@4.4.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))':
@@ -19617,9 +19629,9 @@ snapshots:
       graphql: 16.9.0
       typescript: 5.5.3
 
-  '@graphiql/react@0.23.0-canary-083d8bad.0(patch_hash=kvxknm7ffl3iumevmltgk7wg7i)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/react@0.24.0-canary-869419d9.0(patch_hash=ta44p5kemld4y55kkax5o5aev4)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@graphiql/toolkit': 0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
+      '@graphiql/toolkit': 0.9.2(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
       '@headlessui/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dropdown-menu': 2.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -19628,11 +19640,11 @@ snapshots:
       '@types/codemirror': 5.60.15
       clsx: 1.2.1
       codemirror: 5.65.9
-      codemirror-graphql: 2.0.12(@codemirror/language@6.10.2)(codemirror@5.65.9)(graphql@16.9.0)
+      codemirror-graphql: 2.0.13(@codemirror/language@6.10.2)(codemirror@5.65.9)(graphql@16.9.0)
       copy-to-clipboard: 3.3.3
       framer-motion: 11.3.2(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql: 16.9.0
-      graphql-language-service: 5.2.1(graphql@16.9.0)
+      graphql-language-service: 5.2.2(graphql@16.9.0)
       markdown-it: 14.1.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -19646,6 +19658,16 @@ snapshots:
       - graphql-ws
 
   '@graphiql/toolkit@0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)':
+    dependencies:
+      '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
+      graphql: 16.9.0
+      meros: 1.2.1(@types/node@20.14.10)
+    optionalDependencies:
+      graphql-ws: 5.16.0(graphql@16.9.0)
+    transitivePeerDependencies:
+      - '@types/node'
+
+  '@graphiql/toolkit@0.9.2(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)':
     dependencies:
       '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
       graphql: 16.9.0
@@ -26341,13 +26363,13 @@ snapshots:
 
   code-block-writer@13.0.1: {}
 
-  codemirror-graphql@2.0.12(@codemirror/language@6.10.2)(codemirror@5.65.9)(graphql@16.9.0):
+  codemirror-graphql@2.0.13(@codemirror/language@6.10.2)(codemirror@5.65.9)(graphql@16.9.0):
     dependencies:
       '@codemirror/language': 6.10.2
       '@types/codemirror': 0.0.90
       codemirror: 5.65.9
       graphql: 16.9.0
-      graphql-language-service: 5.2.1(graphql@16.9.0)
+      graphql-language-service: 5.2.2(graphql@16.9.0)
 
   codemirror@5.65.9: {}
 
@@ -26898,6 +26920,8 @@ snapshots:
   dateformat@4.6.3: {}
 
   dayjs@1.11.7: {}
+
+  debounce-promise@3.1.2: {}
 
   debounce@1.2.1: {}
 
@@ -28640,13 +28664,10 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphiql@3.4.0-canary-083d8bad.0(patch_hash=5yfz3gguejfncoxswzvliett3i)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  graphiql@3.5.0-canary-869419d9.0(patch_hash=lrhfdnfw462iuju56c5bfes2sy)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@graphiql/react': 0.23.0-canary-083d8bad.0(patch_hash=kvxknm7ffl3iumevmltgk7wg7i)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@graphiql/toolkit': 0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
+      '@graphiql/react': 0.24.0-canary-869419d9.0(patch_hash=ta44p5kemld4y55kkax5o5aev4)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql: 16.9.0
-      graphql-language-service: 5.2.1(graphql@16.9.0)
-      markdown-it: 14.1.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
@@ -28778,8 +28799,9 @@ snapshots:
       - encoding
       - utf-8-validate
 
-  graphql-language-service@5.2.1(graphql@16.9.0):
+  graphql-language-service@5.2.2(graphql@16.9.0):
     dependencies:
+      debounce-promise: 3.1.2
       graphql: 16.9.0
       nullthrows: 1.1.1
       vscode-languageserver-types: 3.17.2

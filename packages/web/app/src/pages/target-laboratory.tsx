@@ -429,6 +429,12 @@ function LaboratoryPageContent(props: {
           .graphiql-logo {
             margin-left: auto;
           }
+          .graphiql-tab {
+            white-space: nowrap;
+          }
+          .graphiql-tab-button {
+            padding-right: 24px !important;
+          }
         `}</style>
       </Helmet>
 

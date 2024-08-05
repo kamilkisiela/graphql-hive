@@ -173,6 +173,7 @@ export function useOperationCollectionsPlugin(props: {
             query: (savedOperation || currentOperation).query,
             variables: (savedOperation || currentOperation).variables,
             headers: currentOperation.headers,
+            title: currentOperation.name,
           });
 
           if (!savedOperation) {
@@ -268,7 +269,7 @@ export function useOperationCollectionsPlugin(props: {
       const renderedCollections = collections.map(collection => (
         <AccordionItem key={collection.id} value={collection.id} className="border-b-0">
           <AccordionHeader className="flex items-center justify-between">
-            <AccordionTriggerPrimitive className="group flex w-full items-center gap-x-3 rounded p-2 font-medium text-white hover:bg-gray-100/10">
+            <AccordionTriggerPrimitive className="group flex w-full items-center gap-x-3 rounded p-2 text-left font-medium text-white hover:bg-gray-100/10">
               <FolderIcon className="group-radix-state-open:hidden size-4" />
               <FolderOpenIcon className="group-radix-state-closed:hidden size-4" />
               {collection.name}
@@ -321,7 +322,7 @@ export function useOperationCollectionsPlugin(props: {
                     }}
                     search={{ operation: node.id }}
                     className={cn(
-                      'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white',
+                      'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white hover:no-underline',
                       node.id === queryParamsOperationId && [
                         'bg-gray-100/10 text-white',
                         currentOperation &&

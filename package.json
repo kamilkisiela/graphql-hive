@@ -127,8 +127,8 @@
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "graphiql@3.4.0-canary-083d8bad.0": "patches/graphiql@3.4.0-canary-514e049b.0.patch",
-      "@graphiql/react@0.23.0-canary-083d8bad.0": "patches/@graphiql__react@0.23.0-canary-083d8bad.0.patch"
+      "graphiql@3.5.0-canary-869419d9.0": "patches/graphiql@3.5.0-canary-869419d9.0.patch",
+      "@graphiql/react@0.24.0-canary-869419d9.0": "patches/@graphiql__react@0.24.0-canary-869419d9.0.patch"
     }
   }
 }
