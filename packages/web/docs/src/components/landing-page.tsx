@@ -180,7 +180,7 @@ export function IndexPage(): ReactElement {
             </CallToAction>
           </HeroLinks>
         </Hero>
-        <FeatureTabs className="relative top-[-68px]" />
+        <FeatureTabs className="relative mt-[-68px]" />
         <TrustedBy className="mg:my-16 mx-auto my-8 lg:my-24">
           <MeetupLogo title="Meetup" height={32} className="translate-y-[5px]" />
           <LinktreeLogo title="Linktree" height={22} />
