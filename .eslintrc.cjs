@@ -36,6 +36,8 @@ const HIVE_RESTRICTED_SYNTAX = [
   },
 ];
 
+const tailwindCallees = ['clsx', 'cn', 'cva', 'cx'];
+
 module.exports = {
   ignorePatterns: [
     'scripts',
@@ -195,6 +197,7 @@ module.exports = {
       files: ['packages/web/app/**'],
       settings: {
         tailwindcss: {
+          callees: tailwindCallees,
           config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
         },
@@ -214,6 +217,7 @@ module.exports = {
           rootDir: 'packages/web/docs',
         },
         tailwindcss: {
+          callees: tailwindCallees,
           config: 'packages/web/docs/tailwind.config.cjs',
         },
       },
