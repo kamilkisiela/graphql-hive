@@ -279,6 +279,11 @@ export class SingleLegacyModel {
           messages,
           changes,
           breakingChanges: breakingChanges ?? null,
+          coordinatesDiff:
+            diffCheck.result?.coordinatesDiff ??
+            diffCheck.reason?.coordinatesDiff ??
+            diffCheck.data?.coordinatesDiff ??
+            null,
           compositionErrors,
           schema: incoming,
           schemas,
@@ -304,6 +309,7 @@ export class SingleLegacyModel {
         code: PublishFailureReasonCode.BreakingChanges,
         changes: diffCheck.reason.all ?? [],
         breakingChanges: diffCheck.reason.breaking ?? [],
+        coordinatesDiff: diffCheck.reason?.coordinatesDiff ?? null,
       });
     }
 
