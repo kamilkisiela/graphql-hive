@@ -1278,14 +1278,6 @@ export class SchemaPublisher {
               })
             : null;
 
-        const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
-        for (const contract of contracts ?? []) {
-          contractIdToLatestValidContractVersionId.set(
-            contract.contract.id,
-            contract.latestValidVersion?.id ?? null,
-          );
-        }
-
         const deleteResult = await this.models[project.type][modelVersion].delete({
           input: {
             serviceName: input.serviceName,
@@ -1622,14 +1614,6 @@ export class SchemaPublisher {
             targetId: target.id,
           })
         : null;
-
-    const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
-    for (const contract of contracts ?? []) {
-      contractIdToLatestValidContractVersionId.set(
-        contract.contract.id,
-        contract.latestValidVersion?.id ?? null,
-      );
-    }
 
     const compareToPreviousComposableVersion = shouldUseLatestComposableVersion(
       target.id,
