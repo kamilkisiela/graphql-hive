@@ -916,13 +916,7 @@ function LaboratoryPageContent(props: {
     query.data?.target?.graphqlEndpointUrl ?? null,
   );
 
-  const mockEndpoint = useMemo(() => {
-    if (globalThis.window) {
-      return `${location.origin}/api/lab/${props.organizationId}/${props.projectId}/${props.targetId}`;
-    }
-
-    return '';
-  }, [props.organizationId, props.projectId, props.targetId]);
+  const mockEndpoint = `${location.origin}/api/lab/${props.organizationId}/${props.projectId}/${props.targetId}`;
 
   const fetcher = useMemo<Fetcher>(() => {
     return async (params, opts) => {
@@ -1175,7 +1169,7 @@ export function TargetLaboratoryPage(props: {
 
 function useApiTabValueState(graphqlEndpointUrl: string | null) {
   const [state, setState] = useResetState<'mockApi' | 'linkedApi'>(() => {
-    const value = globalThis.window?.localStorage.getItem('hive:laboratory-tab-value');
+    const value = localStorage.getItem('hive:laboratory-tab-value');
     if (!value || !['mockApi', 'linkedApi'].includes(value)) {
       return graphqlEndpointUrl ? 'linkedApi' : 'mockApi';
     }
@@ -1191,7 +1185,7 @@ function useApiTabValueState(graphqlEndpointUrl: string | null) {
     state,
     useCallback(
       (state: 'mockApi' | 'linkedApi') => {
-        globalThis.window?.localStorage.setItem('hive:laboratory-tab-value', state);
+        localStorage.setItem('hive:laboratory-tab-value', state);
         setState(state);
       },
       [setState],
