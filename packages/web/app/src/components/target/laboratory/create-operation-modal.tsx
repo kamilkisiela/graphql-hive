@@ -175,8 +175,8 @@ export function CreateOperationModalContent(props: {
   isOpen: boolean;
   close: () => void;
   onSubmit: (values: CreateOperationModalFormValues) => void;
-  organizationId: string;
   projectId: string;
+  organizationId: string;
   form: UseFormReturn<CreateOperationModalFormValues>;
   targetId: string;
   fetching: boolean;
