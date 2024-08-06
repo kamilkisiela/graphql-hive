@@ -32,8 +32,8 @@ export function EcosystemManagementSection() {
         <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
       </div>
       <div>
-        <CallToAction>
-          Migrate to Apollo
+        <CallToAction href="/" variant="primary">
+          Migrate from Apollo
         </CallToAction>
       </div>
       <div>{/*  */}</div>
