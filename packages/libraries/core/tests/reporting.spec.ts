@@ -50,7 +50,6 @@ test('should not leak the exception', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://127.0.0.1:55404 Attempt (1/6)
     [ERR] [hive][reporting] Error: connect ECONNREFUSED 127.0.0.1:55404
     [ERR] [hive][reporting]     at TCPConnectWrap.afterConnect [as oncomplete] (node:net:666:666)
     [ERR] [hive][reporting] POST http://127.0.0.1:55404 failed (666ms). connect ECONNREFUSED 127.0.0.1:55404
@@ -125,8 +124,6 @@ test('should send data to Hive', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
   `);
 });
@@ -198,8 +195,6 @@ test('should send data to Hive (deprecated endpoint)', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
   `);
 
@@ -273,8 +268,6 @@ test('should send data to app.graphql-hive.com/graphql by default', async () => 
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST https://app.graphql-hive.com/graphql Attempt (1/6)
-    [INF] [hive][reporting] POST https://app.graphql-hive.com/graphql succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
   `);
 
@@ -348,11 +341,9 @@ test('should send data to Hive immediately', async () => {
   expect(logger.getLogs()).toMatchInlineSnapshot(`[INF] [hive][reporting] Publish schema`);
   logger.clear();
   await waitFor(50);
-  expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Successfully published schema
-  `);
+  expect(logger.getLogs()).toMatchInlineSnapshot(
+    `[INF] [hive][reporting] Successfully published schema`,
+  );
   expect(body.variables.input.sdl).toBe(`type Query{foo:String}`);
   expect(body.variables.input.author).toBe(author);
   expect(body.variables.input.commit).toBe(commit);
@@ -361,11 +352,9 @@ test('should send data to Hive immediately', async () => {
   expect(body.variables.input.force).toBe(true);
 
   await waitFor(100);
-  expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][reporting] Successfully published schema
-  `);
+  expect(logger.getLogs()).toMatchInlineSnapshot(
+    `[INF] [hive][reporting] Successfully published schema`,
+  );
 
   await hive.dispose();
   http.done();
@@ -433,8 +422,6 @@ test('should send original schema of a federated (v1) service', async () => {
   const logs = logger.getLogs();
   expect(logs).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
   `);
   http.done();
@@ -502,8 +489,6 @@ test('should send original schema of a federated (v2) service', async () => {
   const logs = logger.getLogs();
   expect(logs).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][reporting] Published schema
   `);
   http.done();
@@ -563,8 +548,6 @@ test('should display SchemaPublishMissingServiceError', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [ERR] [hive][reporting] Failed to report schema: Service name is not defined
   `);
 });
@@ -624,12 +607,9 @@ test('should display SchemaPublishMissingUrlError', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/200 Attempt (1/6)
-    [INF] [hive][reporting] POST http://localhost/200 succeeded with status 200 (666ms).
     [ERR] [hive][reporting] Failed to report schema: Service url is not defined
   `);
 
-  expect(logger.getLogs()).toContain('POST http://localhost/200 Attempt (1/6)');
   expect(logger.getLogs()).toContain('Service url is not defined');
 });
 
@@ -677,7 +657,6 @@ test('retry on non-200', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][reporting] Publish schema
-    [INF] [hive][reporting] POST http://localhost/registry Attempt (1/6)
     [ERR] [hive][reporting] Error: connect ECONNREFUSED ::1:80
     [ERR] [hive][reporting]     at createConnectionError (node:net:666:666)
     [ERR] [hive][reporting]     at afterConnectMultiple (node:net:666:666)

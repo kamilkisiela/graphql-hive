@@ -167,8 +167,6 @@ test('should send data to Hive', async () => {
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Disposing
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://localhost/200
-    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][usage] Report sent!
   `);
 
@@ -273,8 +271,6 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Disposing
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://localhost/200
-    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][usage] Report sent!
   `);
 
@@ -358,7 +354,6 @@ test('should not leak the exception', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://404.localhost.noop Attempt (1/2)
     [ERR] [hive][usage] Error: getaddrinfo ENOTFOUND 404.localhost.noop
     [ERR] [hive][usage]     at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:666:666)
     [ERR] [hive][usage] POST http://404.localhost.noop failed (666ms). getaddrinfo ENOTFOUND 404.localhost.noop
@@ -425,8 +420,6 @@ test('sendImmediately should not stop the schedule', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://localhost/200
-    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][usage] Report sent!
   `);
   logger.clear();
@@ -438,17 +431,13 @@ test('sendImmediately should not stop the schedule', async () => {
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Sending immediately
     [INF] [hive][usage] Sending report (queue 2)
-    [INF] [hive][usage] POST http://localhost/200
   `);
   logger.clear();
   await waitFor(100);
   // Let's check if the scheduled send task is still running
   await collect(args, {});
   await waitFor(30);
-  expect(logger.getLogs()).toMatchInlineSnapshot(`
-    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
-    [INF] [hive][usage] Report sent!
-  `);
+  expect(logger.getLogs()).toMatchInlineSnapshot(`[INF] [hive][usage] Report sent!`);
 
   await hive.dispose();
   http.done();
@@ -542,8 +531,6 @@ test('should send data to Hive at least once when using atLeastOnceSampler', asy
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Disposing
     [INF] [hive][usage] Sending report (queue 2)
-    [INF] [hive][usage] POST http://localhost/200
-    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][usage] Report sent!
   `);
 
@@ -646,8 +633,6 @@ test('should not send excluded operation name data to Hive', async () => {
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Disposing
     [INF] [hive][usage] Sending report (queue 2)
-    [INF] [hive][usage] POST http://localhost/200
-    [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][usage] Report sent!
   `);
 
@@ -744,7 +729,6 @@ test('retry on non-200', async () => {
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] Sending report (queue 1)
-    [INF] [hive][usage] POST http://localhost/200 Attempt (1/2)
     [ERR] [hive][usage] POST http://localhost/200 failed with status 500 (666ms): No no no
     [INF] [hive][usage] Disposing
   `);
