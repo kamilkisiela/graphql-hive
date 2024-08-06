@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { DocumentCollection, DocumentCollectionOperationsConnection } from '@/gql/graphql';
+import { DocumentCollection } from '@/gql/graphql';
 import { useCollections } from '@/pages/target-laboratory';
 import { useEditorContext } from '@graphiql/react';
 import { zodResolver } from '@hookform/resolvers/zod';
