@@ -71,7 +71,7 @@ const Template: StoryFn<typeof CreateOperationModalContent> = args => {
 export const Default: Story = Template.bind({});
 Default.args = {
   isOpen: true,
-  close: () => {},
+  close: () => { },
   collections: [
     // @ts-expect-error -- Tuval: these types are invalid
     {
@@ -96,5 +96,5 @@ Default.args = {
     },
   ],
   fetching: false,
-  onSubmit: () => {},
+  onSubmit: () => { },
 };
