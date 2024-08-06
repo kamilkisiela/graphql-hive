@@ -1,10 +1,15 @@
-import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Modal } from '@/components/v2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { TrashIcon } from '@radix-ui/react-icons';
 
 const DeleteCollectionMutation = graphql(`
   mutation DeleteCollection($selector: TargetSelectorInput!, $id: ID!) {
@@ -39,45 +44,75 @@ export function DeleteCollectionModal(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
+  const { toast } = useToast();
   const { isOpen, toggleModalOpen, collectionId } = props;
   const [, mutate] = useMutation(DeleteCollectionMutation);
 
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      id: collectionId,
+      selector: {
+        target: props.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+      },
+    });
+    toggleModalOpen();
+    if (error) {
+      toast({
+        title: 'Failed to delete collection',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Collection deleted',
+        description: 'The collection has been successfully deleted',
+        variant: 'default',
+      });
+    }
+  };
+
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex flex-col items-center gap-5"
-    >
-      <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
-      <Heading>Delete Collection</Heading>
-      <p className="text-sm text-gray-500">
-        Are you sure you wish to delete this collection? This action is irreversible!
-      </p>
-      <div className="flex w-full gap-2">
-        <Button type="button" size="lg" className="w-full justify-center" onClick={toggleModalOpen}>
-          Cancel
-        </Button>
-        <Button
-          size="lg"
-          className="w-full justify-center"
-          variant="destructive"
-          onClick={async () => {
-            await mutate({
-              id: collectionId,
-              selector: {
-                target: props.targetId,
-                organization: props.organizationId,
-                project: props.projectId,
-              },
-            });
-            toggleModalOpen();
-          }}
-          data-cy="confirm"
-        >
-          Delete
-        </Button>
-      </div>
-    </Modal>
+    <DeleteCollectionModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+}
+
+export function DeleteCollectionModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
+        <DialogHeader>
+          <DialogTitle>Delete Collection</DialogTitle>
+          <DialogDescription>Are you sure you wish to delete this collection?</DialogDescription>
+          <DialogDescription>
+            <span className="font-bold">This action is irreversible!</span>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={props.handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
