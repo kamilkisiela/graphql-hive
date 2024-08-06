@@ -134,7 +134,7 @@ export const EditOperationModal = (props: {
     <EditOperationModalContent
       fetching={updateOperationNameState.fetching}
       close={props.close}
-      isOpen={true}
+      isOpen
       form={form}
       onSubmit={onSubmit}
     />
@@ -182,7 +182,7 @@ export const EditOperationModalContent = (props: {
                   className="w-full justify-center"
                   onClick={ev => {
                     ev.preventDefault();
-                    close();
+                    props.close();
                     props.form.reset();
                   }}
                 >
