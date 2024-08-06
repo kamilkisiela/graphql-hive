@@ -250,7 +250,7 @@ export function CreateOperationModalContent(props: {
                   className="w-full justify-center"
                   onClick={ev => {
                     ev.preventDefault();
-                    close();
+                    props.close();
                     props.form.reset();
                   }}
                 >
