@@ -534,34 +534,48 @@ function Illustration() {
           '--gap': '80px',
         }}
       >
-        <div>
+        <Edge>
           <div
             style={{
+              borderLeftWidth: 'var(--bw)',
+              borderTopWidth: 'var(--bw)',
               height:
                 'calc(var(--node-h) / 2 + var(--gap) + var(--big-node-h) / 2 - var(--label-h) / 2)',
             }}
-            className="ml-4 mt-[calc(var(--node-h)/2)] w-10 rounded-tl-xl border-l border-t border-green-700"
+            className="ml-4 mt-[calc(var(--node-h)/2)] w-10 rounded-tl-xl border-green-700"
           />
           <EdgeLabel>5</EdgeLabel>
           <div
             style={{
+              borderBottomWidth: 'var(--bw)',
+              borderLeftWidth: 'var(--bw)',
               height:
                 'calc(var(--node-h) / 2 + var(--gap) + var(--big-node-h) / 2 - var(--label-h) / 2)',
             }}
-            className="ml-4 box-content w-10 rounded-bl-xl border-b border-l border-green-700"
+            className="ml-4 box-content w-10 rounded-bl-xl border-green-700"
           />
-        </div>
+        </Edge>
         <div>
           <Node title="Mesh" description="GraphQL Gateway">
             <svg width={48} height={48}>
               <use xlinkHref="/ecosystem-management.svg#mesh" />
             </svg>
           </Node>
-          <div className="ml-[calc(var(--node-w)/2-var(--label-h)/2-4px)]">
-            <div className="ml-[calc(var(--label-h)/2-.5px)] h-[calc((var(--gap)-var(--label-h))/2)] border-l border-green-700" />
+          <Edge className="ml-[calc(var(--node-w)/2-var(--label-h)/2-4px)]">
+            <div
+              style={{
+                borderLeftWidth: 'var(--bw)',
+              }}
+              className="ml-[calc(var(--label-h)/2-.5px)] h-[calc((var(--gap)-var(--label-h))/2)] border-green-700"
+            />
             <EdgeLabel>4</EdgeLabel>
-            <div className="ml-[calc(var(--label-h)/2-.5px)] h-[calc((var(--gap)-var(--label-h))/2)] border-l border-green-700" />
-          </div>
+            <div
+              style={{
+                borderLeftWidth: 'var(--bw)',
+              }}
+              className="ml-[calc(var(--label-h)/2-.5px)] h-[calc((var(--gap)-var(--label-h))/2)] border-green-700"
+            />
+          </Edge>
           <Node
             className="h-[var(--big-node-h)] w-[var(--node-w)] flex-col text-center"
             title="Hive"
@@ -572,11 +586,21 @@ function Illustration() {
               <use xlinkHref="/ecosystem-management.svg#hive" />
             </svg>
           </Node>
-          <div className="ml-[calc(var(--node-w)/2-var(--label-h)/2-4px)]">
-            <div className="ml-[calc(var(--label-h)/2-.5px)] h-6 border-l border-green-700" />
+          <Edge className="ml-[calc(var(--node-w)/2-var(--label-h)/2-4px)]">
+            <div
+              style={{
+                borderLeftWidth: 'var(--bw)',
+              }}
+              className="ml-[calc(var(--label-h)/2-.5px)] h-6 border-green-700"
+            />
             <EdgeLabel>6</EdgeLabel>
-            <div className="ml-[calc(var(--label-h)/2-.5px)] h-6 border-l border-green-700" />
-          </div>
+            <div
+              style={{
+                borderLeftWidth: 'var(--bw)',
+              }}
+              className="ml-[calc(var(--label-h)/2-.5px)] h-6 border-green-700"
+            />
+          </Edge>
           <Node title="Yoga" description="GraphQL Subgraph">
             <svg width={48} height={48}>
               <use xlinkHref="/ecosystem-management.svg#yoga" />
@@ -584,25 +608,55 @@ function Illustration() {
           </Node>
         </div>
         <div>
-          <div className="flex h-[var(--node-h)] flex-row items-center">
-            <div className="w-[calc(var(--label-h)/1.6)] border-t border-green-700" />
+          <Edge className="flex h-[var(--node-h)] flex-row items-center">
+            <div
+              style={{
+                borderTopWidth: 'var(--bw)',
+              }}
+              className="w-[calc(var(--label-h)/1.6)] border-green-700"
+            />
             <EdgeLabel>1</EdgeLabel>
-            <div className="w-[calc(var(--label-h)/1.6)] border-t border-green-700" />
-          </div>
+            <div
+              style={{
+                borderTopWidth: 'var(--bw)',
+              }}
+              className="w-[calc(var(--label-h)/1.6)] border-green-700"
+            />
+          </Edge>
           <div className="h-[var(--gap)]" />
-          <div className="flex h-[var(--big-node-h)] flex-row items-center">
-            <div className="w-[calc(var(--label-h)/1.6)] border-t border-green-700" />
+          <Edge highlighted className="flex h-[var(--big-node-h)] flex-row items-center">
+            <div
+              style={{
+                borderTopWidth: 'var(--bw)',
+              }}
+              className="w-[calc(var(--label-h)/1.6)] border-green-700"
+            />
             <EdgeLabel>3</EdgeLabel>
-            <div className="w-[calc(var(--label-h)/1.6)] border-t border-green-700" />
-          </div>
+            <div
+              style={{
+                borderTopWidth: 'var(--bw)',
+              }}
+              className="w-[calc(var(--label-h)/1.6)] border-green-700"
+            />
+          </Edge>
         </div>
         <div>
           <Node title="GraphQL Client" className="justify-center" />
-          <div className="flex h-[calc(var(--gap)+var(--big-node-h)/2-var(--node-h)/2)] flex-col items-center">
-            <div className="flex-1 border-l border-green-700" />
+          <Edge className="flex h-[calc(var(--gap)+var(--big-node-h)/2-var(--node-h)/2)] flex-col items-center">
+            <div
+              style={{
+                borderLeftWidth: 'var(--bw)',
+              }}
+              className="flex-1 border-green-700"
+            />
             <EdgeLabel>2</EdgeLabel>
-            <div className="flex-1 border-l border-green-700" />
-          </div>
+            <div
+              style={{
+                borderLeftWidth: 'var(--bw)',
+              }}
+              className="flex-1 border-green-700"
+            />
+          </Edge>
           <Node title="Codegen" description="GraphQL Code Generation" highlighted>
             <svg width={48} height={48}>
               <use xlinkHref="/ecosystem-management.svg#codegen" />
@@ -614,17 +668,31 @@ function Illustration() {
   );
 }
 
-interface EdgeLabelProps extends React.HTMLAttributes<HTMLElement> {
+interface EdgeProps extends React.HTMLAttributes<HTMLElement> {
   highlighted?: boolean;
 }
-function EdgeLabel({ highlighted, ...rest }: React.HTMLAttributes<HTMLElement>) {
+function Edge({ highlighted, className, ...rest }: EdgeProps) {
+  return (
+    <div
+      style={{ '--bw': highlighted ? '2px' : '1px' }}
+      className={cn(
+        className,
+        highlighted && '[&>*]:text-green-1000 [&>*]:border-green-300 [&>*]:bg-green-300',
+      )}
+      {...rest}
+    />
+  );
+}
+
+interface EdgeLabelProps extends React.HTMLAttributes<HTMLElement> {}
+function EdgeLabel(props: EdgeLabelProps) {
   return (
     <div
       className={
         'flex size-8 h-[var(--label-h)] items-center justify-center' +
         ' rounded bg-green-700 text-sm font-medium leading-[20px]'
       }
-      {...rest}
+      {...props}
     />
   );
 }

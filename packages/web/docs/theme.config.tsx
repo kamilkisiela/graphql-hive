@@ -61,5 +61,5 @@ export default defineConfig({
   },
   description: 'Schema registry for your GraphQL workflows',
   websiteName: 'Hive',
-  logo: <HiveLogo className="text-[#004540]" />,
+  logo: <HiveLogo className="text-green-1000" />,
 });
