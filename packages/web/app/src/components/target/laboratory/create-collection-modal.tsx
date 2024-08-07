@@ -3,6 +3,7 @@ import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Callout } from '@/components/ui/callout';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { graphql } from '@/gql';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Callout } from '@/components/ui/callout';
 
 const CollectionQuery = graphql(`
   query Collection($selector: TargetSelectorInput!, $id: ID!) {
@@ -188,25 +188,25 @@ export function CreateCollectionModal(props: {
   async function onSubmit(values: CreateCollectionModalFormValues) {
     const { error } = collectionId
       ? await mutateUpdate({
-        selector: {
-          target: props.targetId,
-          organization: props.organizationId,
-          project: props.projectId,
-        },
-        input: {
-          collectionId,
-          name: values.name,
-          description: values.description,
-        },
-      })
+          selector: {
+            target: props.targetId,
+            organization: props.organizationId,
+            project: props.projectId,
+          },
+          input: {
+            collectionId,
+            name: values.name,
+            description: values.description,
+          },
+        })
       : await mutateCreate({
-        selector: {
-          target: props.targetId,
-          organization: props.organizationId,
-          project: props.projectId,
-        },
-        input: values,
-      });
+          selector: {
+            target: props.targetId,
+            organization: props.organizationId,
+            project: props.projectId,
+          },
+          input: values,
+        });
     if (!error || errorCombaind) {
       form.reset();
       toggleModalOpen();
