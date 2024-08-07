@@ -1992,8 +1992,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
-        specifier: 6.7.0-alpha-20240801094234-0970ab5f77ff3f600cb5bf175b7a9028b4b53ddb
-        version: 6.7.0-alpha-20240801094234-0970ab5f77ff3f600cb5bf175b7a9028b4b53ddb(@types/react@18.3.3)(next@14.2.4(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)(webpack@4.47.0)
+        specifier: ^7.0.0-alpha
+        version: 7.0.0-alpha-20240802174641-eb1b5ff127d962320fe87371c73888c547c7bb53(@types/react@18.3.3)(next@14.2.4(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)(webpack@4.47.0)
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -7622,8 +7622,8 @@ packages:
   '@theguild/buddy@0.1.0':
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
 
-  '@theguild/components@6.7.0-alpha-20240801094234-0970ab5f77ff3f600cb5bf175b7a9028b4b53ddb':
-    resolution: {integrity: sha512-5WPALNDpBBxylejvsUYH7wdRVOlDKFOfOc+mLMbkbqCy+CeLDKYEFVkdgP62skq6uoMjYn/+fi6o3eESZTCqYQ==}
+  '@theguild/components@7.0.0-alpha-20240802174641-eb1b5ff127d962320fe87371c73888c547c7bb53':
+    resolution: {integrity: sha512-hYE9NFz26h/tgFCdSlwxCxsQ40YkK+s9ZzU9IPznVfNpMwwjnczHQhYDrMdFKGxx3UPiYONy7AbwlMfsDG1xFQ==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -25268,7 +25268,7 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@6.7.0-alpha-20240801094234-0970ab5f77ff3f600cb5bf175b7a9028b4b53ddb(@types/react@18.3.3)(next@14.2.4(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)(webpack@4.47.0)':
+  '@theguild/components@7.0.0-alpha-20240802174641-eb1b5ff127d962320fe87371c73888c547c7bb53(@types/react@18.3.3)(next@14.2.4(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.3)(webpack@4.47.0)':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@next/bundle-analyzer': 14.2.5

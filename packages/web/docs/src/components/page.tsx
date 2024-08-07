@@ -1,5 +1,6 @@
 import { ReactElement, ReactNode, useCallback, useState } from 'react';
 import { useMounted } from '@theguild/components';
+import { cn } from '../lib';
 
 const CookiesConsent = (): ReactElement => {
   const [show, setShow] = useState(() => localStorage.getItem('cookies') !== 'true');
@@ -37,12 +38,12 @@ const CookiesConsent = (): ReactElement => {
   );
 };
 
-export function Page(props: { children: ReactNode }) {
+export function Page(props: { children: ReactNode, className?: string }) {
   const mounted = useMounted();
 
   return (
     <>
-      <div className="flex h-full flex-col">{props.children}</div>
+      <div className={cn("flex h-full flex-col", props.className)}>{props.children}</div>
       {mounted && <CookiesConsent />}
     </>
   );
