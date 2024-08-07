@@ -3,6 +3,15 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
 
+const TypeToEmoji = {
+  default: '💡',
+  error: '🚫',
+  info: <InfoCircledIcon className="h-6 w-auto" />,
+  warning: '⚠️',
+};
+
+type CalloutType = keyof typeof TypeToEmoji;
+
 const calloutVariants = cva('mt-6 flex items-center gap-4 rounded-lg border px-4 py-2', {
   variants: {
     type: {
@@ -20,15 +29,6 @@ const calloutVariants = cva('mt-6 flex items-center gap-4 rounded-lg border px-4
   },
 });
 
-const emojiMap = {
-  default: '💡',
-  error: '🚫',
-  info: <InfoCircledIcon className="h-6 w-auto" />,
-  warning: '⚠️',
-};
-
-type CalloutType = keyof typeof emojiMap;
-
 type CalloutProps = {
   type?: CalloutType;
   emoji?: string | React.ReactElement;
@@ -39,9 +39,7 @@ type CalloutProps = {
 const Callout = React.forwardRef<
   HTMLDivElement,
   CalloutProps & VariantProps<typeof calloutVariants>
->(({ children, type = 'default', emoji, className, ...props }, ref) => {
-  const selectedEmoji = emoji ?? emojiMap[type];
-
+>(({ children, type = 'default', emoji = TypeToEmoji[type], className, ...props }, ref) => {
   return (
     <div ref={ref} className={cn(calloutVariants({ type }), className)} {...props}>
       <div
@@ -50,7 +48,7 @@ const Callout = React.forwardRef<
           fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
         }}
       >
-        {selectedEmoji}
+        {emoji}
       </div>
       <div className="w-full min-w-0 leading-7">{children}</div>
     </div>
