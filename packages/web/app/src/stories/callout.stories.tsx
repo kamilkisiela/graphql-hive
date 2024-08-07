@@ -1,6 +1,6 @@
-import { Meta, StoryObj } from '@storybook/react';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
 import { Callout } from '@/components/ui/callout';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Callout> = {
   title: 'Components/Callout',
