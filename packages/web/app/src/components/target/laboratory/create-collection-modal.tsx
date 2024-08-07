@@ -20,9 +20,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Callout } from '@/components/v2';
 import { graphql } from '@/gql';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Callout } from '@/components/ui/callout';
 
 const CollectionQuery = graphql(`
   query Collection($selector: TargetSelectorInput!, $id: ID!) {
@@ -188,25 +188,25 @@ export function CreateCollectionModal(props: {
   async function onSubmit(values: CreateCollectionModalFormValues) {
     const { error } = collectionId
       ? await mutateUpdate({
-          selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
-          },
-          input: {
-            collectionId,
-            name: values.name,
-            description: values.description,
-          },
-        })
+        selector: {
+          target: props.targetId,
+          organization: props.organizationId,
+          project: props.projectId,
+        },
+        input: {
+          collectionId,
+          name: values.name,
+          description: values.description,
+        },
+      })
       : await mutateCreate({
-          selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
-          },
-          input: values,
-        });
+        selector: {
+          target: props.targetId,
+          organization: props.organizationId,
+          project: props.projectId,
+        },
+        input: values,
+      });
     if (!error || errorCombaind) {
       form.reset();
       toggleModalOpen();
