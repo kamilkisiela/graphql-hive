@@ -131,8 +131,6 @@ module.exports = {
         'prefer-const': 'off',
         'no-useless-escape': 'off',
         '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-
-        // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
@@ -173,8 +171,8 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
         'prefer-destructuring': 'off',
-        // TODO: enable below rules👇
         'no-console': 'off',
+        'no-useless-escape': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
