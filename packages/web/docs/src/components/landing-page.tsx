@@ -1,16 +1,12 @@
-import { ReactElement, ReactNode, useState } from 'react';
-import Head from 'next/head';
-import Image, { StaticImageData } from 'next/image';
+import { ReactElement, ReactNode } from 'react';
 import Link from 'next/link';
 import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
-import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
-import { ArrowIcon } from './arrow-icon';
-import { BookIcon } from './book-icon';
 import { CallToAction } from './call-to-action';
-import { CheckIcon } from './CheckIcon';
-import { EcosystemManagementSection } from './ecosystem-management-section';
+import { CheckIcon } from './check-icon';
+import { EcosystemManagementSection } from './ecosystem-management';
+import { FeatureTabs } from './feature-tabs';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { Highlights, HighlightTextLink } from './highlights';
@@ -18,27 +14,6 @@ import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from 
 import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
-import observabilityClientsImage from '../../public/features/observability/clients.png';
-import observabilityOperationsImage from '../../public/features/observability/operations.png';
-import observabilityOverallImage from '../../public/features/observability/overall.png';
-import registryExplorerImage from '../../public/features/registry/explorer.png';
-import registrySchemaChecksImage from '../../public/features/registry/schema-checks.png';
-import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.png';
-
-const classes = {
-  root: cn('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
-  content: cn('flex flex-col text-black'),
-  title: cn('text-xl font-semibold'),
-  description: cn('text-gray-600'),
-};
-
-const gradients: [string, string][] = [
-  ['#ff9472', '#f2709c'],
-  ['#4776e6', '#8e54e9'],
-  ['#f857a6', '#ff5858'],
-  ['#4ac29a', '#bdfff3'],
-  ['#00c6ff', '#0072ff'],
-];
 
 const renderFeatures = ({
   title,
@@ -49,18 +24,15 @@ const renderFeatures = ({
   description: ReactNode;
   documentationLink?: string;
 }) => (
-  <div className={classes.root} key={title}>
-    <div className={classes.content}>
-      <h3 className={cn(classes.title, 'text-lg')}>{title}</h3>
-      <p className={cn(classes.description, 'text-sm')}>{description}</p>
+  <div className="flex flex-1 flex-row gap-6 md:flex-col lg:flex-row" key={title}>
+    <div className="flex flex-col text-black">
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="text-sm text-gray-600">{description}</p>
       {documentationLink ? (
         <Link
           href={documentationLink}
           className="group mt-2 inline-flex items-center gap-x-2 text-sm underline-offset-8 transition hover:underline"
         >
-          <div>
-            <BookIcon size={16} />
-          </div>
           <div>Learn more</div>
         </Link>
       ) : null}
@@ -68,86 +40,10 @@ const renderFeatures = ({
   </div>
 );
 
-function Feature(props: {
-  icon: ReactNode;
-  title: string;
-  description: string;
-  highlights: {
-    title: string;
-    description: string;
-    image: StaticImageData;
-  }[];
-  documentationLink?: string;
-}) {
-  const [activeHighlight, setActiveHighlight] = useState(0);
-  const { icon, title, description, documentationLink, highlights } = props;
-
-  return (
-    <>
-      <Head>
-        {highlights
-          ? highlights.map(highlight => (
-              <link key={highlight.image.src} rel="preload" as="image" href={highlight.image.src} />
-            ))
-          : null}
-      </Head>
-      <article className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
-          <header className="flex flex-col gap-4 md:gap-6">
-            <div className="w-fit rounded-lg bg-[linear-gradient(135deg,#68A8B6,#3B736A)] p-[9px] text-white">
-              {icon}
-            </div>
-            <Heading as="h2" size="md" className="text-green-1000">
-              {title}
-            </Heading>
-            <p className="leading-6 text-green-800">{description}</p>
-          </header>
-          <dl className="grid grid-cols-2 gap-4 md:gap-12">
-            {highlights.map((highlight, i) => {
-              return (
-                <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
-                  <dt className="text-green-1000 font-medium">{highlight.title}</dt>
-                  <dd className="mt-2 text-sm leading-[20px] text-green-800">
-                    {highlight.description}
-                  </dd>
-                </div>
-              );
-            })}
-          </dl>
-          <CallToAction variant="primary" href={documentationLink}>
-            Learn more
-            <ArrowIcon />
-          </CallToAction>
-        </div>
-        {highlights.map((highlight, i) => (
-          <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
-            <div className="relative px-4 sm:px-6 lg:hidden">
-              <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
-                {highlight.description}
-              </p>
-            </div>
-            <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
-              {/* TODO: Use cropped images so we don't load too much without need. */}
-              <Image
-                width={925}
-                height={578}
-                src={highlight.image}
-                className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
-                role="presentation"
-                alt=""
-              />
-            </div>
-          </div>
-        ))}
-      </article>
-    </>
-  );
-}
-
 export function IndexPage(): ReactElement {
   return (
     <Tooltip.Provider>
-      <Page>
+      <Page className="mx-auto max-w-[90rem] bg-white">
         <Hero>
           <Heading
             as="h1"
@@ -253,12 +149,7 @@ export function IndexPage(): ReactElement {
             </div>
           </div>
 
-          <div
-            className="relative overflow-hidden"
-            style={{
-              backgroundImage: `linear-gradient(-70deg, ${gradients[4][1]}, ${gradients[4][0]})`,
-            }}
-          >
+          <div className="relative overflow-hidden">
             <div>
               <div className="absolute top-0 h-px w-full bg-blue-900 opacity-25" />
             </div>
@@ -321,34 +212,14 @@ export function IndexPage(): ReactElement {
           </div>
           <div className={cn('relative overflow-hidden')}>
             <div>
-              <div
-                className="absolute top-0 h-px w-full opacity-25"
-                style={{
-                  backgroundImage: `linear-gradient(90deg, ${gradients[3][1]}, ${gradients[3][0]})`,
-                }}
-              />
-              <div
-                className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-                style={{
-                  backgroundImage: `linear-gradient(180deg, ${gradients[3][0]}, ${gradients[3][1]})`,
-                }}
-              />
-              <div
-                className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-                style={{
-                  backgroundImage: `linear-gradient(180deg, ${gradients[3][1]}, ${gradients[3][0]})`,
-                }}
-              />
+              <div className="absolute top-0 h-px w-full opacity-25" />
+              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl" />
+              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl" />
             </div>
             <div className="py-24">
               <div className="container mx-auto box-border flex flex-col gap-y-24 px-6">
                 <div className="text-center">
-                  <h2
-                    className="mb-6 bg-clip-text text-5xl font-semibold leading-normal text-transparent"
-                    style={{
-                      backgroundImage: `linear-gradient(-70deg, ${gradients[3][1]}, ${gradients[3][0]})`,
-                    }}
-                  >
+                  <h2 className="mb-6 bg-clip-text text-5xl font-semibold leading-normal text-transparent">
                     Open-Source
                   </h2>
                   <p className="text-lg leading-7 text-gray-600">Built entirely in public.</p>
@@ -377,147 +248,8 @@ export function IndexPage(): ReactElement {
             </div>
           </div>
         </div>
-        <Pricing gradient={gradients[4]} />
+        <Pricing />
       </Page>
     </Tooltip.Provider>
-  );
-}
-
-function FeatureTabs({ className }: { className?: string }) {
-  const tabs = ['Schema Registry', 'GraphQL Observability', 'Schema Management'];
-  const icons = [<SchemaRegistryIcon />, <GraphQLObservabilityIcon />, <SchemaManagementIcon />];
-
-  return (
-    <section className={cn('mx-auto w-[1200px] max-w-full rounded-3xl bg-white md:p-6', className)}>
-      <Tabs.Root defaultValue={tabs[0]}>
-        <Tabs.List className="bg-beige-200 mb-12 flex flex-row rounded-2xl">
-          {tabs.map((tab, i) => (
-            <Tabs.Trigger
-              key={tab}
-              value={tab}
-              className={
-                "data-[state='active']:text-green-1000 data-[state='active']:border-beige-600 data-[state='active']:bg-white" +
-                ' border border-transparent font-medium leading-6 text-green-800' +
-                ' flex flex-1 justify-center gap-2.5 rounded-[15px] p-2 md:p-4'
-              }
-            >
-              {icons[i]}
-              {tab}
-            </Tabs.Trigger>
-          ))}
-        </Tabs.List>
-        <Tabs.Content value="Schema Registry" tabIndex={-1}>
-          <Feature
-            title="Schema Registry"
-            icon={<SchemaRegistryIcon />}
-            documentationLink="/docs/features/schema-registry"
-            description="A comprehensive Schema Registry to track and manage all changes in your GraphQL schemas."
-            highlights={[
-              {
-                title: 'Version Control System',
-                description:
-                  'Track modifications precisely across multiple environments from staging to production.',
-                image: registryVersionControlSystemImage,
-              },
-              {
-                title: 'Schema Checks',
-                description:
-                  'Enhance reliability in consumer apps with proactive detection for smooth API evolution.',
-                image: registrySchemaChecksImage,
-              },
-              {
-                title: 'Composition Error Prevention',
-                description:
-                  'Safeguard your gateway’s operation, preventing systemic failures that could halt your enterprise processes.',
-                image: registrySchemaChecksImage, // TODO: Replace with correct image
-              },
-              {
-                title: 'Schema Explorer',
-                description: 'Navigate and analyze the connections within your GraphQL schema.',
-                image: registryExplorerImage,
-              },
-            ]}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="GraphQL Observability" tabIndex={-1}>
-          <Feature
-            title="GraphQL Observability"
-            icon={<GraphQLObservabilityIcon />}
-            documentationLink="/docs/features/usage-reporting"
-            description="Enhanced GraphQL Observability tools provide insights into API usage and user experience metrics."
-            highlights={[
-              {
-                title: 'GraphQL consumers',
-                description:
-                  'Track each GraphQL request source to monitor how the APIs are utilized, optimizing resource management.',
-                image: observabilityClientsImage,
-              },
-              {
-                title: 'Overall performance',
-                description: 'Global dashboard for an overarching view of your GraphQL API usage.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Query performance',
-                description:
-                  'Identify and analyze slow GraphQL operations to pinpoint performance bottlenecks.',
-                image: observabilityOperationsImage,
-              },
-            ]}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="Schema Management" tabIndex={-1}>
-          <Feature
-            title="Schema Management"
-            icon={<SchemaManagementIcon />}
-            description="Optimize your GraphQL APIs for clear visibility and control over team modifications, ensuring cohesive and efficient evolution."
-            highlights={[
-              {
-                title: 'Prevent breaking changes',
-                description:
-                  'Integrated Schema Registry with GraphQL Monitoring for confident API evolution.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Detect unused fields',
-                description:
-                  'Hive detects and removes unused fields in your GraphQL schema for efficiency and tidiness.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Schema Policy',
-                description:
-                  'Hive provides tools to lint, verify, and enforce coding best practices across your federated GraphQL architecture.',
-                image: observabilityOverallImage,
-              },
-            ]}
-          />
-        </Tabs.Content>
-      </Tabs.Root>
-    </section>
-  );
-}
-
-function SchemaRegistryIcon() {
-  return (
-    <svg width="24" height="24" fill="currentColor">
-      <path d="M5.25 7.5a2.25 2.25 0 1 1 3 2.122v4.756a2.251 2.251 0 1 1-1.5 0V9.622A2.25 2.25 0 0 1 5.25 7.5Zm9.22-2.03a.75.75 0 0 1 1.06 0l.97.97.97-.97a.75.75 0 1 1 1.06 1.06l-.97.97.97.97a.75.75 0 0 1-1.06 1.06l-.97-.97-.97.97a.75.75 0 1 1-1.06-1.06l.97-.97-.97-.97a.75.75 0 0 1 0-1.06Zm2.03 5.03a.75.75 0 0 1 .75.75v3.128a2.251 2.251 0 1 1-1.5 0V11.25a.75.75 0 0 1 .75-.75Z" />
-    </svg>
-  );
-}
-
-function GraphQLObservabilityIcon() {
-  return (
-    <svg width="24" height="24" fill="currentColor">
-      <path d="M11.1 19.2v-6.3H9.3v-2.7h5.4v2.7h-1.8v6.3h4.5V21H6.6v-1.8h4.5Zm-.9-16V2.1h3.6v1.1a8.102 8.102 0 0 1 2.694 14.64l-1-1.497a6.3 6.3 0 1 0-6.99 0l-.998 1.497A8.103 8.103 0 0 1 10.2 3.2Z" />
-    </svg>
-  );
-}
-
-function SchemaManagementIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor">
-      <path d="M7.761 9.111a2.701 2.701 0 0 0 2.606 1.989h3.6a4.5 4.5 0 0 1 4.434 3.731 2.7 2.7 0 1 1-3.489 3.075 2.7 2.7 0 0 1 1.66-3.017 2.702 2.702 0 0 0-2.605-1.989h-3.6a4.48 4.48 0 0 1-2.7-.9v2.853a2.701 2.701 0 1 1-1.8 0V9.147a2.7 2.7 0 1 1 1.894-.036ZM6.767 7.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Zm0 10.8a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Zm10.8 0a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z" />
-    </svg>
   );
 }

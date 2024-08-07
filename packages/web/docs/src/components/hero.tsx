@@ -4,7 +4,7 @@ import { ArchDecoration, ArchDecorationGradientDefs, HighlightDecoration } from 
 
 export function Hero(props: { children: ReactNode }) {
   return (
-    <div className="bg-green-1000 relative mx-1 flex flex-col gap-8 overflow-hidden rounded-3xl pb-52 pt-24 md:mx-6">
+    <div className="bg-green-1000 relative mx-1 flex max-w-[90rem] flex-col gap-8 overflow-hidden rounded-3xl pb-52 pt-24 md:mx-6">
       <ArchDecoration className="pointer-events-none absolute left-[-186px] top-[-76px] rotate-180" />
       <ArchDecoration className="pointer-events-none absolute bottom-0 right-[-72px]" />
       <ArchDecorationGradientDefs />
