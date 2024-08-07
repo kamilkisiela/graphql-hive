@@ -90,6 +90,11 @@ export function RoleSelector<T>(props: {
                     <Tooltip delayDuration={200} {...(isActive ? { open: false } : {})}>
                       <TooltipTrigger className="w-full text-left">
                         <CommandItem
+                          // We have to remove characters that may break [data-value="..."] query selector
+                          value={`${role.name} - ${role.description}`.replaceAll(
+                            /[^a-z0-9\-\:\ ]+/gi,
+                            '',
+                          )}
                           onSelect={() => {
                             setPhase('busy');
                             setOpen(false);
