@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { Callout } from '@/components/v2';
+import { Callout } from '@/components/ui/callout';
 import { FragmentType, graphql, useFragment } from '@/gql';
 
 const ProPlanBilling_OrganizationFragment = graphql(`

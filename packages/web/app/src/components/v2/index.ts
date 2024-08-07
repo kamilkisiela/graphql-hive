@@ -1,7 +1,6 @@
 export { Accordion } from '@/components/v2/accordion';
 export { Autocomplete } from '@/components/v2/autocomplete';
 export { Avatar } from '@/components/v2/avatar';
-export { Callout } from '@/components/v2/callout';
 export { Card } from '@/components/v2/card';
 export { Checkbox } from '@/components/v2/checkbox';
 export { CopyValue } from '@/components/v2/copy-value';
