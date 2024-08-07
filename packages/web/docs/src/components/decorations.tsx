@@ -23,8 +23,8 @@ export function ArchDecorationGradientDefs() {
           y2="341"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#fff" stop-opacity=".1" />
-          <stop offset="1" stop-color="#fff" stop-opacity=".3" />
+          <stop stopColor="#fff" stopOpacity=".1" />
+          <stop offset="1" stopColor="#fff" stopOpacity=".3" />
         </linearGradient>
         <linearGradient
           id="arch-decoration-b"
@@ -34,8 +34,8 @@ export function ArchDecorationGradientDefs() {
           y2="431"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#fff" stop-opacity=".1" />
-          <stop offset="1" stop-color="#fff" stop-opacity=".4" />
+          <stop stopColor="#fff" stopOpacity=".1" />
+          <stop offset="1" stopColor="#fff" stopOpacity=".4" />
         </linearGradient>
       </defs>
     </svg>
