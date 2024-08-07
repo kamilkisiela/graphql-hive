@@ -7,7 +7,7 @@ import type {
   OrganizationSelector,
   ProjectSelector,
   TargetSelector,
-} from '../__generated__/types';
+} from '../__generated__/types.next';
 import { DateRange } from './entities';
 
 export {

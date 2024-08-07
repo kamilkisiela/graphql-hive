@@ -79,7 +79,7 @@ const Template = () => {
                   onSelect={() => handleChange(schema.service)}
                 >
                   <Check
-                    className={cn('mr-2 h-4 w-4', term === schema.id ? 'opacity-100' : 'opacity-0')}
+                    className={cn('mr-2 size-4', term === schema.id ? 'opacity-100' : 'opacity-0')}
                   />
                   {schema.service}
                 </CommandItem>

@@ -524,7 +524,7 @@ function CreateContractDialogContent(props: {
                               >
                                 <Check
                                   className={cn(
-                                    'mr-2 h-4 w-4',
+                                    'mr-2 size-4',
                                     form.values.includeTags.includes(value)
                                       ? 'opacity-100'
                                       : 'opacity-0',
@@ -637,7 +637,7 @@ function CreateContractDialogContent(props: {
                               >
                                 <Check
                                   className={cn(
-                                    'mr-2 h-4 w-4',
+                                    'mr-2 size-4',
                                     form.values.excludeTags.includes(value)
                                       ? 'opacity-100'
                                       : 'opacity-0',
