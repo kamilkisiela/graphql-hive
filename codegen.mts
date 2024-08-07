@@ -17,14 +17,7 @@ const config: CodegenConfig = {
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
-        blacklistedModules: [
-          'billing',
-          'collection',
-          'lab',
-          'operations',
-          'organization',
-          'schema',
-        ],
+        blacklistedModules: ['collection', 'lab', 'operations', 'organization', 'schema'],
         scalarsOverrides: {
           Date: { type: 'string' },
           SafeInt: { type: 'number' },
