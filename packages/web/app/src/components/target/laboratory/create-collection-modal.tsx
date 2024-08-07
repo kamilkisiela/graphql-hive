@@ -289,7 +289,10 @@ export function CreateCollectionModalContent(props: {
                   type="button"
                   size="lg"
                   className="w-full justify-center"
-                  onClick={props.toggleModalOpen}
+                  onClick={ev => {
+                    ev.preventDefault();
+                    props.toggleModalOpen();
+                  }}
                 >
                   Cancel
                 </Button>
