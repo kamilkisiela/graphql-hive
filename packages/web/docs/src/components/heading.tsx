@@ -17,7 +17,7 @@ export function Heading({ as: _as, size, className, ...rest }: HeadingProps) {
       sizeStyle = 'text-4xl leading-[1.2] md:text-5xl md:leading-[1.16667] tracking-[-0.48px]';
       break;
     case 'sm':
-      sizeStyle = 'text-xl leading-[1.2] tracking-[-0.2px]';
+      sizeStyle = 'text-[40px] leading-[1.2] tracking-[-0.2px]';
       break;
   }
 
