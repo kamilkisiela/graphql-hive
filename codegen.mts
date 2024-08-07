@@ -23,11 +23,9 @@ const config: CodegenConfig = {
           'lab',
           'operations',
           'organization',
-          'policy',
           'schema',
         ],
         scalarsOverrides: {
-          DateTime: { type: 'string' },
           Date: { type: 'string' },
           SafeInt: { type: 'number' },
           ID: { type: 'string' },
