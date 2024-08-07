@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
-import { Callout } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { Callout } from '@/components/ui/callout';
 
 const ProPlanBilling_OrganizationFragment = graphql(`
   fragment ProPlanBilling_OrganizationFragment on Organization {
