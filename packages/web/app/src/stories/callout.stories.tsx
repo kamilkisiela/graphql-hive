@@ -16,10 +16,12 @@ const meta: Meta<typeof Callout> = {
     children: {
       control: { type: 'text' },
     },
+    className: {
+      control: { type: 'text' },
+    },
   },
   args: {
     type: 'default',
-    emoji: '💡',
     children: 'This is a callout',
   },
 };
@@ -28,7 +30,12 @@ export default meta;
 
 type Story = StoryObj<typeof Callout>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    type: 'default',
+    emoji: '💡',
+  },
+};
 
 export const Error: Story = {
   args: {
