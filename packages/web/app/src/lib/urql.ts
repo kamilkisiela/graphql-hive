@@ -137,10 +137,13 @@ export const urqlClient = createClient({
       forwardSubscription(operation) {
         return {
           subscribe: sink => {
+            const usePersistedOperations = env.graphql.persistedOperationsPrefix !== null;
+
             const dispose = sseClient.subscribe(
               {
-                // @ts-expect-error SSE client expects string, we pass undefined 😇
-                query: usePersistedOperations ? undefined : operation.query,
+                query: (usePersistedOperations ? undefined : operation.query) as unknown as string,
+                // @ts-expect-error documentId does not exist within SSEClient typings.
+                documentId: usePersistedOperations ? operation.documentId : undefined,
                 operationName: operation.operationName,
                 variables: operation.variables,
                 extensions: operation.extensions,
