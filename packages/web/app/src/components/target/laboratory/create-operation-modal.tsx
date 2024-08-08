@@ -7,7 +7,7 @@ import { Heading } from '@/components/ui/heading';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useCollections } from '@/pages/target-laboratory';
+import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useEditorContext } from '@graphiql/react';
 
 const CreateOperationMutation = graphql(`
