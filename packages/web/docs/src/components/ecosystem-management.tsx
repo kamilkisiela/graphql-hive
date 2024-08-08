@@ -132,7 +132,7 @@ function Illustration() {
           </Edge>
           <Node
             title="Yoga"
-            description="GraphQL server"
+            description="GraphQL Subgraph"
             highlighted={[5, 6].includes(highlightedEdge)}
           >
             <svg width={48} height={48}>
@@ -177,8 +177,8 @@ function Illustration() {
             <div className="flex-1" />
           </Edge>
           <Node
-            title="GraphQL Codegen"
-            description="End-to-end safety"
+            title="Codegen"
+            description="GraphQL Code Generation"
             highlighted={[2, 3].includes(highlightedEdge)}
           >
             <svg width={48} height={48}>
