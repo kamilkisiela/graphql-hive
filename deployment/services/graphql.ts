@@ -7,7 +7,6 @@ import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
-import { Emails } from './emails';
 import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { Observability } from './observability';
@@ -20,9 +19,9 @@ import { Schema } from './schema';
 import { Sentry } from './sentry';
 import { Supertokens } from './supertokens';
 import { Tokens } from './tokens';
+import { Transmission } from './transmission';
 import { Usage } from './usage';
 import { UsageEstimator } from './usage-estimation';
-import { Webhooks } from './webhooks';
 import { Zendesk } from './zendesk';
 
 export type GraphQL = ReturnType<typeof deployGraphQL>;
@@ -37,7 +36,6 @@ export function deployGraphQL({
   image,
   environment,
   tokens,
-  webhooks,
   schema,
   schemaPolicy,
   cdn,
@@ -47,7 +45,7 @@ export function deployGraphQL({
   dbMigrations,
   rateLimit,
   billing,
-  emails,
+  transmission,
   supertokens,
   s3,
   s3Mirror,
@@ -65,7 +63,6 @@ export function deployGraphQL({
   clickhouse: Clickhouse;
   environment: Environment;
   tokens: Tokens;
-  webhooks: Webhooks;
   schema: Schema;
   schemaPolicy: SchemaPolicy;
   redis: Redis;
@@ -77,7 +74,7 @@ export function deployGraphQL({
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
   billing: StripeBillingService;
-  emails: Emails;
+  transmission: Transmission;
   supertokens: Supertokens;
   zendesk: Zendesk;
   docker: Docker;
@@ -125,12 +122,11 @@ export function deployGraphQL({
           REQUEST_LOGGING: '0', // disabled
           BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
           TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
-          WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
           SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
           SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),
           HIVE_USAGE_ENDPOINT: serviceLocalEndpoint(usage.service),
           RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
-          EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
+          TRANSMISSION_ENDPOINT: serviceLocalEndpoint(transmission.service),
           USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
           WEB_APP_URL: `https://${environment.appDns}`,
           GRAPHQL_PUBLIC_ORIGIN: `https://${environment.appDns}`,

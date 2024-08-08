@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
 import sm from 'sendmail';
-import type {
-  EmailProviderConfig,
-  MockEmailProviderConfig,
-  PostmarkEmailProviderConfig,
-  SendmailEmailProviderConfig,
-  SMTPEmailProviderConfig,
-} from './environment';
+import {
+  env,
+  type EmailProviderConfig,
+  type MockEmailProviderConfig,
+  type PostmarkEmailProviderConfig,
+  type SendmailEmailProviderConfig,
+  type SMTPEmailProviderConfig,
+} from '../../../environment.js';
 
 interface Email {
   to: string;
@@ -27,7 +28,7 @@ export interface EmailProvider {
   history: Email[];
 }
 
-export function createEmailProvider(config: EmailProviderConfig, emailFrom: string): EmailProvider {
+function createEmailProvider(config: EmailProviderConfig, emailFrom: string): EmailProvider {
   switch (config.provider) {
     case 'mock':
       return mock(config, emailFrom);
@@ -38,6 +39,12 @@ export function createEmailProvider(config: EmailProviderConfig, emailFrom: stri
     case 'sendmail':
       return sendmail(config, emailFrom);
   }
+}
+
+export const emailProvider = createEmailProvider(env.email.provider, env.email.emailFrom);
+
+export function getEmailProviderHistory() {
+  return emailProvider.history;
 }
 
 function postmark(config: PostmarkEmailProviderConfig, emailFrom: string) {

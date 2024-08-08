@@ -157,7 +157,7 @@ export const env = {
     prometheus.PROMETHEUS_METRICS === '1'
       ? {
           labels: {
-            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'usage-service',
+            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'stripe-billing',
           },
         }
       : null,

@@ -2,13 +2,13 @@ import * as pulumi from '@pulumi/pulumi';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
+import type { Broker } from './cf-broker';
 import { Docker } from './docker';
 import { Environment } from './environment';
 import { Observability } from './observability';
-import { Redis } from './redis';
 import { Sentry } from './sentry';
 
-export type Emails = ReturnType<typeof deployEmails>;
+export type Transmission = ReturnType<typeof deployTransmission>;
 
 class PostmarkSecret extends ServiceSecret<{
   token: pulumi.Output<string> | string;
@@ -16,19 +16,19 @@ class PostmarkSecret extends ServiceSecret<{
   messageStream: string;
 }> {}
 
-export function deployEmails({
+export function deployTransmission({
   environment,
-  redis,
   heartbeat,
   image,
   docker,
   sentry,
   observability,
+  broker,
 }: {
   observability: Observability;
   environment: Environment;
   image: string;
-  redis: Redis;
+  broker: Broker;
   docker: Docker;
   heartbeat?: string;
   sentry: Sentry;
@@ -41,12 +41,13 @@ export function deployEmails({
   });
 
   const { deployment, service } = new ServiceDeployment(
-    'emails-service',
+    'transmission-service',
     {
       imagePullSecret: docker.secret,
       env: {
         ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
+        REQUEST_BROKER: '1',
         EMAIL_PROVIDER: 'postmark',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         OPENTELEMETRY_COLLECTOR_ENDPOINT:
@@ -61,14 +62,13 @@ export function deployEmails({
       image,
       replicas: environment.isProduction ? 3 : 1,
     },
-    [redis.deployment, redis.service],
+    [],
   )
-    .withSecret('REDIS_HOST', redis.secret, 'host')
-    .withSecret('REDIS_PORT', redis.secret, 'port')
-    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
     .withSecret('EMAIL_FROM', postmarkSecret, 'from')
     .withSecret('EMAIL_PROVIDER_POSTMARK_TOKEN', postmarkSecret, 'token')
     .withSecret('EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM', postmarkSecret, 'messageStream')
+    .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
+    .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 

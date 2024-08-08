@@ -2,11 +2,11 @@ import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
-import { Emails } from './emails';
 import { Environment } from './environment';
 import { Observability } from './observability';
 import { Postgres } from './postgres';
 import { Sentry } from './sentry';
+import { Transmission } from './transmission';
 import { UsageEstimator } from './usage-estimation';
 
 export type RateLimitService = ReturnType<typeof deployRateLimit>;
@@ -15,7 +15,7 @@ export function deployRateLimit({
   environment,
   dbMigrations,
   usageEstimator,
-  emails,
+  transmission,
   image,
   docker,
   postgres,
@@ -26,7 +26,7 @@ export function deployRateLimit({
   usageEstimator: UsageEstimator;
   environment: Environment;
   dbMigrations: DbMigrations;
-  emails: Emails;
+  transmission: Transmission;
   image: string;
   docker: Docker;
   postgres: Postgres;
@@ -45,7 +45,7 @@ export function deployRateLimit({
         SENTRY: sentry.enabled ? '1' : '0',
         LIMIT_CACHE_UPDATE_INTERVAL_MS: environment.isProduction ? '60000' : '86400000',
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
-        EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
+        TRANSMISSION_ENDPOINT: serviceLocalEndpoint(transmission.service),
         WEB_APP_URL: `https://${environment.appDns}/`,
         OPENTELEMETRY_COLLECTOR_ENDPOINT:
           observability.enabled && observability.tracingEndpoint
