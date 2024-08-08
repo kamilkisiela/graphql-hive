@@ -141,13 +141,13 @@ export const urqlClient = createClient({
 
             const dispose = sseClient.subscribe(
               {
-                query: (usePersistedOperations ? undefined : operation.query) as unknown as string,
-                // @ts-expect-error documentId does not exist within SSEClient typings.
-                documentId: usePersistedOperations ? operation.documentId : undefined,
+                ...(usePersistedOperations
+                  ? { documentId: operation.documentId! }
+                  : { query: operation.query! }),
                 operationName: operation.operationName,
                 variables: operation.variables,
                 extensions: operation.extensions,
-              },
+              } satisfies GraphQLPayload as any,
               sink,
             );
             return {
@@ -159,3 +159,18 @@ export const urqlClient = createClient({
     }),
   ].filter(isSome),
 });
+
+type GraphQLPayload = {
+  variables?: Record<string, any>;
+  operationName?: string;
+  extensions?: Record<string, any>;
+} & (
+  | {
+      query: string;
+      documentId?: void;
+    }
+  | {
+      query?: void;
+      documentId: string;
+    }
+);
