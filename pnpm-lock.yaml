@@ -658,9 +658,6 @@ importers:
       '@hive/cdn-script':
         specifier: workspace:*
         version: link:../cdn-worker
-      '@hive/emails':
-        specifier: workspace:*
-        version: link:../emails
       '@hive/schema':
         specifier: workspace:*
         version: link:../schema
@@ -673,15 +670,15 @@ importers:
       '@hive/tokens':
         specifier: workspace:*
         version: link:../tokens
+      '@hive/transmission':
+        specifier: workspace:*
+        version: link:../transmission
       '@hive/usage-common':
         specifier: workspace:*
         version: link:../usage-common
       '@hive/usage-ingestor':
         specifier: workspace:*
         version: link:../usage-ingestor
-      '@hive/webhooks':
-        specifier: workspace:*
-        version: link:../webhooks
       '@octokit/app':
         specifier: 14.1.0
         version: 14.1.0
@@ -881,60 +878,6 @@ importers:
         specifier: 3.23.8
         version: 3.23.8
 
-  packages/services/emails:
-    devDependencies:
-      '@hive/service-common':
-        specifier: workspace:*
-        version: link:../service-common
-      '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
-      '@trpc/server':
-        specifier: 10.45.2
-        version: 10.45.2
-      '@types/mjml':
-        specifier: 4.7.1
-        version: 4.7.1
-      '@types/nodemailer':
-        specifier: 6.4.15
-        version: 6.4.15
-      '@types/sendmail':
-        specifier: 1.4.7
-        version: 1.4.7
-      bullmq:
-        specifier: 5.12.1
-        version: 5.12.1
-      copyfiles:
-        specifier: 2.4.1
-        version: 2.4.1
-      dotenv:
-        specifier: 16.4.5
-        version: 16.4.5
-      ioredis:
-        specifier: 5.4.1
-        version: 5.4.1
-      mjml:
-        specifier: 4.14.0
-        version: 4.14.0(encoding@0.1.13)
-      nodemailer:
-        specifier: 6.9.14
-        version: 6.9.14
-      p-timeout:
-        specifier: 6.1.2
-        version: 6.1.2
-      pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
-      sendmail:
-        specifier: 1.6.1
-        version: 1.6.1
-      tslib:
-        specifier: 2.6.3
-        version: 2.6.3
-      zod:
-        specifier: 3.23.8
-        version: 3.23.8
-
   packages/services/external-composition/federation-2:
     devDependencies:
       '@apollo/composition':
@@ -1006,15 +949,15 @@ importers:
 
   packages/services/rate-limit:
     devDependencies:
-      '@hive/emails':
-        specifier: workspace:*
-        version: link:../emails
       '@hive/service-common':
         specifier: workspace:*
         version: link:../service-common
       '@hive/storage':
         specifier: workspace:*
         version: link:../storage
+      '@hive/transmission':
+        specifier: workspace:*
+        version: link:../transmission
       '@sentry/node':
         specifier: 7.118.0
         version: 7.118.0
@@ -1452,6 +1395,63 @@ importers:
         specifier: 3.23.8
         version: 3.23.8
 
+  packages/services/transmission:
+    devDependencies:
+      '@hive/service-common':
+        specifier: workspace:*
+        version: link:../service-common
+      '@sentry/node':
+        specifier: 7.118.0
+        version: 7.118.0
+      '@trpc/server':
+        specifier: 10.45.2
+        version: 10.45.2
+      '@types/mjml':
+        specifier: 4.7.1
+        version: 4.7.1
+      '@types/nodemailer':
+        specifier: 6.4.15
+        version: 6.4.15
+      '@types/pg':
+        specifier: 8.11.6
+        version: 8.11.6
+      '@types/sendmail':
+        specifier: 1.4.7
+        version: 1.4.7
+      dotenv:
+        specifier: 16.4.5
+        version: 16.4.5
+      got:
+        specifier: 14.4.1
+        version: 14.4.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
+      graphile-worker:
+        specifier: 0.16.6
+        version: 0.16.6(typescript@5.5.3)
+      mjml:
+        specifier: 4.14.0
+        version: 4.14.0(encoding@0.1.13)
+      nodemailer:
+        specifier: 6.9.14
+        version: 6.9.14
+      p-timeout:
+        specifier: 6.1.2
+        version: 6.1.2
+      pg:
+        specifier: 8.12.0
+        version: 8.12.0
+      pino-pretty:
+        specifier: 11.2.1
+        version: 11.2.1
+      sendmail:
+        specifier: 1.6.1
+        version: 1.6.1
+      tslib:
+        specifier: 2.6.3
+        version: 2.6.3
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+
   packages/services/usage:
     devDependencies:
       '@hive/service-common':
@@ -1577,45 +1577,6 @@ importers:
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
-      tslib:
-        specifier: 2.6.3
-        version: 2.6.3
-      zod:
-        specifier: 3.23.8
-        version: 3.23.8
-
-  packages/services/webhooks:
-    devDependencies:
-      '@hive/service-common':
-        specifier: workspace:*
-        version: link:../service-common
-      '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
-      '@trpc/server':
-        specifier: 10.45.2
-        version: 10.45.2
-      bullmq:
-        specifier: 5.12.1
-        version: 5.12.1
-      copyfiles:
-        specifier: 2.4.1
-        version: 2.4.1
-      dotenv:
-        specifier: 16.4.5
-        version: 16.4.5
-      got:
-        specifier: 14.4.1
-        version: 14.4.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
-      ioredis:
-        specifier: 5.4.1
-        version: 5.4.1
-      p-timeout:
-        specifier: 6.1.2
-        version: 6.1.2
-      pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
       tslib:
         specifier: 2.6.3
         version: 2.6.3
@@ -4021,6 +3982,7 @@ packages:
 
   '@fastify/vite@6.0.7':
     resolution: {integrity: sha512-+dRo9KUkvmbqdmBskG02SwigWl06Mwkw8SBDK1zTNH6vd4DyXbRvI7RmJEmBkLouSU81KTzy1+OzwHSffqSD6w==}
+    bundledDependencies: []
 
   '@floating-ui/core@1.2.6':
     resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
@@ -4054,6 +4016,9 @@ packages:
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
+
+  '@graphile/logger@0.2.0':
+    resolution: {integrity: sha512-jjcWBokl9eb1gVJ85QmoaQ73CQ52xAaOCF29ukRbYNl6lY+ts0ErTaDYOBlejcbUs2OpaiqYLO5uDhyLFzWw4w==}
 
   '@graphiql/react@0.22.4':
     resolution: {integrity: sha512-FsupNjAUJ17qhdyCjKo150wpNH7gr0ScAm/Rmk7VHP4Mh0Osid+1bKLPtXEOjGI+InuTPSKhJw3Zbm8dD3+o1A==}
@@ -4689,8 +4654,17 @@ packages:
     resolution: {integrity: sha512-55ONqFytZExfOIjF1RjXPcVmT/jJqFzbbDqxK9jmRV4nxiYWtL9hENSW1Jfx0SdZfrvoqd44YJ/GJTqfRrawSQ==}
     engines: {node: ^8.13.0 || >=10.10.0}
 
+  '@grpc/grpc-js@1.11.1':
+    resolution: {integrity: sha512-gyt/WayZrVPH2w/UTLansS7F9Nwld472JxxaETamrM8HNlsa+jSLNyKAZmhxI2Me4c3mQHFiS1wWHDY1g1Kthw==}
+    engines: {node: '>=12.10.0'}
+
   '@grpc/proto-loader@0.7.10':
     resolution: {integrity: sha512-CAqDfoaQ8ykFd9zqBDn4k6iWT9loLAlc2ETmDFS9JCD70gDcnA4L3AFEo2iV7KyAtAAHFW9ftq1Fz+Vsgq80RQ==}
+    engines: {node: '>=6'}
+    hasBin: true
+
+  '@grpc/proto-loader@0.7.13':
+    resolution: {integrity: sha512-AiXO/bfe9bmxBjxxtYxFAXGZvMaN5s8kO+jBHAJCON8rJoB5YS/D6X7ZNc6XQkuHNmyl4CYaMI1fJ/Gn27RGGw==}
     engines: {node: '>=6'}
     hasBin: true
 
@@ -4843,6 +4817,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
+  '@js-sdsl/ordered-map@4.4.2':
+    resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
+
   '@jsdevtools/ono@7.1.3':
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
 
@@ -4931,36 +4908,6 @@ packages:
 
   '@motionone/utils@10.15.1':
     resolution: {integrity: sha512-p0YncgU+iklvYr/Dq4NobTRdAPv9PveRDUXabPEeOjBLSO/1FNB2phNTZxOxpi1/GZwYpAoECEa0Wam+nsmhSw==}
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
-    resolution: {integrity: sha512-9bfjwDxIDWmmOKusUcqdS4Rw+SETlp9Dy39Xui9BEGEk19dDwH0jhipwFzEff/pFg95NKymc6TOTbRKcWeRqyQ==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.2':
-    resolution: {integrity: sha512-lwriRAHm1Yg4iDf23Oxm9n/t5Zpw1lVnxYU3HnJPTi2lJRkKTrps1KVgvL6m7WvmhYVt/FIsssWay+k45QHeuw==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.2':
-    resolution: {integrity: sha512-FU20Bo66/f7He9Fp9sP2zaJ1Q8L9uLPZQDub/WlUip78JlPeMbVL8546HbZfcW9LNciEXc8d+tThSJjSC+tmsg==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.2':
-    resolution: {integrity: sha512-MOI9Dlfrpi2Cuc7i5dXdxPbFIgbDBGgKR5F2yWEa6FVEtSWncfVNKW5AKjImAQ6CZlBK9tympdsZJ2xThBiWWA==}
-    cpu: [arm]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.2':
-    resolution: {integrity: sha512-gsWNDCklNy7Ajk0vBBf9jEx04RUxuDQfBse918Ww+Qb9HCPoGzS+XJTLe96iN3BVK7grnLiYghP/M4L8VsaHeA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.2':
-    resolution: {integrity: sha512-O+6Gs8UeDbyFpbSh2CPEz/UOrrdWPTBYNblZK5CxxLisYt4kGX3Sc+czffFonyjiGSq3jWLwJS/CCJc7tBr4sQ==}
-    cpu: [x64]
-    os: [win32]
 
   '@n1ru4l/push-pull-async-iterable-iterator@3.2.0':
     resolution: {integrity: sha512-3fkKj25kEjsfObL6IlKPAlHYPq/oYwUkkQ03zsTTiDjD7vg/RxjdiLeCydqtxHZP0JgsXL3D/X5oAkMGzuUp/Q==}
@@ -7748,6 +7695,9 @@ packages:
   '@types/cross-spawn@6.0.3':
     resolution: {integrity: sha512-BDAkU7WHHRHnvBf5z89lcvACsvkz/n7Tv+HyD/uW76O29HoH1Tk/W6iQrepaZVbisvlEek4ygwT8IW7ow9XLAA==}
 
+  '@types/debug@4.1.12':
+    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
+
   '@types/debug@4.1.7':
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
 
@@ -7819,6 +7769,9 @@ packages:
 
   '@types/http-cache-semantics@4.0.4':
     resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
+
+  '@types/interpret@1.1.3':
+    resolution: {integrity: sha512-uBaBhj/BhilG58r64mtDb/BEdH51HIQLgP5bmWzc5qCtFMja8dCk/IOJmk36j0lbi9QHwI6sbtUNGuqXdKCAtQ==}
 
   '@types/ioredis-mock@8.2.5':
     resolution: {integrity: sha512-cZyuwC9LGtg7s5G9/w6rpy3IOZ6F/hFR0pQlWYZESMo1xQUYbDpa6haqB4grTePjsGzcB/YLBFCjqRunK5wieg==}
@@ -8776,9 +8729,6 @@ packages:
   builtins@5.0.1:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
 
-  bullmq@5.12.1:
-    resolution: {integrity: sha512-XNUnT4+hJ/bnu3HkIeauN/i+fU+DwC74rubPLktoUsds7zBfugN3jF8XbaT7Ya4U+SANR+3T4u9YG8KUbsp2+g==}
-
   bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}
     engines: {node: '>=12'}
@@ -9304,10 +9254,6 @@ packages:
 
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
-
-  cron-parser@4.6.0:
-    resolution: {integrity: sha512-guZNLMGUgg6z4+eGhmHGw7ft+v6OQeuHzd1gcLxCo9Yg/qoxmG3nindp2/uwGCLizEisf2H0ptqeVXeoCpP6FA==}
-    engines: {node: '>=12.0.0'}
 
   cross-fetch@3.1.8:
     resolution: {integrity: sha512-cvA+JwZoU0Xq+h6WkMvAUqPEYy92Obet6UdKLfW60qn99ftItKjB5T+BkyWOFWe2pUyfQ+IJHmpOTznqk1M6Kg==}
@@ -10933,6 +10879,15 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
+  graphile-config@0.0.1-beta.9:
+    resolution: {integrity: sha512-7vNxXZ24OAgXxDKXYi9JtgWPMuNbBL3057Yf32Ux+/rVP4+EePgySCc+NNnn0tORi8qwqVreN8bdWqGIcSwNXg==}
+    engines: {node: '>=16'}
+
+  graphile-worker@0.16.6:
+    resolution: {integrity: sha512-e7gGYDmGqzju2l83MpzX8vNG/lOtVJiSzI3eZpAFubSxh/cxs7sRrRGBGjzBP1kNG0H+c95etPpNRNlH65PYhw==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+
   graphiql@3.3.2:
     resolution: {integrity: sha512-LJ8Q6UM3kUzTXvybud9a4sj/QBEVHwHWd5Oc3OjLp9DQiKjqVY/2P/Q3RdPQD/MihwaO+6eC69R4MYnPQGd2Hw==}
     peerDependencies:
@@ -11418,6 +11373,10 @@ packages:
   internmap@2.0.3:
     resolution: {integrity: sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg==}
     engines: {node: '>=12'}
+
+  interpret@3.1.1:
+    resolution: {integrity: sha512-6xwYfHbajpoF0xLW+iwLkhwgvLoZDfjYfoFNu8ftMoXINzwuymNLd9u/KmwtdT2GbR+/Cz66otEGEVVUHX9QLQ==}
+    engines: {node: '>=10.13.0'}
 
   intersection-observer@0.12.2:
     resolution: {integrity: sha512-7m1vEcPCxXYI8HqnL8CKI6siDyD+eIWSwgB3DZA+ZTogxk9I4CDnj4wilt9x/+/QbHI4YG5YZNmC6458/e9Ktg==}
@@ -12309,10 +12268,6 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  luxon@3.0.4:
-    resolution: {integrity: sha512-aV48rGUwP/Vydn8HT+5cdr26YYQiUZ42NM6ToMoaGKwYfWbfLeRkEu1wXWMHBZT6+KyLfcbbtVcoQFCbbPjKlw==}
-    engines: {node: '>=12'}
-
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
@@ -12975,13 +12930,6 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  msgpackr-extract@3.0.2:
-    resolution: {integrity: sha512-SdzXp4kD/Qf8agZ9+iTu6eql0m3kWm1A2y1hkpTeVNENutaB0BwHlSvAIaMxwntmRUAUjon2V4L8Z/njd0Ct8A==}
-    hasBin: true
-
-  msgpackr@1.10.1:
-    resolution: {integrity: sha512-r5VRLv9qouXuLiIBrLpl2d5ZvPt8svdQTl5/vMvE4nzDMyEX4sgW5yWhuBBj5UmgwOTWj8CIdSXn5sAfsHAWIQ==}
-
   multi-fork@0.0.2:
     resolution: {integrity: sha512-SHWGuze0cZNiH+JGJQFlB1k7kZLGFCvW1Xo5Fcpe86KICkC3aVTJWpjUcmyYcLCB0I6gdzKLCia/bTIw2ggl8A==}
 
@@ -13131,10 +13079,6 @@ packages:
   node-fetch@3.3.2:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  node-gyp-build-optional-packages@5.0.7:
-    resolution: {integrity: sha512-YlCCc6Wffkx0kHkmam79GKvDQ6x+QZkMjFGrIMxgFNILFvGSbCp2fCBC55pGTT9gVaz8Na5CLmxt/urtzRv36w==}
-    hasBin: true
 
   node-gyp@10.0.1:
     resolution: {integrity: sha512-gg3/bHehQfZivQVfqIyy8wTdSymF9yTyP4CJifK73imyNMU8AIGQE2pUa7dNWfmMeG9cDVF2eehiRMv0LC1iAg==}
@@ -14835,6 +14779,9 @@ packages:
 
   rxjs@7.8.0:
     resolution: {integrity: sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==}
+
+  rxjs@7.8.1:
+    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
 
   sade@1.8.1:
     resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
@@ -19672,6 +19619,8 @@ snapshots:
       graphql: 16.9.0
       typescript: 5.5.3
 
+  '@graphile/logger@0.2.0': {}
+
   '@graphiql/react@0.22.4(@codemirror/language@6.10.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@graphiql/toolkit': 0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
@@ -20888,7 +20837,19 @@ snapshots:
       '@grpc/proto-loader': 0.7.10
       '@types/node': 20.14.10
 
+  '@grpc/grpc-js@1.11.1':
+    dependencies:
+      '@grpc/proto-loader': 0.7.13
+      '@js-sdsl/ordered-map': 4.4.2
+
   '@grpc/proto-loader@0.7.10':
+    dependencies:
+      lodash.camelcase: 4.3.0
+      long: 5.2.3
+      protobufjs: 7.3.0
+      yargs: 17.7.2
+
+  '@grpc/proto-loader@0.7.13':
     dependencies:
       lodash.camelcase: 4.3.0
       long: 5.2.3
@@ -21081,6 +21042,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
 
+  '@js-sdsl/ordered-map@4.4.2': {}
+
   '@jsdevtools/ono@7.1.3': {}
 
   '@kamilkisiela/fast-url-parser@1.1.4': {}
@@ -21228,24 +21191,6 @@ snapshots:
       '@motionone/types': 10.15.1
       hey-listen: 1.0.8
       tslib: 2.6.3
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.2':
-    optional: true
 
   '@n1ru4l/push-pull-async-iterable-iterator@3.2.0': {}
 
@@ -22247,7 +22192,7 @@ snapshots:
 
   '@opentelemetry/otlp-grpc-exporter-base@0.52.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@grpc/grpc-js': 1.10.1
+      '@grpc/grpc-js': 1.11.1
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/otlp-exporter-base': 0.52.1(@opentelemetry/api@1.9.0)
@@ -24824,6 +24769,10 @@ snapshots:
     dependencies:
       '@types/node': 20.14.10
 
+  '@types/debug@4.1.12':
+    dependencies:
+      '@types/ms': 0.7.34
+
   '@types/debug@4.1.7':
     dependencies:
       '@types/ms': 0.7.34
@@ -24919,6 +24868,10 @@ snapshots:
       hoist-non-react-statics: 3.3.2
 
   '@types/http-cache-semantics@4.0.4': {}
+
+  '@types/interpret@1.1.3':
+    dependencies:
+      '@types/node': 20.14.10
 
   '@types/ioredis-mock@8.2.5':
     dependencies:
@@ -26028,18 +25981,6 @@ snapshots:
     dependencies:
       semver: 7.6.2
 
-  bullmq@5.12.1:
-    dependencies:
-      cron-parser: 4.6.0
-      ioredis: 5.4.1
-      msgpackr: 1.10.1
-      node-abort-controller: 3.1.1
-      semver: 7.6.2
-      tslib: 2.6.3
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - supports-color
-
   bundle-name@3.0.0:
     dependencies:
       run-applescript: 5.0.0
@@ -26629,10 +26570,6 @@ snapshots:
   crack-json@1.3.0: {}
 
   create-require@1.1.1: {}
-
-  cron-parser@4.6.0:
-    dependencies:
-      luxon: 3.0.4
 
   cross-fetch@3.1.8(encoding@0.1.13):
     dependencies:
@@ -28754,6 +28691,36 @@ snapshots:
 
   graphemer@1.4.0: {}
 
+  graphile-config@0.0.1-beta.9:
+    dependencies:
+      '@types/interpret': 1.1.3
+      '@types/node': 20.14.10
+      '@types/semver': 7.5.6
+      chalk: 4.1.2
+      debug: 4.3.5(supports-color@8.1.1)
+      interpret: 3.1.1
+      semver: 7.6.2
+      tslib: 2.6.3
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - supports-color
+
+  graphile-worker@0.16.6(typescript@5.5.3):
+    dependencies:
+      '@graphile/logger': 0.2.0
+      '@types/debug': 4.1.12
+      '@types/pg': 8.11.6
+      cosmiconfig: 8.3.6(typescript@5.5.3)
+      graphile-config: 0.0.1-beta.9
+      json5: 2.2.3
+      pg: 8.12.0
+      tslib: 2.6.3
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - pg-native
+      - supports-color
+      - typescript
+
   graphiql@3.3.2(patch_hash=p4mc7pxwsatzeupmv5hnqi5t6q)(@codemirror/language@6.10.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@graphiql/react': 0.22.4(@codemirror/language@6.10.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -29415,7 +29382,7 @@ snapshots:
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
-      rxjs: 7.8.0
+      rxjs: 7.8.1
       string-width: 4.2.3
       strip-ansi: 6.0.1
       through: 2.3.8
@@ -29430,6 +29397,8 @@ snapshots:
       side-channel: 1.0.4
 
   internmap@2.0.3: {}
+
+  interpret@3.1.1: {}
 
   intersection-observer@0.12.2: {}
 
@@ -29453,7 +29422,7 @@ snapshots:
     dependencies:
       '@ioredis/commands': 1.2.0
       cluster-key-slot: 1.1.1
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.5(supports-color@8.1.1)
       denque: 2.1.0
       lodash.defaults: 4.2.0
       lodash.isarguments: 3.1.0
@@ -30113,7 +30082,7 @@ snapshots:
       log-update: 4.0.0
       p-map: 4.0.0
       rfdc: 1.3.1
-      rxjs: 7.8.0
+      rxjs: 7.8.1
       through: 2.3.8
       wrap-ansi: 7.0.0
     optionalDependencies:
@@ -30302,8 +30271,6 @@ snapshots:
   lucide-react@0.408.0(react@18.3.1):
     dependencies:
       react: 18.3.1
-
-  luxon@3.0.4: {}
 
   lz-string@1.5.0: {}
 
@@ -31562,22 +31529,6 @@ snapshots:
 
   ms@2.1.3: {}
 
-  msgpackr-extract@3.0.2:
-    dependencies:
-      node-gyp-build-optional-packages: 5.0.7
-    optionalDependencies:
-      '@msgpackr-extract/msgpackr-extract-darwin-arm64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-darwin-x64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-arm': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-arm64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.2
-      '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.2
-    optional: true
-
-  msgpackr@1.10.1:
-    optionalDependencies:
-      msgpackr-extract: 3.0.2
-
   multi-fork@0.0.2: {}
 
   mute-stream@0.0.8: {}
@@ -31772,9 +31723,6 @@ snapshots:
       data-uri-to-buffer: 4.0.1
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
-
-  node-gyp-build-optional-packages@5.0.7:
-    optional: true
 
   node-gyp@10.0.1:
     dependencies:
@@ -33657,6 +33605,10 @@ snapshots:
   rw@1.3.3: {}
 
   rxjs@7.8.0:
+    dependencies:
+      tslib: 2.6.3
+
+  rxjs@7.8.1:
     dependencies:
       tslib: 2.6.3
 
@@ -35619,7 +35571,7 @@ snapshots:
   yargs@17.7.2:
     dependencies:
       cliui: 8.0.1
-      escalade: 3.1.1
+      escalade: 3.1.2
       get-caller-file: 2.0.5
       require-directory: 2.1.1
       string-width: 4.2.3

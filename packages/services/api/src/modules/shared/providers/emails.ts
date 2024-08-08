@@ -1,34 +1,24 @@
-import { Inject, Injectable, InjectionToken, Optional } from 'graphql-modules';
-import type { EmailsApi } from '@hive/emails';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { Injectable, Scope } from 'graphql-modules';
+import { Transmission } from './transmission';
 
-export const EMAILS_ENDPOINT = new InjectionToken<string>('EMAILS_ENDPOINT');
-
-@Injectable()
+@Injectable({
+  scope: Scope.Operation,
+})
 export class Emails {
-  private api;
-
-  constructor(@Optional() @Inject(EMAILS_ENDPOINT) endpoint?: string) {
-    this.api = endpoint
-      ? createTRPCProxyClient<EmailsApi>({
-          links: [
-            httpLink({
-              url: `${endpoint}/trpc`,
-              fetch,
-            }),
-          ],
-        })
-      : null;
-  }
+  constructor(private transmission: Transmission) {}
 
   schedule(input: { id?: string; email: string; subject: string; body: MJMLValue }) {
-    if (!this.api) {
-      return Promise.resolve();
-    }
-
-    return this.api.schedule.mutate({
-      ...input,
-      body: input.body.content,
+    return this.transmission.client.emailTask.mutate({
+      payload: {
+        to: input.email,
+        subject: input.subject,
+        body: input.body.content,
+      },
+      spec: {
+        maxAttempts: 5,
+        jobKey: input.id,
+        jobKeyMode: input.id ? 'replace' : undefined,
+      },
     });
   }
 }

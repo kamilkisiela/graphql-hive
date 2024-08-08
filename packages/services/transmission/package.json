@@ -1,5 +1,5 @@
 {
-  "name": "@hive/emails",
+  "name": "@hive/transmission",
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
@@ -7,7 +7,6 @@
   "scripts": {
     "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
-    "postbuild": "copyfiles -f \"node_modules/bullmq/dist/esm/commands/*.lua\" dist && copyfiles -f \"node_modules/bullmq/dist/esm/commands/includes/*.lua\" dist/includes",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
@@ -16,14 +15,15 @@
     "@trpc/server": "10.45.2",
     "@types/mjml": "4.7.1",
     "@types/nodemailer": "6.4.15",
+    "@types/pg": "8.11.6",
     "@types/sendmail": "1.4.7",
-    "bullmq": "5.12.1",
-    "copyfiles": "2.4.1",
     "dotenv": "16.4.5",
-    "ioredis": "5.4.1",
+    "got": "14.4.1",
+    "graphile-worker": "0.16.6",
     "mjml": "4.14.0",
     "nodemailer": "6.9.14",
     "p-timeout": "6.1.2",
+    "pg": "8.12.0",
     "pino-pretty": "11.2.1",
     "sendmail": "1.6.1",
     "tslib": "2.6.3",

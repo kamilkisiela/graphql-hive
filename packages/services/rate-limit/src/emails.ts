@@ -1,18 +1,45 @@
-import type { EmailsApi } from '@hive/emails';
+import type { JobSpec, TransmissionAPI } from '@hive/transmission';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { env } from './environment';
 
-export function createEmailScheduler(config?: { endpoint: string }) {
-  const api = config?.endpoint
-    ? createTRPCProxyClient<EmailsApi>({
-        links: [
-          httpLink({
-            url: `${config.endpoint}/trpc`,
-            fetch,
-          }),
-        ],
-      })
-    : null;
+function sharedJobSpec(input: {
+  event: 'warning' | 'exceeded';
+  organizationId: string;
+  period: {
+    start: number;
+    end: number;
+  };
+  limit: number;
+}): JobSpec {
+  return {
+    // Shared jobKey and `jobKeyMode: 'replace'`, makes sure the latest email wins
+    // (in case we warn and after a short period of time, rate limit).
+    jobKey: `rate-limit-${input.organizationId}`,
+    jobKeyMode: 'replace',
+    maxAttempts: 10,
+    // The key includes all necessary information to make sure we don't send an email
+    // about the same thing multiple times within the same context.
+    // By context I mean:
+    // - billing period (when a new billing period starts, we can send an email again)
+    // - limits (when user updates the limit, we can send an email again)
+    monthlyDedupeKey: JSON.stringify({
+      event: input.event,
+      organizationId: input.organizationId,
+      period: input.period,
+      limit: input.limit,
+    }),
+  };
+}
+
+export function createEmailScheduler(transmissionEndpoint: string) {
+  const api = createTRPCProxyClient<TransmissionAPI>({
+    links: [
+      httpLink({
+        url: `${transmissionEndpoint}/trpc`,
+        fetch,
+      }),
+    ],
+  });
 
   const numberFormatter = new Intl.NumberFormat();
   let scheduledEmails: Promise<unknown>[] = [];
@@ -39,23 +66,12 @@ export function createEmailScheduler(config?: { endpoint: string }) {
         current: number;
       };
     }) {
-      if (!api) {
-        return scheduledEmails.push(Promise.resolve());
-      }
-
       return scheduledEmails.push(
-        api.schedule.mutate({
-          email: input.organization.email,
-          // If the jobId would include only the period and org id, then we would be able to notify the user once per month.
-          // There's a chance that an organization will increase the limit and we might need to notify them again.
-          id: JSON.stringify({
-            id: 'rate-limit-exceeded',
-            organization: input.organization.id,
-            period: input.period,
-            limit: input.usage.quota,
-          }),
-          subject: `GraphQL-Hive operations quota for ${input.organization.name} exceeded`,
-          body: `
+        api.emailTask.mutate({
+          payload: {
+            to: input.organization.email,
+            subject: `GraphQL-Hive operations quota for ${input.organization.name} exceeded`,
+            body: `
           <mjml>
             <mj-body>
               <mj-section>
@@ -83,6 +99,13 @@ export function createEmailScheduler(config?: { endpoint: string }) {
             </mj-body>
           </mjml>
         `,
+          },
+          spec: sharedJobSpec({
+            event: 'exceeded',
+            organizationId: input.organization.id,
+            period: input.period,
+            limit: input.usage.quota,
+          }),
         }),
       );
     },
@@ -103,23 +126,13 @@ export function createEmailScheduler(config?: { endpoint: string }) {
         current: number;
       };
     }) {
-      if (!api) {
-        return scheduledEmails.push(Promise.resolve());
-      }
-
       return scheduledEmails.push(
-        api.schedule.mutate({
-          email: input.organization.email,
-          // If the jobId would include only the period and org id, then we would be able to notify the user once per month.
-          // There's a chance that an organization will increase the limit and we might need to notify them again.
-          id: JSON.stringify({
-            id: 'rate-limit-warning',
-            organization: input.organization.id,
-            period: input.period,
-            limit: input.usage.quota,
-          }),
-          subject: `${input.organization.name} is approaching its rate limit`,
-          body: `
+        // prevent sending the same email multiple times
+        api.emailTask.mutate({
+          payload: {
+            to: input.organization.email,
+            subject: `${input.organization.name} is approaching its rate limit`,
+            body: `
           <mjml>
             <mj-body>
               <mj-section>
@@ -147,6 +160,13 @@ export function createEmailScheduler(config?: { endpoint: string }) {
             </mj-body>
           </mjml>
         `,
+          },
+          spec: sharedJobSpec({
+            event: 'warning',
+            organizationId: input.organization.id,
+            period: input.period,
+            limit: input.usage.quota,
+          }),
         }),
       );
     },

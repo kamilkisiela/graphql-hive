@@ -10,7 +10,7 @@ import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-n
 import type { TypeInput } from 'supertokens-node/types';
 import zod from 'zod';
 import { HiveError, type Storage } from '@hive/api';
-import type { EmailsApi } from '@hive/emails';
+import type { TransmissionAPI } from '@hive/transmission';
 import { captureException } from '@sentry/node';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { createInternalApiCaller } from './api';
@@ -41,8 +41,8 @@ export const backendConfig = (requirements: {
   broadcastLog: BroadcastOIDCIntegrationLog;
 }): TypeInput => {
   const { logger } = requirements;
-  const emailsService = createTRPCProxyClient<EmailsApi>({
-    links: [httpLink({ url: `${env.hiveServices.emails?.endpoint}/trpc` })],
+  const transmissionClient = createTRPCProxyClient<TransmissionAPI>({
+    links: [httpLink({ url: `${env.hiveServices.transmission.endpoint}/trpc` })],
   });
   const internalApi = createInternalApiCaller({
     storage: requirements.storage,
@@ -137,7 +137,7 @@ export const backendConfig = (requirements: {
             ...originalImplementation,
             async sendEmail(input) {
               if (input.type === 'PASSWORD_RESET') {
-                await emailsService.sendPasswordResetEmail.mutate({
+                await transmissionClient.sendPasswordResetEmail.mutate({
                   user: {
                     id: input.user.id,
                     email: input.user.email,
@@ -163,7 +163,7 @@ export const backendConfig = (requirements: {
             ...originalImplementation,
             async sendEmail(input) {
               if (input.type === 'EMAIL_VERIFICATION') {
-                await emailsService.sendEmailVerificationEmail.mutate({
+                await transmissionClient.sendEmailVerificationEmail.mutate({
                   user: {
                     id: input.user.id,
                     email: input.user.email,

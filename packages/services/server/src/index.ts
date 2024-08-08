@@ -310,9 +310,8 @@ export async function main() {
       billing: {
         endpoint: env.hiveServices.billing ? env.hiveServices.billing.endpoint : null,
       },
-      emailsEndpoint: env.hiveServices.emails ? env.hiveServices.emails.endpoint : undefined,
-      webhooks: {
-        endpoint: env.hiveServices.webhooks.endpoint,
+      transmission: {
+        endpoint: env.hiveServices.transmission.endpoint,
       },
       schemaService: {
         endpoint: env.hiveServices.schema.endpoint,
