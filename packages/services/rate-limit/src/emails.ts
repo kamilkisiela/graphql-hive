@@ -67,7 +67,7 @@ export function createEmailScheduler(transmissionEndpoint: string) {
       };
     }) {
       return scheduledEmails.push(
-        api.emailTask.mutate({
+        api.sendEmail.mutate({
           payload: {
             to: input.organization.email,
             subject: `GraphQL-Hive operations quota for ${input.organization.name} exceeded`,
@@ -128,7 +128,7 @@ export function createEmailScheduler(transmissionEndpoint: string) {
     }) {
       return scheduledEmails.push(
         // prevent sending the same email multiple times
-        api.emailTask.mutate({
+        api.sendEmail.mutate({
           payload: {
             to: input.organization.email,
             subject: `${input.organization.name} is approaching its rate limit`,

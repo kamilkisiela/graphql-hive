@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { addJob } from '../../tasks';
-import { publicProcedure } from '../../trpc';
+import { publicProcedure } from '../../../lib/trpc.js';
+import { addJob } from '../../../tasks.js';
 import { renderEmailVerificationEmail } from './templates/email-verification';
 import { renderPasswordResetEmail } from './templates/password-reset';
 

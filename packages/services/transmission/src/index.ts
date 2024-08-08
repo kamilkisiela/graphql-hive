@@ -13,12 +13,10 @@ import { createStorage } from '@hive/storage';
 import { captureException, init as initSentry } from '@sentry/node';
 import { createConnectionString } from './connection-string.js';
 import { env } from './environment.js';
-import { getEmailProviderHistory } from './notifications/email/providers.js';
-import { taskList, taskRouter } from './tasks.js';
-import type { TrpcContext } from './trpc.js';
-import { enhanceTaskList } from './utils.js';
-
-const numOfCPUs = cpus().length;
+import type { TrpcContext } from './lib/trpc.js';
+import { createCrontab, enhanceTaskList } from './lib/utils.js';
+import { taskRouter, tasks } from './tasks.js';
+import { getEmailProviderHistory } from './tasks/notifications/email/providers.js';
 
 // TODO: OTEL tracing (discuss it)
 
@@ -65,6 +63,7 @@ async function main() {
 
   try {
     const connectionString = createConnectionString(env.postgres);
+    const numOfCPUs = cpus().length;
     // In development: 2 workers
     // In other environments: number of CPUs (at least 1 :D - in case the length is 0 for some reason)
     const concurrency = env.environment === 'development' ? 2 : numOfCPUs > 1 ? numOfCPUs : 1;
@@ -93,17 +92,24 @@ async function main() {
       logger: workerLogger,
       // disable automatic graceful shutdown on SIGINT, SIGTERM, etc
       noHandleSignals: true,
-      taskList: enhanceTaskList({ storage }, lockClient, taskList.getTaskList()),
-      crontab: [
-        // // Run the alerts cron task every minute,
-        // // retry up to 3 times, and give it a high priority.
-        // '* * * * * alertsCronTask ?max=3&jobKey=alertsCronTask&jobKeyMode=replace&priority=10',
-        // Run the cleanup task every hour
-        '0 * * * * monthlyDeduplicationCleanupTask ?max=5&priority=8',
-      ].join('\n'),
+      taskList: enhanceTaskList({ storage }, lockClient, tasks.getTaskList()),
+      // Run the alerts cron task every minute,
+      // retry up to 3 times, and give it a high priority.
+      // '* * * * * alertsCronTask ?max=3&jobKey=alertsCronTask&jobKeyMode=replace&priority=10',
+      crontab: createCrontab(tasks.getTaskList(), [
+        {
+          // Run the cleanup task every hour
+          cron: '0 * * * *',
+          task: 'monthlyDeduplicationCleanupTask',
+          options: {
+            max: 5,
+            priority: 8,
+          },
+        },
+      ]),
     });
 
-    taskList.registerEvents(runner.events);
+    tasks.registerEvents(runner.events);
 
     // Log lock events
     lockClient.on('error', error => {

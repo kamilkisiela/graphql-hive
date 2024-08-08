@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { createTask } from '../utils';
+import { createTask } from '../../lib/utils.js';
 
-export const sendMSTeamWebhook = createTask(
+export const sendMSTeamsWebhook = createTask(
   z.object({
     url: z.string().url(),
     body: z.string(),

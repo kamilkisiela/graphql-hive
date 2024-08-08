@@ -7,7 +7,7 @@ import {
   type PostmarkEmailProviderConfig,
   type SendmailEmailProviderConfig,
   type SMTPEmailProviderConfig,
-} from '../../environment';
+} from '../../../environment.js';
 
 interface Email {
   to: string;

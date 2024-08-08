@@ -1,7 +1,7 @@
 import { got } from 'got';
 import { z } from 'zod';
-import { env } from '../environment';
-import { createTask } from '../utils';
+import { env } from '../../environment.js';
+import { createTask } from '../../lib/utils.js';
 
 export const sendWebhookTask = createTask(
   z.object({

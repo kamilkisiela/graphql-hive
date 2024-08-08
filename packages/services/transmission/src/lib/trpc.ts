@@ -3,8 +3,8 @@ import { z } from 'zod';
 import type { Storage } from '@hive/api';
 import { FastifyRequest, handleTRPCError } from '@hive/service-common';
 import { initTRPC } from '@trpc/server';
-import { ensureMonthlyDedupeKey, rollbackMonthlyDedupeKey } from './monthly-deduplication';
-import { addJob, type TaskSchemas } from './tasks';
+import { addJob, type TaskSchemas } from '../tasks.js';
+import { ensureMonthlyDedupeKey, rollbackMonthlyDedupeKey } from './monthly-deduplication.js';
 
 /**
  * Should be done only once per backend!
@@ -12,8 +12,6 @@ import { addJob, type TaskSchemas } from './tasks';
 export const t = initTRPC.context<TrpcContext>().create();
 export const router = t.router;
 export const publicProcedure = t.procedure.use(handleTRPCError);
-
-type AvailableTaskName = keyof TaskSchemas;
 
 const SpecSchema = z.object({
   maxAttempts: z
@@ -50,9 +48,10 @@ export interface TrpcContext {
 }
 
 export function createProcedure<
-  Name extends AvailableTaskName,
+  Name extends keyof TaskSchemas,
   ZodType extends NonNullable<TaskSchemas[Name]>,
->(taskName: Name, payloadSchema: ZodType) {
+>(taskSchemas: TaskSchemas, taskName: Name) {
+  const payloadSchema = taskSchemas[taskName] as ZodType;
   return publicProcedure
     .input(
       z.object({

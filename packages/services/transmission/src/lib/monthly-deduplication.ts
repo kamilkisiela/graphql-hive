@@ -1,5 +1,5 @@
 import { pgSql, Storage } from '@hive/api';
-import { createTask } from './utils';
+import { createTask } from './utils.js';
 
 export const monthlyDeduplicationCleanupTask = createTask(null, async (_, helpers) => {
   // TODO: check perf

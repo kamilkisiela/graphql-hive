@@ -1,21 +1,22 @@
-import { monthlyDeduplicationCleanupTask } from './monthly-deduplication';
-import { sendEmailTask } from './notifications/email';
-import { emailsFailuresTotal } from './notifications/email/metrics';
+import { monthlyDeduplicationCleanupTask } from './lib/monthly-deduplication.js';
+import { createProcedure, router } from './lib/trpc.js';
+import { AddJobFn, tasksFactory } from './lib/utils.js';
+import { sendEmailTask } from './tasks/notifications/email.js';
+import { emailsFailuresTotal } from './tasks/notifications/email/metrics.js';
 import {
   sendEmailVerificationEmail,
   sendPasswordResetEmail,
-} from './notifications/email/procedures';
-import { sendMSTeamWebhook as sendMSTeamsWebhook } from './notifications/ms-teams';
-import { sendSlackMessageTask } from './notifications/slack';
-import { sendWebhookTask } from './notifications/webhook';
-import { createProcedure, router } from './trpc';
-import { AddJobFn, createTaskList } from './utils';
+} from './tasks/notifications/email/procedures.js';
+import { sendMSTeamsWebhook } from './tasks/notifications/ms-teams.js';
+import { sendSlackMessageTask } from './tasks/notifications/slack.js';
+import { sendWebhookTask } from './tasks/notifications/webhook.js';
 
-export const taskList = createTaskList()
+export const tasks = tasksFactory()
   .addTask('monthlyDeduplicationCleanupTask', monthlyDeduplicationCleanupTask)
   .addTask('sendEmail', sendEmailTask, {
     'job:failed': _ => {
-      // when a job fails, after all retries, we increment the failure counter
+      // when a job fails after all retries,
+      // we increment the failure counter
       emailsFailuresTotal.inc();
     },
   })
@@ -23,20 +24,20 @@ export const taskList = createTaskList()
   .addTask('sendMSTeamsWebhook', sendMSTeamsWebhook)
   .addTask('sendWebhook', sendWebhookTask);
 
-const taskSchemas = taskList.getTaskPayloadSchemaList();
+const taskSchemas = tasks.getTaskPayloadSchemaList();
 export type TaskSchemas = typeof taskSchemas;
 
 export const taskRouter = router({
-  webhookTask: createProcedure('sendWebhook', taskSchemas.sendWebhook),
-  emailTask: createProcedure('sendEmail', taskSchemas.sendEmail),
-  slackTask: createProcedure('sendSlackMessage', taskSchemas.sendSlackMessage),
-  msTeamsTask: createProcedure('sendMSTeamsWebhook', taskSchemas.sendMSTeamsWebhook),
+  sendWebhook: createProcedure(taskSchemas, 'sendWebhook'),
+  sendEmail: createProcedure(taskSchemas, 'sendEmail'),
+  sendSlackMessage: createProcedure(taskSchemas, 'sendSlackMessage'),
+  sendMSTeamsWebhook: createProcedure(taskSchemas, 'sendMSTeamsWebhook'),
   sendEmailVerificationEmail,
   sendPasswordResetEmail,
 });
 
 // utils
 
-export const addJob: AddJobFn<typeof taskList> = async (helpers, taskName, payload, spec) => {
-  return helpers.addJob(taskName as string /* FIXME: later */, payload, spec);
+export const addJob: AddJobFn<typeof tasks> = async (helpers, taskName, payload, spec) => {
+  return helpers.addJob(taskName as string, payload, spec);
 };

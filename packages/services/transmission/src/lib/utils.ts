@@ -12,16 +12,6 @@ import type { Client } from 'pg';
 import { z, ZodSchema } from 'zod';
 import { Storage } from '@hive/api';
 
-export type Context = {
-  storage: Storage;
-};
-
-export type JobHelpers = WorkerJobHelpers & {
-  context: Context;
-};
-
-export type TypedTask<Payload, Return> = (payload: Payload, helpers: JobHelpers) => Promise<Return>;
-
 export const createTask = <ZodType extends ZodSchema | null>(
   schema: ZodType,
   task: TypedTask<ZodType extends null ? null : z.infer<NonNullable<ZodType>>, void>,
@@ -38,6 +28,15 @@ export const createTask = <ZodType extends ZodSchema | null>(
     schema,
   };
 };
+
+export function createCrontab<TaskRecords extends Record<string, TypedTask<any, any>>>(
+  _: TaskRecords,
+  crons: Crontab<keyof TaskRecords>[],
+): string {
+  return crons
+    .map(c => `${c.cron} ${c.task as string} ${c.options ? '?' + encodeUrlParams(c.options) : ''}`)
+    .join('\n');
+}
 
 /**
  * Wraps a task list with a lock, ensuring that when a worker unexpectedly dies, the task is not left in a locked state.
@@ -88,6 +87,68 @@ export function enhanceTaskList(
 
   return newTaskList as TaskList;
 }
+
+export type Context = {
+  storage: Storage;
+};
+
+export type JobHelpers = WorkerJobHelpers & {
+  context: Context;
+};
+
+export type TypedTask<Payload, Return> = (payload: Payload, helpers: JobHelpers) => Promise<Return>;
+
+type Crontab<TaskName> = {
+  task: TaskName;
+  cron: string;
+  /**
+   * @link https://worker.graphile.org/docs/cron#crontab-opts
+   */
+  options?: {
+    /**
+     * A unique alphanumeric case-sensitive identifier starting with a letter.
+     * Specify an identifier for this crontab entry;
+     * If you want more than one schedule for the same task
+     * (e.g. with different payload, or different times)
+     * then you will need to supply a unique identifier explicitly.
+     *
+     * @default {task_identifier}
+     */
+    id?: string;
+    /**
+     * "time phrase".
+     * Backfill any entries from the last time period t.
+     * For example if the worker was not running when they were due to be executed
+     * @default {no backfilling}
+     * @link https://worker.graphile.org/docs/cron#time-phrase
+     */
+    fill?: string;
+    /**
+     * A small positive integer.
+     * Override the max_attempts of the job.
+     */
+    max?: number;
+    /**
+     * Alphanumeric queue name.
+     * Add the job to a named queue so it executes serially.
+     */
+    queue?: string;
+    /**
+     * Job key — replace/update the existing job with this key, if present.
+     */
+    jobKey?: string;
+    /**
+     * if jobKey is specified, affects what it does.
+     * @default {unsafe_dedupe}
+     */
+    jobKeyMode?: 'replace' | 'preserve_run_at' | 'unsafe_dedupe';
+    /**
+     * A small positive integer.
+     * Set the priority of the job.
+     */
+    priority?: number;
+  };
+};
 
 type GetTaskList<T> = () => T;
 type GetTaskPayloadSchemaList<T> = () => T;
@@ -144,7 +205,7 @@ type ReplaceJobInEventMap<TaskName extends string> = {
   ) => void;
 };
 
-export const createTaskList = () => {
+export const tasksFactory = () => {
   const taskList: Record<string, TypedTask<any, any>> = {};
   const taskListSchema: Record<string, ZodSchema | null> = {};
   const listenersByTaskName: {
@@ -225,4 +286,12 @@ function stringTo64BitInt(str: string) {
   const hash64 = hash.substring(0, 15);
   // Convert the 60-bit hash to an integer
   return BigInt('0x' + hash64);
+}
+
+function encodeUrlParams(params: Record<string, string | number>) {
+  return Object.keys(params)
+    .map(function (k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    })
+    .join('&');
 }

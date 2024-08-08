@@ -8,7 +8,7 @@ export class Emails {
   constructor(private transmission: Transmission) {}
 
   schedule(input: { id?: string; email: string; subject: string; body: MJMLValue }) {
-    return this.transmission.client.emailTask.mutate({
+    return this.transmission.client.sendEmail.mutate({
       payload: {
         to: input.email,
         subject: input.subject,

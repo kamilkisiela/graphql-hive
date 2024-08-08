@@ -5,7 +5,6 @@ export const emailsTotal = new metrics.Counter({
   help: 'Number of sent emails',
 });
 
-// TODO: add it to the listener of the error event of a job
 export const emailsFailuresTotal = new metrics.Counter({
   name: 'emails_failures_total',
   help: 'Number of failures',

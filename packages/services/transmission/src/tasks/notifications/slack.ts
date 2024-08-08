@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createTask } from '../utils';
+import { createTask } from '../../lib/utils.js';
 
 export const sendSlackMessageTask = createTask(
   z.object({

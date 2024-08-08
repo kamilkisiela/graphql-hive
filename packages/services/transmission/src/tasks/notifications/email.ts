@@ -1,9 +1,9 @@
 import mjml2html from 'mjml';
 import { z } from 'zod';
 import { captureException } from '@sentry/node';
-import { createTask } from '../utils';
-import { emailsTotal } from './email/metrics';
-import { emailProvider } from './email/providers';
+import { createTask } from '../../lib/utils.js';
+import { emailsTotal } from './email/metrics.js';
+import { emailProvider } from './email/providers.js';
 
 export const sendEmailTask = createTask(
   z.object({
