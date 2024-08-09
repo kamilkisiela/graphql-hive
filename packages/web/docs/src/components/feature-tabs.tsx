@@ -6,6 +6,7 @@ import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
 import { CallToAction } from './call-to-action';
 import { Heading } from './heading';
+import { Stud } from './stud';
 import observabilityClientsImage from '../../public/features/observability/clients.png';
 import observabilityOperationsImage from '../../public/features/observability/operations.png';
 import observabilityOverallImage from '../../public/features/observability/overall.png';
@@ -183,9 +184,7 @@ function Feature(props: {
       <article className="grid grid-cols-1 lg:grid-cols-2">
         <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
           <header className="flex flex-col gap-4 md:gap-6">
-            <div className="w-fit rounded-lg bg-[linear-gradient(135deg,#68A8B6,#3B736A)] p-[9px] text-white">
-              {icon}
-            </div>
+            <Stud>{icon}</Stud>
             <Heading as="h2" size="md" className="text-green-1000">
               {title}
             </Heading>

@@ -79,7 +79,7 @@ const OPERATIONS_EXPLAINER = 'GraphQL operations reported to GraphQL Hive';
 
 export function Pricing(): ReactElement {
   return (
-    <section className="py-12 sm:py-20">
+    <section className="py-12 sm:py-24">
       <div className="mx-auto box-border w-full max-w-[1200px]">
         <header className="px-6">
           <Heading as="h2" size="md" className="text-green-1000 text-center">
