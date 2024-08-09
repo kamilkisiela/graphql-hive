@@ -98,7 +98,8 @@ function Illustration() {
             description="GraphQL Gateway"
             highlighted={[1, 4, 5].includes(highlightedEdge)}
           >
-            <svg width={48} height={48}>
+            <svg viewBox="0 0 48 48" width={48} height={48}>
+              <SafariLinearGradientDefs />
               <use xlinkHref="/ecosystem-management.svg#mesh" />
             </svg>
           </Node>
@@ -181,7 +182,7 @@ function Illustration() {
             description="GraphQL Code Generation"
             highlighted={[2, 3].includes(highlightedEdge)}
           >
-            <svg width={48} height={48}>
+            <svg width={48} height={48} viewBox="0 0 48 48">
               <use xlinkHref="/ecosystem-management.svg#codegen" />
             </svg>
           </Node>
@@ -257,5 +258,34 @@ function Node({ title, description, children, highlighted, className, ...rest }:
         )}
       </div>
     </div>
+  );
+}
+
+function SafariLinearGradientDefs() {
+  return (
+    <defs>
+      <linearGradient
+        id="linear-blue"
+        x1="0"
+        y1="0"
+        x2="100%"
+        y2="100%"
+        gradientUnits="objectBoundingBox"
+      >
+        <stop stop-color="#8CBEB3" />
+        <stop offset="1" stop-color="#68A8B6" />
+      </linearGradient>
+      <linearGradient
+        id="linear-white"
+        x1="0"
+        y1="0"
+        x2="100%"
+        y2="100%"
+        gradientUnits="objectBoundingBox"
+      >
+        <stop stop-color="white" stop-opacity="0.4" />
+        <stop offset="1" stop-color="white" stop-opacity="0.1" />
+      </linearGradient>
+    </defs>
   );
 }
