@@ -7,7 +7,14 @@ export interface InfoCardProps extends React.HTMLAttributes<HTMLElement> {
   heading: ReactNode;
   as?: 'div' | 'li';
 }
-export function InfoCard({ as: Root, icon, heading, className, children, ...rest }: InfoCardProps) {
+export function InfoCard({
+  as: Root = 'div',
+  icon,
+  heading,
+  className,
+  children,
+  ...rest
+}: InfoCardProps) {
   return (
     <Root className={cn('bg-beige-100 p-12', className)} {...rest}>
       <Stud>{icon}</Stud>
