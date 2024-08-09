@@ -84,7 +84,7 @@ export function IndexPage(): ReactElement {
 
 function EnterpriseFocusedCards() {
   return (
-    <section className="bg-beige-100 rounded-3xl py-24 md:py-[120px]">
+    <section className="bg-beige-100 py-24 sm:rounded-3xl md:py-[120px]">
       <Heading as="h3" size="md" className="text-balance px-6 text-center">
         Enterprise-focused tooling at your disposal
       </Heading>
