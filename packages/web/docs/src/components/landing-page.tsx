@@ -90,7 +90,7 @@ function GetStartedTodaySection() {
     <section className="relative overflow-hidden bg-[#003834] p-12 text-center sm:rounded-3xl sm:p-24">
       <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
       <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
-      <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:visible" />
+      <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
       <Heading as="h3" size="md" className="text-white">
         Get started today!
       </Heading>
