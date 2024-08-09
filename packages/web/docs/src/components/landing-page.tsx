@@ -17,7 +17,14 @@ import { StatsItem, StatsList } from './stats';
 export function IndexPage(): ReactElement {
   return (
     <Tooltip.Provider>
-      <Page className="mx-auto max-w-[90rem] bg-white">
+      <style global jsx>
+        {`
+          body {
+            background: #fff;
+          }
+        `}
+      </style>
+      <Page className="text-green-1000 mx-auto max-w-[90rem]">
         <Hero>
           <Heading
             as="h1"
