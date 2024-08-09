@@ -1,8 +1,6 @@
-import React, { ReactElement, ReactNode } from 'react';
-import Link from 'next/link';
+import React, { ReactElement } from 'react';
 import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { cn } from '../lib';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
 import { EcosystemManagementSection } from './ecosystem-management';
@@ -78,8 +76,57 @@ export function IndexPage(): ReactElement {
         </StatsList>
         <UltimatePerformanceCards />
         <Pricing />
+        <EnterpriseFocusedCards />
       </Page>
     </Tooltip.Provider>
+  );
+}
+
+function EnterpriseFocusedCards() {
+  return (
+    <section className="bg-beige-100 rounded-3xl py-24 md:py-[120px]">
+      <Heading as="h3" size="md" className="text-balance px-6 text-center">
+        Enterprise-focused tooling at your disposal
+      </Heading>
+      <div className="-my-8 overflow-auto py-8">
+        <ul className="mt-16 flex min-w-[900px] flex-row justify-center divide-x divide-solid md:px-6 lg:px-16">
+          <InfoCard
+            as="li"
+            heading="Cloud and Self-Hosted"
+            icon={<PerformanceListItemIcon />}
+            className="flex-1 px-8 py-0"
+          >
+            Hive is completely open source, MIT licensed. You can host it on your own
+            infrastructure!
+          </InfoCard>
+          <InfoCard
+            as="li"
+            heading="OIDC Login"
+            icon={<PerformanceListItemIcon />}
+            className="flex-1 px-8 py-0"
+          >
+            Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
+            security.
+          </InfoCard>
+          <InfoCard
+            as="li"
+            heading="Secure and efficient"
+            icon={<PerformanceListItemIcon />}
+            className="flex-1 px-8 py-0"
+          >
+            <a
+              href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline"
+            >
+              Persisted Documents
+            </a>{' '}
+            secure and reduce traffic by hashing operations on app deployments.
+          </InfoCard>
+        </ul>
+      </div>
+    </section>
   );
 }
 
