@@ -23,7 +23,7 @@ const EnvironmentModel = zod.object({
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
   USAGE_ESTIMATOR_ENDPOINT: zod.string().url(),
-  EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
+  TRANSMISSION_ENDPOINT: zod.string().url(),
   LIMIT_CACHE_UPDATE_INTERVAL_MS: emptyString(NumberFromString.optional()),
   WEB_APP_URL: emptyString(zod.string().url().optional()),
 });
@@ -119,7 +119,7 @@ export const env = {
   release: base.RELEASE ?? 'local',
   hiveServices: {
     usageEstimator: { endpoint: base.USAGE_ESTIMATOR_ENDPOINT },
-    emails: base.EMAILS_ENDPOINT ? { endpoint: base.EMAILS_ENDPOINT } : null,
+    transmission: { endpoint: base.TRANSMISSION_ENDPOINT },
     webAppUrl: base.WEB_APP_URL ?? 'http://localhost:3000',
   },
   limitCacheUpdateIntervalMs: base.LIMIT_CACHE_UPDATE_INTERVAL_MS ?? 60_000,

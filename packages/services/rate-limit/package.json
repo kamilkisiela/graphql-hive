@@ -11,9 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@hive/emails": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
+    "@hive/transmission": "workspace:*",
     "@sentry/node": "7.118.0",
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",

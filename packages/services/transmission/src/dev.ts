@@ -5,4 +5,4 @@ config({
   encoding: 'utf8',
 });
 
-await import('./index');
+await import('./index.js');

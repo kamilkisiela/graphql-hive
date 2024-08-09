@@ -1,4 +1,4 @@
-import { ClickHouse, HttpClient, OperationsReader, sql } from '@hive/api';
+import { chSql, ClickHouse, HttpClient, OperationsReader } from '@hive/api';
 import type { ServiceLogger } from '@hive/service-common';
 
 export type Estimator = ReturnType<typeof createEstimator>;
@@ -47,7 +47,7 @@ export function createEstimator(config: {
         total: string;
         target: string;
       }>({
-        query: sql`
+        query: chSql`
           SELECT
             target,
             sum(total) as total
@@ -68,7 +68,7 @@ export function createEstimator(config: {
       return await clickhouse.query<{
         total: string;
       }>({
-        query: sql`
+        query: chSql`
           SELECT 
             sum(total) as total
           FROM monthly_overview

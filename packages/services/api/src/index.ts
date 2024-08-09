@@ -1,6 +1,7 @@
 export type { RegistryContext } from './context';
 export type { Application as Registry } from 'graphql-modules';
 export { createRegistry } from './create';
+export { sql as pgSql } from 'slonik';
 export type { LogFn, Logger } from './modules/shared/providers/logger';
 export type { Storage } from './modules/shared/providers/storage';
 export type {
@@ -26,7 +27,7 @@ export type { AuthProvider } from './__generated__/types';
 export { HttpClient } from './modules/shared/providers/http-client';
 export { OperationsManager } from './modules/operations/providers/operations-manager';
 export { OperationsReader } from './modules/operations/providers/operations-reader';
-export { ClickHouse, sql } from './modules/operations/providers/clickhouse-client';
+export { ClickHouse, sql as chSql } from './modules/operations/providers/clickhouse-client';
 export {
   organizationAdminScopes,
   reservedOrganizationNames,

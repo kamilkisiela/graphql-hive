@@ -1,6 +1,6 @@
-# Emails
+# Transmission
 
-Service for sending Hive Emails.
+Service for sending emails, webhooks, slack messages and other types of notifications.
 
 ## Configuration
 
@@ -9,9 +9,6 @@ Service for sending Hive Emails.
 | Name                                     | Required                                              | Description                                                                                              | Example Value                                        |
 | ---------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | `PORT`                                   | No                                                    | The port this service is running on.                                                                     | `6260`                                               |
-| `REDIS_HOST`                             | **Yes**                                               | The host of your redis instance.                                                                         | `"127.0.0.1"`                                        |
-| `REDIS_PORT`                             | **Yes**                                               | The port of your redis instance.                                                                         | `6379`                                               |
-| `REDIS_PASSWORD`                         | **Yes**                                               | The password of your redis instance.                                                                     | `"apollorocks"`                                      |
 | `EMAIL_FROM`                             | **Yes**                                               | The email address used for sending emails                                                                | `kamil@graphql-hive.com`                             |
 | `EMAIL_PROVIDER`                         | **Yes**                                               | The email provider that should be used for sending emails.                                               | `smtp` or `postmark` or `mock`                       |
 | `EMAIL_PROVIDER_SMTP_PROTOCOL`           | No (**Yes** if `EMAIL_PROVIDER` is set to `smtp`)     | The protocol used for the smtp server                                                                    | `smtp` or `smtps`                                    |
@@ -28,6 +25,10 @@ Service for sending Hive Emails.
 | `PROMETHEUS_METRICS`                     | No                                                    | Whether Prometheus metrics should be enabled                                                             | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE`      | No                                                    | The instance label added for the prometheus metrics.                                                     | `emails`                                             |
 | `PROMETHEUS_METRICS_PORT`                | No                                                    | Port on which prometheus metrics are exposed                                                             | Defaults to `10254`                                  |
+| `REQUEST_LOGGING`                        | No                                                    | Log http requests                                                                                        | `1` (enabled) or `0` (disabled)                      |
+| `REQUEST_BROKER`                         | No                                                    | Whether Request Broker should be enabled.                                                                | `1` (enabled) or `0` (disabled)                      |
+| `REQUEST_BROKER_ENDPOINT`                | No                                                    | The address                                                                                              | `https://broker.worker.dev`                          |
+| `REQUEST_BROKER_SIGNATURE`               | No                                                    | A secret signature needed to verify the request origin                                                   | `hbsahdbzxch123`                                     |
 | `REQUEST_LOGGING`                        | No                                                    | Log http requests                                                                                        | `1` (enabled) or `0` (disabled)                      |
 | `LOG_LEVEL`                              | No                                                    | The verbosity of the service logs. One of `trace`, `debug`, `info`, `warn` ,`error`, `fatal` or `silent` | `info` (default)                                     |
 | `OPENTELEMETRY_COLLECTOR_ENDPOINT`       | No                                                    | OpenTelemetry Collector endpoint. The expected traces transport is HTTP (port `4318`).                   | `http://localhost:4318/v1/traces`                    |

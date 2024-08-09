@@ -1,5 +1,13 @@
+import { config as dotenv } from 'dotenv';
 import zod from 'zod';
-import { OpenTelemetryConfigurationModel } from '@hive/service-common';
+
+// eslint-disable-next-line no-process-env
+if (!process.env.RELEASE) {
+  dotenv({
+    debug: true,
+    encoding: 'utf8',
+  });
+}
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
 
@@ -19,28 +27,22 @@ const emptyString = <T extends zod.ZodType>(input: T) => {
 };
 
 const EnvironmentModel = zod.object({
-  PORT: emptyString(NumberFromString.optional()),
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
+  PORT: emptyString(NumberFromString.optional()),
   HEARTBEAT_ENDPOINT: emptyString(zod.string().url().optional()),
-  EMAIL_FROM: zod.string().email(),
 });
 
-const SentryModel = zod.union([
+const RequestBrokerModel = zod.union([
   zod.object({
-    SENTRY: emptyString(zod.literal('0').optional()),
+    REQUEST_BROKER: emptyString(zod.literal('0').optional()),
   }),
   zod.object({
-    SENTRY: zod.literal('1'),
-    SENTRY_DSN: zod.string(),
+    REQUEST_BROKER: zod.literal('1'),
+    REQUEST_BROKER_ENDPOINT: zod.string().min(1),
+    REQUEST_BROKER_SIGNATURE: zod.string().min(1),
   }),
 ]);
-
-const RedisModel = zod.object({
-  REDIS_HOST: zod.string(),
-  REDIS_PORT: NumberFromString,
-  REDIS_PASSWORD: emptyString(zod.string().optional()),
-});
 
 const PostmarkEmailModel = zod.object({
   EMAIL_PROVIDER: zod.literal('postmark'),
@@ -77,10 +79,19 @@ const EmailProviderModel = zod.union([
   SendmailEmailModel,
 ]);
 
-const PrometheusModel = zod.object({
-  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
-  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
-  PROMETHEUS_METRICS_PORT: emptyString(NumberFromString.optional()),
+const EmailModel = zod
+  .object({
+    EMAIL_FROM: zod.string().email(),
+  })
+  .and(EmailProviderModel);
+
+const PostgresModel = zod.object({
+  POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+  POSTGRES_HOST: zod.string(),
+  POSTGRES_PORT: NumberFromString,
+  POSTGRES_DB: zod.string(),
+  POSTGRES_USER: zod.string(),
+  POSTGRES_PASSWORD: zod.string(),
 });
 
 const LogModel = zod.object({
@@ -102,21 +113,39 @@ const LogModel = zod.object({
   ),
 });
 
+const SentryModel = zod.union([
+  zod.object({
+    SENTRY: emptyString(zod.literal('0').optional()),
+  }),
+  zod.object({
+    SENTRY: zod.literal('1'),
+    SENTRY_DSN: zod.string(),
+  }),
+]);
+
+const PrometheusModel = zod.object({
+  PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
+  PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
+  PROMETHEUS_METRICS_PORT: emptyString(NumberFromString.optional()),
+});
+
+export type EmailProviderConfig = typeof emailProviderConfig;
+export type PostmarkEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'postmark' }>;
+export type SMTPEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'smtp' }>;
+export type SendmailEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'sendmail' }>;
+export type MockEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'mock' }>;
+
+// eslint-disable-next-line no-process-env
+const processEnv = process.env;
+
 const configs = {
-  // eslint-disable-next-line no-process-env
-  base: EnvironmentModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  email: EmailProviderModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  sentry: SentryModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  redis: RedisModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  prometheus: PrometheusModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  log: LogModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  tracing: OpenTelemetryConfigurationModel.safeParse(process.env),
+  base: EnvironmentModel.safeParse(processEnv),
+  postgres: PostgresModel.safeParse(processEnv),
+  log: LogModel.safeParse(processEnv),
+  sentry: SentryModel.safeParse(processEnv),
+  prometheus: PrometheusModel.safeParse(processEnv),
+  requestBroker: RequestBrokerModel.safeParse(processEnv),
+  email: EmailModel.safeParse(processEnv),
 };
 
 const environmentErrors: Array<string> = [];
@@ -141,12 +170,12 @@ function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Out
 }
 
 const base = extractConfig(configs.base);
+const postgres = extractConfig(configs.postgres);
+const requestBroker = extractConfig(configs.requestBroker);
 const email = extractConfig(configs.email);
-const redis = extractConfig(configs.redis);
+const log = extractConfig(configs.log);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
-const log = extractConfig(configs.log);
-const tracing = extractConfig(configs.tracing);
 
 const emailProviderConfig =
   email.EMAIL_PROVIDER === 'postmark'
@@ -173,44 +202,44 @@ const emailProviderConfig =
         ? ({ provider: 'sendmail' } as const)
         : ({ provider: 'mock' } as const);
 
-export type EmailProviderConfig = typeof emailProviderConfig;
-export type PostmarkEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'postmark' }>;
-export type SMTPEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'smtp' }>;
-export type SendmailEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'sendmail' }>;
-export type MockEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'mock' }>;
-
 export const env = {
   environment: base.ENVIRONMENT,
   release: base.RELEASE ?? 'local',
-  http: {
-    port: base.PORT ?? 6260,
-  },
-  tracing: {
-    enabled: !!tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT,
-    collectorEndpoint: tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT,
-  },
-  redis: {
-    host: redis.REDIS_HOST,
-    port: redis.REDIS_PORT,
-    password: redis.REDIS_PASSWORD ?? '',
-  },
-  email: {
-    provider: emailProviderConfig,
-    emailFrom: base.EMAIL_FROM,
-  },
   heartbeat: base.HEARTBEAT_ENDPOINT ? { endpoint: base.HEARTBEAT_ENDPOINT } : null,
-  sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
     level: log.LOG_LEVEL ?? 'info',
     requests: log.REQUEST_LOGGING === '1',
   },
+  http: {
+    port: base.PORT ?? 6250,
+  },
+  sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   prometheus:
     prometheus.PROMETHEUS_METRICS === '1'
       ? {
           labels: {
-            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'emails',
+            instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'transmission-service',
           },
           port: prometheus.PROMETHEUS_METRICS_PORT ?? 10_254,
+        }
+      : null,
+  email: {
+    provider: emailProviderConfig,
+    emailFrom: email.EMAIL_FROM,
+  },
+  postgres: {
+    host: postgres.POSTGRES_HOST,
+    port: postgres.POSTGRES_PORT,
+    db: postgres.POSTGRES_DB,
+    user: postgres.POSTGRES_USER,
+    password: postgres.POSTGRES_PASSWORD,
+    ssl: postgres.POSTGRES_SSL === '1',
+  },
+  requestBroker:
+    requestBroker.REQUEST_BROKER === '1'
+      ? {
+          endpoint: requestBroker.REQUEST_BROKER_ENDPOINT,
+          signature: requestBroker.REQUEST_BROKER_SIGNATURE,
         }
       : null,
 } as const;

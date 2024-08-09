@@ -89,24 +89,24 @@ target "target-publish" {
   cache-to = ["type=gha,mode=max,ignore-error=true"]
 }
 
-target "emails" {
+target "transmission" {
   inherits = ["service-base", get_target()]
   contexts = {
-    dist = "${PWD}/packages/services/emails/dist"
+    dist = "${PWD}/packages/services/transmission/dist"
     shared = "${PWD}/docker/shared"
   }
   args = {
-    SERVICE_DIR_NAME = "@hive/emails"
-    IMAGE_TITLE = "graphql-hive/emails"
-    IMAGE_DESCRIPTION = "The emails service of the GraphQL Hive project."
+    SERVICE_DIR_NAME = "@hive/transmission"
+    IMAGE_TITLE = "graphql-hive/transmission"
+    IMAGE_DESCRIPTION = "The transmission service of the GraphQL Hive project."
     PORT = "3006"
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
   }
   tags = [
-    local_image_tag("emails"),
-    stable_image_tag("emails"),
-    image_tag("emails", COMMIT_SHA),
-    image_tag("emails", BRANCH_NAME)
+    local_image_tag("transmission"),
+    stable_image_tag("transmission"),
+    image_tag("transmission", COMMIT_SHA),
+    image_tag("transmission", BRANCH_NAME)
   ]
 }
 
@@ -317,27 +317,6 @@ target "usage" {
   ]
 }
 
-target "webhooks" {
-  inherits = ["service-base", get_target()]
-  contexts = {
-    dist = "${PWD}/packages/services/webhooks/dist"
-    shared = "${PWD}/docker/shared"
-  }
-  args = {
-    SERVICE_DIR_NAME = "@hive/webhooks"
-    IMAGE_TITLE = "graphql-hive/webhooks"
-    IMAGE_DESCRIPTION = "The webhooks ingestor service of the GraphQL Hive project."
-    PORT = "3005"
-    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
-  }
-  tags = [
-    local_image_tag("webhooks"),
-    stable_image_tag("webhooks"),
-    image_tag("webhooks", COMMIT_SHA),
-    image_tag("webhooks", BRANCH_NAME)
-  ]
-}
-
 target "composition-federation-2" {
   inherits = ["service-base", get_target()]
   contexts = {
@@ -418,7 +397,7 @@ target "cli" {
 
 group "build" {
   targets = [
-    "emails",
+    "transmission",
     "rate-limit",
     "schema",
     "policy",
@@ -427,7 +406,6 @@ group "build" {
     "usage-estimator",
     "usage-ingestor",
     "usage",
-    "webhooks",
     "server",
     "stripe-billing",
     "composition-federation-2",
@@ -437,7 +415,7 @@ group "build" {
 
 group "integration-tests" {
   targets = [
-    "emails",
+    "transmission",
     "rate-limit",
     "schema",
     "policy",
@@ -446,7 +424,6 @@ group "integration-tests" {
     "usage-estimator",
     "usage-ingestor",
     "usage",
-    "webhooks",
     "server",
     "composition-federation-2"
   ]

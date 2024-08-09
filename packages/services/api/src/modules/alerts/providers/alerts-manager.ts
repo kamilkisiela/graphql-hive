@@ -187,7 +187,6 @@ export class AlertsManager {
         channel: channels.find(channel => channel.id === alert.channelId)!,
       };
     });
-    console.log('pairs:', pairs);
 
     const slackToken = await this.slackIntegrationManager.getToken({
       organization: event.organization.id,

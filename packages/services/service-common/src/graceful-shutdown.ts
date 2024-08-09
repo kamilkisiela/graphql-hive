@@ -11,11 +11,13 @@ export function registerShutdown(config: {
 
   async function shutdown() {
     if (exited) {
+      config.logger.info('Already exited');
       return;
     }
     config.logger.info('Shutting down...');
     exited = true;
     await config.onShutdown();
+    config.logger.info('Shutdown complete');
   }
 
   errorTypes.map(type => {
