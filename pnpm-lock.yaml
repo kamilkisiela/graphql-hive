@@ -1127,8 +1127,8 @@ importers:
         specifier: 6.3.1
         version: 6.3.1(@envelop/core@5.0.1)(graphql@16.9.0)
       '@envelop/sentry':
-        specifier: 7.1.1
-        version: 7.1.1(@envelop/core@5.0.1)(@sentry/node@7.118.0)(graphql@16.9.0)
+        specifier: 9.0.0
+        version: 9.0.0(@envelop/core@5.0.1)(@sentry/node@7.118.0)(graphql@16.9.0)
       '@envelop/types':
         specifier: 5.0.0
         version: 5.0.0
@@ -3614,8 +3614,8 @@ packages:
       '@envelop/core': ^5.0.0
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@envelop/sentry@7.1.1':
-    resolution: {integrity: sha512-dNq56ZaMQSj7U9czMSdcL+HqBuJVTTYyzLrX2nBRukohdI+kvDi+ptfpfAKtOXT+1fuKTlzvLupXDMMVjPbB8Q==}
+  '@envelop/sentry@9.0.0':
+    resolution: {integrity: sha512-R1qgYKOiaDGc1MXRfJCzNs8z5lVuRK3liHquwR72HxawgXP2wEPzTJgqMo1M7s7pZEHgf2RvO6mYAUExbZNYlg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@envelop/core': ^5.0.0
@@ -19304,7 +19304,7 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.3
 
-  '@envelop/sentry@7.1.1(@envelop/core@5.0.1)(@sentry/node@7.118.0)(graphql@16.9.0)':
+  '@envelop/sentry@9.0.0(@envelop/core@5.0.1)(@sentry/node@7.118.0)(graphql@16.9.0)':
     dependencies:
       '@envelop/core': 5.0.1
       '@sentry/node': 7.118.0
