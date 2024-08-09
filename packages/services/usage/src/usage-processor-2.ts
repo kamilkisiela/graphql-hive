@@ -125,7 +125,7 @@ export function usageProcessorV2(
 
     let client: ClientMetadata | undefined;
     if (operation.persistedDocumentHash) {
-      const [name, version] = operation.persistedDocumentHash.split('/');
+      const [name, version] = operation.persistedDocumentHash.split('~');
       client = {
         name,
         version,
@@ -259,7 +259,7 @@ const MetadataSchema = tb.Type.Object(
 const PersistedDocumentHash = tb.Type.String({
   title: 'PersistedDocumentHash',
   // appName/appVersion/hash
-  pattern: '^[a-zA-Z0-9_-]{1,64}\\/[a-zA-Z0-9._-]{1,64}\\/([A-Za-z]|[0-9]|_){1,128}$',
+  pattern: '^[a-zA-Z0-9_-]{1,64}~[a-zA-Z0-9._-]{1,64}~([A-Za-z]|[0-9]|_){1,128}$',
 });
 
 /** Query + Mutation */

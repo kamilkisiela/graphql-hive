@@ -1858,7 +1858,7 @@ test('app deployment usage reporting', async () => {
       contextValue: { request },
     },
     {},
-    'app-name/app-version/aaa',
+    'app-name~app-version~aaa',
   );
 
   await waitFor(5000);

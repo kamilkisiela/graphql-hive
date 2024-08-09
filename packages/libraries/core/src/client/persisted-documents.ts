@@ -32,7 +32,9 @@ export function createPersistedDocuments(config: PersistedDocumentsConfiguration
         return document;
       }
 
-      const response = await fetch(config.cdn.endpoint + '/apps/' + documentId, {
+      const cdnHttpId = documentId.replaceAll('~', '/');
+
+      const response = await fetch(config.cdn.endpoint + '/apps/' + cdnHttpId, {
         method: 'GET',
         headers: {
           'X-Hive-CDN-Key': config.cdn.accessToken,
