@@ -196,7 +196,9 @@ function ChangeItem(props: {
               )}
             >
               <div className="inline-flex justify-start space-x-2">
-                <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+                <span className="text-left text-gray-600 dark:text-white">
+                  {labelize(change.message)}
+                </span>
                 {change.isSafeBasedOnUsage && (
                   <span className="cursor-pointer text-yellow-500">
                     {' '}
