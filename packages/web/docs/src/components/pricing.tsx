@@ -7,12 +7,9 @@ function Tooltip({ content, children }: { content: string; children: ReactNode }
   return (
     <Root delayDuration={0}>
       <Trigger className="text-left">{children}</Trigger>
-      <Content
-        sideOffset={5}
-        className="rounded-sm bg-white p-2 text-xs font-normal text-black shadow"
-      >
+      <Content sideOffset={5} className="bg-green-1000 rounded p-2 font-normal text-white shadow">
         {content}
-        <Arrow className="fill-current text-white" />
+        <Arrow className="fill-green-1000" />
       </Content>
     </Root>
   );
