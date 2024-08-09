@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import Link from 'next/link';
 import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -9,6 +9,7 @@ import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
+import { InfoCard } from './info-card';
 import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
 import { Pricing } from './pricing';
@@ -90,42 +91,32 @@ function UltimatePerformanceCards() {
         GraphQL for the ultimate performance
       </Heading>
       <ul className="mt-16 flex flex-row flex-wrap justify-center gap-2 md:gap-6">
-        <li className="bg-beige-100 flex-1 p-12">
-          <Stud>
-            <PerformanceListItemIcon />
-          </Stud>
-          <h3 className="text-green-1000 mt-6 text-xl font-medium leading-[1.4]">
-            Deliver improvements faster
-          </h3>
-          <p className="mt-4 text-green-800">
-            Accelerate feature improvements and experiments, by seamless decoupling of backend and
-            frontend environments.
-          </p>
-        </li>
-        <li className="bg-beige-100 flex-1 p-12">
-          <Stud>
-            <PerformanceListItemIcon />
-          </Stud>
-          <h3 className="text-green-1000 mt-6 text-xl font-medium leading-[1.4]">
-            Network efficiency
-          </h3>
-          <p className="mt-4 text-green-800">
-            Accelerate feature improvements and experiments, by seamless decoupling of backend and
-            frontend environments.
-          </p>
-        </li>
-        <li className="bg-beige-100 flex-1 basis-full p-12 lg:basis-0">
-          <Stud>
-            <PerformanceListItemIcon />
-          </Stud>
-          <h3 className="text-green-1000 mt-6 text-xl font-medium leading-[1.4]">
-            Optimized data retrieval
-          </h3>
-          <p className="mt-4 text-green-800">
-            Reduce latency effectively with Hive by enabling frontend teams to obtain all required
-            data in a single request, maximizing GraphQL’s inherent performance benefits.
-          </p>
-        </li>
+        <InfoCard
+          as="li"
+          heading="Deliver improvements faster"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1"
+        >
+          Accelerate feature improvements and experiments, by seamless decoupling of backend and
+          frontend environments.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Network efficiency"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1"
+        >
+          Accelerate feature improvements and experiments, by seamless decoupling of backend and
+          frontend environments.
+        </InfoCard>
+        <InfoCard
+          heading="Optimized data retrieval"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full lg:basis-0"
+        >
+          Reduce latency effectively with Hive by enabling frontend teams to obtain all required
+          data in a single request, maximizing GraphQL’s inherent performance benefits.
+        </InfoCard>
       </ul>
     </section>
   );
