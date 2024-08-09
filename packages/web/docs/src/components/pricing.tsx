@@ -2,6 +2,7 @@ import { ReactElement, ReactNode } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
+import { ArrowIcon } from './arrow-icon';
 
 const linkClass = clsx(
   'flex flex-row items-center justify-between',
@@ -10,22 +11,6 @@ const linkClass = clsx(
   'text-sm text-white font-medium',
   'rounded-md py-2 px-3',
   'bg-gray-300/10 hover:bg-gray-300/20',
-);
-
-const ArrowIcon = ({ size }: { size: number }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m9 18 6-6-6-6" />
-  </svg>
 );
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
@@ -66,14 +51,14 @@ function Plan(plan: {
               <div onClick={plan.linkOnClick} className={linkClass}>
                 <div>{plan.linkText}</div>
                 <div>
-                  <ArrowIcon size={16} />
+                  <ArrowIcon className="w-4" />
                 </div>
               </div>
             ) : (
               <Link href="https://app.graphql-hive.com" className={linkClass}>
                 <div>{plan.linkText}</div>
                 <div>
-                  <ArrowIcon size={16} />
+                  <ArrowIcon className="w-4" />
                 </div>
               </Link>
             )}
