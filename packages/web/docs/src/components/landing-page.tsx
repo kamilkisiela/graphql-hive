@@ -14,7 +14,6 @@ import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from 
 import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
-import { Stud } from './stud';
 
 export function IndexPage(): ReactElement {
   return (
