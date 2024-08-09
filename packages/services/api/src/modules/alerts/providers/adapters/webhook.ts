@@ -24,7 +24,7 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
       input.event.target.id,
     );
     try {
-      await this.transmission.client.webhookTask.mutate({
+      await this.transmission.client.sendWebhook.mutate({
         payload: {
           url: input.channel.webhookEndpoint!,
           body: JSON.stringify(input.event),
