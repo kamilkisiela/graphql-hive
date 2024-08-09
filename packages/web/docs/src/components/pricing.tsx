@@ -93,7 +93,11 @@ export function Pricing(): ReactElement {
             honest and based only on your real usage.
           </p>
         </header>
-        <div className="overflow-auto">
+
+        <div
+          // the padding is here so `overflow-auto` doesn't cut button hover states
+          className="-mx-1 overflow-auto px-1"
+        >
           <div className="mt-16 flex min-w-[1000px] flex-row items-stretch gap-8 px-6 lg:mt-24 lg:gap-10 xl:gap-12 xl:px-0">
             <Plan
               name="Hobby"
