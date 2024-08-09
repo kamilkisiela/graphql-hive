@@ -45,6 +45,10 @@ type AwsRequestInit = RequestInit & {
     allHeaders?: boolean;
     singleEncode?: boolean;
   };
+  /**
+   * Timeout in milliseconds for each fetch call.
+   */
+  timeout?: number;
 };
 
 export class AwsClient {
@@ -91,7 +95,15 @@ export class AwsClient {
   async sign(input: RequestInfo, init?: AwsRequestInit) {
     if (input instanceof Request) {
       const { method, url, headers, body } = input;
-      init = Object.assign({ method, url, headers }, init);
+      init = Object.assign(
+        {
+          method,
+          url,
+          headers,
+          signal: init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
+        },
+        init,
+      );
       if (init.body == null && headers.has('Content-Type')) {
         init.body =
           body != null && headers.has('X-Amz-Content-Sha256')
@@ -120,9 +132,14 @@ export class AwsClient {
       if (i === this.retries) {
         return fetched; // No need to await if we're returning anyway
       }
-      const res = await fetched;
-      if (res.status < 500 && res.status !== 429 && res.status !== 499) {
-        return res;
+      try {
+        const res = await fetched;
+        if (res.status < 500 && res.status !== 429 && res.status !== 499) {
+          return res;
+        }
+      } catch (error) {
+        // Retry also when there's an exception
+        console.error(error);
       }
       await new Promise(resolve =>
         setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)),
