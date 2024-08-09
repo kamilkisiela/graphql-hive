@@ -1,7 +1,5 @@
 import React, { ReactElement } from 'react';
-import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { HiveIcon } from '@theguild/components';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
 import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
