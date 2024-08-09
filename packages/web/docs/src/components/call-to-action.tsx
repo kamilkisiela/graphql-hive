@@ -46,7 +46,7 @@ export function CallToAction({ className, variant, ...rest }: CallToActionProps)
       )}
       {...rest}
     >
-      <div className="absolute inset-0 rounded-lg border border-green-800 bg-inherit" />
+      <div className="absolute inset-0 rounded-lg border border-green-800" />
       <div className="relative flex flex-row items-center gap-2">{rest.children}</div>
     </Anchor>
   );
