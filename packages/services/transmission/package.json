@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
+    "@hive/storage": "workspace:*",
     "@sentry/node": "7.118.0",
     "@trpc/server": "10.45.2",
     "@types/mjml": "4.7.1",
@@ -25,6 +27,7 @@
     "p-timeout": "6.1.2",
     "pg": "8.12.0",
     "pino-pretty": "11.2.1",
+    "reflect-metadata": "0.2.2",
     "sendmail": "1.6.1",
     "tslib": "2.6.3",
     "zod": "3.23.8"

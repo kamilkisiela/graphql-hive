@@ -158,7 +158,7 @@ const rateLimit = deployRateLimit({
   environment,
   dbMigrations,
   usageEstimator,
-  emails,
+  transmission,
   postgres,
   sentry,
   observability,

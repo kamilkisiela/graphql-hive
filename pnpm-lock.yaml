@@ -1397,9 +1397,15 @@ importers:
 
   packages/services/transmission:
     devDependencies:
+      '@hive/api':
+        specifier: workspace:*
+        version: link:../api
       '@hive/service-common':
         specifier: workspace:*
         version: link:../service-common
+      '@hive/storage':
+        specifier: workspace:*
+        version: link:../storage
       '@sentry/node':
         specifier: 7.118.0
         version: 7.118.0
@@ -1442,6 +1448,9 @@ importers:
       pino-pretty:
         specifier: 11.2.1
         version: 11.2.1
+      reflect-metadata:
+        specifier: 0.2.2
+        version: 0.2.2
       sendmail:
         specifier: 1.6.1
         version: 1.6.1

@@ -136,6 +136,11 @@ export interface document_collections {
   updated_at: Date;
 }
 
+export interface job_monthly_deduplication {
+  created_at: Date;
+  key: string;
+}
+
 export interface migration {
   date: Date;
   hash: string;
@@ -269,6 +274,15 @@ export interface schema_checks {
   supergraph_sdl_store_id: string | null;
   target_id: string;
   updated_at: Date;
+}
+
+export interface schema_cleanup_tracker {
+  coordinate: string;
+  created_at: Date;
+  created_in_version_id: string;
+  deprecated_at: Date | null;
+  deprecated_in_version_id: string | null;
+  target_id: string;
 }
 
 export interface schema_log {
@@ -408,6 +422,7 @@ export interface DBTables {
   contracts: contracts;
   document_collection_documents: document_collection_documents;
   document_collections: document_collections;
+  job_monthly_deduplication: job_monthly_deduplication;
   migration: migration;
   oidc_integrations: oidc_integrations;
   organization_invitations: organization_invitations;
@@ -418,6 +433,7 @@ export interface DBTables {
   projects: projects;
   schema_change_approvals: schema_change_approvals;
   schema_checks: schema_checks;
+  schema_cleanup_tracker: schema_cleanup_tracker;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;
