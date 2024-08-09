@@ -110,6 +110,7 @@ function UltimatePerformanceCards() {
           frontend environments.
         </InfoCard>
         <InfoCard
+          as="li"
           heading="Optimized data retrieval"
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full lg:basis-0"
