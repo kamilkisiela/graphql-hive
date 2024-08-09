@@ -11,6 +11,7 @@ export const Project: Pick<
   | 'name'
   | 'type'
   | 'validationUrl'
+  | '__isTypeOf'
 > = {
   experimental_nativeCompositionPerTarget: async (project, _, { injector }) => {
     if (project.type !== ProjectType.FEDERATION) {
