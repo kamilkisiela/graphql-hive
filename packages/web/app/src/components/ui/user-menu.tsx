@@ -49,11 +49,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@tanstack/react-router';
 import { GetStartedProgress } from '../get-started/trigger';
 import { MemberRoleMigrationStickyNote } from '../organization/members/migration';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
-import { useToast } from '../ui/use-toast';
 import { Changelog } from './changelog/changelog';
 import { latestChangelog } from './changelog/generated-changelog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './form';
+import { Input } from './input';
+import { useToast } from './use-toast';
 
 const UserMenu_OrganizationConnectionFragment = graphql(`
   fragment UserMenu_OrganizationConnectionFragment on OrganizationConnection {
