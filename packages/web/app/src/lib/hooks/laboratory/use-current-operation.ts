@@ -27,7 +27,7 @@ export function useCurrentOperation(props: {
   projectId: string;
   targetId: string;
 }) {
-  const operationIdFromSearch = useOperationFromQueryString()
+  const operationIdFromSearch = useOperationFromQueryString();
   const [{ data }] = useQuery({
     query: OperationQuery,
     variables: {

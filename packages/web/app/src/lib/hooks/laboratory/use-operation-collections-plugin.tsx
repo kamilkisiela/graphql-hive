@@ -115,16 +115,10 @@ export function useOperationCollectionsPlugin(props: {
         projectId: props.projectId,
         targetId: props.targetId,
       });
-      const {
-        queryEditor,
-        variableEditor,
-        headerEditor,
-        tabs,
-        changeTab,
-        addTab,
-      } = useEditorContext({
-        nonNull: true,
-      });
+      const { queryEditor, variableEditor, headerEditor, tabs, changeTab, addTab } =
+        useEditorContext({
+          nonNull: true,
+        });
 
       const hasAllEditors = !!(queryEditor && variableEditor && headerEditor);
       const queryParamsOperationId = useOperationFromQueryString();
