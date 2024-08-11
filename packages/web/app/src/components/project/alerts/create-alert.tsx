@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -155,6 +156,9 @@ export function CreateAlertModalContent(props: {
           <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
             <DialogHeader>
               <DialogTitle>Create an alert</DialogTitle>
+              <DialogDescription>
+                Create an alert to receive notifications when a schema change occurs.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-8">
               <FormField
