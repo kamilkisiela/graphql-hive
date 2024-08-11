@@ -74,7 +74,7 @@ const CreateOperationMutation = graphql(`
   }
 `);
 
-const tabBadgeClassName = clsx(
+const _tabBadgeClassName = clsx(
   'hive-badge-is-changed',
   'relative after:top-1/2 after:-translate-y-1/2 after:right-[.65rem] hover:after:hidden',
   '[&_.graphiql-tab-close]:hidden [&:hover_.graphiql-tab-close]:block',
@@ -120,7 +120,6 @@ export function useOperationCollectionsPlugin(props: {
         variableEditor,
         headerEditor,
         tabs,
-        updateActiveTabValues,
         changeTab,
         addTab,
       } = useEditorContext({
