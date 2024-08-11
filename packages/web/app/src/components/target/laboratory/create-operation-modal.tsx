@@ -53,7 +53,7 @@ export type CreateOperationMutationType = typeof CreateOperationMutation;
 export function CreateOperationModal(props: {
   isOpen: boolean;
   close: () => void;
-  onSaveSuccess?: (operationId?: string) => void;
+  onSaveSuccess: (args: { id: string; name: string }) => void;
   organizationId: string;
   projectId: string;
   targetId: string;
@@ -110,7 +110,10 @@ export function CreateOperationModal(props: {
       const error = response.error || response.data?.createOperationInDocumentCollection.error;
 
       if (!error) {
-        onSaveSuccess?.(result?.createOperationInDocumentCollection.ok?.operation.id);
+        const operation = result?.createOperationInDocumentCollection.ok?.operation;
+        if (operation) {
+          onSaveSuccess({ id: operation.id, name: operation.name });
+        }
         resetForm();
         close();
       }

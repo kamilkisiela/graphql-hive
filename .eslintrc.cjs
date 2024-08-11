@@ -197,7 +197,7 @@ module.exports = {
         tailwindcss: {
           config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none'],
-          cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/graphiql.css'],
+          cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/dist/style.css'],
         },
       },
     },

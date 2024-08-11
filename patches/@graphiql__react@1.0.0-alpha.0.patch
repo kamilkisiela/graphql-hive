@@ -1,8 +1,8 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 10032c731fbfc99696d1dd3400329d13f3a90a76..a15448260b5f293d33c2620a972d6130332dc8ef 100644
+index 2cbf03985f40165341cbf0d1f35937842e52627b..1aa6bc8230fb72a688fbf0b5d4953cf779b868c3 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -3009,14 +3009,16 @@ function useSetEditorValues({
+@@ -3007,14 +3007,16 @@ function useSetEditorValues({
    );
  }
  function createTab({
@@ -22,7 +22,7 @@ index 10032c731fbfc99696d1dd3400329d13f3a90a76..a15448260b5f293d33c2620a972d6130
      query,
      variables,
      headers,
-@@ -3034,8 +3036,7 @@ function setPropertiesInActiveTab(state, partialTab) {
+@@ -3032,8 +3034,7 @@ function setPropertiesInActiveTab(state, partialTab) {
        const newTab = { ...tab, ...partialTab };
        return {
          ...newTab,
@@ -32,21 +32,58 @@ index 10032c731fbfc99696d1dd3400329d13f3a90a76..a15448260b5f293d33c2620a972d6130
        };
      })
    };
-@@ -3256,11 +3257,11 @@ function EditorContextProvider(props) {
-     responseEditor
+@@ -3255,25 +3256,31 @@ function EditorContextProvider(props) {
+     responseEditor,
+     defaultHeaders
    });
-   const { onTabChange, defaultHeaders, children } = props;
 -  const addTab = useCallback(() => {
-+  const addTab = useCallback((_tabState) => {
-     setTabState((current) => {
-       const updatedValues = synchronizeActiveTabValues(current);
-       const updated = {
+-    setTabState((current) => {
+-      const updatedValues = synchronizeActiveTabValues(current);
+-      const updated = {
 -        tabs: [...updatedValues.tabs, createTab({ headers: defaultHeaders })],
-+        tabs: [...updatedValues.tabs, createTab({ ..._tabState, headers: defaultHeaders })],
-         activeTabIndex: updatedValues.tabs.length
-       };
-       storeTabs(updated);
-@@ -3370,6 +3371,7 @@ function EditorContextProvider(props) {
+-        activeTabIndex: updatedValues.tabs.length
+-      };
+-      storeTabs(updated);
+-      setEditorValues(updated.tabs[updated.activeTabIndex]);
+-      onTabChange == null ? void 0 : onTabChange(updated);
+-      return updated;
+-    });
+-  }, [
+-    defaultHeaders,
+-    onTabChange,
+-    setEditorValues,
+-    storeTabs,
+-    synchronizeActiveTabValues
+-  ]);
++  const addTab = useCallback(
++    (_tabState) => {
++      setTabState((current) => {
++        const updatedValues = synchronizeActiveTabValues(current);
++        const updated = {
++          tabs: [
++            ...updatedValues.tabs,
++            createTab({ ..._tabState, headers: defaultHeaders })
++          ],
++          activeTabIndex: updatedValues.tabs.length
++        };
++        storeTabs(updated);
++        setEditorValues(updated.tabs[updated.activeTabIndex]);
++        onTabChange == null ? void 0 : onTabChange(updated);
++        return updated;
++      });
++    },
++    [
++      defaultHeaders,
++      onTabChange,
++      setEditorValues,
++      storeTabs,
++      synchronizeActiveTabValues
++    ]
++  );
+   const changeTab = useCallback(
+     (index) => {
+       setTabState((current) => {
+@@ -3369,6 +3376,7 @@ function EditorContextProvider(props) {
    const value = useMemo(
      () => ({
        ...tabState,
@@ -54,10 +91,10 @@ index 10032c731fbfc99696d1dd3400329d13f3a90a76..a15448260b5f293d33c2620a972d6130
        addTab,
        changeTab,
        moveTab,
-diff --git a/types/editor/context.d.ts b/types/editor/context.d.ts
-index 84b8cfc95addce217179d531a0504be8e0ca19ea..72db57881396d4543498f2c9e7a75a27568cea48 100644
---- a/types/editor/context.d.ts
-+++ b/types/editor/context.d.ts
+diff --git a/dist/types/editor/context.d.ts b/dist/types/editor/context.d.ts
+index 199db8a294f8132d46470498870adbdf9fdc83af..ef2c3a80a02d11e59d06cd96a591707f86a99d78 100644
+--- a/dist/types/editor/context.d.ts
++++ b/dist/types/editor/context.d.ts
 @@ -1,6 +1,6 @@
  import { DocumentNode, FragmentDefinitionNode, OperationDefinitionNode, ValidationRule } from 'graphql';
  import { VariableToType } from 'graphql-language-service';
@@ -79,10 +116,19 @@ index 84b8cfc95addce217179d531a0504be8e0ca19ea..72db57881396d4543498f2c9e7a75a27
      /**
       * Switch to a different tab.
       * @param index The index of the tab that should be switched to.
-diff --git a/types/editor/tabs.d.ts b/types/editor/tabs.d.ts
-index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..a53dd7436e046fe871f163abe29dffc7881c9ab2 100644
---- a/types/editor/tabs.d.ts
-+++ b/types/editor/tabs.d.ts
+@@ -38,7 +39,7 @@ export declare type EditorContextType = TabsState & {
+      * @param partialTab A partial tab state object that will override the
+      * current values. The properties `id`, `hash` and `title` cannot be changed.
+      */
+-    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): void;
++    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'hash' | 'title'>>): void;
+     /**
+      * The CodeMirror editor instance for the headers editor.
+      */
+diff --git a/dist/types/editor/tabs.d.ts b/dist/types/editor/tabs.d.ts
+index 28704a9c1c6e22fa75986de8591759e13035c8c5..e28bbc369d069aa9b361ed5200b74b5b546d8a30 100644
+--- a/dist/types/editor/tabs.d.ts
++++ b/dist/types/editor/tabs.d.ts
 @@ -42,6 +42,7 @@ export declare type TabState = TabDefinition & {
       * The contents of the response editor of this tab.
       */
@@ -91,7 +137,7 @@ index 13ebb006948ec56d21e4ec292bbc7a52f2ccba5d..a53dd7436e046fe871f163abe29dffc7
  };
  /**
   * This object describes the state of all tabs.
-@@ -89,7 +90,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
+@@ -90,7 +91,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
      headers?: string | null | undefined;
      response: string | null;
  }) => void;

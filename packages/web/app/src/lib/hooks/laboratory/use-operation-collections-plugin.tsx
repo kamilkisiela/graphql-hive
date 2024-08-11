@@ -27,6 +27,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
+import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { cn } from '@/lib/utils';
 import { GraphiQLPlugin, useEditorContext, usePluginContext } from '@graphiql/react';
 import { BookmarkFilledIcon, BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
@@ -127,11 +128,7 @@ export function useOperationCollectionsPlugin(props: {
       });
 
       const hasAllEditors = !!(queryEditor && variableEditor && headerEditor);
-      const queryParamsOperationId =
-        'operation' in router.latestLocation.search &&
-        typeof router.latestLocation.search.operation === 'string'
-          ? router.latestLocation.search.operation
-          : null;
+      const queryParamsOperationId = useOperationFromQueryString();
       const activeTab = tabs.find(tab => tab.id === queryParamsOperationId);
 
       const isSame =
@@ -195,8 +192,7 @@ export function useOperationCollectionsPlugin(props: {
       }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
       useEffect(() => {
-        updateActiveTabValues({ className: isSame ? '' : tabBadgeClassName });
-
+        // updateActiveTabValues({ className: isSame ? '' : tabBadgeClassName });
         if (!hasAllEditors || !currentOperation || isSame) {
           return;
         }

@@ -1,6 +1,6 @@
 import { useQuery } from 'urql';
 import { graphql } from '@/gql';
-import { useRouter } from '@tanstack/react-router';
+import { useOperationFromQueryString } from './useOperationFromQueryString';
 
 const OperationQuery = graphql(`
   query Operation($selector: TargetSelectorInput!, $id: ID!) {
@@ -27,12 +27,7 @@ export function useCurrentOperation(props: {
   projectId: string;
   targetId: string;
 }) {
-  const router = useRouter();
-  const operationIdFromSearch =
-    'operation' in router.latestLocation.search &&
-    typeof router.latestLocation.search.operation === 'string'
-      ? router.latestLocation.search.operation
-      : null;
+  const operationIdFromSearch = useOperationFromQueryString()
   const [{ data }] = useQuery({
     query: OperationQuery,
     variables: {

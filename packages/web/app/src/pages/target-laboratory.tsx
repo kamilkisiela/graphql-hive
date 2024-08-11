@@ -30,10 +30,12 @@ import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
 import { useOperationCollectionsPlugin } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
+import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
 import {
   UnStyledButton as GraphiQLButton,
+  GraphiQLProviderProps,
   Tooltip as GraphiQLTooltip,
   useEditorContext,
 } from '@graphiql/react';
@@ -41,13 +43,14 @@ import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolk
 import { EnterFullScreenIcon, ExitFullScreenIcon } from '@radix-ui/react-icons';
 import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
-import 'graphiql/graphiql.css';
+import 'graphiql/style.css';
 
-function Share({ operation }: { operation: string | null }): ReactElement | null {
+function Share(): ReactElement | null {
   const label = 'Share query';
   const copyToClipboard = useClipboard();
+  const operationFromQueryString = useOperationFromQueryString();
 
-  if (!operation) return null;
+  if (!operationFromQueryString) return null;
 
   return (
     <GraphiQLTooltip label={label}>
@@ -111,9 +114,14 @@ function Save(props: {
     projectId: props.projectId,
     targetId: props.targetId,
   });
+  const operationFromQueryString = useOperationFromQueryString();
+
   const onSaveSuccess = useCallback(
-    (operationId?: string) => {
-      if (operationId) {
+    ({ id, name }: { id: string; name: string }) => {
+      if (id) {
+        if (!operationFromQueryString) {
+          updateActiveTabValues({ id, title: name });
+        }
         void router.navigate({
           to: '/$organizationId/$projectId/$targetId/laboratory',
           params: {
@@ -121,7 +129,7 @@ function Save(props: {
             projectId: props.projectId,
             targetId: props.targetId,
           },
-          search: { operation: operationId },
+          search: { operation: id },
         });
       }
       clearOperation();
@@ -140,7 +148,13 @@ function Save(props: {
     <DropdownMenu>
       <GraphiQLTooltip label={label}>
         <DropdownMenuTrigger asChild>
-          <GraphiQLButton className="graphiql-toolbar-button" aria-label={label}>
+          <GraphiQLButton
+            className={cn(
+              'graphiql-toolbar-button',
+              operationFromQueryString && !isSame && 'hive-badge-is-changed relative after:top-1',
+            )}
+            aria-label={label}
+          >
             <SaveIcon className="graphiql-toolbar-icon h-5" />
           </GraphiQLButton>
         </DropdownMenuTrigger>
@@ -262,6 +276,17 @@ function LaboratoryPageContent(props: {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const currentOrganization = query.data?.organization?.organization;
+  const { collections } = useCollections({
+    organizationId: props.organizationId,
+    projectId: props.projectId,
+    targetId: props.targetId,
+  });
+  const userOperations = useMemo(() => {
+    const operations = collections.flatMap(collection =>
+      collection.operations.edges.map(o => o.node.id),
+    );
+    return new Set(operations);
+  }, [collections]);
 
   const operationCollectionsPlugin = useOperationCollectionsPlugin({
     canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
@@ -319,13 +344,24 @@ function LaboratoryPageContent(props: {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
 
-  const searchObj = router.latestLocation.search;
-  const operation =
-    'operation' in searchObj && typeof searchObj.operation === 'string'
-      ? searchObj.operation
-      : null;
-
   const FullScreenIcon = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
+
+  const handleTabChange = useCallback<Exclude<GraphiQLProviderProps['onTabChange'], undefined>>(
+    ({ tabs, activeTabIndex }) => {
+      const activeTab = tabs.find((_, index) => index === activeTabIndex)!;
+      // Set search params while clicking on tab
+      void router.navigate({
+        to: '/$organizationId/$projectId/$targetId/laboratory',
+        params: {
+          organizationId: props.organizationId,
+          projectId: props.projectId,
+          targetId: props.targetId,
+        },
+        search: userOperations.has(activeTab.id) ? { operation: activeTab.id } : {},
+      });
+    },
+    [userOperations],
+  );
 
   return (
     <TargetLayout
@@ -426,14 +462,8 @@ function LaboratoryPageContent(props: {
           .CodeMirror-lint-tooltip {
             background: #030711;
           }
-          .graphiql-logo {
-            margin-left: auto;
-          }
           .graphiql-tab {
             white-space: nowrap;
-          }
-          .graphiql-tab-button {
-            padding-right: 24px !important;
           }
         `}</style>
       </Helmet>
@@ -441,18 +471,6 @@ function LaboratoryPageContent(props: {
       {!query.fetching && !query.stale && (
         <GraphiQL
           fetcher={fetcher}
-          toolbar={{
-            additionalContent: (
-              <>
-                <Save
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
-                />
-                <Share operation={operation} />
-              </>
-            ),
-          }}
           showPersistHeadersSettings={false}
           shouldPersistHeaders={false}
           plugins={[operationCollectionsPlugin]}
@@ -460,21 +478,7 @@ function LaboratoryPageContent(props: {
           schema={schema}
           forcedTheme="dark"
           className={isFullScreen ? 'fixed inset-0 bg-[#030711]' : ''}
-          onTabChange={({ tabs, activeTabIndex }) => {
-            const activeTab = tabs.find((_, index) => index === activeTabIndex)!;
-            // Set search params while clicking on tab
-            if (activeTab.id !== operation) {
-              void router.navigate({
-                to: '/$organizationId/$projectId/$targetId/laboratory',
-                params: {
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
-                },
-                search: { operation: activeTab.id },
-              });
-            }
-          }}
+          onTabChange={handleTabChange}
         >
           <GraphiQL.Logo>
             <Button
@@ -486,6 +490,19 @@ function LaboratoryPageContent(props: {
               {isFullScreen ? 'Exit' : 'Enter'} Full Screen
             </Button>
           </GraphiQL.Logo>
+          <GraphiQL.Toolbar>
+            {({ prettify }) => (
+              <>
+                <Save
+                  organizationId={props.organizationId}
+                  projectId={props.projectId}
+                  targetId={props.targetId}
+                />
+                <Share />
+                {prettify}
+              </>
+            )}
+          </GraphiQL.Toolbar>
         </GraphiQL>
       )}
       <ConnectLabModal

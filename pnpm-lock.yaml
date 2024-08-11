@@ -8,9 +8,9 @@ patchedDependencies:
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
-  '@graphiql/react@0.24.0-canary-869419d9.0':
-    hash: xhdzbhyz6z5ib4od2bwau7t3py
-    path: patches/@graphiql__react@0.24.0-canary-869419d9.0.patch
+  '@graphiql/react@1.0.0-alpha.0':
+    hash: i3oi5sxxjxo7g3eqonoixuo5he
+    path: patches/@graphiql__react@1.0.0-alpha.0.patch
   '@graphql-eslint/eslint-plugin@3.20.1':
     hash: n437g5o7zq7pnxdxldn52uql2q
     path: patches/@graphql-eslint__eslint-plugin@3.20.1.patch
@@ -29,9 +29,9 @@ patchedDependencies:
   got@14.4.1:
     hash: b6pwqmrs3qqykctltsasvrfwti
     path: patches/got@14.4.1.patch
-  graphiql@3.5.0-canary-869419d9.0:
-    hash: lrhfdnfw462iuju56c5bfes2sy
-    path: patches/graphiql@3.5.0-canary-869419d9.0.patch
+  graphiql@4.0.0-alpha.0:
+    hash: dntx4mscvfizxeu7lk5co47xxu
+    path: patches/graphiql@4.0.0-alpha.0.patch
   mjml-core@4.14.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.14.0.patch
@@ -1641,8 +1641,8 @@ importers:
         specifier: 6.0.7
         version: 6.0.7(@types/node@20.14.10)(less@4.2.0)(terser@5.31.1)
       '@graphiql/react':
-        specifier: 0.24.0-canary-869419d9.0
-        version: 0.24.0-canary-869419d9.0(patch_hash=xhdzbhyz6z5ib4od2bwau7t3py)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 1.0.0-alpha.0
+        version: 1.0.0-alpha.0(patch_hash=i3oi5sxxjxo7g3eqonoixuo5he)(@codemirror/language@6.0.0)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/toolkit':
         specifier: 0.9.1
         version: 0.9.1(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
@@ -1854,8 +1854,8 @@ importers:
         specifier: 11.3.2
         version: 11.3.2(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphiql:
-        specifier: 3.5.0-canary-869419d9.0
-        version: 3.5.0-canary-869419d9.0(patch_hash=lrhfdnfw462iuju56c5bfes2sy)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.0-alpha.0
+        version: 4.0.0-alpha.0(patch_hash=dntx4mscvfizxeu7lk5co47xxu)(@codemirror/language@6.0.0)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql:
         specifier: 16.9.0
         version: 16.9.0
@@ -3459,14 +3459,14 @@ packages:
   '@cloudflare/workers-types@4.20240712.0':
     resolution: {integrity: sha512-C+C0ZnkRrxR2tPkZKAXwBsWEse7bWaA7iMbaG6IKaxaPTo/5ilx7Ei3BkI2izxmOJMsC05VS1eFUf95urXzhmw==}
 
-  '@codemirror/language@6.10.2':
-    resolution: {integrity: sha512-kgbTYTo0Au6dCSc/TFy7fK3fpJmgHDv1sG1KNQKJXVi+xBTEeBPY/M30YXiU6mMXeH+YIDLsbrT4ZwNRdtF+SA==}
+  '@codemirror/language@6.0.0':
+    resolution: {integrity: sha512-rtjk5ifyMzOna1c7PBu7J1VCt0PvA5wy3o8eMVnxMKb7z8KA7JFecvD04dSn14vj/bBaAbqRsGed5OjtofEnLA==}
 
   '@codemirror/state@6.4.1':
     resolution: {integrity: sha512-QkEyUiLhsJoZkbumGZlswmAhA7CBU02Wrz7zvH4SrcifbsqwlXShVXg65f3v/ts57W3dqyamEriMhij1Z3Zz4A==}
 
-  '@codemirror/view@6.28.2':
-    resolution: {integrity: sha512-A3DmyVfjgPsGIjiJqM/zvODUAPQdQl3ci0ghehYNnbt5x+o76xq+dL5+mMBuysDXnI3kapgOkoeJ0sbtL/3qPw==}
+  '@codemirror/view@6.31.0':
+    resolution: {integrity: sha512-pEqRyzcodpvIuWOhGSo0AIs3WKnewDl1EffAnaSZjqGtxk8HisBLY3VltYKA6Lr94VBH3B6O7G8G1tsQ/Wyi7w==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -3512,8 +3512,14 @@ packages:
   '@emotion/hash@0.9.0':
     resolution: {integrity: sha512-14FtKiHhy2QoPIzdTcvh//8OyBlknNs2nXRwIhG904opCby3l+9Xaf/wuPvICBF0rc1ZCNBd3nKe9cd2mecVkQ==}
 
+  '@emotion/is-prop-valid@0.8.8':
+    resolution: {integrity: sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA==}
+
   '@emotion/is-prop-valid@1.2.2':
     resolution: {integrity: sha512-uNsoYd37AFmaCdXlg6EYD1KaPOaRWRByMCYzbKUX4+hhMfrxdVSelShywL4JVaAeM/eHUOSprYBQls+/neX3pw==}
+
+  '@emotion/memoize@0.7.4':
+    resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
 
   '@emotion/memoize@0.8.0':
     resolution: {integrity: sha512-G/YwXTkv7Den9mXDO7AhLWkE3q+I92B+VqAE+dYG4NGPaHZGvt3G8Q0p9vmE+sq7rTGphUbAvmQ9YpbfMQGGlA==}
@@ -4053,8 +4059,8 @@ packages:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
 
-  '@graphiql/react@0.24.0-canary-869419d9.0':
-    resolution: {integrity: sha512-AUPEuB1YsllqWX1LxvEr9FT06f3unZhmAUbhOoXrabEwP8gqxW2ZGr6QFCP1FMQ8HKWyTr6tshu3lDuwi6ZzHA==}
+  '@graphiql/react@1.0.0-alpha.0':
+    resolution: {integrity: sha512-/jBG8ySHunj6aGK8MxZsm5ISx2xzwiqy2DAjpfTJeYa+9rsBddvS8ohNVjNwEOLsja46pTAaIq6KA5RDJBNE4A==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       react: ^16.8.0 || ^17 || ^18
@@ -4865,8 +4871,8 @@ packages:
   '@lezer/highlight@1.2.0':
     resolution: {integrity: sha512-WrS5Mw51sGrpqjlh3d4/fOwpEV2Hd3YOkp9DBt4k8XZQcoTHZFB7sx030A6OcahF4J1nDQAa3jXlTVVYH50IFA==}
 
-  '@lezer/lr@1.4.1':
-    resolution: {integrity: sha512-CHsKq8DMKBf9b3yXPDIU4DbH+ZJd/sJdYOW2llbW/HudP5u0VS6Bfq1hLYfgU7uAYGFIyGGQIsSOXGPEErZiJw==}
+  '@lezer/lr@1.4.2':
+    resolution: {integrity: sha512-pu0K1jCIdnQ12aWNaAVU5bzi7Bd1w54J3ECgANPmYLtQKP0HBj2cE/5coBD66MT10xbtIuUr7tg0Shbsvk0mDA==}
 
   '@lit-labs/ssr-dom-shim@1.2.0':
     resolution: {integrity: sha512-yWJKmpGE6lUURKAaIltoPIE/wrbY3TEkqQt+X0m+7fQNnAv0keydnYvbiJFP1PnMhizmIWRWOG5KLhYyc/xl+g==}
@@ -9083,8 +9089,8 @@ packages:
       codemirror: ^5.65.3
       graphql: ^15.5.0 || ^16.0.0
 
-  codemirror@5.65.9:
-    resolution: {integrity: sha512-19Jox5sAKpusTDgqgKB5dawPpQcY+ipQK7xoEI+MVucEF9qqFaXpeqY1KaoyGBso/wHQoDa4HMMxMjdsS3Zzzw==}
+  codemirror@5.65.17:
+    resolution: {integrity: sha512-1zOsUx3lzAOu/gnMAZkQ9kpIHcPYOc9y1Fbm2UVk5UBPkdq380nhkelG0qUwm1f7wPvTbndu9ZYlug35EwAZRQ==}
 
   collapse-white-space@2.1.0:
     resolution: {integrity: sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw==}
@@ -10622,6 +10628,17 @@ packages:
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
 
+  framer-motion@10.18.0:
+    resolution: {integrity: sha512-oGlDh1Q1XqYPksuTD/usb0I70hq95OUzmL9+6Zd+Hs4XV0oaISBa/UUMSjYiq6m8EUF32132mOJ8xVZS+I0S6w==}
+    peerDependencies:
+      react: ^18.0.0
+      react-dom: ^18.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   framer-motion@11.3.2:
     resolution: {integrity: sha512-RgjSzrNFZmedWcvmW4MMc84A7UcoY37jocadE3Mbg3o+UMofodfyeNnYD/HR15UhP22/bb5KOebNhYOj4mYkpQ==}
     peerDependencies:
@@ -10907,8 +10924,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  graphiql@3.5.0-canary-869419d9.0:
-    resolution: {integrity: sha512-sFnshM/mMWvGwYRvvOjSYH5VFX5gGyj5CzSDQWLj13tl/6IMTuE1kjTywwoXuzrR0EKS2BbAvPNX5vei5Ro4rA==}
+  graphiql@4.0.0-alpha.0:
+    resolution: {integrity: sha512-2gcjCmN2FUtXdUxfCSoHVbieaZ2NANlHX0WbvBz/F+u57HgOuwcvkHke/slti+IDqLTJIqQ+mcAYGCxcZ2AZQw==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       react: ^16.8.0 || ^17 || ^18
@@ -19040,18 +19057,18 @@ snapshots:
 
   '@cloudflare/workers-types@4.20240712.0': {}
 
-  '@codemirror/language@6.10.2':
+  '@codemirror/language@6.0.0':
     dependencies:
       '@codemirror/state': 6.4.1
-      '@codemirror/view': 6.28.2
+      '@codemirror/view': 6.31.0
       '@lezer/common': 1.2.1
       '@lezer/highlight': 1.2.0
-      '@lezer/lr': 1.4.1
+      '@lezer/lr': 1.4.2
       style-mod: 4.1.2
 
   '@codemirror/state@6.4.1': {}
 
-  '@codemirror/view@6.28.2':
+  '@codemirror/view@6.31.0':
     dependencies:
       '@codemirror/state': 6.4.1
       style-mod: 4.1.2
@@ -19152,9 +19169,17 @@ snapshots:
 
   '@emotion/hash@0.9.0': {}
 
+  '@emotion/is-prop-valid@0.8.8':
+    dependencies:
+      '@emotion/memoize': 0.7.4
+    optional: true
+
   '@emotion/is-prop-valid@1.2.2':
     dependencies:
       '@emotion/memoize': 0.8.1
+    optional: true
+
+  '@emotion/memoize@0.7.4':
     optional: true
 
   '@emotion/memoize@0.8.0': {}
@@ -19629,7 +19654,7 @@ snapshots:
       graphql: 16.9.0
       typescript: 5.5.3
 
-  '@graphiql/react@0.24.0-canary-869419d9.0(patch_hash=xhdzbhyz6z5ib4od2bwau7t3py)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/react@1.0.0-alpha.0(patch_hash=i3oi5sxxjxo7g3eqonoixuo5he)(@codemirror/language@6.0.0)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@graphiql/toolkit': 0.9.2(@types/node@20.14.10)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)
       '@headlessui/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -19639,10 +19664,10 @@ snapshots:
       '@radix-ui/react-visually-hidden': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/codemirror': 5.60.15
       clsx: 1.2.1
-      codemirror: 5.65.9
-      codemirror-graphql: 2.0.13(@codemirror/language@6.10.2)(codemirror@5.65.9)(graphql@16.9.0)
+      codemirror: 5.65.17
+      codemirror-graphql: 2.0.13(@codemirror/language@6.0.0)(codemirror@5.65.17)(graphql@16.9.0)
       copy-to-clipboard: 3.3.3
-      framer-motion: 11.3.2(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      framer-motion: 10.18.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql: 16.9.0
       graphql-language-service: 5.2.2(graphql@16.9.0)
       markdown-it: 14.1.0
@@ -19651,7 +19676,6 @@ snapshots:
       set-value: 4.1.0
     transitivePeerDependencies:
       - '@codemirror/language'
-      - '@emotion/is-prop-valid'
       - '@types/node'
       - '@types/react'
       - '@types/react-dom'
@@ -21068,7 +21092,7 @@ snapshots:
     dependencies:
       '@lezer/common': 1.2.1
 
-  '@lezer/lr@1.4.1':
+  '@lezer/lr@1.4.2':
     dependencies:
       '@lezer/common': 1.2.1
 
@@ -26363,15 +26387,15 @@ snapshots:
 
   code-block-writer@13.0.1: {}
 
-  codemirror-graphql@2.0.13(@codemirror/language@6.10.2)(codemirror@5.65.9)(graphql@16.9.0):
+  codemirror-graphql@2.0.13(@codemirror/language@6.0.0)(codemirror@5.65.17)(graphql@16.9.0):
     dependencies:
-      '@codemirror/language': 6.10.2
+      '@codemirror/language': 6.0.0
       '@types/codemirror': 0.0.90
-      codemirror: 5.65.9
+      codemirror: 5.65.17
       graphql: 16.9.0
       graphql-language-service: 5.2.2(graphql@16.9.0)
 
-  codemirror@5.65.9: {}
+  codemirror@5.65.17: {}
 
   collapse-white-space@2.1.0: {}
 
@@ -28312,6 +28336,14 @@ snapshots:
 
   fraction.js@4.3.7: {}
 
+  framer-motion@10.18.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      tslib: 2.6.3
+    optionalDependencies:
+      '@emotion/is-prop-valid': 0.8.8
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   framer-motion@11.3.2(@emotion/is-prop-valid@1.2.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       tslib: 2.6.3
@@ -28664,15 +28696,14 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  graphiql@3.5.0-canary-869419d9.0(patch_hash=lrhfdnfw462iuju56c5bfes2sy)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  graphiql@4.0.0-alpha.0(patch_hash=dntx4mscvfizxeu7lk5co47xxu)(@codemirror/language@6.0.0)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@graphiql/react': 0.24.0-canary-869419d9.0(patch_hash=xhdzbhyz6z5ib4od2bwau7t3py)(@codemirror/language@6.10.2)(@emotion/is-prop-valid@1.2.2)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@graphiql/react': 1.0.0-alpha.0(patch_hash=i3oi5sxxjxo7g3eqonoixuo5he)(@codemirror/language@6.0.0)(@types/node@20.14.10)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphql: 16.9.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
       - '@codemirror/language'
-      - '@emotion/is-prop-valid'
       - '@types/node'
       - '@types/react'
       - '@types/react-dom'
