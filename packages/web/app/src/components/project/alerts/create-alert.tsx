@@ -211,6 +211,14 @@ export function CreateAlertModalContent(props: {
                               'Select a Channel'}
                           </SelectTrigger>
                           <SelectContent className="w-[--radix-select-trigger-width]">
+                            {props.channels.length === 0 && (
+                              <SelectItem
+                                value="No channels available - Please create a channel first"
+                                disabled
+                              >
+                                No channels available - Please create a channel first
+                              </SelectItem>
+                            )}
                             {props.channels.map(channel => (
                               <SelectItem key={channel.id} value={channel.id}>
                                 {channel.name}
@@ -243,8 +251,16 @@ export function CreateAlertModalContent(props: {
                               'Select a Target'}
                           </SelectTrigger>
                           <SelectContent className="w-[--radix-select-trigger-width]">
+                            {props.targets.length === 0 && (
+                              <SelectItem
+                                value="No targets available - Please create a target first"
+                                disabled
+                              >
+                                No targets available - Please create a target first
+                              </SelectItem>
+                            )}
                             {props.targets.map(target => (
-                              <SelectItem key={target.id} value={target.cleanId}>
+                              <SelectItem key={target.id} value={target.id}>
                                 {target.name}
                               </SelectItem>
                             ))}

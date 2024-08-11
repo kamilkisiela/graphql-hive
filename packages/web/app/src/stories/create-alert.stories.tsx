@@ -118,3 +118,10 @@ CreateAlert.args = {
   ],
   isOpen: true,
 };
+
+export const CreateAlertWithoutChannelsOrAlerts: Story = Template.bind({});
+CreateAlertWithoutChannelsOrAlerts.args = {
+  channels: [],
+  targets: [],
+  isOpen: true,
+};
