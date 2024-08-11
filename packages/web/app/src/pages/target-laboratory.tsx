@@ -120,6 +120,7 @@ function Save(props: {
     ({ id, name }: { id: string; name: string }) => {
       if (id) {
         if (!operationFromQueryString) {
+          // @ts-expect-error -- fix type
           updateActiveTabValues({ id, title: name });
         }
         void router.navigate({
