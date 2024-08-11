@@ -1,7 +1,10 @@
+import { ReactElement } from 'react';
 import cookies from 'js-cookie';
 import { LifeBuoyIcon } from 'lucide-react';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
-import { useMutation } from 'urql';
+import { useMutation, useQuery } from 'urql';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -42,10 +45,13 @@ import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from '@tanstack/react-router';
 import { GetStartedProgress } from '../get-started/trigger';
 import { MemberRoleMigrationStickyNote } from '../organization/members/migration';
-import { UserSettingsModal } from '../user/settings';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
+import { useToast } from '../ui/use-toast';
 import { Changelog } from './changelog/changelog';
 import { latestChangelog } from './changelog/generated-changelog';
 
@@ -361,6 +367,178 @@ export function LeaveOrganizationModalContent(props: {
             Leave organization
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const UserSettings_MeQuery = graphql(`
+  query UserSettings_MeQuery {
+    me {
+      id
+      fullName
+      displayName
+      canSwitchOrganization
+    }
+  }
+`);
+
+const UpdateMeMutation = graphql(`
+  mutation updateMe($input: UpdateMeInput!) {
+    updateMe(input: $input) {
+      ok {
+        updatedUser {
+          id
+          fullName
+          displayName
+        }
+      }
+      error {
+        message
+        inputErrors {
+          fullName
+          displayName
+        }
+      }
+    }
+  }
+`);
+
+const userSettingsModalFormSchema = z.object({
+  fullName: z
+    .string({
+      required_error: 'Full Name is required',
+    })
+    .min(2, {
+      message: 'Name must be at least 2 characters long',
+    })
+    .max(50, {
+      message: 'Name must be at most 50 characters long',
+    }),
+  displayName: z
+    .string({
+      required_error: 'Display Name is required',
+    })
+    .min(2, {
+      message: 'Name must be at least 2 characters long',
+    })
+    .max(50, {
+      message: 'Name must be at most 50 characters long',
+    }),
+});
+
+export type UserSettingsModalFormValues = z.infer<typeof userSettingsModalFormSchema>;
+
+export function UserSettingsModal({
+  isOpen,
+  toggleModalOpen,
+}: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+}): ReactElement {
+  const [meQuery] = useQuery({ query: UserSettings_MeQuery, pause: !isOpen });
+  const [, mutate] = useMutation(UpdateMeMutation);
+  const { toast } = useToast();
+  const me = meQuery.data?.me;
+
+  const form = useForm<UserSettingsModalFormValues>({
+    mode: 'onChange',
+    resolver: zodResolver(userSettingsModalFormSchema),
+    defaultValues: {
+      fullName: me?.fullName ?? '',
+      displayName: me?.displayName ?? '',
+    },
+  });
+
+  async function onSubmit(values: UserSettingsModalFormValues) {
+    const { data } = await mutate({ input: values });
+    if (data?.updateMe.ok) {
+      toggleModalOpen();
+      toast({
+        variant: 'default',
+        title: 'Profile updated',
+        description: 'Your profile has been updated successfully',
+      });
+    }
+    if (data?.updateMe.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: data.updateMe.error.message,
+      });
+    }
+  }
+
+  return (
+    <UserSettingsModalContent
+      close={toggleModalOpen}
+      form={form}
+      isOpen={isOpen}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+export function UserSettingsModalContent(props: {
+  isOpen: boolean;
+  close: () => void;
+  form: UseFormReturn<UserSettingsModalFormValues>;
+  onSubmit: (values: UserSettingsModalFormValues) => void;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.close}>
+      <DialogContent className="container w-4/5 max-w-[400px] md:w-3/5">
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Profile settings</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-8">
+              <FormField
+                control={props.form.control}
+                name="fullName"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Your Full Name" autoComplete="off" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={props.form.control}
+                name="displayName"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Display Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Your Display Name" autoComplete="off" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full justify-center"
+                variant="primary"
+                data-cy="confirm"
+                disabled={props.form.formState.isSubmitting || !props.form.formState.isDirty}
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
