@@ -34,7 +34,7 @@ export function Highlights(props: {
               className="group mt-4 inline-flex items-center gap-x-2 font-semibold text-yellow-500 underline-offset-8 transition hover:underline"
             >
               <div>
-                <BookIcon size={16} />
+                <BookIcon className="size-4" />
               </div>
               <div>Learn more</div>
             </Link>
