@@ -926,8 +926,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       sendmail:
         specifier: 1.6.1
         version: 1.6.1
@@ -998,8 +998,8 @@ importers:
         specifier: 16.9.0
         version: 16.9.0
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1037,8 +1037,8 @@ importers:
         specifier: 14.4.1
         version: 14.4.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1106,8 +1106,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1217,8 +1217,8 @@ importers:
         specifier: 5.4.1
         version: 5.4.1
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       prom-client:
         specifier: 15.1.3
         version: 15.1.3
@@ -1395,8 +1395,8 @@ importers:
         specifier: 14.4.1
         version: 14.4.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1440,8 +1440,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1494,8 +1494,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1530,8 +1530,8 @@ importers:
         specifier: 14.4.1
         version: 14.4.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2
@@ -1575,8 +1575,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1617,8 +1617,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 11.2.1
-        version: 11.2.1
+        specifier: 11.2.2
+        version: 11.2.2
       tslib:
         specifier: 2.6.3
         version: 2.6.3
@@ -13755,8 +13755,8 @@ packages:
   pino-abstract-transport@1.2.0:
     resolution: {integrity: sha512-Guhh8EZfPCfH+PMXAb6rKOjGQEoy0xlAIn+irODG5kgfYV+BQ0rGYYWTIel3P5mmyXqkYkPmdIkywsn6QKUR1Q==}
 
-  pino-pretty@11.2.1:
-    resolution: {integrity: sha512-O05NuD9tkRasFRWVaF/uHLOvoRDFD7tb5VMertr78rbsYFjYp48Vg3477EshVAF5eZaEw+OpDl/tu+B0R5o+7g==}
+  pino-pretty@11.2.2:
+    resolution: {integrity: sha512-2FnyGir8nAJAqD3srROdrF1J5BIcMT4nwj7hHSc60El6Uxlym00UbCCd8pYIterstVBFlMyF1yFV8XdGIPbj4A==}
     hasBin: true
 
   pino-std-serializers@6.2.2:
@@ -32495,7 +32495,7 @@ snapshots:
       readable-stream: 4.4.0
       split2: 4.1.0
 
-  pino-pretty@11.2.1:
+  pino-pretty@11.2.2:
     dependencies:
       colorette: 2.0.20
       dateformat: 4.6.3
