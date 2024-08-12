@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import Link from 'next/link';
 import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
@@ -9,6 +9,7 @@ import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
+import { InfoCard } from './info-card';
 import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
 import { Pricing } from './pricing';
@@ -69,16 +70,62 @@ export function IndexPage(): ReactElement {
           <SoundYXZLogo title="SoundXYZ" height={32} />
         </TrustedBy>
         <EcosystemManagementSection />
-        <div className="relative even:bg-gray-50">
-          <StatsList>
-            <StatsItem label="GitHub commits" value={6.2} suffix="K" decimal />
-            <StatsItem label="Active developers" value={5.7} suffix="K" decimal />
-            <StatsItem label="Registered schemas" value={225} suffix="K" />
-            <StatsItem label="Collected operations" value={315} suffix="B" />
-          </StatsList>
-        </div>
+        <StatsList>
+          <StatsItem label="GitHub commits" value={6.2} suffix="K" decimal />
+          <StatsItem label="Active developers" value={5.7} suffix="K" decimal />
+          <StatsItem label="Registered schemas" value={225} suffix="K" />
+          <StatsItem label="Collected operations" value={315} suffix="B" />
+        </StatsList>
+        <UltimatePerformanceCards />
         <Pricing />
       </Page>
     </Tooltip.Provider>
+  );
+}
+
+function UltimatePerformanceCards() {
+  return (
+    <section className="px-6 py-12 sm:py-24">
+      <Heading as="h3" size="md" className="text-center">
+        GraphQL for the ultimate performance
+      </Heading>
+      <ul className="mt-16 flex flex-row flex-wrap justify-center gap-2 md:gap-6">
+        <InfoCard
+          as="li"
+          heading="Deliver improvements faster"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1"
+        >
+          Accelerate feature improvements and experiments, by seamless decoupling of backend and
+          frontend environments.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Network efficiency"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1"
+        >
+          Accelerate feature improvements and experiments, by seamless decoupling of backend and
+          frontend environments.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Optimized data retrieval"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full lg:basis-0"
+        >
+          Reduce latency effectively with Hive by enabling frontend teams to obtain all required
+          data in a single request, maximizing GraphQL’s inherent performance benefits.
+        </InfoCard>
+      </ul>
+    </section>
+  );
+}
+
+function PerformanceListItemIcon() {
+  return (
+    <svg width="24" height="24" fill="currentColor">
+      <path d="M5.25 7.5a2.25 2.25 0 1 1 3 2.122v4.756a2.251 2.251 0 1 1-1.5 0V9.622A2.25 2.25 0 0 1 5.25 7.5Zm9.22-2.03a.75.75 0 0 1 1.06 0l.97.97.97-.97a.75.75 0 1 1 1.06 1.06l-.97.97.97.97a.75.75 0 0 1-1.06 1.06l-.97-.97-.97.97a.75.75 0 1 1-1.06-1.06l.97-.97-.97-.97a.75.75 0 0 1 0-1.06Zm2.03 5.03a.75.75 0 0 1 .75.75v3.128a2.251 2.251 0 1 1-1.5 0V11.25a.75.75 0 0 1 .75-.75Z" />
+    </svg>
   );
 }
