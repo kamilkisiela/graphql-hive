@@ -313,7 +313,7 @@ function SafariLinearGradientDefs() {
         gradientUnits="objectBoundingBox"
       >
         <stop stop-color="#8CBEB3" />
-        <stop offset="1" stop-color="#68A8B6" />
+        <stop offset="1" stopColor="#68A8B6" />
       </linearGradient>
       <linearGradient
         id="linear-white"
@@ -323,8 +323,8 @@ function SafariLinearGradientDefs() {
         y2="100%"
         gradientUnits="objectBoundingBox"
       >
-        <stop stop-color="white" stop-opacity="0.4" />
-        <stop offset="1" stop-color="white" stop-opacity="0.1" />
+        <stop stop-color="white" stopOpacity="0.4" />
+        <stop offset="1" stopColor="white" stopOpacity="0.1" />
       </linearGradient>
     </defs>
   );
