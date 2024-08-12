@@ -9,7 +9,7 @@ export function TeamSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'flex h-[748px] flex-col flex-wrap bg-blue-400' +
+        'flex h-[748px] flex-col flex-wrap justify-center bg-blue-400' +
           ' p-24 sm:rounded-3xl md:grid-cols-[467px_1fr] md:py-[120px]',
         className,
       )}
