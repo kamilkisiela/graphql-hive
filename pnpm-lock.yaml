@@ -905,8 +905,8 @@ importers:
         specifier: 1.4.7
         version: 1.4.7
       bullmq:
-        specifier: 5.12.3
-        version: 5.12.3
+        specifier: 5.12.4
+        version: 5.12.4
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1599,8 +1599,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       bullmq:
-        specifier: 5.12.3
-        version: 5.12.3
+        specifier: 5.12.4
+        version: 5.12.4
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -4024,7 +4024,6 @@ packages:
 
   '@fastify/vite@6.0.7':
     resolution: {integrity: sha512-+dRo9KUkvmbqdmBskG02SwigWl06Mwkw8SBDK1zTNH6vd4DyXbRvI7RmJEmBkLouSU81KTzy1+OzwHSffqSD6w==}
-    bundledDependencies: []
 
   '@floating-ui/core@1.2.6':
     resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
@@ -8801,8 +8800,8 @@ packages:
   builtins@5.0.1:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
 
-  bullmq@5.12.3:
-    resolution: {integrity: sha512-1CmTTVllhjRX/intqAoqKn1SDa5byURbv7XDU0l5c+zO38nr5mjj7gLOh9BlDjl1cvFVa5PCrlbZoCdtzfQCPw==}
+  bullmq@5.12.4:
+    resolution: {integrity: sha512-0IhyehN1BVr556NR2cY7Hn5KOHL5SJZHJyS8vsuBt/1ynLYOde0uv/V1OspfB/6DF7vSEBTZs8Zq6VzFGoKlkA==}
 
   bundle-name@3.0.0:
     resolution: {integrity: sha512-PKA4BeSvBpQKQ8iPOGCSiell+N8P+Tf1DlwqmYhpe2gAhKPHn8EYOxVT+ShuGmhg8lN8XiSlS80yiExKXrURlw==}
@@ -17002,10 +17001,10 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sso-oidc': 3.596.0(@aws-sdk/client-sts@3.596.0)
-      '@aws-sdk/client-sts': 3.596.0
+      '@aws-sdk/client-sso-oidc': 3.596.0
+      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
       '@aws-sdk/core': 3.592.0
-      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17110,13 +17109,13 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0)':
+  '@aws-sdk/client-sso-oidc@3.596.0':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.596.0
+      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
       '@aws-sdk/core': 3.592.0
-      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17153,7 +17152,6 @@ snapshots:
       '@smithy/util-utf8': 3.0.0
       tslib: 2.6.3
     transitivePeerDependencies:
-      - '@aws-sdk/client-sts'
       - aws-crt
 
   '@aws-sdk/client-sso-oidc@3.614.0(@aws-sdk/client-sts@3.614.0)':
@@ -17287,13 +17285,13 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sts@3.596.0':
+  '@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0)':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sso-oidc': 3.596.0(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/client-sso-oidc': 3.596.0
       '@aws-sdk/core': 3.592.0
-      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17330,6 +17328,7 @@ snapshots:
       '@smithy/util-utf8': 3.0.0
       tslib: 2.6.3
     transitivePeerDependencies:
+      - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
   '@aws-sdk/client-sts@3.614.0':
@@ -17435,14 +17434,14 @@ snapshots:
       '@smithy/util-stream': 3.0.6
       tslib: 2.6.3
 
-  '@aws-sdk/credential-provider-ini@3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)':
+  '@aws-sdk/credential-provider-ini@3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))':
     dependencies:
-      '@aws-sdk/client-sts': 3.596.0
+      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
       '@aws-sdk/credential-provider-env': 3.587.0
       '@aws-sdk/credential-provider-http': 3.596.0
       '@aws-sdk/credential-provider-process': 3.587.0
-      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))
-      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
       '@aws-sdk/types': 3.577.0
       '@smithy/credential-provider-imds': 3.1.3
       '@smithy/property-provider': 3.1.3
@@ -17471,14 +17470,14 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
-  '@aws-sdk/credential-provider-node@3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)':
+  '@aws-sdk/credential-provider-node@3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))':
     dependencies:
       '@aws-sdk/credential-provider-env': 3.587.0
       '@aws-sdk/credential-provider-http': 3.596.0
-      '@aws-sdk/credential-provider-ini': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/credential-provider-ini': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
       '@aws-sdk/credential-provider-process': 3.587.0
-      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))
-      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
       '@aws-sdk/types': 3.577.0
       '@smithy/credential-provider-imds': 3.1.3
       '@smithy/property-provider': 3.1.3
@@ -17525,10 +17524,10 @@ snapshots:
       '@smithy/types': 3.3.0
       tslib: 2.6.3
 
-  '@aws-sdk/credential-provider-sso@3.592.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))':
+  '@aws-sdk/credential-provider-sso@3.592.0(@aws-sdk/client-sso-oidc@3.596.0)':
     dependencies:
       '@aws-sdk/client-sso': 3.592.0
-      '@aws-sdk/token-providers': 3.587.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))
+      '@aws-sdk/token-providers': 3.587.0(@aws-sdk/client-sso-oidc@3.596.0)
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.3
       '@smithy/shared-ini-file-loader': 3.1.3
@@ -17551,9 +17550,9 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
-  '@aws-sdk/credential-provider-web-identity@3.587.0(@aws-sdk/client-sts@3.596.0)':
+  '@aws-sdk/credential-provider-web-identity@3.587.0(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))':
     dependencies:
-      '@aws-sdk/client-sts': 3.596.0
+      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.3
       '@smithy/types': 3.3.0
@@ -17723,9 +17722,9 @@ snapshots:
       '@smithy/types': 3.3.0
       tslib: 2.6.3
 
-  '@aws-sdk/token-providers@3.587.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))':
+  '@aws-sdk/token-providers@3.587.0(@aws-sdk/client-sso-oidc@3.596.0)':
     dependencies:
-      '@aws-sdk/client-sso-oidc': 3.596.0(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/client-sso-oidc': 3.596.0
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.3
       '@smithy/shared-ini-file-loader': 3.1.3
@@ -24698,8 +24697,8 @@ snapshots:
       '@typescript-eslint/parser': 7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3)
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-config-prettier: 9.1.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-jsonc: 2.11.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-mdx: 3.0.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
@@ -26097,7 +26096,7 @@ snapshots:
     dependencies:
       semver: 7.6.2
 
-  bullmq@5.12.3:
+  bullmq@5.12.4:
     dependencies:
       cron-parser: 4.6.0
       ioredis: 5.4.1
@@ -27642,13 +27641,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       debug: 4.3.5(supports-color@8.1.1)
       enhanced-resolve: 5.17.0
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       fast-glob: 3.3.2
       get-tsconfig: 4.7.5
       is-core-module: 2.13.1
@@ -27679,14 +27678,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       debug: 3.2.7(supports-color@8.1.1)
     optionalDependencies:
       '@typescript-eslint/parser': 7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3)
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
     transitivePeerDependencies:
       - supports-color
 
@@ -27702,7 +27701,7 @@ snapshots:
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-compat-utils: 0.1.2(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       array-includes: 3.1.7
       array.prototype.findlastindex: 1.2.3
@@ -27712,7 +27711,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.1.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       hasown: 2.0.0
       is-core-module: 2.13.1
       is-glob: 4.0.3
