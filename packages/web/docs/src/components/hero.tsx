@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { cn } from '../lib';
 
 export function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -120,16 +121,14 @@ export function HeroTitle(props: { children: ReactNode }) {
   );
 }
 
-export function TrustedBy(props: { children: ReactNode }) {
+export function TrustedBy({ className, children, ...rest }: React.HTMLAttributes<HTMLElement>) {
   return (
-    <div className="mt-24 lg:mt-36">
-      <div className="mx-auto max-w-[80%] text-center lg:max-w-screen-lg">
-        <p className="text-sm text-gray-700">
-          Trusted by global enterprises and fast-moving startups.
-        </p>
-        <div className="mt-10 flex flex-row flex-wrap items-center justify-center gap-x-12 gap-y-6 text-gray-700">
-          {props.children}
-        </div>
+    <div className={cn('max-w-[80%] text-center', className)} {...rest}>
+      <p className="text-base text-blue-800">
+        Trusted by global enterprises and fast-moving startups
+      </p>
+      <div className="text-blue-1000 mt-6 flex flex-row flex-wrap items-center justify-center gap-x-16 gap-y-6">
+        {children}
       </div>
     </div>
   );
