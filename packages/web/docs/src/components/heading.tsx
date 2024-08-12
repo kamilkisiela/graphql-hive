@@ -2,7 +2,7 @@ import { ComponentPropsWithoutRef } from 'react';
 import { cn } from '../lib';
 
 export interface HeadingProps extends ComponentPropsWithoutRef<'h1'> {
-  as: 'h1' | 'h2' | 'h3';
+  as: 'h1' | 'h2' | 'h3' | 'div';
   size: 'xl' | 'md' | 'sm';
 }
 export function Heading({ as: _as, size, className, ...rest }: HeadingProps) {
