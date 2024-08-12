@@ -32,6 +32,7 @@ module.exports = {
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
+      inherit: 'inherit',
       white: '#fcfcfc',
       black: '#0b0d11',
       emerald: colors.emerald,
@@ -70,10 +71,29 @@ module.exports = {
         700: '#008c66',
         800: '#007052',
         900: '#005b43',
+        // workaround for ESLint not respecting Tailwind settings paths in CI
+        1000: '#005b43',
       },
       cyan: '#0acccc',
       purple: '#5f2eea',
-      blue: colors.sky,
+      blue: {
+        ...colors.sky,
+        // workaround for ESLint not respecting Tailwind settings paths in CI
+        1000: colors.sky[900],
+      },
+      // workaround for ESLint not respecting Tailwind settings paths in CI
+      beige: {
+        100: '#F8F7F6',
+        200: '#F1EEE4',
+        300: '#E9E5DA',
+        400: '#DEDACF',
+        500: '#CFCABF',
+        600: '#B9B4A9',
+        700: '#A29E93',
+        800: '#86827A',
+        900: '#6D6A63',
+        1000: '#4D4B46',
+      },
       gray: colors.stone,
       magenta: '#f11197',
       orange: {
@@ -306,8 +326,8 @@ function asd() {
 }
 
 function addVariablesForColors({ addBase, theme }) {
-  let allColors = flattenColorPalette(theme('colors'));
-  let newVars = Object.fromEntries(
+  const allColors = flattenColorPalette(theme('colors'));
+  const newVars = Object.fromEntries(
     Object.entries(allColors).map(([key, val]) => [`--${key}`, val]),
   );
 
