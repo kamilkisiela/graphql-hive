@@ -29,7 +29,7 @@ export function StatsItem(props: {
 
 export function StatsList(props: { children: ReactNode }) {
   return (
-    <div className="container mx-auto box-border grid grid-cols-2 gap-8 px-6 py-12 lg:grid-cols-4">
+    <div className="container mx-auto grid grid-cols-2 gap-8 px-6 py-12 lg:grid-cols-4">
       {props.children}
     </div>
   );
