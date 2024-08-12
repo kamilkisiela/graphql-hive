@@ -166,7 +166,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Deliver improvements faster"
           icon={<PerformanceListItemIcon />}
-          className="flex-1"
+          className="flex-1 rounded-3xl"
         >
           Accelerate feature improvements and experiments, by seamless decoupling of backend and
           frontend environments.
@@ -175,7 +175,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Network efficiency"
           icon={<PerformanceListItemIcon />}
-          className="flex-1"
+          className="flex-1 rounded-3xl"
         >
           Accelerate feature improvements and experiments, by seamless decoupling of backend and
           frontend environments.
@@ -184,7 +184,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Optimized data retrieval"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 basis-full lg:basis-0"
+          className="flex-1 basis-full rounded-3xl lg:basis-0"
         >
           Reduce latency effectively with Hive by enabling frontend teams to obtain all required
           data in a single request, maximizing GraphQL’s inherent performance benefits.
