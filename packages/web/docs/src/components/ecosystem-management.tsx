@@ -1,4 +1,4 @@
-import { ReactNode, useLayoutEffect, useState } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useState } from 'react';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
 import { CallToAction } from './call-to-action';
@@ -53,13 +53,26 @@ export function EcosystemManagementSection() {
   );
 }
 
+const edgeTexts = [
+  'Apps send requests to the Mesh Gateway which is the entrypoint to the internal GraphQL service/subgraph infrastructure.',
+  'Developers that build the apps/api clients will use graphql codegen for generating type-safe code that makes writing apps more safe and faster.',
+  'Codegen uses Hive to pull the graphql schema for generating the code.',
+  'Mesh pulls the composite schema / supergraph from the Hive schema registry that gives it all the information about the subgraphs and data available to server to the outside world/clients.',
+  'Mesh delegates GraphQL requests to the corresponding Yoga subgraphs within your internal network.',
+  'Check the subgraph schema against the Hive registry before deployment to ensure integrity. After deploying a new subgraph version, publish its schema to Hive, which generates the supergraph used by Mesh.',
+];
+
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+const INTERVAL_TIME = 5000;
+
 function Illustration() {
   const [highlightedEdge, setHighlightedEdge] = useState<number | null>(4);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const interval = setInterval(() => {
       setHighlightedEdge(prev => (prev % 6) + 1);
-    }, 2500);
+    }, INTERVAL_TIME);
     return () => clearInterval(interval);
   }, []);
 
@@ -188,6 +201,9 @@ function Illustration() {
           </Node>
         </div>
       </div>
+      <p className="absolute bottom-0 right-0 h-[144px] w-[250px] text-white/80">
+        {edgeTexts[highlightedEdge - 1]}
+      </p>
     </div>
   );
 }
