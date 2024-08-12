@@ -87,17 +87,12 @@ function Plan(plan: {
 const USAGE_DATA_RETENTION_EXPLAINER = 'How long your GraphQL operations are stored on Hive';
 const OPERATIONS_EXPLAINER = 'GraphQL operations reported to GraphQL Hive';
 
-export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
+export function Pricing(): ReactElement {
   return (
     <div className="w-full bg-[#111111]">
       <div className="mx-auto my-12 box-border w-full max-w-screen-lg px-6">
         <a id="pricing">
-          <h2
-            className="bg-clip-text text-2xl font-bold leading-normal text-transparent md:text-3xl"
-            style={{
-              backgroundImage: `linear-gradient(-70deg, ${gradient[1]}, ${gradient[0]})`,
-            }}
-          >
+          <h2 className="bg-clip-text text-2xl font-bold leading-normal text-transparent md:text-3xl">
             Pricing
           </h2>
         </a>
