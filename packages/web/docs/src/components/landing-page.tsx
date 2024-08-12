@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { CallToAction } from './call-to-action';
