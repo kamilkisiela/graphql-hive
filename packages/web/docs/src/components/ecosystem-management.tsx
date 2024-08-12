@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useLayoutEffect, useState } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
 import { CallToAction } from './call-to-action';
@@ -69,12 +69,25 @@ const INTERVAL_TIME = 5000;
 function Illustration() {
   const [highlightedEdge, setHighlightedEdge] = useState<number | null>(4);
 
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useIsomorphicLayoutEffect(() => {
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setHighlightedEdge(prev => (prev % 6) + 1);
     }, INTERVAL_TIME);
-    return () => clearInterval(interval);
+
+    return () => clearInterval(intervalRef.current);
   }, []);
+
+  const onPointerOverEdge = (event: React.PointerEvent<HTMLElement>) => {
+    const edgeNumber = parseInt(event.currentTarget.textContent);
+    if (Number.isNaN(edgeNumber) || edgeNumber < 1 || edgeNumber > 6) {
+      return;
+    }
+
+    clearInterval(intervalRef.current);
+    setHighlightedEdge(edgeNumber);
+  };
 
   return (
     <div className="relative min-h-[400px]">
@@ -96,7 +109,7 @@ function Illustration() {
             }}
             className="ml-[calc(1rem+1px-var(--bw))] mt-[calc(var(--node-h)/2)] w-10 rounded-tl-xl"
           />
-          <EdgeLabel>5</EdgeLabel>
+          <EdgeLabel onPointerOver={onPointerOverEdge}>5</EdgeLabel>
           <div
             style={{
               height:
@@ -122,7 +135,7 @@ function Illustration() {
             highlighted={highlightedEdge === 4}
           >
             <div className="ml-[calc(var(--label-h)/2-.5px)] h-[calc((var(--gap)-var(--label-h))/2)]" />
-            <EdgeLabel>4</EdgeLabel>
+            <EdgeLabel onPointerOver={onPointerOverEdge}>4</EdgeLabel>
             <div className="ml-[calc(var(--label-h)/2-.5px)] h-[calc((var(--gap)-var(--label-h))/2)]" />
           </Edge>
           <Node
@@ -141,7 +154,7 @@ function Illustration() {
             highlighted={highlightedEdge === 6}
           >
             <div className="ml-[calc(var(--label-h)/2-.5px)] h-6" />
-            <EdgeLabel>6</EdgeLabel>
+            <EdgeLabel onPointerOver={onPointerOverEdge}>6</EdgeLabel>
             <div className="ml-[calc(var(--label-h)/2-.5px)] h-6" />
           </Edge>
           <Node
@@ -161,7 +174,7 @@ function Illustration() {
             highlighted={highlightedEdge === 1}
           >
             <div className="w-[calc(var(--label-h)/1.6)]" />
-            <EdgeLabel>1</EdgeLabel>
+            <EdgeLabel onPointerOver={onPointerOverEdge}>1</EdgeLabel>
             <div className="w-[calc(var(--label-h)/1.6)]" />
           </Edge>
           <div className="h-[var(--gap)]" />
@@ -171,7 +184,7 @@ function Illustration() {
             className="flex h-[var(--big-node-h)] flex-row items-center"
           >
             <div className="w-[calc(var(--label-h)/1.6)]" />
-            <EdgeLabel>3</EdgeLabel>
+            <EdgeLabel onPointerOver={onPointerOverEdge}>3</EdgeLabel>
             <div className="w-[calc(var(--label-h)/1.6)]" />
           </Edge>
         </div>
@@ -187,7 +200,7 @@ function Illustration() {
             highlighted={highlightedEdge === 2}
           >
             <div className="flex-1" />
-            <EdgeLabel>2</EdgeLabel>
+            <EdgeLabel onPointerOver={onPointerOverEdge}>2</EdgeLabel>
             <div className="flex-1" />
           </Edge>
           <Node
@@ -214,6 +227,7 @@ interface EdgeProps extends React.HTMLAttributes<HTMLElement> {
   left?: boolean;
   bottom?: boolean;
 }
+
 function Edge({ highlighted, top, bottom, left, className, ...rest }: EdgeProps) {
   return (
     <div
@@ -234,13 +248,15 @@ function Edge({ highlighted, top, bottom, left, className, ...rest }: EdgeProps)
   );
 }
 
-interface EdgeLabelProps extends React.HTMLAttributes<HTMLElement> {}
+interface EdgeLabelProps extends React.HTMLAttributes<HTMLElement> {
+  onPointerOver: React.PointerEventHandler<HTMLElement>;
+}
 function EdgeLabel(props: EdgeLabelProps) {
   return (
     <div
       className={
         'flex size-8 h-[var(--label-h)] items-center justify-center' +
-        ' rounded bg-green-700 text-sm font-medium leading-[20px]'
+        ' cursor-default rounded bg-green-700 text-sm font-medium leading-[20px]'
       }
       {...props}
     />
