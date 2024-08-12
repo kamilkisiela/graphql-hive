@@ -38,12 +38,12 @@ const CookiesConsent = (): ReactElement => {
   );
 };
 
-export function Page(props: { children: ReactNode, className?: string }) {
+export function Page(props: { children: ReactNode; className?: string }) {
   const mounted = useMounted();
 
   return (
     <>
-      <div className={cn("flex h-full flex-col", props.className)}>{props.children}</div>
+      <div className={cn('flex h-full flex-col', props.className)}>{props.children}</div>
       {mounted && <CookiesConsent />}
     </>
   );
