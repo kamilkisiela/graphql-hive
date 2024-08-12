@@ -24,7 +24,7 @@
     "@hive/storage": "workspace:*",
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",
-    "@types/dockerode": "3.3.30",
+    "@types/dockerode": "3.3.31",
     "@types/ioredis": "5.0.0",
     "bcryptjs": "2.4.3",
     "date-fns": "3.6.0",
