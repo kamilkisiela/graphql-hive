@@ -32,7 +32,7 @@ const testimonials: Testimonial[] = [
     href: '#TODO',
   },
   {
-    company: 'Meetup',
+    company: 'Linktree',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: [
@@ -47,7 +47,7 @@ const testimonials: Testimonial[] = [
     href: '#TODO',
   },
   {
-    company: 'Meetup',
+    company: 'Klarna',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: [
@@ -62,7 +62,7 @@ const testimonials: Testimonial[] = [
     href: '#TODO',
   },
   {
-    company: 'Meetup',
+    company: 'Uber',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: [
@@ -77,7 +77,7 @@ const testimonials: Testimonial[] = [
     href: '#TODO',
   },
   {
-    company: 'Meetup',
+    company: 'KLM',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: [
@@ -101,11 +101,11 @@ export function CompanyTestimonialsSection() {
         ' p-8 md:p-[72px]'
       }
     >
-      <Heading as="h2" size="md" className="text-center">
+      <Heading as="h2" size="md">
         Loved by developers, trusted by business
       </Heading>
       <Tabs.Root defaultValue={testimonials[0].company}>
-        <Tabs.List className="bg-beige-200 mb-16 hidden flex-row rounded-2xl lg:flex">
+        <Tabs.List className="bg-beige-200 my-16 hidden flex-row rounded-2xl lg:flex">
           {testimonials.map(testimonial => {
             const Logo = testimonial.logo;
             return (
@@ -126,40 +126,46 @@ export function CompanyTestimonialsSection() {
         {testimonials.map(
           ({ company, data, href, text, person: [personName, personTitle, image] }) => {
             return (
-              <Tabs.Content key={company} value={company} tabIndex={-1}>
+              <Tabs.Content
+                key={company}
+                value={company}
+                tabIndex={-1}
+                className="flex flex-row gap-12"
+              >
                 <Image
                   src={image}
                   alt={personName}
                   width={300}
                   height={300}
-                  className="hidden rounded-full lg:block"
+                  className="hidden size-[300px] shrink-0 rounded-3xl lg:block"
                 />
-                <article className="flex flex-row gap-12">
+                <article className="relative">
                   <p className="lg:text-2xl lg:leading-[32px]">{text}</p>
-                  <dl>
-                    {data.map(([numbers, description]) => (
-                      <div>
-                        <dt
-                          className={
-                            'text-[40px] leading-[1.2] tracking-[-0.2px]' +
-                            ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
-                          }
-                        >
-                          {numbers}
-                        </dt>
-                        <dd className="mt-2">{description}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <div>
-                    <p className='font-medium'>{}</p>
-                    <p className="text-green-800">{personTitle}</p>
+                  <div className="mt-6">
+                    <p className="font-medium">{personName}</p>
+                    <p className="mt-1 text-green-800">{personTitle}</p>
                   </div>
-                  <CallToAction variant="primary" href={href}>
+                  <CallToAction variant="primary" href={href} className="absolute bottom-0">
                     Read Case Study
                     <ArrowIcon />
                   </CallToAction>
                 </article>
+                <div /* divider */ className="bg-beige-600 w-px" />
+                <ul className="flex gap-12 lg:flex-col">
+                  {data.map(([numbers, description], i) => (
+                    <li key={i}>
+                      <span
+                        className={
+                          'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
+                          ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
+                        }
+                      >
+                        {numbers}
+                      </span>
+                      <span className="mt-2">{description}</span>
+                    </li>
+                  ))}
+                </ul>
               </Tabs.Content>
             );
           },

@@ -3,6 +3,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
+import { CompanyTestimonialsSection } from './company-testimonials';
 import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
@@ -77,10 +78,11 @@ export function IndexPage(): ReactElement {
           <StatsItem label="Collected operations" value={315} suffix="B" />
         </StatsList>
         <UltimatePerformanceCards />
+        <CompanyTestimonialsSection />
+        <GetStartedTodaySection className="mt-6 md:mx-6" />
+        <EnterpriseFocusedCards className="mt-6 md:mx-6" />
         <Pricing />
-        <TeamSection />
-        <GetStartedTodaySection className="mt-6" />
-        <EnterpriseFocusedCards />
+        <TeamSection className="md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
@@ -115,9 +117,9 @@ function GetStartedTodaySection({ className }: { className?: string }) {
   );
 }
 
-function EnterpriseFocusedCards() {
+function EnterpriseFocusedCards({ className }: { className?: string }) {
   return (
-    <section className="bg-beige-100 py-24 sm:rounded-3xl md:py-[120px]">
+    <section className={cn('bg-beige-100 py-24 sm:rounded-3xl md:py-[120px]', className)}>
       <Heading as="h3" size="md" className="text-balance px-6 text-center">
         Enterprise-focused tooling at your disposal
       </Heading>
