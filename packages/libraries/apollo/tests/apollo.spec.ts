@@ -110,7 +110,7 @@ test('should not interrupt the process', async () => {
 
 test('should capture client name and version headers', async () => {
   const clean = handleProcess();
-  const fetchSpy = vi.fn<[RequestInfo | URL, options: RequestInit | undefined]>(async () =>
+  const fetchSpy = vi.fn(async (_input: string | URL | globalThis.Request, _init?: RequestInit) =>
     Response.json({}, { status: 200 }),
   );
 

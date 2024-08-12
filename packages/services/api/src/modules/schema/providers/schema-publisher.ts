@@ -1028,7 +1028,14 @@ export class SchemaPublisher {
     );
 
     const token = this.authManager.ensureApiToken();
-    const contracts = await this.contracts.getActiveContractsByTargetId({ targetId: input.target });
+    const [contracts, latestVersion] = await Promise.all([
+      this.contracts.getActiveContractsByTargetId({ targetId: input.target }),
+      this.schemaManager.getMaybeLatestVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+    ]);
 
     const checksum = createHash('md5')
       .update(
@@ -1042,6 +1049,10 @@ export class SchemaPublisher {
             contractId: contract.id,
             contractName: contract.contractName,
           })),
+          // We include the latest version ID to avoid caching a schema publication that targets different versions.
+          // When deleting a schema, and publishing it again, the latest version ID will be different.
+          // If we don't include it, the cache will return the previous result.
+          latestVersionId: latestVersion?.id,
         }),
       )
       .update(token)
@@ -1335,6 +1346,7 @@ export class SchemaPublisher {
               composable: deleteResult.state.composable,
               diffSchemaVersionId,
               changes: deleteResult.state.changes,
+              coordinatesDiff: deleteResult.state.coordinatesDiff,
               contracts:
                 deleteResult.state.contracts?.map(contract => ({
                   contractId: contract.contractId,
@@ -1909,6 +1921,7 @@ export class SchemaPublisher {
         }
       },
       changes,
+      coordinatesDiff: publishResult.state.coordinatesDiff,
       diffSchemaVersionId,
       previousSchemaVersion: latestVersion?.version ?? null,
       conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
