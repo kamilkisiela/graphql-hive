@@ -1,12 +1,32 @@
 import { ReactElement } from 'react';
-import { useFormik } from 'formik';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Input, Modal, Select, Tag } from '@/components/v2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { DocsLink } from '@/components/ui/docs-note';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
+import { Tag } from '@/components/v2';
 import { graphql } from '@/gql';
 import { AlertChannelType } from '@/gql/graphql';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export const CreateChannel_AddAlertChannelMutation = graphql(`
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
@@ -31,6 +51,28 @@ export const CreateChannel_AddAlertChannelMutation = graphql(`
   }
 `);
 
+const createChannelModalFormSchema = z.object({
+  channelName: z
+    .string({
+      required_error: 'Channel name is required',
+    })
+    .min(2, {
+      message: 'Name must be at least 2 characters long',
+    })
+    .max(50, {
+      message: 'Name must be at most 50 characters long',
+    }),
+  type: z.nativeEnum(AlertChannelType),
+  slackChannel: z.string({
+    required_error: 'Slack channel is required',
+  }),
+  endpoint: z.string({
+    required_error: 'Endpoint is required',
+  }),
+});
+
+type CreateChannelModalFormValues = z.infer<typeof createChannelModalFormSchema>;
+
 export const CreateChannelModal = ({
   isOpen,
   toggleModalOpen,
@@ -42,186 +84,269 @@ export const CreateChannelModal = ({
   organizationId: string;
   projectId: string;
 }): ReactElement => {
-  const [mutation, mutate] = useMutation(CreateChannel_AddAlertChannelMutation);
-  const { errors, values, touched, handleChange, handleBlur, handleSubmit, isSubmitting } =
-    useFormik({
-      initialValues: {
-        name: '',
-        type: '' as AlertChannelType,
-        slackChannel: '',
-        endpoint: '',
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Must enter name'),
-        type: Yup.mixed().oneOf(Object.values(AlertChannelType)).required('Must select type'),
-        slackChannel: Yup.string()
-          .matches(/^[@#]{1}/, 'Must start with a @ or # character')
-          .when('type', ([type], schema) =>
-            type === AlertChannelType.Slack ? schema.required('Must enter slack channel') : schema,
-          ),
-        endpoint: Yup.string()
-          .url()
-          .when('type', ([_type], schema) =>
-            isWebhookLike ? schema.required('Must enter endpoint') : schema,
-          ),
-      }),
-      async onSubmit(values) {
-        const { data, error } = await mutate({
-          input: {
-            organization: organizationId,
-            project: projectId,
-            name: values.name,
-            type: values.type,
-            slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
-            webhook: isWebhookLike ? { endpoint: values.endpoint } : null,
-          },
-        });
-        if (error) {
-          console.error(error);
-        }
-        if (data?.addAlertChannel.error) {
-          console.error(data.addAlertChannel.error);
-        }
-        if (data?.addAlertChannel.ok) {
-          toggleModalOpen();
-        }
+  const [, mutate] = useMutation(CreateChannel_AddAlertChannelMutation);
+  const { toast } = useToast();
+
+  const form = useForm<CreateChannelModalFormValues>({
+    mode: 'onChange',
+    resolver: zodResolver(createChannelModalFormSchema),
+    defaultValues: {
+      channelName: '',
+      type: AlertChannelType.Slack,
+      slackChannel: '',
+      endpoint: '',
+    },
+  });
+
+  const isWebhookLike = [AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(
+    form.getValues().type,
+  );
+
+  async function onSubmit(values: CreateChannelModalFormValues) {
+    if (values.type === AlertChannelType.Slack && !values.slackChannel) {
+      form.setError('slackChannel', { message: 'Slack channel is required' });
+      return;
+    }
+    if (
+      values.type === AlertChannelType.Slack &&
+      !values.slackChannel.startsWith('#') &&
+      !values.slackChannel.startsWith('@')
+    ) {
+      form.setError('slackChannel', { message: 'Slack channel must start with # or @' });
+      return;
+    }
+    if (
+      [AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(values.type) &&
+      !values.endpoint
+    ) {
+      form.setError('endpoint', { message: 'Endpoint is required' });
+      return;
+    }
+    if (values.endpoint && !values.endpoint.startsWith('http')) {
+      form.setError('endpoint', { message: 'Endpoint should be a valid URL' });
+      return;
+    }
+
+    const { data, error } = await mutate({
+      input: {
+        name: values.channelName,
+        type: values.type,
+        organization: organizationId,
+        project: projectId,
+        webhook:
+          form.getValues().type === AlertChannelType.Webhook ||
+          form.getValues().type === AlertChannelType.MsteamsWebhook
+            ? { endpoint: values.endpoint }
+            : null,
+        slack:
+          form.getValues().type === AlertChannelType.Slack
+            ? { channel: values.slackChannel }
+            : null,
       },
     });
-  const isWebhookLike = [AlertChannelType.Webhook, AlertChannelType.MsteamsWebhook].includes(
-    values.type,
-  );
+    // When Data is null, it means that the user has not integrated with Slack App
+    if (!data) {
+      toggleModalOpen();
+      await toast({
+        title: 'Please integrate with Slack App',
+        description:
+          'The channel has been created but you will not receive alerts until you integrate with Slack App',
+        variant: 'destructive',
+        duration: 10000,
+      });
+    } else if (error || data?.addAlertChannel.error) {
+      toast({
+        title: 'Failed to create channel',
+        description: 'Please try again later',
+        variant: 'destructive',
+      });
+    } else if (data?.addAlertChannel.ok) {
+      toggleModalOpen();
+      form.reset();
+      toast({
+        title: 'Channel created',
+        description: 'You can now receive alerts on this channel',
+        variant: 'default',
+      });
+    }
+  }
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen}>
-      <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-        <Heading>Create a channel</Heading>
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="name">
-            Name
-          </label>
-          <Input
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            placeholder="Example: Slack #hives"
-            disabled={isSubmitting}
-            isInvalid={touched.name && !!errors.name}
-            className="grow"
-          />
-          {touched.name && errors.name && <div className="text-sm text-red-500">{errors.name}</div>}
-          {mutation.data?.addAlertChannel.error?.inputErrors.name && (
-            <div className="text-sm text-red-500">
-              {mutation.data.addAlertChannel.error.inputErrors.name}
-            </div>
-          )}
-          <p className="text-sm text-gray-500">
-            This will be displayed on channels list, we recommend to make it self-explanatory.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="name">
-            Type
-          </label>
-          <Select
-            name="type"
-            value={values.type}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            isInvalid={!!(touched.type && errors.type)}
-            placeholder="Select channel type"
-            options={[
-              { value: AlertChannelType.Slack, name: 'Slack' },
-              { value: AlertChannelType.Webhook, name: 'Webhook' },
-              { value: AlertChannelType.MsteamsWebhook, name: 'MS Teams Webhook' },
-            ]}
-          />
-          {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
-        </div>
-
-        {isWebhookLike && (
-          <div className="flex flex-col gap-4">
-            <label className="text-sm font-semibold" htmlFor="endpoint">
-              Endpoint
-            </label>
-            <Input
-              name="endpoint"
-              value={values.endpoint}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder="Your endpoint"
-              disabled={isSubmitting}
-              isInvalid={touched.endpoint && !!errors.endpoint}
-              className="grow"
-            />
-            {touched.endpoint && errors.endpoint && (
-              <div className="text-sm text-red-500">{errors.endpoint}</div>
-            )}
-            {mutation.data?.addAlertChannel.error?.inputErrors.webhookEndpoint && (
-              <div className="text-sm text-red-500">
-                {mutation.data.addAlertChannel.error.inputErrors.webhookEndpoint}
-              </div>
-            )}
-            {values.endpoint ? (
-              <p className="text-sm text-gray-500">Hive will send alerts to your endpoint.</p>
-            ) : (
-              <a href="https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet">
-                Follow this guide to set up an incoming webhook connector in MS Teams
-              </a>
-            )}
-          </div>
-        )}
-
-        {values.type === AlertChannelType.Slack && (
-          <div className="flex flex-col gap-4">
-            <label className="text-sm font-semibold" htmlFor="endpoint">
-              Slack Channel
-            </label>
-            <Input
-              name="slackChannel"
-              value={values.slackChannel}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              placeholder="Where should Hive post messages?"
-              disabled={isSubmitting}
-              isInvalid={touched.slackChannel && !!errors.slackChannel}
-              className="grow"
-            />
-            {touched.slackChannel && errors.slackChannel && (
-              <div className="text-sm text-red-500">{errors.slackChannel}</div>
-            )}
-            {mutation.data?.addAlertChannel.error?.inputErrors.slackChannel && (
-              <div className="text-sm text-red-500">
-                {mutation.data.addAlertChannel.error.inputErrors.slackChannel}
-              </div>
-            )}
-            <p className="text-sm text-gray-500">
-              Use <Tag>#channel</Tag> or <Tag>@username</Tag> form.
-            </p>
-          </div>
-        )}
-
-        <div className="flex w-full gap-2">
-          <Button
-            type="button"
-            size="lg"
-            className="w-full justify-center"
-            onClick={toggleModalOpen}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full justify-center text-ellipsis whitespace-nowrap"
-            variant="primary"
-            disabled={isSubmitting}
-          >
-            Create Channel
-          </Button>
-        </div>
-      </form>
-    </Modal>
+    <CreateChannelModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      form={form}
+      onSubmit={onSubmit}
+      isWebhookLike={isWebhookLike}
+    />
   );
 };
+
+export function CreateChannelModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  form: UseFormReturn<z.infer<typeof createChannelModalFormSchema>>;
+  onSubmit: (values: CreateChannelModalFormValues) => void;
+  isWebhookLike: boolean;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create a channel</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-8">
+              <FormField
+                control={props.form.control}
+                name="channelName"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <DialogDescription className="mt-0 p-0">
+                        This will be displayed on channels list, we recommend to make it
+                        self-explanatory.
+                      </DialogDescription>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Example: Slack #hives"
+                          disabled={props.form.formState.isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={props.form.control}
+                name="type"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={async v => {
+                            await field.onChange(v);
+                          }}
+                        >
+                          <SelectTrigger>
+                            {field.value === AlertChannelType.Slack
+                              ? 'Slack'
+                              : field.value === AlertChannelType.Webhook
+                                ? 'Webhook'
+                                : field.value === AlertChannelType.MsteamsWebhook
+                                  ? 'MS Teams Webhook'
+                                  : 'Select channel type'}
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            <SelectItem value={AlertChannelType.Slack}>Slack</SelectItem>
+                            <SelectItem value={AlertChannelType.Webhook}>Webhook</SelectItem>
+                            <SelectItem value={AlertChannelType.MsteamsWebhook}>
+                              MS Teams Webhook
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              {props.isWebhookLike && (
+                <FormField
+                  control={props.form.control}
+                  name="endpoint"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Endpoint</FormLabel>
+                        <DialogDescription>
+                          Hive will send alerts to your endpoint.
+                        </DialogDescription>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Your endpoint"
+                            disabled={props.form.formState.isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        <DocsLink href="https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=newteams%2Cdotnet">
+                          Follow this guide to set up an incoming webhook connector in MS Teams
+                        </DocsLink>
+                      </FormItem>
+                    );
+                  }}
+                />
+              )}
+
+              {props.form.getValues().type === AlertChannelType.Slack && (
+                <FormField
+                  control={props.form.control}
+                  name="slackChannel"
+                  rules={{
+                    validate: value => {
+                      if (!value.startsWith('#') && !value.startsWith('@')) {
+                        return 'Slack channel must start with # or @';
+                      }
+                      return true;
+                    },
+                  }}
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Slack Channel</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Where should Hive post messages?"
+                            disabled={props.form.formState.isSubmitting}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        <DialogDescription>
+                          Use <Tag>#channel</Tag> or <Tag>@username</Tag> form.
+                          <DocsLink href="https://the-guild.dev/graphql/hive/docs/management/organizations#slack">
+                            Please make sure to integrate with Slack App to start receiving alerts.
+                          </DocsLink>
+                        </DialogDescription>
+                      </FormItem>
+                    );
+                  }}
+                />
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                size="lg"
+                className="w-full justify-center"
+                onClick={ev => {
+                  ev.preventDefault();
+                  props.toggleModalOpen();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full justify-center"
+                variant="primary"
+                disabled={props.form.formState.isSubmitting}
+              >
+                Create Channel
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
