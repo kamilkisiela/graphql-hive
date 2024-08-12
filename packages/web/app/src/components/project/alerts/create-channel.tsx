@@ -152,7 +152,7 @@ export const CreateChannelModal = ({
         description:
           'The channel has been created but you will not receive alerts until you integrate with Slack App',
         variant: 'destructive',
-        duration: 10000,
+        duration: 10_000,
       });
     } else if (error || data?.addAlertChannel.error) {
       toast({
