@@ -1,10 +1,8 @@
-import React, { ReactElement, ReactNode } from 'react';
-import Link from 'next/link';
-import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
+import React, { ReactElement } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { cn } from '../lib';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
+import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { Heading } from './heading';
@@ -78,8 +76,82 @@ export function IndexPage(): ReactElement {
         </StatsList>
         <UltimatePerformanceCards />
         <Pricing />
+        <GetStartedTodaySection />
+        <EnterpriseFocusedCards />
       </Page>
     </Tooltip.Provider>
+  );
+}
+
+function GetStartedTodaySection() {
+  return (
+    <section className="relative overflow-hidden bg-[#003834] p-12 text-center sm:rounded-3xl sm:p-24">
+      <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
+      <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
+      <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
+      <Heading as="h3" size="md" className="text-white">
+        Get started today!
+      </Heading>
+      <p className="mt-4 text-white/80">
+        Start with a free Hobby plan that fits perfectly most side projects or try our Pro plan with
+        30&nbsp;days trial period.
+      </p>
+      <CallToAction
+        variant="primary-inverted"
+        className="mx-auto mt-8"
+        href="https://app.graphql-hive.com/"
+      >
+        Enter Hive
+      </CallToAction>
+    </section>
+  );
+}
+
+function EnterpriseFocusedCards() {
+  return (
+    <section className="bg-beige-100 py-24 sm:rounded-3xl md:py-[120px]">
+      <Heading as="h3" size="md" className="text-balance px-6 text-center">
+        Enterprise-focused tooling at your disposal
+      </Heading>
+      <div className="-my-8 overflow-auto py-8">
+        <ul className="mt-16 flex min-w-[900px] flex-row justify-center divide-x divide-solid md:px-6 lg:px-16">
+          <InfoCard
+            as="li"
+            heading="Cloud and Self-Hosted"
+            icon={<PerformanceListItemIcon />}
+            className="flex-1 px-8 py-0"
+          >
+            Hive is completely open source, MIT licensed. You can host it on your own
+            infrastructure!
+          </InfoCard>
+          <InfoCard
+            as="li"
+            heading="OIDC Login"
+            icon={<PerformanceListItemIcon />}
+            className="flex-1 px-8 py-0"
+          >
+            Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
+            security.
+          </InfoCard>
+          <InfoCard
+            as="li"
+            heading="Secure and efficient"
+            icon={<PerformanceListItemIcon />}
+            className="flex-1 px-8 py-0"
+          >
+            <a
+              href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:underline"
+            >
+              Persisted Documents
+            </a>{' '}
+            secure and reduce traffic by hashing operations on app deployments.
+          </InfoCard>
+        </ul>
+      </div>
+    </section>
   );
 }
 
