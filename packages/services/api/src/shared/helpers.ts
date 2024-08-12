@@ -214,6 +214,11 @@ export function pushIfMissing<T>(list: T[], item: T): void {
 
 export type PromiseOrValue<T> = Promise<T> | T;
 
+type BatchGroup<TItem, TResult> = {
+  args: TItem[];
+  callbacks: Array<{ resolve: (result: TResult) => void; reject: (error: Error) => void }>;
+};
+
 /**
  * Batch processing of items based on a built key
  */
@@ -222,31 +227,42 @@ export function batchBy<TItem, TResult>(
   buildBatchKey: (arg: TItem) => string,
   /** Loader for each batch group. */
   loader: (args: TItem[]) => Promise<Promise<TResult>[]>,
+  /** Maximum amount of items per batch, if it is exceeded a new batch for a given batchKey is created. */
+  maxBatchSize = Infinity,
 ) {
-  let batchGroups = new Map<
-    string,
-    {
-      args: TItem[];
-      callbacks: Array<{ resolve: (result: TResult) => void; reject: (error: Error) => void }>;
-    }
-  >();
+  let batchGroups = new Map<string, BatchGroup<TItem, TResult>[]>();
   let didSchedule = false;
 
-  return (arg: TItem): Promise<TResult> => {
-    const key = buildBatchKey(arg);
-    let currentBatch = batchGroups.get(key);
-    if (!currentBatch) {
+  function getBatchGroup(batchKey: string) {
+    // get the batch collection for the batch key
+    let currentBatches = batchGroups.get(batchKey);
+    if (!currentBatches) {
+      currentBatches = [];
+      batchGroups.set(batchKey, currentBatches);
+    }
+
+    // get the last batch for the batch key
+    let currentBatch = currentBatches.at(-1);
+    // if it does not exist or the batch is full, create a new batch
+    if (currentBatch === undefined || currentBatch.args.length >= maxBatchSize) {
       currentBatch = {
         args: [],
         callbacks: [],
       };
-      batchGroups.set(key, currentBatch);
+      currentBatches.push(currentBatch);
     }
 
-    if (!didSchedule) {
-      didSchedule = true;
-      process.nextTick(() => {
-        for (const currentBatch of batchGroups.values()) {
+    return currentBatch;
+  }
+
+  function scheduleExecutionOnNextTick() {
+    if (didSchedule) {
+      return;
+    }
+    didSchedule = true;
+    process.nextTick(() => {
+      for (const currentBatches of batchGroups.values()) {
+        for (const currentBatch of currentBatches) {
           const tickArgs = [...currentBatch.args];
           const tickCallbacks = [...currentBatch.callbacks];
 
@@ -270,12 +286,19 @@ export function batchBy<TItem, TResult>(
             },
           );
         }
-        // reset the batch
-        batchGroups = new Map();
-        didSchedule = false;
-      });
-    }
+      }
+      // reset the batch
+      batchGroups = new Map();
+      didSchedule = false;
+    });
+  }
+
+  return (arg: TItem): Promise<TResult> => {
+    const key = buildBatchKey(arg);
+    let currentBatch = getBatchGroup(key);
+    scheduleExecutionOnNextTick();
     currentBatch.args.push(arg);
+
     const { callbacks } = currentBatch;
     return new Promise((resolve, reject) => {
       callbacks.push({ resolve, reject });

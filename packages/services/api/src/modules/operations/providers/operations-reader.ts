@@ -1077,6 +1077,7 @@ export class OperationsReader {
         schemaCoordinates,
       }).then(result => result.map(result => Promise.resolve(result)));
     },
+    20,
   );
 
   /** Result array retains the order of the input `args.schemaCoordinates`. */
@@ -1247,6 +1248,7 @@ export class OperationsReader {
         schemaCoordinates,
       }).then(result => result.map(result => Promise.resolve(result)));
     },
+    20,
   );
 
   async countClientVersions({
