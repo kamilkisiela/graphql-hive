@@ -74,7 +74,7 @@
     "@sentry/cli": "2.33.1",
     "@swc/core": "1.6.13",
     "@theguild/eslint-config": "0.11.10",
-    "@theguild/prettier-config": "2.0.6",
+    "@theguild/prettier-config": "2.0.7",
     "@types/node": "20.14.10",
     "bob-the-bundler": "7.0.1",
     "cypress": "13.13.2",

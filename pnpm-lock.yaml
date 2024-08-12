@@ -107,8 +107,8 @@ importers:
         specifier: 0.11.10
         version: 0.11.10(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.3)
       '@theguild/prettier-config':
-        specifier: 2.0.6
-        version: 2.0.6(prettier@3.3.3)
+        specifier: 2.0.7
+        version: 2.0.7(prettier@3.3.3)
       '@types/node':
         specifier: 20.14.10
         version: 20.14.10
@@ -4729,15 +4729,6 @@ packages:
     resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
     deprecated: Use @eslint/object-schema instead
 
-  '@ianvs/prettier-plugin-sort-imports@4.2.1':
-    resolution: {integrity: sha512-NKN1LVFWUDGDGr3vt+6Ey3qPeN/163uR1pOPAlkWpgvAqgxQ6kSdUf1F0it8aHUtKRUzEGcK38Wxd07O61d7+Q==}
-    peerDependencies:
-      '@vue/compiler-sfc': 2.7.x || 3.x
-      prettier: 2 || 3
-    peerDependenciesMeta:
-      '@vue/compiler-sfc':
-        optional: true
-
   '@ianvs/prettier-plugin-sort-imports@4.3.1':
     resolution: {integrity: sha512-ZHwbyjkANZOjaBm3ZosADD2OUYGFzQGxfy67HmGZU94mHqe7g1LCMA7YYKB1Cq+UTPCBqlAYapY0KXAjKEw8Sg==}
     peerDependencies:
@@ -7641,8 +7632,8 @@ packages:
     peerDependencies:
       graphql: ^16.0.0
 
-  '@theguild/prettier-config@2.0.6':
-    resolution: {integrity: sha512-aEWJ422Ro9IIC+2FGEO8kgJdq6DiwafgCOLVjW6b0mgWKHgdH6VReGck6Jv+9jsa4CBh/rpRuu40uIf0KGDtEg==}
+  '@theguild/prettier-config@2.0.7':
+    resolution: {integrity: sha512-FqpgGAaAFbYHFQmkWEZjIhqmk+Oow82/t+0k408qoBd9RsB4QTwSQSDDbNSgFa/K7c8Dcwau5z3XbHUR/ksKqw==}
     peerDependencies:
       prettier: ^3
 
@@ -20954,18 +20945,6 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.2': {}
 
-  '@ianvs/prettier-plugin-sort-imports@4.2.1(prettier@3.3.3)':
-    dependencies:
-      '@babel/core': 7.24.7
-      '@babel/generator': 7.24.7
-      '@babel/parser': 7.24.7
-      '@babel/traverse': 7.24.7
-      '@babel/types': 7.24.7
-      prettier: 3.3.3
-      semver: 7.6.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@ianvs/prettier-plugin-sort-imports@4.3.1(prettier@3.3.3)':
     dependencies:
       '@babel/core': 7.24.7
@@ -20977,7 +20956,6 @@ snapshots:
       semver: 7.6.2
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   '@inquirer/confirm@3.1.8':
     dependencies:
@@ -24718,9 +24696,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@theguild/prettier-config@2.0.6(prettier@3.3.3)':
+  '@theguild/prettier-config@2.0.7(prettier@3.3.3)':
     dependencies:
-      '@ianvs/prettier-plugin-sort-imports': 4.2.1(prettier@3.3.3)
+      '@ianvs/prettier-plugin-sort-imports': 4.3.1(prettier@3.3.3)
       prettier: 3.3.3
       prettier-plugin-pkg: 0.18.0(prettier@3.3.3)
       prettier-plugin-sh: 0.14.0(prettier@3.3.3)
