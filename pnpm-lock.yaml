@@ -36,7 +36,7 @@ patchedDependencies:
     hash: fkmkpwec6wqhte6g47j3tlprse
     path: patches/oclif@4.13.6.patch
   slonik@30.4.4:
-    hash: jxrvl4xmdvyktjijg7yfdkb34i
+    hash: 6efwxzj32yj7ednm5ufysfyzge
     path: patches/slonik@30.4.4.patch
 
 importers:
@@ -325,7 +325,7 @@ importers:
         version: 5.4.1
       slonik:
         specifier: 30.4.4
-        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+        version: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
       strip-ansi:
         specifier: 7.1.0
         version: 7.1.0
@@ -620,7 +620,7 @@ importers:
         version: 11.9.0
       slonik:
         specifier: 30.4.4
-        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+        version: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.10)(typescript@5.5.3)
@@ -789,7 +789,7 @@ importers:
         version: 5.0.0-beta.2
       slonik:
         specifier: 30.4.4
-        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+        version: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
       supertokens-node:
         specifier: 15.2.1
         version: 15.2.1(encoding@0.1.13)
@@ -1243,7 +1243,7 @@ importers:
         version: 15.1.3
       slonik:
         specifier: 30.4.4
-        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+        version: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -1291,13 +1291,13 @@ importers:
         version: 11.9.0
       slonik:
         specifier: 30.4.4
-        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+        version: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
       slonik-interceptor-query-logging:
         specifier: 45.6.0
-        version: 45.6.0(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i))
+        version: 45.6.0(slonik@30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge))
       slonik-utilities:
         specifier: 1.9.4
-        version: 1.9.4(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i))
+        version: 1.9.4(slonik@30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge))
       tslib:
         specifier: 2.6.3
         version: 2.6.3
@@ -32060,7 +32060,7 @@ snapshots:
 
   p-limit@5.0.0:
     dependencies:
-      yocto-queue: 1.0.0
+      yocto-queue: 1.1.1
 
   p-limit@6.1.0:
     dependencies:
@@ -33882,14 +33882,14 @@ snapshots:
 
   slick@1.12.2: {}
 
-  slonik-interceptor-query-logging@45.6.0(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)):
+  slonik-interceptor-query-logging@45.6.0(slonik@30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)):
     dependencies:
       crack-json: 1.3.0
       pretty-ms: 7.0.1
       serialize-error: 8.1.0
-      slonik: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+      slonik: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
 
-  slonik-utilities@1.9.4(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)):
+  slonik-utilities@1.9.4(slonik@30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)):
     dependencies:
       core-js: 3.25.5
       delay: 4.4.1
@@ -33897,9 +33897,9 @@ snapshots:
       lodash: 4.17.21
       roarr: 7.14.3
       serialize-error: 5.0.0
-      slonik: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
+      slonik: 30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge)
 
-  slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i):
+  slonik@30.4.4(patch_hash=6efwxzj32yj7ednm5ufysfyzge):
     dependencies:
       concat-stream: 2.0.0
       es6-error: 4.1.1

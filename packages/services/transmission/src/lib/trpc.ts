@@ -13,7 +13,7 @@ export const t = initTRPC.context<TrpcContext>().create();
 export const router = t.router;
 export const publicProcedure = t.procedure.use(handleTRPCError);
 
-const SpecSchema = z.object({
+export const SpecSchema = z.object({
   maxAttempts: z
     .number()
     .optional()
@@ -37,6 +37,7 @@ const SpecSchema = z.object({
     .describe(
       'Should the job be persisted to the database for a month and new jobs with the same name be ignored? (Default: null)',
     ),
+  requestId: z.string().optional().describe('Request ID for logging purposes'),
 });
 
 export type JobSpec = z.infer<typeof SpecSchema>;
@@ -66,7 +67,7 @@ export function createProcedure<
 
       const monthlyDedupeKey = input.spec.monthlyDedupeKey;
       if (monthlyDedupeKey) {
-        if (await ensureMonthlyDedupeKey(ctx.storage, monthlyDedupeKey)) {
+        if (await ensureMonthlyDedupeKey(ctx.storage.pool, monthlyDedupeKey)) {
           ctx.req.log.debug(`Found a fresh job with "${monthlyDedupeKey}" monthly key, skipping.`);
           return;
         }
@@ -76,7 +77,7 @@ export function createProcedure<
         await addJob(ctx.runner, taskName, input.payload as any, input.spec);
       } catch (error) {
         if (monthlyDedupeKey) {
-          await rollbackMonthlyDedupeKey(ctx.storage, monthlyDedupeKey);
+          await rollbackMonthlyDedupeKey(ctx.storage.pool, monthlyDedupeKey);
         }
 
         throw error;

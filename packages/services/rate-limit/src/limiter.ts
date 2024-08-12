@@ -44,12 +44,12 @@ export type CachedRateLimitInfo = {
 // to prevent applying lower retention value then expected.
 const RETENTION_IN_DAYS_FALLBACK = 365;
 
-export type Limiter = ReturnType<typeof createRateLimiter>;
+export type Limiter = Awaited<ReturnType<typeof createRateLimiter>>;
 
 type OrganizationId = string;
 type TargetId = string;
 
-export function createRateLimiter(config: {
+export async function createRateLimiter(config: {
   logger: ServiceLogger;
   rateLimitConfig: {
     interval: number;
@@ -73,7 +73,6 @@ export function createRateLimiter(config: {
       }),
     ],
   });
-  const emails = createEmailScheduler(config.transmission.endpoint);
 
   const { logger } = config;
   const postgres$ = createPostgreSQLStorage(
@@ -81,6 +80,7 @@ export function createRateLimiter(config: {
     1,
     config.storage.additionalInterceptors,
   );
+  const emails = createEmailScheduler(config.transmission.endpoint);
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 

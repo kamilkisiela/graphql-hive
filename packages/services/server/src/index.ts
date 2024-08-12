@@ -298,7 +298,7 @@ export async function main() {
       };
     }
     const logger = createGraphQLLogger();
-    const registry = createRegistry({
+    const registry = await createRegistry({
       app: env.hiveServices.webApp
         ? {
             baseUrl: env.hiveServices.webApp.url,

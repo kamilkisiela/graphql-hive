@@ -67,7 +67,7 @@ async function main() {
   }
 
   try {
-    const limiter = createRateLimiter({
+    const limiter = await createRateLimiter({
       logger: server.log,
       rateLimitConfig: {
         interval: env.limitCacheUpdateIntervalMs,

@@ -24,17 +24,18 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
       input.event.target.id,
     );
     try {
-      await this.transmission.client.sendWebhook.mutate({
-        payload: {
+      await this.transmission.addJob(
+        'sendWebhook',
+        {
           url: input.channel.webhookEndpoint!,
           body: JSON.stringify(input.event),
         },
-        spec: {
+        {
           jobKey: `webhook-schema-change-notification-${input.event.schema.id}`,
           jobKeyMode: 'replace',
           maxAttempts: 5,
         },
-      });
+      );
     } catch (error) {
       this.logger.error(`Failed to send Webhook notification`, error);
     }

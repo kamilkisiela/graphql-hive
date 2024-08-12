@@ -1,6 +1,7 @@
 import { createApplication, Scope } from 'graphql-modules';
 import { Redis } from 'ioredis';
 import { AwsClient } from '@hive/cdn-script/aws';
+import { createTaskClient } from '@hive/transmission';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
 import { appDeploymentsModule } from './modules/app-deployments';
@@ -56,7 +57,11 @@ import { REDIS_INSTANCE } from './modules/shared/providers/redis';
 import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
 import { WEB_APP_URL } from './modules/shared/providers/tokens';
-import { Transmission, TRANSMISSION_ENDPOINT } from './modules/shared/providers/transmission';
+import {
+  Transmission,
+  TRANSMISSION_ENDPOINT,
+  TRANSMISSION_TASK_CLIENT,
+} from './modules/shared/providers/transmission';
 import { supportModule } from './modules/support';
 import { provideSupportConfig, SupportConfig } from './modules/support/providers/config';
 import { targetModule } from './modules/target';
@@ -92,7 +97,7 @@ const modules = [
   appDeploymentsModule,
 ];
 
-export function createRegistry({
+export async function createRegistry({
   app,
   tokens,
   transmission,
@@ -204,6 +209,11 @@ export function createRegistry({
     {
       provide: TRANSMISSION_ENDPOINT,
       useValue: transmission.endpoint,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: TRANSMISSION_TASK_CLIENT,
+      useValue: await createTaskClient({ pool: storage.pool, logger }),
       scope: Scope.Singleton,
     },
     {

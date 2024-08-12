@@ -1,3 +1,15 @@
+diff --git a/dist/src/binders/bindPool.js b/dist/src/binders/bindPool.js
+index ad509058bf5d26c82d4b2aea35e945df2f83f38e..1ca27403f70362f9a60abef7df6c2fdaaba1805b 100644
+--- a/dist/src/binders/bindPool.js
++++ b/dist/src/binders/bindPool.js
+@@ -7,6 +7,7 @@ const factories_1 = require("../factories");
+ const state_1 = require("../state");
+ const bindPool = (parentLog, pool, clientConfiguration) => {
+     return {
++        pool,
+         any: (query) => {
+             return (0, factories_1.createConnection)(parentLog, pool, clientConfiguration, 'IMPLICIT_QUERY', (connectionLog, connection, boundConnection) => {
+                 return boundConnection.any(query);
 diff --git a/dist/src/factories/createPool.js b/dist/src/factories/createPool.js
 index b91a9fe433dc340f5cdf096ca4c568297c343ab3..401df1272d1c7f344bb956b38cc7dbde29231742 100644
 --- a/dist/src/factories/createPool.js
@@ -19,3 +31,818 @@ index b91a9fe433dc340f5cdf096ca4c568297c343ab3..401df1272d1c7f344bb956b38cc7dbde
      state_1.poolStateMap.set(pool, {
          ended: false,
          mock: false,
+diff --git a/dist/src/types.d.ts b/dist/src/types.d.ts
+index d091b301b1df0f8d9ad9298d587081fe6d33c0be..dbc4f05c850eac972879145a5038e02ac0b2ea58 100644
+--- a/dist/src/types.d.ts
++++ b/dist/src/types.d.ts
+@@ -132,6 +132,7 @@ export declare type PoolState = {
+     readonly waitingClientCount: number;
+ };
+ export declare type DatabasePool = CommonQueryMethods & {
++    readonly pool: PgPool;
+     readonly configuration: ClientConfiguration;
+     readonly connect: <T>(connectionRoutine: ConnectionRoutine<T>) => Promise<T>;
+     readonly copyFromBinary: QueryCopyFromBinaryFunction;
+diff --git a/src/binders/bindPool.ts b/src/binders/bindPool.ts
+index d10bb50117b613f262ee715fc40745e8270a60b3..fde977dd042ec2561163f252c7f76f92cb043eb0 100644
+--- a/src/binders/bindPool.ts
++++ b/src/binders/bindPool.ts
+@@ -26,6 +26,7 @@ export const bindPool = (
+   clientConfiguration: ClientConfiguration,
+ ): DatabasePool => {
+   return {
++    pool,
+     any: (query: TaggedTemplateLiteralInvocation) => {
+       return createConnection(
+         parentLog,
+diff --git a/src/types.ts b/src/types.ts
+index da293a0a4ce2583c43711cbe90d4829ec9c46fa8..ff161cdb3faf792da67872d967d49ea3e9b5c9d0 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -1,37 +1,26 @@
+-import {
+-  type Readable,
+-  type ReadableOptions,
+-} from 'stream';
+-import {
+-  type ConnectionOptions as TlsConnectionOptions,
+-} from 'tls';
++import { type Readable, type ReadableOptions } from "stream";
++import { type ConnectionOptions as TlsConnectionOptions } from "tls";
+ import {
+   type PoolConfig,
+   type Pool as PgPool,
+   type PoolClient as PgPoolClient,
+-} from 'pg';
+-import {
+-  type NoticeMessage as Notice,
+-} from 'pg-protocol/dist/messages';
+-import {
+-  type Logger,
+-} from 'roarr';
+-import {
+-  type SlonikError,
+-} from './errors';
+-import type * as tokens from './tokens';
++} from "pg";
++import { type NoticeMessage as Notice } from "pg-protocol/dist/messages";
++import { type Logger } from "roarr";
++import { type SlonikError } from "./errors";
++import type * as tokens from "./tokens";
+ 
+ /**
+  * @see https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+  */
+ export type ConnectionOptions = {
+-  applicationName?: string,
+-  databaseName?: string,
+-  host?: string,
+-  password?: string,
+-  port?: number,
+-  sslMode?: 'disable' | 'no-verify' | 'require',
+-  username?: string,
++  applicationName?: string;
++  databaseName?: string;
++  host?: string;
++  password?: string;
++  port?: number;
++  sslMode?: "disable" | "no-verify" | "require";
++  username?: string;
+ };
+ 
+ /**
+@@ -40,22 +29,27 @@ export type ConnectionOptions = {
+  */
+ export type TypeNameIdentifier =
+   | string
+-  | 'bool'
+-  | 'bytea'
+-  | 'float4'
+-  | 'float8'
+-  | 'int2'
+-  | 'int4'
+-  | 'int8'
+-  | 'json'
+-  | 'text'
+-  | 'timestamptz'
+-  | 'uuid';
++  | "bool"
++  | "bytea"
++  | "float4"
++  | "float8"
++  | "int2"
++  | "int4"
++  | "int8"
++  | "json"
++  | "text"
++  | "timestamptz"
++  | "uuid";
+ 
+ export type SerializableValue =
+-  boolean | number | string | readonly SerializableValue[] | {
+-    [key: string]: SerializableValue | undefined,
+-  } | null;
++  | boolean
++  | number
++  | string
++  | readonly SerializableValue[]
++  | {
++      [key: string]: SerializableValue | undefined;
++    }
++  | null;
+ 
+ export type QueryId = string;
+ 
+@@ -63,79 +57,79 @@ export type MaybePromise<T> = Promise<T> | T;
+ 
+ export type StreamHandler = (stream: Readable) => void;
+ 
+-export type Connection = 'EXPLICIT' | 'IMPLICIT_QUERY' | 'IMPLICIT_TRANSACTION';
++export type Connection = "EXPLICIT" | "IMPLICIT_QUERY" | "IMPLICIT_TRANSACTION";
+ 
+ export type Field = {
+-  readonly dataTypeId: number,
+-  readonly name: string,
++  readonly dataTypeId: number;
++  readonly name: string;
+ };
+ 
+ export type QueryResult<T> = {
+-  readonly command: 'COPY' | 'DELETE' | 'INSERT' | 'SELECT' | 'UPDATE',
+-  readonly fields: readonly Field[],
+-  readonly notices: readonly Notice[],
+-  readonly rowCount: number,
+-  readonly rows: readonly T[],
++  readonly command: "COPY" | "DELETE" | "INSERT" | "SELECT" | "UPDATE";
++  readonly fields: readonly Field[];
++  readonly notices: readonly Notice[];
++  readonly rowCount: number;
++  readonly rows: readonly T[];
+ };
+ 
+ export type ClientConfiguration = {
+   /**
+    * Override the underlying PostgreSQL driver. *
+    */
+-  readonly PgPool?: new (poolConfig: PoolConfig) => PgPool,
++  readonly PgPool?: new (poolConfig: PoolConfig) => PgPool;
+   /**
+    * Dictates whether to capture stack trace before executing query. Middlewares access stack trace through query execution context. (Default: true)
+    */
+-  readonly captureStackTrace: boolean,
++  readonly captureStackTrace: boolean;
+   /**
+    * Number of times to retry establishing a new connection. (Default: 3)
+    */
+-  readonly connectionRetryLimit: number,
++  readonly connectionRetryLimit: number;
+   /**
+    * Timeout (in milliseconds) after which an error is raised if connection cannot cannot be established. (Default: 5000)
+    */
+-  readonly connectionTimeout: number | 'DISABLE_TIMEOUT',
++  readonly connectionTimeout: number | "DISABLE_TIMEOUT";
+   /**
+    * Timeout (in milliseconds) after which idle clients are closed. Use 'DISABLE_TIMEOUT' constant to disable the timeout. (Default: 60000)
+    */
+-  readonly idleInTransactionSessionTimeout: number | 'DISABLE_TIMEOUT',
++  readonly idleInTransactionSessionTimeout: number | "DISABLE_TIMEOUT";
+   /**
+    * Timeout (in milliseconds) after which idle clients are closed. Use 'DISABLE_TIMEOUT' constant to disable the timeout. (Default: 5000)
+    */
+-  readonly idleTimeout: number | 'DISABLE_TIMEOUT',
++  readonly idleTimeout: number | "DISABLE_TIMEOUT";
+   /**
+    * An array of [Slonik interceptors](https://github.com/gajus/slonik#slonik-interceptors).
+    */
+-  readonly interceptors: readonly Interceptor[],
++  readonly interceptors: readonly Interceptor[];
+   /**
+    * Do not allow more than this many connections. Use 'DISABLE_TIMEOUT' constant to disable the timeout. (Default: 10)
+    */
+-  readonly maximumPoolSize: number,
++  readonly maximumPoolSize: number;
+   /**
+    * Number of times a query failing with Transaction Rollback class error, that doesn't belong to a transaction, is retried. (Default: 5)
+    */
+-  readonly queryRetryLimit: number,
++  readonly queryRetryLimit: number;
+   /**
+    * tls.connect options *
+    */
+-  readonly ssl?: TlsConnectionOptions,
++  readonly ssl?: TlsConnectionOptions;
+   /**
+    * Timeout (in milliseconds) after which database is instructed to abort the query. Use 'DISABLE_TIMEOUT' constant to disable the timeout. (Default: 60000)
+    */
+-  readonly statementTimeout: number | 'DISABLE_TIMEOUT',
++  readonly statementTimeout: number | "DISABLE_TIMEOUT";
+   /**
+    * Number of times a transaction failing with Transaction Rollback class error is retried. (Default: 5)
+    */
+-  readonly transactionRetryLimit: number,
++  readonly transactionRetryLimit: number;
+   /**
+    * An array of [Slonik type parsers](https://github.com/gajus/slonik#slonik-type-parsers).
+    */
+-  readonly typeParsers: readonly TypeParser[],
++  readonly typeParsers: readonly TypeParser[];
+ };
+ 
+ export type ClientConfigurationInput = Partial<ClientConfiguration>;
+ 
+-export type QueryStreamConfig = ReadableOptions & {batchSize?: number, };
++export type QueryStreamConfig = ReadableOptions & { batchSize?: number };
+ 
+ export type StreamFunction = (
+   sql: TaggedTemplateLiteralInvocation,
+@@ -147,50 +141,58 @@ export type QueryCopyFromBinaryFunction = (
+   streamQuery: TaggedTemplateLiteralInvocation,
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   tupleList: ReadonlyArray<readonly any[]>,
+-  columnTypes: readonly TypeNameIdentifier[],
++  columnTypes: readonly TypeNameIdentifier[]
+ ) => Promise<Record<string, unknown> | null>;
+ 
+ export type CommonQueryMethods = {
+-  readonly any: QueryAnyFunction,
+-  readonly anyFirst: QueryAnyFirstFunction,
+-  readonly exists: QueryExistsFunction,
+-  readonly many: QueryManyFunction,
+-  readonly manyFirst: QueryManyFirstFunction,
+-  readonly maybeOne: QueryMaybeOneFunction,
+-  readonly maybeOneFirst: QueryMaybeOneFirstFunction,
+-  readonly one: QueryOneFunction,
+-  readonly oneFirst: QueryOneFirstFunction,
+-  readonly query: QueryFunction,
+-  readonly transaction: <T>(handler: TransactionFunction<T>, transactionRetryLimit?: number) => Promise<T>,
++  readonly any: QueryAnyFunction;
++  readonly anyFirst: QueryAnyFirstFunction;
++  readonly exists: QueryExistsFunction;
++  readonly many: QueryManyFunction;
++  readonly manyFirst: QueryManyFirstFunction;
++  readonly maybeOne: QueryMaybeOneFunction;
++  readonly maybeOneFirst: QueryMaybeOneFirstFunction;
++  readonly one: QueryOneFunction;
++  readonly oneFirst: QueryOneFirstFunction;
++  readonly query: QueryFunction;
++  readonly transaction: <T>(
++    handler: TransactionFunction<T>,
++    transactionRetryLimit?: number
++  ) => Promise<T>;
+ };
+ 
+ export type DatabaseTransactionConnection = CommonQueryMethods & {
+-  readonly stream: StreamFunction,
++  readonly stream: StreamFunction;
+ };
+ 
+-export type TransactionFunction<T> = (connection: DatabaseTransactionConnection) => Promise<T>;
++export type TransactionFunction<T> = (
++  connection: DatabaseTransactionConnection
++) => Promise<T>;
+ 
+ export type DatabasePoolConnection = CommonQueryMethods & {
+-  readonly copyFromBinary: QueryCopyFromBinaryFunction,
+-  readonly stream: StreamFunction,
++  readonly copyFromBinary: QueryCopyFromBinaryFunction;
++  readonly stream: StreamFunction;
+ };
+ 
+-export type ConnectionRoutine<T> = (connection: DatabasePoolConnection) => Promise<T>;
++export type ConnectionRoutine<T> = (
++  connection: DatabasePoolConnection
++) => Promise<T>;
+ 
+ export type PoolState = {
+-  readonly activeConnectionCount: number,
+-  readonly ended: boolean,
+-  readonly idleConnectionCount: number,
+-  readonly waitingClientCount: number,
++  readonly activeConnectionCount: number;
++  readonly ended: boolean;
++  readonly idleConnectionCount: number;
++  readonly waitingClientCount: number;
+ };
+ 
+ export type DatabasePool = CommonQueryMethods & {
+-  readonly configuration: ClientConfiguration,
+-  readonly connect: <T>(connectionRoutine: ConnectionRoutine<T>) => Promise<T>,
+-  readonly copyFromBinary: QueryCopyFromBinaryFunction,
+-  readonly end: () => Promise<void>,
+-  readonly getPoolState: () => PoolState,
+-  readonly stream: StreamFunction,
++  readonly configuration: ClientConfiguration;
++  readonly connect: <T>(connectionRoutine: ConnectionRoutine<T>) => Promise<T>;
++  readonly copyFromBinary: QueryCopyFromBinaryFunction;
++  readonly end: () => Promise<void>;
++  readonly getPoolState: () => PoolState;
++  readonly stream: StreamFunction;
++  readonly pool: PgPool;
+ };
+ 
+ export type DatabaseConnection = DatabasePool | DatabasePoolConnection;
+@@ -200,21 +202,21 @@ export type QueryResultRowColumn = PrimitiveValueExpression;
+ export type QueryResultRow = Record<string, QueryResultRowColumn>;
+ 
+ export type Query = {
+-  readonly sql: string,
+-  readonly values: readonly PrimitiveValueExpression[],
++  readonly sql: string;
++  readonly values: readonly PrimitiveValueExpression[];
+ };
+ 
+ export type SqlFragment = {
+-  readonly sql: string,
+-  readonly values: readonly PrimitiveValueExpression[],
++  readonly sql: string;
++  readonly values: readonly PrimitiveValueExpression[];
+ };
+ 
+ /**
+  * @property name Value of "pg_type"."typname" (e.g. "int8", "timestamp", "timestamptz").
+  */
+ export type TypeParser<T = unknown> = {
+-  readonly name: string,
+-  readonly parse: (value: string) => T,
++  readonly name: string;
++  readonly parse: (value: string) => T;
+ };
+ 
+ /**
+@@ -223,9 +225,9 @@ export type TypeParser<T = unknown> = {
+  * @property query The query that is initiating the connection.
+  */
+ export type PoolContext = {
+-  readonly log: Logger,
+-  readonly poolId: string,
+-  readonly query: TaggedTemplateLiteralInvocation | null,
++  readonly log: Logger;
++  readonly poolId: string;
++  readonly query: TaggedTemplateLiteralInvocation | null;
+ };
+ 
+ /**
+@@ -234,27 +236,27 @@ export type PoolContext = {
+  * @property poolId Unique connection pool ID.
+  */
+ export type ConnectionContext = {
+-  readonly connectionId: string,
+-  readonly connectionType: Connection,
+-  readonly log: Logger,
+-  readonly poolId: string,
++  readonly connectionId: string;
++  readonly connectionType: Connection;
++  readonly log: Logger;
++  readonly poolId: string;
+ };
+ 
+ type CallSite = {
+-  readonly columnNumber: number,
+-  readonly fileName: string | null,
+-  readonly functionName: string | null,
+-  readonly lineNumber: number,
++  readonly columnNumber: number;
++  readonly fileName: string | null;
++  readonly functionName: string | null;
++  readonly lineNumber: number;
+ };
+ 
+ export type IntervalInput = {
+-  days?: number,
+-  hours?: number,
+-  minutes?: number,
+-  months?: number,
+-  seconds?: number,
+-  weeks?: number,
+-  years?: number,
++  days?: number;
++  hours?: number;
++  minutes?: number;
++  months?: number;
++  seconds?: number;
++  weeks?: number;
++  years?: number;
+ };
+ 
+ /**
+@@ -268,84 +270,86 @@ export type IntervalInput = {
+  * @property transactionId Unique transaction ID.
+  */
+ export type QueryContext = {
+-  readonly connectionId: string,
+-  readonly log: Logger,
+-  readonly originalQuery: Query,
+-  readonly poolId: string,
+-  readonly queryId: QueryId,
+-  readonly queryInputTime: bigint | number,
+-  readonly sandbox: Record<string, unknown>,
+-  readonly stackTrace: readonly CallSite[] | null,
+-  readonly transactionId: string | null,
++  readonly connectionId: string;
++  readonly log: Logger;
++  readonly originalQuery: Query;
++  readonly poolId: string;
++  readonly queryId: QueryId;
++  readonly queryInputTime: bigint | number;
++  readonly sandbox: Record<string, unknown>;
++  readonly stackTrace: readonly CallSite[] | null;
++  readonly transactionId: string | null;
+ };
+ 
+ export type ArraySqlToken = {
+-  readonly memberType: SqlToken | TypeNameIdentifier,
+-  readonly type: typeof tokens.ArrayToken,
+-  readonly values: readonly PrimitiveValueExpression[],
++  readonly memberType: SqlToken | TypeNameIdentifier;
++  readonly type: typeof tokens.ArrayToken;
++  readonly values: readonly PrimitiveValueExpression[];
+ };
+ 
+ export type BinarySqlToken = {
+-  readonly data: Buffer,
+-  readonly type: typeof tokens.BinaryToken,
++  readonly data: Buffer;
++  readonly type: typeof tokens.BinaryToken;
+ };
+ 
+ export type DateSqlToken = {
+-  readonly date: Date,
+-  readonly type: typeof tokens.DateToken,
++  readonly date: Date;
++  readonly type: typeof tokens.DateToken;
+ };
+ 
+ export type IdentifierSqlToken = {
+-  readonly names: readonly string[],
+-  readonly type: typeof tokens.IdentifierToken,
++  readonly names: readonly string[];
++  readonly type: typeof tokens.IdentifierToken;
+ };
+ 
+ export type IntervalSqlToken = {
+-  readonly interval: IntervalInput,
+-  readonly type: typeof tokens.IntervalToken,
++  readonly interval: IntervalInput;
++  readonly type: typeof tokens.IntervalToken;
+ };
+ 
+ export type ListSqlToken = {
+-  readonly glue: SqlSqlToken,
+-  readonly members: readonly ValueExpression[],
+-  readonly type: typeof tokens.ListToken,
++  readonly glue: SqlSqlToken;
++  readonly members: readonly ValueExpression[];
++  readonly type: typeof tokens.ListToken;
+ };
+ 
+ export type JsonBinarySqlToken = {
+-  readonly type: typeof tokens.JsonBinaryToken,
+-  readonly value: SerializableValue,
++  readonly type: typeof tokens.JsonBinaryToken;
++  readonly value: SerializableValue;
+ };
+ 
+ export type JsonSqlToken = {
+-  readonly type: typeof tokens.JsonToken,
+-  readonly value: SerializableValue,
++  readonly type: typeof tokens.JsonToken;
++  readonly value: SerializableValue;
+ };
+ 
+ export type SqlSqlToken<T = UserQueryResultRow> = {
+-  readonly parser?: Parser<T>,
+-  readonly sql: string,
+-  readonly type: typeof tokens.SqlToken,
+-  readonly values: readonly PrimitiveValueExpression[],
++  readonly parser?: Parser<T>;
++  readonly sql: string;
++  readonly type: typeof tokens.SqlToken;
++  readonly values: readonly PrimitiveValueExpression[];
+ };
+ 
+ export type TimestampSqlToken = {
+-  readonly date: Date,
+-  readonly type: typeof tokens.TimestampToken,
++  readonly date: Date;
++  readonly type: typeof tokens.TimestampToken;
+ };
+ 
+ export type UnnestSqlToken = {
+-  readonly columnTypes: Array<[...string[], TypeNameIdentifier]> | Array<SqlSqlToken | TypeNameIdentifier>,
+-  readonly tuples: ReadonlyArray<readonly ValueExpression[]>,
+-  readonly type: typeof tokens.UnnestToken,
++  readonly columnTypes:
++    | Array<[...string[], TypeNameIdentifier]>
++    | Array<SqlSqlToken | TypeNameIdentifier>;
++  readonly tuples: ReadonlyArray<readonly ValueExpression[]>;
++  readonly type: typeof tokens.UnnestToken;
+ };
+ 
+ export type PrimitiveValueExpression =
+-  Buffer |
+-  boolean |
+-  number |
+-  string |
+-  readonly PrimitiveValueExpression[] |
+-  null;
++  | Buffer
++  | boolean
++  | number
++  | string
++  | readonly PrimitiveValueExpression[]
++  | null;
+ 
+ export type SqlToken =
+   | ArraySqlToken
+@@ -363,7 +367,7 @@ export type SqlToken =
+ export type ValueExpression = PrimitiveValueExpression | SqlToken;
+ 
+ export type NamedAssignment = {
+-  readonly [key: string]: ValueExpression,
++  readonly [key: string]: ValueExpression;
+ };
+ 
+ /**
+@@ -371,9 +375,9 @@ export type NamedAssignment = {
+  * Re-defined here to avoid a hard dependency on zod.
+  */
+ export type ParserIssue = {
+-  code: string,
+-  message: string,
+-  path: Array<number | string>,
++  code: string;
++  message: string;
++  path: Array<number | string>;
+ };
+ 
+ /**
+@@ -382,11 +386,15 @@ export type ParserIssue = {
+  */
+ export type Parser<T> = {
+   _def: {
+-    typeName: 'ZodObject',
+-    unknownKeys: 'strict' | 'strip',
+-  },
+-  safeParse: (input: unknown) => { data: T, success: true, } | { error: { issues: ParserIssue[], }, success: false, },
+-  strict: () => Parser<T>,
++    typeName: "ZodObject";
++    unknownKeys: "strict" | "strip";
++  };
++  safeParse: (
++    input: unknown
++  ) =>
++    | { data: T; success: true }
++    | { error: { issues: ParserIssue[] }; success: false };
++  strict: () => Parser<T>;
+ };
+ 
+ // @todo may want to think how to make this extendable.
+@@ -394,29 +402,42 @@ export type Parser<T> = {
+ type UserQueryResultRow = Record<string, any>;
+ 
+ export type SqlTaggedTemplate<T extends UserQueryResultRow = QueryResultRow> = {
+-  <U extends UserQueryResultRow = T>(template: TemplateStringsArray, ...values: ValueExpression[]): TaggedTemplateLiteralInvocation<U>,
++  <U extends UserQueryResultRow = T>(
++    template: TemplateStringsArray,
++    ...values: ValueExpression[]
++  ): TaggedTemplateLiteralInvocation<U>;
+   array: (
+     values: readonly PrimitiveValueExpression[],
+-    memberType: SqlToken | TypeNameIdentifier,
+-  ) => ArraySqlToken,
+-  binary: (data: Buffer) => BinarySqlToken,
+-  date: (date: Date) => DateSqlToken,
+-  identifier: (names: readonly string[]) => IdentifierSqlToken,
+-  interval: (interval: IntervalInput) => IntervalSqlToken,
+-  join: (members: readonly ValueExpression[], glue: SqlSqlToken) => ListSqlToken,
+-  json: (value: SerializableValue) => JsonSqlToken,
+-  jsonb: (value: SerializableValue) => JsonBinarySqlToken,
+-  literalValue: (value: string) => SqlSqlToken,
+-  timestamp: (date: Date) => TimestampSqlToken,
+-  type: <U>(parser: Parser<U>) => (template: TemplateStringsArray, ...values: ValueExpression[]) => TaggedTemplateLiteralInvocation<U>,
++    memberType: SqlToken | TypeNameIdentifier
++  ) => ArraySqlToken;
++  binary: (data: Buffer) => BinarySqlToken;
++  date: (date: Date) => DateSqlToken;
++  identifier: (names: readonly string[]) => IdentifierSqlToken;
++  interval: (interval: IntervalInput) => IntervalSqlToken;
++  join: (
++    members: readonly ValueExpression[],
++    glue: SqlSqlToken
++  ) => ListSqlToken;
++  json: (value: SerializableValue) => JsonSqlToken;
++  jsonb: (value: SerializableValue) => JsonBinarySqlToken;
++  literalValue: (value: string) => SqlSqlToken;
++  timestamp: (date: Date) => TimestampSqlToken;
++  type: <U>(
++    parser: Parser<U>
++  ) => (
++    template: TemplateStringsArray,
++    ...values: ValueExpression[]
++  ) => TaggedTemplateLiteralInvocation<U>;
+   unnest: (
+     // Value might be ReadonlyArray<ReadonlyArray<PrimitiveValueExpression>>,
+     // or it can be infinitely nested array, e.g.
+     // https://github.com/gajus/slonik/issues/44
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     tuples: ReadonlyArray<readonly any[]>,
+-    columnTypes: Array<[...string[], TypeNameIdentifier]> | Array<SqlSqlToken | TypeNameIdentifier>
+-  ) => UnnestSqlToken,
++    columnTypes:
++      | Array<[...string[], TypeNameIdentifier]>
++      | Array<SqlSqlToken | TypeNameIdentifier>
++  ) => UnnestSqlToken;
+ };
+ 
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+@@ -425,7 +446,7 @@ export type InternalQueryMethod<R = any> = (
+   connection: PgPoolClient,
+   clientConfiguration: ClientConfiguration,
+   slonikSql: TaggedTemplateLiteralInvocation,
+-  uid?: QueryId,
++  uid?: QueryId
+ ) => R;
+ 
+ export type InternalCopyFromBinaryFunction = (
+@@ -435,7 +456,7 @@ export type InternalCopyFromBinaryFunction = (
+   slonikSql: TaggedTemplateLiteralInvocation,
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   tupleList: ReadonlyArray<readonly any[]>,
+-  columnTypes: readonly TypeNameIdentifier[],
++  columnTypes: readonly TypeNameIdentifier[]
+ ) => Promise<Record<string, unknown>>;
+ 
+ export type InternalStreamFunction = (
+@@ -445,7 +466,7 @@ export type InternalStreamFunction = (
+   slonikSql: TaggedTemplateLiteralInvocation,
+   streamHandler: StreamHandler,
+   uid?: QueryId,
+-  config?: QueryStreamConfig,
++  config?: QueryStreamConfig
+ ) => Promise<Record<string, unknown>>;
+ 
+ export type InternalTransactionFunction = <T>(
+@@ -453,7 +474,7 @@ export type InternalTransactionFunction = <T>(
+   connection: PgPoolClient,
+   clientConfiguration: ClientConfiguration,
+   handler: TransactionFunction<T>,
+-  transactionRetryLimit?: number,
++  transactionRetryLimit?: number
+ ) => Promise<T>;
+ 
+ export type InternalNestedTransactionFunction = <T>(
+@@ -462,109 +483,115 @@ export type InternalNestedTransactionFunction = <T>(
+   clientConfiguration: ClientConfiguration,
+   handler: TransactionFunction<T>,
+   transactionDepth: number,
+-  transactionRetryLimit?: number,
++  transactionRetryLimit?: number
+ ) => Promise<T>;
+ 
+ // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-unused-vars
+-export interface TaggedTemplateLiteralInvocation<Result extends UserQueryResultRow = QueryResultRow> extends SqlSqlToken { }
++export interface TaggedTemplateLiteralInvocation<
++  Result extends UserQueryResultRow = QueryResultRow
++> extends SqlSqlToken {}
+ 
+ export type QueryAnyFirstFunction = <T, Row = Record<string, T>>(
+   sql: TaggedTemplateLiteralInvocation<Row>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<ReadonlyArray<Row[keyof Row]>>;
+ export type QueryAnyFunction = <T>(
+   sql: TaggedTemplateLiteralInvocation<T>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<readonly T[]>;
+ export type QueryExistsFunction = (
+   sql: TaggedTemplateLiteralInvocation,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<boolean>;
+ export type QueryFunction = <T>(
+   sql: TaggedTemplateLiteralInvocation<T>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<QueryResult<T>>;
+ export type QueryManyFirstFunction = <T, Row = Record<string, T>>(
+   sql: TaggedTemplateLiteralInvocation<Row>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<ReadonlyArray<Row[keyof Row]>>;
+ export type QueryManyFunction = <T>(
+   sql: TaggedTemplateLiteralInvocation<T>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<readonly T[]>;
+ export type QueryMaybeOneFirstFunction = <T, Row = Record<string, T>>(
+   sql: TaggedTemplateLiteralInvocation<Row>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<Row[keyof Row] | null>;
+ export type QueryMaybeOneFunction = <T>(
+   sql: TaggedTemplateLiteralInvocation<T>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<T | null>;
+ export type QueryOneFirstFunction = <T, Row = Record<string, T>>(
+   sql: TaggedTemplateLiteralInvocation<Row>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<Row[keyof Row]>;
+-export type QueryOneFunction = <T extends UserQueryResultRow = UserQueryResultRow>(
++export type QueryOneFunction = <
++  T extends UserQueryResultRow = UserQueryResultRow
++>(
+   sql: TaggedTemplateLiteralInvocation<T>,
+-  values?: PrimitiveValueExpression[],
++  values?: PrimitiveValueExpression[]
+ ) => Promise<T>;
+ 
+ export type Interceptor = {
+   readonly afterPoolConnection?: (
+     connectionContext: ConnectionContext,
+-    connection: DatabasePoolConnection,
+-  ) => MaybePromise<null>,
++    connection: DatabasePoolConnection
++  ) => MaybePromise<null>;
+   readonly afterQueryExecution?: (
+     queryContext: QueryContext,
+     query: Query,
+-    result: QueryResult<QueryResultRow>,
+-  ) => MaybePromise<null>,
++    result: QueryResult<QueryResultRow>
++  ) => MaybePromise<null>;
+   readonly beforePoolConnection?: (
+-    connectionContext: PoolContext,
+-  ) => MaybePromise<DatabasePool | null | undefined>,
++    connectionContext: PoolContext
++  ) => MaybePromise<DatabasePool | null | undefined>;
+   readonly beforePoolConnectionRelease?: (
+     connectionContext: ConnectionContext,
+-    connection: DatabasePoolConnection,
+-  ) => MaybePromise<null>,
++    connection: DatabasePoolConnection
++  ) => MaybePromise<null>;
+   readonly beforeQueryExecution?: (
+     queryContext: QueryContext,
+-    query: Query,
+-  ) => MaybePromise<QueryResult<QueryResultRow> | null>,
++    query: Query
++  ) => MaybePromise<QueryResult<QueryResultRow> | null>;
+   readonly beforeQueryResult?: (
+     queryContext: QueryContext,
+     query: Query,
+-    result: QueryResult<QueryResultRow>,
+-  ) => MaybePromise<null>,
+-  readonly beforeTransformQuery?: (queryContext: QueryContext, query: Query) => MaybePromise<null>,
++    result: QueryResult<QueryResultRow>
++  ) => MaybePromise<null>;
++  readonly beforeTransformQuery?: (
++    queryContext: QueryContext,
++    query: Query
++  ) => MaybePromise<null>;
+   readonly queryExecutionError?: (
+     queryContext: QueryContext,
+     query: Query,
+     error: SlonikError,
+-    notices: readonly Notice[],
+-  ) => MaybePromise<null>,
+-  readonly transformQuery?: (queryContext: QueryContext, query: Query) => Query,
++    notices: readonly Notice[]
++  ) => MaybePromise<null>;
++  readonly transformQuery?: (queryContext: QueryContext, query: Query) => Query;
+   readonly transformRow?: (
+     queryContext: QueryContext,
+     query: Query,
+     row: QueryResultRow,
+-    fields: readonly Field[],
+-  ) => QueryResultRow,
++    fields: readonly Field[]
++  ) => QueryResultRow;
+ };
+ 
+ export type IdentifierNormalizer = (identifierName: string) => string;
+ 
+ export type MockPoolOverrides = {
+-  readonly query: (sql: string, values: readonly PrimitiveValueExpression[]) => Promise<QueryResult<QueryResultRow>>,
++  readonly query: (
++    sql: string,
++    values: readonly PrimitiveValueExpression[]
++  ) => Promise<QueryResult<QueryResultRow>>;
+ };
+ 
+-export type {
+-  Logger,
+-} from 'roarr';
++export type { Logger } from "roarr";
+ 
+ export type TypeOverrides = {
+-  setTypeParser: (type: string, parser: (value: string) => unknown) => void,
++  setTypeParser: (type: string, parser: (value: string) => unknown) => void;
+ };
+ 
+-export {
+-  NoticeMessage as Notice,
+-} from 'pg-protocol/dist/messages';
++export { NoticeMessage as Notice } from "pg-protocol/dist/messages";

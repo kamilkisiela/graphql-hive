@@ -8,18 +8,19 @@ export class Emails {
   constructor(private transmission: Transmission) {}
 
   schedule(input: { id?: string; email: string; subject: string; body: MJMLValue }) {
-    return this.transmission.client.sendEmail.mutate({
-      payload: {
+    return this.transmission.addJob(
+      'sendEmail',
+      {
         to: input.email,
         subject: input.subject,
         body: input.body.content,
       },
-      spec: {
+      {
         maxAttempts: 5,
         jobKey: input.id,
         jobKeyMode: input.id ? 'replace' : undefined,
       },
-    });
+    );
   }
 }
 export type MJMLValue = {
