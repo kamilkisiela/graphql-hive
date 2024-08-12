@@ -2,11 +2,11 @@ import { ReactElement, ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
-import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiPhone, FiServer, FiTruck } from 'react-icons/fi';
+import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
-import { HereTrustedBy, Hero, HeroLinks, HeroSubtitle, HeroTitle } from './hero';
+import { CheckIcon, Heading, Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { Highlights, HighlightTextLink } from './highlights';
 import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
@@ -20,9 +20,6 @@ import registrySchemaChecksImage from '../../public/features/registry/schema-che
 import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.png';
 
 const classes = {
-  link: cn(
-    'inline-block rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 shadow-sm hover:bg-gray-200',
-  ),
   feature: cn('w-full', 'even:bg-gray-50', 'odd:bg-white'),
   root: cn('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
   content: cn('flex flex-col text-black'),
@@ -294,69 +291,43 @@ export function IndexPage(): ReactElement {
     <Tooltip.Provider>
       <Page>
         <Hero>
-          <HeroTitle>Open GraphQL Platform</HeroTitle>
-          <HeroSubtitle>
-            Prevent breaking changes, monitor performance of your GraphQL API, and manage your API
-            gateway
-          </HeroSubtitle>
+          <Heading as="h1" size="xl" className="mx-auto max-w-3xl text-balance text-center">
+            Open-source GraphQL management platform
+          </Heading>
+          <p className="mx-auto max-w-[512px] text-center font-medium leading-6 text-white/80">
+            Your GraphQL API stack in one place: seamlessly integrate, customize, and secure all API
+            environments without vendor lock-in.
+          </p>
+          <HeroFeatures>
+            <li>
+              <CheckIcon className="text-blue-400" />
+              Fully open-source
+            </li>
+            <li>
+              <CheckIcon className="text-blue-400" />
+              No vendor lock
+            </li>
+            <li>
+              <CheckIcon className="text-blue-400" />
+              Can be self-hosted!
+            </li>
+          </HeroFeatures>
           <HeroLinks>
-            <>
-              <a
-                href="https://app.graphql-hive.com"
-                className={cn(
-                  'inline-block rounded-lg px-6 py-3 font-medium text-white shadow-sm',
-                  'bg-yellow-500 hover:bg-yellow-500/75',
-                )}
-              >
-                Start for free
-              </a>
-              <Link href="/docs" className={classes.link}>
-                Documentation
-              </Link>
-              <a
-                className={cn(classes.link, 'flex flex-row items-center gap-2')}
-                href="https://github.com/kamilkisiela/graphql-hive"
-              >
-                <FiGithub /> Star on GitHub
-              </a>
-              <a
-                className={cn(classes.link, 'flex flex-row items-center gap-2')}
-                href="#"
-                onClick={() => {
-                  (window as any).$crisp?.push(['do', 'chat:open']);
-                }}
-              >
-                <FiPhone /> Talk to us
-              </a>
-            </>
+            <a
+              href="https://app.graphql-hive.com"
+              className="bg-primary text-green-1000 rounded-lg border border-green-800 px-6 py-3 font-medium leading-6"
+            >
+              Get started for free
+            </a>
+            <Link
+              className="text-green-1000 rounded-lg border border-green-800 bg-green-300 px-6 py-3 font-medium leading-6"
+              href="/docs"
+            >
+              View Pricing
+            </Link>
           </HeroLinks>
-          <HereTrustedBy>
-            <MeetupLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={32}
-            />
-            <LinktreeLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={22}
-            />
-            <KarrotLogo
-              height={28}
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-            />
-            <AligentLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={32}
-            />
-            <SoundYXZLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={32}
-            />
-          </HereTrustedBy>
         </Hero>
         <div className="relative even:bg-gray-50">
-          <div>
-            <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
-          </div>
           <StatsList>
             <StatsItem label="Happy users" value={5.7} suffix="K" decimal />
             <StatsItem label="Registered Schemas" value={225} suffix="K" />
@@ -364,6 +335,28 @@ export function IndexPage(): ReactElement {
             <StatsItem label="GitHub Commits" value={6.2} suffix="K" decimal />
           </StatsList>
         </div>
+        <TrustedBy>
+          <MeetupLogo
+            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
+            height={32}
+          />
+          <LinktreeLogo
+            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
+            height={22}
+          />
+          <KarrotLogo
+            height={28}
+            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
+          />
+          <AligentLogo
+            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
+            height={32}
+          />
+          <SoundYXZLogo
+            className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
+            height={32}
+          />
+        </TrustedBy>
         <div className="flex flex-col">
           <Feature
             title="Schema Registry"
