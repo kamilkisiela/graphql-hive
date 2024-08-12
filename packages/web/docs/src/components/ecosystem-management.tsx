@@ -55,8 +55,8 @@ export function EcosystemManagementSection() {
 
 const edgeTexts = [
   'Apps send requests to the Mesh Gateway which is the entrypoint to the internal GraphQL service/subgraph infrastructure.',
-  'Developers that build the apps/api clients will use graphql codegen for generating type-safe code that makes writing apps more safe and faster.',
-  'Codegen uses Hive to pull the graphql schema for generating the code.',
+  'Developers that build the apps/api clients will use GraphQL Codegen for generating type-safe code that makes writing apps safer and faster.',
+  'Codegen uses Hive to pull the GraphQL schema for generating the code.',
   'Mesh pulls the composite schema / supergraph from the Hive schema registry that gives it all the information about the subgraphs and data available to server to the outside world/clients.',
   'Mesh delegates GraphQL requests to the corresponding Yoga subgraphs within your internal network.',
   'Check the subgraph schema against the Hive registry before deployment to ensure integrity. After deploying a new subgraph version, publish its schema to Hive, which generates the supergraph used by Mesh.',
@@ -64,7 +64,8 @@ const edgeTexts = [
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-const INTERVAL_TIME = 5000;
+const EDGE_HOVER_INTERVAL_TIME = 5000;
+const EDGE_HOVER_RESET_TIME = 10_000;
 
 function Illustration() {
   const [highlightedEdge, setHighlightedEdge] = useState<number | null>(4);
@@ -74,7 +75,7 @@ function Illustration() {
   useIsomorphicLayoutEffect(() => {
     intervalRef.current = setInterval(() => {
       setHighlightedEdge(prev => (prev % 6) + 1);
-    }, INTERVAL_TIME);
+    }, EDGE_HOVER_INTERVAL_TIME);
 
     return () => clearInterval(intervalRef.current);
   }, []);
@@ -87,6 +88,13 @@ function Illustration() {
 
     clearInterval(intervalRef.current);
     setHighlightedEdge(edgeNumber);
+
+    // after 10 seconds, we'll start stepping through edges again
+    intervalRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        setHighlightedEdge(prev => (prev % 6) + 1);
+      }, EDGE_HOVER_INTERVAL_TIME);
+    }, EDGE_HOVER_RESET_TIME);
   };
 
   return (
