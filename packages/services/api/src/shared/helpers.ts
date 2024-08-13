@@ -230,26 +230,44 @@ export function batchBy<TItem, TResult>(
   /** Maximum amount of items per batch, if it is exceeded a new batch for a given batchKey is created. */
   maxBatchSize = Infinity,
 ) {
-  let batchGroups = new Map<string, BatchGroup<TItem, TResult>[]>();
+  let batchGroups = new Map<string, BatchGroup<TItem, TResult>>();
   let didSchedule = false;
+
+  function startLoadingBatch(currentBatch: BatchGroup<TItem, TResult>): void {
+    const tickArgs = [...currentBatch.args];
+    const tickCallbacks = [...currentBatch.callbacks];
+
+    loader(tickArgs).then(
+      promises => {
+        for (let i = 0; i < tickCallbacks.length; i++) {
+          promises[i].then(
+            result => {
+              tickCallbacks[i].resolve(result);
+            },
+            error => {
+              tickCallbacks[i].reject(error);
+            },
+          );
+        }
+      },
+      error => {
+        for (let i = 0; i < tickCallbacks.length; i++) {
+          tickCallbacks[i].reject(error);
+        }
+      },
+    );
+  }
 
   function getBatchGroup(batchKey: string) {
     // get the batch collection for the batch key
-    let currentBatches = batchGroups.get(batchKey);
-    if (!currentBatches) {
-      currentBatches = [];
-      batchGroups.set(batchKey, currentBatches);
-    }
-
-    // get the last batch for the batch key
-    let currentBatch = currentBatches.at(-1);
+    let currentBatch = batchGroups.get(batchKey);
     // if it does not exist or the batch is full, create a new batch
-    if (currentBatch === undefined || currentBatch.args.length >= maxBatchSize) {
+    if (currentBatch === undefined) {
       currentBatch = {
         args: [],
         callbacks: [],
       };
-      currentBatches.push(currentBatch);
+      batchGroups.set(batchKey, currentBatch);
     }
 
     return currentBatch;
@@ -261,31 +279,8 @@ export function batchBy<TItem, TResult>(
     }
     didSchedule = true;
     process.nextTick(() => {
-      for (const currentBatches of batchGroups.values()) {
-        for (const currentBatch of currentBatches) {
-          const tickArgs = [...currentBatch.args];
-          const tickCallbacks = [...currentBatch.callbacks];
-
-          loader(tickArgs).then(
-            promises => {
-              for (let i = 0; i < tickCallbacks.length; i++) {
-                promises[i].then(
-                  result => {
-                    tickCallbacks[i].resolve(result);
-                  },
-                  error => {
-                    tickCallbacks[i].reject(error);
-                  },
-                );
-              }
-            },
-            error => {
-              for (let i = 0; i < tickCallbacks.length; i++) {
-                tickCallbacks[i].reject(error);
-              }
-            },
-          );
-        }
+      for (const currentBatch of batchGroups.values()) {
+        startLoadingBatch(currentBatch);
       }
       // reset the batch
       batchGroups = new Map();
@@ -294,14 +289,19 @@ export function batchBy<TItem, TResult>(
   }
 
   return (arg: TItem): Promise<TResult> => {
-    const key = buildBatchKey(arg);
-    let currentBatch = getBatchGroup(key);
+    const batchKey = buildBatchKey(arg);
+    const currentBatch = getBatchGroup(batchKey);
     scheduleExecutionOnNextTick();
     currentBatch.args.push(arg);
 
-    const { callbacks } = currentBatch;
-    return new Promise((resolve, reject) => {
-      callbacks.push({ resolve, reject });
-    });
+    // if the current batch is full, we already start loading it.
+    if (currentBatch.callbacks.length >= maxBatchSize) {
+      batchGroups.delete(batchKey);
+      startLoadingBatch(currentBatch);
+    }
+
+    const d = Promise.withResolvers<TResult>();
+    currentBatch.callbacks.push({ resolve: d.resolve, reject: d.reject });
+    return d.promise;
   };
 }
