@@ -52,5 +52,4 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-radix')({ variantPrefix: 'rdx' })],
 };

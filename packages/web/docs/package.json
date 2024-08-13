@@ -25,8 +25,7 @@
     "react-countup": "6.5.3",
     "react-dom": "18.3.1",
     "rss": "1.2.2",
-    "tailwind-merge": "2.4.0",
-    "tailwindcss-radix": "3.0.3"
+    "tailwind-merge": "2.4.0"
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.4.2",

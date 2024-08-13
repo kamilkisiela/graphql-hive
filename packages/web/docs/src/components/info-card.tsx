@@ -16,10 +16,10 @@ export function InfoCard({
   ...rest
 }: InfoCardProps) {
   return (
-    <Root className={cn('bg-beige-100 p-6 md:p-12', className)} {...rest}>
+    <Root className={cn('bg-beige-100 p-12', className)} {...rest}>
       <Stud>{icon}</Stud>
-      <h3 className="text-green-1000 mt-4 text-xl font-medium leading-[1.4] md:mt-6">{heading}</h3>
-      <p className="mt-2 text-green-800 md:mt-4">{children}</p>
+      <h3 className="text-green-1000 mt-6 text-xl font-medium leading-[1.4]">{heading}</h3>
+      <p className="mt-4 text-green-800">{children}</p>
     </Root>
   );
 }

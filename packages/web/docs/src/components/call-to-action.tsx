@@ -37,9 +37,8 @@ export function CallToAction({ className, variant, ...rest }: CallToActionProps)
   return (
     <Anchor
       className={cn(
-        'relative block w-fit rounded-lg' +
-          ' text-green-1000 px-6 py-3 font-medium leading-6' +
-          ' relative flex flex-row items-center justify-center gap-2',
+        'relative block w-fit rounded-lg',
+        'text-green-1000 px-6 py-3 font-medium leading-6',
         'focus-visible:ring-0 focus-visible:ring-offset-0',
         '[&:hover>:first-child]:inset-[-1px] [&:hover>:first-child]:rounded-[9px]',
         variantStyles[variant],
@@ -48,7 +47,7 @@ export function CallToAction({ className, variant, ...rest }: CallToActionProps)
       {...rest}
     >
       <div className="absolute inset-0 rounded-lg border border-green-800" />
-      {rest.children}
+      <div className="relative flex flex-row items-center gap-2">{rest.children}</div>
     </Anchor>
   );
 }
