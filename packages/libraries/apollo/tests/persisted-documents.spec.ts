@@ -57,7 +57,7 @@ test('use persisted documents (GraphQL over HTTP "documentId")', async () => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      documentId: 'client-name/client-version/hash',
+      documentId: 'client-name~client-version~hash',
     }),
   });
   expect(response.status).toBe(200);
@@ -112,7 +112,7 @@ test('persisted document not found (GraphQL over HTTP "documentId")', async () =
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      documentId: 'client-name/client-version/hash',
+      documentId: 'client-name~client-version~hash',
     }),
   });
 
@@ -265,7 +265,7 @@ test('usage reporting for persisted document', async () => {
         {
           metadata: {},
           operationMapKey: 'ace78a32bbf8a79071356e5d5b13c5c83baf4e14',
-          persistedDocumentHash: 'client-name/client-version/hash',
+          persistedDocumentHash: 'client-name~client-version~hash',
         },
       ]);
 
@@ -334,7 +334,7 @@ test('usage reporting for persisted document', async () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          documentId: 'client-name/client-version/hash',
+          documentId: 'client-name~client-version~hash',
         }),
       });
       expect(response.status).toBe(200);
