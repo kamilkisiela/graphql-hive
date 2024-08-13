@@ -5,7 +5,7 @@ export interface HeadingProps extends ComponentPropsWithoutRef<'h1'> {
   as: 'h1' | 'h2' | 'h3' | 'div';
   size: 'xl' | 'md' | 'sm';
 }
-export function Heading({ as: _as, size, className, ...rest }: HeadingProps) {
+export function Heading({ as: _as, size, className, children, ...rest }: HeadingProps) {
   const Level = _as || 'h2';
 
   let sizeStyle = '';
@@ -21,5 +21,18 @@ export function Heading({ as: _as, size, className, ...rest }: HeadingProps) {
       break;
   }
 
-  return <Level className={cn(sizeStyle, className)} {...rest} />;
+  const id =
+    typeof children === 'string' ? children.replace(/[\s\.,]+/g, '-').toLowerCase() : undefined;
+
+  return (
+    <Level className={cn(sizeStyle, className)} id={id} {...rest}>
+      {id ? (
+        <a href={`#${id}`} className="cursor-text">
+          {children}
+        </a>
+      ) : (
+        children
+      )}
+    </Level>
+  );
 }
