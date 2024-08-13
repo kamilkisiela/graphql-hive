@@ -130,7 +130,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
           as="li"
           heading="Cloud and Self-Hosted"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 px-0 sm:px-8 sm:py-0"
+          className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
           Hive is completely open source, MIT licensed. You can host it on your own infrastructure!
         </InfoCard>
@@ -138,7 +138,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
           as="li"
           heading="OIDC Login"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 basis-full px-0 sm:basis-0 sm:px-8 sm:py-0"
+          className="flex-1 basis-full px-0 sm:basis-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
           Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
           security.
@@ -147,7 +147,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
           as="li"
           heading="Secure and efficient"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 px-0 sm:px-8 sm:py-0"
+          className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
           <a
             href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
