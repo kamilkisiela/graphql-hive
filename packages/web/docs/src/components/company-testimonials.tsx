@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useRef } from 'react';
+import React, { Fragment, useRef } from 'react';
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
 import { cn } from '../lib';
