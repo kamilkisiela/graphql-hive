@@ -168,7 +168,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
 function UltimatePerformanceCards() {
   return (
     <section className="px-6 py-12 sm:py-24">
-      <Heading as="h3" size="md" className="text-center">
+      <Heading as="h3" size="md" className="text-center text-balance">
         GraphQL for the ultimate performance
       </Heading>
       <ul className="mt-16 flex flex-row flex-wrap justify-center gap-2 md:gap-6">
@@ -176,7 +176,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Deliver improvements faster"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 rounded-3xl"
+          className="flex-1 rounded-2xl md:rounded-3xl"
         >
           Accelerate feature improvements and experiments, by seamless decoupling of backend and
           frontend environments.
@@ -185,7 +185,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Network efficiency"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 rounded-3xl"
+          className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
         >
           Accelerate feature improvements and experiments, by seamless decoupling of backend and
           frontend environments.
@@ -194,7 +194,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Optimized data retrieval"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 basis-full rounded-3xl lg:basis-0"
+          className="flex-1 basis-full rounded-2xl md:rounded-3xl lg:basis-0"
         >
           Reduce latency effectively with Hive by enabling frontend teams to obtain all required
           data in a single request, maximizing GraphQL’s inherent performance benefits.
