@@ -13,8 +13,7 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { http } from '@graphql-hive/core';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { createHive, createSupergraphSDLFetcher, useHive } from '../src';
-import { version } from '../src/version';
+import { createHive, useHive } from '../src';
 
 function createLogger() {
   return {
@@ -82,12 +81,12 @@ test('should not interrupt the process', async () => {
           logger,
         },
         reporting: {
-          endpoint: 'http://404.localhost/registry',
+          endpoint: 'http://404.localhost.noop/registry',
           author: 'jest',
           commit: 'js',
         },
         usage: {
-          endpoint: 'http://404.localhost/usage',
+          endpoint: 'http://404.localhost.noop/usage',
         },
       }),
     ],
@@ -100,7 +99,7 @@ test('should not interrupt the process', async () => {
       }
     `,
   });
-  await waitFor(50);
+  await waitFor(200);
   await apollo.stop();
   clean();
   expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[hive][info]'));
@@ -110,7 +109,7 @@ test('should not interrupt the process', async () => {
 
 test('should capture client name and version headers', async () => {
   const clean = handleProcess();
-  const fetchSpy = vi.fn<[RequestInfo | URL, options: RequestInit | undefined]>(async () =>
+  const fetchSpy = vi.fn(async (_input: string | URL | globalThis.Request, _init?: RequestInit) =>
     Response.json({}, { status: 200 }),
   );
 
@@ -169,141 +168,116 @@ test('should capture client name and version headers', async () => {
   clean();
 }, 1_000);
 
-describe('supergraph SDL fetcher', async () => {
-  test('createSupergraphSDLFetcher without ETag', async () => {
-    const supergraphSdl = 'type SuperQuery { sdl: String }';
-    const newSupergraphSdl = 'type NewSuperQuery { sdl: String }';
-    const key = 'secret-key';
-    nock('http://localhost')
-      .get('/supergraph')
-      .once()
-      .matchHeader('X-Hive-CDN-Key', key)
-      .reply(200, supergraphSdl, {
-        ETag: 'first',
-      })
-      .get('/supergraph')
-      .once()
-      .matchHeader('X-Hive-CDN-Key', key)
-      .matchHeader('User-Agent', `hive-client/${version}`)
-      .reply(200, newSupergraphSdl, {
-        ETag: 'second',
-      });
+test('send usage reports in intervals', async () => {
+  const clean = handleProcess();
+  const fetchSpy = vi.fn(async (_input: string | URL | globalThis.Request, _init?: RequestInit) =>
+    Response.json({}, { status: 200 }),
+  );
 
-    const fetcher = createSupergraphSDLFetcher({
-      endpoint: 'http://localhost',
-      key,
-    });
-
-    const result = await fetcher();
-
-    expect(result.id).toBeDefined();
-    expect(result.supergraphSdl).toEqual(supergraphSdl);
-
-    const secondResult = await fetcher();
-
-    expect(secondResult.id).toBeDefined();
-    expect(secondResult.supergraphSdl).toEqual(newSupergraphSdl);
+  const apollo = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [
+      useHive({
+        enabled: true,
+        debug: false,
+        token: 'my-token',
+        agent: {
+          maxRetries: 0,
+          sendInterval: 10,
+          timeout: 50,
+          __testing: {
+            fetch: fetchSpy,
+          },
+        },
+        reporting: false,
+        usage: {
+          endpoint: 'http://apollo.localhost:4200/usage',
+        },
+      }),
+    ],
   });
 
-  test('createSupergraphSDLFetcher', async () => {
-    const supergraphSdl = 'type SuperQuery { sdl: String }';
-    const newSupergraphSdl = 'type Query { sdl: String }';
-    const key = 'secret-key';
-    nock('http://localhost')
-      .get('/supergraph')
-      .once()
-      .matchHeader('X-Hive-CDN-Key', key)
-      .reply(200, supergraphSdl, {
-        ETag: 'first',
-      })
-      .get('/supergraph')
-      .once()
-      .matchHeader('X-Hive-CDN-Key', key)
-      .matchHeader('If-None-Match', 'first')
-      .reply(304)
-      .get('/supergraph')
-      .matchHeader('X-Hive-CDN-Key', key)
-      .matchHeader('User-Agent', `hive-client/${version}`)
-      .matchHeader('If-None-Match', 'first')
-      .reply(200, newSupergraphSdl, {
-        ETag: 'changed',
-      });
+  await startStandaloneServer(apollo);
 
-    const fetcher = createSupergraphSDLFetcher({
-      endpoint: 'http://localhost',
-      key,
-    });
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '1.0.0',
+      },
+    },
+  );
 
-    const result = await fetcher();
+  await waitFor(50);
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://apollo.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"1.0.0"}'),
+    }),
+  );
 
-    expect(result.id).toBeDefined();
-    expect(result.supergraphSdl).toEqual(supergraphSdl);
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '2.0.0',
+      },
+    },
+  );
+  await waitFor(50);
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://apollo.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"2.0.0"}'),
+    }),
+  );
 
-    const cachedResult = await fetcher();
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '3.0.0',
+      },
+    },
+  );
 
-    expect(cachedResult.id).toBeDefined();
-    expect(cachedResult.supergraphSdl).toEqual(supergraphSdl);
-
-    const staleResult = await fetcher();
-
-    expect(staleResult.id).toBeDefined();
-    expect(staleResult.supergraphSdl).toEqual(newSupergraphSdl);
-  });
-
-  test('createSupergraphSDLFetcher retry with unexpected status code (nRetryCount=10)', async () => {
-    const supergraphSdl = 'type SuperQuery { sdl: String }';
-    const key = 'secret-key';
-    nock('http://localhost')
-      .get('/supergraph')
-      .times(10)
-      .reply(500)
-      .get('/supergraph')
-      .once()
-      .matchHeader('X-Hive-CDN-Key', key)
-      .reply(200, supergraphSdl, {
-        ETag: 'first',
-      });
-
-    const fetcher = createSupergraphSDLFetcher({
-      endpoint: 'http://localhost',
-      key,
-    });
-
-    const result = await fetcher();
-
-    expect(result.id).toBeDefined();
-    expect(result.supergraphSdl).toEqual(supergraphSdl);
-  });
-
-  test('createSupergraphSDLFetcher retry with unexpected status code (nRetryCount=11)', async () => {
-    expect.assertions(1);
-    const supergraphSdl = 'type SuperQuery { sdl: String }';
-    const key = 'secret-key';
-    nock('http://localhost')
-      .get('/supergraph')
-      .times(11)
-      .reply(500)
-      .get('/supergraph')
-      .once()
-      .matchHeader('X-Hive-CDN-Key', key)
-      .reply(200, supergraphSdl, {
-        ETag: 'first',
-      });
-
-    const fetcher = createSupergraphSDLFetcher({
-      endpoint: 'http://localhost',
-      key,
-    });
-
-    try {
-      await fetcher();
-    } catch (err) {
-      expect(err).toMatchInlineSnapshot(
-        `[Error: Failed to fetch http://localhost/supergraph, received: 500 Internal Server Error]`,
-      );
-    }
-  });
-});
+  await apollo.stop();
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://apollo.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"3.0.0"}'),
+    }),
+  );
+  clean();
+}, 1_000);
 
 describe('built-in HTTP usage reporting', async () => {
   test('successful query operation is reported', async () => {

@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// Suppress warnings from the CLI
+process.removeAllListeners('warning');
+
 const oclif = require('@oclif/core');
 
 oclif

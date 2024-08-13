@@ -20,7 +20,7 @@
     "ioredis": "5.4.1",
     "ms": "2.1.3",
     "p-timeout": "6.1.2",
-    "pino-pretty": "11.2.1",
+    "pino-pretty": "11.2.2",
     "reflect-metadata": "0.2.2",
     "tiny-lru": "8.0.2",
     "tslib": "2.6.3",

@@ -72,6 +72,15 @@ export function initSeed() {
   }
 
   return {
+    async createDbConnection() {
+      const pool = await createConnectionPool();
+      return {
+        pool,
+        [Symbol.asyncDispose]: async () => {
+          await pool.end();
+        },
+      };
+    },
     authenticate: authenticate,
     generateEmail: () => userEmail(generateUnique()),
     async createOwner() {

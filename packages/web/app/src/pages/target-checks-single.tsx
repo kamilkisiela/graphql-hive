@@ -201,7 +201,9 @@ const PolicyBlock = (props: {
             key={key}
             className={cn(props.type === 'warning' ? 'text-yellow-400' : 'text-red-400', 'my-1')}
           >
-            <span className="text-gray-600 dark:text-white">{labelize(edge.node.message)}</span>
+            <span className="text-left text-gray-600 dark:text-white">
+              {labelize(edge.node.message)}
+            </span>
           </li>
         ))}
       </ul>

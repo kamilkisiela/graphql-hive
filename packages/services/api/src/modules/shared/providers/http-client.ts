@@ -69,11 +69,10 @@ export class HttpClient {
           return Promise.resolve(response.body);
         },
         error => {
-          span.setAttribute('http.response.status_code', error.response.statusCode);
-
           let details: string | null = null;
 
           if (error instanceof HTTPError) {
+            span.setAttribute('http.response.status_code', error.response.statusCode);
             if (typeof error.response.body === 'string') {
               details = error.response.body;
               logger.error(details);

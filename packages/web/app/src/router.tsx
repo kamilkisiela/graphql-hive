@@ -37,7 +37,7 @@ import { DevPage } from './pages/dev';
 import { IndexPage } from './pages/index';
 import { LogoutPage } from './pages/logout';
 import { ManagePage } from './pages/manage';
-import { OrganizationPage } from './pages/organization';
+import { OrganizationIndexRouteSearch, OrganizationPage } from './pages/organization';
 import { JoinOrganizationPage } from './pages/organization-join';
 import { OrganizationMembersPage } from './pages/organization-members';
 import { NewOrgPage } from './pages/organization-new';
@@ -48,7 +48,7 @@ import { OrganizationSubscriptionManagePage } from './pages/organization-subscri
 import { OrganizationSupportPage } from './pages/organization-support';
 import { OrganizationSupportTicketPage } from './pages/organization-support-ticket';
 import { OrganizationTransferPage } from './pages/organization-transfer';
-import { ProjectPage } from './pages/project';
+import { ProjectIndexRouteSearch, ProjectPage } from './pages/project';
 import { ProjectAlertsPage } from './pages/project-alerts';
 import { ProjectPolicyPage } from './pages/project-policy';
 import { ProjectSettingsPage } from './pages/project-settings';
@@ -345,9 +345,18 @@ const organizationRoute = createRoute({
 const organizationIndexRoute = createRoute({
   getParentRoute: () => organizationRoute,
   path: '/',
+  validateSearch: OrganizationIndexRouteSearch.parse,
   component: function OrganizationRoute() {
     const { organizationId } = organizationRoute.useParams();
-    return <OrganizationPage organizationId={organizationId} />;
+    const { search, sortBy, sortOrder } = organizationIndexRoute.useSearch();
+    return (
+      <OrganizationPage
+        organizationId={organizationId}
+        search={search}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+    );
   },
   notFoundComponent: NotFound,
   errorComponent: ErrorComponent,
@@ -457,9 +466,19 @@ const projectRoute = createRoute({
 const projectIndexRoute = createRoute({
   getParentRoute: () => projectRoute,
   path: '/',
+  validateSearch: ProjectIndexRouteSearch.parse,
   component: function ProjectRoute() {
     const { organizationId, projectId } = projectIndexRoute.useParams();
-    return <ProjectPage organizationId={organizationId} projectId={projectId} />;
+    const { search, sortBy, sortOrder } = projectIndexRoute.useSearch();
+    return (
+      <ProjectPage
+        organizationId={organizationId}
+        projectId={projectId}
+        search={search}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+    );
   },
 });
 

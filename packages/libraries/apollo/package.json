@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/apollo",
-  "version": "0.33.4",
+  "version": "0.35.1",
   "type": "module",
   "description": "GraphQL Hive + Apollo Server",
   "repository": {
@@ -50,14 +50,14 @@
     "@graphql-hive/core": "workspace:*"
   },
   "devDependencies": {
-    "@apollo/server": "4.10.4",
+    "@apollo/server": "4.11.0",
     "@graphql-tools/schema": "10.0.4",
     "body-parser": "1.20.2",
     "express": "4.19.2",
     "graphql": "16.9.0",
     "graphql-ws": "5.16.0",
     "nock": "14.0.0-beta.7",
-    "vitest": "1.6.0",
+    "vitest": "2.0.3",
     "ws": "8.18.0"
   },
   "publishConfig": {

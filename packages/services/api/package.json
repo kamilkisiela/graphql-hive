@@ -31,7 +31,7 @@
     "@octokit/request-error": "6.1.4",
     "@sentry/node": "7.118.0",
     "@sentry/types": "7.118.0",
-    "@slack/web-api": "7.3.1",
+    "@slack/web-api": "7.3.2",
     "@theguild/buddy": "0.1.0",
     "@theguild/federation-composition": "0.12.1",
     "@trpc/client": "10.45.2",
@@ -65,7 +65,7 @@
     "slonik": "30.4.4",
     "supertokens-node": "15.2.1",
     "tslib": "2.6.3",
-    "vitest": "1.6.0",
+    "vitest": "2.0.3",
     "zod": "3.23.8",
     "zod-validation-error": "3.3.0"
   }

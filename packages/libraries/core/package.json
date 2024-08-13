@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/core",
-  "version": "0.5.0",
+  "version": "0.7.1",
   "type": "module",
   "repository": {
     "type": "git",
@@ -53,13 +53,13 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "@apollo/subgraph": "2.8.3",
+    "@apollo/subgraph": "2.8.4",
     "@types/async-retry": "1.4.8",
     "@types/lodash.sortby": "4.7.9",
     "graphql": "16.9.0",
     "nock": "14.0.0-beta.7",
     "tslib": "2.6.3",
-    "vitest": "1.6.0"
+    "vitest": "2.0.3"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

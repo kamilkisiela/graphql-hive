@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.39.0",
+  "version": "0.42.0",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -73,7 +73,7 @@
     "oclif": "4.13.6",
     "rimraf": "4.4.1",
     "tsx": "4.16.2",
-    "typescript": "5.5.3"
+    "typescript": "5.5.4"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -87,6 +87,11 @@
       "@oclif/plugin-update"
     ],
     "update": {
+      "node": {
+        "options": [
+          "--no-deprecation"
+        ]
+      },
       "s3": {
         "host": "https://cli.graphql-hive.com/",
         "bucket": "graphql-hive-cli"
