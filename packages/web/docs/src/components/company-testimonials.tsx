@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
 import { cn } from '../lib';
@@ -95,37 +95,74 @@ const testimonials: Testimonial[] = [
 ];
 
 export function CompanyTestimonialsSection({ className }: { className?: string }) {
+  const tabsListRef = useRef<HTMLDivElement>(null);
+  const scrollviewRef = React.useRef<HTMLDivElement>(null);
+  const updateDotsOnScroll = useRef<(event: React.UIEvent) => void>(null);
+  updateDotsOnScroll.current ||= debounce(() => {
+    const scrollview = scrollviewRef.current;
+    const tabsList = tabsListRef.current;
+    if (!scrollview || !tabsList) return;
+    const scrollLeft = scrollview.scrollLeft;
+    const scrollWidth = scrollview.scrollWidth;
+    const index = Math.round((scrollLeft / scrollWidth) * testimonials.length);
+
+    const tabs = tabsList.querySelectorAll('[role="tab"]');
+    for (const [i, tab] of tabs.entries()) {
+      tab.setAttribute('data-state', i === index ? 'active' : 'inactive');
+    }
+  }, 50);
+
   return (
     <section
       className={cn(
-        'bg-beige-100 text-green-1000 relative overflow-hidden rounded-3xl px-4 py-6 md:p-[72px]',
+        'bg-beige-100 text-green-1000 relative overflow-hidden rounded-3xl px-4 py-6 md:p-10 lg:p-[72px]',
         className,
       )}
     >
       <Heading as="h2" size="md">
         Loved by developers, trusted by business
       </Heading>
-      <Tabs.Root defaultValue={testimonials[0].company}>
-        <Tabs.List className="bg-beige-200 my-16 hidden flex-row rounded-2xl lg:flex">
+      <Tabs.Root
+        defaultValue={testimonials[0].company}
+        className="flex flex-col"
+        onValueChange={value => {
+          const id = getTestimonialId(value);
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
+          }
+        }}
+      >
+        <Tabs.List
+          ref={tabsListRef}
+          className="lg:bg-beige-200 order-1 mt-4 flex flex-row justify-center rounded-2xl lg:order-first lg:my-16"
+        >
           {testimonials.map(testimonial => {
             const Logo = testimonial.logo;
             return (
               <Tabs.Trigger
                 key={testimonial.company}
                 value={testimonial.company}
+                onClick={() => {}}
                 className={
-                  "data-[state='active']:text-green-1000 data-[state='active']:border-beige-600 data-[state='active']:bg-white" +
-                  ' border border-transparent font-medium leading-6 text-green-800' +
-                  ' flex flex-1 justify-center gap-2.5 rounded-[15px] p-2 md:p-4'
+                  'flex-grow-0 [&[data-state="active"]>:first-child]:bg-blue-400' +
+                  ' lg:rdx-state-active:bg-white lg:flex-grow lg:bg-transparent' +
+                  ' justify-center p-0.5 lg:p-4' +
+                  ' rdx-state-active:text-green-1000 lg:rdx-state-active:border-beige-600' +
+                  ' border-transparent font-medium leading-6 text-green-800 lg:border' +
+                  ' flex flex-1 justify-center rounded-[15px]'
                 }
               >
-                <Logo title={testimonial.company} height={32} />
+                <div className="size-2 rounded-full bg-blue-200 transition-colors lg:hidden" />
+                <Logo title={testimonial.company} height={32} className="hidden lg:block" />
               </Tabs.Trigger>
             );
           })}
         </Tabs.List>
         <div
-          /* mobile scrollview */ className="-mb-3 flex snap-x snap-mandatory gap-4 overflow-auto pb-3"
+          ref={scrollviewRef}
+          /* mobile scrollview */ className="-mb-10 flex snap-x snap-mandatory gap-4 overflow-auto pb-10"
+          onScroll={updateDotsOnScroll.current}
         >
           {testimonials.map(({ company, data, href, text, person, logo: Logo }) => {
             return (
@@ -148,7 +185,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                   height={300}
                   className="hidden size-[300px] shrink-0 rounded-3xl xl:block"
                 />
-                <article className="lg:relative">
+                <article className="lg:relative" id={getTestimonialId(company)}>
                   <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
                   <p className="lg:text-xl xl:text-2xl xl:leading-[32px]">{text}</p>
                   <TestimonialPerson className="mt-6" person={person} />
@@ -164,8 +201,8 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                 <div /* divider */ className="bg-beige-600 hidden w-px md:block" />
                 <ul className="flex gap-6 md:flex-col md:gap-12">
                   {data.map(({ numbers, description }, i) => (
-                    <>
-                      <li key={i}>
+                    <Fragment key={i}>
+                      <li>
                         <span
                           className={
                             'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
@@ -179,7 +216,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                       {i < data.length - 1 && (
                         <div /* divider */ className="bg-beige-600 w-px md:hidden" />
                       )}
-                    </>
+                    </Fragment>
                   ))}
                 </ul>
               </Tabs.Content>
@@ -189,6 +226,10 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
       </Tabs.Root>
     </section>
   );
+}
+
+function getTestimonialId(company: string) {
+  return encodeURIComponent(company.toLowerCase()) + '-testimonial';
 }
 
 function TestimonialPerson({
@@ -212,4 +253,12 @@ function TestimonialPerson({
       <p className="mt-1 text-xs text-green-800 md:text-sm">{person.title}</p>
     </div>
   );
+}
+
+function debounce<T extends (...args: any[]) => any>(fn: T, delay = 100) {
+  let timeout: NodeJS.Timeout;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  } as T;
 }
