@@ -6,20 +6,20 @@ import { CheckIcon } from './check-icon';
 import { HighlightDecoration } from './decorations';
 import { Heading } from './heading';
 
-export function EcosystemManagementSection() {
+export function EcosystemManagementSection({ className }: { className?: string }) {
   return (
     <section
-      className={
-        'bg-green-1000 relative mx-1 overflow-hidden rounded-3xl text-white md:mx-6' +
-        ' p-8 md:p-[72px]'
-      }
+      className={cn(
+        'bg-green-1000 relative overflow-hidden rounded-3xl text-white' + ' p-8 md:p-[72px]',
+        className,
+      )}
     >
       <div className="mx-auto flex w-[1392px] max-w-full flex-row flex-wrap gap-x-[120px] gap-y-16">
         <div className="flex w-[488px] flex-col gap-12">
           <Heading as="h3" size="sm">
             360° GraphQL Ecosystem Management
           </Heading>
-          <ul className="mx-auto flex list-none flex-col gap-y-6 text-white/80">
+          <ul className="mx-auto flex list-none flex-col gap-y-4 text-white/80 md:gap-y-6">
             {[
               'A complete ecosystem covering all your dev and management needs.',
               'Full Federation Support out of the box. Drop-in replacement for Apollo GraphOS (Apollo Studio)',
@@ -46,7 +46,7 @@ export function EcosystemManagementSection() {
             </CallToAction>
           </div>
         </div>
-        <Illustration />
+        <Illustration className="hidden md:block" />
       </div>
       <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
     </section>
@@ -67,7 +67,7 @@ const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : us
 const EDGE_HOVER_INTERVAL_TIME = 5000;
 const EDGE_HOVER_RESET_TIME = 10_000;
 
-function Illustration() {
+function Illustration(props: { className?: string }) {
   const [highlightedEdge, setHighlightedEdge] = useState<number | null>(4);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -98,7 +98,7 @@ function Illustration() {
   };
 
   return (
-    <div className="relative min-h-[400px]">
+    <div className={cn('relative min-h-[400px]', props.className)}>
       <div
         className="flex flex-row"
         style={{
