@@ -6,3 +6,4 @@ export { atLeastOnceSampler } from './client/samplers.js';
 export { isHiveClient, isAsyncIterable, createHash, joinUrl } from './client/utils.js';
 export { http, URL } from './client/http-client.js';
 export type { Logger } from './client/types.js';
+export { createSupergraphSDLFetcher, SupergraphSDLFetcherOptions } from './client/supergraph.js';
