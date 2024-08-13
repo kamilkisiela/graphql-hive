@@ -169,6 +169,117 @@ test('should capture client name and version headers', async () => {
   clean();
 }, 1_000);
 
+test('send usage reports in intervals', async () => {
+  const clean = handleProcess();
+  const fetchSpy = vi.fn(async (_input: string | URL | globalThis.Request, _init?: RequestInit) =>
+    Response.json({}, { status: 200 }),
+  );
+
+  const apollo = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [
+      useHive({
+        enabled: true,
+        debug: false,
+        token: 'my-token',
+        agent: {
+          maxRetries: 0,
+          sendInterval: 10,
+          timeout: 50,
+          __testing: {
+            fetch: fetchSpy,
+          },
+        },
+        reporting: false,
+        usage: {
+          endpoint: 'http://apollo.localhost:4200/usage',
+        },
+      }),
+    ],
+  });
+
+  await startStandaloneServer(apollo);
+
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '1.0.0',
+      },
+    },
+  );
+
+  await waitFor(50);
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://apollo.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"1.0.0"}'),
+    }),
+  );
+
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '2.0.0',
+      },
+    },
+  );
+  await waitFor(50);
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://apollo.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"2.0.0"}'),
+    }),
+  );
+
+  await http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    {
+      headers: {
+        'content-type': 'application/json',
+        'x-graphql-client-name': 'vitest',
+        'x-graphql-client-version': '3.0.0',
+      },
+    },
+  );
+
+  await apollo.stop();
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://apollo.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"3.0.0"}'),
+    }),
+  );
+  clean();
+}, 1_000);
+
 describe('supergraph SDL fetcher', async () => {
   test('createSupergraphSDLFetcher without ETag', async () => {
     const supergraphSdl = 'type SuperQuery { sdl: String }';
