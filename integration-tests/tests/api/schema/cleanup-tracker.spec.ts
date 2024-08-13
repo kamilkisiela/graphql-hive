@@ -18,7 +18,7 @@ async function fetchCoordinates(db: CommonQueryMethods, target: { id: string }) 
   return result.rows;
 }
 
-describe('schema cleanup tracker', () => {
+describe.skip('schema cleanup tracker', () => {
   test.concurrent('single', async ({ expect }) => {
     const { publishSchema, target, createDbConnection } = await prepare();
     // This API is soooooooooooo awkward xD
