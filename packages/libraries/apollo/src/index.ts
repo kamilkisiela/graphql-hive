@@ -9,7 +9,6 @@ import {
   isHiveClient,
   SupergraphSDLFetcherOptions,
 } from '@graphql-hive/core';
-import { version } from './version.js';
 
 export {
   atLeastOnceSampler,
