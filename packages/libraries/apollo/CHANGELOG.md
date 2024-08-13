@@ -1,5 +1,18 @@
 # @graphql-hive/apollo
 
+## 0.35.1
+
+### Patch Changes
+
+- [#5367](https://github.com/kamilkisiela/graphql-hive/pull/5367)
+  [`a896642`](https://github.com/kamilkisiela/graphql-hive/commit/a896642197e6d7779ba7ed71f365dfbd80532282)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Move createSupergraphSDLFetcher to
+  @graphql-hive/core package
+
+- Updated dependencies
+  [[`a896642`](https://github.com/kamilkisiela/graphql-hive/commit/a896642197e6d7779ba7ed71f365dfbd80532282)]:
+  - @graphql-hive/core@0.7.1
+
 ## 0.35.0
 
 ### Minor Changes

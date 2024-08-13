@@ -1,5 +1,19 @@
 # @graphql-hive/cli
 
+## 0.42.0
+
+### Minor Changes
+
+- [#5190](https://github.com/kamilkisiela/graphql-hive/pull/5190)
+  [`7039d83`](https://github.com/kamilkisiela/graphql-hive/commit/7039d83b943c05fbb289f391ff9be0ae0da720f1)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - add support for app deployments
+
+### Patch Changes
+
+- Updated dependencies
+  [[`a896642`](https://github.com/kamilkisiela/graphql-hive/commit/a896642197e6d7779ba7ed71f365dfbd80532282)]:
+  - @graphql-hive/core@0.7.1
+
 ## 0.41.0
 
 ### Minor Changes
