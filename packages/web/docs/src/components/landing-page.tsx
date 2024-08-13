@@ -125,7 +125,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
       <Heading as="h3" size="md" className="text-balance sm:px-6 sm:text-center">
         Enterprise-focused tooling at your disposal
       </Heading>
-      <ul className="flex flex-row flex-wrap justify-center divide-y divide-solid sm:mt-6 sm:divide-x sm:divide-y-0 md:mt-16 md:px-6 lg:px-16">
+      <ul className="flex flex-row flex-wrap justify-center divide-y divide-solid sm:mt-6 sm:divide-x sm:divide-y-0 md:mt-16 md:px-6 xl:px-16">
         <InfoCard
           as="li"
           heading="Cloud and Self-Hosted"

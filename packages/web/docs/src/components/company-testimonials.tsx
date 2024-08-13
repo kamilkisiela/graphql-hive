@@ -138,11 +138,11 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                 alt=""
                 width={300}
                 height={300}
-                className="hidden size-[300px] shrink-0 rounded-3xl md:block"
+                className="hidden size-[300px] shrink-0 rounded-3xl xl:block"
               />
-              <article className="md:relative">
-                <Logo title={company} height={32} className="text-blue-1000 my-6 md:hidden" />
-                <p className="md:text-2xl md:leading-[32px]">{text}</p>
+              <article className="lg:relative">
+                <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
+                <p className="lg:text-xl xl:text-2xl xl:leading-[32px]">{text}</p>
                 <TestimonialPerson className="mt-6" person={person} />
                 <CallToAction
                   variant="primary"
@@ -197,7 +197,7 @@ function TestimonialPerson({
         alt=""
         width={42}
         height={42}
-        className="bg-beige-200 float-left mr-4 size-[42px] shrink-0 translate-y-[.5px] rounded-full md:hidden"
+        className="bg-beige-200 float-left mr-4 size-[42px] shrink-0 translate-y-[.5px] rounded-full xl:hidden"
       />
       <p className="text-sm font-medium leading-[20px]">{person.name}</p>
       <p className="mt-1 text-xs text-green-800 md:text-sm">{person.title}</p>
