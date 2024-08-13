@@ -1,5 +1,21 @@
 # @graphql-hive/cli
 
+## 0.41.0
+
+### Minor Changes
+
+- [#5307](https://github.com/kamilkisiela/graphql-hive/pull/5307)
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Re-introduce retry logging removed in previous
+  release.
+
+### Patch Changes
+
+- Updated dependencies
+  [[`3f03e7b`](https://github.com/kamilkisiela/graphql-hive/commit/3f03e7b3a65707ba8aa04335684f0aa8d261868f),
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)]:
+  - @graphql-hive/core@0.7.0
+
 ## 0.40.1
 
 ### Patch Changes

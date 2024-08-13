@@ -1,5 +1,18 @@
 # @graphql-hive/envelop
 
+## 0.33.6
+
+### Patch Changes
+
+- [#5361](https://github.com/kamilkisiela/graphql-hive/pull/5361)
+  [`3f03e7b`](https://github.com/kamilkisiela/graphql-hive/commit/3f03e7b3a65707ba8aa04335684f0aa8d261868f)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fixed issue where usage reports were
+  sent only on app disposal or max batch size, now also sent at set intervals.
+- Updated dependencies
+  [[`3f03e7b`](https://github.com/kamilkisiela/graphql-hive/commit/3f03e7b3a65707ba8aa04335684f0aa8d261868f),
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)]:
+  - @graphql-hive/core@0.7.0
+
 ## 0.33.5
 
 ### Patch Changes
