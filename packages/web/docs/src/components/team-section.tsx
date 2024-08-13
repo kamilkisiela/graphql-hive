@@ -36,7 +36,7 @@ export function TeamSection({ className }: { className?: string }) {
       </CallToAction>
 
       <TeamGallery
-        className="hidden w-[636px] md:flex"
+        className="hidden w-[636px] xl:flex"
         style={{
           '--size': '120px',
         }}
