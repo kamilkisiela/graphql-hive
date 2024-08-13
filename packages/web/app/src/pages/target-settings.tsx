@@ -625,7 +625,6 @@ const ConditionalBreakingChanges = (props: {
               type="number"
               min="1"
               max={retentionInDays}
-              defaultValue={values.period}
               className="mx-2 !inline-flex !w-16"
             />
             days.
