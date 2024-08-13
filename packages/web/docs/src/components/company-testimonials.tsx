@@ -20,7 +20,7 @@ const testimonials: Testimonial[] = [
   {
     company: 'Meetup',
     logo: MeetupLogo,
-    text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
+    text: 'Hive 1 offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: {
       name: 'Ryan Baldwin',
       title: 'Senior Backend Engineering Manager',
@@ -35,7 +35,7 @@ const testimonials: Testimonial[] = [
   {
     company: 'Linktree',
     logo: MeetupLogo,
-    text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
+    text: 'Hive 2 offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: {
       name: 'Ryan Baldwin',
       title: 'Senior Backend Engineering Manager',
@@ -50,7 +50,7 @@ const testimonials: Testimonial[] = [
   {
     company: 'Klarna',
     logo: MeetupLogo,
-    text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
+    text: 'Hive 3 offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
     person: {
       name: 'Ryan Baldwin',
       title: 'Senior Backend Engineering Manager',
@@ -124,59 +124,68 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
             );
           })}
         </Tabs.List>
-        {testimonials.map(({ company, data, href, text, person, logo: Logo }) => {
-          return (
-            <Tabs.Content
-              key={company}
-              value={company}
-              tabIndex={-1}
-              className='relative flex flex-col gap-6 data-[state="active"]:pb-[72px] md:flex-row md:gap-12'
-            >
-              <Image
-                src={person.image}
-                role="presentation"
-                alt=""
-                width={300}
-                height={300}
-                className="hidden size-[300px] shrink-0 rounded-3xl xl:block"
-              />
-              <article className="lg:relative">
-                <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
-                <p className="lg:text-xl xl:text-2xl xl:leading-[32px]">{text}</p>
-                <TestimonialPerson className="mt-6" person={person} />
-                <CallToAction
-                  variant="primary"
-                  href={href}
-                  className="absolute bottom-0 w-full md:w-fit"
-                >
-                  Read Case Study
-                  <ArrowIcon />
-                </CallToAction>
-              </article>
-              <div /* divider */ className="bg-beige-600 hidden w-px md:block" />
-              <ul className="flex gap-6 md:flex-col md:gap-12">
-                {data.map(({ numbers, description }, i) => (
-                  <>
-                    <li key={i}>
-                      <span
-                        className={
-                          'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
-                          ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
-                        }
-                      >
-                        {numbers}
-                      </span>
-                      <span className="mt-2">{description}</span>
-                    </li>
-                    {i < data.length - 1 && (
-                      <div /* divider */ className="bg-beige-600 w-px md:hidden" />
-                    )}
-                  </>
-                ))}
-              </ul>
-            </Tabs.Content>
-          );
-        })}
+        <div
+          /* mobile scrollview */ className="-mb-3 flex snap-x snap-mandatory gap-4 overflow-auto pb-3"
+        >
+          {testimonials.map(({ company, data, href, text, person, logo: Logo }) => {
+            return (
+              <Tabs.Content
+                key={company}
+                value={company}
+                tabIndex={-1}
+                className={
+                  'relative flex w-full shrink-0 snap-center flex-col' +
+                  ' gap-6 data-[state="active"]:pb-[72px] md:flex-row md:gap-12 lg:data-[state="active"]:pb-0' +
+                  ' lg:data-[state="inactive"]:hidden'
+                }
+                forceMount // we mount everything, as we scroll through tabs on mobile
+              >
+                <Image
+                  src={person.image}
+                  role="presentation"
+                  alt=""
+                  width={300}
+                  height={300}
+                  className="hidden size-[300px] shrink-0 rounded-3xl xl:block"
+                />
+                <article className="lg:relative">
+                  <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
+                  <p className="lg:text-xl xl:text-2xl xl:leading-[32px]">{text}</p>
+                  <TestimonialPerson className="mt-6" person={person} />
+                  <CallToAction
+                    variant="primary"
+                    href={href}
+                    className="absolute bottom-0 w-full md:w-fit"
+                  >
+                    Read Case Study
+                    <ArrowIcon />
+                  </CallToAction>
+                </article>
+                <div /* divider */ className="bg-beige-600 hidden w-px md:block" />
+                <ul className="flex gap-6 md:flex-col md:gap-12">
+                  {data.map(({ numbers, description }, i) => (
+                    <>
+                      <li key={i}>
+                        <span
+                          className={
+                            'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
+                            ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
+                          }
+                        >
+                          {numbers}
+                        </span>
+                        <span className="mt-2">{description}</span>
+                      </li>
+                      {i < data.length - 1 && (
+                        <div /* divider */ className="bg-beige-600 w-px md:hidden" />
+                      )}
+                    </>
+                  ))}
+                </ul>
+              </Tabs.Content>
+            );
+          })}
+        </div>
       </Tabs.Root>
     </section>
   );
