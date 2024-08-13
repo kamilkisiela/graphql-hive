@@ -1,14 +1,15 @@
 import React from 'react';
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
+import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
 import { CallToAction } from './call-to-action';
 import { Heading } from './heading';
-import { MeetupLogo } from './logos';
+import { MeetupLogo, type LogoProps } from './logos';
 
 type Testimonial = {
   company: string;
-  logo: (props: { title: string; height: number }) => React.ReactElement;
+  logo: (props: LogoProps) => React.ReactElement;
   text: string;
   person: { name: string; title: string; image: string };
   data: Array<{ numbers: string; description: string }>;
@@ -93,13 +94,13 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-export function CompanyTestimonialsSection() {
+export function CompanyTestimonialsSection({ className }: { className?: string }) {
   return (
     <section
-      className={
-        'bg-beige-100 text-green-1000 relative mx-1 overflow-hidden rounded-3xl md:mx-6' +
-        ' p-8 md:p-[72px]'
-      }
+      className={cn(
+        'bg-beige-100 text-green-1000 relative overflow-hidden rounded-3xl px-4 py-6 md:p-[72px]',
+        className,
+      )}
     >
       <Heading as="h2" size="md">
         Loved by developers, trusted by business
@@ -123,13 +124,13 @@ export function CompanyTestimonialsSection() {
             );
           })}
         </Tabs.List>
-        {testimonials.map(({ company, data, href, text, person }) => {
+        {testimonials.map(({ company, data, href, text, person, logo: Logo }) => {
           return (
             <Tabs.Content
               key={company}
               value={company}
               tabIndex={-1}
-              className="flex flex-row gap-12"
+              className='relative flex flex-col gap-6 data-[state="active"]:pb-[72px] md:flex-row md:gap-12'
             >
               <Image
                 src={person.image}
@@ -137,33 +138,40 @@ export function CompanyTestimonialsSection() {
                 alt=""
                 width={300}
                 height={300}
-                className="hidden size-[300px] shrink-0 rounded-3xl lg:block"
+                className="hidden size-[300px] shrink-0 rounded-3xl md:block"
               />
-              <article className="relative">
-                <p className="lg:text-2xl lg:leading-[32px]">{text}</p>
-                <div className="mt-6">
-                  <p className="font-medium">{person.name}</p>
-                  <p className="mt-1 text-green-800">{person.title}</p>
-                </div>
-                <CallToAction variant="primary" href={href} className="absolute bottom-0">
+              <article className="md:relative">
+                <Logo title={company} height={32} className="text-blue-1000 my-6 md:hidden" />
+                <p className="md:text-2xl md:leading-[32px]">{text}</p>
+                <TestimonialPerson className="mt-6" person={person} />
+                <CallToAction
+                  variant="primary"
+                  href={href}
+                  className="absolute bottom-0 w-full md:w-fit"
+                >
                   Read Case Study
                   <ArrowIcon />
                 </CallToAction>
               </article>
-              <div /* divider */ className="bg-beige-600 w-px" />
-              <ul className="flex gap-12 lg:flex-col">
+              <div /* divider */ className="bg-beige-600 hidden w-px md:block" />
+              <ul className="flex gap-6 md:flex-col md:gap-12">
                 {data.map(({ numbers, description }, i) => (
-                  <li key={i}>
-                    <span
-                      className={
-                        'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
-                        ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
-                      }
-                    >
-                      {numbers}
-                    </span>
-                    <span className="mt-2">{description}</span>
-                  </li>
+                  <>
+                    <li key={i}>
+                      <span
+                        className={
+                          'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
+                          ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
+                        }
+                      >
+                        {numbers}
+                      </span>
+                      <span className="mt-2">{description}</span>
+                    </li>
+                    {i < data.length - 1 && (
+                      <div /* divider */ className="bg-beige-600 w-px md:hidden" />
+                    )}
+                  </>
                 ))}
               </ul>
             </Tabs.Content>
@@ -171,5 +179,28 @@ export function CompanyTestimonialsSection() {
         })}
       </Tabs.Root>
     </section>
+  );
+}
+
+function TestimonialPerson({
+  className,
+  person,
+}: {
+  className?: string;
+  person: Testimonial['person'];
+}) {
+  return (
+    <div className={className}>
+      <Image
+        src={person.image}
+        role="presentation"
+        alt=""
+        width={42}
+        height={42}
+        className="bg-beige-200 float-left mr-4 size-[42px] shrink-0 translate-y-[.5px] rounded-full md:hidden"
+      />
+      <p className="text-sm font-medium leading-[20px]">{person.name}</p>
+      <p className="mt-1 text-xs text-green-800 md:text-sm">{person.title}</p>
+    </div>
   );
 }

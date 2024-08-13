@@ -1,4 +1,4 @@
-type LogoProps = {
+export type LogoProps = {
   height: number;
   className?: string;
   title?: string;
