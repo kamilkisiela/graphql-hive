@@ -2,9 +2,14 @@ import { ReactNode } from 'react';
 import { cn } from '../lib';
 import { ArchDecoration, ArchDecorationGradientDefs, HighlightDecoration } from './decorations';
 
-export function Hero(props: { children: ReactNode }) {
+export function Hero(props: { children: ReactNode; className?: string }) {
   return (
-    <div className="bg-green-1000 relative mx-1 flex max-w-[90rem] flex-col gap-8 overflow-hidden rounded-3xl pb-[168px] pt-24 md:mx-6">
+    <div
+      className={cn(
+        'bg-green-1000 relative flex max-w-[90rem] flex-col gap-8 overflow-hidden rounded-3xl pb-[168px] pt-24',
+        props.className,
+      )}
+    >
       <ArchDecoration className="pointer-events-none absolute left-[-186px] top-[-76px] rotate-180" />
       <ArchDecoration className="pointer-events-none absolute bottom-0 right-[-72px]" />
       <ArchDecorationGradientDefs />

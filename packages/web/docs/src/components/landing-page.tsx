@@ -27,7 +27,7 @@ export function IndexPage(): ReactElement {
         `}
       </style>
       <Page className="text-green-1000 mx-auto max-w-[90rem]">
-        <Hero>
+        <Hero className="mx-4 md:mx-6">
           <Heading
             as="h1"
             size="xl"
@@ -70,15 +70,15 @@ export function IndexPage(): ReactElement {
           <AligentLogo title="Aligent" height={32} />
           <SoundYXZLogo title="SoundXYZ" height={32} />
         </TrustedBy>
-        <EcosystemManagementSection />
-        <StatsList>
+        <EcosystemManagementSection className="mx-4 md:mx-6" />
+        <StatsList className="mt-6 md:mt-0">
           <StatsItem label="GitHub commits" value={6.2} suffix="K" decimal />
           <StatsItem label="Active developers" value={5.7} suffix="K" decimal />
           <StatsItem label="Registered schemas" value={225} suffix="K" />
           <StatsItem label="Collected operations" value={315} suffix="B" />
         </StatsList>
         <UltimatePerformanceCards />
-        <CompanyTestimonialsSection />
+        <CompanyTestimonialsSection className="mx-4 mt-6 md:mx-6" />
         <GetStartedTodaySection className="mx-4 mt-6 md:mx-6" />
         <EnterpriseFocusedCards className="mx-4 mt-6 md:mx-6" />
         <Pricing />
@@ -170,7 +170,7 @@ function UltimatePerformanceCards() {
       <Heading as="h3" size="md" className="text-balance text-center">
         GraphQL for the ultimate performance
       </Heading>
-      <ul className="mt-16 flex flex-row flex-wrap justify-center gap-2 md:gap-6">
+      <ul className="mt-6 flex flex-row flex-wrap justify-center gap-2 md:mt-16 md:gap-6">
         <InfoCard
           as="li"
           heading="Deliver improvements faster"

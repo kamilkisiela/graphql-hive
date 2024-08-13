@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import CountUp from 'react-countup';
+import { cn } from '../lib';
 import { Heading } from './heading';
 
 export function StatsItem(props: {
@@ -28,9 +29,9 @@ export function StatsItem(props: {
   );
 }
 
-export function StatsList(props: { children: ReactNode }) {
+export function StatsList(props: { children: ReactNode; className?: string }) {
   return (
-    <section className="px-6 py-12 sm:py-20 md:py-24">
+    <section className={cn('p-6 sm:py-20 md:py-24', props.className)}>
       <Heading as="h2" size="md" className="text-center">
         Living and breathing GraphQL
       </Heading>
