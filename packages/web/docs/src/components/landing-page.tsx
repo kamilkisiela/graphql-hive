@@ -79,8 +79,8 @@ export function IndexPage(): ReactElement {
         </StatsList>
         <UltimatePerformanceCards />
         <CompanyTestimonialsSection />
-        <GetStartedTodaySection className="mt-6 md:mx-6" />
-        <EnterpriseFocusedCards className="mt-6 md:mx-6" />
+        <GetStartedTodaySection className="mx-4 mt-6 md:mx-6" />
+        <EnterpriseFocusedCards className="mx-4 mt-6 md:mx-6" />
         <Pricing />
         <TeamSection className="md:mx-6" />
       </Page>
@@ -92,7 +92,7 @@ function GetStartedTodaySection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'relative overflow-hidden bg-[#003834] p-12 text-center sm:rounded-3xl sm:p-24',
+        'relative overflow-hidden rounded-3xl bg-[#003834] p-12 text-center sm:p-24',
         className,
       )}
     >
@@ -119,56 +119,55 @@ function GetStartedTodaySection({ className }: { className?: string }) {
 
 function EnterpriseFocusedCards({ className }: { className?: string }) {
   return (
-    <section className={cn('bg-beige-100 py-24 sm:rounded-3xl md:py-[120px]', className)}>
-      <Heading as="h3" size="md" className="text-balance px-6 text-center">
+    <section
+      className={cn('bg-beige-100 rounded-3xl px-4 pt-6 sm:py-24 md:px-6 md:py-[120px]', className)}
+    >
+      <Heading as="h3" size="md" className="text-balance sm:px-6 sm:text-center">
         Enterprise-focused tooling at your disposal
       </Heading>
-      <div className="-my-8 overflow-auto py-8">
-        <ul className="mt-16 flex min-w-[900px] flex-row justify-center divide-x divide-solid md:px-6 lg:px-16">
-          <InfoCard
-            as="li"
-            heading="Cloud and Self-Hosted"
-            icon={<PerformanceListItemIcon />}
-            className="flex-1 px-8 py-0"
+      <ul className="flex flex-row flex-wrap justify-center divide-y divide-solid sm:mt-6 sm:divide-x sm:divide-y-0 md:mt-16 md:px-6 lg:px-16">
+        <InfoCard
+          as="li"
+          heading="Cloud and Self-Hosted"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 px-0 sm:px-8 sm:py-0"
+        >
+          Hive is completely open source, MIT licensed. You can host it on your own infrastructure!
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="OIDC Login"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full px-0 sm:basis-0 sm:px-8 sm:py-0"
+        >
+          Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
+          security.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Secure and efficient"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 px-0 sm:px-8 sm:py-0"
+        >
+          <a
+            href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
           >
-            Hive is completely open source, MIT licensed. You can host it on your own
-            infrastructure!
-          </InfoCard>
-          <InfoCard
-            as="li"
-            heading="OIDC Login"
-            icon={<PerformanceListItemIcon />}
-            className="flex-1 px-8 py-0"
-          >
-            Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
-            security.
-          </InfoCard>
-          <InfoCard
-            as="li"
-            heading="Secure and efficient"
-            icon={<PerformanceListItemIcon />}
-            className="flex-1 px-8 py-0"
-          >
-            <a
-              href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:underline"
-            >
-              Persisted Documents
-            </a>{' '}
-            secure and reduce traffic by hashing operations on app deployments.
-          </InfoCard>
-        </ul>
-      </div>
+            Persisted Documents
+          </a>{' '}
+          secure and reduce traffic by hashing operations on app deployments.
+        </InfoCard>
+      </ul>
     </section>
   );
 }
 
 function UltimatePerformanceCards() {
   return (
-    <section className="px-6 py-12 sm:py-24">
-      <Heading as="h3" size="md" className="text-center text-balance">
+    <section className="px-4 py-6 sm:py-24 md:px-6 md:py-12">
+      <Heading as="h3" size="md" className="text-balance text-center">
         GraphQL for the ultimate performance
       </Heading>
       <ul className="mt-16 flex flex-row flex-wrap justify-center gap-2 md:gap-6">
