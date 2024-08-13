@@ -3,7 +3,7 @@ import Command from '../../base-command';
 import { graphql } from '../../gql';
 import { graphqlEndpoint } from '../../helpers/config';
 
-export default class AppPublish extends Command {
+export default class AppPublish extends Command<typeof AppPublish> {
   static description = 'publish an app deployment';
   static flags = {
     'registry.endpoint': Flags.string({

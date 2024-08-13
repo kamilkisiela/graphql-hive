@@ -5,7 +5,7 @@ import { graphql } from '../../gql';
 import { AppDeploymentStatus } from '../../gql/graphql';
 import { graphqlEndpoint } from '../../helpers/config';
 
-export default class AppCreate extends Command {
+export default class AppCreate extends Command<typeof AppCreate> {
   static description = 'create an app deployment';
   static flags = {
     'registry.endpoint': Flags.string({
