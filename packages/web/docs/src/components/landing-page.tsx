@@ -3,6 +3,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
+import { CompanyTestimonialsSection } from './company-testimonials';
 import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
@@ -20,13 +21,16 @@ export function IndexPage(): ReactElement {
     <Tooltip.Provider>
       <style global jsx>
         {`
+          html {
+            scroll-behavior: smooth;
+          }
           body {
             background: #fff;
           }
         `}
       </style>
       <Page className="text-green-1000 mx-auto max-w-[90rem]">
-        <Hero>
+        <Hero className="mx-4 md:mx-6">
           <Heading
             as="h1"
             size="xl"
@@ -69,18 +73,19 @@ export function IndexPage(): ReactElement {
           <AligentLogo title="Aligent" height={32} />
           <SoundYXZLogo title="SoundXYZ" height={32} />
         </TrustedBy>
-        <EcosystemManagementSection />
-        <StatsList>
+        <EcosystemManagementSection className="mx-4 md:mx-6" />
+        <StatsList className="mt-6 md:mt-0">
           <StatsItem label="GitHub commits" value={6.2} suffix="K" decimal />
           <StatsItem label="Active developers" value={5.7} suffix="K" decimal />
           <StatsItem label="Registered schemas" value={225} suffix="K" />
           <StatsItem label="Collected operations" value={315} suffix="B" />
         </StatsList>
         <UltimatePerformanceCards />
+        <CompanyTestimonialsSection className="mx-4 mt-6 md:mx-6" />
+        <GetStartedTodaySection className="mx-4 mt-6 md:mx-6" />
+        <EnterpriseFocusedCards className="mx-4 mt-6 md:mx-6" />
         <Pricing />
-        <TeamSection />
-        <GetStartedTodaySection className="mt-6" />
-        <EnterpriseFocusedCards />
+        <TeamSection className="md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
@@ -90,7 +95,7 @@ function GetStartedTodaySection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'relative overflow-hidden bg-[#003834] p-12 text-center sm:rounded-3xl sm:p-24',
+        'relative overflow-hidden rounded-3xl bg-[#003834] p-12 text-center sm:p-24',
         className,
       )}
     >
@@ -115,66 +120,65 @@ function GetStartedTodaySection({ className }: { className?: string }) {
   );
 }
 
-function EnterpriseFocusedCards() {
+function EnterpriseFocusedCards({ className }: { className?: string }) {
   return (
-    <section className="bg-beige-100 py-24 sm:rounded-3xl md:py-[120px]">
-      <Heading as="h3" size="md" className="text-balance px-6 text-center">
+    <section
+      className={cn('bg-beige-100 rounded-3xl px-4 pt-6 sm:py-24 md:px-6 md:py-[120px]', className)}
+    >
+      <Heading as="h3" size="md" className="text-balance sm:px-6 sm:text-center">
         Enterprise-focused tooling at your disposal
       </Heading>
-      <div className="-my-8 overflow-auto py-8">
-        <ul className="mt-16 flex min-w-[900px] flex-row justify-center divide-x divide-solid md:px-6 lg:px-16">
-          <InfoCard
-            as="li"
-            heading="Cloud and Self-Hosted"
-            icon={<PerformanceListItemIcon />}
-            className="flex-1 px-8 py-0"
+      <ul className="flex flex-row flex-wrap justify-center divide-y divide-solid sm:mt-6 sm:divide-x sm:divide-y-0 md:mt-16 md:px-6 xl:px-16">
+        <InfoCard
+          as="li"
+          heading="Cloud and Self-Hosted"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
+        >
+          Hive is completely open source, MIT licensed. You can host it on your own infrastructure!
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="OIDC Login"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full px-0 sm:basis-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
+        >
+          Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
+          security.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Secure and efficient"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
+        >
+          <a
+            href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
           >
-            Hive is completely open source, MIT licensed. You can host it on your own
-            infrastructure!
-          </InfoCard>
-          <InfoCard
-            as="li"
-            heading="OIDC Login"
-            icon={<PerformanceListItemIcon />}
-            className="flex-1 px-8 py-0"
-          >
-            Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
-            security.
-          </InfoCard>
-          <InfoCard
-            as="li"
-            heading="Secure and efficient"
-            icon={<PerformanceListItemIcon />}
-            className="flex-1 px-8 py-0"
-          >
-            <a
-              href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:underline"
-            >
-              Persisted Documents
-            </a>{' '}
-            secure and reduce traffic by hashing operations on app deployments.
-          </InfoCard>
-        </ul>
-      </div>
+            Persisted Documents
+          </a>{' '}
+          secure and reduce traffic by hashing operations on app deployments.
+        </InfoCard>
+      </ul>
     </section>
   );
 }
 
 function UltimatePerformanceCards() {
   return (
-    <section className="px-6 py-12 sm:py-24">
-      <Heading as="h3" size="md" className="text-center">
+    <section className="px-4 py-6 sm:py-24 md:px-6 md:py-12">
+      <Heading as="h3" size="md" className="text-balance text-center">
         GraphQL for the ultimate performance
       </Heading>
-      <ul className="mt-16 flex flex-row flex-wrap justify-center gap-2 md:gap-6">
+      <ul className="mt-6 flex flex-row flex-wrap justify-center gap-2 md:mt-16 md:gap-6">
         <InfoCard
           as="li"
           heading="Deliver improvements faster"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 rounded-3xl"
+          className="flex-1 rounded-2xl md:rounded-3xl"
         >
           Accelerate feature improvements and experiments, by seamless decoupling of backend and
           frontend environments.
@@ -183,7 +187,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Network efficiency"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 rounded-3xl"
+          className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
         >
           Accelerate feature improvements and experiments, by seamless decoupling of backend and
           frontend environments.
@@ -192,7 +196,7 @@ function UltimatePerformanceCards() {
           as="li"
           heading="Optimized data retrieval"
           icon={<PerformanceListItemIcon />}
-          className="flex-1 basis-full rounded-3xl lg:basis-0"
+          className="flex-1 basis-full rounded-2xl md:rounded-3xl lg:basis-0"
         >
           Reduce latency effectively with Hive by enabling frontend teams to obtain all required
           data in a single request, maximizing GraphQL’s inherent performance benefits.
