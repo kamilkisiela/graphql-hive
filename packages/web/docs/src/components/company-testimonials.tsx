@@ -10,8 +10,8 @@ type Testimonial = {
   company: string;
   logo: (props: { title: string; height: number }) => React.ReactElement;
   text: string;
-  person: [name: string, title: string, image: string];
-  data: Array<[numbers: string, description: string]>;
+  person: { name: string; title: string; image: string };
+  data: Array<{ numbers: string; description: string }>;
   href: string;
 };
 
@@ -20,14 +20,14 @@ const testimonials: Testimonial[] = [
     company: 'Meetup',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
-    person: [
-      'Ryan Baldwin',
-      'Senior Backend Engineering Manager',
-      'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
-    ],
+    person: {
+      name: 'Ryan Baldwin',
+      title: 'Senior Backend Engineering Manager',
+      image: 'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
+    },
     data: [
-      ['65M+', 'daily events processed'],
-      ['40%', 'more resource efficient'],
+      { numbers: '65M+', description: 'daily events processed' },
+      { numbers: '40%', description: 'more resource efficient' },
     ],
     href: '#TODO',
   },
@@ -35,14 +35,14 @@ const testimonials: Testimonial[] = [
     company: 'Linktree',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
-    person: [
-      'Ryan Baldwin',
-      'Senior Backend Engineering Manager',
-      'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
-    ],
+    person: {
+      name: 'Ryan Baldwin',
+      title: 'Senior Backend Engineering Manager',
+      image: 'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
+    },
     data: [
-      ['65M+', 'daily events processed'],
-      ['40%', 'more resource efficient'],
+      { numbers: '65M+', description: 'daily events processed' },
+      { numbers: '40%', description: 'more resource efficient' },
     ],
     href: '#TODO',
   },
@@ -50,14 +50,14 @@ const testimonials: Testimonial[] = [
     company: 'Klarna',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
-    person: [
-      'Ryan Baldwin',
-      'Senior Backend Engineering Manager',
-      'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
-    ],
+    person: {
+      name: 'Ryan Baldwin',
+      title: 'Senior Backend Engineering Manager',
+      image: 'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
+    },
     data: [
-      ['65M+', 'daily events processed'],
-      ['40%', 'more resource efficient'],
+      { numbers: '65M+', description: 'daily events processed' },
+      { numbers: '40%', description: 'more resource efficient' },
     ],
     href: '#TODO',
   },
@@ -65,14 +65,14 @@ const testimonials: Testimonial[] = [
     company: 'Uber',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
-    person: [
-      'Ryan Baldwin',
-      'Senior Backend Engineering Manager',
-      'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
-    ],
+    person: {
+      name: 'Ryan Baldwin',
+      title: 'Senior Backend Engineering Manager',
+      image: 'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
+    },
     data: [
-      ['65M+', 'daily events processed'],
-      ['40%', 'more resource efficient'],
+      { numbers: '65M+', description: 'daily events processed' },
+      { numbers: '40%', description: 'more resource efficient' },
     ],
     href: '#TODO',
   },
@@ -80,14 +80,14 @@ const testimonials: Testimonial[] = [
     company: 'KLM',
     logo: MeetupLogo,
     text: 'Hive offers an impressive suite of tools for managing and monitoring GraphQL schemas. The collaborative features, such as schema sharing and team-based permissions, have streamlined our development process.',
-    person: [
-      'Ryan Baldwin',
-      'Senior Backend Engineering Manager',
-      'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
-    ],
+    person: {
+      name: 'Ryan Baldwin',
+      title: 'Senior Backend Engineering Manager',
+      image: 'https://github.com/user-attachments/assets/107be3fa-1051-49d5-b3d7-8fe374a3bd03',
+    },
     data: [
-      ['65M+', 'daily events processed'],
-      ['40%', 'more resource efficient'],
+      { numbers: '65M+', description: 'daily events processed' },
+      { numbers: '40%', description: 'more resource efficient' },
     ],
     href: '#TODO',
   },
@@ -123,53 +123,52 @@ export function CompanyTestimonialsSection() {
             );
           })}
         </Tabs.List>
-        {testimonials.map(
-          ({ company, data, href, text, person: [personName, personTitle, image] }) => {
-            return (
-              <Tabs.Content
-                key={company}
-                value={company}
-                tabIndex={-1}
-                className="flex flex-row gap-12"
-              >
-                <Image
-                  src={image}
-                  alt={personName}
-                  width={300}
-                  height={300}
-                  className="hidden size-[300px] shrink-0 rounded-3xl lg:block"
-                />
-                <article className="relative">
-                  <p className="lg:text-2xl lg:leading-[32px]">{text}</p>
-                  <div className="mt-6">
-                    <p className="font-medium">{personName}</p>
-                    <p className="mt-1 text-green-800">{personTitle}</p>
-                  </div>
-                  <CallToAction variant="primary" href={href} className="absolute bottom-0">
-                    Read Case Study
-                    <ArrowIcon />
-                  </CallToAction>
-                </article>
-                <div /* divider */ className="bg-beige-600 w-px" />
-                <ul className="flex gap-12 lg:flex-col">
-                  {data.map(([numbers, description], i) => (
-                    <li key={i}>
-                      <span
-                        className={
-                          'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
-                          ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
-                        }
-                      >
-                        {numbers}
-                      </span>
-                      <span className="mt-2">{description}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Tabs.Content>
-            );
-          },
-        )}
+        {testimonials.map(({ company, data, href, text, person }) => {
+          return (
+            <Tabs.Content
+              key={company}
+              value={company}
+              tabIndex={-1}
+              className="flex flex-row gap-12"
+            >
+              <Image
+                src={person.image}
+                role="presentation"
+                alt=""
+                width={300}
+                height={300}
+                className="hidden size-[300px] shrink-0 rounded-3xl lg:block"
+              />
+              <article className="relative">
+                <p className="lg:text-2xl lg:leading-[32px]">{text}</p>
+                <div className="mt-6">
+                  <p className="font-medium">{person.name}</p>
+                  <p className="mt-1 text-green-800">{person.title}</p>
+                </div>
+                <CallToAction variant="primary" href={href} className="absolute bottom-0">
+                  Read Case Study
+                  <ArrowIcon />
+                </CallToAction>
+              </article>
+              <div /* divider */ className="bg-beige-600 w-px" />
+              <ul className="flex gap-12 lg:flex-col">
+                {data.map(({ numbers, description }, i) => (
+                  <li key={i}>
+                    <span
+                      className={
+                        'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
+                        ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
+                      }
+                    >
+                      {numbers}
+                    </span>
+                    <span className="mt-2">{description}</span>
+                  </li>
+                ))}
+              </ul>
+            </Tabs.Content>
+          );
+        })}
       </Tabs.Root>
     </section>
   );
