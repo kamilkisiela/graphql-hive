@@ -21,6 +21,9 @@ export function IndexPage(): ReactElement {
     <Tooltip.Provider>
       <style global jsx>
         {`
+          html {
+            scroll-behavior: smooth;
+          }
           body {
             background: #fff;
           }
