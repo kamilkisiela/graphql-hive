@@ -19,7 +19,7 @@ export function EcosystemManagementSection() {
           <Heading as="h3" size="sm">
             360° GraphQL Ecosystem Management
           </Heading>
-          <ul className="mx-auto flex list-none flex-col gap-y-6 text-white/80">
+          <ul className="mx-auto flex list-none flex-col gap-y-4 text-white/80 md:gap-y-6">
             {[
               'A complete ecosystem covering all your dev and management needs.',
               'Full Federation Support out of the box. Drop-in replacement for Apollo GraphOS (Apollo Studio)',
