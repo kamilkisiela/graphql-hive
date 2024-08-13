@@ -120,7 +120,6 @@ function Save(props: {
     ({ id, name }: { id: string; name: string }) => {
       if (id) {
         if (!operationFromQueryString) {
-          // @ts-expect-error -- fix type
           updateActiveTabValues({ id, title: name });
         }
         void router.navigate({
@@ -152,7 +151,7 @@ function Save(props: {
           <GraphiQLButton
             className={cn(
               'graphiql-toolbar-button',
-              operationFromQueryString && !isSame && 'hive-badge-is-changed relative after:top-1',
+              currentOperation && !isSame && 'hive-badge-is-changed relative after:top-1',
             )}
             aria-label={label}
           >
@@ -203,7 +202,6 @@ function Save(props: {
             if (data) {
               clearOperation();
               notify('Updated!', 'success');
-              updateActiveTabValues({ className: '' });
             }
             if (error) {
               notify(error.message, 'error');

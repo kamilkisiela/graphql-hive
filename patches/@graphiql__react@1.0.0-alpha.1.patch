@@ -1,8 +1,8 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 2cbf03985f40165341cbf0d1f35937842e52627b..1aa6bc8230fb72a688fbf0b5d4953cf779b868c3 100644
+index 404938981a74f70e0785f8a0cc05b67a9daf354c..417ff099fc2951c9b8975b5069a79cb729e5afa5 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -3007,14 +3007,16 @@ function useSetEditorValues({
+@@ -3003,14 +3003,16 @@ function useSetEditorValues({
    );
  }
  function createTab({
@@ -22,7 +22,7 @@ index 2cbf03985f40165341cbf0d1f35937842e52627b..1aa6bc8230fb72a688fbf0b5d4953cf7
      query,
      variables,
      headers,
-@@ -3032,8 +3034,7 @@ function setPropertiesInActiveTab(state, partialTab) {
+@@ -3028,8 +3030,7 @@ function setPropertiesInActiveTab(state, partialTab) {
        const newTab = { ...tab, ...partialTab };
        return {
          ...newTab,
@@ -32,7 +32,7 @@ index 2cbf03985f40165341cbf0d1f35937842e52627b..1aa6bc8230fb72a688fbf0b5d4953cf7
        };
      })
    };
-@@ -3255,25 +3256,31 @@ function EditorContextProvider(props) {
+@@ -3251,25 +3252,31 @@ function EditorContextProvider(props) {
      responseEditor,
      defaultHeaders
    });
@@ -83,7 +83,7 @@ index 2cbf03985f40165341cbf0d1f35937842e52627b..1aa6bc8230fb72a688fbf0b5d4953cf7
    const changeTab = useCallback(
      (index) => {
        setTabState((current) => {
-@@ -3369,6 +3376,7 @@ function EditorContextProvider(props) {
+@@ -3365,6 +3372,7 @@ function EditorContextProvider(props) {
    const value = useMemo(
      () => ({
        ...tabState,
@@ -92,7 +92,7 @@ index 2cbf03985f40165341cbf0d1f35937842e52627b..1aa6bc8230fb72a688fbf0b5d4953cf7
        changeTab,
        moveTab,
 diff --git a/dist/types/editor/context.d.ts b/dist/types/editor/context.d.ts
-index 199db8a294f8132d46470498870adbdf9fdc83af..ef2c3a80a02d11e59d06cd96a591707f86a99d78 100644
+index 199db8a294f8132d46470498870adbdf9fdc83af..d8901fe0d50db17db36a502dcf69d5f69efb84a1 100644
 --- a/dist/types/editor/context.d.ts
 +++ b/dist/types/editor/context.d.ts
 @@ -1,6 +1,6 @@
@@ -121,23 +121,15 @@ index 199db8a294f8132d46470498870adbdf9fdc83af..ef2c3a80a02d11e59d06cd96a591707f
       * current values. The properties `id`, `hash` and `title` cannot be changed.
       */
 -    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): void;
-+    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'hash' | 'title'>>): void;
++    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'hash'>>): void;
      /**
       * The CodeMirror editor instance for the headers editor.
       */
 diff --git a/dist/types/editor/tabs.d.ts b/dist/types/editor/tabs.d.ts
-index 28704a9c1c6e22fa75986de8591759e13035c8c5..e28bbc369d069aa9b361ed5200b74b5b546d8a30 100644
+index 28704a9c1c6e22fa75986de8591759e13035c8c5..5204d2b25198f89da9bba70804656f02799c7df6 100644
 --- a/dist/types/editor/tabs.d.ts
 +++ b/dist/types/editor/tabs.d.ts
-@@ -42,6 +42,7 @@ export declare type TabState = TabDefinition & {
-      * The contents of the response editor of this tab.
-      */
-     response: string | null;
-+    className?: string;
- };
- /**
-  * This object describes the state of all tabs.
-@@ -90,7 +91,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
+@@ -90,7 +90,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
      headers?: string | null | undefined;
      response: string | null;
  }) => void;
