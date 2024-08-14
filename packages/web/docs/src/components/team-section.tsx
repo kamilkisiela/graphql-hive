@@ -9,8 +9,8 @@ export function TeamSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'flex h-[748px] flex-col flex-wrap justify-center bg-blue-400' +
-          ' p-24 sm:rounded-3xl md:grid-cols-[467px_1fr] md:py-[120px]',
+        'flex flex-col flex-wrap justify-center bg-blue-400 lg:h-[748px]' +
+          ' grid-cols-1 rounded-3xl px-4 py-6 md:grid-cols-[467px_1fr] lg:px-24 lg:py-[120px]',
         className,
       )}
     >
@@ -18,7 +18,7 @@ export function TeamSection({ className }: { className?: string }) {
         Built by The Guild. Industry veterans.
       </Heading>
 
-      <p className="mt-6 hidden w-[468px] max-w-full text-green-800 md:block">
+      <p className="mt-6 w-[468px] max-w-full text-green-800">
         Contrary to most, we believe in long-term sight, not temporary growth. We believe in extreme
         quality, not scrappy pivots. We believe in open, not locked. We fight for a world where
         software liberates, not confines — ensuring technology serves, not subjugates.
@@ -29,14 +29,14 @@ export function TeamSection({ className }: { className?: string }) {
         href="https://the-guild.dev/"
         target="_blank"
         rel="noreferrer"
-        className="mt-12"
+        className="max-lg:order-1 max-lg:w-full lg:mt-12"
       >
         Visit The Guild
         <ArrowIcon />
       </CallToAction>
 
       <TeamGallery
-        className="hidden w-[636px] xl:flex"
+        className="w-[calc(100%+2rem)] max-lg:-mx-4 max-lg:px-4 max-lg:py-6 lg:w-[636px]"
         style={{
           '--size': '120px',
         }}
@@ -68,7 +68,8 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
     <ul
       {...props}
       className={cn(
-        'flex flex-row flex-wrap gap-8' + ' shrink-0 [&>:nth-child(8n-7)]:ml-[calc(var(--size)/2)]',
+        'flex flex-row gap-2 overflow-auto lg:flex-wrap lg:gap-8' +
+          ' shrink-0 lg:[&>:nth-child(8n-7)]:ml-[calc(var(--size)/2)]',
         props.className,
       )}
     >
@@ -84,8 +85,9 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
     <div className="relative">
       <a
         className={
-          'absolute right-0 top-0 rounded-full border-2 bg-[#222530] p-[9px] text-white hover:border-[#222530]' +
-          ' -translate-y-1/2 translate-x-1/2 border-transparent'
+          'absolute right-0 top-0 rounded-2xl border-2 bg-[#222530] p-[9px] text-white hover:border-[#222530] lg:rounded-full' +
+          ' border-transparent lg:-translate-y-1/2 lg:translate-x-1/2' +
+          ' max-lg:size-[var(--size)] max-lg:opacity-0'
         }
         href={social}
       >

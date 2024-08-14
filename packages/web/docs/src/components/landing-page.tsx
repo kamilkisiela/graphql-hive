@@ -85,7 +85,7 @@ export function IndexPage(): ReactElement {
         <GetStartedTodaySection className="mx-4 mt-6 md:mx-6" />
         <EnterpriseFocusedCards className="mx-4 mt-6 md:mx-6" />
         <Pricing />
-        <TeamSection className="md:mx-6" />
+        <TeamSection className="mx-4 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
