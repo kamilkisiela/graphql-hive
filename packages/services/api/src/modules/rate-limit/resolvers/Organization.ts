@@ -2,7 +2,7 @@ import { Logger } from '../../shared/providers/logger';
 import { RateLimitProvider } from '../providers/rate-limit.provider';
 import type { OrganizationResolvers } from './../../../__generated__/types.next';
 
-export const Organization: Pick<OrganizationResolvers, 'rateLimit'> = {
+export const Organization: Pick<OrganizationResolvers, 'rateLimit' | '__isTypeOf'> = {
   rateLimit: async (org, _args, { injector }) => {
     let limitedForOperations = false;
     const logger = injector.get(Logger);

@@ -1,7 +1,10 @@
 import { BillingProvider } from '../providers/billing.provider';
 import type { BillingPlanType, OrganizationResolvers } from './../../../__generated__/types.next';
 
-export const Organization: Pick<OrganizationResolvers, 'billingConfiguration' | 'plan'> = {
+export const Organization: Pick<
+  OrganizationResolvers,
+  'billingConfiguration' | 'plan' | '__isTypeOf'
+> = {
   plan: org => (org.billingPlan || 'HOBBY') as BillingPlanType,
   billingConfiguration: async (org, _args, { injector }) => {
     if (org.billingPlan === 'ENTERPRISE') {

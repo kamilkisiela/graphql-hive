@@ -3,7 +3,7 @@ import type { OrganizationResolvers } from './../../../__generated__/types.next'
 
 export const Organization: Pick<
   OrganizationResolvers,
-  'oidcIntegration' | 'viewerCanManageOIDCIntegration'
+  'oidcIntegration' | 'viewerCanManageOIDCIntegration' | '__isTypeOf'
 > = {
   oidcIntegration: async (organization, _, { injector }) => {
     if (injector.get(OIDCIntegrationsProvider).isEnabled() === false) {
