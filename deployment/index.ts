@@ -10,7 +10,6 @@ import { deployDbMigrations } from './services/db-migrations';
 import { configureDocker } from './services/docker';
 import { deployEmails } from './services/emails';
 import { prepareEnvironment } from './services/environment';
-import { deployFederationDemo } from './services/federation-demo';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
@@ -324,10 +323,6 @@ deployCloudFlareSecurityTransform({
     '/api/lab',
   ],
   ignoredHosts: ['cdn.graphql-hive.com', 'cdn.staging.graphql-hive.com'],
-});
-
-deployFederationDemo({
-  environment,
 });
 
 export const graphqlApiServiceId = graphql.service.id;
