@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout, Cards, Steps } from '@theguild/components'
+import { Callout, Cards, Steps, Tabs } from '@theguild/components'
 import orgImage from '../../../../public/docs/pages/first-steps/org.png'
 import projectImage from '../../../../public/docs/pages/first-steps/project.png'
 import signupImage from '../../../../public/docs/pages/first-steps/signup.png'
@@ -50,9 +50,36 @@ You can create as many organizations as you want, and you can be a member of mul
 
 ### Install Hive CLI
 
-Hive CLI is a command-line tool that allows you to manage your GraphQL schemas terminal.
+Hive CLI is a command-line tool for managing your Hive projects and schemas from the terminal. It
+will be used for publishing schemas and apps to the Hive registry.
 
-#### NodeJS
+<Tabs items={['Binary', 'NodeJS', 'Docker']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+If you are running a non-JavaScript project, you can download the prebuilt binary of Hive CLI using
+the following command:
+
+```bash
+curl -sSL https://graphql-hive.com/install.sh | sh
+```
+
+To download a specific version, follow instructions from the
+["Hive CLI installation"](/docs/api-reference/cli#specific-version) chapter.
+
+Run the following command to verify the installation:
+
+```bash
+hive --version
+```
+
+</Tabs.Tab>
+
+{/* NodeJS */}
+
+<Tabs.Tab>
 
 If you are running a JavaScript/NodeJS project, you can install Hive CLI from the `npm` registry:
 
@@ -65,35 +92,48 @@ npm i -D @graphql-hive/cli
   using a global installation.
 </Callout>
 
-#### Binary
-
-If you are running a non-JavaScript project, you can download the prebuilt binary of Hive CLI using
-the following command:
+Verify the downloaded image by running the following command:
 
 ```bash
-curl -sSL https://graphql-hive.com/install.sh | sh
+npx hive --version
 ```
 
-To download a specific version, follow instructions from the
-["Hive CLI installation"](/docs/api-reference/cli#specific-version) chapter.
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For a docker-based project, you can use the official Hive CLI Docker image.
+
+```bash
+docker pull ghcr.io/kamilkisiela/graphql-hive/cli
+```
+
+Verify the downloaded image by running the following command:
+
+```bash
+docker run --name graphql-hive-cli --rm ghcr.io/kamilkisiela/graphql-hive/cli --version
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 ### Create Hive Project
 
 A Hive **project** represents a GraphQL API project running a GraphQL schema, created under an
 organization.
 
-Within a Hive **project**, you can create **targets** (which are equivalent to runtime environments)
-and manage different schemas across different contextual runtimes.
-
 Hive supports the following project types:
 
-- **Single Schema**: a GraphQL project that has a single GraphQL schema developed as a standalone.
+- **Apollo Federation**: composition of multiple GraphQL services following the
+  [Apollo Federation specification](https://www.apollographql.com/docs/federation/subgraph-spec/)
+  into a single unified graph.
+- **Single Schema**: a simple monolithic GraphQL schema
 - **Schema Stitching**: a form of remote schema merging allowing developers to merge any GraphQL
-  schema(s), under one or many gateways. You can use either direct
-  [Schema Stitching](https://the-guild.dev/graphql/stitching) or
-  [GraphQL Mesh](https://the-guild.dev/graphql/mesh) for this project type.
-- **Apollo Federation**: a form of remote schema merging developed according to the
-  [Federation specification](https://www.apollographql.com/docs/federation/subgraph-spec/).
+  schema(s), under one or many gateways using
+  [Schema Stitching](https://the-guild.dev/graphql/stitching)
 
 <Callout>
   Please note that a **project** type cannot be changed once it is created. However, you can always
@@ -109,12 +149,7 @@ organization's main page:
   className="mt-10 max-w-lg rounded-lg drop-shadow-md"
 />
 
-Once you have your project created, you should notice that 3 **targets** are automatically created
-for you: `development`, `staging` and `production`. These are just defaults, and you can feel free
-to change/delete them as you see fit.
-
-The following guides will help you to get started with your Hive **project**, depending on the type
-of project you selected:
+Continue with one of the following guidebased on the type of project you selected.
 
 <Cards>
   <Cards.Card arrow title="Apollo Federation" href="/docs/get-started/apollo-federation" />

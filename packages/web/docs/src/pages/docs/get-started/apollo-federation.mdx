@@ -1,23 +1,33 @@
 import NextImage from 'next/image'
 import { Callout, Cards, FileTree, Steps, Tabs } from '@theguild/components'
+import createAccessToken from '../../../../public/docs/pages/get-started/apollo-federation/create-access-token.png'
+import createdAccessToken from '../../../../public/docs/pages/get-started/apollo-federation/created-access-token.png'
+
+import registryTokenSettings from '../../../../public/docs/pages/get-started/apollo-federation/registry-token-settings.png'
+import targetOverview from '../../../../public/docs/pages/get-started/apollo-federation/target-overview.png'
 import cdnTokenImage from '../../../../public/docs/pages/guides/federation-cdn-token.png'
 import federationExplorerImage from '../../../../public/docs/pages/guides/federation-explorer.png'
 import federationHistoryImage from '../../../../public/docs/pages/guides/federation-history.png'
 import federationSchemaImage from '../../../../public/docs/pages/guides/federation-schema.png'
+
 import historyImage from '../../../../public/docs/pages/guides/history.png'
 import tokenImage from '../../../../public/docs/pages/guides/token.png'
 
-# Apollo Federation Project
+# Get started with Apollo Federation
 
-Once you've created a Hive project of type **Apollo Federation**, you can simply push your GraphQL
-schema to the registry. This guide will guide you through the basics of schema pushing, checking and
-fetching of the Supergraph SDL to your Apollo Gateway / Router.
+Once you've created a Hive project of type **Apollo Federation**, you can start pushing your Apollo
+Federation subgraph schemas to the Hive registry.
+
+This guide will walk you through the basics of schema pushing, checking, and spin up the Hive
+Gateway serving the federated GraphQL schema.
 
 <Steps>
 
-### Subgraphs
+### Prerequisites
 
-For this guide, we are going to use the following Subgraphs:
+For this guide, we are going to use the following Subgraphs that we are going to publish to Hive.
+
+> **Note**: If you want you can also use your own subgraphs instead of the ones we provide.
 
 <FileTree>
   <FileTree.Folder name="subgraphs" defaultOpen>
@@ -26,7 +36,14 @@ For this guide, we are going to use the following Subgraphs:
   </FileTree.Folder>
 </FileTree>
 
-Here's the GraphQL schema (SDL) for every subgraph we are going to publish to Hive:
+We provide the actual URLs for these running subgraphs, so we can later on send some real GraphQL
+requests with our federation gateway.
+
+- **Products**: https://federation-demo.theguild.workers.dev/products
+- **Reviews**: https://federation-demo.theguild.workers.dev/reviews
+
+Here's the GraphQL schema (SDL) for every subgraph we are going to publish to Hive. Save these to
+files on your machine.
 
 <Tabs items={['Products', 'Reviews']}>
   <Tabs.Tab>
@@ -108,59 +125,124 @@ type ReviewSummary {
   </Tabs.Tab>
 </Tabs>
 
-### Hive CLI Access Token
+### Hive CLI setup
 
 As you may have noticed, Hive has created three targets under your project: `development`,
-`staging`, and `production`. This guide will use the `development` target to explore the features
-Hive offers.
+`staging`, and `production`. Each of these targets represent a different environment. You can remove
+or create new targets as needed, for modelling the different environments of your project.
 
-To begin, select the `development` target under your Hive project and then choose the **Settings**
-tab. On the Settings screen, you can manage your target's settings and access tokens.
+<NextImage
+  src={targetOverview}
+  alt="Project overview showing the available targets"
+  className="mt-10 max-w-xl rounded-lg drop-shadow-md"
+/>
 
-Under the **Registry Access Tokens** section, click the **Generate new token** button. Give your
-access token a name and select **Schema Check & Push** from the list of token presets:
+For this guide we will use the `development` target.
+
+In order to publish our subgraph schemas to the schema registry, we first need to create an registry
+access token with the necessary permissions for the Hive CLI.
+
+Select the `development` target under your Hive project and then choose the **Settings** tab. On the
+Settings screen, you can manage your target's settings and access tokens.
+
+<NextImage
+  src={registryTokenSettings}
+  alt="Target settings for registry token management"
+  className="mt-10 max-w-xl rounded-lg drop-shadow-md"
+/>
+
+Under the **Registry Access Tokens** section, click the **Create new registry token** button. Give
+your access token a name and select **Read & Write** for the permissions:
 
 <NextImage
   alt="Create Registry Token Form"
-  src={tokenImage}
-  className="mt-10 max-w-md rounded-lg drop-shadow-md"
+  src={createAccessToken}
+  className="mt-10 max-w-xl rounded-lg drop-shadow-md"
 />
 
 Click on **Generate Token** button and you should get your CLI token created, with permissions to
 publish GraphQL schemas.
 
+<NextImage
+  alt="Created Registry Token Form"
+  src={createdAccessToken}
+  className="mt-10 max-w-xl rounded-lg drop-shadow-md"
+/>
+
 Make sure to copy your token and keep it safe. **You won't be able to see it again.**
 
-<Callout type="info">
-  **Note:** You can create multiple tokens with different permissions for different use cases.
-</Callout>
-
-### Publish your schemas
+### Publish subgraphs
 
 Now that you have your access token, and you have the base schema defined, you can publish your
 schema to the registry.
 
 We'll start with the **Products** subgraph.
 
+If you did not yet copy the contents of the `subgraphs/products.graphql` to a local file, you can do
+so now.
+
 Run the following command in your terminal, to publish your `subgraphs/products.graphql` to the
-registry (replace `YOUR_TOKEN_HERE` with the token you have just created):
+registry. Replace `<YOUR_TOKEN_HERE>` with the access token we just created.
+
+<Tabs items={['Binary', 'NodeJS', 'Docker']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
 
 ```bash
 hive schema:publish \
-  --registry.accessToken YOUR_TOKEN_HERE \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
   --service="products" \
-  --url="http://fake.com/products/graphql" \
-  --author "Me" \
-  --commit "First" \
+  --url="https://federation-demo.theguild.workers.dev/products" \
+  --author "John Doe" \
+  --commit "My first commit" \
   subgraphs/products.graphql
 ```
 
-<Callout type="info">
-  If you are running under a NodeJS project, make sure to include the `npx`, `yarn` or `pnpm` prefix
-  to the command.
-</Callout>
+</Tabs.Tab>
 
-If everything goes well, you should see the following output:
+{/* NodeJS */}
+
+<Tabs.Tab>
+
+```bash
+npx hive schema:publish \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
+  --service="products" \
+  --url="https://federation-demo.theguild.workers.dev/products" \
+  --author "John Doe" \
+  --commit "My first commit" \
+  subgraphs/products.graphql
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For Docker, we need to mount the subgraph schema file into the container.
+
+```bash
+docker run --name graphql-hive-cli --rm \
+  -v $(pwd)/subgraphs/products.graphql/:/usr/src/app/subgraphs/products.graphql \
+  ghcr.io/kamilkisiela/graphql-hive/cli \
+  schema:publish \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
+  --service="products" \
+  --url="https://federation-demo.theguild.workers.dev/products" \
+  --author "John Doe" \
+  --commit "My first commit" \
+  ./subgraphs/products.graphql
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+If everything goes well, you should see the following output, containing a link pointing you to the
+schema version on the Hive dashboard.
 
 ```bash copy=false
 ✔ Published initial schema.
@@ -180,17 +262,67 @@ new schema you just published 🎉
   explore the API types, fields, and arguments.
 </Callout>
 
-Now, let's publish the **Reviews** subgraph schema to Hive:
+Next, we will publish the **Reviews** subgraph schema to Hive. Again, let's start by copying the
+schema to a local file.
+
+Then, we run the following command in your terminal.
+
+<Tabs items={['Binary', 'NodeJS', 'Docker']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
 
 ```bash
 hive schema:publish \
   --registry.accessToken YOUR_TOKEN_HERE \
   --service="reviews" \
-  --url="http://fake.com/reviews/graphql" \
-  --author "Me" \
-  --commit "Second" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  --author "John Doe" \
+  --commit "My second commit" \
   subgraphs/reviews.graphql
 ```
+
+</Tabs.Tab>
+
+{/* NodeJS */}
+
+<Tabs.Tab>
+
+```bash
+npx hive schema:publish \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  --author "John Doe" \
+  --commit "My second commit" \
+  subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For Docker, we need to mount the subgraph schema file into the container.
+
+```bash
+docker run --name graphql-hive-cli --rm \
+  -v $(pwd)/subgraphs/reviews.graphql/:/usr/src/app/subgraphs/reviews.graphql \
+  ghcr.io/kamilkisiela/graphql-hive/cli \
+  schema:publish \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  --author "John Doe" \
+  --commit "My second commit" \
+  ./subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 If everything goes well, you should see the following output:
 
@@ -206,11 +338,13 @@ On your target's **Explorer** page now, you'll be able to see the schema of both
   className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
-### Schema Checks
+### Schema checks
 
 Hive can perform several checks on your schema before publishing it to the registry. You can use
-Hive CLI to run these check and find potential breaking changes, and potential composition issues
-when a Apollo Federation project is used.
+Hive CLI to run these check and find potential breaking changes or composition issues.
+
+Usually, you would run these checks in your subgraphs CI pipeline, to ensure that your subgraph
+schema integrates flawlessly with the other subgraphs in the federation project.
 
 To see how schema checks works, let's make a small change to our schema. First, we'll start with a
 non-breaking change - we'll add a new field to the `Review` type under the **Reviews** subgraph:
@@ -238,12 +372,56 @@ type ReviewSummary {
 Now, run the Hive CLI with the `schema:check` command and your modified `subgraphs/reviews.graphql`
 file:
 
+<Tabs items={['Binary', 'NodeJS', 'Docker']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
 ```bash
 hive schema:check \
   --registry.accessToken YOUR_TOKEN_HERE \
   --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
   subgraphs/reviews.graphql
 ```
+
+</Tabs.Tab>
+
+{/* NodeJS */}
+
+<Tabs.Tab>
+
+```bash
+npx hive schema:check \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For Docker, we need to mount the subgraph schema file into the container.
+
+```bash
+docker run --name graphql-hive-cli --rm \
+  -v $(pwd)/subgraphs/reviews.graphql/:/usr/src/app/subgraphs/reviews.graphql \
+  ghcr.io/kamilkisiela/graphql-hive/cli \
+  schema:check \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  ./subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
 meaning that the schema is compatible, valid and has no breaking changes:
@@ -276,12 +454,56 @@ type ReviewSummary {
 }
 ```
 
+<Tabs items={['Binary', 'NodeJS', 'Docker']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
 ```bash
 hive schema:check \
   --registry.accessToken YOUR_TOKEN_HERE \
   --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
   subgraphs/reviews.graphql
 ```
+
+</Tabs.Tab>
+
+{/* NodeJS */}
+
+<Tabs.Tab>
+
+```bash
+npx hive schema:check \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For Docker, we need to mount the subgraph schema file into the container.
+
+```bash
+docker run --name graphql-hive-cli --rm \
+  -v $(pwd)/subgraphs/reviews.graphql/:/usr/src/app/subgraphs/reviews.graphql \
+  ghcr.io/kamilkisiela/graphql-hive/cli \
+  schema:check \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  ./subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 In that case, you'll notice that Hive CLI exists with a `1` exit code, meaning that the schema has
 breaking changes, and it's not compatible with the current schema in the registry:
@@ -327,12 +549,56 @@ type ReviewSummary {
 Run the Hive CLI with the `schema:check` command again and the modified `subgraphs/reviews.graphql`
 file:
 
+<Tabs items={['Binary', 'NodeJS', 'Docker']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
 ```bash
 hive schema:check \
   --registry.accessToken YOUR_TOKEN_HERE \
   --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
   subgraphs/reviews.graphql
 ```
+
+</Tabs.Tab>
+
+{/* NodeJS */}
+
+<Tabs.Tab>
+
+```bash
+npx hive schema:check \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For Docker, we need to mount the subgraph schema file into the container.
+
+```bash
+docker run --name graphql-hive-cli --rm \
+  -v $(pwd)/subgraphs/reviews.graphql/:/usr/src/app/subgraphs/reviews.graphql \
+  ghcr.io/kamilkisiela/graphql-hive/cli \
+  schema:check \
+  --registry.accessToken "<YOUR_TOKEN_HERE>" \
+  --service="reviews" \
+  --url="https://federation-demo.theguild.workers.dev/reviews" \
+  ./subgraphs/reviews.graphql
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 And now you can see that the schema check process has failed, due to conflicts and inconsistencies
 between the schemas:
@@ -348,118 +614,22 @@ between the schemas:
 - Field Product.price changed type from Price to Int
 ```
 
-### Evolve your schema
+As you can see schema checks can help you to catch potential issues before you publish your schema
+to the registry.
 
-Now that you have your schema published, you can evolve it over time. You can add new types, fields,
-and implement new capabilities for your consumers.
+Schema checks are usually integrated into the Continious Integration (CI) pipeline of your subgraph,
+where schema publishes are made within the Continious Deployment (CD) pipeline.
 
-Let's make a valid change in our schema and push it again to the registry:
+### Hive Gateway
 
-```graphql {11} filename="subgraphs/reviews.graphql"
-extend type Product @key(fields: "id") {
-  id: ID! @external
-  reviews: [Review]
-  reviewSummary: ReviewSummary
-}
-
-type Review @key(fields: "id") {
-  id: ID!
-  rating: Float
-  content: String
-  verified: Boolean # new field added
-}
-
-type ReviewSummary {
-  totalReviews: Int
-  averageRating: Float
-}
-```
-
-And publish it to Hive:
-
-```bash
-hive schema:publish \
-  --registry.accessToken YOUR_TOKEN_HERE \
-  --service="reviews" \
-  --url="http://fake.com/reviews/graphql" \
-  --author "Me" \
-  --commit "Third" \
-  subgraphs/reviews.graphql
-```
-
-You should see now that Hive accepted your published schema and updated the registry:
-
-```bash copy=false
-✔ Schema published
-```
-
-It's a good timing to check the **History** tab of your Hive target. You should see that a new
-schema is published now, and you can see the changes you made:
-
-<NextImage
-  alt="Schema History"
-  src={federationHistoryImage}
-  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
-/>
-
-### Fetch your Supergraph
-
-Now that your GraphQL schema is stored in the Hive registry, you can access and fetch it through
-Hive's CDN (Content Delivery Network).
-
-The Hive Cloud service leverages the
-[CloudFlare Global Network](https://www.cloudflare.com/network/) to deliver your GraphQL schema and
-schema metadata. This means that your schema will be available from the nearest location to your
-GraphQL gateway, with 100% uptime, regardless of Hive's status. This ensures that everything
-required for your GraphQL API is always available, and reduces the risk of depending on Hive as a
-single point of failure.
-[You can read more about Hive's CDN here](/docs/features/high-availability-cdn).
-
-To get started with Hive's CDN access, you'll need to create a CDN token from your target's
-**Settings** page. You'll see a separate section for managing and creating CDN tokens, called **CDN
-Access Token**.
-
-Click on **Create new CDN Token** to create a new CDN token. Describe your token with an alias, and
-click **Create**. Please store this access token securely. **You will not be able to see it again.**
-
-<Callout type="info">
-**Why are Registry and CDN tokens different?**
-
-We use a separate, externally managed storage to manage CDN tokens to ensure high availability of
-your schemas. This approach ensures that your GraphQL schemas are fully secured and highly
-available. CDN tokens are read-only and can only fetch schemas from the CDN. They do not have
-permissions to perform any other action on your Hive organization.
-
-</Callout>
-
-To use your access token, go to your target's page on Hive's dashboard and click on the **Connect to
-CDN** button. You will see a screen with instructions on how to obtain different types of artifacts
-from the CDN. For this guide, you can pick the **Apollo Federation Supergraph** artifact.
-
-<NextImage
-  alt="CDN Token Form"
-  src={cdnTokenImage}
-  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
-/>
-
-Copy the URL and let's try to fetch your schema using `curl` (replace `YOUR_HIVE_CDN_TOKEN` with
-your CDN token, and `CDN_ENDPOINT_HERE` with the endpoint you copied from Hive's dashboard):
-
-```bash
-curl -L -H "X-Hive-CDN-Key: YOUR_HIVE_CDN_TOKEN" CDN_ENDPOINT_HERE
-```
-
-You should see that Hive CDN returns the complete Supergraph as an output for that command.
-
-### GraphQL Gateway
-
-The next step is to use real subgraphs and a GraphQL gateway that routes GraphQL requests to your
+The next step to spin up our GraphQL gateway that uses the information published to the schema
+registry for serving the composed GraphQL schema and delegating the GraphQL request to the
 subgraphs.
 
 ```mermaid
 
 flowchart LR
-    A["Federation Gateway"] -. Poll supergraph .-> C
+    A["Hive Gateway"] -. Poll supergraph .-> C
     subgraph hive [Hive]
       direction TB
       B[Registry] -. Publish supergraph .-> C["HA CDN
@@ -477,10 +647,39 @@ flowchart LR
 
 ```
 
-#### GraphQL Mesh
+#### CDN Access
 
-Our recommended gateway for Federation is **GraphQL Mesh**. You can run GraphQL Mesh either as a
-Docker image or CLI tool.
+The Hive schema registry publishes the supergraph (artifact of the composed schemas that contains
+all the information about the subgraphs and fields available) to the high-availability CDN on
+Cloudflare.
+
+The federation gateway can poll the supergraph from the CDN and serve the composed GraphQL schema.
+
+For accessing the supergraph, you need to get the CDN token from the Hive dashboard.
+
+Navigate to your target's page on Hive's dashboard and click on the **Connect to CDN** button. You
+will see a screen with instructions on how to obtain different types of artifacts from the CDN. For
+this guide, you can pick the **Apollo Federation Supergraph** artifact.
+
+<NextImage
+  alt="CDN Token Form"
+  src={cdnTokenImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+Copy the URL and let's try to fetch your schema using `curl` (replace `YOUR_HIVE_CDN_TOKEN` with
+your CDN token, and `CDN_ENDPOINT_HERE` with the endpoint you copied from Hive's dashboard):
+
+```bash
+curl -L -H "X-Hive-CDN-Key: YOUR_HIVE_CDN_TOKEN" CDN_ENDPOINT_HERE
+```
+
+You should see that Hive CDN returns the complete Supergraph as an output for that command.
+
+#### Run the Gateway
+
+Hive Gateway is the Federation Gateway that seamlessly integrates with the Hive registry. You can
+run Hive Gateay either as a Docker image, binary or NPM package.
 
 <Tabs items={['Docker', 'Node.js Package']}>
   {/* Docker */}
@@ -490,19 +689,16 @@ The Docker image for GraphQL Mesh is published to the GitHub docker registry. Yo
 following command to start a GraphQL Mesh gateway instance from your existing Hive target.
 
 ```sh
-docker run \
-  -p 4000:4000 \
-  -e HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
-  -e HIVE_CDN_KEY="<hive_cdn_access_key>" \
-  -e HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
-  ghcr.io/ardatan/mesh-serve
+docker run --name hive-gateway -rm \
+  ghcr.io/ardatan/mesh-serve supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>"
 ```
 
-| Parameter             | Description                                 |
-| --------------------- | ------------------------------------------- |
-| `hive_cdn_endpoint`   | The endpoint of your Hive target            |
-| `hive_cdn_access_key` | The Hive CDN access key                     |
-| `hive_registry_token` | The Hive registry token for usage reporting |
+| Parameter               | Description                      |
+| ----------------------- | -------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target |
+| `<hive_cdn_access_key>` | The Hive CDN access key          |
 
   </Tabs.Tab>
 
@@ -520,17 +716,15 @@ npm install @graphql-mesh/serve-cli
 You can then run the Mesh CLI from your existing Hive target using the following command.
 
 ```sh filename="Run Mesh Gateway"
-HIVE_CDN_ENDPOINT="<hive_cdn_endpoint>" \
-  HIVE_CDN_KEY="<hive_cdn_access_key>" \
-  HIVE_REGISTRY_TOKEN="<hive_registry_token>" \
-  npx mesh-serve
+npx mesh-serve supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>"
 ```
 
-| Parameter             | Description                                 |
-| --------------------- | ------------------------------------------- |
-| `hive_cdn_endpoint`   | The endpoint of your Hive target            |
-| `hive_cdn_access_key` | The Hive CDN access key                     |
-| `hive_registry_token` | The Hive registry token for usage reporting |
+| Parameter             | Description                      |
+| --------------------- | -------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target |
+| `hive_cdn_access_key` | The Hive CDN access key          |
 
   </Tabs.Tab>
 </Tabs>
@@ -549,27 +743,86 @@ import MeshLandingPageImage from '../../../../public/docs/pages/get-started/apol
 Now, if you navigate to `http://localhost:4000/graphql`, you should see the GrapihQL interface where
 you can write and execute queries against the supergraph.
 
-#### Other Gateways
+#### Usage reporting
 
-You can also use alternative gateways such as **Apollo Gateway** (JS) or **Apollo Router** (Rust)
-depending on your needs. Check out these guides to deploy a gateway based on your technical
-preference.
+Up next let's report the usage from our gateway to the registry, so we can see on the dashboard how
+the API is being used.
 
-<Cards>
-  <Cards.Card arrow title="Apollo Gateway (JS)" href="/docs/integrations/apollo-gateway" />
-  <Cards.Card arrow title="Apollo Router (Rust)" href="/docs/integrations/apollo-router" />
-</Cards>
+For this, we simply provide a usage reporting token in addition to our CDN access token. For this
+guide, we can simply re-use the registry token we already use for the CLI.
+
+<Tabs items={['Docker', 'Node.js Package']}>
+  {/* Docker */}
+  <Tabs.Tab>
+
+The Docker image for GraphQL Mesh is published to the GitHub docker registry. You can simply run the
+following command to start a GraphQL Mesh gateway instance from your existing Hive target.
+
+```sh
+docker run --name hive-gateway -rm \
+  ghcr.io/ardatan/mesh-serve supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>" \
+  --hive-registry-token "<hive_registry_token>"
+```
+
+| Parameter               | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
+| `<hive_cdn_access_key>` | The Hive CDN access key                     |
+| `<hive_registry_token>` | The Hive registry token for usage reporting |
+
+  </Tabs.Tab>
+
+{/* Node.js Package */}
+
+  <Tabs.Tab>
+
+```sh filename="Run Mesh Gateway with registry token"
+npx mesh-serve supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>" \
+  --hive-registry-token "<hive_registry_token>"
+```
+
+| Parameter               | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
+| `<hive_cdn_access_key>` | The Hive CDN access key                     |
+| `<hive_registry_token>` | The Hive registry token for usage reporting |
+
+  </Tabs.Tab>
+</Tabs>
+
+After starting the gateway with the usage reporting token, we can no execute some queries using the
+gateways built-in GraphiQL interface.
+
+```graphql
+{
+  topProducts {
+    upc
+    name
+    price
+  }
+}
+```
+
+[Execute Query on Hive Gateway GraphiQL](http://localhost:4000/graphql?query=%7B%0A++topProducts+%7B%0A++++upc%0A++++name%0A++++price%0A++%7D%0A%7D)
+
+After executing the query, a few times, let's switch back to the Hive dashboard and navigate to the
+insights page.
+
+{/* TODO: PICTURE */}
+
+Here we can now see the GraphQL operations from our Gateway being reported to the registry.
 
 ### Next Steps
 
-Now that you use the basic functionality of Hive as a schema registry, we recommend following other
-powerful features of Hive:
+Congratulations on publishing your first subgraph schemas to the Hive schema registry, composing
+your supergraph, spinning up your own Federation Gateway serving the unified GraphQL schema and
+reporting the usage data!
 
-- [External Schema Compostion for Apollo Federation v2](/docs/management/external-schema-composition)
-- [Usage Reporting and Monintoring](/docs/features/usage-reporting)
-- [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
-- [Alerts and Notifications](/docs/management/projects#alerts-and-notifications)
-- [CI/CD Integration](/docs/integrations/ci-cd)
-- [Schema Policies](/docs/features/schema-policy)
+From here you can continue to explore the Hive dashboard, or dive deeper into the documentation to
+learn about all the features of the Hive platform.
 
 </Steps>
