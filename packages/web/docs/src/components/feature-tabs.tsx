@@ -39,7 +39,7 @@ export function FeatureTabs({ className }: { className?: string }) {
           <link key={image.src} rel="preload" as="image" href={image.src} />
         ))}
       </Head>
-      <Tabs.Root defaultValue={tabs[0]}>
+      <Tabs.Root defaultValue={tabs[0]} {...useSmallScreenTabsHandlers()}>
         <Tabs.List
           className={
             'bg-beige-200 mb-12 flex flex-col rounded-2xl sm:flex-row' +
@@ -64,6 +64,8 @@ export function FeatureTabs({ className }: { className?: string }) {
                   ' max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:rounded-b-lg max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:border-b' +
                   ' max-sm:group-focus-within:border-beige-600 max-sm:rdx-state-active:border max-sm:group-focus-within:border-x' +
                   ' max-sm:group-focus-within:rdx-state-active:rounded-b-none max-sm:group-focus-within:rdx-state-active:border-b-0' +
+                  ' max-sm:group-focus-within:aria-selected:z-20 max-sm:group-focus-within:aria-selected:ring-4' +
+                  ' max-sm:rdx-state-inactive:pointer-events-none max-sm:rdx-state-inactive:group-focus-within:pointer-events-auto' +
                   // between 640px and 721px we still want tabs, but they won't fit with big padding
                   ' sm:max-[721px]:p-2'
                 }
@@ -255,4 +257,81 @@ function Feature(props: {
       ))}
     </article>
   );
+}
+
+function useSmallScreenTabsHandlers() {
+  const isSmallScreen = () => window.innerWidth < 640;
+  return {
+    onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+      const tabs = event.currentTarget.querySelectorAll('[role="tablist"] > [role="tab"]');
+      for (const tab of tabs) {
+        tab.ariaSelected = 'false';
+      }
+    },
+    onValueChange: () => {
+      if (!isSmallScreen()) return;
+      setTimeout(() => {
+        const activeElement = document.activeElement;
+        // This isn't a perfect dropdown for keyboard users, but we only render it on mobiles.
+        if (activeElement && activeElement instanceof HTMLElement && activeElement.role === 'tab') {
+          activeElement.blur();
+        }
+      }, 0);
+    },
+    // edge case, but people can plug in keyboards to phones
+    onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        !isSmallScreen() ||
+        (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Enter')
+      ) {
+        return;
+      }
+      event.preventDefault();
+
+      // We proceed only if the tablist is focused.
+      const activeElement = document.activeElement;
+      if (
+        !activeElement ||
+        !(activeElement instanceof HTMLElement) ||
+        activeElement.role !== 'tab'
+      ) {
+        return;
+      }
+
+      const items = activeElement.parentElement?.querySelectorAll(
+        '[role="tab"][data-state="inactive"]',
+      );
+      if (!items) {
+        return;
+      }
+
+      let index = Array.from(items).indexOf(activeElement);
+      for (const [i, item] of items.entries()) {
+        if (item.ariaSelected === 'true') {
+          index = i;
+        }
+        item.ariaSelected = 'false';
+      }
+
+      switch (event.key) {
+        case 'ArrowDown':
+          index = (index + 1) % items.length;
+          break;
+
+        case 'ArrowUp':
+          index = (index - 1 + items.length) % items.length;
+          break;
+
+        case 'Enter': {
+          const item = items[index];
+          if (item instanceof HTMLElement) {
+            item.focus();
+          }
+          break;
+        }
+      }
+
+      items[index].ariaSelected = 'true';
+    },
+  };
 }
