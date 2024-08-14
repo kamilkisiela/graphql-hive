@@ -29,7 +29,7 @@ export function TeamSection({ className }: { className?: string }) {
         href="https://the-guild.dev/"
         target="_blank"
         rel="noreferrer"
-        className="max-lg:order-1 max-lg:w-full lg:mt-12"
+        className="max-lg:order-1 max-md:w-full lg:mt-12"
       >
         Visit The Guild
         <ArrowIcon />
