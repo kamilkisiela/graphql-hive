@@ -25,6 +25,18 @@ export function FeatureTabs({ className }: { className?: string }) {
         className,
       )}
     >
+      <Head>
+        {[
+          observabilityClientsImage,
+          observabilityOperationsImage,
+          observabilityOverallImage,
+          registryExplorerImage,
+          registrySchemaChecksImage,
+          registryVersionControlSystemImage,
+        ].map(image => (
+          <link key={image.src} rel="preload" as="image" href={image.src} />
+        ))}
+      </Head>
       <Tabs.Root defaultValue={tabs[0]}>
         <Tabs.List className="bg-beige-200 mb-12 flex flex-row rounded-2xl">
           {tabs.map((tab, i) => (
@@ -173,62 +185,53 @@ function Feature(props: {
   const { icon, title, description, documentationLink, highlights } = props;
 
   return (
-    <>
-      <Head>
-        {highlights
-          ? highlights.map(highlight => (
-              <link key={highlight.image.src} rel="preload" as="image" href={highlight.image.src} />
-            ))
-          : null}
-      </Head>
-      <article className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
-          <header className="flex flex-col gap-4 md:gap-6">
-            <Stud>{icon}</Stud>
-            <Heading as="h2" size="md" className="text-green-1000">
-              {title}
-            </Heading>
-            <p className="leading-6 text-green-800">{description}</p>
-          </header>
-          <dl className="grid grid-cols-2 gap-4 md:gap-12">
-            {highlights.map((highlight, i) => {
-              return (
-                <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
-                  <dt className="text-green-1000 font-medium">{highlight.title}</dt>
-                  <dd className="mt-2 text-sm leading-[20px] text-green-800">
-                    {highlight.description}
-                  </dd>
-                </div>
-              );
-            })}
-          </dl>
-          <CallToAction variant="primary" href={documentationLink}>
-            Learn more
-            <ArrowIcon />
-          </CallToAction>
-        </div>
-        {highlights.map((highlight, i) => (
-          <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
-            {/* TODO: Chat with the designer about the mobile version of this again. */}
-            {/* <div className="relative px-4 sm:px-6 lg:hidden">
+    <article className="grid grid-cols-1 lg:grid-cols-2">
+      <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
+        <header className="flex flex-col gap-4 md:gap-6">
+          <Stud>{icon}</Stud>
+          <Heading as="h2" size="md" className="text-green-1000">
+            {title}
+          </Heading>
+          <p className="leading-6 text-green-800">{description}</p>
+        </header>
+        <dl className="grid grid-cols-2 gap-4 md:gap-12">
+          {highlights.map((highlight, i) => {
+            return (
+              <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
+                <dt className="text-green-1000 font-medium">{highlight.title}</dt>
+                <dd className="mt-2 text-sm leading-[20px] text-green-800">
+                  {highlight.description}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+        <CallToAction variant="primary" href={documentationLink}>
+          Learn more
+          <ArrowIcon />
+        </CallToAction>
+      </div>
+      {highlights.map((highlight, i) => (
+        <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
+          {/* TODO: Chat with the designer about the mobile version of this again. */}
+          {/* <div className="relative px-4 sm:px-6 lg:hidden">
               <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
                 {highlight.description}
               </p>
             </div> */}
-            <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
-              {/* TODO: Use cropped images so we don't load too much without need. */}
-              <Image
-                width={925}
-                height={578}
-                src={highlight.image}
-                className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
-                role="presentation"
-                alt=""
-              />
-            </div>
+          <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
+            {/* TODO: Use cropped images so we don't load too much without need. */}
+            <Image
+              width={925}
+              height={578}
+              src={highlight.image}
+              className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
+              role="presentation"
+              alt=""
+            />
           </div>
-        ))}
-      </article>
-    </>
+        </div>
+      ))}
+    </article>
   );
 }
