@@ -619,8 +619,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       pg-promise:
-        specifier: 11.9.0
-        version: 11.9.0
+        specifier: 11.9.1
+        version: 11.9.1
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -1347,8 +1347,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       pg-promise:
-        specifier: 11.9.0
-        version: 11.9.0
+        specifier: 11.9.1
+        version: 11.9.1
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -13677,8 +13677,8 @@ packages:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
 
-  pg-minify@1.6.4:
-    resolution: {integrity: sha512-cf6hBt1YqzqPX0OznXKSv4U7e4o7eUU4zp2zQsbJ+4OCNNr7EnnAVWkIz4k0dv6UN4ouS1ZL4WlXxCrZHHl69g==}
+  pg-minify@1.6.5:
+    resolution: {integrity: sha512-u0UE8veaCnMfJmoklqneeBBopOAPG3/6DHqGVHYAhz8DkJXh9dnjPlz25fRxn4e+6XVzdOp7kau63Rp52fZ3WQ==}
     engines: {node: '>=14.0.0'}
 
   pg-numeric@1.0.2:
@@ -13690,8 +13690,8 @@ packages:
     peerDependencies:
       pg: '>=8.0'
 
-  pg-promise@11.9.0:
-    resolution: {integrity: sha512-yOnJp8unK2xP2zx/2chJV5321TiJxtk57A9bMrgvJlvVM3exJ/j1FsHSccX3MnjUrnSYk1NMH6j329JfDyz8+A==}
+  pg-promise@11.9.1:
+    resolution: {integrity: sha512-qvMmyDvWd64X0a25hCuWV40GLMbgeYf4z7ZmzxQqGHtUIlzMtxcMtaBHAMr7XVOL62wFv2ZVKW5pFruD/4ZAOg==}
     engines: {node: '>=14.0'}
 
   pg-protocol@1.6.1:
@@ -32426,7 +32426,7 @@ snapshots:
 
   pg-int8@1.0.1: {}
 
-  pg-minify@1.6.4: {}
+  pg-minify@1.6.5: {}
 
   pg-numeric@1.0.2: {}
 
@@ -32438,11 +32438,11 @@ snapshots:
     dependencies:
       pg: 8.12.0
 
-  pg-promise@11.9.0:
+  pg-promise@11.9.1:
     dependencies:
       assert-options: 0.8.1
       pg: 8.12.0
-      pg-minify: 1.6.4
+      pg-minify: 1.6.5
       spex: 3.3.0
     transitivePeerDependencies:
       - pg-native
