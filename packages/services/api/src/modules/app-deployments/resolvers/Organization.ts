@@ -9,7 +9,7 @@ import type { OrganizationResolvers } from './../../../__generated__/types.next'
  *
  * If you want to skip this file generation, remove the mapper or update the pattern in the `resolverGeneration.object` config.
  */
-export const Organization: Pick<OrganizationResolvers, 'isAppDeploymentsEnabled'> = {
+export const Organization: Pick<OrganizationResolvers, 'isAppDeploymentsEnabled' | '__isTypeOf'> = {
   /* Implement Organization resolver logic here */
   isAppDeploymentsEnabled(appDeployment) {
     return appDeployment.featureFlags.appDeployments;

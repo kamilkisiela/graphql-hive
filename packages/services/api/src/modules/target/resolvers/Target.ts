@@ -12,6 +12,7 @@ export const Target: Pick<
   | 'name'
   | 'project'
   | 'validationSettings'
+  | '__isTypeOf'
 > = {
   project: (target, _args, { injector }) =>
     injector.get(ProjectManager).getProject({

@@ -10,7 +10,7 @@ import type { TargetResolvers } from './../../../__generated__/types.next';
  *
  * If you want to skip this file generation, remove the mapper or update the pattern in the `resolverGeneration.object` config.
  */
-export const Target: Pick<TargetResolvers, 'appDeployment' | 'appDeployments'> = {
+export const Target: Pick<TargetResolvers, 'appDeployment' | 'appDeployments' | '__isTypeOf'> = {
   /* Implement Target resolver logic here */
   appDeployment: async (target, args, { injector }) => {
     return injector.get(AppDeploymentsManager).getAppDeploymentForTarget(target, {

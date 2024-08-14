@@ -9,6 +9,7 @@ export const Member: Pick<
   | 'projectAccessScopes'
   | 'targetAccessScopes'
   | 'user'
+  | '__isTypeOf'
 > = {
   organizationAccessScopes: (member, _, { injector }) => {
     return injector.get(AuthManager).getMemberOrganizationScopes({
