@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
@@ -21,7 +22,8 @@ export function FeatureTabs({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'border-beige-400 mx-auto w-[1200px] max-w-[calc(100%-4rem)] rounded-3xl border bg-white md:p-6',
+        'border-beige-400 mx-auto w-[1200px] max-w-full rounded-3xl bg-white' +
+          ' sm:max-w-[calc(100%-4rem)] sm:border md:p-6',
         className,
       )}
     >
@@ -38,21 +40,40 @@ export function FeatureTabs({ className }: { className?: string }) {
         ))}
       </Head>
       <Tabs.Root defaultValue={tabs[0]}>
-        <Tabs.List className="bg-beige-200 mb-12 flex flex-row rounded-2xl">
-          {tabs.map((tab, i) => (
-            <Tabs.Trigger
-              key={tab}
-              value={tab}
-              className={
-                "data-[state='active']:text-green-1000 data-[state='active']:border-beige-600 data-[state='active']:bg-white" +
-                ' border border-transparent font-medium leading-6 text-green-800' +
-                ' flex flex-1 justify-center gap-2.5 rounded-[15px] p-2 md:p-4'
-              }
-            >
-              {icons[i]}
-              {tab}
-            </Tabs.Trigger>
-          ))}
+        <Tabs.List
+          className={
+            'bg-beige-200 mb-12 flex flex-col rounded-2xl sm:flex-row' +
+            ' group mx-4 mt-6 md:mx-0 md:mt-0' +
+            ' max-sm:h-[58px] max-sm:focus-within:rounded-b-none'
+          }
+        >
+          {tabs.map((tab, i) => {
+            return (
+              <Tabs.Trigger
+                key={tab}
+                value={tab}
+                className={
+                  'rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
+                  ' border-transparent font-medium leading-6 text-green-800 sm:border' +
+                  ' flex flex-1 justify-center gap-2.5 p-4' +
+                  ' text-base sm:text-sm lg:text-base [&>svg]:shrink-0' +
+                  ' max-sm:rdx-state-inactive:hidden group-focus-within:rdx-state-inactive:flex [&[data-state="inactive"]>:last-child]:invisible' +
+                  ' rounded-lg sm:rounded-[15px]' +
+                  ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none max-sm:rdx-state-inactive:order-1 z-10' +
+                  ' max-sm:[&[data-state="active"]~:nth-child(3)]:rounded-b-lg max-sm:[&[data-state="active"]~:nth-child(3)]:border-b' +
+                  ' max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:rounded-b-lg max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:border-b' +
+                  ' max-sm:group-focus-within:border-beige-600 max-sm:rdx-state-active:border max-sm:group-focus-within:border-x' +
+                  ' max-sm:group-focus-within:rdx-state-active:rounded-b-none max-sm:group-focus-within:rdx-state-active:border-b-0' +
+                  // between 640px and 721px we still want tabs, but they won't fit with big padding
+                  ' sm:max-[721px]:p-2'
+                }
+              >
+                {icons[i]}
+                {tab}
+                <ChevronDownIcon className="ml-auto size-6 text-green-800 sm:hidden" />
+              </Tabs.Trigger>
+            );
+          })}
         </Tabs.List>
         <Tabs.Content value="Schema Registry" tabIndex={-1}>
           <Feature
