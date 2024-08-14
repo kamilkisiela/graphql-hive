@@ -1,4 +1,5 @@
 packages:
+  - packages/services/demo/*
   - packages/services/*
   - packages/migrations
   - packages/services/external-composition/*
