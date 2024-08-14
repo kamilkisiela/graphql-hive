@@ -470,7 +470,7 @@ const SettingsPageRenderer = (props: {
           </Form>
 
           {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
-            <Card>
+            <Card id="integrations">
               <CardHeader>
                 <CardTitle>Integrations</CardTitle>
                 <CardDescription>
