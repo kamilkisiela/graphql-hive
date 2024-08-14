@@ -14,11 +14,11 @@ export function TeamSection({ className }: { className?: string }) {
         className,
       )}
     >
-      <Heading as="h3" size="md" className="text-green-1000 w-[468px] max-w-full">
+      <Heading as="h3" size="md" className="text-green-1000 w-[468px] max-w-full text-balance">
         Built by The Guild. Industry veterans.
       </Heading>
 
-      <p className="mt-6 w-[468px] max-w-full text-green-800">
+      <p className="mt-4 w-[468px] max-w-full text-green-800 lg:mt-6">
         Contrary to most, we believe in long-term sight, not temporary growth. We believe in extreme
         quality, not scrappy pivots. We believe in open, not locked. We fight for a world where
         software liberates, not confines — ensuring technology serves, not subjugates.
