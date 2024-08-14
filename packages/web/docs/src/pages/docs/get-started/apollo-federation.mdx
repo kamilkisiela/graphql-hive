@@ -1,8 +1,10 @@
 import NextImage from 'next/image'
 import { Callout, Cards, FileTree, Steps, Tabs } from '@theguild/components'
+import cdnAccessTokenSettings from '../../../../public/docs/pages/get-started/apollo-federation/cdn-access-token-settings.png'
 import createAccessToken from '../../../../public/docs/pages/get-started/apollo-federation/create-access-token.png'
+import cdnAccessTokenCreate from '../../../../public/docs/pages/get-started/apollo-federation/create-cdn-access-token.png'
 import createdAccessToken from '../../../../public/docs/pages/get-started/apollo-federation/created-access-token.png'
-
+import cdnAccessTokenCreated from '../../../../public/docs/pages/get-started/apollo-federation/created-cdn-access-token.png'
 import registryTokenSettings from '../../../../public/docs/pages/get-started/apollo-federation/registry-token-settings.png'
 import targetOverview from '../../../../public/docs/pages/get-started/apollo-federation/target-overview.png'
 import cdnTokenImage from '../../../../public/docs/pages/guides/federation-cdn-token.png'
@@ -49,54 +51,15 @@ files on your machine.
   <Tabs.Tab>
 
 ```graphql filename="subgraphs/products.graphql"
-enum CURRENCY_CODE {
-  USD
-}
-
-type Department {
-  category: ProductCategory
-  url: String
-}
-
-type Money {
-  amount: Float
-  currencyCode: CURRENCY_CODE
-}
-
-type Price {
-  cost: Money
-  deal: Float
-  dealSavings: Money
-}
-
-type Product @key(fields: "id") {
-  id: ID!
-  title: String
-  url: String
-  description: String
-  price: Price
-  salesRank(category: ProductCategory = ALL): Int
-  salesRankOverall: Int
-  salesRankInCategory: Int
-  category: ProductCategory
-  images(size: Int = 1000): [String]
-  primaryImage(size: Int = 1000): String
-}
-
-enum ProductCategory {
-  ALL
-  GIFT_CARDS
-  ELECTRONICS
-  CAMERA_N_PHOTO
-  VIDEO_GAMES
-  BOOKS
-  CLOTHING
-}
-
 extend type Query {
-  bestSellers(category: ProductCategory = ALL): [Product]
-  categories: [Department]
-  product(id: ID!): Product
+  topProducts(first: Int = 5): [Product]
+}
+
+type Product @key(fields: "upc") {
+  upc: String!
+  name: String
+  price: Int
+  weight: Int
 }
 ```
 
@@ -104,21 +67,22 @@ extend type Query {
   <Tabs.Tab>
 
 ```graphql filename="subgraphs/reviews.graphql"
-extend type Product @key(fields: "id") {
-  id: ID! @external
-  reviews: [Review]
-  reviewSummary: ReviewSummary
-}
-
 type Review @key(fields: "id") {
   id: ID!
-  rating: Float
-  content: String
+  body: String
+  author: User @provides(fields: "username")
+  product: Product
 }
 
-type ReviewSummary {
-  totalReviews: Int
-  averageRating: Float
+extend type User @key(fields: "id") {
+  id: ID! @external
+  username: String @external
+  reviews: [Review]
+}
+
+extend type Product @key(fields: "upc") {
+  upc: String! @external
+  reviews: [Review]
 }
 ```
 
@@ -343,29 +307,28 @@ On your target's **Explorer** page now, you'll be able to see the schema of both
 Hive can perform several checks on your schema before publishing it to the registry. You can use
 Hive CLI to run these check and find potential breaking changes or composition issues.
 
-Usually, you would run these checks in your subgraphs CI pipeline, to ensure that your subgraph
-schema integrates flawlessly with the other subgraphs in the federation project.
+To see how schema checks works, let's make a small change to our local schema file. First, we'll
+start with a non-breaking change - we'll add a new field to the `Review` type under the **Reviews**
+subgraph:
 
-To see how schema checks works, let's make a small change to our schema. First, we'll start with a
-non-breaking change - we'll add a new field to the `Review` type under the **Reviews** subgraph:
-
-```graphql {11} filename="subgraphs/reviews.graphql"
-extend type Product @key(fields: "id") {
-  id: ID! @external
-  reviews: [Review]
-  reviewSummary: ReviewSummary
-}
-
+```graphql {6} filename="subgraphs/reviews.graphql"
 type Review @key(fields: "id") {
   id: ID!
-  rating: Float
-  content: String
+  body: String
+  author: User @provides(fields: "username")
+  product: Product
   verified: Boolean # new field added
 }
 
-type ReviewSummary {
-  totalReviews: Int
-  averageRating: Float
+extend type User @key(fields: "id") {
+  id: ID! @external
+  username: String @external
+  reviews: [Review]
+}
+
+extend type Product @key(fields: "upc") {
+  upc: String! @external
+  reviews: [Review]
 }
 ```
 
@@ -426,6 +389,8 @@ docker run --name graphql-hive-cli --rm \
 You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
 meaning that the schema is compatible, valid and has no breaking changes:
 
+**TODO: Update logs**
+
 ```bash copy=false
 ℹ Detected 1 change
 
@@ -435,22 +400,23 @@ meaning that the schema is compatible, valid and has no breaking changes:
 Now, are going to try introduce a breaking change. To do that, we'll rename an existing field in the
 GraphQL schema of the **Reviews** subgraph:
 
-```graphql {9} filename="subgraphs/reviews.graphql"
-extend type Product @key(fields: "id") {
-  id: ID! @external
-  reviews: [Review]
-  reviewSummary: ReviewSummary
-}
-
+```graphql {3} filename="subgraphs/reviews.graphql"
 type Review @key(fields: "id") {
   id: ID!
-  averageRating: Float # renamed from "rating"
-  content: String
+  bodyContents: String # renamed from body
+  author: User @provides(fields: "username")
+  product: Product
 }
 
-type ReviewSummary {
-  totalReviews: Int
-  averageRating: Float
+extend type User @key(fields: "id") {
+  id: ID! @external
+  username: String @external
+  reviews: [Review]
+}
+
+extend type Product @key(fields: "upc") {
+  upc: String! @external
+  reviews: [Review]
 }
 ```
 
@@ -508,6 +474,8 @@ docker run --name graphql-hive-cli --rm \
 In that case, you'll notice that Hive CLI exists with a `1` exit code, meaning that the schema has
 breaking changes, and it's not compatible with the current schema in the registry:
 
+**TODO: Update logs**
+
 ```bash copy=false
 ✖ Detected 1 error
 
@@ -526,23 +494,24 @@ schema.
 We are going to add a conflict to the **Reviews** service. We are going to add a new field (`price`)
 to the `Product` type, that conflicts with the `Products` type in the **Products** service.
 
-```graphql {5} filename="subgraphs/reviews.graphql"
-extend type Product @key(fields: "id") {
-  id: ID! @external
-  reviews: [Review]
-  reviewSummary: ReviewSummary
-  price: Int # new field added
-}
-
+```graphql {17} filename="subgraphs/reviews.graphql"
 type Review @key(fields: "id") {
   id: ID!
-  rating: Float
-  content: String
+  body: String
+  author: User @provides(fields: "username")
+  product: Product
 }
 
-type ReviewSummary {
-  totalReviews: Int
-  averageRating: Float
+extend type User @key(fields: "id") {
+  id: ID! @external
+  username: String @external
+  reviews: [Review]
+}
+
+extend type Product @key(fields: "upc") {
+  upc: String! @external
+  reviews: [Review]
+  price: String # type conflicts with the products subgraph
 }
 ```
 
@@ -603,6 +572,8 @@ docker run --name graphql-hive-cli --rm \
 And now you can see that the schema check process has failed, due to conflicts and inconsistencies
 between the schemas:
 
+**TODO: Update logs**
+
 ```bash copy=false
 ✖ Detected 2 errors
 
@@ -617,14 +588,24 @@ between the schemas:
 As you can see schema checks can help you to catch potential issues before you publish your schema
 to the registry.
 
-Schema checks are usually integrated into the Continious Integration (CI) pipeline of your subgraph,
-where schema publishes are made within the Continious Deployment (CD) pipeline.
+Usually, you would run these checks in your subgraphs CI pipeline, to ensure that your subgraph
+schema integrates flawlessly with the other subgraphs in the federation project, where schema
+publishes are made within the Continious Deployment (CD) pipeline to actually publish the latest
+subgraph version to the schema registry.
 
 ### Hive Gateway
 
-The next step to spin up our GraphQL gateway that uses the information published to the schema
-registry for serving the composed GraphQL schema and delegating the GraphQL request to the
-subgraphs.
+The next step is to spin up our GraphQL gateway that will serve the federated GraphQL schema
+composed out of the subgraphs we published to the schema registry.
+
+The Gateway will delegate the requests from the clients to the appropriate subgraph services, and
+then merge the results into a single response.
+
+The Hive schema registry publishes the supergraph (artifact of the composed schemas that contains
+all the information about the subgraphs and fields available) to the high-availability CDN on
+Cloudflare.
+
+The gateway can poll the supergraph from the CDN and serve the composed GraphQL schema.
 
 ```mermaid
 
@@ -649,32 +630,32 @@ flowchart LR
 
 #### CDN Access
 
-The Hive schema registry publishes the supergraph (artifact of the composed schemas that contains
-all the information about the subgraphs and fields available) to the high-availability CDN on
-Cloudflare.
+For accessing the supergraph, we need to create the CDN access token from the Hive dashboard.
 
-The federation gateway can poll the supergraph from the CDN and serve the composed GraphQL schema.
-
-For accessing the supergraph, you need to get the CDN token from the Hive dashboard.
-
-Navigate to your target's page on Hive's dashboard and click on the **Connect to CDN** button. You
-will see a screen with instructions on how to obtain different types of artifacts from the CDN. For
-this guide, you can pick the **Apollo Federation Supergraph** artifact.
+Navigate to your target's settings page and select the **CDN Tokens** tab.
 
 <NextImage
   alt="CDN Token Form"
-  src={cdnTokenImage}
+  src={cdnAccessTokenSettings}
   className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
-Copy the URL and let's try to fetch your schema using `curl` (replace `YOUR_HIVE_CDN_TOKEN` with
-your CDN token, and `CDN_ENDPOINT_HERE` with the endpoint you copied from Hive's dashboard):
+Click the **Create new CDN token** button, give your token a name and click **Create**.
 
-```bash
-curl -L -H "X-Hive-CDN-Key: YOUR_HIVE_CDN_TOKEN" CDN_ENDPOINT_HERE
-```
+<NextImage
+  alt="CDN Token Form"
+  src={cdnAccessTokenCreate}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
 
-You should see that Hive CDN returns the complete Supergraph as an output for that command.
+There will be a confirmation screen showing the CDN token you just created. Make sure to copy it and
+keep it safe.
+
+<NextImage
+  alt="CDN Token Form"
+  src={cdnAccessTokenCreated}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
 
 #### Run the Gateway
 
@@ -812,7 +793,7 @@ gateways built-in GraphiQL interface.
 After executing the query, a few times, let's switch back to the Hive dashboard and navigate to the
 insights page.
 
-{/* TODO: PICTURE */}
+**TODO: INSERT PICTURES**
 
 Here we can now see the GraphQL operations from our Gateway being reported to the registry.
 
@@ -824,5 +805,7 @@ reporting the usage data!
 
 From here you can continue to explore the Hive dashboard, or dive deeper into the documentation to
 learn about all the features of the Hive platform.
+
+**TODO: Link collection**
 
 </Steps>
