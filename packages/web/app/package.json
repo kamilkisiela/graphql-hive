@@ -20,7 +20,7 @@
     "@graphiql/react": "0.22.4",
     "@graphiql/toolkit": "0.9.1",
     "@graphql-codegen/client-preset-swc-plugin": "0.2.0",
-    "@graphql-tools/mock": "9.0.3",
+    "@graphql-tools/mock": "9.0.4",
     "@graphql-typed-document-node/core": "3.2.0",
     "@headlessui/react": "2.1.2",
     "@hookform/resolvers": "3.9.0",
