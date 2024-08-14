@@ -3,7 +3,7 @@ import { SchemaPolicyProvider } from '../providers/schema-policy.provider';
 import { serializeSeverity } from '../utils';
 import type { TargetResolvers } from './../../../__generated__/types.next';
 
-export const Target: Pick<TargetResolvers, 'schemaPolicy'> = {
+export const Target: Pick<TargetResolvers, 'schemaPolicy' | '__isTypeOf'> = {
   schemaPolicy: async (target, _, { injector }) => {
     const { mergedPolicy, orgLevel, projectLevel } = await injector
       .get(SchemaPolicyProvider)

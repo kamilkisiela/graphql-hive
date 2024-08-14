@@ -4,7 +4,7 @@ import type { OrganizationResolvers } from './../../../__generated__/types.next'
 
 export const Organization: Pick<
   OrganizationResolvers,
-  'gitHubIntegration' | 'hasGitHubIntegration' | 'hasSlackIntegration'
+  'gitHubIntegration' | 'hasGitHubIntegration' | 'hasSlackIntegration' | '__isTypeOf'
 > = {
   gitHubIntegration: async (organization, _, { injector }) => {
     const repositories = await injector.get(GitHubIntegrationManager).getRepositories({
