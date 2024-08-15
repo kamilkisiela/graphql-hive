@@ -61,9 +61,7 @@
         "footer": {
           "countRows": false,
           "fields": "",
-          "reducer": [
-            "sum"
-          ],
+          "reducer": ["sum"],
           "show": false
         },
         "frameIndex": 1,
@@ -82,9 +80,7 @@
               "operator": "=",
               "scope": "span",
               "tag": "guid:x-request-id",
-              "value": [
-                "$requestId"
-              ],
+              "value": ["$requestId"],
               "valueType": "string"
             }
           ],
