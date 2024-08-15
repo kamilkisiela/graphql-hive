@@ -99,7 +99,7 @@ function GetStartedTodaySection({ className }: { className?: string }) {
         className,
       )}
     >
-      <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
+      <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 sm:-left-1/4 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
       <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
       <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
       <Heading as="h3" size="md" className="text-white">
@@ -110,7 +110,7 @@ function GetStartedTodaySection({ className }: { className?: string }) {
         30&nbsp;days trial period.
       </p>
       <CallToAction
-        variant="primary-inverted"
+      variant="primary-inverted"
         className="mx-auto mt-8"
         href="https://app.graphql-hive.com/"
       >
@@ -169,7 +169,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
 
 function UltimatePerformanceCards() {
   return (
-    <section className="px-4 py-6 sm:py-24 md:px-6 md:py-12">
+    <section className="px-4 py-6 sm:py-12 md:px-6">
       <Heading as="h3" size="md" className="text-balance text-center">
         GraphQL for the ultimate performance
       </Heading>
