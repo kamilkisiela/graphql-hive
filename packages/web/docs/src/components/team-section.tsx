@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import { GlobeIcon } from '@radix-ui/react-icons';
 import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
 import { cn } from '../lib';
