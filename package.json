@@ -127,7 +127,7 @@
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "@graphiql/react@1.0.0-alpha.2": "patches/@graphiql__react@1.0.0-alpha.2.patch"
+      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch"
     }
   }
 }

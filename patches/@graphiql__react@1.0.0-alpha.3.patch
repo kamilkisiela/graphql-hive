@@ -1,8 +1,8 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 8472eea02eeae9850f5dfbd70d4d7f4c2affea61..df93990a46cf42d2b312b6214c44eddbb55b6f8c 100644
+index 567480ba5ccc30619db2eb8e6da8d618ddb5e891..c49c573893a26897062cda2af9896bc69881db2a 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -3054,14 +3054,16 @@ function useSetEditorValues({
+@@ -3056,14 +3056,16 @@ function useSetEditorValues({
    );
  }
  function createTab({
@@ -22,7 +22,7 @@ index 8472eea02eeae9850f5dfbd70d4d7f4c2affea61..df93990a46cf42d2b312b6214c44eddb
      query,
      variables,
      headers,
-@@ -3079,8 +3081,7 @@ function setPropertiesInActiveTab(state, partialTab) {
+@@ -3081,8 +3083,7 @@ function setPropertiesInActiveTab(state, partialTab) {
        const newTab = { ...tab, ...partialTab };
        return {
          ...newTab,
@@ -32,7 +32,7 @@ index 8472eea02eeae9850f5dfbd70d4d7f4c2affea61..df93990a46cf42d2b312b6214c44eddb
        };
      })
    };
-@@ -3302,25 +3303,31 @@ function EditorContextProvider(props) {
+@@ -3304,25 +3305,31 @@ function EditorContextProvider(props) {
      responseEditor,
      defaultHeaders
    });
@@ -83,7 +83,7 @@ index 8472eea02eeae9850f5dfbd70d4d7f4c2affea61..df93990a46cf42d2b312b6214c44eddb
    const changeTab = useCallback(
      (index) => {
        setTabState((current) => {
-@@ -3416,6 +3423,7 @@ function EditorContextProvider(props) {
+@@ -3418,6 +3425,7 @@ function EditorContextProvider(props) {
    const value = useMemo(
      () => ({
        ...tabState,
