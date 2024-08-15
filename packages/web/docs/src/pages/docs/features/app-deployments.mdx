@@ -315,6 +315,10 @@ curl \
 Once you have the persisted documents available on your GraphQL server or Gateway, you can send a
 GraphQL request with the persisted document ID following the GraphQL over HTTP specification.
 
+<Tabs items={["curl", "Apollo Client"]}>
+
+<Tabs.Tab>
+
 ```text filename="GraphQL Request with Persisted Document"
 POST /graphql
 Content-Type: application/json
@@ -338,6 +342,59 @@ curl \
   -d '{"documentId": "<app_name>~<app_version>~<document_hash>"}' \
   http://localhost:4000/graphql
 ```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+The code demonstrates how to send a persisted document request using Apollo Client. Make sure to
+replace the placeholders with your actual values.
+
+```typescript filename="Apollo Client Persisted Document Configuration"
+import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
+import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
+
+// replace <app_name>, <app_version>, and with your values
+const appVersionPrefix = '<app_name>~<app_version>~'
+
+const persistedQueriesLink = createPersistedQueryLink({
+  generateHash(document) {
+    // GraphQL Code Generator Client Preset generates
+    // the persisted document ID within the document node.
+    // For other implementations return the hash prefixed with the app version.
+    return appVersionPrefix + document['__metadata__']['hash']
+  }
+})
+
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql',
+  fetch(url, init) {
+    const parsedBody = JSON.parse(init!.body as string)
+    return fetch(url, {
+      ...init,
+      body: JSON.stringify({
+        variables: parsedBody.variables,
+        documentId: parsedBody.extensions.persistedQuery.sha256Hash,
+        extensions: { ...parsedBody.extensions, persistedQuery: undefined }
+      })
+    })
+  }
+})
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  link: persistedQueriesLink.concat(httpLink)
+})
+```
+
+| Parameter       | Description                        |
+| --------------- | ---------------------------------- |
+| `<app_name>`    | The name of the app deployment.    |
+| `<app_version>` | The version of the app deployment. |
+
+</Tabs.Tab>
+
+</Tabs>
 
 ## Continous Deployment (CD) Integration
 
