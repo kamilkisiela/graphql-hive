@@ -110,7 +110,7 @@ function GetStartedTodaySection({ className }: { className?: string }) {
         30&nbsp;days trial period.
       </p>
       <CallToAction
-      variant="primary-inverted"
+        variant="primary-inverted"
         className="mx-auto mt-8"
         href="https://app.graphql-hive.com/"
       >

@@ -1,6 +1,12 @@
 export function ArchDecoration(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg width="432" height="432" {...props}>
+    <svg
+      width="432"
+      height="432"
+      viewBox="0 0 432 432"
+      preserveAspectRatio="xMidYMid meet"
+      {...props}
+    >
       <path
         d="M.75 431v.25h90.24V160.868c0-38.596 31.282-69.878 69.878-69.878H431.25V.75H191.864a47.017 47.017 0 0 0-33.23 13.771l-68.07 68.071-7.972 7.971-68.07 68.071A47.018 47.018 0 0 0 .75 191.864V431Z"
         fill="url(#arch-decoration-a)"
@@ -13,7 +19,7 @@ export function ArchDecoration(props: React.SVGProps<SVGSVGElement>) {
 
 export function ArchDecorationGradientDefs() {
   return (
-    <svg width="432" height="432" className="absolute -z-10">
+    <svg width="432" height="432" viewBox="0 0 432 432" className="absolute -z-10">
       <defs>
         <linearGradient
           id="arch-decoration-a"
