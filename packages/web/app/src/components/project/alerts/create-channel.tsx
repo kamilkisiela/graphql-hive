@@ -29,7 +29,7 @@ import { graphql } from '@/gql';
 import { AlertChannelType } from '@/gql/graphql';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-const ADD_ALERT_CHANNEL_MUTATION = graphql(`
+export const CreateChannel_AddAlertChannelMutation = graphql(`
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
     addAlertChannel(input: $input) {
       ok {
@@ -110,7 +110,7 @@ export const CreateChannelModal = (props: {
   userHasSlackIntegration: boolean;
   hasAccessToSettingsIntegration: string[];
 }): ReactElement => {
-  const [, mutate] = useMutation(ADD_ALERT_CHANNEL_MUTATION);
+  const [, mutate] = useMutation(CreateChannel_AddAlertChannelMutation);
   const { toast } = useToast();
 
   const form = useForm<CreateChannelFormValues>({
