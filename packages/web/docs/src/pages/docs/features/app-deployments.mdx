@@ -315,7 +315,7 @@ curl \
 Once you have the persisted documents available on your GraphQL server or Gateway, you can send a
 GraphQL request with the persisted document ID following the GraphQL over HTTP specification.
 
-<Tabs items={["curl", "Apollo Client"]}>
+<Tabs items={["curl", "Apollo Client", "Urql"]}>
 
 <Tabs.Tab>
 
@@ -367,7 +367,7 @@ const persistedQueriesLink = createPersistedQueryLink({
 })
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: '/graphql',
   fetch(url, init) {
     const parsedBody = JSON.parse(init!.body as string)
     return fetch(url, {
@@ -384,6 +384,49 @@ const httpLink = new HttpLink({
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: persistedQueriesLink.concat(httpLink)
+})
+```
+
+| Parameter       | Description                        |
+| --------------- | ---------------------------------- |
+| `<app_name>`    | The name of the app deployment.    |
+| `<app_version>` | The version of the app deployment. |
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+The code demonstrates how to send a persisted document request using Urql. Make sure to replace the
+placeholders with your actual values.
+
+```typescript filename="Urql Persisted Document Configuration"
+import { createClient, fetchExchange, mapExchange } from 'urql';
+
+// replace <app_name>, <app_version>, and with your values
+const appVersionPrefix = '<app_name>~<app_version>~'
+
+const urqlClient = createClient({
+  url: '/graphql',
+  exchanges: [
+    mapExchange({
+          onOperation(op) {
+            return {
+              ...op,
+              query: {
+                documentId:
+                  // GraphQL Code Generator Client Preset generates
+                  // the persisted document ID within the document node.
+                  // For other implementations return the hash prefixed with the app version.
+                  appVersionPrefix +
+                  (op.query as any)?.['__meta__']?.['hash'],
+                definitions: [],
+              } as any,
+            };
+          },
+        })
+      : null,
+    fetchExchange,
+  ],
 })
 ```
 
