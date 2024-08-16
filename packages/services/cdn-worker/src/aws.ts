@@ -139,7 +139,7 @@ export class AwsClient {
         }
       } catch (error) {
         // Retry also when there's an exception
-        console.error(error);
+        console.error('EMERGENCY_DEBUG', error);
       }
       await new Promise(resolve =>
         setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)),
