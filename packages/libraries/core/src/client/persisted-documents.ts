@@ -1,6 +1,6 @@
 import type { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue.js';
 import LRU from 'tiny-lru';
-import { http } from './http-client';
+import { http } from './http-client.js';
 import type { Logger, PersistedDocumentsConfiguration } from './types';
 
 type HeadersObject = {
