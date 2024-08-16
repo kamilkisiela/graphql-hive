@@ -5166,69 +5166,69 @@ async function updateSchemaCoordinateStatus(
 
   if (args.coordinatesDiff.deleted) {
     console.log('DELETED', JSON.stringify(Array.from(args.coordinatesDiff.deleted)));
-    // actions.push(
-    //   trx.query(sql`/* schema_coordinate_status_deleted */
-    //   DELETE FROM schema_coordinate_status
-    //   WHERE
-    //     target_id = ${args.targetId}
-    //     AND
-    //     coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deleted), 'text')})
-    //     AND
-    //     created_at <= NOW()
-    // `),
-    // );
+    actions.push(
+      trx.query(sql`/* schema_coordinate_status_deleted */
+      DELETE FROM schema_coordinate_status
+      WHERE
+        target_id = ${args.targetId}
+        AND
+        coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deleted), 'text')})
+        AND
+        created_at <= NOW()
+    `),
+    );
   }
 
   if (args.coordinatesDiff.added) {
     console.log('ADDED', JSON.stringify(Array.from(args.coordinatesDiff.added)));
-    // actions.push(
-    //   trx.query(sql`/* schema_coordinate_status_inserted */
-    //     INSERT INTO schema_coordinate_status
-    //     ( target_id, coordinate, created_in_version_id, deprecated_at, deprecated_in_version_id )
-    //     SELECT * FROM ${sql.unnest(
-    //       Array.from(args.coordinatesDiff.added).map(coordinate => {
-    //         const isDeprecatedAsWell = args.coordinatesDiff.deprecated.has(coordinate);
-    //         return [
-    //           args.targetId,
-    //           coordinate,
-    //           args.versionId,
-    //           // if it's added and deprecated at the same time
-    //           isDeprecatedAsWell ? 'NOW()' : null,
-    //           isDeprecatedAsWell ? args.versionId : null,
-    //         ];
-    //       }),
-    //       ['uuid', 'text', 'uuid', 'date', 'uuid'],
-    //     )}
-    //   `),
-    // );
+    actions.push(
+      trx.query(sql`/* schema_coordinate_status_inserted */
+        INSERT INTO schema_coordinate_status
+        ( target_id, coordinate, created_in_version_id, deprecated_at, deprecated_in_version_id )
+        SELECT * FROM ${sql.unnest(
+          Array.from(args.coordinatesDiff.added).map(coordinate => {
+            const isDeprecatedAsWell = args.coordinatesDiff.deprecated.has(coordinate);
+            return [
+              args.targetId,
+              coordinate,
+              args.versionId,
+              // if it's added and deprecated at the same time
+              isDeprecatedAsWell ? 'NOW()' : null,
+              isDeprecatedAsWell ? args.versionId : null,
+            ];
+          }),
+          ['uuid', 'text', 'uuid', 'date', 'uuid'],
+        )}
+      `),
+    );
   }
 
   if (args.coordinatesDiff.undeprecated) {
     console.log('UNDEPRECATED', JSON.stringify(Array.from(args.coordinatesDiff.undeprecated)));
-    // actions.push(
-    //   trx.query(sql`/* schema_coordinate_status_undeprecated */
-    //   UPDATE schema_coordinate_status
-    //   SET deprecated_at = NULL, deprecated_in_version_id = NULL
-    //   WHERE
-    //     target_id = ${args.targetId}
-    //     AND
-    //     coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.undeprecated), 'text')})
-    // `),
-    // );
+    actions.push(
+      trx.query(sql`/* schema_coordinate_status_undeprecated */
+      UPDATE schema_coordinate_status
+      SET deprecated_at = NULL, deprecated_in_version_id = NULL
+      WHERE
+        target_id = ${args.targetId}
+        AND
+        coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.undeprecated), 'text')})
+    `),
+    );
   }
 
   await Promise.all(actions);
 
   if (args.coordinatesDiff.deprecated) {
     console.log('DEPRECATED', JSON.stringify(Array.from(args.coordinatesDiff.deprecated)));
-    // await trx.query(sql`/* schema_coordinate_status_deprecated */
-    //   UPDATE schema_coordinate_status
-    //   SET deprecated_at = NOW(), deprecated_in_version_id = ${args.versionId}
-    //   WHERE
-    //     target_id = ${args.targetId}
-    //     AND
-    //     coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deprecated), 'text')})
-    // `);
+    await trx.query(sql`/* schema_coordinate_status_deprecated */
+      UPDATE schema_coordinate_status
+      SET deprecated_at = NOW(), deprecated_in_version_id = ${args.versionId}
+      WHERE
+        target_id = ${args.targetId}
+        AND
+        coordinate = ANY(${sql.array(Array.from(args.coordinatesDiff.deprecated), 'text')})
+    `);
   }
 }
 

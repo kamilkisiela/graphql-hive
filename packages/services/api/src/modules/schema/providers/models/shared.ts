@@ -208,7 +208,7 @@ export type SchemaPublishFailureReason =
       code: (typeof PublishFailureReasonCode)['BreakingChanges'];
       breakingChanges: Array<SchemaChangeType>;
       changes: Array<SchemaChangeType>;
-      coordinatesDiff: SchemaCoordinatesDiffResult;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
     };
 
 type ContractResult = {

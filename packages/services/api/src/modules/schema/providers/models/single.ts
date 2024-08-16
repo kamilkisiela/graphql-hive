@@ -242,15 +242,26 @@ export class SingleModel {
       contracts: null,
     });
 
-    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
-      orchestrator: this.orchestrator,
-      version: comparedVersion,
-      organization,
-      project,
-      targetId: target.id,
-    });
+    const [previousVersionSdl, previousComposableVersionSdl] = await Promise.all([
+      this.checks.retrievePreviousVersionSdl({
+        orchestrator: this.orchestrator,
+        version: comparedVersion,
+        organization,
+        project,
+        targetId: target.id,
+      }),
+      latestComposable
+        ? this.checks.retrievePreviousVersionSdl({
+            orchestrator: this.orchestrator,
+            version: latestComposable,
+            organization,
+            project,
+            targetId: target.id,
+          })
+        : null,
+    ]);
 
-    const [metadataCheck, diffCheck] = await Promise.all([
+    const [metadataCheck, diffCheck, coordinatesDiff] = await Promise.all([
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
       this.checks.diff({
         conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
@@ -259,6 +270,10 @@ export class SingleModel {
         approvedChanges: null,
         existingSdl: previousVersionSdl,
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
+      this.checks.coordinatesDiff({
+        existingComposableSchema: previousComposableVersionSdl,
+        incomingComposableSchema: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
     ]);
 
@@ -307,11 +322,7 @@ export class SingleModel {
         changes: diffCheck.result?.all ?? diffCheck.reason?.all ?? null,
         messages,
         breakingChanges: null,
-        coordinatesDiff:
-          diffCheck.result?.coordinatesDiff ??
-          diffCheck.reason?.coordinatesDiff ??
-          diffCheck.data?.coordinatesDiff ??
-          null,
+        coordinatesDiff,
         compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,

@@ -161,6 +161,7 @@ export class CompositeLegacyModel {
     input,
     target,
     latest,
+    latestComposable,
     project,
     organization,
     baseSchema,
@@ -171,6 +172,11 @@ export class CompositeLegacyModel {
     organization: Organization;
     target: Target;
     latest: {
+      isComposable: boolean;
+      sdl: string | null;
+      schemas: PushedCompositeSchema[];
+    } | null;
+    latestComposable: {
       isComposable: boolean;
       sdl: string | null;
       schemas: PushedCompositeSchema[];
@@ -275,15 +281,26 @@ export class CompositeLegacyModel {
       contracts: null,
     });
 
-    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
-      orchestrator,
-      version: latestVersion,
-      organization,
-      project,
-      targetId: target.id,
-    });
+    const [previousVersionSdl, previousComposableVersionSdl] = await Promise.all([
+      this.checks.retrievePreviousVersionSdl({
+        orchestrator,
+        version: latestVersion,
+        organization,
+        project,
+        targetId: target.id,
+      }),
+      latestComposable
+        ? this.checks.retrievePreviousVersionSdl({
+            orchestrator,
+            version: latestComposable,
+            organization,
+            project,
+            targetId: target.id,
+          })
+        : null,
+    ]);
 
-    const [diffCheck, metadataCheck] = await Promise.all([
+    const [diffCheck, metadataCheck, coordinatesDiff] = await Promise.all([
       this.checks.diff({
         includeUrlChanges: {
           schemasBefore: latestVersion?.schemas ?? [],
@@ -300,6 +317,10 @@ export class CompositeLegacyModel {
             status: 'skipped' as const,
           }
         : this.checks.metadata(incoming, previousService ?? null),
+      this.checks.coordinatesDiff({
+        existingComposableSchema: previousComposableVersionSdl,
+        incomingComposableSchema: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
     ]);
 
     const compositionErrors =
@@ -347,11 +368,7 @@ export class CompositeLegacyModel {
           messages,
           changes,
           breakingChanges: breakingChanges ?? null,
-          coordinatesDiff:
-            diffCheck.result?.coordinatesDiff ??
-            diffCheck.reason?.coordinatesDiff ??
-            diffCheck.data?.coordinatesDiff ??
-            null,
+          coordinatesDiff,
           compositionErrors,
           schema: incoming,
           schemas,
@@ -377,7 +394,7 @@ export class CompositeLegacyModel {
         code: PublishFailureReasonCode.BreakingChanges,
         changes: diffCheck.reason.all ?? [],
         breakingChanges: diffCheck.reason.breaking ?? [],
-        coordinatesDiff: diffCheck.reason?.coordinatesDiff ?? null,
+        coordinatesDiff,
       });
     }
 

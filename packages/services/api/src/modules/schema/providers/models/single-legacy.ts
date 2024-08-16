@@ -144,6 +144,7 @@ export class SingleLegacyModel {
     input,
     target,
     latest,
+    latestComposable,
     project,
     organization,
     baseSchema,
@@ -154,6 +155,11 @@ export class SingleLegacyModel {
     organization: Organization;
     target: Target;
     latest: {
+      isComposable: boolean;
+      sdl: string | null;
+      schemas: [SingleSchema];
+    } | null;
+    latestComposable: {
       isComposable: boolean;
       sdl: string | null;
       schemas: [SingleSchema];
@@ -215,15 +221,26 @@ export class SingleLegacyModel {
       contracts: null,
     });
 
-    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
-      orchestrator: this.orchestrator,
-      version: latestVersion,
-      organization,
-      project,
-      targetId: target.id,
-    });
+    const [previousVersionSdl, previousComposableVersionSdl] = await Promise.all([
+      this.checks.retrievePreviousVersionSdl({
+        orchestrator: this.orchestrator,
+        version: latestVersion,
+        organization,
+        project,
+        targetId: target.id,
+      }),
+      latestComposable
+        ? this.checks.retrievePreviousVersionSdl({
+            orchestrator: this.orchestrator,
+            version: latestComposable,
+            organization,
+            project,
+            targetId: target.id,
+          })
+        : null,
+    ]);
 
-    const [diffCheck, metadataCheck] = await Promise.all([
+    const [diffCheck, metadataCheck, coordinatesDiff] = await Promise.all([
       this.checks.diff({
         conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
         includeUrlChanges: false,
@@ -233,6 +250,10 @@ export class SingleLegacyModel {
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
+      this.checks.coordinatesDiff({
+        existingComposableSchema: previousComposableVersionSdl,
+        incomingComposableSchema: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
     ]);
 
     const compositionErrors =
@@ -279,11 +300,7 @@ export class SingleLegacyModel {
           messages,
           changes,
           breakingChanges: breakingChanges ?? null,
-          coordinatesDiff:
-            diffCheck.result?.coordinatesDiff ??
-            diffCheck.reason?.coordinatesDiff ??
-            diffCheck.data?.coordinatesDiff ??
-            null,
+          coordinatesDiff,
           compositionErrors,
           schema: incoming,
           schemas,
@@ -309,7 +326,7 @@ export class SingleLegacyModel {
         code: PublishFailureReasonCode.BreakingChanges,
         changes: diffCheck.reason.all ?? [],
         breakingChanges: diffCheck.reason.breaking ?? [],
-        coordinatesDiff: diffCheck.reason?.coordinatesDiff ?? null,
+        coordinatesDiff,
       });
     }
 
