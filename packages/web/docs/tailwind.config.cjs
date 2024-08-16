@@ -1,4 +1,5 @@
 const config = require('@theguild/tailwind-config');
+const plugin = require('tailwindcss/plugin');
 const { fontFamily } = require('tailwindcss/defaultTheme');
 
 module.exports = {
@@ -52,5 +53,14 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-radix')({ variantPrefix: 'rdx' })],
+  plugins: [
+    require('tailwindcss-radix')({ variantPrefix: 'rdx' }),
+    plugin(({ addUtilities }) => {
+      addUtilities({
+        '.mask-image-none': {
+          'mask-image': 'none',
+        },
+      });
+    }),
+  ],
 };

@@ -3,6 +3,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
+import { CommunitySection } from './community-section';
 import { CompanyTestimonialsSection } from './company-testimonials';
 import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
@@ -86,6 +87,7 @@ export function IndexPage(): ReactElement {
         <EnterpriseFocusedCards className="mx-4 mt-6 md:mx-6" />
         <Pricing />
         <TeamSection className="mx-4 md:mx-6" />
+        <CommunitySection className="mx-4 mt-6 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
