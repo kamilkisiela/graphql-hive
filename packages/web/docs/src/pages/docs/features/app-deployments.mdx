@@ -315,7 +315,7 @@ curl \
 Once you have the persisted documents available on your GraphQL server or Gateway, you can send a
 GraphQL request with the persisted document ID following the GraphQL over HTTP specification.
 
-<Tabs items={["curl", "Apollo Client", "Urql"]}>
+<Tabs items={["curl", "Apollo Client", "Urql", "Relay"]}>
 
 <Tabs.Tab>
 
@@ -362,6 +362,9 @@ const persistedQueriesLink = createPersistedQueryLink({
     // GraphQL Code Generator Client Preset generates
     // the persisted document ID within the document node.
     // For other implementations return the hash prefixed with the app version.
+    if (document?.['__metadata__']?.['hash']) {
+      throw Error('Hash not available for document')
+    }
     return appVersionPrefix + document['__metadata__']['hash']
   }
 })
@@ -410,6 +413,10 @@ const urqlClient = createClient({
   exchanges: [
     mapExchange({
           onOperation(op) {
+            if (op.query?.['__metadata__']?.['hash']) {
+              throw Error("Hash not available for document")
+            }
+
             return {
               ...op,
               query: {
@@ -418,9 +425,9 @@ const urqlClient = createClient({
                   // the persisted document ID within the document node.
                   // For other implementations return the hash prefixed with the app version.
                   appVersionPrefix +
-                  (op.query as any)?.['__meta__']?.['hash'],
+                  op.query['__meta__']['hash'],
                 definitions: [],
-              } as any,
+              },
             };
           },
         })
@@ -434,6 +441,29 @@ const urqlClient = createClient({
 | --------------- | ---------------------------------- |
 | `<app_name>`    | The name of the app deployment.    |
 | `<app_version>` | The version of the app deployment. |
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Configure Relay to generate persisted document hashes.
+
+```typescript filename="Relay Persisted Document Configuration"
+function fetchQuery(operation, variables) {
+  return fetch('/graphql', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      documentId: operation.id, // NOTE: pass md5 hash to the server
+      variables
+    })
+  }).then(response => {
+    return response.json()
+  })
+}
+```
 
 </Tabs.Tab>
 
