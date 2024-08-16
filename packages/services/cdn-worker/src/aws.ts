@@ -134,7 +134,6 @@ export class AwsClient {
 
   async fetch(input: RequestInfo, init: AwsRequestInit): Promise<Response> {
     for (let i = 0; i <= this.retries; i++) {
-      console.log('GO');
       const fetched = fetch(await this.sign(input, init));
       if (i === this.retries) {
         return fetched; // No need to await if we're returning anyway
