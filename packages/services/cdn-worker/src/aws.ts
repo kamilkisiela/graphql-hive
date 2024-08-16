@@ -100,7 +100,6 @@ export class AwsClient {
           method,
           url,
           headers,
-          signal: init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
         },
         init,
       );
@@ -113,8 +112,15 @@ export class AwsClient {
       input = url;
     }
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
-    const signed = Object.assign({}, init, await signer.sign());
+    const signed = Object.assign(
+      {
+        signal: init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
+      },
+      init,
+      await signer.sign(),
+    );
     delete signed.aws;
+
     try {
       return new Request(signed.url.toString(), signed);
     } catch (e) {
@@ -138,6 +144,7 @@ export class AwsClient {
           return res;
         }
       } catch (error) {
+
         // Retry also when there's an exception
         console.error(error);
       }
