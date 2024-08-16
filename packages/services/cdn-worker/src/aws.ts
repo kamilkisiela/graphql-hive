@@ -144,7 +144,6 @@ export class AwsClient {
           return res;
         }
       } catch (error) {
-        console.log('no');
 
         // Retry also when there's an exception
         console.error(error);
