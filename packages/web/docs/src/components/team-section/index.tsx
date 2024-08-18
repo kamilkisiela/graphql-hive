@@ -1,9 +1,11 @@
+import { StaticImageData } from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
 import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
-import { cn } from '../lib';
-import { ArrowIcon } from './arrow-icon';
-import { CallToAction } from './call-to-action';
-import { Heading } from './heading';
+import { cn } from '../../lib';
+import { ArrowIcon } from '../arrow-icon';
+import { CallToAction } from '../call-to-action';
+import { Heading } from '../heading';
+import noamPhoto from './noam.webp';
 
 export function TeamSection({ className }: { className?: string }) {
   return (
@@ -45,22 +47,66 @@ export function TeamSection({ className }: { className?: string }) {
   );
 }
 
-type TeamMember = [name: string, avatar: string, social: string];
+type TeamMember = [name: string, avatar: string | StaticImageData, social: string];
 const team: TeamMember[] = [
-  ['Denis Badurina', '', ''],
-  ['Dimitri Postolov', '', ''],
-  ['Dotan Simha', '', ''],
-  ['Gil Gardosh', '', ''],
+  [
+    'Denis Badurina',
+    'https://avatars.githubusercontent.com/enisdenjo?v=4&s=120',
+    'https://github.com/enisdenjo',
+  ],
+  [
+    'Dimitri Postolov',
+    'https://avatars.githubusercontent.com/dimaMachina?v=4&s=120',
+    'https://github.com/dimaMachina',
+  ],
+  [
+    'Dotan Simha',
+    'https://avatars.githubusercontent.com/dotansimha?v=4&s=120',
+    'https://github.com/dotansimha',
+  ],
+  [
+    'Gil Gardosh',
+    'https://avatars.githubusercontent.com/gilgardosh?v=4&s=120',
+    'https://github.com/gilgardosh',
+  ],
 
-  ['Kamil Kisiela', '', ''],
-  ['Laurin Quast', '', ''],
-  ['Noam Malka', '', ''],
-  ['Saihajpreet Singh', '', ''],
+  [
+    'Kamil Kisiela',
+    'https://avatars.githubusercontent.com/kamilkisiela?v=4&s=120',
+    'https://github.com/kamilkisiela',
+  ],
+  [
+    'Laurin Quast',
+    'https://avatars.githubusercontent.com/n1ru4l?v=4&s=120',
+    'https://github.com/n1ru4l',
+  ],
+  ['Noam Malka', noamPhoto, 'https://noam-malka.com/'],
+  [
+    'Saihajpreet Singh',
+    'https://avatars.githubusercontent.com/saihaj?v=4&s=120',
+    'https://github.com/saihaj',
+  ],
 
-  ['Tuval Simha', '', ''],
-  ['Uri Goldshtein', '', ''],
-  ['Valentin Cocaud', '', ''],
-  ['Yassin Eldeeb', '', ''],
+  [
+    'Tuval Simha',
+    'https://avatars.githubusercontent.com/tuvalsimha?v=4&s=120',
+    'https://github.com/tuvalsimha',
+  ],
+  [
+    'Uri Goldshtein',
+    'https://avatars.githubusercontent.com/Urigo?v=4&s=120',
+    'https://github.com/Urigo',
+  ],
+  [
+    'Valentin Cocaud',
+    'https://avatars.githubusercontent.com/EmrysMyrddin?v=4&s=120',
+    'https://github.com/EmrysMyrddin',
+  ],
+  [
+    'Yassin Eldeeb',
+    'https://avatars.githubusercontent.com/YassinEldeeb?v=4&s=120',
+    'https://github.com/YassinEldeeb',
+  ],
 ];
 
 function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
