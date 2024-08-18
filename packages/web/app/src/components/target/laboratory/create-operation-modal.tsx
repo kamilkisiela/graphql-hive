@@ -72,8 +72,8 @@ const createOperationModalFormSchema = z.object({
     .string({
       required_error: 'Operation name is required',
     })
-    .min(2, {
-      message: 'Operation name must be at least 2 characters long',
+    .min(3, {
+      message: 'Operation name must be at least 3 characters long',
     })
     .max(50, {
       message: 'Operation name must be less than 50 characters long',
