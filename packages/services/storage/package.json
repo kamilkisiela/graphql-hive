@@ -30,7 +30,7 @@
     "param-case": "3.0.4",
     "pg-promise": "11.9.1",
     "slonik": "30.4.4",
-    "slonik-interceptor-query-logging": "45.6.0",
+    "slonik-interceptor-query-logging": "46.0.1",
     "slonik-utilities": "1.9.4",
     "tslib": "2.6.3",
     "typescript": "5.5.4",
