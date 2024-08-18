@@ -102,7 +102,7 @@ export function DeleteOperationModalContent(props: {
       <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
           <DialogTitle>Delete Operation</DialogTitle>
-          <DialogDescription>Are you sure you wish to delete this operation?</DialogDescription>
+          <DialogDescription>Do you really want to delete this operation?</DialogDescription>
           <DialogDescription>
             <span className="font-bold">This action is irreversible!</span>
           </DialogDescription>
