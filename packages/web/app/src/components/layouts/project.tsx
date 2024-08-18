@@ -15,7 +15,6 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { UserMenu } from '@/components/ui/user-menu';
-import { Tabs } from '@/components/v2/tabs';
 import { graphql } from '@/gql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useToggle } from '@/lib/hooks';
@@ -25,6 +24,7 @@ import { Link, useRouter } from '@tanstack/react-router';
 import { ProjectMigrationToast } from '../project/migration-toast';
 import { HiveLink } from '../ui/hive-link';
 import { PlusIcon } from '../ui/icon';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { ProjectSelector } from './project-selector';
 
 export enum Page {
@@ -130,8 +130,8 @@ export function ProjectLayout({
         <div className="container flex items-center justify-between">
           {currentOrganization && currentProject ? (
             <Tabs value={page}>
-              <Tabs.List>
-                <Tabs.Trigger value={Page.Targets} asChild>
+              <TabsList variant="menu">
+                <TabsTrigger variant="menu" value={Page.Targets} asChild>
                   <Link
                     to="/$organizationId/$projectId"
                     params={{
@@ -141,9 +141,9 @@ export function ProjectLayout({
                   >
                     Targets
                   </Link>
-                </Tabs.Trigger>
+                </TabsTrigger>
                 {canAccessProject(ProjectAccessScope.Alerts, currentOrganization.me) && (
-                  <Tabs.Trigger value={Page.Alerts} asChild>
+                  <TabsTrigger variant="menu" value={Page.Alerts} asChild>
                     <Link
                       to="/$organizationId/$projectId/view/alerts"
                       params={{
@@ -153,11 +153,11 @@ export function ProjectLayout({
                     >
                       Alerts
                     </Link>
-                  </Tabs.Trigger>
+                  </TabsTrigger>
                 )}
                 {canAccessProject(ProjectAccessScope.Settings, currentOrganization.me) && (
                   <>
-                    <Tabs.Trigger value={Page.Policy} asChild>
+                    <TabsTrigger variant="menu" value={Page.Policy} asChild>
                       <Link
                         to="/$organizationId/$projectId/view/policy"
                         params={{
@@ -167,8 +167,8 @@ export function ProjectLayout({
                       >
                         Policy
                       </Link>
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.Settings} asChild>
+                    </TabsTrigger>
+                    <TabsTrigger variant="menu" value={Page.Settings} asChild>
                       <Link
                         to="/$organizationId/$projectId/view/settings"
                         params={{
@@ -178,10 +178,10 @@ export function ProjectLayout({
                       >
                         Settings
                       </Link>
-                    </Tabs.Trigger>
+                    </TabsTrigger>
                   </>
                 )}
-              </Tabs.List>
+              </TabsList>
             </Tabs>
           ) : (
             <div className="flex flex-row gap-x-8 border-b-2 border-b-transparent px-4 py-3">
