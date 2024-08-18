@@ -191,7 +191,7 @@ export class Observability {
                   // By defualt, Envoy reports this as full URL, but we only want the path
                   'replace_pattern(attributes["http.url"], "https?://[^/]+(/[^?#]*)", "$$1") where attributes["component"] == "proxy"',
                   // Replace Envoy default span name with a more human-readable one (e.g. "METHOD /path")
-                  'set(name, Concat([attributes["http.method"], attributes["http.url"]], " ")) where attributes["component"] == "proxy"',
+                  'set(name, Concat([attributes["http.method"], attributes["http.url"]], " ")) where attributes["component"] == "proxy" and attributes["http.method"] != nil',
                 ],
               },
             ],
