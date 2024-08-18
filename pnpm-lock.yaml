@@ -695,11 +695,11 @@ importers:
         specifier: 6.1.4
         version: 6.1.4
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sentry/types':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@slack/web-api':
         specifier: 7.3.4
         version: 7.3.4
@@ -890,8 +890,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -974,8 +974,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sentry/tracing':
         specifier: 7.114.0
         version: 7.114.0
@@ -1019,8 +1019,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -1067,8 +1067,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@theguild/federation-composition':
         specifier: 0.12.1
         version: 0.12.1(graphql@16.9.0)
@@ -1131,7 +1131,7 @@ importers:
         version: 6.3.1(@envelop/core@5.0.1)(graphql@16.9.0)
       '@envelop/sentry':
         specifier: 7.1.1
-        version: 7.1.1(@envelop/core@5.0.1)(@sentry/node@7.118.0)(graphql@16.9.0)
+        version: 7.1.1(@envelop/core@5.0.1)(@sentry/node@7.119.0)(graphql@16.9.0)
       '@envelop/types':
         specifier: 5.0.0
         version: 5.0.0
@@ -1181,8 +1181,8 @@ importers:
         specifier: 7.114.0
         version: 7.114.0
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@swc/core':
         specifier: 1.6.13
         version: 1.6.13(@swc/helpers@0.5.11)
@@ -1278,14 +1278,14 @@ importers:
         specifier: 1.25.1
         version: 1.25.1
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sentry/types':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sentry/utils':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       fastify:
         specifier: 4.28.1
         version: 4.28.1
@@ -1317,11 +1317,11 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sentry/types':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@tgriesser/schemats':
         specifier: 9.0.1
         version: 9.0.1
@@ -1377,8 +1377,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -1416,8 +1416,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1467,8 +1467,8 @@ importers:
         specifier: workspace:*
         version: link:../usage-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sinclair/typebox':
         specifier: 0.33.7
         version: 0.33.7
@@ -1518,8 +1518,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1554,8 +1554,8 @@ importers:
         specifier: workspace:*
         version: link:../usage-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       agentkeepalive:
         specifier: 4.5.0
         version: 4.5.0
@@ -1593,8 +1593,8 @@ importers:
         specifier: workspace:*
         version: link:../service-common
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1734,14 +1734,14 @@ importers:
         specifier: 3.0.6
         version: 3.0.6
       '@sentry/node':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@sentry/react':
-        specifier: 7.118.0
-        version: 7.118.0(react@18.3.1)
+        specifier: 7.119.0
+        version: 7.119.0(react@18.3.1)
       '@sentry/types':
-        specifier: 7.118.0
-        version: 7.118.0
+        specifier: 7.119.0
+        version: 7.119.0
       '@storybook/addon-essentials':
         specifier: 8.2.2
         version: 8.2.2(storybook@8.2.2(@babel/preset-env@7.24.5(@babel/core@7.24.7)))
@@ -6913,24 +6913,24 @@ packages:
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
 
-  '@sentry-internal/feedback@7.118.0':
-    resolution: {integrity: sha512-IYOGRcqIqKJJpMwBBv+0JTu0FPpXnakJYvOx/XEa/SNyF5+l7b9gGEjUVWh1ok50kTLW/XPnpnXNAGQcoKHg+w==}
+  '@sentry-internal/feedback@7.119.0':
+    resolution: {integrity: sha512-om8TkAU5CQGO8nkmr7qsSBVkP+/vfeS4JgtW3sjoTK0fhj26+DljR6RlfCGWtYQdPSP6XV7atcPTjbSnsmG9FQ==}
     engines: {node: '>=12'}
 
-  '@sentry-internal/replay-canvas@7.118.0':
-    resolution: {integrity: sha512-XxHlCClvrxmVKpiZetFYyiBaPQNiojoBGFFVgbbWBIAPc+fWeLJ2BMoQEBjn/0NA/8u8T6lErK5YQo/eIx9+XQ==}
+  '@sentry-internal/replay-canvas@7.119.0':
+    resolution: {integrity: sha512-NL02VQx6ekPxtVRcsdp1bp5Tb5w6vnfBKSIfMKuDRBy5A10Uc3GSoy/c3mPyHjOxB84452A+xZSx6bliEzAnuA==}
     engines: {node: '>=12'}
 
   '@sentry-internal/tracing@7.114.0':
     resolution: {integrity: sha512-dOuvfJN7G+3YqLlUY4HIjyWHaRP8vbOgF+OsE5w2l7ZEn1rMAaUbPntAR8AF9GBA6j2zWNoSo8e7GjbJxVofSg==}
     engines: {node: '>=8'}
 
-  '@sentry-internal/tracing@7.118.0':
-    resolution: {integrity: sha512-dERAshKlQLrBscHSarhHyUeGsu652bDTUN1FK0m4e3X48M3I5/s+0N880Qjpe5MprNLcINlaIgdQ9jkisvxjfw==}
+  '@sentry-internal/tracing@7.119.0':
+    resolution: {integrity: sha512-oKdFJnn+56f0DHUADlL8o9l8jTib3VDLbWQBVkjD9EprxfaCwt2m8L5ACRBdQ8hmpxCEo4I8/6traZ7qAdBUqA==}
     engines: {node: '>=8'}
 
-  '@sentry/browser@7.118.0':
-    resolution: {integrity: sha512-8onDOFV1VLEoBuqA5yaJeR3FF1JNuxr5C7p1oN3OwY724iTVqQnOLmZKZaSnHV3RkY67wKDGQkQIie14sc+42g==}
+  '@sentry/browser@7.119.0':
+    resolution: {integrity: sha512-WwmW1Y4D764kVGeKmdsNvQESZiAn9t8LmCWO0ucBksrjL2zw9gBPtOpRcO6l064sCLeSxxzCN+kIxhRm1gDFEA==}
     engines: {node: '>=8'}
 
   '@sentry/cli-darwin@2.33.1':
@@ -6987,8 +6987,8 @@ packages:
     resolution: {integrity: sha512-YnanVlmulkjgZiVZ9BfY9k6I082n+C+LbZo52MTvx3FY6RE5iyiPMpaOh67oXEZRWcYQEGm+bKruRxLVP6RlbA==}
     engines: {node: '>=8'}
 
-  '@sentry/core@7.118.0':
-    resolution: {integrity: sha512-ol0xBdp3/K11IMAYSQE0FMxBOOH9hMsb/rjxXWe0hfM5c72CqYWL3ol7voPci0GELJ5CZG+9ImEU1V9r6gK64g==}
+  '@sentry/core@7.119.0':
+    resolution: {integrity: sha512-CS2kUv9rAJJEjiRat6wle3JATHypB0SyD7pt4cpX5y0dN5dZ1JrF57oLHRMnga9fxRivydHz7tMTuBhSSwhzjw==}
     engines: {node: '>=8'}
 
   '@sentry/integrations@7.112.2':
@@ -6999,22 +6999,22 @@ packages:
     resolution: {integrity: sha512-BJIBWXGKeIH0ifd7goxOS29fBA8BkEgVVCahs6xIOXBjX1IRS6PmX0zYx/GP23nQTfhJiubv2XPzoYOlZZmDxg==}
     engines: {node: '>=8'}
 
-  '@sentry/integrations@7.118.0':
-    resolution: {integrity: sha512-C2rR4NvIMjokF8jP5qzSf1o2zxDx7IeYnr8u15Kb2+HdZtX559owALR0hfgwnfeElqMhGlJBaKUWZ48lXJMzCQ==}
+  '@sentry/integrations@7.119.0':
+    resolution: {integrity: sha512-OHShvtsRW0A+ZL/ZbMnMqDEtJddPasndjq+1aQXw40mN+zeP7At/V1yPZyFaURy86iX7Ucxw5BtmzuNy7hLyTA==}
     engines: {node: '>=8'}
 
-  '@sentry/node@7.118.0':
-    resolution: {integrity: sha512-79N63DvYKkNPqzmc0cjO+vMZ/nU7+CbE3K3COQNiV7gk58+666G9mRZQJuZVOVebatq5wM5UR0G4LPkwD+J84g==}
+  '@sentry/node@7.119.0':
+    resolution: {integrity: sha512-9PFzN8xS6U0oZCflpVxS2SSIsHkCaj7qYBlsvHj4CTGWfao9ImwrU6+smy4qoG6oxwPfoVb5pOOMb4WpWOvXcQ==}
     engines: {node: '>=8'}
 
-  '@sentry/react@7.118.0':
-    resolution: {integrity: sha512-oEYe5TGk8S7YzPsFqDf4xDHjfzs35/QFE+dou3S2d24OYpso8Tq4C5f1VzYmnOOyy85T7JNicYLSo0n0NSJvQg==}
+  '@sentry/react@7.119.0':
+    resolution: {integrity: sha512-cf8Cei+qdSA26gx+IMAuc/k44PeBImNzIpXi3930SLhUe44ypT5OZ/44L6xTODHZzTIyMSJPduf59vT2+eW9yg==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
 
-  '@sentry/replay@7.118.0':
-    resolution: {integrity: sha512-boQfCL+1L/tSZ9Huwi00+VtU+Ih1Lcg8HtxBuAsBCJR9pQgUL5jp7ECYdTeeHyCh/RJO7JqV1CEoGTgohe10mA==}
+  '@sentry/replay@7.119.0':
+    resolution: {integrity: sha512-BnNsYL+X5I4WCH6wOpY6HQtp4MgVt0NVlhLUsEyrvMUiTs0bPkDBrulsgZQBUKJsbOr3l9nHrFoNVB/0i6WNLA==}
     engines: {node: '>=12'}
 
   '@sentry/tracing@7.114.0':
@@ -7029,8 +7029,8 @@ packages:
     resolution: {integrity: sha512-tsqkkyL3eJtptmPtT0m9W/bPLkU7ILY7nvwpi1hahA5jrM7ppoU0IMaQWAgTD+U3rzFH40IdXNBFb8Gnqcva4w==}
     engines: {node: '>=8'}
 
-  '@sentry/types@7.118.0':
-    resolution: {integrity: sha512-2drqrD2+6kgeg+W/ycmiti3G4lJrV3hGjY9PpJ3bJeXrh6T2+LxKPzlgSEnKFaeQWkXdZ4eaUbtTXVebMjb5JA==}
+  '@sentry/types@7.119.0':
+    resolution: {integrity: sha512-27qQbutDBPKGbuJHROxhIWc1i0HJaGLA90tjMu11wt0E4UNxXRX+UQl4Twu68v4EV3CPvQcEpQfgsViYcXmq+w==}
     engines: {node: '>=8'}
 
   '@sentry/utils@7.112.2':
@@ -7041,8 +7041,8 @@ packages:
     resolution: {integrity: sha512-319N90McVpupQ6vws4+tfCy/03AdtsU0MurIE4+W5cubHME08HtiEWlfacvAxX+yuKFhvdsO4K4BB/dj54ideg==}
     engines: {node: '>=8'}
 
-  '@sentry/utils@7.118.0':
-    resolution: {integrity: sha512-43qItc/ydxZV1Zb3Kn2M54RwL9XXFa3IAYBO8S82Qvq5YUYmU2AmJ1jgg7DabXlVSWgMA1HntwqnOV3JLaEnTQ==}
+  '@sentry/utils@7.119.0':
+    resolution: {integrity: sha512-ZwyXexWn2ZIe2bBoYnXJVPc2esCSbKpdc6+0WJa8eutXfHq3FRKg4ohkfCBpfxljQGEfP1+kfin945lA21Ka+A==}
     engines: {node: '>=8'}
 
   '@shikijs/core@1.2.0':
@@ -19508,10 +19508,10 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.6.3
 
-  '@envelop/sentry@7.1.1(@envelop/core@5.0.1)(@sentry/node@7.118.0)(graphql@16.9.0)':
+  '@envelop/sentry@7.1.1(@envelop/core@5.0.1)(@sentry/node@7.119.0)(graphql@16.9.0)':
     dependencies:
       '@envelop/core': 5.0.1
-      '@sentry/node': 7.118.0
+      '@sentry/node': 7.119.0
       graphql: 16.9.0
       tslib: 2.6.3
 
@@ -23712,18 +23712,18 @@ snapshots:
 
   '@sec-ant/readable-stream@0.4.1': {}
 
-  '@sentry-internal/feedback@7.118.0':
+  '@sentry-internal/feedback@7.119.0':
     dependencies:
-      '@sentry/core': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry/core': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
-  '@sentry-internal/replay-canvas@7.118.0':
+  '@sentry-internal/replay-canvas@7.119.0':
     dependencies:
-      '@sentry/core': 7.118.0
-      '@sentry/replay': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry/core': 7.119.0
+      '@sentry/replay': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
   '@sentry-internal/tracing@7.114.0':
     dependencies:
@@ -23731,22 +23731,22 @@ snapshots:
       '@sentry/types': 7.114.0
       '@sentry/utils': 7.114.0
 
-  '@sentry-internal/tracing@7.118.0':
+  '@sentry-internal/tracing@7.119.0':
     dependencies:
-      '@sentry/core': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry/core': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
-  '@sentry/browser@7.118.0':
+  '@sentry/browser@7.119.0':
     dependencies:
-      '@sentry-internal/feedback': 7.118.0
-      '@sentry-internal/replay-canvas': 7.118.0
-      '@sentry-internal/tracing': 7.118.0
-      '@sentry/core': 7.118.0
-      '@sentry/integrations': 7.118.0
-      '@sentry/replay': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry-internal/feedback': 7.119.0
+      '@sentry-internal/replay-canvas': 7.119.0
+      '@sentry-internal/tracing': 7.119.0
+      '@sentry/core': 7.119.0
+      '@sentry/integrations': 7.119.0
+      '@sentry/replay': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
   '@sentry/cli-darwin@2.33.1':
     optional: true
@@ -23798,10 +23798,10 @@ snapshots:
       '@sentry/types': 7.114.0
       '@sentry/utils': 7.114.0
 
-  '@sentry/core@7.118.0':
+  '@sentry/core@7.119.0':
     dependencies:
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
   '@sentry/integrations@7.112.2':
     dependencies:
@@ -23817,36 +23817,36 @@ snapshots:
       '@sentry/utils': 7.114.0
       localforage: 1.10.0
 
-  '@sentry/integrations@7.118.0':
+  '@sentry/integrations@7.119.0':
     dependencies:
-      '@sentry/core': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry/core': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
       localforage: 1.10.0
 
-  '@sentry/node@7.118.0':
+  '@sentry/node@7.119.0':
     dependencies:
-      '@sentry-internal/tracing': 7.118.0
-      '@sentry/core': 7.118.0
-      '@sentry/integrations': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry-internal/tracing': 7.119.0
+      '@sentry/core': 7.119.0
+      '@sentry/integrations': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
-  '@sentry/react@7.118.0(react@18.3.1)':
+  '@sentry/react@7.119.0(react@18.3.1)':
     dependencies:
-      '@sentry/browser': 7.118.0
-      '@sentry/core': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry/browser': 7.119.0
+      '@sentry/core': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
 
-  '@sentry/replay@7.118.0':
+  '@sentry/replay@7.119.0':
     dependencies:
-      '@sentry-internal/tracing': 7.118.0
-      '@sentry/core': 7.118.0
-      '@sentry/types': 7.118.0
-      '@sentry/utils': 7.118.0
+      '@sentry-internal/tracing': 7.119.0
+      '@sentry/core': 7.119.0
+      '@sentry/types': 7.119.0
+      '@sentry/utils': 7.119.0
 
   '@sentry/tracing@7.114.0':
     dependencies:
@@ -23856,7 +23856,7 @@ snapshots:
 
   '@sentry/types@7.114.0': {}
 
-  '@sentry/types@7.118.0': {}
+  '@sentry/types@7.119.0': {}
 
   '@sentry/utils@7.112.2':
     dependencies:
@@ -23866,9 +23866,9 @@ snapshots:
     dependencies:
       '@sentry/types': 7.114.0
 
-  '@sentry/utils@7.118.0':
+  '@sentry/utils@7.119.0':
     dependencies:
-      '@sentry/types': 7.118.0
+      '@sentry/types': 7.119.0
 
   '@shikijs/core@1.2.0': {}
 
