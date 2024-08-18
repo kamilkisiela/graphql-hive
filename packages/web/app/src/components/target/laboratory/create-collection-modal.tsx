@@ -161,7 +161,7 @@ export function CreateCollectionModal(props: {
     pause: !collectionId,
   });
 
-  const errorCombaind = mutationCreate.error || collectionError || mutationUpdate.error;
+  const errorCombined = mutationCreate.error || collectionError || mutationUpdate.error;
   const fetching = loadingCollection;
 
   const form = useForm<CreateCollectionModalFormValues>({
@@ -188,26 +188,26 @@ export function CreateCollectionModal(props: {
   async function onSubmit(values: CreateCollectionModalFormValues) {
     const { error } = collectionId
       ? await mutateUpdate({
-          selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
-          },
-          input: {
-            collectionId,
-            name: values.name,
-            description: values.description,
-          },
-        })
+        selector: {
+          target: props.targetId,
+          organization: props.organizationId,
+          project: props.projectId,
+        },
+        input: {
+          collectionId,
+          name: values.name,
+          description: values.description,
+        },
+      })
       : await mutateCreate({
-          selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
-          },
-          input: values,
-        });
-    if (!error || errorCombaind) {
+        selector: {
+          target: props.targetId,
+          organization: props.organizationId,
+          project: props.projectId,
+        },
+        input: values,
+      });
+    if (!error || errorCombined) {
       form.reset();
       toggleModalOpen();
     }
