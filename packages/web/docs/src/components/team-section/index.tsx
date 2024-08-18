@@ -151,11 +151,7 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
       <div className="aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 mix-blend-multiply xl:w-[var(--size)]">
         <Image
           alt=""
-          className={
-            'rounded-2xl' +
-            " bg-['linear-gradient(0deg,#A2C1C4_0%,#A2C1C4_100%),url(var(--src))_lightgray_50%_/_cover_no-repeat']" +
-            ' bg-blue-300 grayscale'
-          }
+          className="rounded-2xl bg-blue-300 grayscale"
           {...(typeof avatar === 'string' ? { src: avatar, width: 180, height: 180 } : avatar)}
         />
       </div>
