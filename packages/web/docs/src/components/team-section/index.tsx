@@ -132,9 +132,9 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
     <div className="relative flex flex-col">
       <a
         className={
-          'absolute right-0 top-0 rounded-2xl border-2 bg-[#222530] p-[9px] text-white hover:border-[#222530] xl:rounded-full' +
+          'absolute right-0 top-0 rounded-2xl border-2 bg-[#222530] p-[9px] text-white hover:border-blue-400 xl:rounded-full' +
           ' border-transparent xl:-translate-y-1/2 xl:translate-x-1/2' +
-          ' max-xl:min-size-[var(--size)] max-xl:opacity-0'
+          ' max-xl:min-size-[var(--size)] ease duration-250 z-10 transition-colors max-xl:opacity-0'
         }
         href={social}
       >
@@ -148,14 +148,17 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
           <GlobeIcon className="size-[14px]" />
         )}
       </a>
-      <Image
-        alt=""
-        className="aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 rounded-2xl bg-['linear-gradient(0deg,#A2C1C4_0%,#A2C1C4_100%),url(var(--src))_lightgray_50%_/_cover_no-repeat'] bg-blue-300"
-        style={{
-          backgroundBlendMode: 'multiply, normal',
-        }}
-        {...(typeof avatar === 'string' ? { src: avatar, width: 180, height: 180 } : avatar)}
-      />
+      <div className="aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 mix-blend-multiply xl:w-[var(--size)]">
+        <Image
+          alt=""
+          className={
+            'rounded-2xl' +
+            " bg-['linear-gradient(0deg,#A2C1C4_0%,#A2C1C4_100%),url(var(--src))_lightgray_50%_/_cover_no-repeat']" +
+            ' bg-blue-300 grayscale'
+          }
+          {...(typeof avatar === 'string' ? { src: avatar, width: 180, height: 180 } : avatar)}
+        />
+      </div>
       <span className="text-green-1000 mt-2 block text-sm font-medium leading-5 lg:max-xl:block lg:max-xl:text-base">
         {name}
       </span>
