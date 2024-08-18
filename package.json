@@ -85,7 +85,7 @@
     "eslint-plugin-tailwindcss": "3.17.4",
     "fs-extra": "11.2.0",
     "graphql": "16.9.0",
-    "husky": "9.0.11",
+    "husky": "9.1.4",
     "jest-snapshot-serializer-raw": "2.0.0",
     "lint-staged": "15.2.9",
     "pg": "8.12.0",
