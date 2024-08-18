@@ -22,7 +22,7 @@ services:
       - '5432:5432'
 
   redis:
-    image: bitnami/redis:7.2.5
+    image: bitnami/redis:7.4.0
     mem_limit: 50m
     networks:
       - 'stack'
