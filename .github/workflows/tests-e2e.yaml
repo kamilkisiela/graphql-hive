@@ -35,7 +35,7 @@ jobs:
         run: pnpm cypress install
 
       - name: patch compose file volumes
-        uses: mikefarah/yq@v4.44.2
+        uses: mikefarah/yq@v4.44.3
         with:
           cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 
