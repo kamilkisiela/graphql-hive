@@ -1,37 +1,67 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { Callout } from '../components/v2/callout';
+import { Callout } from '@/components/ui/callout';
+import {
+  CrossCircledIcon,
+  ExclamationTriangleIcon,
+  InfoCircledIcon,
+  LightningBoltIcon,
+} from '@radix-ui/react-icons';
+import { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Callout> = {
-  title: 'Callout',
+  title: 'Components/Callout',
   component: Callout,
+  argTypes: {
+    type: {
+      control: { type: 'inline-radio' },
+      options: ['default', 'error', 'info', 'warning'],
+    },
+    emoji: {
+      control: { type: 'text' },
+    },
+    children: {
+      control: { type: 'text' },
+    },
+    className: {
+      control: { type: 'text' },
+    },
+  },
+  args: {
+    type: 'default',
+    children: 'This is a callout',
+  },
 };
 
 export default meta;
+
 type Story = StoryObj<typeof Callout>;
 
 export const Default: Story = {
-  render: () => <Callout>Hello</Callout>,
+  args: {
+    type: 'default',
+    emoji: <LightningBoltIcon className="h-6 w-auto" />,
+  },
 };
 
 export const Error: Story = {
-  render: () => <Callout type="error">Hello</Callout>,
+  args: {
+    type: 'error',
+    emoji: <CrossCircledIcon className="h-6 w-auto" />,
+    children: 'This is an error callout',
+  },
 };
 
 export const Info: Story = {
-  render: () => <Callout type="info">Hello</Callout>,
+  args: {
+    type: 'info',
+    emoji: <InfoCircledIcon className="h-6 w-auto" />,
+    children: 'This is an info callout',
+  },
 };
 
 export const Warning: Story = {
-  render: () => <Callout type="warning">Hello</Callout>,
-};
-
-export const Long: Story = {
-  render: () => (
-    <Callout type="warning">
-      <b>Your organization is being rate-limited for operations.</b>
-      <br />
-      Since you reached your organization rate-limit and data ingestion limitation, your
-      organization <b>The Guild</b> is currently unable to ingest data.
-    </Callout>
-  ),
+  args: {
+    type: 'warning',
+    emoji: <ExclamationTriangleIcon className="h-6 w-auto" />,
+    children: 'This is a warning callout',
+  },
 };
