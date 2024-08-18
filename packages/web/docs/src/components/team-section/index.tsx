@@ -1,4 +1,4 @@
-import { StaticImageData } from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
 import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
 import { cn } from '../../lib';
@@ -51,60 +51,60 @@ type TeamMember = [name: string, avatar: string | StaticImageData, social: strin
 const team: TeamMember[] = [
   [
     'Denis Badurina',
-    'https://avatars.githubusercontent.com/enisdenjo?v=4&s=120',
+    'https://avatars.githubusercontent.com/enisdenjo?v=4&s=180',
     'https://github.com/enisdenjo',
   ],
   [
     'Dimitri Postolov',
-    'https://avatars.githubusercontent.com/dimaMachina?v=4&s=120',
+    'https://avatars.githubusercontent.com/dimaMachina?v=4&s=180',
     'https://github.com/dimaMachina',
   ],
   [
     'Dotan Simha',
-    'https://avatars.githubusercontent.com/dotansimha?v=4&s=120',
+    'https://avatars.githubusercontent.com/dotansimha?v=4&s=180',
     'https://github.com/dotansimha',
   ],
   [
     'Gil Gardosh',
-    'https://avatars.githubusercontent.com/gilgardosh?v=4&s=120',
+    'https://avatars.githubusercontent.com/gilgardosh?v=4&s=180',
     'https://github.com/gilgardosh',
   ],
 
   [
     'Kamil Kisiela',
-    'https://avatars.githubusercontent.com/kamilkisiela?v=4&s=120',
+    'https://avatars.githubusercontent.com/kamilkisiela?v=4&s=180',
     'https://github.com/kamilkisiela',
   ],
   [
     'Laurin Quast',
-    'https://avatars.githubusercontent.com/n1ru4l?v=4&s=120',
+    'https://avatars.githubusercontent.com/n1ru4l?v=4&s=180',
     'https://github.com/n1ru4l',
   ],
   ['Noam Malka', noamPhoto, 'https://noam-malka.com/'],
   [
     'Saihajpreet Singh',
-    'https://avatars.githubusercontent.com/saihaj?v=4&s=120',
+    'https://avatars.githubusercontent.com/saihaj?v=4&s=180',
     'https://github.com/saihaj',
   ],
 
   [
     'Tuval Simha',
-    'https://avatars.githubusercontent.com/tuvalsimha?v=4&s=120',
+    'https://avatars.githubusercontent.com/tuvalsimha?v=4&s=180',
     'https://github.com/tuvalsimha',
   ],
   [
     'Uri Goldshtein',
-    'https://avatars.githubusercontent.com/Urigo?v=4&s=120',
+    'https://avatars.githubusercontent.com/Urigo?v=4&s=180',
     'https://github.com/Urigo',
   ],
   [
     'Valentin Cocaud',
-    'https://avatars.githubusercontent.com/EmrysMyrddin?v=4&s=120',
+    'https://avatars.githubusercontent.com/EmrysMyrddin?v=4&s=180',
     'https://github.com/EmrysMyrddin',
   ],
   [
     'Yassin Eldeeb',
-    'https://avatars.githubusercontent.com/YassinEldeeb?v=4&s=120',
+    'https://avatars.githubusercontent.com/YassinEldeeb?v=4&s=180',
     'https://github.com/YassinEldeeb',
   ],
 ];
@@ -129,7 +129,7 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
 
 function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
   return (
-    <div className="relative">
+    <div className="relative flex flex-col">
       <a
         className={
           'absolute right-0 top-0 rounded-2xl border-2 bg-[#222530] p-[9px] text-white hover:border-[#222530] xl:rounded-full' +
@@ -148,13 +148,13 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
           <GlobeIcon className="size-[14px]" />
         )}
       </a>
-      <div
-        role="presentation"
-        className="aspect-square min-h-[var(--size)] min-w-[var(--size)] rounded-2xl bg-['linear-gradient(0deg,#A2C1C4_0%,#A2C1C4_100%),url(var(--src))_lightgray_50%_/_cover_no-repeat'] bg-blue-300"
+      <Image
+        alt=""
+        className="aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 rounded-2xl bg-['linear-gradient(0deg,#A2C1C4_0%,#A2C1C4_100%),url(var(--src))_lightgray_50%_/_cover_no-repeat'] bg-blue-300"
         style={{
-          '--src': 'https://place.dog/120/120' + '?' + 'name=' + avatar,
           backgroundBlendMode: 'multiply, normal',
         }}
+        {...(typeof avatar === 'string' ? { src: avatar, width: 180, height: 180 } : avatar)}
       />
       <span className="text-green-1000 mt-2 block text-sm font-medium leading-5 lg:max-xl:block lg:max-xl:text-base">
         {name}
