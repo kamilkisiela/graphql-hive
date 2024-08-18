@@ -93,7 +93,7 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.3.18
+    image: redpandadata/redpanda:v23.3.19
     mem_limit: 300m
     mem_reservation: 100m
     container_name: broker
