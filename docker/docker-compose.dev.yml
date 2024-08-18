@@ -2,7 +2,7 @@ version: '3.8'
 name: 'hive-dev'
 services:
   db:
-    image: postgres:14.12-alpine
+    image: postgres:14.13-alpine
     mem_limit: 300m
     networks:
       - 'stack'
