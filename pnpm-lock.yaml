@@ -125,8 +125,8 @@ importers:
         specifier: 8.57.0
         version: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-plugin-cypress:
-        specifier: 3.3.0
-        version: 3.3.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+        specifier: 3.5.0
+        version: 3.5.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-hive:
         specifier: file:rules
         version: link:rules
@@ -10139,8 +10139,8 @@ packages:
       eslint-import-resolver-webpack:
         optional: true
 
-  eslint-plugin-cypress@3.3.0:
-    resolution: {integrity: sha512-HPHMPzYBIshzJM8wqgKSKHG2p/8R0Gbg4Pb3tcdC9WrmkuqxiKxSKbjunUrajhV5l7gCIFrh1P7C7GuBqH6YuQ==}
+  eslint-plugin-cypress@3.5.0:
+    resolution: {integrity: sha512-JZQ6XnBTNI8h1B9M7wJSFzc48SYbh7VMMKaNTQOFa3BQlnmXPrVc4PKen8R+fpv6VleiPeej6VxloGb42zdRvw==}
     peerDependencies:
       eslint: '>=7'
 
@@ -27762,7 +27762,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-cypress@3.3.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-plugin-cypress@3.5.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       globals: 13.22.0
