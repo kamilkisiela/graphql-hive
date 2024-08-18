@@ -203,11 +203,11 @@ importers:
         specifier: 1.0.1
         version: 1.0.1(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
       '@pulumi/kubernetes':
-        specifier: 4.14.0
-        version: 4.14.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
+        specifier: 4.17.1
+        version: 4.17.1(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.14.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))(@pulumi/pulumi@3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))
+        version: 0.1.6(@pulumi/kubernetes@4.17.1(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))(@pulumi/pulumi@3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))
       '@pulumi/pulumi':
         specifier: 3.129.0
         version: 3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
@@ -6049,8 +6049,8 @@ packages:
   '@pulumi/command@1.0.1':
     resolution: {integrity: sha512-PqqcMp80Y9dc7Lt0epXqvqha76S4XF08NB8lpMA0zJ9zWvkkssQ8lq8XdHuZOrAGHXj7gKBs6JBrhhltoovUTQ==}
 
-  '@pulumi/kubernetes@4.14.0':
-    resolution: {integrity: sha512-q3xwRJYx4hJpvpLboCZeyncqfzGtTVZ6zGEk4aZQ3jmbUUkIP8hYi1EkUedjtyjw9xtWch5Zb1s+PZgqXz9l3w==}
+  '@pulumi/kubernetes@4.17.1':
+    resolution: {integrity: sha512-XmPhPG7vqXHo0/hs14JX25oNF7Aum0dmdqYTWIvbUUqi9GUD05eJTYh0PyNpOm4sFuRbFVvqHdc8NbVbc1R6Fg==}
 
   '@pulumi/kubernetesx@0.1.6':
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
@@ -22801,7 +22801,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetes@4.14.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)':
+  '@pulumi/kubernetes@4.17.1(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)':
     dependencies:
       '@pulumi/pulumi': 3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
       '@types/node-fetch': 2.6.4
@@ -22817,9 +22817,9 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.14.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))(@pulumi/pulumi@3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))':
+  '@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.17.1(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))(@pulumi/pulumi@3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4))':
     dependencies:
-      '@pulumi/kubernetes': 4.14.0(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
+      '@pulumi/kubernetes': 4.17.1(encoding@0.1.13)(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
       '@pulumi/pulumi': 3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)
 
   '@pulumi/pulumi@3.129.0(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.4))(typescript@5.5.4)':
