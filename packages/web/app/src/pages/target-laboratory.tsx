@@ -23,12 +23,10 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { graphql } from '@/gql';
-import { TargetAccessScope } from '@/gql/graphql';
-import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
-import { useOperationCollectionsPlugin } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
+import { useOperationCollectionsPlugin, TargetLaboratoryPageQuery } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
@@ -238,29 +236,6 @@ function Save(props: {
   );
 }
 
-const TargetLaboratoryPageQuery = graphql(`
-  query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organization(selector: { organization: $organizationId }) {
-      organization {
-        id
-        me {
-          id
-          ...CanAccessTarget_MemberFragment
-        }
-      }
-    }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
-      id
-      graphqlEndpointUrl
-      latestSchemaVersion {
-        id
-        sdl
-      }
-    }
-    ...Laboratory_IsCDNEnabledFragment
-  }
-`);
-
 function LaboratoryPageContent(props: {
   organizationId: string;
   projectId: string;
@@ -277,8 +252,6 @@ function LaboratoryPageContent(props: {
   const router = useRouter();
   const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
   const [isFullScreen, setIsFullScreen] = useState(false);
-
-  const currentOrganization = query.data?.organization?.organization;
   const { collections } = useCollections({
     organizationId: props.organizationId,
     projectId: props.projectId,
@@ -291,13 +264,7 @@ function LaboratoryPageContent(props: {
     return new Set(operations);
   }, [collections]);
 
-  const operationCollectionsPlugin = useOperationCollectionsPlugin({
-    canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
-    canDelete: canAccessTarget(TargetAccessScope.Delete, currentOrganization?.me ?? null),
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
-  });
+  const operationCollectionsPlugin = useOperationCollectionsPlugin();
 
   const sdl = query.data?.target?.latestSchemaVersion?.sdl;
   const schema = useMemo(() => (sdl ? buildSchema(sdl) : null), [sdl]);

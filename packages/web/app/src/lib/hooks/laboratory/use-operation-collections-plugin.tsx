@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { FolderIcon, FolderOpenIcon, SquareTerminalIcon } from 'lucide-react';
-import { useMutation } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import { CreateCollectionModal } from '@/components/target/laboratory/create-collection-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
@@ -26,6 +26,8 @@ import { Link } from '@/components/ui/link';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { graphql } from '@/gql';
+import { TargetAccessScope } from '@/gql/graphql';
+import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { cn } from '@/lib/utils';
@@ -74,16 +76,30 @@ const CreateOperationMutation = graphql(`
   }
 `);
 
-const _tabBadgeClassName = clsx(
-  'hive-badge-is-changed',
-  'relative after:top-1/2 after:-translate-y-1/2 after:right-[.65rem] hover:after:hidden',
-  '[&_.graphiql-tab-close]:hidden [&:hover_.graphiql-tab-close]:block',
-);
+export const TargetLaboratoryPageQuery = graphql(`
+  query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        id
+        me {
+          id
+          ...CanAccessTarget_MemberFragment
+        }
+      }
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      graphqlEndpointUrl
+      latestSchemaVersion {
+        id
+        sdl
+      }
+    }
+    ...Laboratory_IsCDNEnabledFragment
+  }
+`);
 
-export function useOperationCollectionsPlugin(props: {
-  canEdit: boolean;
-  canDelete: boolean;
-}): GraphiQLPlugin {
+export function useOperationCollectionsPlugin(): GraphiQLPlugin {
   return useMemo(() => {
     function Content() {
       const { organizationId, projectId, targetId } = useParams({ strict: false }) as {
@@ -92,6 +108,15 @@ export function useOperationCollectionsPlugin(props: {
         targetId: string;
       };
       // console.log(111, { organizationId, projectId, targetId });
+
+      const [query] = useQuery({
+        query: TargetLaboratoryPageQuery,
+        variables: { organizationId, projectId, targetId },
+      });
+      const currentOrganization = query.data?.organization?.organization;
+      const canEdit = canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null);
+      const canDelete = canAccessTarget(TargetAccessScope.Delete, currentOrganization?.me ?? null);
+
       const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
       const { collections, fetching: loading } = useCollections({
         organizationId,
@@ -199,7 +224,7 @@ export function useOperationCollectionsPlugin(props: {
         });
       }, [queryEditor?.getValue(), variableEditor?.getValue()]);
 
-      const shouldShowMenu = props.canEdit || props.canDelete;
+      const shouldShowMenu = canEdit || canDelete;
 
       const initialSelectedCollection =
         currentOperation?.id &&
@@ -336,7 +361,7 @@ export function useOperationCollectionsPlugin(props: {
                         Copy link to operation
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      {props.canEdit && (
+                      {canEdit && (
                         <DropdownMenuItem
                           onClick={() => {
                             setOperationToEditId(node.id);
@@ -345,7 +370,7 @@ export function useOperationCollectionsPlugin(props: {
                           Edit
                         </DropdownMenuItem>
                       )}
-                      {props.canDelete && (
+                      {canDelete && (
                         <DropdownMenuItem
                           onClick={() => {
                             setOperationToDeleteId(node.id);
@@ -422,7 +447,7 @@ export function useOperationCollectionsPlugin(props: {
               <div className="flex flex-col items-center">
                 <BookmarkIcon width={30} height={30} />
                 <div className="mt-2 text-xs">There are no collections available.</div>
-                {props.canEdit && (
+                {canEdit && (
                   <Button
                     onClick={() => {
                       if (collectionId) {
@@ -490,5 +515,5 @@ export function useOperationCollectionsPlugin(props: {
     };
 
     return plugin;
-  }, [props.canEdit, props.canDelete]);
+  }, []);
 }
