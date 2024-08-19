@@ -84,7 +84,7 @@ export class AwsClient {
     this.cache = args.cache || new Map();
     this.retries = args.retries != null ? args.retries : 10; // Up to 25.6 secs
     this.initRetryMs = args.initRetryMs || 50;
-    this._fetch = args.fetch || fetch;
+    this._fetch = args.fetch || fetch.bind(globalThis);
   }
 
   async sign(input: RequestInfo, init?: AwsRequestInit) {
