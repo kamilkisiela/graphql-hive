@@ -15,7 +15,7 @@ export function ToolsAndLibrariesCards({ className }: { className?: string }) {
       <MainCards />
       <p className="text-green-800">Our libraries to support all your GraphQL needs</p>
       <SecondaryCards />
-      <CallToAction href="https://github.com/the-guild-org" variant="primary">
+      <CallToAction href="/#360%C2%B0-graphql-ecosystem-management" variant="primary">
         Explore the Ecosystem
       </CallToAction>
     </section>
