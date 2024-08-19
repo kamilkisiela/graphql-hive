@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery } from 'urql';
 import { graphql } from '@/gql';
+import { CollectionsQuery as _CollectionsQuery } from '@/gql/graphql';
 import { useNotifications } from '@/lib/hooks';
 
 export const CollectionsQuery = graphql(`
@@ -30,13 +31,21 @@ export const CollectionsQuery = graphql(`
   }
 `);
 
-const EMPTY_ARRAY = [] as const;
+export type DocumentCollectionOperation = Exclude<
+  _CollectionsQuery['target'],
+  null | undefined
+>['documentCollections']['edges'][number]['node'];
+
+const EMPTY_ARRAY: DocumentCollectionOperation[] = [];
 
 export function useCollections(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}) {
+}): {
+  fetching: boolean;
+  collections: DocumentCollectionOperation[];
+} {
   const [{ data, error, fetching }] = useQuery({
     query: CollectionsQuery,
     variables: {

@@ -22,8 +22,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { DocumentCollection } from '@/gql/graphql';
-import { useCollections } from '@/lib/hooks/laboratory/use-collections';
+import {
+  DocumentCollectionOperation,
+  useCollections,
+} from '@/lib/hooks/laboratory/use-collections';
 import { useEditorContext } from '@graphiql/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -169,11 +171,6 @@ export function CreateOperationModal(props: {
   );
 }
 
-type DocumentCollectionWithOutOperations = Omit<
-  DocumentCollection,
-  'createdBy' | 'createdAt' | 'updatedAt' | 'operations' | 'pageInfo'
->;
-
 export function CreateOperationModalContent(props: {
   isOpen: boolean;
   close: () => void;
@@ -183,7 +180,7 @@ export function CreateOperationModalContent(props: {
   form: UseFormReturn<CreateOperationModalFormValues>;
   targetId: string;
   fetching: boolean;
-  collections: DocumentCollectionWithOutOperations[];
+  collections: DocumentCollectionOperation[];
 }): ReactElement {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.close}>
@@ -198,52 +195,43 @@ export function CreateOperationModalContent(props: {
                 <FormField
                   control={props.form.control}
                   name="name"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Operation Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Your Operation Name" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Operation Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Your Operation Name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 <FormField
                   control={props.form.control}
                   name="collectionId"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Collection Description</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={async v => {
-                              await field.onChange(v);
-                            }}
-                          >
-                            <SelectTrigger>
-                              {props.collections.find(c => c.id === field.value)?.name ??
-                                'Select a Collection'}
-                            </SelectTrigger>
-                            <SelectContent className="w-[--radix-select-trigger-width]">
-                              {props.collections.map(c => (
-                                <SelectItem key={c.id} value={c.id}>
-                                  {c.name}
-                                  <div className="mt-1 line-clamp-1 text-xs opacity-50">
-                                    {c.description}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Collection Description</FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger>
+                            {props.collections.find(c => c.id === field.value)?.name ??
+                              'Select a Collection'}
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            {props.collections.map(c => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.name}
+                                <div className="mt-1 line-clamp-1 text-xs opacity-50">
+                                  {c.description}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
               <DialogFooter>
