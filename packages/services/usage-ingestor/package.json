@@ -17,7 +17,7 @@
     "agentkeepalive": "4.5.0",
     "date-fns": "3.6.0",
     "dotenv": "16.4.5",
-    "got": "14.4.1",
+    "got": "14.4.2",
     "graphql": "16.9.0",
     "kafkajs": "2.2.4",
     "pino-pretty": "11.2.2",
