@@ -24,9 +24,12 @@ import { QueryError } from '@/components/ui/query-error';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
+import {
+  operationCollectionsPlugin,
+  TargetLaboratoryPageQuery,
+} from '@/lib/hooks/laboratory/operation-collections-plugin';
 import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
-import { useOperationCollectionsPlugin, TargetLaboratoryPageQuery } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
@@ -46,6 +49,9 @@ import 'graphiql/style.css';
 import '@graphiql/plugin-explorer/style.css';
 
 const explorer = explorerPlugin();
+
+// Declare outside components, otherwise while clicking on field in explorer operationCollectionsPlugin will be open
+const plugins = [explorer, operationCollectionsPlugin];
 
 function Share(): ReactElement | null {
   const label = 'Share query';
@@ -264,8 +270,6 @@ function LaboratoryPageContent(props: {
     return new Set(operations);
   }, [collections]);
 
-  const operationCollectionsPlugin = useOperationCollectionsPlugin();
-
   const sdl = query.data?.target?.latestSchemaVersion?.sdl;
   const schema = useMemo(() => (sdl ? buildSchema(sdl) : null), [sdl]);
 
@@ -443,7 +447,7 @@ function LaboratoryPageContent(props: {
           fetcher={fetcher}
           showPersistHeadersSettings={false}
           shouldPersistHeaders={false}
-          plugins={[explorer, operationCollectionsPlugin]}
+          plugins={plugins}
           visiblePlugin={operationCollectionsPlugin}
           schema={schema}
           forcedTheme="dark"
