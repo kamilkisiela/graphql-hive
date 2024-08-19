@@ -73,18 +73,21 @@ Default.args = {
   isOpen: true,
   close: () => {},
   collections: [
+    // @ts-expect-error -- Tuval: these types are invalid
     {
       id: '1',
       name: 'Collection 1',
       __typename: 'DocumentCollection',
       description: 'Collection 1 description',
     },
+    // @ts-expect-error -- Tuval: these types are invalid
     {
       id: '2',
       name: 'Collection 2',
       __typename: 'DocumentCollection',
       description: 'Collection 2 description',
     },
+    // @ts-expect-error -- Tuval: these types are invalid
     {
       id: '3',
       name: 'Collection 3',
