@@ -31,7 +31,7 @@ const meta: Meta<typeof UserSettingsModalContent> = {
   title: 'Modals/User Settings Modal',
   component: UserSettingsModalContent,
   argTypes: {
-    close: {
+    toggleModalOpen: {
       action: 'close',
     },
     form: {
@@ -46,6 +46,11 @@ const meta: Meta<typeof UserSettingsModalContent> = {
     },
     onSubmit: {
       action: 'onSubmit',
+    },
+    fetching: {
+      control: {
+        type: 'boolean',
+      },
     },
   },
 };
@@ -69,5 +74,5 @@ const Template: StoryFn<typeof UserSettingsModalContent> = args => {
 export const UserSettings: Story = Template.bind({});
 UserSettings.args = {
   isOpen: true,
-  close: () => console.log('Close'),
+  toggleModalOpen: () => console.log('Close'),
 };
