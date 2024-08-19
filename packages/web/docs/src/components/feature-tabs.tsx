@@ -222,9 +222,7 @@ function Feature(props: {
             return (
               <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
                 <dt className="text-green-1000 font-medium">{highlight.title}</dt>
-                <dd className="mt-2 text-sm leading-5 text-green-800">
-                  {highlight.description}
-                </dd>
+                <dd className="mt-2 text-sm leading-5 text-green-800">{highlight.description}</dd>
               </div>
             );
           })}
