@@ -76,7 +76,7 @@ export function CommunitySection({ className }: { className?: string }) {
         fade="y"
       >
         {Array.from({ length: 4 }).map((_, i) => (
-          <div className="contents flex-col gap-6 sm:flex [&>:last-child]:flex-1" key={i}>
+          <div className="contents flex-col gap-6 sm:flex max-lg:[&>:last-child]:flex-1" key={i}>
             {tempSocialPosts.map((post, j) =>
               j % 4 === i ? <SocialPostCard post={post} key={j} /> : null,
             )}
