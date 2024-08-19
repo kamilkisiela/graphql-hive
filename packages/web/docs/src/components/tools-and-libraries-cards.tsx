@@ -1,16 +1,23 @@
 import { CodegenIcon, HiveIcon, MeshIcon, YogaIcon } from '@theguild/components';
 import { PRODUCTS } from '@theguild/components/products';
+import { cn } from '../lib';
+import { CallToAction } from './call-to-action';
+import { HighlightDecoration } from './decorations';
 import { Heading } from './heading';
 
-export function ToolsAndLibrariesCards() {
+export function ToolsAndLibrariesCards({ className }: { className?: string }) {
   return (
-    <section className="gap-12">
+    <section className={cn('flex flex-col gap-6 px-4 py-6 lg:gap-12 lg:p-[120px]', className)}>
       <Heading as="h2" size="md" className="text-green-1000">
         Discover the complete ecosystem of tools and libraries
       </Heading>
       <p className="text-green-800">Complete GraphQL Management Stack</p>
       <MainCards />
       <p className="text-green-800">Our libraries to support all your GraphQL needs</p>
+      <SecondaryCards />
+      <CallToAction href="https://github.com/the-guild-org" variant="primary">
+        Explore the Ecosystem
+      </CallToAction>
     </section>
   );
 }
@@ -20,32 +27,45 @@ function MainCards() {
   const icons = [HiveIcon, YogaIcon, MeshIcon, CodegenIcon];
 
   return (
-    <ul>
+    <ul className="flex flex-row gap-[22px] overflow-hidden">
       {products.map((product, i) => {
         const Icon = icons[i];
         const Decoration = cardDecorations[product.name];
         return (
-          <li key={product.name}>
+          <li
+            key={product.name}
+            className="text-green-1000 first-of-type:bg-green-1000 group relative w-[283.5px] rounded-2xl bg-blue-400 p-8 first-of-type:text-white"
+          >
             <a href={product.href}>
               {product.name}
-              <Icon />
+              <Icon className="mt-8" />
             </a>
-            <Decoration />
+            <Decoration
+              className="pointer-events-none absolute bottom-0 right-0 fill-blue-200 stroke-[0.5px] opacity-0 transition-opacity duration-500 group-first-of-type:fill-blue-700 group-hover:opacity-100"
+              preserveAspectRatio="xMidYMid meet"
+            />
+            <HighlightDecoration className="pointer-events-none absolute left-0 top-[-15%] h-[150%] w-full opacity-0 transition-opacity duration-1000 group-hover:opacity-100" />
           </li>
         );
       })}
     </ul>
   );
 }
+
+function SecondaryCards() {
+  return <ul>{}</ul>;
+}
+
 const cardDecorations = {
-  [PRODUCTS.HIVE.name]() {
+  [PRODUCTS.HIVE.name](props: React.SVGAttributes<SVGSVGElement>) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="160"
-        height="172"
+        height="174"
         viewBox="0 0 160 172"
         fill="none"
+        {...props}
       >
         <mask
           id="path-1-outside-1_642_4223"
@@ -101,7 +121,7 @@ const cardDecorations = {
       </svg>
     );
   },
-  [PRODUCTS.YOGA.name]() {
+  [PRODUCTS.YOGA.name](props: React.SVGAttributes<SVGSVGElement>) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -109,6 +129,7 @@ const cardDecorations = {
         height="163"
         viewBox="0 0 211 163"
         fill="none"
+        {...props}
       >
         <mask
           id="path-1-outside-1_642_4128"
@@ -164,14 +185,15 @@ const cardDecorations = {
       </svg>
     );
   },
-  [PRODUCTS.MESH.name]() {
+  [PRODUCTS.MESH.name](props: React.SVGAttributes<SVGSVGElement>) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="156"
-        height="172"
+        height="174"
         viewBox="0 0 156 172"
         fill="none"
+        {...props}
       >
         <mask
           id="path-1-outside-1_642_4203"
@@ -227,14 +249,15 @@ const cardDecorations = {
       </svg>
     );
   },
-  [PRODUCTS.CODEGEN.name]() {
+  [PRODUCTS.CODEGEN.name](props: React.SVGAttributes<SVGSVGElement>) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="177"
-        height="172"
+        height="174"
         viewBox="0 0 177 172"
         fill="none"
+        {...props}
       >
         <mask
           id="path-1-outside-1_642_4281"
