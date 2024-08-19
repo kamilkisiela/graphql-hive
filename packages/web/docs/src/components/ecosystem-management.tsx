@@ -267,7 +267,7 @@ function EdgeLabel(props: EdgeLabelProps) {
     <div
       className={
         'flex size-8 h-[var(--label-h)] items-center justify-center' +
-        ' cursor-default rounded bg-green-700 text-sm font-medium leading-[20px]'
+        ' cursor-default rounded bg-green-700 text-sm font-medium leading-5'
       }
       {...props}
     />
@@ -297,7 +297,7 @@ function Node({ title, description, children, highlighted, className, ...rest }:
       <div>
         <div className="font-medium text-green-100">{title}</div>
         {description && (
-          <div className="mt-0.5 text-sm leading-[20px] text-green-200">{description}</div>
+          <div className="mt-0.5 text-sm leading-5 text-green-200">{description}</div>
         )}
       </div>
     </div>
