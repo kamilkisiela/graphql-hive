@@ -4,7 +4,6 @@ dist/
 .next/
 __generated__/
 
-/.husky/_/
 /.turbo/
 /integration-tests/testkit/gql/
 /packages/libraries/cli/src/sdk.ts
