@@ -419,8 +419,8 @@ function LaboratoryPageContent(props: {
                 className={clsx(
                   'text-xs hover:text-white',
                   !query.fetching &&
-                  actualSelectedApiEndpoint === 'mockApi' &&
-                  'bg-gray-800 text-white',
+                    actualSelectedApiEndpoint === 'mockApi' &&
+                    'bg-gray-800 text-white',
                 )}
                 disabled={query.fetching}
               >
@@ -433,8 +433,8 @@ function LaboratoryPageContent(props: {
                 className={cn(
                   'text-xs hover:text-white',
                   !query.fetching &&
-                  actualSelectedApiEndpoint === 'linkedApi' &&
-                  'bg-gray-800 text-white',
+                    actualSelectedApiEndpoint === 'linkedApi' &&
+                    'bg-gray-800 text-white',
                 )}
                 disabled={!query.data?.target?.graphqlEndpointUrl || query.fetching}
               >
