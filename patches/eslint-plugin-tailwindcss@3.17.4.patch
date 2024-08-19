@@ -12,10 +12,10 @@ index 97216be99de4137d492928fde5b4ae0b7981c8ab..8d5f76cc5c70508f7688642335edb4ec
          context.report({
            node,
 diff --git a/lib/util/customConfig.js b/lib/util/customConfig.js
-index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..926a641f670f0725624837098a4cb6125514603e 100644
+index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..1af80c4eb1aeb44a34409bb0c17bd8b0a8086a7b 100644
 --- a/lib/util/customConfig.js
 +++ b/lib/util/customConfig.js
-@@ -39,27 +39,34 @@ function requireUncached(module) {
+@@ -39,27 +39,37 @@ function requireUncached(module) {
   * @returns `null` when unchanged, `{}` when not found
   */
  function loadConfig(config) {
@@ -37,7 +37,10 @@ index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..926a641f670f0725624837098a4cb612
          lastModifiedDate = mtime;
          loadedConfig = requireUncached(resolvedPath);
        } else {
-+        console.log('config unchanged');
++        console.log('config unchanged', {
++          lastModifiedDate,
++          mtime,
++        });
          // Unchanged config
          loadedConfig = null;
        }
@@ -50,7 +53,7 @@ index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..926a641f670f0725624837098a4cb612
        return loadedConfig;
      }
    } else {
-@@ -91,6 +98,7 @@ function resolve(twConfig) {
+@@ -91,6 +101,7 @@ function resolve(twConfig) {
      const userConfig = loadConfig(twConfig);
      // userConfig is null when config file was not modified
      if (userConfig !== null) {
