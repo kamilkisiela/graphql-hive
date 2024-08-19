@@ -8,6 +8,7 @@ import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
 import { cdnModule } from './modules/cdn';
+import { AwsClient } from './modules/cdn/providers/aws';
 import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
 import { collectionModule } from './modules/collection';
 import { feedbackModule } from './modules/feedback';
@@ -66,7 +67,6 @@ import {
   USAGE_ESTIMATION_SERVICE_CONFIG,
   UsageEstimationServiceConfig,
 } from './modules/usage-estimation/providers/tokens';
-import { AwsClient } from './modules/cdn/providers/aws';
 
 const modules = [
   sharedModule,

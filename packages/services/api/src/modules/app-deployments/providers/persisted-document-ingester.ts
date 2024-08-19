@@ -321,7 +321,9 @@ export class PersistedDocumentIngester {
           );
 
           if (response.statusCode !== 200) {
-            throw new Error(`Failed to upload operation to S3: [${response.statusCode}] ${response.statusMessage}`);
+            throw new Error(
+              `Failed to upload operation to S3: [${response.statusCode}] ${response.statusMessage}`,
+            );
           }
         }),
       );

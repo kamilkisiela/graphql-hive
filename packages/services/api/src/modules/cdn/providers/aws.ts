@@ -129,9 +129,9 @@ export class AwsClient {
         beforeRetry: [
           (error, retryCount) => {
             console.log(`Retrying ${init.method} ${url} [${retryCount}]: ${error.code}`);
-          }
-        ]
-      }
+          },
+        ],
+      },
     }).finally(() => {
       console.log(`Finished ${init.method} ${url} in ${Date.now() - startedAt}ms`);
     });
