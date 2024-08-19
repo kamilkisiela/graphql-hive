@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -91,7 +92,7 @@ export const EditOperationModal = (props: {
   }, [collections]);
 
   const form = useForm<EditOperationModalFormValues>({
-    mode: 'onChange',
+    mode: 'all',
     resolver: zodResolver(editOperationModalFormSchema),
     defaultValues: {
       name: operation?.name || '',
@@ -150,13 +151,20 @@ export const EditOperationModalContent = (props: {
   opreationId?: string;
 }): ReactElement => {
   return (
-    <Dialog open={props.isOpen} onOpenChange={props.close}>
+    <Dialog
+      open={props.isOpen}
+      onOpenChange={() => {
+        props.close();
+        props.form.reset();
+      }}
+    >
       <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
         {!props.fetching && (
           <Form {...props.form}>
             <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
               <DialogHeader>
                 <DialogTitle>Edit Operation</DialogTitle>
+                <DialogDescription>Update the operation name</DialogDescription>
               </DialogHeader>
               <div className="space-y-8">
                 <FormField
@@ -193,7 +201,11 @@ export const EditOperationModalContent = (props: {
                   size="lg"
                   className="w-full justify-center"
                   variant="primary"
-                  disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
+                  disabled={
+                    props.form.formState.isSubmitting ||
+                    !props.form.formState.isValid ||
+                    !props.form.formState.isDirty
+                  }
                   data-cy="confirm"
                 >
                   Update Operation

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -95,7 +96,7 @@ export function CreateOperationModal(props: {
 }): ReactElement {
   const { toast } = useToast();
   const { isOpen, close, onSaveSuccess } = props;
-  const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
+  const [, mutateCreate] = useMutation(CreateOperationMutation);
 
   const { collections, fetching } = useCollections({
     organizationId: props.organizationId,
@@ -113,15 +114,11 @@ export function CreateOperationModal(props: {
       name: '',
       collectionId: '',
     },
+    disabled: fetching,
   });
 
   async function onSubmit(values: CreateOperationModalFormValues) {
-    if (mutationCreate.error) {
-      form.setError('name', {
-        message: mutationCreate.error.message,
-      });
-    }
-    const response = await mutateCreate({
+    const result = await mutateCreate({
       selector: {
         target: props.targetId,
         organization: props.organizationId,
@@ -135,18 +132,22 @@ export function CreateOperationModal(props: {
         headers: headerEditor?.getValue(),
       },
     });
-    const result = response.data;
-    const error = response.error || response.data?.createOperationInDocumentCollection.error;
+    const error = result.error || result.data?.createOperationInDocumentCollection.error;
 
-    if (!error) {
-      onSaveSuccess?.(result?.createOperationInDocumentCollection.ok?.operation.id);
-      form.reset();
-      close();
-    } else {
+    if (error) {
       toast({
-        title: 'Could not create operation',
-        description: error.message,
+        title: 'Error',
+        description: 'Failed to create operation',
         variant: 'destructive',
+      });
+    } else {
+      close();
+      onSaveSuccess?.(result.data?.createOperationInDocumentCollection.ok?.operation.id);
+      form.reset();
+      toast({
+        title: 'Success',
+        description: `Operation "${values.name}" created successfully and added to collection "${collections.find(c => c.id === values.collectionId)?.name}"`,
+        variant: 'default',
       });
     }
   }
@@ -183,64 +184,71 @@ export function CreateOperationModalContent(props: {
   collections: DocumentCollectionWithOutOperations[];
 }): ReactElement {
   return (
-    <Dialog open={props.isOpen} onOpenChange={props.close}>
+    <Dialog
+      open={props.isOpen}
+      onOpenChange={() => {
+        props.close();
+        props.form.reset();
+      }}
+    >
       <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
         {!props.fetching && (
           <Form {...props.form}>
             <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
               <DialogHeader>
                 <DialogTitle>Create Operation</DialogTitle>
+                <DialogDescription>
+                  Create a new operation and add it to a collection
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-8">
                 <FormField
                   control={props.form.control}
                   name="name"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Operation Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Your Operation Name" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Operation Name</FormLabel>
+                      <FormControl>
+                        <Input autoComplete="off" {...field} placeholder="Your Operation Name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 <FormField
                   control={props.form.control}
                   name="collectionId"
-                  render={({ field }) => {
-                    return (
-                      <FormItem>
-                        <FormLabel>Collection Description</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={async v => {
-                              await field.onChange(v);
-                            }}
-                          >
-                            <SelectTrigger>
-                              {props.collections.find(c => c.id === field.value)?.name ??
-                                'Select a Collection'}
-                            </SelectTrigger>
-                            <SelectContent className="w-[--radix-select-trigger-width]">
-                              {props.collections.map(c => (
-                                <SelectItem key={c.id} value={c.id}>
-                                  {c.name}
-                                  <div className="mt-1 line-clamp-1 text-xs opacity-50">
-                                    {c.description}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Which collection would you like to save this operation to?
+                      </FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={async v => {
+                            await field.onChange(v);
+                          }}
+                        >
+                          <SelectTrigger>
+                            {props.collections.find(c => c.id === field.value)?.name ??
+                              'Select a Collection'}
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            {props.collections.map(c => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.name}
+                                <div className="mt-1 line-clamp-1 text-xs opacity-50">
+                                  {c.description}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
               <DialogFooter>
@@ -261,7 +269,11 @@ export function CreateOperationModalContent(props: {
                   size="lg"
                   className="w-full justify-center"
                   variant="primary"
-                  disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
+                  disabled={
+                    props.form.formState.isSubmitting ||
+                    !props.form.formState.isValid ||
+                    !props.form.getValues('collectionId')
+                  }
                   data-cy="confirm"
                 >
                   Add Operation
