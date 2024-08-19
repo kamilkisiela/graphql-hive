@@ -143,16 +143,15 @@ export function CreateOperationModal(props: {
         variant: 'destructive',
       });
     } else {
-      const operation = result?.createOperationInDocumentCollection.ok?.operation;
+      const operation = result?.data?.createOperationInDocumentCollection.ok?.operation;
       if (operation) {
         onSaveSuccess({ id: operation.id, name: operation.name });
       }
       form.reset();
       close();
       toast({
-        title: 'Success',
-        description: `Operation "${values.name}" created successfully and added to collection "${collections.find(c => c.id === values.collectionId)?.name}"`,
-        variant: 'default',
+        title: 'Operation created',
+        description: `Operation "${values.name}" added to collection "${collections.find(c => c.id === values.collectionId)?.name}"`,
       });
     }
   }
@@ -224,10 +223,7 @@ export function CreateOperationModalContent(props: {
                         Which collection would you like to save this operation to?
                       </FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
+                        <Select value={field.value} onValueChange={field.onChange}>
                           <SelectTrigger>
                             {props.collections.find(c => c.id === field.value)?.name ??
                               'Select a Collection'}
