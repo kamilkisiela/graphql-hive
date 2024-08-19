@@ -72,7 +72,7 @@
     "@next/eslint-plugin-next": "14.2.4",
     "@parcel/watcher": "2.4.1",
     "@sentry/cli": "2.33.1",
-    "@swc/core": "1.6.13",
+    "@swc/core": "1.7.12",
     "@theguild/eslint-config": "0.12.0",
     "@theguild/prettier-config": "2.0.7",
     "@types/node": "20.16.0",
