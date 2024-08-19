@@ -1,9 +1,9 @@
 import { GraphiQL } from 'graphiql';
-import { HiveLogo } from '@/components/ui/icon';
-import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import 'graphiql/graphiql.css';
 import { Helmet } from 'react-helmet-async';
+import { HiveLogo } from '@/components/ui/icon';
 import { env } from '@/env/frontend';
+import { createGraphiQLFetcher } from '@graphiql/toolkit';
+import 'graphiql/style.css';
 
 export function DevPage() {
   return (

@@ -62,13 +62,10 @@ export class ArtifactStorageWriter {
         // This boolean makes Google Cloud Storage & AWS happy.
         signQuery: true,
       },
-      // Add a timeout to prevent hanging the request.
-      // Should be more than enough to write an artifact.
-      timeout: 10_000,
     });
 
-    if (result.status !== 200) {
-      throw new Error(`Unexpected status code ${result.status} when writing artifact.`);
+    if (result.statusCode !== 200) {
+      throw new Error(`Unexpected status code ${result.statusCode} when writing artifact.`);
     }
   }
 
@@ -98,20 +95,17 @@ export class ArtifactStorageWriter {
         // This boolean makes Google Cloud Storage & AWS happy.
         signQuery: true,
       },
-      // Add a timeout to prevent hanging the request.
-      // Should be more than enough to delete an artifact.
-      timeout: 5_000,
     });
 
-    if (result.status !== 204) {
+    if (result.statusCode !== 204) {
       this.logger.debug(
         'Failed deleting artifact, S3 compatible storage returned unexpected status code. (targetId=%s, contractName=%s, artifactType=%s, statusCode=%s)',
         args.targetId,
         args.artifactType,
         args.contractName,
-        result.status,
+        result.statusCode,
       );
-      throw new Error(`Unexpected status code ${result.status} when deleting artifact.`);
+      throw new Error(`Unexpected status code ${result.statusCode} when deleting artifact.`);
     }
 
     this.logger.debug(

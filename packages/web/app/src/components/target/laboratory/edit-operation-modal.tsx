@@ -22,8 +22,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
+import { useCollections } from '@/lib/hooks/laboratory/use-collections';
+import { useEditorContext } from '@graphiql/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCollections } from '../../../pages/target-laboratory';
 
 const UpdateOperationNameMutation = graphql(`
   mutation UpdateOperation(
@@ -79,6 +80,7 @@ export const EditOperationModal = (props: {
     projectId: props.projectId,
     targetId: props.targetId,
   });
+  const { setTabState } = useEditorContext({ nonNull: true });
 
   const [collection, operation] = useMemo(() => {
     for (const collection of collections) {
@@ -116,6 +118,13 @@ export const EditOperationModal = (props: {
     const error = response.error || response.data?.updateOperationInDocumentCollection?.error;
 
     if (!error) {
+      // Update tab title
+      setTabState(state => ({
+        ...state,
+        tabs: state.tabs.map(tab =>
+          tab.id === props.operationId ? { ...tab, title: values.name } : tab,
+        ),
+      }));
       props.close();
       toast({
         title: 'Operation Updated',

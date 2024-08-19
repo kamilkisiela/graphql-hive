@@ -23,8 +23,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { DocumentCollection } from '@/gql/graphql';
-import { useCollections } from '@/pages/target-laboratory';
+import {
+  DocumentCollectionOperation,
+  useCollections,
+} from '@/lib/hooks/laboratory/use-collections';
 import { useEditorContext } from '@graphiql/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -89,7 +91,7 @@ export type CreateOperationModalFormValues = z.infer<typeof createOperationModal
 export function CreateOperationModal(props: {
   isOpen: boolean;
   close: () => void;
-  onSaveSuccess?: (operationId?: string) => void;
+  onSaveSuccess: (args: { id: string; name: string }) => void;
   organizationId: string;
   projectId: string;
   targetId: string;
@@ -141,9 +143,12 @@ export function CreateOperationModal(props: {
         variant: 'destructive',
       });
     } else {
-      close();
-      onSaveSuccess?.(result.data?.createOperationInDocumentCollection.ok?.operation.id);
+      const operation = result?.createOperationInDocumentCollection.ok?.operation;
+      if (operation) {
+        onSaveSuccess({ id: operation.id, name: operation.name });
+      }
       form.reset();
+      close();
       toast({
         title: 'Success',
         description: `Operation "${values.name}" created successfully and added to collection "${collections.find(c => c.id === values.collectionId)?.name}"`,
@@ -167,11 +172,6 @@ export function CreateOperationModal(props: {
   );
 }
 
-type DocumentCollectionWithOutOperations = Omit<
-  DocumentCollection,
-  'createdBy' | 'createdAt' | 'updatedAt' | 'operations' | 'pageInfo'
->;
-
 export function CreateOperationModalContent(props: {
   isOpen: boolean;
   close: () => void;
@@ -181,7 +181,7 @@ export function CreateOperationModalContent(props: {
   form: UseFormReturn<CreateOperationModalFormValues>;
   targetId: string;
   fetching: boolean;
-  collections: DocumentCollectionWithOutOperations[];
+  collections: DocumentCollectionOperation[];
 }): ReactElement {
   return (
     <Dialog
@@ -226,9 +226,7 @@ export function CreateOperationModalContent(props: {
                       <FormControl>
                         <Select
                           value={field.value}
-                          onValueChange={async v => {
-                            await field.onChange(v);
-                          }}
+                          onValueChange={field.onChange}
                         >
                           <SelectTrigger>
                             {props.collections.find(c => c.id === field.value)?.name ??
