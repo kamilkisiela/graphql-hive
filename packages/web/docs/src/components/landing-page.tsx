@@ -16,6 +16,7 @@ import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
 import { TeamSection } from './team-section';
+import { ToolsAndLibrariesCards } from './tools-and-libraries-cards';
 
 export function IndexPage(): ReactElement {
   return (
@@ -61,7 +62,7 @@ export function IndexPage(): ReactElement {
             <CallToAction variant="primary-inverted" href="https://app.graphql-hive.com">
               Get started for free
             </CallToAction>
-            <CallToAction variant="secondary" href="/docs">
+            <CallToAction variant="secondary" href="/#pricing">
               View Pricing
             </CallToAction>
           </HeroLinks>
@@ -88,6 +89,7 @@ export function IndexPage(): ReactElement {
         <Pricing />
         <TeamSection className="mx-4 md:mx-6" />
         <CommunitySection className="mx-4 mt-6 md:mx-6" />
+        <ToolsAndLibrariesCards className="mx-4 mt-6 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );

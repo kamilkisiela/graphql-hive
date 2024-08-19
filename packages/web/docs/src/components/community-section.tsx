@@ -60,12 +60,7 @@ export function CommunitySection({ className }: { className?: string }) {
           title="Available for free"
           description="Free Hobby plan that fits perfectly for most side projects."
         >
-          <CallToAction
-            variant="secondary-inverted"
-            href="/#pricing"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <CallToAction variant="secondary-inverted" href="/#pricing">
             Check Pricing
           </CallToAction>
         </CommunityCard>
