@@ -1,11 +1,16 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Modal } from '@/components/v2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { useNotifications } from '@/lib/hooks';
-import { TrashIcon } from '@radix-ui/react-icons';
 
 const DeleteOperationMutation = graphql(`
   mutation DeleteOperation($selector: TargetSelectorInput!, $id: ID!) {
@@ -42,51 +47,81 @@ const DeleteOperationMutation = graphql(`
 export type DeleteOperationMutationType = typeof DeleteOperationMutation;
 
 export function DeleteOperationModal(props: {
-  close: () => void;
+  isOpen: boolean;
+  toggleModalOpen: () => void;
   operationId: string;
   organizationId: string;
   projectId: string;
   targetId: string;
 }): ReactElement {
-  const { close, operationId } = props;
+  const { toast } = useToast();
+  const { isOpen, toggleModalOpen, operationId } = props;
   const [, mutate] = useMutation(DeleteOperationMutation);
-  const notify = useNotifications();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      id: operationId,
+      selector: {
+        target: props.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+      },
+    });
+    toggleModalOpen();
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Operation Deleted',
+        description: 'The operation has been successfully deleted.',
+        variant: 'default',
+      });
+    }
+  };
 
   return (
-    <Modal open onOpenChange={close} className="flex flex-col items-center gap-5">
-      <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
-      <Heading>Delete Operation</Heading>
-      <p className="text-sm text-gray-500">
-        Are you sure you wish to delete this operation? This action is irreversible!
-      </p>
-      <div className="flex w-full gap-2">
-        <Button type="button" size="lg" className="w-full justify-center" onClick={close}>
-          Cancel
-        </Button>
-        <Button
-          size="lg"
-          className="w-full justify-center"
-          variant="destructive"
-          onClick={async () => {
-            const { error } = await mutate({
-              id: operationId,
-              selector: {
-                target: props.targetId,
-                organization: props.organizationId,
-                project: props.projectId,
-              },
-            });
+    <DeleteOperationModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+}
 
-            if (error) {
-              notify(error.message, 'error');
-            }
-            close();
-          }}
-          data-cy="confirm"
-        >
-          Delete
-        </Button>
-      </div>
-    </Modal>
+export function DeleteOperationModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+}): ReactElement {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
+        <DialogHeader>
+          <DialogTitle>Delete Operation</DialogTitle>
+          <DialogDescription>Do you really want to delete this operation?</DialogDescription>
+          <DialogDescription>
+            <span className="font-bold">This action is irreversible!</span>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={props.handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

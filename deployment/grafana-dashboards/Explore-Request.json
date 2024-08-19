@@ -20,18 +20,93 @@
   "graphTooltip": 0,
   "id": 65,
   "links": [],
-  "liveNow": false,
   "panels": [
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "grafanacloud-traces"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "frameIndex": 1,
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0-74515",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "grafanacloud-traces"
+          },
+          "filters": [
+            {
+              "id": "5b9b60be",
+              "operator": "=",
+              "scope": "span",
+              "tag": "guid:x-request-id",
+              "value": ["$requestId"],
+              "valueType": "string"
+            }
+          ],
+          "limit": 20,
+          "queryType": "traceqlSearch",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Distributed Tracing",
+      "type": "table"
+    },
     {
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
       "gridPos": {
-        "h": 13,
+        "h": 8,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 5
       },
       "id": 3,
       "options": {
@@ -44,6 +119,7 @@
         "sortOrder": "Ascending",
         "wrapLogMessage": false
       },
+      "pluginVersion": "11.2.0-74515",
       "targets": [
         {
           "datasource": {
@@ -67,6 +143,10 @@
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
       "gridPos": {
         "h": 13,
         "w": 24,
@@ -84,6 +164,7 @@
         "sortOrder": "Ascending",
         "wrapLogMessage": false
       },
+      "pluginVersion": "11.2.0-74515",
       "targets": [
         {
           "datasource": {
@@ -102,43 +183,40 @@
       "type": "logs"
     }
   ],
+  "preload": false,
   "refresh": "",
-  "schemaVersion": 38,
-  "style": "dark",
+  "schemaVersion": 39,
   "tags": [],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "16310560-80d1-48ac-a045-e75bbf3d47de",
-          "value": "16310560-80d1-48ac-a045-e75bbf3d47de"
+          "text": "e66d686a-e571-980c-8daf-b838da91e6ec",
+          "value": "e66d686a-e571-980c-8daf-b838da91e6ec"
         },
         "description": "Show logs associated with x-request-id header",
-        "hide": 0,
         "label": "Request ID",
         "name": "requestId",
         "options": [
           {
             "selected": true,
-            "text": "16310560-80d1-48ac-a045-e75bbf3d47de",
-            "value": "16310560-80d1-48ac-a045-e75bbf3d47de"
+            "text": "e66d686a-e571-980c-8daf-b838da91e6ec",
+            "value": "e66d686a-e571-980c-8daf-b838da91e6ec"
           }
         ],
-        "query": "16310560-80d1-48ac-a045-e75bbf3d47de",
-        "skipUrlSync": false,
+        "query": "e66d686a-e571-980c-8daf-b838da91e6ec",
         "type": "textbox"
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Explore Request",
+  "title": "Explore Request (7d)",
   "uid": "b977162a-89b3-4394-969c-5f654b926161",
-  "version": 2,
+  "version": 15,
   "weekStart": ""
 }

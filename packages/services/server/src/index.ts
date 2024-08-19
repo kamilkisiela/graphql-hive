@@ -279,7 +279,6 @@ export async function main() {
     const errorHandler = createErrorHandler('error');
     const fatalHandler = createErrorHandler('fatal');
 
-    // eslint-disable-next-line no-inner-declarations
     function createGraphQLLogger(binds: Record<string, any> = {}): Logger {
       return {
         error: wrapLogFn(errorHandler),

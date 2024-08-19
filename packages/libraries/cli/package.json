@@ -52,7 +52,7 @@
     "@graphql-tools/json-file-loader": "~8.0.0",
     "@graphql-tools/load": "~8.0.0",
     "@graphql-tools/url-loader": "~8.0.0",
-    "@graphql-tools/utils": "10.5.3",
+    "@graphql-tools/utils": "10.5.4",
     "@graphql-typed-document-node/core": "3.2.0",
     "@oclif/core": "^3.26.6",
     "@oclif/plugin-help": "6.0.22",
@@ -72,7 +72,7 @@
     "graphql": "16.9.0",
     "oclif": "4.13.6",
     "rimraf": "4.4.1",
-    "tsx": "4.16.2",
+    "tsx": "4.17.0",
     "typescript": "5.5.4"
   },
   "publishConfig": {

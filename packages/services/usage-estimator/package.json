@@ -13,10 +13,10 @@
   "devDependencies": {
     "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.118.0",
+    "@sentry/node": "7.119.0",
     "@trpc/server": "10.45.2",
     "dotenv": "16.4.5",
-    "got": "14.4.1",
+    "got": "14.4.2",
     "pino-pretty": "11.2.2",
     "reflect-metadata": "0.2.2",
     "tslib": "2.6.3",
