@@ -21,9 +21,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useEditorContext } from '@graphiql/react';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const UpdateOperationNameMutation = graphql(`
   mutation UpdateOperation(

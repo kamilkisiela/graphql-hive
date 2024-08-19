@@ -97,6 +97,7 @@ export function useOperationCollectionsPlugin(props: {
       });
       const [collectionId, setCollectionId] = useState('');
       const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
+      const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
       const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
       const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
       const { clearOperation, savedOperation, setSavedOperation } = useSyncOperationState({
@@ -353,6 +354,7 @@ export function useOperationCollectionsPlugin(props: {
                         <DropdownMenuItem
                           onClick={() => {
                             setOperationToDeleteId(node.id);
+                            toggleDeleteOperationModalOpen();
                           }}
                           className="text-red-500"
                         >
@@ -463,7 +465,8 @@ export function useOperationCollectionsPlugin(props: {
               organizationId={props.organizationId}
               projectId={props.projectId}
               targetId={props.targetId}
-              close={() => setOperationToDeleteId(null)}
+              isOpen={isDeleteOperationModalOpen}
+              toggleModalOpen={toggleDeleteOperationModalOpen}
               operationId={operationToDeleteId}
             />
           )}
