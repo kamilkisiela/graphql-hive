@@ -1,7 +1,5 @@
 import { createApplication, Scope } from 'graphql-modules';
 import { Redis } from 'ioredis';
-import { Agent as UndiciAgent, fetch as undiciFetch } from 'undici';
-import { AwsClient } from '@hive/cdn-script/aws';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
 import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
@@ -10,6 +8,7 @@ import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
 import { cdnModule } from './modules/cdn';
+import { AwsClient } from './modules/cdn/providers/aws';
 import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
 import { collectionModule } from './modules/collection';
 import { feedbackModule } from './modules/feedback';
@@ -151,24 +150,12 @@ export function createRegistry({
   organizationOIDC: boolean;
   pubSub: HivePubSub;
 }) {
-  const agent = new UndiciAgent({
-    connectTimeout: 5_000,
-    headersTimeout: 10_000,
-    bodyTimeout: 10_000,
-  });
-
   const s3Config: S3Config = {
     client: new AwsClient({
       accessKeyId: s3.accessKeyId,
       secretAccessKey: s3.secretAccessKeyId,
       sessionToken: s3.sessionToken,
       service: 's3',
-      fetch: (input, init) => {
-        return undiciFetch(input as any, {
-          ...(init ? (init as any) : {}),
-          agent,
-        }) as ReturnType<typeof fetch>;
-      },
     }),
     bucket: s3.bucketName,
     endpoint: s3.endpoint,

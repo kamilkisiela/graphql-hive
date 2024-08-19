@@ -410,8 +410,8 @@ export class AppDeployments {
       },
     );
 
-    if (result.status !== 200) {
-      throw new Error(`Failed to enable app deployment: ${result.statusText}`);
+    if (result.statusCode !== 200) {
+      throw new Error(`Failed to enable app deployment: ${result.statusMessage}`);
     }
 
     const updatedAppDeployment = await this.pool
@@ -546,16 +546,16 @@ export class AppDeployments {
     );
 
     /** We receive a 204 status code if the DELETE operation was successful */
-    if (result.status !== 204) {
+    if (result.statusCode !== 204) {
       this.logger.error(
         'Failed to disable app deployment (organizationId=%s, targetId=%s, appDeploymentId=%s, statusCode=%s)',
         args.organizationId,
         args.targetId,
         appDeployment.id,
-        result.status,
+        result.statusCode,
       );
       throw new Error(
-        `Failed to disable app deployment. Request failed with status code "${result.statusText}".`,
+        `Failed to disable app deployment. Request failed with status code "${result.statusMessage}".`,
       );
     }
 

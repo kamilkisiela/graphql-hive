@@ -120,15 +120,15 @@ export class CdnProvider {
       },
     );
 
-    if (headResponse.status !== 404) {
+    if (headResponse.statusCode !== 404) {
       this.logger.debug(
         'Failed creating CDN access token. Head request on S3 returned unexpected status while checking token availability. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
         args.organizationId,
         args.projectId,
         args.targetId,
-        headResponse.status,
+        headResponse.statusCode,
       );
-      this.logger.debug(await headResponse.text());
+      this.logger.debug(headResponse.body);
 
       return {
         type: 'failure',
@@ -157,15 +157,15 @@ export class CdnProvider {
       },
     );
 
-    if (putResponse.status !== 200) {
+    if (putResponse.statusCode !== 200) {
       this.logger.debug(
         'Failed creating CDN Access Token. Head request on S3 returned unexpected status while creating token. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
         args.organizationId,
         args.projectId,
         args.targetId,
-        headResponse.status,
+        headResponse.statusCode,
       );
-      this.logger.error(await putResponse.text());
+      this.logger.error(putResponse.body);
 
       return {
         type: 'failure',
@@ -295,7 +295,7 @@ export class CdnProvider {
       },
     );
 
-    if (headResponse.status !== 204) {
+    if (headResponse.statusCode !== 204) {
       this.logger.debug(
         'Delete CDN access token error. Head request on S3 failed. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
         args.organizationId,
