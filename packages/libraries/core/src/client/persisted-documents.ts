@@ -1,12 +1,17 @@
 import type { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue.js';
 import LRU from 'tiny-lru';
-import type { PersistedDocumentsConfiguration } from './types';
+import { http } from './http-client.js';
+import type { Logger, PersistedDocumentsConfiguration } from './types';
 
 type HeadersObject = {
   get(name: string): string | null;
 };
 
-export function createPersistedDocuments(config: PersistedDocumentsConfiguration): null | {
+export function createPersistedDocuments(
+  config: PersistedDocumentsConfiguration & {
+    logger: Logger;
+  },
+): null | {
   resolve(documentId: string): Promise<string | null>;
   allowArbitraryDocuments(context: { headers?: HeadersObject }): PromiseOrValue<boolean>;
 } {
@@ -23,31 +28,50 @@ export function createPersistedDocuments(config: PersistedDocumentsConfiguration
     allowArbitraryDocuments = () => false;
   }
 
+  /** if there is already a in-flight request for a document, we re-use it. */
+  const fetchCache = new Map<string, Promise<string | null>>();
+
+  /** Batch load a persisted documents */
+  async function loadPersistedDocument(documentId: string) {
+    const document = persistedDocumentsCache.get(documentId);
+    if (document) {
+      return document;
+    }
+
+    const cdnDocumentId = documentId.replaceAll('~', '/');
+
+    const url = config.cdn.endpoint + '/apps/' + cdnDocumentId;
+    let promise = fetchCache.get(url);
+
+    if (!promise) {
+      promise = http
+        .get(url, {
+          headers: {
+            'X-Hive-CDN-Key': config.cdn.accessToken,
+          },
+          logger: config.logger,
+          isRequestOk: response => response.status === 200 || response.status === 404,
+        })
+        .then(async response => {
+          if (response.status !== 200) {
+            return null;
+          }
+          const text = await response.text();
+          persistedDocumentsCache.set(documentId, text);
+          return text;
+        })
+        .finally(() => {
+          fetchCache.delete(url);
+        });
+
+      fetchCache.set(url, promise);
+    }
+
+    return promise;
+  }
+
   return {
     allowArbitraryDocuments,
-    async resolve(documentId: string) {
-      const document = persistedDocumentsCache.get(documentId);
-
-      if (document) {
-        return document;
-      }
-
-      const cdnHttpId = documentId.replaceAll('~', '/');
-
-      const response = await fetch(config.cdn.endpoint + '/apps/' + cdnHttpId, {
-        method: 'GET',
-        headers: {
-          'X-Hive-CDN-Key': config.cdn.accessToken,
-        },
-      });
-
-      if (response.status !== 200) {
-        return null;
-      }
-      const txt = await response.text();
-      persistedDocumentsCache.set(documentId, txt);
-
-      return txt;
-    },
+    resolve: loadPersistedDocument,
   };
 }
