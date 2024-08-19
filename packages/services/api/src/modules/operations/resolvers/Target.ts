@@ -2,7 +2,10 @@ import { parseDateRangeInput } from '../../../shared/helpers';
 import { OperationsManager } from '../providers/operations-manager';
 import type { TargetResolvers } from './../../../__generated__/types.next';
 
-export const Target: Pick<TargetResolvers, 'operation' | 'requestsOverTime' | 'totalRequests'> = {
+export const Target: Pick<
+  TargetResolvers,
+  'operation' | 'requestsOverTime' | 'totalRequests' | '__isTypeOf'
+> = {
   totalRequests: (target, { period }, { injector }) => {
     return injector.get(OperationsManager).countRequests({
       target: target.id,
