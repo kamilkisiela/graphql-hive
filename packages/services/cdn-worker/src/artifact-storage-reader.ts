@@ -77,7 +77,7 @@ export class ArtifactStorageReader {
     public: string;
     private: string;
   }> {
-    const signedUrl = await this.s3.client.sign(
+    const [signedUrl] = await this.s3.client.sign(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
         method: 'GET',
@@ -90,19 +90,19 @@ export class ArtifactStorageReader {
 
     if (!this.publicUrl) {
       return {
-        public: signedUrl.url,
-        private: signedUrl.url,
+        public: signedUrl,
+        private: signedUrl,
       };
     }
 
-    const publicUrl = new URL(signedUrl.url);
+    const publicUrl = new URL(signedUrl);
     publicUrl.protocol = this.publicUrl.protocol;
     publicUrl.host = this.publicUrl.host;
     publicUrl.port = this.publicUrl.port;
 
     return {
       public: publicUrl.toString(),
-      private: signedUrl.url,
+      private: signedUrl,
     };
   }
 
