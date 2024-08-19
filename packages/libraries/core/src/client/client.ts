@@ -220,7 +220,10 @@ export function createHive(options: HivePluginOptions): HiveClient {
     createInstrumentedSubscribe,
     createInstrumentedExecute,
     experimental__persistedDocuments: options.experimental__persistedDocuments
-      ? createPersistedDocuments(options.experimental__persistedDocuments)
+      ? createPersistedDocuments({
+          ...options.experimental__persistedDocuments,
+          logger,
+        })
       : null,
   };
 }

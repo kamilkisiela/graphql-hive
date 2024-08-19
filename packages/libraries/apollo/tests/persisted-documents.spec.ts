@@ -13,8 +13,13 @@ type ApolloServerContext = {
   req: IncomingMessage;
 };
 
+const logger = {
+  info: () => {},
+  error: () => {},
+};
+
 test('use persisted documents (GraphQL over HTTP "documentId")', async () => {
-  const httpScope = nock('http://artifatcs-cdn.localhost', {
+  const httpScope = nock('http://artifacts-cdn.localhost', {
     reqheaders: {
       'X-Hive-CDN-Key': value => {
         expect(value).toBe('foo');
@@ -36,9 +41,12 @@ test('use persisted documents (GraphQL over HTTP "documentId")', async () => {
         token: 'token',
         experimental__persistedDocuments: {
           cdn: {
-            endpoint: 'http://artifatcs-cdn.localhost',
+            endpoint: 'http://artifacts-cdn.localhost',
             accessToken: 'foo',
           },
+        },
+        agent: {
+          logger,
         },
       }),
     ],
@@ -68,7 +76,7 @@ test('use persisted documents (GraphQL over HTTP "documentId")', async () => {
 });
 
 test('persisted document not found (GraphQL over HTTP "documentId")', async () => {
-  const httpScope = nock('http://artifatcs-cdn.localhost', {
+  const httpScope = nock('http://artifacts-cdn.localhost', {
     reqheaders: {
       'X-Hive-CDN-Key': value => {
         expect(value).toBe('foo');
@@ -90,9 +98,12 @@ test('persisted document not found (GraphQL over HTTP "documentId")', async () =
         token: 'token',
         experimental__persistedDocuments: {
           cdn: {
-            endpoint: 'http://artifatcs-cdn.localhost',
+            endpoint: 'http://artifacts-cdn.localhost',
             accessToken: 'foo',
           },
+        },
+        agent: {
+          logger,
         },
       }),
     ],
@@ -143,10 +154,13 @@ test('arbitrary options are rejected with allowArbitraryDocuments=false (GraphQL
         token: 'token',
         experimental__persistedDocuments: {
           cdn: {
-            endpoint: 'http://artifatcs-cdn.localhost',
+            endpoint: 'http://artifacts-cdn.localhost',
             accessToken: 'foo',
           },
           allowArbitraryDocuments: false,
+        },
+        agent: {
+          logger,
         },
       }),
     ],
@@ -193,10 +207,13 @@ test('arbitrary options are allowed with allowArbitraryDocuments=true (GraphQL o
         token: 'token',
         experimental__persistedDocuments: {
           cdn: {
-            endpoint: 'http://artifatcs-cdn.localhost',
+            endpoint: 'http://artifacts-cdn.localhost',
             accessToken: 'foo',
           },
           allowArbitraryDocuments: true,
+        },
+        agent: {
+          logger,
         },
       }),
     ],
@@ -229,7 +246,7 @@ test('arbitrary options are allowed with allowArbitraryDocuments=true (GraphQL o
 });
 
 test('usage reporting for persisted document', async () => {
-  const httpScope = nock('http://artifatcs-cdn.localhost', {
+  const httpScope = nock('http://artifacts-cdn.localhost', {
     reqheaders: {
       'X-Hive-CDN-Key': value => {
         expect(value).toBe('foo');
@@ -286,7 +303,7 @@ test('usage reporting for persisted document', async () => {
         token: 'brrrt',
         experimental__persistedDocuments: {
           cdn: {
-            endpoint: 'http://artifatcs-cdn.localhost',
+            endpoint: 'http://artifacts-cdn.localhost',
             accessToken: 'foo',
           },
         },
@@ -300,6 +317,7 @@ test('usage reporting for persisted document', async () => {
         },
         agent: {
           maxSize: 1,
+          logger,
         },
       }),
     ],
