@@ -108,8 +108,6 @@ integration-tests/testkit/gql/
 
 *.pem
 
-/.husky/_/
-
 npm-shrinkwrap.json
 
 # Rust
