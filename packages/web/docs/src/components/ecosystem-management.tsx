@@ -6,11 +6,6 @@ import { CheckIcon } from './check-icon';
 import { HighlightDecoration } from './decorations';
 import { Heading } from './heading';
 
-/**
- * TODO: Link to a /ecosystem page when it's implemented.
- */
-const ECOSYSTEM_PAGE_LINK = '';
-
 export function EcosystemManagementSection({ className }: { className?: string }) {
   return (
     <section
@@ -45,12 +40,10 @@ export function EcosystemManagementSection({ className }: { className?: string }
             <CallToAction href="/" variant="primary-inverted">
               Migrate from Apollo
             </CallToAction>
-            {ECOSYSTEM_PAGE_LINK && (
-              <CallToAction href={ECOSYSTEM_PAGE_LINK} variant="secondary">
-                <BookIcon />
-                Explore the full Ecosystem
-              </CallToAction>
-            )}
+            <CallToAction href="https://github.com/the-guild-org" variant="secondary">
+              <BookIcon />
+              Explore the full Ecosystem
+            </CallToAction>
           </div>
         </div>
         <Illustration className="hidden md:block" />
