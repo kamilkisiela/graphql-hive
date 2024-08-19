@@ -31,7 +31,7 @@ import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperation
 import { cn } from '@/lib/utils';
 import { GraphiQLPlugin, useEditorContext, usePluginContext } from '@graphiql/react';
 import { BookmarkFilledIcon, BookmarkIcon, DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { useRouter } from '@tanstack/react-router';
+import { useParams, useRouter } from '@tanstack/react-router';
 import { useCollections } from './use-collections';
 import { useCurrentOperation } from './use-current-operation';
 import { useSyncOperationState } from './use-sync-operation-state';
@@ -83,17 +83,20 @@ const _tabBadgeClassName = clsx(
 export function useOperationCollectionsPlugin(props: {
   canEdit: boolean;
   canDelete: boolean;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
 }): GraphiQLPlugin {
   return useMemo(() => {
     function Content() {
+      const { organizationId, projectId, targetId } = useParams({ strict: false }) as {
+        organizationId: string;
+        projectId: string;
+        targetId: string;
+      };
+      // console.log(111, { organizationId, projectId, targetId });
       const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
       const { collections, fetching: loading } = useCollections({
-        organizationId: props.organizationId,
-        projectId: props.projectId,
-        targetId: props.targetId,
+        organizationId,
+        projectId,
+        targetId,
       });
       const [collectionId, setCollectionId] = useState('');
       const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
@@ -101,9 +104,9 @@ export function useOperationCollectionsPlugin(props: {
       const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
       const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
       const { clearOperation, savedOperation, setSavedOperation } = useSyncOperationState({
-        organizationId: props.organizationId,
-        projectId: props.projectId,
-        targetId: props.targetId,
+        organizationId,
+        projectId,
+        targetId,
       });
       const router = useRouter();
       const [accordionValue, setAccordionValue] = useState<string[]>([]);
@@ -112,9 +115,9 @@ export function useOperationCollectionsPlugin(props: {
       const copyToClipboard = useClipboard();
 
       const currentOperation = useCurrentOperation({
-        organizationId: props.organizationId,
-        projectId: props.projectId,
-        targetId: props.targetId,
+        organizationId,
+        projectId,
+        targetId,
       });
       const { queryEditor, variableEditor, headerEditor, tabs, changeTab, addTab } =
         useEditorContext({
@@ -219,9 +222,9 @@ export function useOperationCollectionsPlugin(props: {
             variables: '',
           },
           selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
+            target: targetId,
+            organization: organizationId,
+            project: projectId,
           },
         });
         if (result.error) {
@@ -233,11 +236,7 @@ export function useOperationCollectionsPlugin(props: {
         if (result.data?.createOperationInDocumentCollection.ok) {
           void router.navigate({
             to: '/$organizationId/$projectId/$targetId/laboratory',
-            params: {
-              organizationId: props.organizationId,
-              projectId: props.projectId,
-              targetId: props.targetId,
-            },
+            params: { organizationId, projectId, targetId },
             search: {
               operation: result.data.createOperationInDocumentCollection.ok.operation.id,
             },
@@ -305,11 +304,7 @@ export function useOperationCollectionsPlugin(props: {
                 <div key={node.id} className="flex items-center">
                   <Link
                     to="/$organizationId/$projectId/$targetId/laboratory"
-                    params={{
-                      organizationId: props.organizationId,
-                      projectId: props.projectId,
-                      targetId: props.targetId,
-                    }}
+                    params={{ organizationId, projectId, targetId }}
                     search={{ operation: node.id }}
                     className={cn(
                       'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white hover:no-underline',
@@ -445,26 +440,26 @@ export function useOperationCollectionsPlugin(props: {
             </div>
           )}
           <CreateCollectionModal
-            organizationId={props.organizationId}
-            projectId={props.projectId}
-            targetId={props.targetId}
+            organizationId={organizationId}
+            projectId={projectId}
+            targetId={targetId}
             isOpen={isCollectionModalOpen}
             toggleModalOpen={toggleCollectionModal}
             collectionId={collectionId}
           />
           <DeleteCollectionModal
-            organizationId={props.organizationId}
-            projectId={props.projectId}
-            targetId={props.targetId}
+            organizationId={organizationId}
+            projectId={projectId}
+            targetId={targetId}
             isOpen={isDeleteCollectionModalOpen}
             toggleModalOpen={toggleDeleteCollectionModalOpen}
             collectionId={collectionId}
           />
           {operationToDeleteId && (
             <DeleteOperationModal
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
+              organizationId={organizationId}
+              projectId={projectId}
+              targetId={targetId}
               isOpen={isDeleteOperationModalOpen}
               toggleModalOpen={toggleDeleteOperationModalOpen}
               operationId={operationToDeleteId}
@@ -472,9 +467,9 @@ export function useOperationCollectionsPlugin(props: {
           )}
           {operationToEditId && (
             <EditOperationModal
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
+              organizationId={organizationId}
+              projectId={projectId}
+              targetId={targetId}
               operationId={operationToEditId}
               close={() => setOperationToEditId(null)}
             />
