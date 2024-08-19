@@ -138,7 +138,7 @@ function SocialPostCard({ post }: { post: SocialPost }) {
   const isTwitterLink = post.href.startsWith('https://twitter.com/');
 
   return (
-    <div className="rounded-2xl bg-green-900 p-6 text-green-200 max-sm:h-[fill-available]">
+    <div className="rounded-2xl bg-green-900 p-6 text-green-200 max-sm:h-[stretch]">
       <div className="flex flex-row items-center gap-2">
         <div className="relative">
           <a
