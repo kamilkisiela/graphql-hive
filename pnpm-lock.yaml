@@ -24,7 +24,7 @@ patchedDependencies:
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
   eslint-plugin-tailwindcss@3.17.4:
-    hash: mdywz3kyvi6wg2d4su2zfesw3a
+    hash: tffeibludpt6arxfq4ngten5am
     path: patches/eslint-plugin-tailwindcss@3.17.4.patch
   eslint@8.57.0:
     hash: fjbpfrtrjd6idngyeqxnwopfva
@@ -135,7 +135,13 @@ importers:
         version: link:rules
       eslint-plugin-tailwindcss:
         specifier: 3.17.4
+<<<<<<< HEAD
         version: 3.17.4(patch_hash=mdywz3kyvi6wg2d4su2zfesw3a)(tailwindcss@3.4.10(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4)))
+||||||| parent of 385835593 (Patch with a possible fix)
+        version: 3.17.4(patch_hash=mdywz3kyvi6wg2d4su2zfesw3a)(tailwindcss@3.4.9(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.3)))
+=======
+        version: 3.17.4(patch_hash=tffeibludpt6arxfq4ngten5am)(tailwindcss@3.4.9(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.3)))
+>>>>>>> 385835593 (Patch with a possible fix)
       fs-extra:
         specifier: 11.2.0
         version: 11.2.0
@@ -28021,7 +28027,13 @@ snapshots:
     dependencies:
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
 
+<<<<<<< HEAD
   eslint-plugin-tailwindcss@3.17.4(patch_hash=mdywz3kyvi6wg2d4su2zfesw3a)(tailwindcss@3.4.10(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))):
+||||||| parent of 385835593 (Patch with a possible fix)
+  eslint-plugin-tailwindcss@3.17.4(patch_hash=mdywz3kyvi6wg2d4su2zfesw3a)(tailwindcss@3.4.9(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.3))):
+=======
+  eslint-plugin-tailwindcss@3.17.4(patch_hash=tffeibludpt6arxfq4ngten5am)(tailwindcss@3.4.9(ts-node@10.9.2(@swc/core@1.6.13(@swc/helpers@0.5.11))(@types/node@20.14.15)(typescript@5.5.3))):
+>>>>>>> 385835593 (Patch with a possible fix)
     dependencies:
       fast-glob: 3.3.2
       postcss: 8.4.41

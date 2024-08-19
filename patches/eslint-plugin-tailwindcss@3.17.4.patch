@@ -12,28 +12,29 @@ index 97216be99de4137d492928fde5b4ae0b7981c8ab..8d5f76cc5c70508f7688642335edb4ec
          context.report({
            node,
 diff --git a/lib/util/customConfig.js b/lib/util/customConfig.js
-index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..1af80c4eb1aeb44a34409bb0c17bd8b0a8086a7b 100644
+index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..b931a9f6047c2e5ae9c7a4fba9951a7b6cd1fb31 100644
 --- a/lib/util/customConfig.js
 +++ b/lib/util/customConfig.js
-@@ -39,27 +39,37 @@ function requireUncached(module) {
+@@ -36,9 +36,11 @@ function requireUncached(module) {
+ /**
+  * Load the config from a path string or parsed from an object
+  * @param {string|Object} config
++ * @param {object} options
++ * @param {boolean} options.newConfig when the config has a different path we must resolve even if mtime is the same
   * @returns `null` when unchanged, `{}` when not found
   */
- function loadConfig(config) {
-+  console.log('loading config', config);
+-function loadConfig(config) {
++function loadConfig(config, { newConfig }) {
    let loadedConfig = null;
    if (typeof config === 'string') {
      const resolvedPath = path.isAbsolute(config) ? config : path.join(path.resolve(), config);
-+    console.log({ resolvedPath });
-     try {
-       const stats = fs.statSync(resolvedPath);
-       const mtime = `${stats.mtime || ''}`;
+@@ -48,18 +50,23 @@ function loadConfig(config) {
        if (stats === null) {
-+        console.log('defaulting to no config');
          // Default to no config
          loadedConfig = {};
-       } else if (lastModifiedDate !== mtime) {
-         // Load the config based on path
-+        console.log('loading the config based on path');
+-      } else if (lastModifiedDate !== mtime) {
+-        // Load the config based on path
++      } else if (newConfig || lastModifiedDate !== mtime) {
          lastModifiedDate = mtime;
          loadedConfig = requireUncached(resolvedPath);
        } else {
@@ -53,8 +54,12 @@ index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..1af80c4eb1aeb44a34409bb0c17bd8b0
        return loadedConfig;
      }
    } else {
-@@ -91,6 +101,7 @@ function resolve(twConfig) {
-     const userConfig = loadConfig(twConfig);
+@@ -88,9 +95,10 @@ function resolve(twConfig) {
+   if (newConfig || expired) {
+     previousConfig = twConfig;
+     lastCheck = now;
+-    const userConfig = loadConfig(twConfig);
++    const userConfig = loadConfig(twConfig, { newConfig });
      // userConfig is null when config file was not modified
      if (userConfig !== null) {
 +      console.log('changing merged config to', twConfig);
