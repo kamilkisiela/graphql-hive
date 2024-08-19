@@ -37,7 +37,10 @@ export function EcosystemManagementSection({ className }: { className?: string }
             ))}
           </ul>
           <div className="flex flex-col gap-x-4 gap-y-2 md:flex-row">
-            <CallToAction href="/" variant="primary-inverted">
+            <CallToAction
+              href="https://the-guild.dev/graphql/hive/docs/use-cases/apollo-studio"
+              variant="primary-inverted"
+            >
               Migrate from Apollo
             </CallToAction>
             <CallToAction href="https://github.com/the-guild-org" variant="secondary">
