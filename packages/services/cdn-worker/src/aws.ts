@@ -45,6 +45,23 @@ type AwsRequestInit = RequestInit & {
     allHeaders?: boolean;
     singleEncode?: boolean;
   };
+  /**
+   * Timeout in milliseconds for each fetch call.
+   */
+  timeout?: number;
+};
+
+export type AWSClientConfig = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+  service?: string;
+  region?: string;
+  cache?: Map<string, ArrayBuffer>;
+  retries?: number;
+  initRetryMs?: number;
+  /* fetch implementation */
+  fetch?: typeof fetch;
 };
 
 export class AwsClient {
@@ -56,42 +73,31 @@ export class AwsClient {
   private cache: Map<string, ArrayBuffer>;
   private retries: number;
   private initRetryMs: number;
+  private _fetch: typeof fetch;
 
-  constructor({
-    accessKeyId,
-    secretAccessKey,
-    sessionToken,
-    service,
-    region,
-    cache,
-    retries,
-    initRetryMs,
-  }: {
-    accessKeyId: string;
-    secretAccessKey: string;
-    sessionToken?: string;
-    service?: string;
-    region?: string;
-    cache?: Map<string, ArrayBuffer>;
-    retries?: number;
-    initRetryMs?: number;
-  }) {
-    if (accessKeyId == null) throw new TypeError('accessKeyId is a required option');
-    if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option');
-    this.accessKeyId = accessKeyId;
-    this.secretAccessKey = secretAccessKey;
-    this.sessionToken = sessionToken;
-    this.service = service;
-    this.region = region;
-    this.cache = cache || new Map();
-    this.retries = retries != null ? retries : 10; // Up to 25.6 secs
-    this.initRetryMs = initRetryMs || 50;
+  constructor(args: AWSClientConfig) {
+    this.accessKeyId = args.accessKeyId;
+    this.secretAccessKey = args.secretAccessKey;
+    this.sessionToken = args.sessionToken;
+    this.service = args.service;
+    this.region = args.region;
+    this.cache = args.cache || new Map();
+    this.retries = args.retries != null ? args.retries : 10; // Up to 25.6 secs
+    this.initRetryMs = args.initRetryMs || 50;
+    this._fetch = args.fetch || fetch.bind(globalThis);
   }
 
   async sign(input: RequestInfo, init?: AwsRequestInit) {
     if (input instanceof Request) {
       const { method, url, headers, body } = input;
-      init = Object.assign({ method, url, headers }, init);
+      init = Object.assign(
+        {
+          method,
+          url,
+          headers,
+        },
+        init,
+      );
       if (init.body == null && headers.has('Content-Type')) {
         init.body =
           body != null && headers.has('X-Amz-Content-Sha256')
@@ -101,14 +107,21 @@ export class AwsClient {
       input = url;
     }
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
-    const signed = Object.assign({}, init, await signer.sign());
+    const signed = Object.assign(
+      {
+        signal: init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
+      },
+      init,
+      await signer.sign(),
+    );
     delete signed.aws;
+
     try {
-      return new Request(signed.url.toString(), signed);
+      return [signed.url.toString(), signed] as const;
     } catch (e) {
       if (e instanceof TypeError) {
         // https://bugs.chromium.org/p/chromium/issues/detail?id=1360943
-        return new Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed));
+        return [signed.url.toString(), Object.assign({ duplex: 'half' }, signed)] as const;
       }
       throw e;
     }
@@ -116,13 +129,18 @@ export class AwsClient {
 
   async fetch(input: RequestInfo, init: AwsRequestInit): Promise<Response> {
     for (let i = 0; i <= this.retries; i++) {
-      const fetched = fetch(await this.sign(input, init));
+      const fetched = this._fetch(...(await this.sign(input, init)));
       if (i === this.retries) {
         return fetched; // No need to await if we're returning anyway
       }
-      const res = await fetched;
-      if (res.status < 500 && res.status !== 429 && res.status !== 499) {
-        return res;
+      try {
+        const res = await fetched;
+        if (res.status < 500 && res.status !== 429 && res.status !== 499) {
+          return res;
+        }
+      } catch (error) {
+        // Retry also when there's an exception
+        console.error(error);
       }
       await new Promise(resolve =>
         setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)),

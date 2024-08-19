@@ -2,7 +2,8 @@ version: '3.8'
 name: 'hive-dev'
 services:
   db:
-    image: postgres:14.12-alpine
+    image: postgres:14.13-alpine
+    mem_limit: 300m
     networks:
       - 'stack'
     healthcheck:
@@ -21,7 +22,8 @@ services:
       - '5432:5432'
 
   redis:
-    image: bitnami/redis:7.2.5
+    image: bitnami/redis:7.4.0
+    mem_limit: 50m
     networks:
       - 'stack'
     healthcheck:
@@ -40,6 +42,7 @@ services:
 
   s3:
     image: quay.io/minio/minio:RELEASE.2022-11-29T23-40-49Z
+    mem_limit: 200m
     command: server /data --console-address ":9001"
     ports:
       - '9000:9000'
@@ -70,7 +73,8 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:24.4-alpine
+    image: clickhouse/clickhouse-server:24.7-alpine
+    mem_limit: 2048m
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
@@ -89,7 +93,9 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.3.17
+    image: redpandadata/redpanda:v23.3.19
+    mem_limit: 300m
+    mem_reservation: 100m
     container_name: broker
     hostname: broker
     networks:
@@ -115,13 +121,12 @@ services:
       - --advertise-pandaproxy-addr
       - PLAINTEXT://broker:28082,OUTSIDE://localhost:8082
       - --advertise-rpc-addr redpanda-1:33145
-    mem_limit: 300m
-    mem_reservation: 100m
     volumes:
       - ./.hive-dev/broker/db:/var/lib/kafka/data
 
   supertokens:
     image: registry.supertokens.io/supertokens/supertokens-postgresql:7.0
+    mem_limit: 300m
     depends_on:
       db:
         condition: service_healthy
@@ -139,8 +144,9 @@ services:
       API_KEYS: bubatzbieber6942096420
 
   oidc-server-mock:
-    container_name: oidc-server-mock
     image: ghcr.io/soluto/oidc-server-mock:0.8.6
+    container_name: oidc-server-mock
+    mem_limit: 150m
     ports:
       - '7043:80'
     environment:

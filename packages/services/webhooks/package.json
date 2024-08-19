@@ -12,15 +12,15 @@
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.118.0",
+    "@sentry/node": "7.119.0",
     "@trpc/server": "10.45.2",
-    "bullmq": "5.8.3",
+    "bullmq": "5.12.9",
     "copyfiles": "2.4.1",
     "dotenv": "16.4.5",
-    "got": "14.4.1",
+    "got": "14.4.2",
     "ioredis": "5.4.1",
     "p-timeout": "6.1.2",
-    "pino-pretty": "11.2.1",
+    "pino-pretty": "11.2.2",
     "tslib": "2.6.3",
     "zod": "3.23.8"
   }

@@ -16,7 +16,7 @@ describe('Policy CRUD', () => {
   describe('Target level', () => {
     test.concurrent(
       'Should return empty policy when project and org does not have one',
-      async () => {
+      async ({ expect }) => {
         const { createOrg, ownerToken } = await initSeed().createOwner();
         const { organization, createProject } = await createOrg();
         const { project, target } = await createProject(ProjectType.Single);
@@ -233,7 +233,7 @@ describe('Policy CRUD', () => {
   describe('Project level', () => {
     test.concurrent(
       'creating a project should NOT create a record in the database for the policy',
-      async () => {
+      async ({ expect }) => {
         const { createOrg, ownerToken } = await initSeed().createOwner();
         const { organization, createProject } = await createOrg();
         await createProject(ProjectType.Single);
@@ -329,7 +329,7 @@ describe('Policy CRUD', () => {
   describe('Org level', () => {
     test.concurrent(
       'creating a org should NOT create a record in the database for the policy',
-      async () => {
+      async ({ expect }) => {
         const { createOrg, ownerToken } = await initSeed().createOwner();
         const { organization, createProject } = await createOrg();
         await createProject(ProjectType.Single);
@@ -347,7 +347,7 @@ describe('Policy CRUD', () => {
       },
     );
 
-    test.concurrent('invalid rule name is rejected with an error', async () => {
+    test.concurrent('invalid rule name is rejected with an error', async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject, setOrganizationSchemaPolicy } = await createOrg();
       await createProject(ProjectType.Single);
@@ -358,7 +358,7 @@ describe('Policy CRUD', () => {
       expect(upsertResult.error?.message).toContain('Unknown rule name passed');
     });
 
-    test.concurrent('invalid rule config is rejected with an error', async () => {
+    test.concurrent('invalid rule config is rejected with an error', async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject, setOrganizationSchemaPolicy } = await createOrg();
       await createProject(ProjectType.Single);
@@ -371,7 +371,7 @@ describe('Policy CRUD', () => {
       );
     });
 
-    test.concurrent('empty rule config is rejected with an error', async () => {
+    test.concurrent('empty rule config is rejected with an error', async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
       const { createProject, setOrganizationSchemaPolicy } = await createOrg();
       await createProject(ProjectType.Single);

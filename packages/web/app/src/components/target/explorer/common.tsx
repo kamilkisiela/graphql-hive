@@ -1,8 +1,8 @@
 import React, { ReactElement, ReactNode, useMemo } from 'react';
 import { clsx } from 'clsx';
+import { PulseIcon, UsersIcon } from '@/components/ui/icon';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PulseIcon, UsersIcon } from '@/components/v2/icon';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { formatNumber, toDecimal } from '@/lib/hooks';

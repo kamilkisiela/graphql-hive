@@ -1,11 +1,11 @@
 import { createClient as createSSEClient } from 'graphql-sse';
 import Session from 'supertokens-auth-react/recipe/session';
-import { createClient, fetchExchange, subscriptionExchange } from 'urql';
+import { createClient, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
 import { env } from '@/env/frontend';
 import schema from '@/gql/schema';
 import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
-import { persistedExchange } from '@urql/exchange-persisted';
+import { relayPagination } from '@urql/exchange-graphcache/extras';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
 
@@ -17,8 +17,6 @@ const sseClient = createSSEClient({
   url: env.graphqlPublicSubscriptionEndpoint,
   credentials: 'include',
 });
-
-const usePersistedOperations = env.graphql.persistedOperations;
 
 export const urqlClient = createClient({
   url: env.graphqlPublicEndpoint,
@@ -33,6 +31,14 @@ export const urqlClient = createClient({
       schema,
       updates: {
         Mutation,
+      },
+      resolvers: {
+        Target: {
+          appDeployments: relayPagination(),
+        },
+        AppDeployment: {
+          documents: relayPagination(),
+        },
       },
       keys: {
         RequestsOverTime: noKey,
@@ -107,14 +113,22 @@ export const urqlClient = createClient({
         },
       };
     }),
-    usePersistedOperations
-      ? persistedExchange({
-          enforcePersistedQueries: true,
-          enableForMutation: true,
-          enableForSubscriptions: true,
-          generateHash: (_, document) => {
-            // TODO: improve types here
-            return Promise.resolve((document as any)?.['__meta__']?.['hash'] ?? '');
+    env.graphql.persistedOperationsPrefix !== null
+      ? mapExchange({
+          /**
+           * urql is requires the document node to contain zero definitions and a property named "documentId",
+           * due to tight-coupling with graphql.tada
+           **/
+          onOperation(op) {
+            return {
+              ...op,
+              query: {
+                documentId:
+                  (env.graphql.persistedOperationsPrefix ?? '') +
+                  (op.query as any)?.['__meta__']?.['hash'],
+                definitions: [],
+              } as any,
+            };
           },
         })
       : null,
@@ -123,14 +137,17 @@ export const urqlClient = createClient({
       forwardSubscription(operation) {
         return {
           subscribe: sink => {
+            const usePersistedOperations = env.graphql.persistedOperationsPrefix !== null;
+
             const dispose = sseClient.subscribe(
               {
-                // @ts-expect-error SSE client expects string, we pass undefined 😇
-                query: usePersistedOperations ? undefined : operation.query,
+                ...(usePersistedOperations
+                  ? { documentId: operation.documentId! }
+                  : { query: operation.query! }),
                 operationName: operation.operationName,
                 variables: operation.variables,
                 extensions: operation.extensions,
-              },
+              } satisfies GraphQLPayload as any,
               sink,
             );
             return {
@@ -142,3 +159,18 @@ export const urqlClient = createClient({
     }),
   ].filter(isSome),
 });
+
+type GraphQLPayload = {
+  variables?: Record<string, any>;
+  operationName?: string;
+  extensions?: Record<string, any>;
+} & (
+  | {
+      query: string;
+      documentId?: void;
+    }
+  | {
+      query?: void;
+      documentId: string;
+    }
+);

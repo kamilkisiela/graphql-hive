@@ -33,12 +33,32 @@ import { deployWebhooks } from './services/webhooks';
 import { configureZendesk } from './services/zendesk';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { isDefined } from './utils/helpers';
+import { publishAppDeployment } from './utils/publish-app-deployment';
+import { publishGraphQLSchema } from './utils/publish-graphql-schema';
 
 // eslint-disable-next-line no-process-env
 const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
 
 if (!imagesTag) {
   throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
+}
+
+// eslint-disable-next-line no-process-env
+const graphqlSchemaAbsolutePath: string | undefined = process.env.GRAPHQL_SCHEMA_ABSOLUTE_PATH;
+
+if (!graphqlSchemaAbsolutePath) {
+  throw new Error(`GRAPHQL_SCHEMA_ABSOLUTE_PATH env variable is not set.`);
+}
+
+// eslint-disable-next-line no-process-env
+let hiveAppPersistedDocumentsAbsolutePath: string | undefined =
+  process.env.HIVE_APP_PERSISTED_DOCUMENTS_ABSOLUTE_PATH;
+
+if (!hiveAppPersistedDocumentsAbsolutePath) {
+  console.warn(
+    'HIVE_APP_PERSISTED_DOCUMENTS_ABSOLUTE_PATH env variable is not set, defaulting to "0" (disabled).',
+  );
+  hiveAppPersistedDocumentsAbsolutePath = undefined;
 }
 
 optimizeAzureCluster();
@@ -226,9 +246,43 @@ const graphql = deployGraphQL({
   observability,
 });
 
+const apiConfig = new pulumi.Config('api');
+const apiEnv = apiConfig.requireObject<Record<string, string>>('env');
+
+const publishGraphQLSchemaCommand = publishGraphQLSchema({
+  graphql,
+  registry: {
+    endpoint: `https://${environment.appDns}/registry`,
+    accessToken: apiEnv.HIVE_API_TOKEN,
+  },
+  version: {
+    commit: imagesTag,
+  },
+  schemaPath: graphqlSchemaAbsolutePath,
+});
+
+let publishAppDeploymentCommand: pulumi.Resource | undefined;
+
+if (hiveAppPersistedDocumentsAbsolutePath) {
+  publishAppDeploymentCommand = publishAppDeployment({
+    appName: 'hive-app',
+    registry: {
+      endpoint: `https://${environment.appDns}/registry`,
+      accessToken: apiEnv.HIVE_API_TOKEN,
+    },
+    version: {
+      commit: imagesTag,
+    },
+    persistedDocumentsPath: hiveAppPersistedDocumentsAbsolutePath,
+    // We need to wait until the new GraphQL schema is published before we can publish the app deployment.
+    dependsOn: [publishGraphQLSchemaCommand],
+  });
+}
+
 const app = deployApp({
   environment,
   graphql,
+  publishAppDeploymentCommand,
   dbMigrations,
   image: docker.factory.getImageId('app', imagesTag),
   docker,

@@ -13,10 +13,10 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@9.4.0",
+  "packageManager": "pnpm@9.7.1",
   "engines": {
     "node": ">=22",
-    "pnpm": ">=9.3.0"
+    "pnpm": ">=9.4.0"
   },
   "scripts": {
     "build": "pnpm turbo build --color",
@@ -24,7 +24,9 @@
     "build:services": "pnpm prebuild && pnpm turbo build --filter=./packages/services/**/* --filter=./packages/migrations --color",
     "build:web": "pnpm prebuild && pnpm turbo build --filter=./packages/web/* --color",
     "cargo:fix": "bash ./scripts/fix-symbolic-link.sh",
+    "dev:integration": "cd integration-tests && pnpm dev:integration",
     "docker:build": "docker buildx bake -f docker/docker.hcl --load build",
+    "docker:override-up": "docker compose -f ./docker/docker-compose.override.yml up -d --remove-orphans",
     "env:sync": "tsx scripts/sync-env-files.ts",
     "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
     "graphql:generate": "graphql-codegen --config codegen.mts",
@@ -33,11 +35,9 @@
     "lint:env-template": "tsx scripts/check-env-template.ts",
     "lint:fix": "pnpm lint --fix",
     "lint:prettier": "prettier --cache --check .",
-    "local:setup": "docker-compose -f ./docker/docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
+    "local:setup": "docker compose -f ./docker/docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
     "postinstall": "node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && pnpm cargo:fix",
-    "pre-commit": "exit 0 && lint-staged",
     "prebuild": "rimraf deploy-tmp && rimraf packages/**/deploy-tmp",
-    "prepare": "husky install",
     "prerelease": "pnpm build:libraries",
     "prettier": "prettier --cache --write --list-different --ignore-unknown \"**/*\"",
     "release": "pnpm build:libraries && changeset publish",
@@ -51,68 +51,52 @@
     "workspace": "pnpm run --filter $1 $2"
   },
   "devDependencies": {
-    "@0no-co/graphqlsp": "1.12.10",
+    "@0no-co/graphqlsp": "1.12.13",
     "@actions/core": "1.10.1",
     "@changesets/changelog-github": "0.5.0",
-    "@changesets/cli": "2.27.6",
-    "@eddeee888/gcg-typescript-resolver-files": "0.9.4",
+    "@changesets/cli": "2.27.7",
+    "@eddeee888/gcg-typescript-resolver-files": "0.10.4",
     "@graphql-codegen/add": "5.0.3",
     "@graphql-codegen/cli": "5.0.2",
-    "@graphql-codegen/client-preset": "4.3.1",
-    "@graphql-codegen/graphql-modules-preset": "4.0.8",
-    "@graphql-codegen/schema-ast": "4.1.0",
-    "@graphql-codegen/typescript": "4.0.8",
-    "@graphql-codegen/typescript-operations": "4.2.2",
-    "@graphql-codegen/typescript-resolvers": "4.2.0",
+    "@graphql-codegen/client-preset": "4.3.3",
+    "@graphql-codegen/graphql-modules-preset": "4.0.9",
+    "@graphql-codegen/typescript": "4.0.9",
+    "@graphql-codegen/typescript-operations": "4.2.3",
+    "@graphql-codegen/typescript-resolvers": "4.2.1",
     "@graphql-codegen/urql-introspection": "3.0.0",
     "@graphql-eslint/eslint-plugin": "3.20.1",
     "@graphql-inspector/cli": "4.0.3",
     "@manypkg/get-packages": "2.2.2",
-    "@next/eslint-plugin-next": "14.2.4",
+    "@next/eslint-plugin-next": "14.2.5",
     "@parcel/watcher": "2.4.1",
-    "@sentry/cli": "2.32.1",
-    "@swc/core": "1.6.6",
-    "@theguild/eslint-config": "0.11.10",
-    "@theguild/prettier-config": "2.0.6",
-    "@types/node": "20.14.9",
+    "@sentry/cli": "2.33.1",
+    "@swc/core": "1.7.12",
+    "@theguild/eslint-config": "0.12.0",
+    "@theguild/prettier-config": "2.0.7",
+    "@types/node": "20.16.1",
     "bob-the-bundler": "7.0.1",
-    "cypress": "13.12.0",
+    "cypress": "13.13.3",
     "dotenv": "16.4.5",
     "eslint": "8.57.0",
-    "eslint-plugin-cypress": "3.3.0",
+    "eslint-plugin-cypress": "3.5.0",
     "eslint-plugin-hive": "file:rules",
     "eslint-plugin-tailwindcss": "3.17.4",
     "fs-extra": "11.2.0",
     "graphql": "16.9.0",
-    "husky": "9.0.11",
     "jest-snapshot-serializer-raw": "2.0.0",
-    "lint-staged": "15.2.7",
     "pg": "8.12.0",
-    "prettier": "3.3.2",
-    "prettier-plugin-sql": "0.18.0",
-    "prettier-plugin-tailwindcss": "0.6.5",
+    "prettier": "3.3.3",
+    "prettier-plugin-sql": "0.18.1",
+    "prettier-plugin-tailwindcss": "0.6.6",
     "pretty-quick": "4.0.0",
     "rimraf": "4.4.1",
     "ts-node": "10.9.2",
-    "tsup": "8.1.0",
-    "tsx": "4.15.7",
+    "tsup": "8.2.4",
+    "tsx": "4.17.0",
     "turbo": "1.13.4",
-    "typescript": "5.5.2",
-    "vite-tsconfig-paths": "4.3.2",
-    "vitest": "1.6.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "**/*": [
-      "pretty-quick --staged"
-    ],
-    "**/*.{js,cjs,mjs,ts,tsx}": [
-      "eslint --fix"
-    ]
+    "typescript": "5.5.4",
+    "vite-tsconfig-paths": "5.0.1",
+    "vitest": "2.0.5"
   },
   "pnpm": {
     "patchedDependencies": {
@@ -122,11 +106,11 @@
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.57.0": "patches/eslint@8.57.0.patch",
       "@graphql-eslint/eslint-plugin@3.20.1": "patches/@graphql-eslint__eslint-plugin@3.20.1.patch",
-      "got@14.4.1": "patches/got@14.4.1.patch",
+      "got@14.4.2": "patches/got@14.4.2.patch",
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "graphiql@3.3.2": "patches/graphiql@3.3.0.patch"
+      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch"
     }
   }
 }

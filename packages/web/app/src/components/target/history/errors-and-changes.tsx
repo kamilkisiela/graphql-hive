@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
+import { PulseIcon } from '@/components/ui/icon';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
@@ -24,7 +25,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { PulseIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
@@ -196,7 +196,9 @@ function ChangeItem(props: {
               )}
             >
               <div className="inline-flex justify-start space-x-2">
-                <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+                <span className="text-left text-gray-600 dark:text-white">
+                  {labelize(change.message)}
+                </span>
                 {change.isSafeBasedOnUsage && (
                   <span className="cursor-pointer text-yellow-500">
                     {' '}

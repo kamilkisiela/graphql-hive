@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useState } from 'react';
+import { ComponentProps, PropsWithoutRef, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO } from 'date-fns';
 import { useFormik } from 'formik';
@@ -7,10 +7,19 @@ import * as Yup from 'yup';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
+import { CreateAccessTokenModal } from '@/components/target/settings/registry-access-token';
 import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import {
@@ -21,12 +30,11 @@ import {
   SubPageLayoutHeader,
 } from '@/components/ui/page-content-layout';
 import { QueryError } from '@/components/ui/query-error';
+import { Spinner } from '@/components/ui/spinner';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
 import { Input } from '@/components/v2/input';
-import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
-import { Spinner } from '@/components/v2/spinner';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
 import { Tag } from '@/components/v2/tag';
@@ -103,7 +111,7 @@ function RegistryAccessTokens(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
   const me = useFragment(RegistryAccessTokens_MeFragment, props.me);
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -139,7 +147,7 @@ function RegistryAccessTokens(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Registry Access Tokens"
+        subPageTitle="Registry Access Tokens"
         description={
           <>
             <CardDescription>
@@ -234,7 +242,7 @@ const ExtendBaseSchema = (props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement => {
+}) => {
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const [baseSchema, setBaseSchema] = useState(props.baseSchema);
   const { toast } = useToast();
@@ -244,7 +252,7 @@ const ExtendBaseSchema = (props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Extend Your Schema"
+        subPageTitle="Extend Your Schema"
         description={
           <>
             <CardDescription>
@@ -334,14 +342,14 @@ const ClientExclusion_AvailableClientNamesQuery = graphql(`
 `);
 
 function ClientExclusion(
-  props: React.PropsWithoutRef<
+  props: PropsWithoutRef<
     {
       organizationId: string;
       projectId: string;
       selectedTargets: string[];
       clientsFromSettings: string[];
       value: string[];
-    } & Pick<React.ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
+    } & Pick<ComponentProps<typeof Combobox>, 'name' | 'disabled' | 'onBlur' | 'onChange'>
   >,
 ) {
   const now = floorDate(new Date());
@@ -453,7 +461,7 @@ const ConditionalBreakingChanges = (props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement => {
+}) => {
   const [targetValidation, setValidation] = useMutation(SetTargetValidationMutation);
   const [mutation, updateValidation] = useMutation(
     TargetSettingsPage_UpdateTargetValidationSettingsMutation,
@@ -504,6 +512,15 @@ const ConditionalBreakingChanges = (props: {
       period: Yup.number()
         .min(1)
         .max(targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30)
+        .test('double-precision', 'Invalid precision', num => {
+          if (typeof num !== 'number') {
+            return false;
+          }
+
+          // Round the number to two decimal places
+          // and check if it is equal to the original number
+          return Number(num.toFixed(2)) === num;
+        })
         .required(),
       targets: Yup.array().of(Yup.string()).min(1),
       excludedClients: Yup.array().of(Yup.string()),
@@ -538,7 +555,7 @@ const ConditionalBreakingChanges = (props: {
     <form onSubmit={handleSubmit}>
       <SubPageLayout>
         <SubPageLayoutHeader
-          title="Conditional Breaking Changes"
+          subPageTitle="Conditional Breaking Changes"
           description={
             <>
               <CardDescription>
@@ -590,6 +607,7 @@ const ConditionalBreakingChanges = (props: {
               type="number"
               min="0"
               max="100"
+              step={0.01}
               className="mx-2 !inline-flex !w-16"
             />
             % of traffic in the past
@@ -784,7 +802,7 @@ function TargetName(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Target Name"
+        subPageTitle="Target Name"
         description={
           <>
             <CardDescription>
@@ -857,7 +875,7 @@ function GraphQLEndpointUrl(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
-}): ReactElement {
+}) {
   const { toast } = useToast();
   const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetGraphQLEndpointUrl);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -901,7 +919,7 @@ function GraphQLEndpointUrl(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="GraphQL Endpoint URL"
+        subPageTitle="GraphQL Endpoint URL"
         description={
           <>
             <CardDescription>
@@ -1003,7 +1021,7 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Delete Target"
+        subPageTitle="Delete Target"
         description={
           <>
             <CardDescription>
@@ -1069,24 +1087,24 @@ const subPages = [
     title: 'General',
   },
   {
-    key: 'cdn',
-    title: 'CDN Tokens',
-  },
-  {
     key: 'registry-token',
     title: 'Registry Tokens',
+  },
+  {
+    key: 'cdn',
+    title: 'CDN Tokens',
   },
   {
     key: 'breaking-changes',
     title: 'Breaking Changes',
   },
   {
-    key: 'base-schema',
-    title: 'Base Schema',
-  },
-  {
     key: 'schema-contracts',
     title: 'Schema Contracts',
+  },
+  {
+    key: 'base-schema',
+    title: 'Base Schema',
   },
 ] as const;
 
@@ -1226,7 +1244,11 @@ function TargetSettingsContent(props: {
                   />
                 ) : null}
                 {props.page === 'schema-contracts' ? (
-                  <SchemaContracts organizationId="" projectId="" targetId="" />
+                  <SchemaContracts
+                    organizationId={props.organizationId}
+                    projectId={props.projectId}
+                    targetId={props.targetId}
+                  />
                 ) : null}
               </div>
             ) : null}
@@ -1253,5 +1275,109 @@ export function TargetSettingsPage(props: {
         page={props.page}
       />
     </>
+  );
+}
+
+export const DeleteTargetMutation = graphql(`
+  mutation deleteTarget($selector: TargetSelectorInput!) {
+    deleteTarget(selector: $selector) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTarget {
+        __typename
+        id
+      }
+    }
+  }
+`);
+
+export function DeleteTargetModal(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
+  const { organizationId, projectId, targetId } = props;
+  const [, mutate] = useMutation(DeleteTargetMutation);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    const { error } = await mutate({
+      selector: {
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      },
+    });
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to delete target',
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: 'Target deleted',
+        description: 'The target has been successfully deleted.',
+      });
+      props.toggleModalOpen();
+      void router.navigate({
+        to: '/$organizationId/$projectId',
+        params: {
+          organizationId,
+          projectId,
+        },
+      });
+    }
+  };
+
+  return (
+    <DeleteTargetModalContent
+      isOpen={props.isOpen}
+      toggleModalOpen={props.toggleModalOpen}
+      handleDelete={handleDelete}
+    />
+  );
+}
+
+export function DeleteTargetModalContent(props: {
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  handleDelete: () => void;
+}) {
+  return (
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+      <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
+        <DialogHeader>
+          <DialogTitle>Delete target</DialogTitle>
+          <DialogDescription>
+            Every published schema, reported data, and settings associated with this target will be
+            permanently deleted.
+          </DialogDescription>
+          <DialogDescription>
+            <span className="font-bold">This action is irreversible!</span>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
+            onClick={ev => {
+              ev.preventDefault();
+              props.toggleModalOpen();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={props.handleDelete}>
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

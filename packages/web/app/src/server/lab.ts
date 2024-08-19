@@ -21,6 +21,7 @@ const LabBody = z.object({
     required_error: 'Missing query',
   }),
   variables: z.record(z.unknown()).optional(),
+  operationName: z.string().optional(),
 });
 
 export function connectLab(server: FastifyInstance) {
@@ -110,14 +111,13 @@ export function connectLab(server: FastifyInstance) {
         document,
         variableValues: graphqlRequest.variables || {},
         contextValue: {},
+        operationName: graphqlRequest.operationName,
       });
 
       void res.status(200).send(result);
     } catch (e) {
       req.log.error(e);
-      void res.status(200).send({
-        errors: [e],
-      });
+      void res.status(200).send({ errors: [e] });
     }
   });
 }

@@ -7,7 +7,7 @@
  *
  */
 
-export type alert_channel_type = 'SLACK' | 'WEBHOOK';
+export type alert_channel_type = 'MSTEAMS_WEBHOOK' | 'SLACK' | 'WEBHOOK';
 export type alert_type = 'SCHEMA_CHANGE_NOTIFICATIONS';
 export type schema_policy_resource = 'ORGANIZATION' | 'PROJECT';
 export type user_role = 'ADMIN' | 'MEMBER';
@@ -40,6 +40,16 @@ export interface alerts {
   project_id: string;
   target_id: string;
   type: alert_type;
+}
+
+export interface app_deployments {
+  activated_at: Date | null;
+  created_at: Date;
+  id: string;
+  name: string;
+  retired_at: Date | null;
+  target_id: string;
+  version: string;
 }
 
 export interface cdn_access_tokens {
@@ -140,6 +150,7 @@ export interface oidc_integrations {
   id: string;
   linked_organization_id: string;
   oauth_api_url: string | null;
+  oidc_user_access_only: boolean;
   token_endpoint: string | null;
   updated_at: Date;
   userinfo_endpoint: string | null;
@@ -258,6 +269,15 @@ export interface schema_checks {
   supergraph_sdl_store_id: string | null;
   target_id: string;
   updated_at: Date;
+}
+
+export interface schema_coordinate_status {
+  coordinate: string;
+  created_at: Date;
+  created_in_version_id: string;
+  deprecated_at: Date | null;
+  deprecated_in_version_id: string | null;
+  target_id: string;
 }
 
 export interface schema_log {
@@ -388,6 +408,7 @@ export interface DBTables {
   activities: activities;
   alert_channels: alert_channels;
   alerts: alerts;
+  app_deployments: app_deployments;
   cdn_access_tokens: cdn_access_tokens;
   contract_checks: contract_checks;
   contract_schema_change_approvals: contract_schema_change_approvals;
@@ -406,6 +427,7 @@ export interface DBTables {
   projects: projects;
   schema_change_approvals: schema_change_approvals;
   schema_checks: schema_checks;
+  schema_coordinate_status: schema_coordinate_status;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;

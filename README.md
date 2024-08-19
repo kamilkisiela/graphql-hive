@@ -1,3 +1,14 @@
+<!-- Uncomment guild banner when we remove GraphQL Conf -->
+<!-- Graphql logo readme banner START -->
+<!-- <p style="float: right; margin: 0 0 10px 10px;">
+  <a href="https://the-guild.dev">
+    <img src="https://the-guild-org.github.io/press-kit/full-dark-logo.svg" alt="Created by The guild" style="width: 100px;"/>
+  </a>
+</p> -->
+<!-- Graphql logo readme banner END -->
+
+[![GraphQLConf 2024 Banner: September 10-12, San Francisco. Hosted by the GraphQL Foundation](https://github.com/user-attachments/assets/bdb8cd5d-5186-4ece-b06b-b00a499b7868)](https://graphql.org/conf/2024/?utm_source=github&utm_medium=graphql_hive&utm_campaign=readme)
+
 # GraphQL Hive
 
 GraphQL Hive provides all the tools the get visibility of your GraphQL architecture at all stages,
@@ -51,10 +62,11 @@ GraphQL Hive helps you get a global overview of the usage of your GraphQL API wi
 
 ### Integrations
 
-GraphQL Hive is well integrated with **Slack** and most **CI/CD** systems to get you up and running
-as smoothly as possible!
+GraphQL Hive is well integrated with **Slack**, **MS Teams** and most **CI/CD** systems to get you
+up and running as smoothly as possible!
 
-GraphQL Hive can notify your team when schema changes occur, either via Slack or a custom webhook.
+GraphQL Hive can notify your team when schema changes occur, either via Slack, MS Teams or a custom
+webhook.
 
 Also, the Hive CLI allows integration of the schema checks mechanism to all CI/CD systems (GitHub,
 BitBucket, Azure, and others). The same applies to schema publishing and operations checks.

@@ -14,7 +14,6 @@ const OPERATIONS_PATHS = [
 const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
     [
-      'no-implicit-coercion',
       'import/first',
       'no-restricted-globals',
       '@typescript-eslint/no-unused-vars',
@@ -36,6 +35,8 @@ const HIVE_RESTRICTED_SYNTAX = [
     message: 'Use "::" to make it compatible with both IPv4 and IPv6',
   },
 ];
+
+const tailwindCallees = ['clsx', 'cn', 'cva', 'cx'];
 
 module.exports = {
   ignorePatterns: [
@@ -128,9 +129,9 @@ module.exports = {
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
         'prefer-destructuring': 'off',
         'prefer-const': 'off',
+        'no-useless-escape': 'off',
+        'no-inner-declarations': 'off',
         '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-
-        // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
@@ -171,8 +172,8 @@ module.exports = {
         'jsx-a11y/alt-text': ['warn', { elements: ['img'], img: ['Image', 'NextImage'] }],
         'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...REACT_RESTRICTED_SYNTAX],
         'prefer-destructuring': 'off',
-        // TODO: enable below rules👇
         'no-console': 'off',
+        'no-useless-escape': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
@@ -189,14 +190,17 @@ module.exports = {
         'jsx-a11y/no-static-element-interactions': 'off',
         '@next/next/no-html-link-for-pages': 'off',
         'unicorn/no-negated-condition': 'off',
+        'no-implicit-coercion': 'off',
       },
     },
     {
       files: ['packages/web/app/**'],
       settings: {
         tailwindcss: {
+          callees: tailwindCallees,
           config: 'packages/web/app/tailwind.config.cjs',
-          whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
+          whitelist: ['drag-none'],
+          cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/dist/style.css'],
         },
       },
     },
@@ -214,6 +218,7 @@ module.exports = {
           rootDir: 'packages/web/docs',
         },
         tailwindcss: {
+          callees: tailwindCallees,
           config: 'packages/web/docs/tailwind.config.cjs',
         },
       },

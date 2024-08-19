@@ -82,6 +82,9 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     }
   }
 
+  /**
+   * triggered when a channel is created or deleted
+   */
   async sendChannelConfirmation(input: ChannelConfirmationInput) {
     this.logger.debug(
       `Sending Channel Confirmation over Slack (organization=%s, project=%s, channel=%s)`,
@@ -90,7 +93,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       input.channel.slackChannel,
     );
 
-    const token = input.integrations.slack.token;
+    const token = input.integrations?.slack.token;
 
     if (!token) {
       this.logger.debug(`Slack Integration is not available`);

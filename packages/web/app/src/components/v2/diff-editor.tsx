@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Spinner } from '@/components/v2';
 import { usePrettify } from '@/lib/hooks';
 import type { Monaco, MonacoDiffEditor as OriginalMonacoDiffEditor } from '@monaco-editor/react';
 import { ArrowDownIcon, ArrowUpIcon, DownloadIcon } from '@radix-ui/react-icons';
+import { Spinner } from '../ui/spinner';
 
 export const DiffEditor = (props: {
   before: string | null;
@@ -46,7 +46,7 @@ export const DiffEditor = (props: {
               <div className="mr-2 text-xs font-normal">Navigate changes </div>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -58,7 +58,7 @@ export const DiffEditor = (props: {
                   <TooltipContent>Previous change</TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon-sm"
@@ -129,7 +129,7 @@ function DownloadButton(props: { contents: string; fileName: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <Button
             variant="ghost"
             size="sm"

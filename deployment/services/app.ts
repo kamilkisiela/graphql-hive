@@ -1,5 +1,4 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Observability } from '../services/observability';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBilling } from './billing';
@@ -17,6 +16,7 @@ export type App = ReturnType<typeof deployApp>;
 export function deployApp({
   graphql,
   dbMigrations,
+  publishAppDeploymentCommand,
   image,
   docker,
   zendesk,
@@ -36,6 +36,7 @@ export function deployApp({
   slackApp: SlackApp;
   billing: StripeBilling;
   sentry: Sentry;
+  publishAppDeploymentCommand: pulumi.Resource | undefined;
 }) {
   const appConfig = new pulumi.Config('app');
   const appEnv = appConfig.requireObject<Record<string, string>>('env');
@@ -62,7 +63,7 @@ export function deployApp({
         INTEGRATION_GITHUB_APP_NAME: github.name,
         GA_TRACKING_ID: appEnv.GA_TRACKING_ID,
         DOCS_URL: 'https://the-guild.dev/graphql/hive/docs',
-        GRAPHQL_PERSISTED_OPERATIONS: '1',
+        GRAPHQL_PERSISTED_OPERATIONS: publishAppDeploymentCommand ? '1' : '0',
         ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
         AUTH_GITHUB: '1',
         AUTH_GOOGLE: '1',
@@ -73,7 +74,7 @@ export function deployApp({
       },
       port: 3000,
     },
-    [graphql.service, graphql.deployment, dbMigrations],
+    [graphql.service, graphql.deployment, dbMigrations, publishAppDeploymentCommand],
   )
     .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
     .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')

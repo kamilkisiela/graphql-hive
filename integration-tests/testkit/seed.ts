@@ -72,6 +72,15 @@ export function initSeed() {
   }
 
   return {
+    async createDbConnection() {
+      const pool = await createConnectionPool();
+      return {
+        pool,
+        [Symbol.asyncDispose]: async () => {
+          await pool.end();
+        },
+      };
+    },
     authenticate: authenticate,
     generateEmail: () => userEmail(generateUnique()),
     async createOwner() {
@@ -169,7 +178,7 @@ export function initSeed() {
               return members;
             },
             async createProject(
-              projectType: ProjectType,
+              projectType: ProjectType = ProjectType.Single,
               options?: {
                 useLegacyRegistryModels?: boolean;
               },

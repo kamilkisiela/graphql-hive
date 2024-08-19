@@ -4,7 +4,7 @@ import { execute } from '../../../testkit/graphql';
 import { initSeed } from '../../../testkit/seed';
 import { createPolicy } from '../policy/policy-check.spec';
 
-test.concurrent('can check a schema with target:registry:read access', async () => {
+test.concurrent('can check a schema with target:registry:read access', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
@@ -65,7 +65,7 @@ test.concurrent('can check a schema with target:registry:read access', async () 
   expect(checkResultValid.schemaCheck.__typename).toBe('SchemaCheckSuccess');
 });
 
-test.concurrent('should match indentation of previous description', async () => {
+test.concurrent('should match indentation of previous description', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);
@@ -244,152 +244,158 @@ const ApproveFailedSchemaCheckMutation = graphql(/* GraphQL */ `
   }
 `);
 
-test.concurrent('successful check without previously published schema is persisted', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject, organization } = await createOrg();
-  const { createToken, project, target } = await createProject(ProjectType.Single);
+test.concurrent(
+  'successful check without previously published schema is persisted',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project, target } = await createProject(ProjectType.Single);
 
-  // Create a token with read rights
-  const readToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead],
-    projectScopes: [],
-    organizationScopes: [],
-  });
+    // Create a token with read rights
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
 
-  // Check schema with read rights
-  const checkResult = await readToken
-    .checkSchema(/* GraphQL */ `
-      type Query {
-        ping: String
-        pong: String
-      }
-    `)
-    .then(r => r.expectNoGraphQLErrors());
-  const check = checkResult.schemaCheck;
-
-  if (check.__typename !== 'SchemaCheckSuccess') {
-    throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
-  }
-
-  const schemaCheckId = check.schemaCheck?.id;
-
-  if (schemaCheckId == null) {
-    throw new Error('Missing schema check id.');
-  }
-
-  const schemaCheck = await execute({
-    document: SchemaCheckQuery,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-      id: schemaCheckId,
-    },
-    authToken: readToken.secret,
-  }).then(r => r.expectNoGraphQLErrors());
-
-  expect(schemaCheck).toMatchObject({
-    target: {
-      schemaCheck: {
-        __typename: 'SuccessfulSchemaCheck',
-        id: schemaCheckId,
-        createdAt: expect.any(String),
-        serviceName: null,
-        schemaVersion: null,
-      },
-    },
-  });
-});
-
-test.concurrent('successful check with previously published schema is persisted', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject, organization } = await createOrg();
-  const { createToken, project, target } = await createProject(ProjectType.Single);
-
-  // Create a token with write rights
-  const writeToken = await createToken({
-    targetScopes: [
-      TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
-      TargetAccessScope.Settings,
-    ],
-  });
-
-  // Publish schema with write rights
-  const publishResult = await writeToken
-    .publishSchema({
-      sdl: /* GraphQL */ `
+    // Check schema with read rights
+    const checkResult = await readToken
+      .checkSchema(/* GraphQL */ `
         type Query {
           ping: String
           pong: String
         }
-      `,
-    })
-    .then(r => r.expectNoGraphQLErrors());
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+    const check = checkResult.schemaCheck;
 
-  // Schema publish should be successful
-  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    if (check.__typename !== 'SchemaCheckSuccess') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
+    }
 
-  // Create a token with read rights
-  const readToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead],
-    projectScopes: [],
-    organizationScopes: [],
-  });
+    const schemaCheckId = check.schemaCheck?.id;
 
-  // Check schema with read rights
-  const checkResult = await readToken
-    .checkSchema(/* GraphQL */ `
-      type Query {
-        ping: String
-        pong: String
-      }
-    `)
-    .then(r => r.expectNoGraphQLErrors());
-  const check = checkResult.schemaCheck;
+    if (schemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
 
-  if (check.__typename !== 'SchemaCheckSuccess') {
-    throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
-  }
-
-  const schemaCheckId = check.schemaCheck?.id;
-
-  if (schemaCheckId == null) {
-    throw new Error('Missing schema check id.');
-  }
-
-  const schemaCheck = await execute({
-    document: SchemaCheckQuery,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-      id: schemaCheckId,
-    },
-    authToken: readToken.secret,
-  }).then(r => r.expectNoGraphQLErrors());
-
-  expect(schemaCheck).toMatchObject({
-    target: {
-      schemaCheck: {
-        __typename: 'SuccessfulSchemaCheck',
+    const schemaCheck = await execute({
+      document: SchemaCheckQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
         id: schemaCheckId,
-        createdAt: expect.any(String),
-        serviceName: null,
-        schemaVersion: {
-          id: expect.any(String),
+      },
+      authToken: readToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(schemaCheck).toMatchObject({
+      target: {
+        schemaCheck: {
+          __typename: 'SuccessfulSchemaCheck',
+          id: schemaCheckId,
+          createdAt: expect.any(String),
+          serviceName: null,
+          schemaVersion: null,
         },
       },
-    },
-  });
-});
+    });
+  },
+);
 
-test.concurrent('failed check due to graphql validation is persisted', async () => {
+test.concurrent(
+  'successful check with previously published schema is persisted',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project, target } = await createProject(ProjectType.Single);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    // Publish schema with write rights
+    const publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+            pong: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    // Schema publish should be successful
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    // Create a token with read rights
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    // Check schema with read rights
+    const checkResult = await readToken
+      .checkSchema(/* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+        }
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+    const check = checkResult.schemaCheck;
+
+    if (check.__typename !== 'SchemaCheckSuccess') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
+    }
+
+    const schemaCheckId = check.schemaCheck?.id;
+
+    if (schemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
+
+    const schemaCheck = await execute({
+      document: SchemaCheckQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        id: schemaCheckId,
+      },
+      authToken: readToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(schemaCheck).toMatchObject({
+      target: {
+        schemaCheck: {
+          __typename: 'SuccessfulSchemaCheck',
+          id: schemaCheckId,
+          createdAt: expect.any(String),
+          serviceName: null,
+          schemaVersion: {
+            id: expect.any(String),
+          },
+        },
+      },
+    });
+  },
+);
+
+test.concurrent('failed check due to graphql validation is persisted', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -454,7 +460,7 @@ test.concurrent('failed check due to graphql validation is persisted', async () 
   });
 });
 
-test.concurrent('failed check due to breaking change is persisted', async () => {
+test.concurrent('failed check due to breaking change is persisted', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -546,7 +552,7 @@ test.concurrent('failed check due to breaking change is persisted', async () => 
   });
 });
 
-test.concurrent('failed check due to policy error is persisted', async () => {
+test.concurrent('failed check due to policy error is persisted', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, target, setProjectSchemaPolicy } = await createProject(
@@ -655,123 +661,126 @@ test.concurrent('failed check due to policy error is persisted', async () => {
   });
 });
 
-test.concurrent('successful check with warnings and safe changes is persisted', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject, organization } = await createOrg();
-  const { createToken, project, target, setProjectSchemaPolicy } = await createProject(
-    ProjectType.Single,
-  );
+test.concurrent(
+  'successful check with warnings and safe changes is persisted',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project, target, setProjectSchemaPolicy } = await createProject(
+      ProjectType.Single,
+    );
 
-  await setProjectSchemaPolicy(createPolicy(RuleInstanceSeverityLevel.Warning));
+    await setProjectSchemaPolicy(createPolicy(RuleInstanceSeverityLevel.Warning));
 
-  // Create a token with write rights
-  const writeToken = await createToken({
-    targetScopes: [
-      TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
-      TargetAccessScope.Settings,
-    ],
-  });
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
 
-  // Publish schema with write rights
-  const publishResult = await writeToken
-    .publishSchema({
-      sdl: /* GraphQL */ `
+    // Publish schema with write rights
+    const publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    // Schema publish should be successful
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    // Create a token with read rights
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    // Check schema with read rights
+    const checkResult = await readToken
+      .checkSchema(/* GraphQL */ `
         type Query {
           ping: String
+          foo: String
         }
-      `,
-    })
-    .then(r => r.expectNoGraphQLErrors());
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+    const check = checkResult.schemaCheck;
 
-  // Schema publish should be successful
-  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    if (check.__typename !== 'SchemaCheckSuccess') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
+    }
 
-  // Create a token with read rights
-  const readToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead],
-    projectScopes: [],
-    organizationScopes: [],
-  });
+    const schemaCheckId = check.schemaCheck?.id;
 
-  // Check schema with read rights
-  const checkResult = await readToken
-    .checkSchema(/* GraphQL */ `
-      type Query {
-        ping: String
-        foo: String
-      }
-    `)
-    .then(r => r.expectNoGraphQLErrors());
-  const check = checkResult.schemaCheck;
+    if (schemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
 
-  if (check.__typename !== 'SchemaCheckSuccess') {
-    throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
-  }
-
-  const schemaCheckId = check.schemaCheck?.id;
-
-  if (schemaCheckId == null) {
-    throw new Error('Missing schema check id.');
-  }
-
-  const schemaCheck = await execute({
-    document: SchemaCheckQuery,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-      id: schemaCheckId,
-    },
-    authToken: readToken.secret,
-  }).then(r => r.expectNoGraphQLErrors());
-
-  expect(schemaCheck).toMatchObject({
-    target: {
-      schemaCheck: {
-        __typename: 'SuccessfulSchemaCheck',
-        id: schemaCheckId,
-        createdAt: expect.any(String),
-        serviceName: null,
-        schemaVersion: {
-          id: expect.any(String),
+    const schemaCheck = await execute({
+      document: SchemaCheckQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
         },
-        schemaPolicyWarnings: {
-          edges: [
-            {
-              node: {
-                end: {
-                  column: 17,
-                  line: 2,
-                },
-                message: 'Description is required for type "Query"',
-                ruleId: 'require-description',
-                start: {
-                  column: 12,
-                  line: 2,
+        id: schemaCheckId,
+      },
+      authToken: readToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(schemaCheck).toMatchObject({
+      target: {
+        schemaCheck: {
+          __typename: 'SuccessfulSchemaCheck',
+          id: schemaCheckId,
+          createdAt: expect.any(String),
+          serviceName: null,
+          schemaVersion: {
+            id: expect.any(String),
+          },
+          schemaPolicyWarnings: {
+            edges: [
+              {
+                node: {
+                  end: {
+                    column: expect.any(Number),
+                    line: expect.any(Number),
+                  },
+                  message: 'Description is required for type "Query"',
+                  ruleId: 'require-description',
+                  start: {
+                    column: expect.any(Number),
+                    line: expect.any(Number),
+                  },
                 },
               },
-            },
-          ],
-        },
-        safeSchemaChanges: {
-          nodes: [
-            {
-              message: "Field 'foo' was added to object type 'Query'",
-            },
-          ],
+            ],
+          },
+          safeSchemaChanges: {
+            nodes: [
+              {
+                message: "Field 'foo' was added to object type 'Query'",
+              },
+            ],
+          },
         },
       },
-    },
-  });
-});
+    });
+  },
+);
 
 test.concurrent(
   'failed check due to missing service name is not persisted (federation/stitching)',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken } = await createProject(ProjectType.Federation);
@@ -801,7 +810,7 @@ test.concurrent(
   },
 );
 
-test.concurrent('metadata is persisted', async () => {
+test.concurrent('metadata is persisted', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -873,7 +882,7 @@ test.concurrent('metadata is persisted', async () => {
 
 test.concurrent(
   'approve failed schema check that has breaking change status to successful and attaches meta information to the breaking change',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -995,7 +1004,7 @@ test.concurrent(
   },
 );
 
-test.concurrent('approve failed schema check with a comment', async () => {
+test.concurrent('approve failed schema check with a comment', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -1106,7 +1115,7 @@ test.concurrent('approve failed schema check with a comment', async () => {
 
 test.concurrent(
   'approving a schema check with contextId containing breaking changes allows the changes for subsequent checks with the same contextId',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -1256,7 +1265,7 @@ test.concurrent(
 
 test.concurrent(
   'approving a schema check with contextId containing breaking changes does not allow the changes for subsequent checks with a different contextId',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -1399,7 +1408,7 @@ test.concurrent(
 
 test.concurrent(
   'subsequent schema check with shared contextId that contains new breaking changes that have not been approved fails',
-  async () => {
+  async ({ expect }) => {
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
     const { createToken, project, target } = await createProject(ProjectType.Single);
@@ -1552,72 +1561,75 @@ test.concurrent(
   },
 );
 
-test.concurrent('contextId that has more than 300 characters is not allowed', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
-  const { createToken } = await createProject(ProjectType.Single);
+test.concurrent(
+  'contextId that has more than 300 characters is not allowed',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Single);
 
-  // Create a token with write rights
-  const writeToken = await createToken({
-    targetScopes: [
-      TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
-      TargetAccessScope.Settings,
-    ],
-  });
-
-  // Publish schema with write rights
-  const publishResult = await writeToken
-    .publishSchema({
-      sdl: /* GraphQL */ `
-        type Query {
-          ping: String
-          pong: String
-        }
-      `,
-    })
-    .then(r => r.expectNoGraphQLErrors());
-
-  // Schema publish should be successful
-  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-
-  // Create a token with read rights
-  const readToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead],
-    projectScopes: [],
-    organizationScopes: [],
-  });
-
-  const contextId = '';
-
-  // Check schema with read rights
-  const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: Float
-        }
-      `,
-      undefined,
-      undefined,
-      contextId,
-    )
-    .then(r => r.expectNoGraphQLErrors());
-
-  expect(checkResult.schemaCheck).toMatchObject({
-    __typename: 'SchemaCheckError',
-    errors: {
-      nodes: [
-        {
-          message: 'Context ID must be at least 1 character long.',
-        },
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
       ],
-    },
-  });
-});
+    });
 
-test.concurrent('contextId that has fewer than 1 characters is not allowed', async () => {
+    // Publish schema with write rights
+    const publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+            pong: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    // Schema publish should be successful
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    // Create a token with read rights
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const contextId = '';
+
+    // Check schema with read rights
+    const checkResult = await readToken
+      .checkSchema(
+        /* GraphQL */ `
+          type Query {
+            ping: Float
+          }
+        `,
+        undefined,
+        undefined,
+        contextId,
+      )
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(checkResult.schemaCheck).toMatchObject({
+      __typename: 'SchemaCheckError',
+      errors: {
+        nodes: [
+          {
+            message: 'Context ID must be at least 1 character long.',
+          },
+        ],
+      },
+    });
+  },
+);
+
+test.concurrent('contextId that has fewer than 1 characters is not allowed', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken } = await createProject(ProjectType.Single);

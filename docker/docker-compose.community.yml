@@ -7,7 +7,7 @@ networks:
 
 services:
   db:
-    image: postgres:14.12-alpine
+    image: postgres:14.13-alpine
     environment:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
@@ -24,7 +24,7 @@ services:
       - ./.hive/postgres:/var/lib/postgresql/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:24.4-alpine
+    image: clickhouse/clickhouse-server:24.7-alpine
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'http://0.0.0.0:8123/ping']
       interval: 5s
@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   broker:
-    image: redpandadata/redpanda:v23.3.17
+    image: redpandadata/redpanda:v23.3.19
     container_name: broker
     hostname: broker
     networks:
@@ -76,7 +76,7 @@ services:
       - ./.hive/broker/db:/var/lib/redpanda/data
 
   redis:
-    image: bitnami/redis:7.2.5
+    image: bitnami/redis:7.4.0
     networks:
       - 'stack'
     healthcheck:

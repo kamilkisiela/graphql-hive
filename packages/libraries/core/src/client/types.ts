@@ -1,7 +1,12 @@
 import type { ExecutionArgs } from 'graphql';
+import type { PromiseOrValue } from 'graphql/jsutils/PromiseOrValue.js';
 import type { AgentOptions } from './agent.js';
 import type { autoDisposeSymbol, hiveClientSymbol } from './client.js';
 import type { SchemaReporter } from './reporting.js';
+
+type HeadersObject = {
+  get(name: string): string | null;
+};
 
 export interface HiveClient {
   [hiveClientSymbol]: true;
@@ -10,11 +15,33 @@ export interface HiveClient {
   reportSchema: SchemaReporter['report'];
   /** Collect usage for Query and Mutation operations */
   collectUsage(): CollectUsageCallback;
+  /** Collect usage for Query and Mutation operations */
+  collectRequest(args: {
+    args: ExecutionArgs;
+    result: GraphQLErrorsResult | AbortAction;
+    duration: number;
+    /**
+     * Persisted document if request is using a persisted document.
+     * It needs to be provided in order to collect app deployment specific information.
+     */
+    experimental__persistedDocumentHash?: string;
+  }): void;
   /** Collect usage for Subscription operations */
-  collectSubscriptionUsage(args: { args: ExecutionArgs }): void;
+  collectSubscriptionUsage(args: {
+    args: ExecutionArgs;
+    /**
+     * Persisted document if subscription is a persisted document.
+     * It needs to be provided in order to collect app deployment specific information.
+     */
+    experimental__persistedDocumentHash?: string;
+  }): void;
   createInstrumentedExecute(executeImpl: any): any;
   createInstrumentedSubscribe(executeImpl: any): any;
   dispose(): Promise<void>;
+  experimental__persistedDocuments: null | {
+    resolve(documentId: string): Promise<string | null>;
+    allowArbitraryDocuments(context: { headers?: HeadersObject }): PromiseOrValue<boolean>;
+  };
 }
 
 export type AsyncIterableIteratorOrValue<T> = AsyncIterableIterator<T> | T;
@@ -28,7 +55,13 @@ export type AbortAction = {
 export type CollectUsageCallback = (
   args: ExecutionArgs,
   result: GraphQLErrorsResult | AbortAction,
+  /**
+   * Persisted document if subscription is a persisted document.
+   * It needs to be provided in order to collect app deployment specific information.
+   */
+  experimental__persistedDocumentHash?: string,
 ) => Promise<void>;
+
 export interface ClientInfo {
   name: string;
   version: string;
@@ -204,6 +237,11 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Yoga / Envelop: Enabled by default for SIGINT and SIGTERM signals
      */
     autoDispose?: boolean | NodeJS.Signals[];
+    /**
+     * Experimental persisted documents configuration.
+     *
+     **/
+    experimental__persistedDocuments?: PersistedDocumentsConfiguration;
   },
   'enabled',
   'token'
@@ -221,9 +259,44 @@ export interface GraphQLErrorsResult {
 export interface SchemaFetcherOptions {
   endpoint: string;
   key: string;
+  logger?: Logger;
 }
 
 export interface ServicesFetcherOptions {
   endpoint: string;
   key: string;
 }
+
+export type PersistedDocumentsConfiguration = {
+  /**
+   * CDN configuration for loading persisted documents.
+   **/
+  cdn: {
+    /**
+     * CDN endpoint
+     * @example https://cdn.graphql-hive.com/artifacts/v1/5d80a1c2-2532-419c-8bb5-75bb04ea1112
+     */
+    endpoint: string;
+    /**
+     * CDN access token
+     * @example hv2ZjUxNGUzN2MtNjVhNS0=
+     */
+    accessToken: string;
+  };
+  /**
+   * Whether arbitrary documents should be allowed along-side persisted documents.
+   * @default false
+   */
+  allowArbitraryDocuments?: boolean | AllowArbitraryDocumentsFunction;
+  /**
+   * Maximum amount of operations that shall be kept in memory after being loaded from the CDN.
+   * Operations are stored in-memory to avoid loading them from the CDN multiple times.
+   * @default 10_000
+   */
+  cache?: number;
+};
+
+export type AllowArbitraryDocumentsFunction = (context: {
+  /** an object for accessing the request headers. */
+  headers?: HeadersObject;
+}) => PromiseOrValue<boolean>;

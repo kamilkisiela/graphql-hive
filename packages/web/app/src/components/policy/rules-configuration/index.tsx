@@ -2,7 +2,7 @@ import { ReactElement } from 'react';
 import type { JSONSchema } from 'json-schema-typed';
 import convertToYup from 'json-schema-yup-transformer';
 import * as Yup from 'yup';
-import { DocsLink } from '@/components/v2';
+import { DocsLink } from '@/components/ui/docs-note';
 import { Markdown } from '@/components/v2/markdown';
 import { RuleInstanceSeverityLevel } from '@/gql/graphql';
 import type { AvailableRulesList } from '../policy-settings';

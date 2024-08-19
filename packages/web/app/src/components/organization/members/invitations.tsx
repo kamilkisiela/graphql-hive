@@ -430,7 +430,7 @@ export function OrganizationInvitations(props: {
   return (
     <SubPageLayout>
       <SubPageLayoutHeader
-        title="Pending invitations"
+        subPageTitle="Pending invitations"
         description="Active invitations to join this organization. Invitations expire after 7 days."
       >
         <MemberInvitationButton

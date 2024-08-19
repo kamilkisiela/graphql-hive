@@ -8,7 +8,7 @@ jobs:
     with:
       npmTag: alpha
       buildScript: build:libraries
-      nodeVersion: 22
+      nodeVersion: '22.4'
       packageManager: pnpm
     secrets:
       githubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -34,11 +34,6 @@ jobs:
       - name: build libraries
         run: pnpm build:libraries
 
-      # Needed for `oclif pack win`
-      - name: Install NSIS
-        run: |
-          sudo apt-get -y install nsis
-
       - name: pack tarballs
         working-directory: packages/libraries/cli
         run: pnpm oclif:pack
@@ -55,17 +50,17 @@ jobs:
           name: hive-cli-darwin-x64
           path: ./packages/libraries/cli/dist/*-darwin-x64.tar.gz
 
-      - name: upload windows x64
+      - name: upload win x64
         uses: actions/upload-artifact@v4
         with:
-          name: hive-cli-windows-x64
-          path: ./packages/libraries/cli/dist/win32/*-x64.exe
+          name: hive-cli-win-x64
+          path: ./packages/libraries/cli/dist/*-win32-x64.tar.gz
 
-      - name: upload windows x86
+      - name: upload win x86
         uses: actions/upload-artifact@v4
         with:
-          name: hive-cli-windows-x86
-          path: ./packages/libraries/cli/dist/win32/*-x86.exe
+          name: hive-cli-win-x86
+          path: ./packages/libraries/cli/dist/*-win32-x86.tar.gz
 
       - name: upload linux arm
         uses: actions/upload-artifact@v4
@@ -98,12 +93,6 @@ jobs:
         with:
           name: hive-cli-linux-x64
 
-      - name: Pull artifact for windows
-        if: matrix.os == 'windows-latest'
-        uses: actions/download-artifact@v4
-        with:
-          name: hive-cli-windows-x64
-
       - name: Unzip and run
         run: |
           rm -rf /usr/local/bin/node
@@ -119,3 +108,30 @@ jobs:
           tar -xzf *.tar.gz
           # Expect the command to succeed
           ./hive/bin/hive --version || exit 1
+
+  extract-cli-version:
+    needs: [npm]
+    runs-on: ubuntu-22.04
+    name: Extract CLI version
+    outputs:
+      published: ${{ steps.cli.outputs.published }}
+      version: ${{ steps.cli.outputs.version }}
+    steps:
+      - name: Extract published version
+        if:
+          needs.npm.outputs.published && contains(needs.npm.outputs.publishedPackages,
+          '"@graphql-hive/cli"')
+        id: cli
+        run: |
+          echo '${{needs.npm.outputs.publishedPackages}}' > cli-ver.json
+          VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+  publish_docker:
+    needs: [extract-cli-version]
+    uses: ./.github/workflows/dockerize-cli.yaml
+    if: ${{ needs.extract-cli-version.outputs.published == 'true' }}
+    with:
+      cliVersion: ${{ needs.extract-cli-version.outputs.version }}
+    secrets: inherit

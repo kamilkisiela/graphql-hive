@@ -36,7 +36,8 @@ jobs:
             "client_payload": {
               "actor": "${{ github.actor }}",
               "ref": "${{ github.sha }}",
-              "pulumiRefresh": "true"
+              "pulumiRefresh": "true",
+              "hiveAppUsePersistedDocuments": "true"
             }
           }'
 

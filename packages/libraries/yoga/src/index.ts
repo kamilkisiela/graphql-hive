@@ -1,11 +1,4 @@
-import {
-  DocumentNode,
-  ExecutionArgs,
-  GraphQLSchema,
-  Kind,
-  parse,
-  type GraphQLError,
-} from 'graphql';
+import { DocumentNode, ExecutionArgs, GraphQLError, GraphQLSchema, Kind, parse } from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
 import {
@@ -17,14 +10,23 @@ import {
   isAsyncIterable,
   isHiveClient,
 } from '@graphql-hive/core';
+import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 
-export { atLeastOnceSampler, createSchemaFetcher, createServicesFetcher } from '@graphql-hive/core';
+export {
+  atLeastOnceSampler,
+  createSchemaFetcher,
+  createServicesFetcher,
+  createSupergraphSDLFetcher,
+} from '@graphql-hive/core';
+export type { SupergraphSDLFetcherOptions } from '@graphql-hive/core';
 
 type CacheRecord = {
   callback: CollectUsageCallback;
   paramsArgs: GraphQLParams;
   executionArgs?: ExecutionArgs;
   parsedDocument?: DocumentNode;
+  /** persisted document id */
+  experimental__documentId?: string;
 };
 
 export function createHive(clientOrOptions: HivePluginOptions) {
@@ -70,7 +72,8 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       latestSchema = schema;
     },
     onParams(context) {
-      if (context.params.query && latestSchema) {
+      // we set the params if there is either a query or documentId in the request
+      if ((context.params.query || 'documentId' in context.params) && latestSchema) {
         cache.set(context.request, {
           callback: hive.collectUsage(),
           paramsArgs: context.params,
@@ -113,16 +116,26 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               errors.push(...ctx.result.errors);
             },
             onEnd() {
-              void record.callback(args, errors.length ? { errors } : {});
+              void record.callback(
+                args,
+                errors.length ? { errors } : {},
+                record.experimental__documentId,
+              );
             },
           };
         },
       };
     },
     onSubscribe(context) {
+      const record = cache.get(context.args.contextValue.request);
+
       return {
         onSubscribeResult() {
-          hive.collectSubscriptionUsage({ args: context.args });
+          const experimental__persistedDocumentHash = record?.experimental__documentId;
+          hive.collectSubscriptionUsage({
+            args: context.args,
+            experimental__persistedDocumentHash,
+          });
         },
       };
     },
@@ -141,6 +154,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             document: record.parsedDocument ?? record.executionArgs.document,
           },
           context.result,
+          record.experimental__documentId,
         );
         return;
       }
@@ -165,11 +179,67 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               operationName: record.paramsArgs.operationName,
             },
             context.result,
+            record.experimental__documentId,
           );
         } catch (err) {
           console.error(err);
         }
       }
+    },
+    onPluginInit({ addPlugin }) {
+      const { experimental__persistedDocuments } = hive;
+      if (!experimental__persistedDocuments) {
+        return;
+      }
+      addPlugin(
+        usePersistedOperations({
+          extractPersistedOperationId(body) {
+            if ('documentId' in body && typeof body.documentId === 'string') {
+              return body.documentId;
+            }
+
+            return null;
+          },
+          async getPersistedOperation(key, request) {
+            const document = await experimental__persistedDocuments.resolve(key);
+            // after we resolve the document we need to update the cache record to contain the resolved document
+            if (document) {
+              const record = cache.get(request);
+              if (record) {
+                record.experimental__documentId = key;
+                record.paramsArgs = {
+                  ...record.paramsArgs,
+                  query: document,
+                };
+              }
+            }
+
+            return document;
+          },
+          allowArbitraryOperations(request) {
+            return experimental__persistedDocuments.allowArbitraryDocuments({
+              headers: request.headers,
+            });
+          },
+          customErrors: {
+            keyNotFound() {
+              return new GraphQLError('Persisted document not found.', {
+                extensions: { code: 'PERSISTED_DOCUMENT_NOT_FOUND' },
+              });
+            },
+            notFound() {
+              return new GraphQLError('Persisted document not found.', {
+                extensions: { code: 'PERSISTED_DOCUMENT_NOT_FOUND' },
+              });
+            },
+            persistedQueryOnly() {
+              return new GraphQLError('No persisted document provided.', {
+                extensions: { code: 'PERSISTED_DOCUMENT_REQUIRED' },
+              });
+            },
+          },
+        }),
+      );
     },
   };
 }

@@ -41,6 +41,7 @@ export interface RequestOperation {
   operationMapKey: string
   execution: Execution
   metadata?: Metadata
+  persistedDocumentHash?: string
 }
 
 export interface Execution {
@@ -156,6 +157,11 @@ export interface Metadata {
                 "required": ["name", "version"]
               }
             }
+          },
+          "persistedDocumentHash": {
+            "type": "string",
+            "title": "PersistedDocumentHash",
+            "pattern": "^[a-zA-Z0-9_-]{1,64}~[a-zA-Z0-9._-]{1,64}~([A-Za-z]|[0-9]|_){1,128}$"
           }
         },
         "required": ["timestamp", "operationMapKey", "execution"]

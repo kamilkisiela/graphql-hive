@@ -1,5 +1,101 @@
 # @graphql-hive/cli
 
+## 0.42.0
+
+### Minor Changes
+
+- [#5190](https://github.com/kamilkisiela/graphql-hive/pull/5190)
+  [`7039d83`](https://github.com/kamilkisiela/graphql-hive/commit/7039d83b943c05fbb289f391ff9be0ae0da720f1)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - add support for app deployments
+
+### Patch Changes
+
+- Updated dependencies
+  [[`a896642`](https://github.com/kamilkisiela/graphql-hive/commit/a896642197e6d7779ba7ed71f365dfbd80532282)]:
+  - @graphql-hive/core@0.7.1
+
+## 0.41.0
+
+### Minor Changes
+
+- [#5307](https://github.com/kamilkisiela/graphql-hive/pull/5307)
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Re-introduce retry logging removed in previous
+  release.
+
+### Patch Changes
+
+- Updated dependencies
+  [[`3f03e7b`](https://github.com/kamilkisiela/graphql-hive/commit/3f03e7b3a65707ba8aa04335684f0aa8d261868f),
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)]:
+  - @graphql-hive/core@0.7.0
+
+## 0.40.1
+
+### Patch Changes
+
+- [#5304](https://github.com/kamilkisiela/graphql-hive/pull/5304)
+  [`f2fef08`](https://github.com/kamilkisiela/graphql-hive/commit/f2fef08e9d1e13cb4a89d3882922db6dc822542e)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fixed a logging issue where both
+  initiated requests and successful responses were being recorded. This was causing the logs to be
+  filled with unnecessary information and affected `hive artifact:fetch --artifact` command.
+
+- Updated dependencies
+  [[`f2fef08`](https://github.com/kamilkisiela/graphql-hive/commit/f2fef08e9d1e13cb4a89d3882922db6dc822542e)]:
+  - @graphql-hive/core@0.6.1
+
+## 0.40.0
+
+### Minor Changes
+
+- [#5234](https://github.com/kamilkisiela/graphql-hive/pull/5234)
+  [`e6dc5c9`](https://github.com/kamilkisiela/graphql-hive/commit/e6dc5c9df34c30c52555b27b0bca50e0be75480b)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Provide debug logging for HTTP requests when
+  providing the `--debug` flag.
+
+### Patch Changes
+
+- Updated dependencies
+  [[`e6dc5c9`](https://github.com/kamilkisiela/graphql-hive/commit/e6dc5c9df34c30c52555b27b0bca50e0be75480b)]:
+  - @graphql-hive/core@0.6.0
+
+## 0.39.0
+
+### Minor Changes
+
+- [#5237](https://github.com/kamilkisiela/graphql-hive/pull/5237)
+  [`c20907b`](https://github.com/kamilkisiela/graphql-hive/commit/c20907b7bf04a0289370e104f5c00371b71813a3)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Changes the default behavior of
+  `hive dev` command. Now schema composition is done locally, without substituting subgraphs
+  available in the registry.
+
+  We added `--remote` flag to the `hive dev` command to mimic the previous behavior.
+
+  **Breaking Change** The `$ hive dev` command is still a work in progress (as stated in the command
+  description). That's why we are not considering this a breaking change, but a minor change.
+
+  **_Before:_**
+
+  The `hive dev` command would substitute subgraphs available in the registry with their local
+  counterparts, performing schema composition over the network according to your project's
+  configuration.
+
+  **_After:_**
+
+  The `hive dev` command will now perform schema composition locally, without substituting subgraphs
+  available in the registry. This is the default behavior.
+
+  To mimic the previous behavior, you can apply the `--remote` flag and continue using the command
+  as before.
+
+## 0.38.5
+
+### Patch Changes
+
+- Updated dependencies
+  [[`f1e43c6`](https://github.com/kamilkisiela/graphql-hive/commit/f1e43c641f3ebac931839c7dfbdcb3a885167562)]:
+  - @graphql-hive/core@0.5.0
+
 ## 0.38.4
 
 ### Patch Changes

@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { DocsLink } from '@/components/ui/docs-note';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +40,6 @@ import {
 } from '@/components/ui/table';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocsLink } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { cn } from '@/lib/utils';
 import { InfoCircledIcon } from '@radix-ui/react-icons';
@@ -171,7 +171,7 @@ export function SchemaContracts(props: {
     <>
       <SubPageLayout>
         <SubPageLayoutHeader
-          title="Schema Contracts"
+          subPageTitle="Schema Contracts"
           description={
             <>
               <CardDescription>
@@ -524,7 +524,7 @@ function CreateContractDialogContent(props: {
                               >
                                 <Check
                                   className={cn(
-                                    'mr-2 h-4 w-4',
+                                    'mr-2 size-4',
                                     form.values.includeTags.includes(value)
                                       ? 'opacity-100'
                                       : 'opacity-0',
@@ -637,7 +637,7 @@ function CreateContractDialogContent(props: {
                               >
                                 <Check
                                   className={cn(
-                                    'mr-2 h-4 w-4',
+                                    'mr-2 size-4',
                                     form.values.excludeTags.includes(value)
                                       ? 'opacity-100'
                                       : 'opacity-0',

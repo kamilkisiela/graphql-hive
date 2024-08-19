@@ -1,12 +1,30 @@
 import { ReactElement, useMemo } from 'react';
-import { useFormik } from 'formik';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Input, Modal } from '@/components/v2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
 import { graphql } from '@/gql';
-import { useCollections } from '../../../pages/target-laboratory';
+import { useCollections } from '@/lib/hooks/laboratory/use-collections';
+import { useEditorContext } from '@graphiql/react';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const UpdateOperationNameMutation = graphql(`
   mutation UpdateOperation(
@@ -30,6 +48,24 @@ const UpdateOperationNameMutation = graphql(`
   }
 `);
 
+const editOperationModalFormSchema = z.object({
+  name: z
+    .string({
+      required_error: 'Operation name is required',
+    })
+    .min(3, {
+      message: 'Operation name must be at least 3 characters long',
+    })
+    .max(50, {
+      message: 'Operation name must be less than 50 characters long',
+    }),
+  collectionId: z.string({
+    required_error: 'Collection is required',
+  }),
+});
+
+export type EditOperationModalFormValues = z.infer<typeof editOperationModalFormSchema>;
+
 export const EditOperationModal = (props: {
   operationId: string;
   close: () => void;
@@ -37,12 +73,14 @@ export const EditOperationModal = (props: {
   projectId: string;
   targetId: string;
 }): ReactElement => {
+  const { toast } = useToast();
   const [updateOperationNameState, mutate] = useMutation(UpdateOperationNameMutation);
   const { collections } = useCollections({
     organizationId: props.organizationId,
     projectId: props.projectId,
     targetId: props.targetId,
   });
+  const { setTabState } = useEditorContext({ nonNull: true });
 
   const [collection, operation] = useMemo(() => {
     for (const collection of collections) {
@@ -55,81 +93,137 @@ export const EditOperationModal = (props: {
     return [null, null] as const;
   }, [collections]);
 
-  const { handleSubmit, values, handleChange, handleBlur, errors, isValid, touched, isSubmitting } =
-    useFormik({
-      initialValues: {
-        name: operation?.name ?? '',
-        collectionId: collection?.id ?? '',
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().min(3).required(),
-        collectionId: Yup.string().required('Collection is a required field'),
-      }),
-      async onSubmit(values) {
-        const response = await mutate({
-          selector: {
-            target: props.targetId,
-            organization: props.organizationId,
-            project: props.projectId,
-          },
-          input: {
-            collectionId: values.collectionId,
-            operationId: props.operationId,
-            name: values.name,
-          },
-        });
-        const error = response.error || response.data?.updateOperationInDocumentCollection?.error;
+  const form = useForm<EditOperationModalFormValues>({
+    mode: 'all',
+    resolver: zodResolver(editOperationModalFormSchema),
+    defaultValues: {
+      name: operation?.name || '',
+      collectionId: collection?.id || '',
+    },
+  });
 
-        if (!error) {
-          props.close();
-        }
+  async function onSubmit(values: EditOperationModalFormValues) {
+    const response = await mutate({
+      selector: {
+        target: props.targetId,
+        organization: props.organizationId,
+        project: props.projectId,
+      },
+      input: {
+        collectionId: values.collectionId,
+        operationId: props.operationId,
+        name: values.name,
       },
     });
+    const error = response.error || response.data?.updateOperationInDocumentCollection?.error;
+
+    if (!error) {
+      // Update tab title
+      setTabState(state => ({
+        ...state,
+        tabs: state.tabs.map(tab =>
+          tab.id === props.operationId ? { ...tab, title: values.name } : tab,
+        ),
+      }));
+      props.close();
+      toast({
+        title: 'Operation Updated',
+        description: 'Operation has been updated successfully',
+        variant: 'default',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  }
 
   return (
-    <Modal open onOpenChange={props.close} className="flex flex-col items-center gap-5">
-      {!updateOperationNameState.fetching && (
-        <form className="flex w-full flex-col gap-8" onSubmit={handleSubmit}>
-          <Heading className="text-center">Edit Operation</Heading>
+    <EditOperationModalContent
+      fetching={updateOperationNameState.fetching}
+      close={props.close}
+      isOpen
+      form={form}
+      onSubmit={onSubmit}
+    />
+  );
+};
 
-          <div className="flex flex-col gap-4">
-            <label className="text-sm font-semibold" htmlFor="name">
-              Operation Name
-            </label>
-            <Input
-              name="name"
-              placeholder="Your Operation Name"
-              value={values.name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              isInvalid={!!(touched.name && errors.name)}
-              data-cy="input.name"
-            />
-            {touched.name && errors.name && (
-              <div className="text-sm text-red-500">{errors.name}</div>
-            )}
-          </div>
-
-          {updateOperationNameState.error && (
-            <div className="text-sm text-red-500">{updateOperationNameState.error.message}</div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2">
-            <Button type="button" size="lg" onClick={props.close}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              size="lg"
-              variant="primary"
-              disabled={isSubmitting || !isValid}
-              data-cy="confirm"
-            >
-              Update Operation
-            </Button>
-          </div>
-        </form>
-      )}
-    </Modal>
+export const EditOperationModalContent = (props: {
+  fetching: boolean;
+  isOpen: boolean;
+  close: () => void;
+  form: UseFormReturn<EditOperationModalFormValues>;
+  onSubmit: (values: EditOperationModalFormValues) => void;
+  opreationId?: string;
+}): ReactElement => {
+  return (
+    <Dialog
+      open={props.isOpen}
+      onOpenChange={() => {
+        props.close();
+        props.form.reset();
+      }}
+    >
+      <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
+        {!props.fetching && (
+          <Form {...props.form}>
+            <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
+              <DialogHeader>
+                <DialogTitle>Edit Operation</DialogTitle>
+                <DialogDescription>Update the operation name</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-8">
+                <FormField
+                  control={props.form.control}
+                  name="name"
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Operation Name</FormLabel>
+                        <FormControl>
+                          <Input autoComplete="off" {...field} placeholder="Your Operation Name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full justify-center"
+                  onClick={ev => {
+                    ev.preventDefault();
+                    props.close();
+                    props.form.reset();
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full justify-center"
+                  variant="primary"
+                  disabled={
+                    props.form.formState.isSubmitting ||
+                    !props.form.formState.isValid ||
+                    !props.form.formState.isDirty
+                  }
+                  data-cy="confirm"
+                >
+                  Update Operation
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

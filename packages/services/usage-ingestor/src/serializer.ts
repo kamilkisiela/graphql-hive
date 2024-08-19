@@ -1,6 +1,7 @@
 import LRU from 'tiny-lru';
 import {
   castValue,
+  ProcessedAppDeploymentUsageRecord,
   type ProcessedOperation,
   type ProcessedRegistryRecord,
   type ProcessedSubscriptionOperation,
@@ -67,6 +68,13 @@ export const registryOrder = [
   'expires_at',
 ] as const;
 
+export const appDeploymentUsageOrder = [
+  'target_id',
+  'app_name',
+  'app_version',
+  'last_request',
+] as const;
+
 export function joinIntoSingleMessage(items: string[]): string {
   return items.join(delimiter);
 }
@@ -115,6 +123,19 @@ export function stringifyRegistryRecord(record: ProcessedRegistryRecord): string
     coordinates: castValue(record.coordinates),
     timestamp: castDate(record.timestamp),
     expires_at: castDate(record.expires_at),
+  };
+
+  return Object.values(mapper).join(',');
+}
+
+export function stringifyAppDeploymentUsageRecord(
+  record: ProcessedAppDeploymentUsageRecord,
+): string {
+  const mapper: Record<KeysOfArray<typeof appDeploymentUsageOrder>, any> = {
+    target_id: castValue(record.target),
+    app_name: castValue(record.appName),
+    app_version: castValue(record.appVersion),
+    last_request: castDate(record.lastRequestTimestamp),
   };
 
   return Object.values(mapper).join(',');

@@ -12,7 +12,8 @@ import { ProjectManager } from '../../project/providers/project-manager';
 import { Logger } from '../../shared/providers/logger';
 import type { ProjectSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
-import { SchemaChangeNotificationInput } from './adapters/common';
+import { ChannelConfirmationInput, SchemaChangeNotificationInput } from './adapters/common';
+import { TeamsCommunicationAdapter } from './adapters/msteams';
 import { SlackCommunicationAdapter } from './adapters/slack';
 import { WebhookCommunicationAdapter } from './adapters/webhook';
 
@@ -29,6 +30,7 @@ export class AlertsManager {
     private slackIntegrationManager: SlackIntegrationManager,
     private slack: SlackCommunicationAdapter,
     private webhook: WebhookCommunicationAdapter,
+    private teamsWebhook: TeamsCommunicationAdapter,
     private organizationManager: OrganizationManager,
     private projectManager: ProjectManager,
     private storage: Storage,
@@ -185,6 +187,7 @@ export class AlertsManager {
         channel: channels.find(channel => channel.id === alert.channelId)!,
       };
     });
+    console.log('pairs:', pairs);
 
     const slackToken = await this.slackIntegrationManager.getToken({
       organization: event.organization.id,
@@ -195,8 +198,9 @@ export class AlertsManager {
 
     const integrations: SchemaChangeNotificationInput['integrations'] = {
       slack: {
-        token: slackToken!,
+        token: slackToken,
       },
+      // ms Teams is integrated via webhook. Webhook contains the token in itself, so we don't have any other token for it
     };
 
     // Let's not leak any data :)
@@ -237,6 +241,14 @@ export class AlertsManager {
             integrations,
           });
         }
+        if (channel.type === 'MSTEAMS_WEBHOOK') {
+          return this.teamsWebhook.sendSchemaChangeNotification({
+            event: safeEvent,
+            alert,
+            channel,
+            integrations,
+          });
+        }
 
         return this.webhook.sendSchemaChangeNotification({
           event: safeEvent,
@@ -265,34 +277,42 @@ export class AlertsManager {
       }),
     ]);
 
+    const channelConfirmationContext: ChannelConfirmationInput = {
+      event: {
+        kind: input.kind,
+        organization: {
+          id: organization.id,
+          cleanId: organization.cleanId,
+          name: organization.name,
+        },
+        project: {
+          id: project.id,
+          cleanId: project.cleanId,
+          name: project.name,
+        },
+      },
+      channel,
+      integrations: {
+        slack: {
+          token: null,
+        },
+      },
+    };
+
     if (channel.type === 'SLACK') {
       const slackToken = await this.slackIntegrationManager.getToken({
         organization: organization.id,
         project: project.id,
         context: IntegrationsAccessContext.ChannelConfirmation,
       });
+      if (!slackToken) {
+        throw new Error(`Slack token was not found for channel "${channel.id}"`);
+      }
 
-      await this.slack.sendChannelConfirmation({
-        event: {
-          kind: input.kind,
-          organization: {
-            id: organization.id,
-            cleanId: organization.cleanId,
-            name: organization.name,
-          },
-          project: {
-            id: project.id,
-            cleanId: project.cleanId,
-            name: project.name,
-          },
-        },
-        channel,
-        integrations: {
-          slack: {
-            token: slackToken!,
-          },
-        },
-      });
+      channelConfirmationContext.integrations.slack.token = slackToken;
+      await this.slack.sendChannelConfirmation(channelConfirmationContext);
+    } else if (channel.type === 'MSTEAMS_WEBHOOK') {
+      await this.teamsWebhook.sendChannelConfirmation(channelConfirmationContext);
     } else {
       await this.webhook.sendChannelConfirmation();
     }

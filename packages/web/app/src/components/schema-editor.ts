@@ -4,7 +4,7 @@ import {
   DiffEditor as MonacoDiffEditor,
   Editor as MonacoEditor,
 } from '@monaco-editor/react';
-import pkg from '../../package.json' assert { type: 'json' };
+import pkg from '../../package.json' with { type: 'json' };
 
 loader.config({
   paths: {

@@ -4,7 +4,7 @@ import { ContourValues } from './contour.types';
 import { helmChart } from './helm';
 
 // prettier-ignore
-export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '17.0.12');
+export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '18.2.11');
 
 export class Proxy {
   private lbService: Output<k8s.core.v1.Service> | null = null;
@@ -27,6 +27,19 @@ export class Proxy {
       virtualHost?: Output<string>;
       httpsUpstream?: boolean;
       withWwwDomain?: boolean;
+      // https://projectcontour.io/docs/1.29/config/rate-limiting/#local-rate-limiting
+      rateLimit?: {
+        // Max amount of request allowed with the "unit" paramter.
+        maxRequests: number;
+        unit: 'second' | 'minute' | 'hour';
+        // defining the number of requests above the baseline rate that are allowed in a short period of time.
+        // This would allow occasional larger bursts of traffic not to be rate limited.
+        burst?: number;
+        // default 429
+        responseStatusCode?: number;
+        // headers to add to the response in case of a rate limit
+        responseHeadersToAdd?: Record<string, string>;
+      };
     }[],
   ) {
     const cert = new k8s.apiextensions.CustomResource(`cert-${dns.record}`, {
@@ -79,6 +92,32 @@ export class Proxy {
                 port: route.service.spec.ports[0].port,
               },
             ],
+            // https://projectcontour.io/docs/1.29/config/request-routing/#session-affinity
+            loadBalancerPolicy: {
+              strategy: 'Cookie',
+            },
+            // https://projectcontour.io/docs/1.29/config/rate-limiting/#local-rate-limiting
+            rateLimitPolicy: route.rateLimit
+              ? {
+                  local: {
+                    requests: route.rateLimit.maxRequests,
+                    unit: route.rateLimit.unit,
+                    responseHeadersToAdd: [
+                      {
+                        name: 'x-rate-limit-active',
+                        value: 'true',
+                      },
+                      ...(route.rateLimit.responseHeadersToAdd
+                        ? Object.entries(route.rateLimit.responseHeadersToAdd).map(
+                            ([key, value]) => ({ name: key, value }),
+                          )
+                        : []),
+                    ],
+                    responseStatusCode: route.rateLimit.responseStatusCode || 429,
+                    burst: route.rateLimit.burst,
+                  },
+                }
+              : undefined,
             ...(route.path === '/'
               ? {}
               : {

@@ -2,7 +2,7 @@ import { http, URL } from '@graphql-hive/core';
 import { Flags } from '@oclif/core';
 import Command from '../../base-command';
 
-export default class ArtifactsFetch extends Command {
+export default class ArtifactsFetch extends Command<typeof ArtifactsFetch> {
   static description = 'fetch artifacts from the CDN';
   static flags = {
     'cdn.endpoint': Flags.string({
@@ -47,8 +47,15 @@ export default class ArtifactsFetch extends Command {
       },
       retry: {
         retries: 3,
-        retryWhen(response) {
-          return response.status >= 500;
+      },
+      logger: {
+        info: (...args) => {
+          if (this.flags.debug) {
+            console.info(...args);
+          }
+        },
+        error: (...args) => {
+          console.error(...args);
         },
       },
     });

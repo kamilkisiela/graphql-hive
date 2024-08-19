@@ -12,6 +12,7 @@ import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { urqlClient } from '@/lib/urql';
 import { configureScope, init } from '@sentry/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   createRootRoute,
   createRoute,
@@ -25,11 +26,18 @@ import { NotFound } from './components/not-found';
 import 'react-toastify/dist/ReactToastify.css';
 import { authenticated } from './components/authenticated-container';
 import { AuthPage } from './pages/auth';
+import { AuthCallbackPage } from './pages/auth-callback';
+import { AuthOIDCPage } from './pages/auth-oidc';
+import { AuthResetPasswordPage } from './pages/auth-reset-password';
+import { AuthSignInPage } from './pages/auth-sign-in';
+import { AuthSignUpPage } from './pages/auth-sign-up';
+import { AuthSSOPage } from './pages/auth-sso';
+import { AuthVerifyEmailPage } from './pages/auth-verify-email';
 import { DevPage } from './pages/dev';
 import { IndexPage } from './pages/index';
 import { LogoutPage } from './pages/logout';
 import { ManagePage } from './pages/manage';
-import { OrganizationPage } from './pages/organization';
+import { OrganizationIndexRouteSearch, OrganizationPage } from './pages/organization';
 import { JoinOrganizationPage } from './pages/organization-join';
 import { OrganizationMembersPage } from './pages/organization-members';
 import { NewOrgPage } from './pages/organization-new';
@@ -40,11 +48,13 @@ import { OrganizationSubscriptionManagePage } from './pages/organization-subscri
 import { OrganizationSupportPage } from './pages/organization-support';
 import { OrganizationSupportTicketPage } from './pages/organization-support-ticket';
 import { OrganizationTransferPage } from './pages/organization-transfer';
-import { ProjectPage } from './pages/project';
+import { ProjectIndexRouteSearch, ProjectPage } from './pages/project';
 import { ProjectAlertsPage } from './pages/project-alerts';
 import { ProjectPolicyPage } from './pages/project-policy';
 import { ProjectSettingsPage } from './pages/project-settings';
 import { TargetPage } from './pages/target';
+import { TargetAppVersionPage } from './pages/target-app-version';
+import { TargetAppsPage } from './pages/target-apps';
 import { TargetChecksPage } from './pages/target-checks';
 import { TargetChecksSinglePage } from './pages/target-checks-single';
 import { TargetExplorerPage } from './pages/target-explorer';
@@ -72,6 +82,8 @@ if (globalThis.window) {
     });
   }
 }
+
+const queryClient = new QueryClient();
 
 const LazyTanStackRouterDevtools = lazy(() =>
   import('@tanstack/router-devtools').then(({ TanStackRouterDevtools }) => ({
@@ -116,13 +128,15 @@ function RootComponent() {
           />
         </Helmet>
       )}
-      <SuperTokensWrapper>
-        <UrqlProvider value={urqlClient}>
-          <LoadingAPIIndicator />
-          <Outlet />
-        </UrqlProvider>
-      </SuperTokensWrapper>
       <Toaster />
+      <SuperTokensWrapper>
+        <QueryClientProvider client={queryClient}>
+          <UrqlProvider value={urqlClient}>
+            <LoadingAPIIndicator />
+            <Outlet />
+          </UrqlProvider>
+        </QueryClientProvider>
+      </SuperTokensWrapper>
       <ToastContainer hideProgressBar />
       {/* eslint-disable-next-line no-process-env */}
       {process.env.NODE_ENV === 'development' && <LazyTanStackRouterDevtools />}
@@ -156,6 +170,115 @@ const authRoute = createRoute({
   component: AuthPage,
   notFoundComponent: NotFound,
   errorComponent: ErrorComponent,
+});
+
+const AuthSharedSearch = z.object({
+  redirectToPath: z.string().optional().default('/'),
+});
+
+const authIndexRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: '/',
+  validateSearch(search) {
+    return AuthSharedSearch.parse(search);
+  },
+  component: () => {
+    const { redirectToPath } = authIndexRoute.useSearch();
+    return <Navigate to="/auth/sign-in" search={{ redirectToPath }} />;
+  },
+});
+
+const AuthResetPasswordRouteSearch = AuthSharedSearch.extend({
+  email: z.string().optional(),
+  token: z.string().optional(),
+});
+
+const authResetPasswordRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'reset-password',
+  validateSearch: AuthResetPasswordRouteSearch.parse,
+  component: function AuthResetPasswordRoute() {
+    const { email, token, redirectToPath } = authResetPasswordRoute.useSearch();
+    return (
+      <AuthResetPasswordPage
+        email={email ?? null}
+        token={token ?? null}
+        redirectToPath={redirectToPath}
+      />
+    );
+  },
+});
+
+const authSignInRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'sign-in',
+  validateSearch(search) {
+    return AuthSharedSearch.parse(search);
+  },
+  component: () => {
+    const { redirectToPath } = authSignInRoute.useSearch();
+    return <AuthSignInPage redirectToPath={redirectToPath} />;
+  },
+});
+
+const authSSORoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'sso',
+  validateSearch(search) {
+    return AuthSharedSearch.parse(search);
+  },
+  component: () => {
+    const { redirectToPath } = authSSORoute.useSearch();
+    return <AuthSSOPage redirectToPath={redirectToPath} />;
+  },
+});
+
+const AuthOIDCRouteSearch = AuthSharedSearch.extend({
+  id: z
+    .string({
+      required_error: 'OIDC ID is required',
+    })
+    .optional(),
+});
+const authOIDCRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'oidc',
+  validateSearch(search) {
+    return AuthOIDCRouteSearch.parse(search);
+  },
+  component: function AuthOIDCRoute() {
+    const { id, redirectToPath } = authOIDCRoute.useSearch();
+    return <AuthOIDCPage oidcId={id} redirectToPath={redirectToPath} />;
+  },
+});
+
+const AuthCallbackRouteParams = z.object({
+  provider: z.enum(['oidc', 'okta', 'github', 'google']),
+});
+const authCallbackRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'callback/$provider',
+  validateSearch(search) {
+    return AuthSharedSearch.parse(search);
+  },
+  component() {
+    const { redirectToPath } = authCallbackRoute.useSearch();
+    const params = authCallbackRoute.useParams();
+    const { provider } = AuthCallbackRouteParams.parse(params);
+    return AuthCallbackPage({ provider, redirectToPath });
+  },
+});
+
+const authSignUpRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'sign-up',
+  component: AuthSignUpPage,
+});
+
+const authVerifyEmailRoute = createRoute({
+  getParentRoute: () => authRoute,
+  path: 'verify-email',
+  component: AuthVerifyEmailPage,
 });
 
 const indexRoute = createRoute({
@@ -222,9 +345,18 @@ const organizationRoute = createRoute({
 const organizationIndexRoute = createRoute({
   getParentRoute: () => organizationRoute,
   path: '/',
+  validateSearch: OrganizationIndexRouteSearch.parse,
   component: function OrganizationRoute() {
     const { organizationId } = organizationRoute.useParams();
-    return <OrganizationPage organizationId={organizationId} />;
+    const { search, sortBy, sortOrder } = organizationIndexRoute.useSearch();
+    return (
+      <OrganizationPage
+        organizationId={organizationId}
+        search={search}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+    );
   },
   notFoundComponent: NotFound,
   errorComponent: ErrorComponent,
@@ -334,9 +466,19 @@ const projectRoute = createRoute({
 const projectIndexRoute = createRoute({
   getParentRoute: () => projectRoute,
   path: '/',
+  validateSearch: ProjectIndexRouteSearch.parse,
   component: function ProjectRoute() {
     const { organizationId, projectId } = projectIndexRoute.useParams();
-    return <ProjectPage organizationId={organizationId} projectId={projectId} />;
+    const { search, sortBy, sortOrder } = projectIndexRoute.useSearch();
+    return (
+      <ProjectPage
+        organizationId={organizationId}
+        projectId={projectId}
+        search={search}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+      />
+    );
   },
 });
 
@@ -428,6 +570,35 @@ const targetLaboratoryRoute = createRoute({
         organizationId={organizationId}
         projectId={projectId}
         targetId={targetId}
+      />
+    );
+  },
+});
+
+const targetAppsRoute = createRoute({
+  getParentRoute: () => targetRoute,
+  path: 'apps',
+  component: function TargetAppsRoute() {
+    const { organizationId, projectId, targetId } = targetAppsRoute.useParams();
+    return (
+      <TargetAppsPage organizationId={organizationId} projectId={projectId} targetId={targetId} />
+    );
+  },
+});
+
+const targetAppVersionRoute = createRoute({
+  getParentRoute: () => targetRoute,
+  path: 'apps/$appName/$appVersion',
+  component: function TargetAppVersionRoute() {
+    const { organizationId, projectId, targetId, appName, appVersion } =
+      targetAppVersionRoute.useParams();
+    return (
+      <TargetAppVersionPage
+        organizationId={organizationId}
+        projectId={projectId}
+        targetId={targetId}
+        appName={appName}
+        appVersion={appVersion}
       />
     );
   },
@@ -624,7 +795,14 @@ const routeTree = root.addChildren([
   notFoundRoute,
   anonymousRoute.addChildren([
     authRoute.addChildren([
-      /* I have no idea why (yet), but this is necessary to make /auth/reset-password page works */
+      authIndexRoute,
+      authResetPasswordRoute,
+      authSignInRoute,
+      authSignUpRoute,
+      authSSORoute,
+      authOIDCRoute,
+      authCallbackRoute,
+      authVerifyEmailRoute,
     ]),
   ]),
   authenticatedRoute.addChildren([
@@ -666,6 +844,8 @@ const routeTree = root.addChildren([
       targetExplorerUnusedRoute,
       targetExplorerTypeRoute,
       targetChecksRoute.addChildren([targetChecksSingleRoute]),
+      targetAppVersionRoute,
+      targetAppsRoute,
     ]),
   ]),
 ]);

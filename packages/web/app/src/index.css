@@ -84,11 +84,6 @@
     @apply border-border;
   }
 
-  html,
-  body {
-    height: 100%;
-  }
-
   body {
     @apply text-foreground bg-[#030711];
     font-feature-settings:
@@ -203,4 +198,8 @@
   input::-webkit-inner-spin-button {
     -webkit-appearance: none;
   }
+}
+
+.hive-badge-is-changed:after {
+  @apply absolute right-2 size-1.5 rounded-full border border-orange-600 bg-orange-400 content-[''];
 }

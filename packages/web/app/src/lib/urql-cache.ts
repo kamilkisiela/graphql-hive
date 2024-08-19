@@ -1,6 +1,8 @@
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
+import type { CreateProjectMutation } from '@/components/layouts/organization';
+import type { CreateTarget_CreateTargetMutation } from '@/components/layouts/project';
 import type { CreateAlertModal_AddAlertMutation } from '@/components/project/alerts/create-alert';
 import type { CreateChannel_AddAlertChannelMutation } from '@/components/project/alerts/create-channel';
 import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
@@ -8,16 +10,17 @@ import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/p
 import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
-import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
-import type { CreateOrganizationMutation } from '@/components/v2/modals/create-organization';
-import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
-import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
-import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
-import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
-import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
+import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/settings/registry-access-token';
 import { graphql } from '@/gql';
-import { CollectionsQuery } from '@/pages/target-laboratory';
-import { TokensDocument, type DeleteTokensDocument } from '@/pages/target-settings';
+import { CollectionsQuery } from '@/lib/hooks/laboratory/use-collections';
+import type { CreateOrganizationMutation } from '@/pages/organization-new';
+import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
+import type { DeleteProjectMutation } from '@/pages/project-settings';
+import {
+  TokensDocument,
+  type DeleteTargetMutation,
+  type DeleteTokensDocument,
+} from '@/pages/target-settings';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 

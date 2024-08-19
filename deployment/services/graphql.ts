@@ -94,6 +94,10 @@ export function deployGraphQL({
     clientSecret: oauthConfig.requireSecret('googleSecret'),
   });
 
+  const persistedDocumentsSecret = new ServiceSecret('persisted-documents', {
+    cdnAccessKeyId: apiConfig.requireSecret('hivePersistedDocumentsCdnAccessKeyId'),
+  });
+
   return (
     new ServiceDeployment(
       'graphql-api',
@@ -133,9 +137,9 @@ export function deployGraphQL({
           HIVE_REPORTING: '1',
           HIVE_USAGE: '1',
           HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
+          HIVE_PERSISTED_DOCUMENTS: '1',
           ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
           INTEGRATION_GITHUB: '1',
-          GRAPHQL_PERSISTED_OPERATIONS_PATH: './persisted-operations.json',
           // Auth
           SUPERTOKENS_CONNECTION_URI: supertokens.localEndpoint,
           AUTH_GITHUB: '1',
@@ -143,7 +147,6 @@ export function deployGraphQL({
           AUTH_ORGANIZATION_OIDC: '1',
           AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
           // Traces (OTLP)
-          OPENTELEMETRY_CONSOLE_EXPORTER: '1',
           OPENTELEMETRY_COLLECTOR_ENDPOINT:
             observability.enabled && observability.tracingEndpoint
               ? observability.tracingEndpoint
@@ -196,6 +199,12 @@ export function deployGraphQL({
       .withSecret('AUTH_GITHUB_CLIENT_SECRET', githubOAuthSecret, 'clientSecret')
       .withSecret('AUTH_GOOGLE_CLIENT_ID', googleOAuthSecret, 'clientId')
       .withSecret('AUTH_GOOGLE_CLIENT_SECRET', googleOAuthSecret, 'clientSecret')
+      // Persisted Documents
+      .withSecret(
+        'HIVE_PERSISTED_DOCUMENTS_CDN_ACCESS_KEY_ID',
+        persistedDocumentsSecret,
+        'cdnAccessKeyId',
+      )
       // Zendesk
       .withConditionalSecret(zendesk.enabled, 'ZENDESK_SUBDOMAIN', zendesk.secret, 'subdomain')
       .withConditionalSecret(zendesk.enabled, 'ZENDESK_USERNAME', zendesk.secret, 'username')

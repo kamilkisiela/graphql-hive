@@ -5,7 +5,7 @@ import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { JsonFileLoader } from '@graphql-tools/json-file-loader';
 import { loadTypedefs } from '@graphql-tools/load';
 import { UrlLoader } from '@graphql-tools/url-loader';
-import baseCommand from '../base-command';
+import BaseCommand from '../base-command';
 import { FragmentType, graphql, useFragment as unmaskFragment } from '../gql';
 import { CriticalityLevel, SchemaErrorConnection, SchemaWarningConnection } from '../gql/graphql';
 
@@ -17,7 +17,7 @@ const criticalityMap: Record<CriticalityLevel, string> = {
   [CriticalityLevel.Dangerous]: colors.green('-'),
 };
 
-export function renderErrors(this: baseCommand, errors: SchemaErrorConnection) {
+export function renderErrors(this: BaseCommand<any>, errors: SchemaErrorConnection) {
   this.fail(`Detected ${errors.total} error${errors.total > 1 ? 's' : ''}`);
   this.log('');
 
@@ -43,7 +43,7 @@ const RenderChanges_SchemaChanges = graphql(`
 `);
 
 export function renderChanges(
-  this: baseCommand,
+  this: BaseCommand<any>,
   maskedChanges: FragmentType<typeof RenderChanges_SchemaChanges>,
 ) {
   const changes = unmaskFragment(RenderChanges_SchemaChanges, maskedChanges);
@@ -91,7 +91,7 @@ export function renderChanges(
   }
 }
 
-export function renderWarnings(this: baseCommand, warnings: SchemaWarningConnection) {
+export function renderWarnings(this: BaseCommand<any>, warnings: SchemaWarningConnection) {
   this.log('');
   this.infoWarning(`Detected ${warnings.total} warning${warnings.total > 1 ? 's' : ''}`);
   this.log('');

@@ -25,7 +25,7 @@ export type ObservabilityConfig = {
 // prettier-ignore
 export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.96.0');
 // prettier-ignore
-export const VECTOR_HELM_CHART = helmChart('https://helm.vector.dev', 'vector', '0.34.0');
+export const VECTOR_HELM_CHART = helmChart('https://helm.vector.dev', 'vector', '0.35.0');
 
 export class Observability {
   constructor(
@@ -191,7 +191,7 @@ export class Observability {
                   // By defualt, Envoy reports this as full URL, but we only want the path
                   'replace_pattern(attributes["http.url"], "https?://[^/]+(/[^?#]*)", "$$1") where attributes["component"] == "proxy"',
                   // Replace Envoy default span name with a more human-readable one (e.g. "METHOD /path")
-                  'set(name, Concat([attributes["http.method"], attributes["http.url"]], " ")) where attributes["component"] == "proxy"',
+                  'set(name, Concat([attributes["http.method"], attributes["http.url"]], " ")) where attributes["component"] == "proxy" and attributes["http.method"] != nil',
                 ],
               },
             ],

@@ -18,7 +18,6 @@ import type {
   SchemaChecksFilter,
 } from '../../../__generated__/types';
 import type {
-  ActivityObject,
   Alert,
   AlertChannel,
   CDNAccessToken,
@@ -45,6 +44,7 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import type { Contracts } from '../../schema/providers/contracts';
+import type { SchemaCoordinatesDiffResult } from '../../schema/providers/inspector';
 
 export interface OrganizationSelector {
   organization: string;
@@ -80,6 +80,8 @@ export interface Storage {
       id: string;
       defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     };
+    firstName: string | null;
+    lastName: string | null;
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
@@ -93,7 +95,7 @@ export interface Storage {
   getOrganizationByGitHubInstallationId(_: {
     installationId: string;
   }): Promise<Organization | null>;
-  getOrganization(_: OrganizationSelector): Promise<Organization | never>;
+  getOrganization(_: { organization: string }): Promise<Organization | never>;
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
@@ -113,8 +115,21 @@ export interface Storage {
   >;
 
   updateOrganizationName(
-    _: OrganizationSelector & Pick<Organization, 'name' | 'cleanId'> & { user: string },
+    _: OrganizationSelector & Pick<Organization, 'name'> & { user: string },
   ): Promise<Organization | never>;
+  updateOrganizationCleanId(
+    _: OrganizationSelector &
+      Pick<Organization, 'cleanId'> & { user: string; reservedNames: string[] },
+  ): Promise<
+    | {
+        ok: true;
+        organization: Organization;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  >;
 
   updateOrganizationPlan(
     _: OrganizationSelector & Pick<Organization, 'billingPlan'>,
@@ -428,6 +443,7 @@ export interface Storage {
       diffSchemaVersionId: string | null;
       conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
       contracts: null | Array<CreateContractVersionInput>;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
     } & TargetSelector &
       (
         | {
@@ -466,6 +482,7 @@ export interface Storage {
       };
       contracts: null | Array<CreateContractVersionInput>;
       conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
     } & TargetSelector) &
       (
         | {
@@ -507,12 +524,6 @@ export interface Storage {
     } & OrganizationSelector &
       Partial<Pick<TargetSelector, 'project' | 'target'>>,
   ): Promise<void>;
-
-  getActivities(
-    _: (OrganizationSelector | ProjectSelector | TargetSelector) & {
-      limit: number;
-    },
-  ): Promise<readonly ActivityObject[]>;
 
   addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
 
@@ -600,6 +611,7 @@ export interface Storage {
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
+  getOIDCIntegrationIdForOrganizationCleanId(_: { cleanId: string }): Promise<string | null>;
 
   getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
 
@@ -622,6 +634,11 @@ export interface Storage {
   }): Promise<OIDCIntegration>;
 
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
+
+  updateOIDCRestrictions(_: {
+    oidcIntegrationId: string;
+    oidcUserAccessOnly: boolean;
+  }): Promise<OIDCIntegration>;
 
   createCDNAccessToken(_: {
     id: string;

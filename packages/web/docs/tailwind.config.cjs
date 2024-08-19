@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     ...config.theme,
     extend: {
-      ...config.extend,
+      ...config.theme.extend,
       fontFamily: {
         display: [
           'Inter var,' + fontFamily.sans.join(','),

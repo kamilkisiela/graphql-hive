@@ -3,6 +3,7 @@ import { parse, print } from 'graphql';
 import { enableExternalSchemaComposition } from 'testkit/flow';
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from 'testkit/gql/graphql';
 import { initSeed } from 'testkit/seed';
+import { getServiceHost } from 'testkit/utils';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createStorage } from '@hive/storage';
 import { sortSDL } from '@theguild/federation-composition';
@@ -63,7 +64,7 @@ function normalizeSDL(sdl: string): string {
 
 test.concurrent(
   'can delete a service and updates the CDN when the super schema is still composable',
-  async () => {
+  async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
     const { createToken, target } = await createProject(ProjectType.Federation);
@@ -245,7 +246,7 @@ test.concurrent(
 
       await enableExternalSchemaComposition(
         {
-          endpoint: `http://${`composition_federation_2:3069`}/compose`,
+          endpoint: `http://${await getServiceHost('composition_federation_2', 3069, false)}/compose`,
           // eslint-disable-next-line no-process-env
           secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
           project: project.cleanId,

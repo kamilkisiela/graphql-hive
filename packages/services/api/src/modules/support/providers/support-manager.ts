@@ -195,7 +195,6 @@ export class SupportManager {
     organizationId: string;
   }): Promise<string> {
     const organizationZendeskId = await this.ensureZendeskOrganizationId(input.organizationId);
-
     const userAsMember = await this.organizationManager.getOrganizationMember({
       organization: input.organizationId,
       user: input.userId,
@@ -203,48 +202,107 @@ export class SupportManager {
 
     if (!userAsMember.user.zendeskId) {
       this.logger.info(
-        'Creating user in zendesk organization (organization: %s, user: %s)',
+        'Attempt to find user via Zendesk API. (organizationID: %s, userId: %s)',
         input.organizationId,
         input.userId,
       );
-      const response = await this.httpClient
-        .post(`https://${this.config.subdomain}.zendesk.com/api/v2/users`, {
+
+      const email = userAsMember.user.email;
+
+      // Before attempting to create the user we need to check whether an user with that email might already exist.
+      let userZendeskId = await this.httpClient
+        .get(`https://${this.config.subdomain}.zendesk.com/api/v2/users`, {
+          searchParams: {
+            query: email,
+          },
           username: this.config.username,
           password: this.config.password,
           responseType: 'json',
           context: {
             logger: this.logger,
           },
-          headers: {
-            'idempotency-key': input.userId,
-          },
-          json: {
-            user: {
-              name: userAsMember.user.fullName,
-              email: userAsMember.user.email,
-              external_id: userAsMember.user.id,
-              identities: [
-                {
-                  type: 'foreign',
-                  value: userAsMember.user.email,
-                },
-              ],
-              role: 'end-user',
-              verified: true,
-            },
-            skip_verify_email: true,
-          },
         })
-        .then(res =>
-          UserCreateResponseModel.parseAsync(res).catch(err => {
-            this.logger.error(err);
-            return Promise.reject(err);
-          }),
-        );
-      const userZendeskId = String(response.user.id);
-      await this.storage.setZendeskUserId({ userId: input.userId, zendeskId: userZendeskId });
+        .then(res => {
+          const data = z
+            .object({
+              users: z.array(
+                z.object({
+                  id: z.number(),
+                  email: z.string(),
+                  organization_id: z.number().nullable(),
+                }),
+              ),
+            })
+            .parse(res);
 
-      userAsMember.user.zendeskId = userZendeskId;
+          const user = data.users.at(0) ?? null;
+
+          if (user?.email === email) {
+            this.logger.info(
+              'User found on Zendesk. (organizationID: %s, userId: %s)',
+              input.organizationId,
+              input.userId,
+            );
+            return user.id;
+          }
+
+          this.logger.info(
+            'User not found on Zendesk. (organizationID: %s, userId: %s)',
+            input.organizationId,
+            input.userId,
+          );
+          return null;
+        });
+
+      if (userZendeskId === null) {
+        this.logger.info(
+          'Creating user in zendesk organization (organization: %s, user: %s)',
+          input.organizationId,
+          input.userId,
+        );
+
+        const response = await this.httpClient
+          .post(`https://${this.config.subdomain}.zendesk.com/api/v2/users`, {
+            username: this.config.username,
+            password: this.config.password,
+            responseType: 'json',
+            context: {
+              logger: this.logger,
+            },
+            headers: {
+              'idempotency-key': input.userId,
+            },
+            json: {
+              user: {
+                name: userAsMember.user.fullName,
+                email,
+                external_id: userAsMember.user.id,
+                identities: [
+                  {
+                    type: 'foreign',
+                    value: email,
+                  },
+                ],
+                role: 'end-user',
+                verified: true,
+              },
+              skip_verify_email: true,
+            },
+          })
+          .then(res =>
+            UserCreateResponseModel.parseAsync(res).catch(err => {
+              this.logger.error(err);
+              return Promise.reject(err);
+            }),
+          );
+        userZendeskId = response.user.id;
+      }
+
+      await this.storage.setZendeskUserId({
+        userId: input.userId,
+        zendeskId: String(userZendeskId),
+      });
+      userAsMember.user.zendeskId = String(userZendeskId);
     }
 
     if (!userAsMember.connectedToZendesk) {
@@ -264,12 +322,13 @@ export class SupportManager {
             logger: this.logger,
           },
           headers: {
-            'idempotency-key': input.userId + ':' + input.organizationId,
+            // v2 post fix is for idemopotency key cache busting.
+            'idempotency-key': input.userId + '|v2',
           },
           json: {
             organization_membership: {
-              user_id: userAsMember.user.zendeskId,
-              organization_id: organizationZendeskId,
+              user_id: parseInt(userAsMember.user.zendeskId, 10),
+              organization_id: parseInt(organizationZendeskId, 10),
             },
           },
         },
@@ -441,8 +500,8 @@ export class SupportManager {
     this.logger.info(
       'Creating support ticket (organization: %s, priority: %s, subject: %s)',
       input.organizationId,
-      input.subject,
       input.priority,
+      input.subject,
     );
 
     const request = SupportTicketCreateRequestModel.safeParse(input);
@@ -475,6 +534,8 @@ export class SupportManager {
           subject: input.subject,
           description: input.description,
           priority: input.priority,
+          // version is here to cache bust the idempotency key.
+          version: 'v2',
         }),
       )
       .digest('hex');
@@ -490,9 +551,9 @@ export class SupportManager {
         password: this.config.password,
         json: {
           ticket: {
-            organization_id: internalOrganizationId,
-            submitter_id: internalUserId,
-            requester_id: internalUserId,
+            organization_id: parseInt(internalOrganizationId, 10),
+            submitter_id: parseInt(internalUserId, 10),
+            requester_id: parseInt(internalUserId, 10),
             comment: {
               body: request.data.description,
             },
@@ -559,6 +620,8 @@ export class SupportManager {
           ticketId: input.ticketId,
           body: input.body,
           internalUserId,
+          // increment for cache busting.
+          version: '2',
         }),
       )
       .digest('hex');
@@ -582,7 +645,7 @@ export class SupportManager {
           ticket: {
             comment: {
               body: request.data.body,
-              author_id: internalUserId,
+              author_id: parseInt(internalUserId, 10),
               public: true,
             },
           },
