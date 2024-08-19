@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/components/ui/use-toast';
 import { UserMenu } from '@/components/ui/user-menu';
-import { Tabs } from '@/components/v2/tabs';
 import { env } from '@/env/frontend';
 import { graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
@@ -44,6 +43,7 @@ import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 import { HiveLink } from '../ui/hive-link';
 import { PlusIcon } from '../ui/icon';
 import { QueryError } from '../ui/query-error';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { OrganizationSelector } from './organization-selectors';
 
 export enum Page {
@@ -144,18 +144,18 @@ export function OrganizationLayout({
       <div className="relative h-[--tabs-navbar-height] border-b border-gray-800">
         <div className="container flex items-center justify-between">
           {currentOrganization && meInCurrentOrg ? (
-            <Tabs value={page}>
-              <Tabs.List>
-                <Tabs.Trigger value={Page.Overview} asChild>
+            <Tabs value={page} className="min-w-[600px]">
+              <TabsList variant="menu">
+                <TabsTrigger variant="menu" value={Page.Overview} asChild>
                   <Link
                     to="/$organizationId"
                     params={{ organizationId: currentOrganization.cleanId }}
                   >
                     Overview
                   </Link>
-                </Tabs.Trigger>
+                </TabsTrigger>
                 {canAccessOrganization(OrganizationAccessScope.Members, meInCurrentOrg) && (
-                  <Tabs.Trigger value={Page.Members} asChild>
+                  <TabsTrigger variant="menu" value={Page.Members} asChild>
                     <Link
                       to="/$organizationId/view/members"
                       params={{ organizationId: currentOrganization.cleanId }}
@@ -163,51 +163,51 @@ export function OrganizationLayout({
                     >
                       Members
                     </Link>
-                  </Tabs.Trigger>
+                  </TabsTrigger>
                 )}
                 {canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                   <>
-                    <Tabs.Trigger value={Page.Policy} asChild>
+                    <TabsTrigger variant="menu" value={Page.Policy} asChild>
                       <Link
                         to="/$organizationId/view/policy"
                         params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Policy
                       </Link>
-                    </Tabs.Trigger>
-                    <Tabs.Trigger value={Page.Settings} asChild>
+                    </TabsTrigger>
+                    <TabsTrigger variant="menu" value={Page.Settings} asChild>
                       <Link
                         to="/$organizationId/view/settings"
                         params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Settings
                       </Link>
-                    </Tabs.Trigger>
+                    </TabsTrigger>
                   </>
                 )}
                 {canAccessOrganization(OrganizationAccessScope.Read, meInCurrentOrg) &&
                   env.zendeskSupport && (
-                    <Tabs.Trigger value={Page.Support} asChild>
+                    <TabsTrigger variant="menu" value={Page.Support} asChild>
                       <Link
                         to="/$organizationId/view/support"
                         params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Support
                       </Link>
-                    </Tabs.Trigger>
+                    </TabsTrigger>
                   )}
                 {getIsStripeEnabled() &&
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
-                    <Tabs.Trigger value={Page.Subscription} asChild>
+                    <TabsTrigger variant="menu" value={Page.Subscription} asChild>
                       <Link
                         to="/$organizationId/view/subscription"
                         params={{ organizationId: currentOrganization.cleanId }}
                       >
                         Subscription
                       </Link>
-                    </Tabs.Trigger>
+                    </TabsTrigger>
                   )}
-              </Tabs.List>
+              </TabsList>
             </Tabs>
           ) : (
             <div className="flex flex-row gap-x-8 border-b-2 border-b-transparent px-4 py-3">

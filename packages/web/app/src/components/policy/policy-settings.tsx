@@ -9,7 +9,8 @@ import {
   SchemaPolicyInput,
 } from '@/gql/graphql';
 import type { ResultOf } from '@graphql-typed-document-node/core';
-import { Callout, DataWrapper } from '../v2';
+import { Callout } from '../ui/callout';
+import { DataWrapper } from '../v2';
 import { PolicyListItem } from './policy-list-item';
 import { buildValidationSchema, PolicyFormValues } from './rules-configuration';
 

@@ -1,5 +1,39 @@
 # @graphql-hive/yoga
 
+## 0.36.0
+
+### Minor Changes
+
+- [#5367](https://github.com/kamilkisiela/graphql-hive/pull/5367)
+  [`a896642`](https://github.com/kamilkisiela/graphql-hive/commit/a896642197e6d7779ba7ed71f365dfbd80532282)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add createSupergraphSDLFetcher to /yoga
+
+### Patch Changes
+
+- Updated dependencies
+  [[`a896642`](https://github.com/kamilkisiela/graphql-hive/commit/a896642197e6d7779ba7ed71f365dfbd80532282)]:
+  - @graphql-hive/core@0.7.1
+
+## 0.35.0
+
+### Minor Changes
+
+- [#5307](https://github.com/kamilkisiela/graphql-hive/pull/5307)
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Re-introduce retry logging removed in previous
+  release.
+
+### Patch Changes
+
+- [#5361](https://github.com/kamilkisiela/graphql-hive/pull/5361)
+  [`3f03e7b`](https://github.com/kamilkisiela/graphql-hive/commit/3f03e7b3a65707ba8aa04335684f0aa8d261868f)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fixed issue where usage reports were
+  sent only on app disposal or max batch size, now also sent at set intervals.
+- Updated dependencies
+  [[`3f03e7b`](https://github.com/kamilkisiela/graphql-hive/commit/3f03e7b3a65707ba8aa04335684f0aa8d261868f),
+  [`0a3b24d`](https://github.com/kamilkisiela/graphql-hive/commit/0a3b24d400770c2cc84642959febb9288ad1c1b7)]:
+  - @graphql-hive/core@0.7.0
+
 ## 0.34.1
 
 ### Patch Changes

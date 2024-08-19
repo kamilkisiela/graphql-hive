@@ -18,7 +18,7 @@ interface SharedConfig {
   /**
    * Function for determining whether the request response is okay.
    * You can override it if you want to accept other status codes as well.
-   * @default (response) => response.ok
+   * @default {response => response.ok}
    **/
   isRequestOk?: ResponseAssertFunction;
 }
@@ -37,7 +37,7 @@ function get(endpoint: string, config: SharedConfig) {
     timeout: config.timeout,
     retry: config.retry,
     fetchImplementation: config.fetchImplementation,
-    logger: config.logger ?? console,
+    logger: config.logger,
     isRequestOk: config.isRequestOk,
   });
 }
@@ -75,12 +75,12 @@ export async function makeFetchCall(
     /**
      * Function for determining whether the request response is okay.
      * You can override it if you want to accept other status codes as well.
-     * @default (response) => response.ok
+     * @default {response => response.ok}
      **/
     isRequestOk?: ResponseAssertFunction;
   },
 ): Promise<Response> {
-  const logger = config.logger ?? console;
+  const logger = config.logger;
   const isRequestOk: ResponseAssertFunction = config.isRequestOk ?? (response => response.ok);
   let retries = 0;
   let minTimeout = 200;
@@ -96,6 +96,11 @@ export async function makeFetchCall(
 
   return await asyncRetry(
     async (bail, attempt) => {
+      logger?.info(
+        `${config.method} ${endpoint}` +
+          (retries > 0 ? ' ' + getAttemptMessagePart(attempt, retries + 1) : ''),
+      );
+
       const getDuration = measureTime();
       const signal = AbortSignal.timeout(config.timeout ?? 20_000);
 
@@ -106,34 +111,38 @@ export async function makeFetchCall(
         signal,
       }).catch((error: unknown) => {
         const logErrorMessage = () =>
-          logger.error(
+          logger?.error(
             `${config.method} ${endpoint} failed ${getDuration()}. ` + getErrorMessage(error),
           );
 
         if (isAggregateError(error)) {
           for (const err of error.errors) {
-            logger.error(err);
+            logger?.error(err);
           }
 
           logErrorMessage();
           throw new Error('Unexpected HTTP error.', { cause: error });
         }
 
-        logger.error(error);
+        logger?.error(error);
         logErrorMessage();
         throw new Error('Unexpected HTTP error.', { cause: error });
       });
 
       if (isRequestOk(response)) {
+        logger?.info(
+          `${config.method} ${endpoint} succeeded with status ${response.status} ${getDuration()}.`,
+        );
+
         return response;
       }
 
-      logger.error(
+      logger?.error(
         `${config.method} ${endpoint} failed with status ${response.status} ${getDuration()}: ${(await response.text()) || '<empty response body>'}`,
       );
 
       if (retries > 0 && attempt > retries) {
-        logger.error(
+        logger?.error(
           `${config.method} ${endpoint} retry limit exceeded after ${attempt} attempts.`,
         );
       }
@@ -144,7 +153,7 @@ export async function makeFetchCall(
 
       if (response.status >= 400 && response.status < 500) {
         if (retries > 0) {
-          logger.error(`Abort retry because of status code ${response.status}.`);
+          logger?.error(`Abort retry because of status code ${response.status}.`);
         }
         bail(error);
       }
@@ -165,6 +174,10 @@ function getErrorMessage(error: unknown): string {
     return String(error.message);
   }
   return '<no error message>';
+}
+
+function getAttemptMessagePart(attempt: number, retry: number): string {
+  return `Attempt (${attempt}/${retry})`;
 }
 
 function measureTime() {

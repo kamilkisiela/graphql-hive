@@ -133,18 +133,24 @@ export function createAgent<TEvent>(
 
     if (data.size() >= options.maxSize) {
       debugLog('Sending immediately');
-      setImmediate(() => send({ throwOnError: false }));
+      setImmediate(() => send({ throwOnError: false, skipSchedule: true }));
     }
   }
 
   function sendImmediately(event: TEvent): Promise<ReadOnlyResponse | null> {
     data.set(event);
     debugLog('Sending immediately');
-    return send({ throwOnError: true });
+    return send({ throwOnError: true, skipSchedule: true });
   }
 
-  async function send(sendOptions?: { throwOnError?: boolean }): Promise<ReadOnlyResponse | null> {
+  async function send(sendOptions?: {
+    throwOnError?: boolean;
+    skipSchedule: boolean;
+  }): Promise<ReadOnlyResponse | null> {
     if (!data.size() || !enabled) {
+      if (!sendOptions?.skipSchedule) {
+        schedule();
+      }
       return null;
     }
 
@@ -183,6 +189,11 @@ export function createAgent<TEvent>(
         }
 
         return null;
+      })
+      .finally(() => {
+        if (!sendOptions?.skipSchedule) {
+          schedule();
+        }
       });
 
     return response;
@@ -199,6 +210,7 @@ export function createAgent<TEvent>(
     }
 
     await send({
+      skipSchedule: true,
       throwOnError: false,
     });
   }

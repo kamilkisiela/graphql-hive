@@ -40,6 +40,7 @@ import { TargetManager } from '../../target/providers/target-manager';
 import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { Contracts } from './contracts';
+import type { SchemaCoordinatesDiffResult } from './inspector';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
@@ -427,6 +428,7 @@ export class SchemaManager {
       projectType: ProjectType;
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType>;
+      coordinatesDiff: SchemaCoordinatesDiffResult | null;
       previousSchemaVersion: string | null;
       diffSchemaVersionId: string | null;
       github: null | {
@@ -460,13 +462,18 @@ export class SchemaManager {
   ) {
     this.logger.info(
       'Creating a new version (input=%o)',
-      lodash.omit(input, [
-        'schema',
-        'actionFn',
-        'changes',
-        'compositeSchemaSDL',
-        'supergraphSDL',
-        'schemaCompositionErrors',
+      lodash.pick(input, [
+        'commit',
+        'author',
+        'valid',
+        'service',
+        'logIds',
+        'url',
+        'projectType',
+        'previousSchemaVersion',
+        'diffSchemaVersionId',
+        'github',
+        'conditionalBreakingChangeMetadata',
       ]),
     );
 

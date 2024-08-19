@@ -62,6 +62,9 @@ export class ArtifactStorageWriter {
         // This boolean makes Google Cloud Storage & AWS happy.
         signQuery: true,
       },
+      // Add a timeout to prevent hanging the request.
+      // Should be more than enough to write an artifact.
+      timeout: 10_000,
     });
 
     if (result.status !== 200) {
@@ -95,6 +98,9 @@ export class ArtifactStorageWriter {
         // This boolean makes Google Cloud Storage & AWS happy.
         signQuery: true,
       },
+      // Add a timeout to prevent hanging the request.
+      // Should be more than enough to delete an artifact.
+      timeout: 5_000,
     });
 
     if (result.status !== 204) {

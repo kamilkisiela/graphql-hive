@@ -170,6 +170,12 @@ export interface ContourValues {
       maxHeapBytes?: string;
       [k: string]: unknown;
     };
+    pdb?: {
+      create?: boolean;
+      maxUnavailable?: string;
+      minAvailable?: string;
+      [k: string]: unknown;
+    };
     podAffinityPreset?: string;
     podAnnotations?: {
       [k: string]: unknown;
@@ -355,7 +361,7 @@ export interface ContourValues {
     pdb?: {
       create?: boolean;
       maxUnavailable?: string;
-      minAvailable?: number;
+      minAvailable?: string;
       [k: string]: unknown;
     };
     podAffinityPreset?: string;
@@ -574,6 +580,12 @@ export interface ContourValues {
     nodeSelector?: {
       [k: string]: unknown;
     };
+    pdb?: {
+      create?: boolean;
+      maxUnavailable?: string;
+      minAvailable?: string;
+      [k: string]: unknown;
+    };
     podAffinityPreset?: string;
     podAnnotations?: {
       [k: string]: unknown;
@@ -700,6 +712,9 @@ export interface ContourValues {
       };
       enabled?: boolean;
       extraArgs?: unknown[];
+      lifecycleHooks?: {
+        [k: string]: unknown;
+      };
       livenessProbe?: {
         enabled?: boolean;
         failureThreshold?: number;

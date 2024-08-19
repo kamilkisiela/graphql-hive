@@ -48,6 +48,16 @@ export default class ArtifactsFetch extends Command<typeof ArtifactsFetch> {
       retry: {
         retries: 3,
       },
+      logger: {
+        info: (...args) => {
+          if (this.flags.debug) {
+            console.info(...args);
+          }
+        },
+        error: (...args) => {
+          console.error(...args);
+        },
+      },
     });
 
     if (response.status >= 300) {

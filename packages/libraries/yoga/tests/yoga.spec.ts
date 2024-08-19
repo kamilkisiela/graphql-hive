@@ -99,7 +99,7 @@ test('should not interrupt the process', async () => {
       },
     }),
   );
-  await waitFor(100);
+  await waitFor(50);
 
   const reportingLogs = logger
     .getLogs()
@@ -123,7 +123,7 @@ test('should not interrupt the process', async () => {
 }, 1_000);
 
 test('should capture client name and version headers', async () => {
-  const fetchSpy = vi.fn<[RequestInfo | URL, options: RequestInit | undefined]>(async () =>
+  const fetchSpy = vi.fn(async (_input: string | URL | globalThis.Request, _init?: RequestInit) =>
     Response.json({}, { status: 200 }),
   );
   const clean = handleProcess();
@@ -179,6 +179,114 @@ test('should capture client name and version headers', async () => {
       body: expect.stringContaining('"client":{"name":"vitest","version":"1.0.0"}'),
     }),
   );
+}, 1_000);
+
+test('send usage reports in intervals', async () => {
+  const fetchSpy = vi.fn(async (_input: string | URL | globalThis.Request, _init?: RequestInit) =>
+    Response.json({}, { status: 200 }),
+  );
+  const clean = handleProcess();
+  const hive = createHive({
+    enabled: true,
+    debug: false,
+    token: 'my-token',
+    agent: {
+      maxRetries: 0,
+      sendInterval: 10,
+      timeout: 50,
+      __testing: {
+        fetch: fetchSpy,
+      },
+    },
+    reporting: false,
+    usage: {
+      endpoint: 'http://yoga.localhost:4200/usage',
+    },
+  });
+
+  const yoga = createYoga({
+    schema: createSchema({
+      typeDefs,
+      resolvers,
+    }),
+    plugins: [useHive(hive)],
+    logging: false,
+  });
+
+  await yoga.fetch(`http://localhost/graphql`, {
+    method: 'POST',
+    body: JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    headers: {
+      'content-type': 'application/json',
+      'x-graphql-client-name': 'vitest',
+      'x-graphql-client-version': '1.0.0',
+    },
+  });
+
+  await waitFor(50);
+
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://yoga.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"1.0.0"}'),
+    }),
+  );
+
+  await yoga.fetch(`http://localhost/graphql`, {
+    method: 'POST',
+    body: JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    headers: {
+      'content-type': 'application/json',
+      'x-graphql-client-name': 'vitest',
+      'x-graphql-client-version': '2.0.0',
+    },
+  });
+
+  await waitFor(50);
+
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://yoga.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"2.0.0"}'),
+    }),
+  );
+
+  await yoga.fetch(`http://localhost/graphql`, {
+    method: 'POST',
+    body: JSON.stringify({
+      query: /* GraphQL */ `
+        {
+          hello
+        }
+      `,
+    }),
+    headers: {
+      'content-type': 'application/json',
+      'x-graphql-client-name': 'vitest',
+      'x-graphql-client-version': '3.0.0',
+    },
+  });
+
+  await hive.dispose();
+  expect(fetchSpy).toHaveBeenCalledWith(
+    'http://yoga.localhost:4200/usage',
+    expect.objectContaining({
+      body: expect.stringContaining('"client":{"name":"vitest","version":"3.0.0"}'),
+    }),
+  );
+  clean();
 }, 1_000);
 
 test('reports usage', async ({ expect }) => {

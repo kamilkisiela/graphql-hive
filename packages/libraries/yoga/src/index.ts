@@ -12,7 +12,13 @@ import {
 } from '@graphql-hive/core';
 import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 
-export { atLeastOnceSampler, createSchemaFetcher, createServicesFetcher } from '@graphql-hive/core';
+export {
+  atLeastOnceSampler,
+  createSchemaFetcher,
+  createServicesFetcher,
+  createSupergraphSDLFetcher,
+} from '@graphql-hive/core';
+export type { SupergraphSDLFetcherOptions } from '@graphql-hive/core';
 
 type CacheRecord = {
   callback: CollectUsageCallback;
