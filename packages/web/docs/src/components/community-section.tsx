@@ -88,6 +88,8 @@ export function CommunitySection({ className }: { className?: string }) {
           <OutreachCombomark />
         </div>
       </footer>
+      {/* workaround for https://github.com/francoismassart/eslint-plugin-tailwindcss/issues/291 */}
+      <div className="mask-image-none hidden" />
     </section>
   );
 }
