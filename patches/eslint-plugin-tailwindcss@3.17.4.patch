@@ -11,3 +11,15 @@ index 97216be99de4137d492928fde5b4ae0b7981c8ab..8d5f76cc5c70508f7688642335edb4ec
          // No match found
          context.report({
            node,
+diff --git a/lib/util/customConfig.js b/lib/util/customConfig.js
+index 1ab15994a1e236b11fe8f3fd03404cea32c7099c..266469644e3a185ea29f8cfa21f6a5fafa79f014 100644
+--- a/lib/util/customConfig.js
++++ b/lib/util/customConfig.js
+@@ -83,6 +83,7 @@ function convertConfigToString(config) {
+ 
+ function resolve(twConfig) {
+   const newConfig = convertConfigToString(twConfig) !== convertConfigToString(previousConfig);
++  console.log('>> resolve', { newConfig, twConfig })
+   const now = Date.now();
+   const expired = now - lastCheck > CHECK_REFRESH_RATE;
+   if (newConfig || expired) {
