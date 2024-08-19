@@ -2,7 +2,7 @@ const config = require('@theguild/tailwind-config');
 const plugin = require('tailwindcss/plugin');
 const { fontFamily } = require('tailwindcss/defaultTheme');
 
-console.log('loaded eslint config', __filename);
+console.log('loaded tailwind config', __filename);
 
 module.exports = {
   ...config,
