@@ -117,11 +117,11 @@ export class AwsClient {
     delete signed.aws;
 
     try {
-      return new Request(signed.url.toString(), signed);
+      return [signed.url.toString(), signed] as const;
     } catch (e) {
       if (e instanceof TypeError) {
         // https://bugs.chromium.org/p/chromium/issues/detail?id=1360943
-        return new Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed));
+        return [signed.url.toString(), Object.assign({ duplex: 'half' }, signed)] as const;
       }
       throw e;
     }
@@ -129,7 +129,7 @@ export class AwsClient {
 
   async fetch(input: RequestInfo, init: AwsRequestInit): Promise<Response> {
     for (let i = 0; i <= this.retries; i++) {
-      const fetched = this._fetch(await this.sign(input, init));
+      const fetched = this._fetch(...(await this.sign(input, init)));
       if (i === this.retries) {
         return fetched; // No need to await if we're returning anyway
       }
