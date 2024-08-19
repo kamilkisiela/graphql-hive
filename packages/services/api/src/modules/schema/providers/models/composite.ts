@@ -441,31 +441,47 @@ export class CompositeModel {
       };
     }
 
-    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
-      orchestrator,
-      version: schemaVersionToCompareAgainst,
-      organization,
-      project,
-      targetId: target.id,
-    });
+    const [previousVersionSdl, previousComposableVersionSdl] = await Promise.all([
+      this.checks.retrievePreviousVersionSdl({
+        orchestrator,
+        version: schemaVersionToCompareAgainst,
+        organization,
+        project,
+        targetId: target.id,
+      }),
+      latestComposable
+        ? this.checks.retrievePreviousVersionSdl({
+            orchestrator,
+            version: latestComposable,
+            organization,
+            project,
+            targetId: target.id,
+          })
+        : null,
+    ]);
 
-    const diffCheck = await this.checks.diff({
-      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
-      includeUrlChanges: {
-        schemasBefore: schemaVersionToCompareAgainst?.schemas ?? [],
-        schemasAfter: schemas,
-      },
-      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
-      approvedChanges: null,
-      existingSdl: previousVersionSdl,
-      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
-    });
-
-    const contractChecks = await this.getContractChecks({
-      contracts,
-      compositionCheck,
-      conditionalBreakingChangeDiffConfig,
-    });
+    const [diffCheck, coordinatesDiff, contractChecks] = await Promise.all([
+      this.checks.diff({
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+        includeUrlChanges: {
+          schemasBefore: schemaVersionToCompareAgainst?.schemas ?? [],
+          schemasAfter: schemas,
+        },
+        filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+        approvedChanges: null,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
+      this.checks.coordinatesDiff({
+        existingComposableSchema: previousComposableVersionSdl,
+        incomingComposableSchema: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
+      this.getContractChecks({
+        contracts,
+        compositionCheck,
+        conditionalBreakingChangeDiffConfig,
+      }),
+    ]);
 
     const messages: string[] = [];
 
@@ -483,11 +499,7 @@ export class CompositeModel {
         composable: compositionCheck.status === 'completed',
         initial: latestVersion === null,
         changes: diffCheck.result?.all ?? diffCheck.reason?.all ?? null,
-        coordinatesDiff:
-          diffCheck.result?.coordinatesDiff ??
-          diffCheck.reason?.coordinatesDiff ??
-          diffCheck.data?.coordinatesDiff ??
-          null,
+        coordinatesDiff,
         messages,
         breakingChanges: null,
         compositionErrors: compositionCheck.reason?.errors ?? null,
@@ -606,31 +618,47 @@ export class CompositeModel {
         })) ?? null,
     });
 
-    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
-      orchestrator,
-      version: compareToLatestComposable ? latestComposable : latest,
-      organization,
-      project,
-      targetId: selector.target,
-    });
+    const [previousVersionSdl, previousComposableVersionSdl] = await Promise.all([
+      this.checks.retrievePreviousVersionSdl({
+        orchestrator,
+        version: compareToLatestComposable ? latestComposable : latest,
+        organization,
+        project,
+        targetId: selector.target,
+      }),
+      latestComposable
+        ? this.checks.retrievePreviousVersionSdl({
+            orchestrator,
+            version: latestComposable,
+            organization,
+            project,
+            targetId: selector.target,
+          })
+        : null,
+    ]);
 
-    const diffCheck = await this.checks.diff({
-      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
-      includeUrlChanges: {
-        schemasBefore: latestVersion.schemas,
-        schemasAfter: schemas,
-      },
-      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
-      approvedChanges: null,
-      existingSdl: previousVersionSdl,
-      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
-    });
-
-    const contractChecks = await this.getContractChecks({
-      contracts,
-      compositionCheck,
-      conditionalBreakingChangeDiffConfig,
-    });
+    const [diffCheck, coordinatesDiff, contractChecks] = await Promise.all([
+      this.checks.diff({
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+        includeUrlChanges: {
+          schemasBefore: latestVersion.schemas,
+          schemasAfter: schemas,
+        },
+        filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+        approvedChanges: null,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
+      this.checks.coordinatesDiff({
+        existingComposableSchema: previousComposableVersionSdl,
+        incomingComposableSchema: compositionCheck.result?.fullSchemaSdl ?? null,
+      }),
+      this.getContractChecks({
+        contracts,
+        compositionCheck,
+        conditionalBreakingChangeDiffConfig,
+      }),
+    ]);
 
     if (
       compositionCheck.status === 'failed' &&
@@ -693,11 +721,7 @@ export class CompositeModel {
         ...composablePartial,
         changes,
         breakingChanges,
-        coordinatesDiff:
-          diffCheck.result?.coordinatesDiff ??
-          diffCheck.reason?.coordinatesDiff ??
-          diffCheck.data?.coordinatesDiff ??
-          null,
+        coordinatesDiff,
         compositionErrors: compositionCheck.reason?.errors ?? [],
         supergraph: compositionCheck.result?.supergraph ?? null,
         tags: compositionCheck.result?.tags ?? null,

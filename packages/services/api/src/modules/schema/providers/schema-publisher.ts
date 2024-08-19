@@ -1651,6 +1651,35 @@ export class SchemaPublisher {
     const comparedSchemaVersion = compareToPreviousComposableVersion
       ? latestComposableSchemaVersion
       : latestSchemaVersion;
+
+    if (latestSchemaVersion) {
+      this.logger.debug(
+        `Latest schema (version=${latestSchemaVersion?.id}/${latestVersion?.version}, composable=${latestSchemaVersion?.isComposable})`,
+      );
+    }
+
+    if (latestComposableSchemaVersion) {
+      this.logger.debug(
+        `Latest composable schema (version=${latestComposableSchemaVersion.id}/${latestComposable?.version}, composable=${latestComposableSchemaVersion.isComposable})`,
+      );
+    }
+
+    if (comparedSchemaVersion) {
+      this.logger.debug(
+        `Got a schema version to compare against (version=${comparedSchemaVersion.id}, composable=${comparedSchemaVersion.isComposable})`,
+      );
+    }
+
+    if (latestVersion?.version !== latestSchemaVersion?.id) {
+      throw new Error('Both latestVersion and latestSchemaVersion should be of the same version');
+    }
+
+    if (latestComposable?.version !== latestComposableSchemaVersion?.id) {
+      throw new Error(
+        'Both latestComposable and latestComposableSchemaVersion should be of the same version',
+      );
+    }
+
     const schemaVersionContracts = comparedSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
           schemaVersionId: comparedSchemaVersion.id,
@@ -1956,6 +1985,8 @@ export class SchemaPublisher {
             tags: null,
           }),
     });
+
+    this.logger.debug('Schema version created (version=%s)', schemaVersion.id);
 
     if (changes.length > 0 || errors.length > 0) {
       void this.alertsManager

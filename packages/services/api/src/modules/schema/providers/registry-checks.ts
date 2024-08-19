@@ -135,7 +135,6 @@ type SchemaDiffFailure = {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
     all: Array<SchemaChangeType> | null;
-    coordinatesDiff: SchemaCoordinatesDiffResult | null;
   };
   result?: never;
 };
@@ -146,7 +145,6 @@ export type SchemaDiffSuccess = {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
     all: Array<SchemaChangeType> | null;
-    coordinatesDiff: SchemaCoordinatesDiffResult | null;
   };
   reason?: never;
 };
@@ -394,6 +392,46 @@ export class RegistryChecks {
   }
 
   /**
+   * Diff incoming and existing SDL (both composable) and generate a list of changes in coordinates.
+   *
+   * TODO: once we migrate everyone to a model where targets are always compared against latest composable version, we can remove this method
+   *       and move it to the diff method.
+   */
+  async coordinatesDiff(args: {
+    existingComposableSchema: string | null;
+    incomingComposableSchema: string | null;
+  }) {
+    if (args.incomingComposableSchema === null) {
+      this.logger.debug('No incoming schema. Skip coordinates diff.');
+      return null;
+    }
+
+    let existingComposableSchema: GraphQLSchema | null = null;
+    let incomingComposableSchema: GraphQLSchema | null = null;
+
+    try {
+      existingComposableSchema = args.existingComposableSchema
+        ? buildSortedSchemaFromSchemaObject(
+            this.helper.createSchemaObject({
+              sdl: args.existingComposableSchema,
+            }),
+          )
+        : null;
+
+      incomingComposableSchema = buildSortedSchemaFromSchemaObject(
+        this.helper.createSchemaObject({
+          sdl: args.incomingComposableSchema,
+        }),
+      );
+    } catch (error) {
+      this.logger.error('Failed to build schema for diff. Skip diff check.', error);
+      return null;
+    }
+
+    return diffSchemaCoordinates(existingComposableSchema, incomingComposableSchema);
+  }
+
+  /**
    * Diff incoming and existing SDL and generate a list of changes.
    * Uses usage stats to determine whether a change is safe or not (if available).
    */
@@ -435,7 +473,7 @@ export class RegistryChecks {
           )
         : null;
     } catch (error) {
-      this.logger.error('Failed to build schema for diff. Skip diff check.');
+      this.logger.error('Failed to build schema for diff. Skip diff check.', error);
       return {
         status: 'skipped',
       } satisfies CheckResult;
@@ -445,9 +483,6 @@ export class RegistryChecks {
       this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
       return {
         status: 'skipped',
-        data: {
-          coordinatesDiff: incomingSchema ? diffSchemaCoordinates(null, incomingSchema) : null,
-        },
       } satisfies CheckResult;
     }
 
@@ -521,8 +556,6 @@ export class RegistryChecks {
     const safeChanges: Array<SchemaChangeType> = [];
     const breakingChanges: Array<SchemaChangeType> = [];
 
-    const coordinatesDiff = diffSchemaCoordinates(existingSchema, incomingSchema);
-
     for (const change of inspectorChanges) {
       if (change.criticality === CriticalityLevel.Breaking) {
         if (change.isSafeBasedOnUsage === true) {
@@ -561,7 +594,6 @@ export class RegistryChecks {
             }
             return null;
           },
-          coordinatesDiff,
         },
       } satisfies SchemaDiffFailure;
     }
@@ -581,7 +613,6 @@ export class RegistryChecks {
           }
           return null;
         },
-        coordinatesDiff,
       },
     } satisfies SchemaDiffSuccess;
   }
