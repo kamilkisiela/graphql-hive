@@ -1,6 +1,6 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 import cookies from 'js-cookie';
-import { LifeBuoyIcon } from 'lucide-react';
+import { LifeBuoyIcon, LoaderCircleIcon } from 'lucide-react';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
 import { useMutation, useQuery } from 'urql';
@@ -436,23 +436,40 @@ export function UserSettingsModal({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement {
-  const [meQuery] = useQuery({ query: UserSettings_MeQuery, pause: !isOpen });
+  const [meQuery] = useQuery({
+    query: UserSettings_MeQuery,
+    pause: !isOpen,
+  });
   const [, mutate] = useMutation(UpdateMeMutation);
   const { toast } = useToast();
-  const me = meQuery.data?.me;
 
   const form = useForm<UserSettingsModalFormValues>({
-    mode: 'onChange',
+    mode: 'all',
     resolver: zodResolver(userSettingsModalFormSchema),
     defaultValues: {
-      fullName: me?.fullName ?? '',
-      displayName: me?.displayName ?? '',
+      fullName: '',
+      displayName: '',
     },
   });
 
+  useEffect(() => {
+    if (meQuery.data?.me) {
+      form.reset({
+        fullName: meQuery.data.me.fullName || '',
+        displayName: meQuery.data.me.displayName || '',
+      });
+    }
+  }, [meQuery.data, form]);
+
   async function onSubmit(values: UserSettingsModalFormValues) {
     const { data } = await mutate({ input: values });
-    if (data?.updateMe.ok) {
+    if (data?.updateMe.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: data.updateMe.error.message,
+      });
+    } else if (data?.updateMe.ok) {
       toggleModalOpen();
       toast({
         variant: 'default',
@@ -460,45 +477,45 @@ export function UserSettingsModal({
         description: 'Your profile has been updated successfully',
       });
     }
-    if (data?.updateMe.error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: data.updateMe.error.message,
-      });
-    }
   }
 
   return (
     <UserSettingsModalContent
-      close={toggleModalOpen}
+      toggleModalOpen={toggleModalOpen}
       form={form}
       isOpen={isOpen}
       onSubmit={onSubmit}
+      fetching={meQuery.fetching}
     />
   );
 }
 
 export function UserSettingsModalContent(props: {
   isOpen: boolean;
-  close: () => void;
+  toggleModalOpen: () => void;
   form: UseFormReturn<UserSettingsModalFormValues>;
   onSubmit: (values: UserSettingsModalFormValues) => void;
+  fetching?: boolean;
 }) {
   return (
-    <Dialog open={props.isOpen} onOpenChange={props.close}>
+    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container w-4/5 max-w-[400px] md:w-3/5">
         <Form {...props.form}>
           <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
             <DialogHeader>
               <DialogTitle>Profile settings</DialogTitle>
+              <DialogDescription>Update your profile information.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-8">
-              <FormField
-                control={props.form.control}
-                name="fullName"
-                render={({ field }) => {
-                  return (
+            {props.fetching ? (
+              <div className="flex justify-center">
+                <LoaderCircleIcon className="mr-2 inline size-4 animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-8">
+                <FormField
+                  control={props.form.control}
+                  name="fullName"
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
@@ -506,14 +523,12 @@ export function UserSettingsModalContent(props: {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  );
-                }}
-              />
-              <FormField
-                control={props.form.control}
-                name="displayName"
-                render={({ field }) => {
-                  return (
+                  )}
+                />
+                <FormField
+                  control={props.form.control}
+                  name="displayName"
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Display Name</FormLabel>
                       <FormControl>
@@ -521,18 +536,23 @@ export function UserSettingsModalContent(props: {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  );
-                }}
-              />
-            </div>
+                  )}
+                />
+              </div>
+            )}
             <DialogFooter>
               <Button
                 type="submit"
                 size="lg"
                 className="w-full justify-center"
                 variant="primary"
+                disabled={
+                  props.form.formState.isSubmitting ||
+                  !props.form.formState.isValid ||
+                  props.fetching ||
+                  !props.form.formState.isDirty
+                }
                 data-cy="confirm"
-                disabled={props.form.formState.isSubmitting || !props.form.formState.isDirty}
               >
                 Save Changes
               </Button>
