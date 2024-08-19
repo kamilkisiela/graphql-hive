@@ -1353,8 +1353,8 @@ importers:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       slonik-interceptor-query-logging:
-        specifier: 45.6.0
-        version: 45.6.0(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i))
+        specifier: 46.0.1
+        version: 46.0.1(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i))
       slonik-utilities:
         specifier: 1.9.4
         version: 1.9.4(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i))
@@ -15292,8 +15292,8 @@ packages:
   slick@1.12.2:
     resolution: {integrity: sha512-4qdtOGcBjral6YIBCWJ0ljFSKNLz9KkhbWtuGvUyRowl1kxfuE1x/Z/aJcaiilpb3do9bl5K7/1h9XC5wWpY/A==}
 
-  slonik-interceptor-query-logging@45.6.0:
-    resolution: {integrity: sha512-52kA1es5THQFIBYnNJshYUlckO9WxCWbRJNjQM1WC8QdR4L+qwbZNb5HX4YMAscQhp9o+JrymNFjf3MpNlOgGw==}
+  slonik-interceptor-query-logging@46.0.1:
+    resolution: {integrity: sha512-I46PmLLzHn/Tq40y/AlDvs35kTnK2eIyqphJ2wu4Ylc9TmLKWmNX8+XFE/H6ssgl41lWaMVYKmT9i8RFf3PFTA==}
     engines: {node: '>=18'}
     peerDependencies:
       slonik: '>=45.0.0'
@@ -34260,7 +34260,7 @@ snapshots:
 
   slick@1.12.2: {}
 
-  slonik-interceptor-query-logging@45.6.0(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)):
+  slonik-interceptor-query-logging@46.0.1(slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)):
     dependencies:
       crack-json: 1.3.0
       pretty-ms: 7.0.1
