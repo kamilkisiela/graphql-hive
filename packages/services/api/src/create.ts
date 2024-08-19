@@ -1,5 +1,6 @@
 import { createApplication, Scope } from 'graphql-modules';
 import { Redis } from 'ioredis';
+import { Agent as UndiciAgent, fetch as undiciFetch } from 'undici';
 import { AwsClient } from '@hive/cdn-script/aws';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
@@ -150,12 +151,24 @@ export function createRegistry({
   organizationOIDC: boolean;
   pubSub: HivePubSub;
 }) {
+  const agent = new UndiciAgent({
+    connectTimeout: 5_000,
+    headersTimeout: 10_000,
+    bodyTimeout: 10_000,
+  });
+
   const s3Config: S3Config = {
     client: new AwsClient({
       accessKeyId: s3.accessKeyId,
       secretAccessKey: s3.secretAccessKeyId,
       sessionToken: s3.sessionToken,
       service: 's3',
+      fetch: (input, init) => {
+        return undiciFetch(input as any, {
+          ...(init ? (init as any) : {}),
+          agent,
+        }) as ReturnType<typeof fetch>;
+      },
     }),
     bucket: s3.bucketName,
     endpoint: s3.endpoint,
