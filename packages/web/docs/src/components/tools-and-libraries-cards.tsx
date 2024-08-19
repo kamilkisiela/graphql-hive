@@ -1,6 +1,7 @@
 import { CodegenIcon, HiveIcon, MeshIcon, YogaIcon } from '@theguild/components';
 import { PRODUCTS } from '@theguild/components/products';
 import { cn } from '../lib';
+import { ArrowIcon } from './arrow-icon';
 import { CallToAction } from './call-to-action';
 import { HighlightDecoration } from './decorations';
 import { Heading } from './heading';
@@ -27,18 +28,19 @@ function MainCards() {
   const icons = [HiveIcon, YogaIcon, MeshIcon, CodegenIcon];
 
   return (
-    <ul className="flex flex-row gap-[22px] overflow-hidden">
+    <ul className="flex grid-cols-4 flex-row gap-[22px] overflow-auto lg:grid">
       {products.map((product, i) => {
         const Icon = icons[i];
         const Decoration = cardDecorations[product.name];
         return (
           <li
             key={product.name}
-            className="text-green-1000 first-of-type:bg-green-1000 group relative w-[283.5px] rounded-2xl bg-blue-400 p-8 first-of-type:text-white"
+            className="text-green-1000 first-of-type:bg-green-1000 group relative shrink-0 overflow-hidden rounded-2xl bg-blue-400 first-of-type:text-white"
           >
-            <a href={product.href}>
+            <a className="relative block w-[283.5px] p-8" href={product.href}>
               {product.name}
               <Icon className="mt-8" />
+              <ArrowIcon className="absolute bottom-8 right-8" />
             </a>
             <Decoration
               className="pointer-events-none absolute bottom-0 right-0 fill-blue-200 stroke-[0.5px] opacity-0 transition-opacity duration-500 group-first-of-type:fill-blue-700 group-hover:opacity-100"
@@ -52,8 +54,45 @@ function MainCards() {
   );
 }
 
+const secondaryProducts = [
+  PRODUCTS.INSPECTOR,
+  PRODUCTS.ENVELOP,
+  PRODUCTS.SOFA,
+  PRODUCTS.SCALARS,
+  PRODUCTS.ESLINT,
+  PRODUCTS.NEXTRA,
+];
+const logos = {
+  [PRODUCTS.ESLINT.name]: 'ESL',
+  [PRODUCTS.NEXTRA.name]: <PRODUCTS.NEXTRA.logo className="w-8" />,
+};
+
 function SecondaryCards() {
-  return <ul>{}</ul>;
+  return (
+    <ul className="flex h-max grid-cols-6 flex-row gap-[22px] overflow-x-auto overflow-y-hidden sm:grid sm:grid-cols-2 lg:grid-cols-3">
+      {secondaryProducts.map(product => {
+        return (
+          <li
+            key={product.name}
+            className="text-green-1000 bg-beige-200 hover:bg-beige-400 shrink-0 basis-[283.5px] rounded-2xl transition-colors duration-500"
+          >
+            <a href={product.href} className="relative flex h-full flex-col p-8">
+              <p>{product.name}</p>
+              <p className="mt-2 text-sm text-green-800">{product.title}</p>
+              <div className="h-8 grow" />
+              <div
+                role="presentation"
+                className="bg-green-1000 flex size-8 items-center justify-center rounded text-sm font-medium leading-5 text-white"
+              >
+                {logos[product.name] ?? product.name.slice(0, 1)}
+              </div>
+              <ArrowIcon className="absolute bottom-8 right-8" />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 const cardDecorations = {
