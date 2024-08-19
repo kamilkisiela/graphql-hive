@@ -3,6 +3,7 @@
 const guildConfig = require('@theguild/eslint-config/base');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
+const path = require('path');
 
 const SCHEMA_PATH = './packages/services/api/src/modules/*/module.graphql.ts';
 const OPERATIONS_PATHS = [
@@ -198,9 +199,25 @@ module.exports = {
       settings: {
         tailwindcss: {
           callees: tailwindCallees,
+<<<<<<< HEAD
           config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none'],
           cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/dist/style.css'],
+||||||| parent of d3f34cbc7 (Use path.join for Tailwind configs)
+    // {
+    //   files: ['packages/web/app/**'],
+    //   settings: {
+    //     tailwindcss: {
+    //       callees: tailwindCallees,
+    //       config: 'packages/web/app/tailwind.config.cjs',
+    //       whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
+    //     },
+    //   },
+    // },
+=======
+          config: path.join(__dirname, './packages/web/app/tailwind.config.cjs'),
+          whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
+>>>>>>> d3f34cbc7 (Use path.join for Tailwind configs)
         },
       },
     },
@@ -219,7 +236,7 @@ module.exports = {
         },
         tailwindcss: {
           callees: tailwindCallees,
-          config: 'packages/web/docs/tailwind.config.cjs',
+          config: path.join(__dirname, './packages/web/docs/tailwind.config.cjs'),
         },
       },
     },
