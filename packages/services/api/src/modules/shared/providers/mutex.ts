@@ -101,7 +101,7 @@ export class Mutex {
               'abort',
               event => {
                 // TODO: how to bubble this to the caller? the lock is basically released at this point
-                this.logger.error('Lock auto-extension failed (id=%s, event=%s)', id, event);
+                this.logger.error('Lock auto-extension failed (id=%s, event=%o)', id, event);
               },
               { once: true },
             );
