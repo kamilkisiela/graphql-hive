@@ -66,8 +66,8 @@ export function CommunitySection({ className }: { className?: string }) {
         </CommunityCard>
       </div>
       <MaskingScrollview
-        outerClassName="max-sm:-mx-4 max-sm:px-4"
-        className="max-sm:!mask-image-none relative -m-4 flex flex-row gap-6 p-4 max-sm:overflow-x-auto sm:grid sm:h-[600px] sm:grid-cols-2 sm:overflow-y-auto lg:grid-cols-4"
+        outerClassName="max-sm:-mx-4 max-sm:px-4 max-sm:!mask-image-none"
+        className="relative -m-4 flex flex-row gap-6 p-4 max-sm:overflow-x-auto sm:grid sm:h-[600px] sm:grid-cols-2 sm:overflow-y-auto lg:grid-cols-4"
         fade="y"
       >
         {Array.from({ length: 4 }).map((_, i) => (
