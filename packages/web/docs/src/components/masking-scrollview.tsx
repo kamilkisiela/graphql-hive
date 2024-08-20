@@ -1,12 +1,7 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 
-export type MaskingScrollviewFade = {
-  y?: boolean;
-  x?: boolean;
-};
-
 export interface MaskingScrollviewProps {
-  fade: MaskingScrollviewFade;
+  fade: 'x' | 'y';
   children: React.ReactNode;
   className?: string;
   outerClassName?: string;
@@ -28,34 +23,20 @@ export function MaskingScrollview({
       className={outerClassName}
       style={{
         // replace "mask" with "background" to debug it
-        maskImage: [
-          fade.x
+        maskImage:
+          fade === 'x'
             ? `linear-gradient(to left, transparent, black 128px 25%, black 50%, transparent 50%),
                linear-gradient(to right, transparent, black 128px 25%, black 50%, transparent 50%)`
-            : '',
-          fade.y
-            ? `linear-gradient(to bottom, transparent, black 128px 25%, black 50%, transparent 50%),
-               linear-gradient(to top, transparent, black 128px 25%, black 50%, transparent 50%)`
-            : '',
-        ]
-          .filter(Boolean)
-          .join(', '),
-        maskSize: [
-          fade.x ? 'calc(100% + 128px) 100%, calc(100% + 128px) 100%' : '',
-          fade.y ? '100% calc(100% + 128px), 100% calc(100% + 128px)' : '',
-        ]
-          .filter(Boolean)
-          .join(', '),
-        maskPosition: [
-          fade.x
+            : `linear-gradient(to bottom, transparent, black 128px 25%, black 50%, transparent 50%),
+               linear-gradient(to top, transparent, black 128px 25%, black 50%, transparent 50%)`,
+        maskSize:
+          fade === 'x'
+            ? 'calc(100% + 128px) 100%, calc(100% + 128px) 100%'
+            : '100% calc(100% + 128px), 100% calc(100% + 128px)',
+        maskPosition:
+          fade === 'x'
             ? `${scrolledSides.right ? '0px' : '-128px'} 0%, ${scrolledSides.left ? '0px' : '-128px'} 0%`
-            : '',
-          fade.y
-            ? `0% ${scrolledSides.top ? '-128px' : '0px'}, 0% ${scrolledSides.bottom ? '0px' : '-128px'}`
-            : '',
-        ]
-          .filter(Boolean)
-          .join(', '),
+            : `0% ${scrolledSides.top ? '-128px' : '0px'}, 0% ${scrolledSides.bottom ? '0px' : '-128px'}`,
         transition: shouldTransition
           ? 'mask-position 0.5s ease, -webkit-mask-position 0.5s ease'
           : '',
