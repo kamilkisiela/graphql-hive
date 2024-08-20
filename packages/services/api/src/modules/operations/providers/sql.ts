@@ -6,6 +6,12 @@ type ArrayValue = {
   readonly values: readonly string[];
 };
 
+type LongArrayValue = {
+  readonly kind: 'longArray';
+  readonly dataType: string;
+  readonly values: readonly string[];
+};
+
 type JoinValue = {
   readonly kind: 'join';
   readonly separator: string;
@@ -24,11 +30,12 @@ export type SqlValue = {
 };
 
 type ValueExpression = string | SpecialValues;
-type SpecialValues = SqlValue | ArrayValue | JoinValue | RawValue;
+type SpecialValues = SqlValue | ArrayValue | LongArrayValue | JoinValue | RawValue;
 
 type SqlTaggedTemplate = {
   (template: TemplateStringsArray, ...values: ValueExpression[]): SqlValue;
   array: (values: Value, memberType: string) => ArrayValue;
+  longArray: (values: Value, memberType: string) => LongArrayValue;
   join: (values: readonly SqlValue[], separator: string) => JoinValue;
   raw: (sql: string) => RawValue;
 };
@@ -45,6 +52,10 @@ function isSqlValue(value: unknown): value is SqlValue {
 
 function isArrayValue(value: unknown): value is ArrayValue {
   return isOfKind<ArrayValue>(value, 'array');
+}
+
+function isLongArrayValue(value: unknown): value is LongArrayValue {
+  return isOfKind<LongArrayValue>(value, 'longArray');
 }
 
 function isJoinValue(value: unknown): value is JoinValue {
@@ -161,6 +172,53 @@ const createSqlQuery = (parts: readonly string[], values: readonly ValueExpressi
     } else if (isArrayValue(token)) {
       rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
       parameterValues.push(token.values);
+    } else if (isLongArrayValue(token)) {
+      // It will basically create a string like this:
+      // arrayConcat({p1: Array(String)}, {p2: Array(String)}, ...)
+      // Use a limit of characters (take the default setting of clickhouse)
+      // check if the next pushed value will exceed the limit
+      // if it does, then push the current value and start a new one
+      // if it doesn't, then append the value to the current value
+      const charactersLimit = 10_000;
+      const batches: string[][] = [];
+      let currentBatch: string[] = [];
+      batches.push(currentBatch);
+
+      let currentCharacters = 0;
+
+      for (const value of token.values) {
+        // we must assume that every added value will be wrapped with double quotes
+        // and that the join will be a comma
+        // so for every value we must add 3 characters, just in case.
+        const valueCharacters = value.length + 3;
+
+        if (currentCharacters + valueCharacters >= charactersLimit) {
+          currentBatch = [];
+          batches.push(currentBatch);
+          currentCharacters = 0;
+        }
+
+        currentBatch.push(value);
+        currentCharacters += valueCharacters;
+      }
+
+      if (batches.length === 1) {
+        rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
+        parameterValues.push(batches[0]);
+        continue;
+      }
+
+      rawSql += `arrayConcat(`;
+
+      for (let index = 0; index < batches.length; index++) {
+        if (index > 0) {
+          rawSql += ', ';
+        }
+        rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
+        parameterValues.push(batches[index]);
+      }
+
+      rawSql += ')';
     } else if (isJoinValue(token)) {
       const sqlFragment = createJoinSqlFragment(token, parameterValues.length);
       rawSql += sqlFragment.sql;
@@ -194,6 +252,14 @@ function sqlTag(rawStrings: TemplateStringsArray, ...rawValues: ValueExpression[
 sqlTag.array = (values: Value, memberType: string): ArrayValue => {
   return {
     kind: 'array',
+    dataType: memberType,
+    values: Array.isArray(values) ? values : [values],
+  };
+};
+
+sqlTag.longArray = (values: Value, memberType: string): LongArrayValue => {
+  return {
+    kind: 'longArray',
     dataType: memberType,
     values: Array.isArray(values) ? values : [values],
   };
