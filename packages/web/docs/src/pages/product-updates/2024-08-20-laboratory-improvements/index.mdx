@@ -7,6 +7,20 @@ authors: [dimitri]
 ---
 
 import fullScreenMode from './full-screen-mode.mp4'
+import newTabs from './tabs-new.mp4'
+import oldTabs from './tabs-old.mp4'
+
+export function Video({ src, alt }) {
+  return (
+    <>
+      <video autoPlay="autoplay" loop muted playsInline>
+        <source src={src} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <p className="text-center text-sm italic">{alt}</p>
+    </>
+  )
+}
 
 In recent months I have worked on improving the Hive's laboratory, its new look and its new
 features. And here is what was improved.
@@ -32,18 +46,27 @@ was moved to the end of the toolbar.
 Users with wide screens can now benefit from the fullscreen mode. The button is located in place of
 GraphiQL logo.
 
-<video autoPlay="autoplay" loop muted playsInline>
-  <source src={fullScreenMode} type="video/mp4" />
-  Your browser does not support the video tag.
-</video>
-
-<p className="text-center text-sm italic">Full screen mode demo</p>
+<Video src={fullScreenMode} alt="Full screen mode demo" />
 
 ### Tabs Support
 
 Laboratory now supports multiple tabs, you can open multiple tabs with different queries and switch
 between them as in regular GraphiQL. There is no longer requirement to mandatory save the query in
 one of the collections, you can have a draft query which will be stored in local storage.
+
+<Video src={newTabs} alt="Tabs demo" />
+
+The differences Hive's tabs from regular GraphiQL tabs is better look, I inspired by UX and UI of
+Google Chrome tabs, and we loved new look so much, so we decided
+[to change them in next major of GraphiQL as well](https://github.com/graphql/graphiql/pull/3644).
+
+Also,
+[tabs will be shown even if there is only a single tab](https://github.com/graphql/graphiql/pull/3713)
+as per Chrome tabs UX.
+
+And for comparison, below is how GraphiQL tabs look like now:
+
+<Video src={oldTabs} alt="GraphiQL tabs demo" />
 
 ## Query Builder
 
