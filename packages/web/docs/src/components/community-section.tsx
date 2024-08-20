@@ -73,7 +73,7 @@ export function CommunitySection({ className }: { className?: string }) {
       <MaskingScrollview
         outerClassName="max-sm:-mx-4 max-sm:px-4"
         className="max-sm:!mask-image-none relative -m-4 flex flex-row gap-6 p-4 max-sm:overflow-x-auto sm:grid sm:h-[600px] sm:grid-cols-2 sm:overflow-y-auto lg:grid-cols-4"
-        fade={{ y: true }}
+        fade="y"
       >
         {Array.from({ length: 4 }).map((_, i) => (
           <div className="contents flex-col gap-6 sm:flex [&>:last-child]:flex-1" key={i}>
@@ -138,6 +138,10 @@ const tempSocialPosts: SocialPost[] = Array.from({ length: 10 })
   }));
 
 function SocialPostCard({ post }: { post: SocialPost }) {
+  const isDiscordLink = post.href.startsWith('https://discordapp.com/');
+  const isGitHubLink = post.href.startsWith('https://github.com/');
+  const isTwitterLink = post.href.startsWith('https://twitter.com/');
+
   return (
     <div className="rounded-2xl bg-green-900 p-6 text-green-200 max-sm:h-[fill-available]">
       <div className="flex flex-row items-center gap-2">
@@ -146,16 +150,14 @@ function SocialPostCard({ post }: { post: SocialPost }) {
             className="absolute -left-1.5 -top-1.5 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
             href={post.href}
             style={{
-              backgroundColor: post.href.startsWith('https://discordapp.com')
-                ? '#5865F2'
-                : '#222530',
+              backgroundColor: isDiscordLink ? '#5865F2' : '#222530',
             }}
           >
-            {post.href.startsWith('https://github.com') ? (
+            {isGitHubLink ? (
               <GitHubIcon className="size-[14px]" />
-            ) : post.href.startsWith('https://discordapp.com') ? (
+            ) : isDiscordLink ? (
               <DiscordIcon className="size-[14px]" />
-            ) : post.href.startsWith('https://twitter.com') ? (
+            ) : isTwitterLink ? (
               <TwitterIcon className="size-[14px]" />
             ) : (
               <GlobeIcon className="size-[14px]" />
