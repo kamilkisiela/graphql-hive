@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import RSS from 'rss';
 import { getChangelogs } from '../../components/product-updates';
 
