@@ -206,7 +206,6 @@ export class CompositeModel {
           },
         })) ?? null,
     });
-    this.logger.info('Composition check: %o', compositionCheck);
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
