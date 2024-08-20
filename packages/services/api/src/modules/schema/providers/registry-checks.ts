@@ -39,17 +39,17 @@ export type ConditionalBreakingChangeDiffConfig = {
 // https://bit.ly/hive-check-result-data
 export type CheckResult<C = unknown, F = unknown, S = unknown> =
   | {
-      status: 'completed';
-      result: C;
-    }
+    status: 'completed';
+    result: C;
+  }
   | {
-      status: 'failed';
-      reason: F;
-    }
+    status: 'failed';
+    reason: F;
+  }
   | {
-      status: 'skipped';
-      data?: S;
-    };
+    status: 'skipped';
+    data?: S;
+  };
 
 type Schemas = [SingleSchema] | PushedCompositeSchema[];
 
@@ -169,7 +169,7 @@ export class RegistryChecks {
     private inspector: Inspector,
     private logger: Logger,
     private operationsReader: OperationsReader,
-  ) {}
+  ) { }
 
   async checksum(args: {
     incoming: {
@@ -403,11 +403,11 @@ export class RegistryChecks {
     /** The incoming SDL */
     incomingSdl: string | null;
     includeUrlChanges:
-      | false
-      | {
-          schemasBefore: [SingleSchema] | PushedCompositeSchema[];
-          schemasAfter: [SingleSchema] | PushedCompositeSchema[];
-        };
+    | false
+    | {
+      schemasBefore: [SingleSchema] | PushedCompositeSchema[];
+      schemasAfter: [SingleSchema] | PushedCompositeSchema[];
+    };
     /** Whether Federation directive related changes should be filtered out from the list of changes. These would only show up due to an internal bug. */
     filterOutFederationChanges: boolean;
     /** Lookup map of changes that are approved and thus safe. */
@@ -421,18 +421,18 @@ export class RegistryChecks {
     try {
       existingSchema = args.existingSdl
         ? buildSortedSchemaFromSchemaObject(
-            this.helper.createSchemaObject({
-              sdl: args.existingSdl,
-            }),
-          )
+          this.helper.createSchemaObject({
+            sdl: args.existingSdl,
+          }),
+        )
         : null;
 
       incomingSchema = args.incomingSdl
         ? buildSortedSchemaFromSchemaObject(
-            this.helper.createSchemaObject({
-              sdl: args.incomingSdl,
-            }),
-          )
+          this.helper.createSchemaObject({
+            sdl: args.incomingSdl,
+          }),
+        )
         : null;
     } catch (error) {
       this.logger.error('Failed to build schema for diff. Skip diff check.');
@@ -483,6 +483,8 @@ export class RegistryChecks {
             schemaCoordinate: change.breakingChangeSchemaCoordinate,
           });
 
+          this.logger.debug('Top affected clients count: %s', topAffectedClients?.length ?? 0);
+
           if (topAffectedClients) {
             const topAffectedOperations =
               await this.operationsReader.getTopOperationsForSchemaCoordinate({
@@ -493,6 +495,8 @@ export class RegistryChecks {
                 schemaCoordinate: change.breakingChangeSchemaCoordinate,
               });
 
+            this.logger.debug("Top affected operations count: %s", topAffectedOperations?.length ?? 0);
+
             if (topAffectedOperations) {
               change.usageStatistics = {
                 topAffectedOperations,
@@ -502,6 +506,7 @@ export class RegistryChecks {
           }
 
           change.isSafeBasedOnUsage = change.usageStatistics === null;
+          this.logger.debug('Change is safe based on usage: %s', change.isSafeBasedOnUsage);
         }),
       );
     } else {
@@ -639,16 +644,16 @@ export class RegistryChecks {
       result:
         existingService && service.url !== existingService.url
           ? {
-              before: existingService.url,
-              after: service.url,
-              message: service.url
-                ? `New service url: ${service.url} (previously: ${existingService.url ?? 'none'})`
-                : `Service url removed (previously: ${existingService.url ?? 'none'})`,
-              status: 'modified' as const,
-            }
+            before: existingService.url,
+            after: service.url,
+            message: service.url
+              ? `New service url: ${service.url} (previously: ${existingService.url ?? 'none'})`
+              : `Service url removed (previously: ${existingService.url ?? 'none'})`,
+            status: 'modified' as const,
+          }
           : {
-              status: 'unchanged' as const,
-            },
+            status: 'unchanged' as const,
+          },
     } satisfies CheckResult;
   }
 
@@ -666,7 +671,7 @@ export class RegistryChecks {
       const modified =
         existingService &&
         hashObject(parsed) !==
-          hashObject(existingService.metadata ? JSON.parse(existingService.metadata) : null);
+        hashObject(existingService.metadata ? JSON.parse(existingService.metadata) : null);
 
       if (modified) {
         this.logger.debug('Metadata is modified');
