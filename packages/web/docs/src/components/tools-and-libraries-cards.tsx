@@ -28,7 +28,7 @@ function MainCards() {
   const icons = [HiveIcon, YogaIcon, MeshIcon, CodegenIcon];
 
   return (
-    <ul className="flex grid-cols-4 flex-row gap-[22px] overflow-auto lg:grid">
+    <ul className="flex grid-cols-4 flex-row gap-[22px] overflow-auto max-sm:-mx-8 max-sm:px-8 lg:grid">
       {products.map((product, i) => {
         const Icon = icons[i];
         const Decoration = cardDecorations[product.name];
@@ -69,7 +69,7 @@ const logos = {
 
 function SecondaryCards() {
   return (
-    <ul className="flex h-max grid-cols-6 flex-row gap-[22px] overflow-x-auto overflow-y-hidden sm:grid sm:grid-cols-2 lg:grid-cols-3">
+    <ul className="flex h-max grid-cols-6 flex-row gap-[22px] overflow-x-auto overflow-y-hidden max-sm:-mx-8 max-sm:px-8 sm:grid sm:grid-cols-2 lg:grid-cols-3">
       {secondaryProducts.map(product => {
         return (
           <li
