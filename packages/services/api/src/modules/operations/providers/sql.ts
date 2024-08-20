@@ -175,13 +175,15 @@ const createSqlQuery = (parts: readonly string[], values: readonly ValueExpressi
     } else if (isLongArrayValue(token)) {
       // It will basically create a string like this:
       // arrayConcat({p1: Array(String)}, {p2: Array(String)}, ...)
-      rawSql += `arrayConcat(`;
       // Use a limit of characters (take the default setting of clickhouse)
       // check if the next pushed value will exceed the limit
       // if it does, then push the current value and start a new one
       // if it doesn't, then append the value to the current value
       const charactersLimit = 10_000;
-      let currentArray: string[] = [];
+      const batches: string[][] = [];
+      let currentBatch: string[] = [];
+      batches.push(currentBatch);
+
       let currentCharacters = 0;
 
       for (const value of token.values) {
@@ -191,20 +193,29 @@ const createSqlQuery = (parts: readonly string[], values: readonly ValueExpressi
         const valueCharacters = value.length + 3;
 
         if (currentCharacters + valueCharacters >= charactersLimit) {
-          rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
-          parameterValues.push(currentArray);
-
-          currentArray = [];
+          currentBatch = [];
+          batches.push(currentBatch);
           currentCharacters = 0;
         }
 
-        currentArray.push(value);
+        currentBatch.push(value);
         currentCharacters += valueCharacters;
       }
 
-      if (currentArray.length > 0) {
+      if (batches.length === 1) {
         rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
-        parameterValues.push(currentArray);
+        parameterValues.push(batches[0]);
+        continue;
+      }
+
+      rawSql += `arrayConcat(`;
+
+      for (let index = 0; index < batches.length; index++) {
+        if (index > 0) {
+          rawSql += ', ';
+        }
+        rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
+        parameterValues.push(batches[index]);
       }
 
       rawSql += ')';
