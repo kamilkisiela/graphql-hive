@@ -10,7 +10,7 @@ export function StatsItem(props: {
   decimal?: boolean;
 }) {
   return (
-    <div className="flex items-end gap-4 rounded-3xl border border-green-400 p-8 lg:flex-col lg:items-start lg:p-12">
+    <div className="flex items-end justify-between gap-4 rounded-3xl border border-green-400 p-8 lg:flex-col lg:items-start lg:p-12">
       <Heading as="div" size="xl" className="text-green-1000 text-[48px] lg:text-6xl">
         <CountUp
           start={0}
