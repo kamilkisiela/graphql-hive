@@ -11,6 +11,10 @@ import queryBuilder from './query-builder.mp4'
 import newTabs from './tabs-new.mp4'
 import oldTabs from './tabs-old.mp4'
 
+export function Caption({ children }) {
+  return <p className="text-center text-sm italic">{children}</p>
+}
+
 export function Video({ src, alt }) {
   return (
     <>
@@ -18,7 +22,7 @@ export function Video({ src, alt }) {
         <source src={src} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      <p className="text-center text-sm italic">{alt}</p>
+      <Caption>{alt}</Caption>
     </>
   )
 }
@@ -36,11 +40,11 @@ was moved to the end of the toolbar.
 
 ![Old look of Operations collections plugin](./operations-collections-plugin-old.png)
 
-<p className="text-center text-sm italic">Old look of Operations collections plugin</p>
+<Caption>Old look of Operations collections plugin</Caption>
 
 ![New look of Operations collections plugin](./operations-collections-plugin-new.png)
 
-<p className="text-center text-sm italic">New look of Operations collections plugin</p>
+<Caption>New look of Operations collections plugin</Caption>
 
 ### Full Screen Mode
 
@@ -88,7 +92,7 @@ GraphiQL, which includes a new tabs look and migration from Webpack to Vite.
 
 ![GraphiQL vite migration attempts](./graphiql-vite-prs.png)
 
-<p className="text-center text-sm italic">Vite migrations attempts</p>
+<Caption>Vite migration attempts</Caption>
 
 If you want to try GraphiQL v4 alpha, you can install it with your favourite package manager:
 
