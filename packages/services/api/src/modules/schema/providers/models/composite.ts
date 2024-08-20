@@ -14,6 +14,7 @@ import type {
   Target,
 } from './../../../../shared/entities';
 import { ProjectType } from './../../../../shared/entities';
+import { Logger } from './../../../shared/providers/logger';
 import {
   buildSchemaCheckFailureState,
   ContractCheckInput,
@@ -40,6 +41,7 @@ export class CompositeModel {
     private federationOrchestrator: FederationOrchestrator,
     private stitchingOrchestrator: StitchingOrchestrator,
     private checks: RegistryChecks,
+    private logger: Logger,
   ) {}
 
   private async getContractChecks(args: {
@@ -166,6 +168,7 @@ export class CompositeModel {
     });
 
     if (checksumCheck === 'unchanged') {
+      this.logger.info('No changes detected, skipping schema check');
       return {
         conclusion: SchemaCheckConclusion.Skip,
       };
@@ -175,6 +178,7 @@ export class CompositeModel {
       project.type === ProjectType.FEDERATION
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
+    this.logger.debug('Orchestrator: %s', orchestrator);
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
@@ -194,6 +198,7 @@ export class CompositeModel {
           },
         })) ?? null,
     });
+    this.logger.info('Composition check: %o', compositionCheck);
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
@@ -208,6 +213,7 @@ export class CompositeModel {
       compositionCheck,
       conditionalBreakingChangeDiffConfig,
     });
+    this.logger.info('Contract checks: %o', contractChecks);
 
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
@@ -225,6 +231,8 @@ export class CompositeModel {
         modifiedSdl: incoming.sdl,
       }),
     ]);
+    this.logger.info('diff check status: %o', diffCheck);
+    this.logger.info('policy check status: %o', policyCheck);
 
     if (
       compositionCheck.status === 'failed' ||
@@ -233,6 +241,7 @@ export class CompositeModel {
       // if any of the contract compositions failed, the schema check failed.
       (contractChecks?.length && contractChecks.some(check => !isContractChecksSuccessful(check)))
     ) {
+      this.logger.debug('Schema check failed');
       return {
         conclusion: SchemaCheckConclusion.Failure,
         state: buildSchemaCheckFailureState({
@@ -244,6 +253,7 @@ export class CompositeModel {
       };
     }
 
+    this.logger.debug('Schema check successful');
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
