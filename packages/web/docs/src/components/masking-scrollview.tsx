@@ -17,26 +17,30 @@ export function MaskingScrollview({
   const scrollviewRef = useRef<HTMLDivElement | null>(null);
   const { scrolledSides, shouldTransition } = useScrolledSides(scrollviewRef);
 
+  scrolledSides.bottom = false;
+
   return (
     <div
       {...rest}
       className={outerClassName}
       style={{
+        '--len': '128px',
+        '--end': 'calc(50%)',
         // replace "mask" with "background" to debug it
         maskImage:
           fade === 'x'
-            ? `linear-gradient(to left, transparent, black 128px 25%, black 50%, transparent 50%),
-               linear-gradient(to right, transparent, black 128px 25%, black 50%, transparent 50%)`
-            : `linear-gradient(to bottom, transparent, black 128px 25%, black 50%, transparent 50%),
-               linear-gradient(to top, transparent, black 128px 25%, black 50%, transparent 50%)`,
+            ? `linear-gradient(to left, transparent, black var(--len) 25%, black var(--end), transparent var(--end)),
+               linear-gradient(to right, transparent, black var(--len) 25%, black var(--end), transparent var(--end))`
+            : `linear-gradient(to bottom, transparent, black var(--len) 25%, black var(--end), transparent var(--end)),
+               linear-gradient(to top, transparent, black var(--len) 25%, black var(--end), transparent var(--end))`,
         maskSize:
           fade === 'x'
             ? 'calc(100% + 128px) 100%, calc(100% + 128px) 100%'
             : '100% calc(100% + 128px), 100% calc(100% + 128px)',
         maskPosition:
           fade === 'x'
-            ? `${scrolledSides.right ? '0px' : '-128px'} 0%, ${scrolledSides.left ? '0px' : '-128px'} 0%`
-            : `0% ${scrolledSides.top ? '-128px' : '0px'}, 0% ${scrolledSides.bottom ? '0px' : '-128px'}`,
+            ? `${scrolledSides.right ? '0px' : 'calc(-var(--len))'} 0%, ${scrolledSides.left ? '0px' : 'calc(-var(--len))'} 0%`
+            : `0% ${scrolledSides.top ? 'calc(-var(--len))' : '0px'}, 0% ${scrolledSides.bottom ? '0px' : 'calc(-var(--len))'}`,
         transition: shouldTransition
           ? 'mask-position 0.5s ease, -webkit-mask-position 0.5s ease'
           : '',
