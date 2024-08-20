@@ -1,25 +1,27 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
 import { HighlightDecoration } from './decorations';
 import { Heading } from './heading';
+import styles from './ecosystem-management.module.css';
 
 export function EcosystemManagementSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'bg-green-1000 relative overflow-hidden rounded-3xl text-white' + ' p-8 md:p-[72px]',
+        'bg-green-1000 relative overflow-hidden rounded-3xl text-white' +
+          ' p-8 pb-[160px] sm:pb-[112px] md:p-[72px] md:pb-[112px] lg:pb-[72px]',
         className,
       )}
     >
-      <div className="mx-auto flex w-[1392px] max-w-full flex-row flex-wrap gap-x-[120px] gap-y-16">
-        <div className="flex w-[488px] flex-col gap-12">
+      <div className="relative mx-auto flex w-[1392px] max-w-full flex-col gap-x-4 gap-y-6 md:gap-y-12 lg:flex-row [@media(min-width:1400px)]:gap-x-[120px]">
+        <div className="flex flex-col gap-12 lg:w-[488px]">
           <Heading as="h3" size="sm">
             360° GraphQL Ecosystem Management
           </Heading>
-          <ul className="mx-auto flex list-none flex-col gap-y-4 text-white/80 md:gap-y-6">
+          <ul className="mx-auto flex list-none flex-col gap-y-4 text-white/80 lg:gap-y-6">
             {[
               'A complete ecosystem covering all your dev and management needs.',
               'Full Federation Support out of the box. Drop-in replacement for Apollo GraphOS (Apollo Studio)',
@@ -36,7 +38,7 @@ export function EcosystemManagementSection({ className }: { className?: string }
               </li>
             ))}
           </ul>
-          <div className="flex flex-col gap-x-4 gap-y-2 md:flex-row">
+          <div className="bottom-0 flex w-full flex-col gap-x-4 gap-y-2 max-lg:absolute max-lg:translate-y-[calc(100%+24px)] sm:flex-row">
             <CallToAction
               href="https://the-guild.dev/graphql/hive/docs/use-cases/apollo-studio"
               variant="primary-inverted"
@@ -49,7 +51,7 @@ export function EcosystemManagementSection({ className }: { className?: string }
             </CallToAction>
           </div>
         </div>
-        <Illustration className="hidden md:block" />
+        <Illustration className="" />
       </div>
       <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
     </section>
@@ -64,6 +66,7 @@ const edgeTexts = [
   'Mesh delegates GraphQL requests to the corresponding Yoga subgraphs within your internal network.',
   'Check the subgraph schema against the Hive registry before deployment to ensure integrity. After deploying a new subgraph version, publish its schema to Hive, which generates the supergraph used by Mesh.',
 ];
+const longestEdgeText = edgeTexts.reduce((a, b) => (a.length > b.length ? a : b));
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
@@ -101,17 +104,14 @@ function Illustration(props: { className?: string }) {
   };
 
   return (
-    <div className={cn('relative min-h-[400px]', props.className)}>
-      <div
-        className="flex flex-row"
-        style={{
-          '--node-h': '96px',
-          '--big-node-h': '222px',
-          '--label-h': '32px',
-          '--node-w': '240px',
-          '--gap': '80px',
-        }}
-      >
+    <div
+      className={cn(
+        'relative flex min-h-[400px] flex-1 flex-col items-center',
+        props.className,
+        styles.container,
+      )}
+    >
+      <div className={'flex flex-row ' + styles.vars}>
         <Edge top bottom left highlighted={highlightedEdge === 5}>
           <div
             style={{
@@ -155,8 +155,8 @@ function Illustration(props: { className?: string }) {
             description="Decision-making engine"
             highlighted={[3, 4, 6].includes(highlightedEdge)}
           >
-            <svg width={112} height={112}>
-              <use xlinkHref="/ecosystem-management.svg#hive" />
+            <svg className="size-[var(--big-logo-size)]">
+              <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
             </svg>
           </Node>
           <Edge
@@ -216,7 +216,9 @@ function Illustration(props: { className?: string }) {
           </Edge>
           <Node
             title="Codegen"
-            description="GraphQL Code Generation"
+            description={
+              <span className="[@media(max-width:1438px)]:hidden">GraphQL Code Generation</span>
+            }
             highlighted={[2, 3].includes(highlightedEdge)}
           >
             <svg width={48} height={48} viewBox="0 0 48 48">
@@ -225,8 +227,10 @@ function Illustration(props: { className?: string }) {
           </Node>
         </div>
       </div>
-      <p className="absolute bottom-0 right-0 h-[144px] w-[250px] text-white/80">
-        {edgeTexts[highlightedEdge - 1]}
+      <p className={cn('relative text-white/80', styles.text)}>
+        {/* We use the longest text to ensure we have enough space. */}
+        <span className="invisible">{longestEdgeText}</span>
+        <span className="absolute inset-0">{edgeTexts[highlightedEdge - 1]}</span>
       </p>
     </div>
   );
@@ -276,14 +280,15 @@ function EdgeLabel(props: EdgeLabelProps) {
 
 interface NodeProps extends React.HTMLAttributes<HTMLElement> {
   title: string;
-  description?: string;
+  description?: ReactNode;
   highlighted: boolean;
 }
 function Node({ title, description, children, highlighted, className, ...rest }: NodeProps) {
   return (
     <div
       className={cn(
-        'relative z-10 flex h-[var(--node-h)] items-center gap-4 rounded-2xl p-[22px]' +
+        styles.node,
+        'relative z-10 flex h-[var(--node-h)] items-center gap-2 rounded-2xl p-4 xl:gap-4 xl:p-[22px]' +
           ' bg-[linear-gradient(135deg,rgb(255_255_255/0.10),rgb(255_255_255/0.20))]' +
           ' transition-colors duration-500 [&>svg]:flex-shrink-0',
         // todo: linear gradients don't transition, so we should add white/10 background layer'
@@ -297,7 +302,14 @@ function Node({ title, description, children, highlighted, className, ...rest }:
       <div>
         <div className="font-medium text-green-100">{title}</div>
         {description && (
-          <div className="mt-0.5 text-sm leading-5 text-green-200">{description}</div>
+          <div
+            className="mt-0.5 text-sm leading-5 text-green-200"
+            style={{
+              display: 'var(--node-desc-display)',
+            }}
+          >
+            {description}
+          </div>
         )}
       </div>
     </div>
