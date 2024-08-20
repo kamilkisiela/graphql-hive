@@ -279,17 +279,6 @@ export async function main() {
     const errorHandler = createErrorHandler('error');
     const fatalHandler = createErrorHandler('fatal');
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-||||||| parent of db36bc4d8 (Try cache-strategy)
-    // eslint-disable-next-line no-inner-declarations
-=======
-     
->>>>>>> db36bc4d8 (Try cache-strategy)
-||||||| parent of 49209922b (Format)
-     
-=======
->>>>>>> 49209922b (Format)
     function createGraphQLLogger(binds: Record<string, any> = {}): Logger {
       return {
         error: wrapLogFn(errorHandler),
