@@ -24,7 +24,9 @@ export function StatsItem(props: {
         />
         {props.suffix}
       </Heading>
-      <div className="mb-3 font-medium sm:mb-3 md:mb-2 lg:mb-0">{props.label}</div>
+      <div className="mb-3 font-medium max-md:text-right sm:mb-3 md:mb-2 lg:mb-0">
+        {props.label}
+      </div>
     </div>
   );
 }
