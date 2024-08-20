@@ -483,8 +483,6 @@ export class RegistryChecks {
             schemaCoordinate: change.breakingChangeSchemaCoordinate,
           });
 
-          this.logger.debug('Top affected clients count: %s', topAffectedClients?.length ?? 0);
-
           if (topAffectedClients) {
             const topAffectedOperations =
               await this.operationsReader.getTopOperationsForSchemaCoordinate({
@@ -495,11 +493,6 @@ export class RegistryChecks {
                 schemaCoordinate: change.breakingChangeSchemaCoordinate,
               });
 
-            this.logger.debug(
-              'Top affected operations count: %s',
-              topAffectedOperations?.length ?? 0,
-            );
-
             if (topAffectedOperations) {
               change.usageStatistics = {
                 topAffectedOperations,
@@ -509,7 +502,6 @@ export class RegistryChecks {
           }
 
           change.isSafeBasedOnUsage = change.usageStatistics === null;
-          this.logger.debug('Change is safe based on usage: %s', change.isSafeBasedOnUsage);
         }),
       );
     } else {
