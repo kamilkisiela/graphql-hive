@@ -1,8 +1,9 @@
-/* eslint-disable no-process-env */
-
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
+  nextraConfig: {
+    themeConfig: './src/theme.config.tsx',
+  },
   output: 'export',
   basePath: process.env.NEXT_BASE_PATH,
   eslint: {

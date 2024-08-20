@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { defineConfig, Footer, Giscus, PRODUCTS, useConfig, useTheme } from '@theguild/components';
-import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
+import { ProductUpdateBlogPostHeader } from './components/product-update-blog-post-header';
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
