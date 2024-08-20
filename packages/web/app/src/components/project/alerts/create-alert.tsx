@@ -113,10 +113,11 @@ export const CreateAlertModal = (props: {
       },
     });
 
-    if (result.error) {
+    const error = result.error || result.data?.addAlert.error
+    if (error) {
       toast({
         title: 'Error',
-        description: result.error.message,
+        description: error.message,
         variant: 'destructive',
       });
     } else {
@@ -126,6 +127,7 @@ export const CreateAlertModal = (props: {
         variant: 'default',
       });
       toggleModalOpen();
+      form.reset();
     }
   }
 
@@ -211,19 +213,20 @@ export function CreateAlertModalContent(props: {
                               'Select a Channel'}
                           </SelectTrigger>
                           <SelectContent className="w-[--radix-select-trigger-width]">
-                            {props.channels.length === 0 && (
+                            {props.channels.length === 0 ? (
                               <SelectItem
                                 value="No channels available - Please create a channel first"
                                 disabled
                               >
                                 No channels available - Please create a channel first
                               </SelectItem>
+                            ) : (
+                              props.channels.map(channel => (
+                                <SelectItem key={channel.id} value={channel.id}>
+                                  {channel.name}
+                                </SelectItem>
+                              ))
                             )}
-                            {props.channels.map(channel => (
-                              <SelectItem key={channel.id} value={channel.id}>
-                                {channel.name}
-                              </SelectItem>
-                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -251,19 +254,20 @@ export function CreateAlertModalContent(props: {
                               'Select a Target'}
                           </SelectTrigger>
                           <SelectContent className="w-[--radix-select-trigger-width]">
-                            {props.targets.length === 0 && (
+                            {props.targets.length === 0 ? (
                               <SelectItem
                                 value="No targets available - Please create a target first"
                                 disabled
                               >
                                 No targets available - Please create a target first
                               </SelectItem>
+                            ) : (
+                              props.targets.map(target => (
+                                <SelectItem key={target.id} value={target.id}>
+                                  {target.name}
+                                </SelectItem>
+                              ))
                             )}
-                            {props.targets.map(target => (
-                              <SelectItem key={target.id} value={target.id}>
-                                {target.name}
-                              </SelectItem>
-                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -281,6 +285,7 @@ export function CreateAlertModalContent(props: {
                 onClick={ev => {
                   ev.preventDefault();
                   props.toggleModalOpen();
+                  props.form.reset();
                 }}
               >
                 Cancel
