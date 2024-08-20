@@ -1638,8 +1638,8 @@ importers:
         specifier: 6.0.7
         version: 6.0.7(@types/node@20.16.1)(less@4.2.0)(terser@5.31.1)
       '@graphiql/plugin-explorer':
-        specifier: 4.0.0-alpha.1
-        version: 4.0.0-alpha.1(@graphiql/react@1.0.0-alpha.3(patch_hash=gnbo5nw2wgehkfq2yrmuhrx4im)(@codemirror/language@6.10.2)(@types/node@20.16.1)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.0-alpha.2
+        version: 4.0.0-alpha.2(@graphiql/react@1.0.0-alpha.3(patch_hash=gnbo5nw2wgehkfq2yrmuhrx4im)(@codemirror/language@6.10.2)(@types/node@20.16.1)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@graphiql/react':
         specifier: 1.0.0-alpha.3
         version: 1.0.0-alpha.3(patch_hash=gnbo5nw2wgehkfq2yrmuhrx4im)(@codemirror/language@6.10.2)(@types/node@20.16.1)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -4195,8 +4195,8 @@ packages:
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
       typescript: ^5.0.0
 
-  '@graphiql/plugin-explorer@4.0.0-alpha.1':
-    resolution: {integrity: sha512-Zi6EIsDTklvv3w+1Qdc1F97upo8a3SrWUS4+EfU2WZE/E+cYhU5xyc941SU3n/6z3UFQja+PESzIAaeyFOUx2A==}
+  '@graphiql/plugin-explorer@4.0.0-alpha.2':
+    resolution: {integrity: sha512-U3pAVaSX9lKUEIpOffJL0wV8S+T5be6qN/Med+p7Jmi6fCJcBsjzOreLf5bUBAaHYIaXAgMBQXCrNTL17lN4Ag==}
     peerDependencies:
       '@graphiql/react': ^1.0.0-alpha.0
       graphql: ^15.5.0 || ^16.0.0 || ^17.0.0-alpha.2
@@ -19883,7 +19883,7 @@ snapshots:
       graphql: 16.9.0
       typescript: 5.5.4
 
-  '@graphiql/plugin-explorer@4.0.0-alpha.1(@graphiql/react@1.0.0-alpha.3(patch_hash=gnbo5nw2wgehkfq2yrmuhrx4im)(@codemirror/language@6.10.2)(@types/node@20.16.1)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@graphiql/plugin-explorer@4.0.0-alpha.2(@graphiql/react@1.0.0-alpha.3(patch_hash=gnbo5nw2wgehkfq2yrmuhrx4im)(@codemirror/language@6.10.2)(@types/node@20.16.1)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@graphiql/react': 1.0.0-alpha.3(patch_hash=gnbo5nw2wgehkfq2yrmuhrx4im)(@codemirror/language@6.10.2)(@types/node@20.16.1)(@types/react-dom@18.3.0)(@types/react@18.3.3)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       graphiql-explorer: 0.9.0(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
