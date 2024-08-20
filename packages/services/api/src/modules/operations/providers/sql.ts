@@ -1,7 +1,15 @@
+import FormData from 'form-data';
+
 type Value = string | readonly string[];
 
 type ArrayValue = {
   readonly kind: 'array';
+  readonly dataType: string;
+  readonly values: readonly string[];
+};
+
+type LongArrayValue = {
+  readonly kind: 'longArray';
   readonly dataType: string;
   readonly values: readonly string[];
 };
@@ -24,11 +32,12 @@ export type SqlValue = {
 };
 
 type ValueExpression = string | SpecialValues;
-type SpecialValues = SqlValue | ArrayValue | JoinValue | RawValue;
+type SpecialValues = SqlValue | ArrayValue | LongArrayValue | JoinValue | RawValue;
 
 type SqlTaggedTemplate = {
   (template: TemplateStringsArray, ...values: ValueExpression[]): SqlValue;
   array: (values: Value, memberType: string) => ArrayValue;
+  longArray: (values: Value, memberType: string) => LongArrayValue;
   join: (values: readonly SqlValue[], separator: string) => JoinValue;
   raw: (sql: string) => RawValue;
 };
@@ -45,6 +54,10 @@ function isSqlValue(value: unknown): value is SqlValue {
 
 function isArrayValue(value: unknown): value is ArrayValue {
   return isOfKind<ArrayValue>(value, 'array');
+}
+
+function isLongArrayValue(value: unknown): value is LongArrayValue {
+  return isOfKind<LongArrayValue>(value, 'longArray');
 }
 
 function isJoinValue(value: unknown): value is JoinValue {
@@ -161,6 +174,42 @@ const createSqlQuery = (parts: readonly string[], values: readonly ValueExpressi
     } else if (isArrayValue(token)) {
       rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
       parameterValues.push(token.values);
+    } else if (isLongArrayValue(token)) {
+      // It will basically create a string like this:
+      // arrayConcat({p1: Array(String)}, {p2: Array(String)}, ...)
+      rawSql += `arrayConcat(`;
+      // Use a limit of characters (take the default setting of clickhouse)
+      // check if the next pushed value will exceed the limit
+      // if it does, then push the current value and start a new one
+      // if it doesn't, then append the value to the current value
+      const charactersLimit = 10_000;
+      let currentArray: string[] = [];
+      let currentCharacters = 0;
+
+      for (const value of token.values) {
+        // we must assume that every added value will be wrapped with double quotes
+        // and that the join will be a comma
+        // so for every value we must add 3 characters, just in case.
+        const valueCharacters = value.length + 3;
+
+        if (currentCharacters + valueCharacters >= charactersLimit) {
+          rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
+          parameterValues.push(currentArray);
+
+          currentArray = [];
+          currentCharacters = 0;
+        }
+
+        currentArray.push(value);
+        currentCharacters += valueCharacters;
+      }
+
+      if (currentArray.length > 0) {
+        rawSql += createParamPlaceholder(parameterValues.length + 1, 'Array(String)');
+        parameterValues.push(currentArray);
+      }
+
+      rawSql += ')';
     } else if (isJoinValue(token)) {
       const sqlFragment = createJoinSqlFragment(token, parameterValues.length);
       rawSql += sqlFragment.sql;
@@ -199,6 +248,14 @@ sqlTag.array = (values: Value, memberType: string): ArrayValue => {
   };
 };
 
+sqlTag.longArray = (values: Value, memberType: string): LongArrayValue => {
+  return {
+    kind: 'longArray',
+    dataType: memberType,
+    values: Array.isArray(values) ? values : [values],
+  };
+};
+
 sqlTag.join = (values: readonly SqlValue[], separator: string): JoinValue => {
   return {
     kind: 'join',
@@ -229,6 +286,19 @@ export function toQueryParams(statement: SqlStatement): Record<string, string> {
   }
 
   return params;
+}
+
+export function toFormData(statement: SqlStatement): FormData {
+  const formData = new FormData();
+
+  formData.append('query', statement.sql);
+
+  for (let i = 0; i < statement.values.length; i++) {
+    // Params are 1-indexed
+    formData.append(`param_p${i + 1}`, stringifyValue(statement.values[i]));
+  }
+
+  return formData;
 }
 
 export function printWithValues(statement: SqlStatement): string {

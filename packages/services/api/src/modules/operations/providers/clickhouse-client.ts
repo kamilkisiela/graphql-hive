@@ -6,7 +6,7 @@ import { castValue, compress } from '@hive/usage-common';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
-import { printWithValues, sql, SqlStatement, toQueryParams } from './sql';
+import { printWithValues, sql, SqlStatement, toFormData } from './sql';
 import type { ClickHouseConfig } from './tokens';
 import { CLICKHOUSE_CONFIG } from './tokens';
 
@@ -92,21 +92,24 @@ export class ClickHouse {
 
     let retries = 0;
 
+    const formData = toFormData(query);
+
     const response = await this.httpClient
       .post<QueryResponse<T>>(
         this.endpoint,
         {
-          body: query.sql,
+          body: formData,
           headers: {
+            'Content-Type': 'multipart/form-data',
             'Accept-Encoding': 'gzip',
             Accept: 'application/json',
+            ...formData.getHeaders(),
           },
           searchParams: {
             default_format: 'JSON',
             // Max execution time in seconds
             max_execution_time: (this.config.requestTimeout ?? timeout) / 1000,
             query_id: executionId,
-            ...toQueryParams(query),
           },
           username: this.config.username,
           password: this.config.password,

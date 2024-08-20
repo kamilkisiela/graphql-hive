@@ -207,7 +207,7 @@ export class OperationsReader {
     excludedClients?: readonly string[] | null;
   }): Promise<Record<string, number>> {
     const coordinates = fields.map(selector => this.makeId(selector));
-    const conditions = [sql`(coordinate IN (${sql.array(coordinates, 'String')}))`];
+    const conditions = [sql`(coordinate IN (${sql.longArray(coordinates, 'String')}))`];
 
     if (Array.isArray(excludedClients) && excludedClients.length > 0) {
       // Eliminate coordinates fetched by excluded clients.
@@ -987,7 +987,7 @@ export class OperationsReader {
               "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
               AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
               AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
-              AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
+              AND "coordinates_daily"."coordinate" IN (${sql.longArray(args.schemaCoordinates, 'String')})
             HAVING "total" >= ${String(args.requestCountThreshold)}
             ORDER BY
               "total" DESC,
@@ -1145,7 +1145,7 @@ export class OperationsReader {
               "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
               AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
               AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
-              AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
+              AND "coordinates_daily"."coordinate" IN (${sql.longArray(args.schemaCoordinates, 'String')})
             LIMIT 1
             BY
               "coordinates_daily"."coordinate",
@@ -2219,7 +2219,7 @@ export class OperationsReader {
     }
 
     if (operations?.length) {
-      where.push(sql`(${columnPrefix}hash) IN (${sql.array(operations, 'String')})`);
+      where.push(sql`(${columnPrefix}hash) IN (${sql.longArray(operations, 'String')})`);
     }
 
     if (clients?.length) {
