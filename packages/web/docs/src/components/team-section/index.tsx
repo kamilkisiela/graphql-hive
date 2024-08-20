@@ -13,38 +13,39 @@ export function TeamSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'flex flex-col flex-wrap justify-center bg-blue-400 xl:h-[748px]' +
-          ' grid-cols-1 rounded-3xl px-4 py-6 lg:px-8 lg:py-16 xl:px-24 xl:py-[120px]',
+        'rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
         className,
       )}
     >
-      <Heading as="h3" size="md" className="text-green-1000 max-w-full text-balance xl:w-[468px]">
-        Built by The Guild. Industry veterans.
-      </Heading>
+      <div className="mx-auto flex grid-cols-1 flex-col flex-wrap justify-center lg:max-xl:w-max xl:h-[476px]">
+        <Heading as="h3" size="md" className="text-green-1000 max-w-full text-balance xl:w-[468px]">
+          Built by The Guild. Industry veterans.
+        </Heading>
 
-      <p className="mt-4 w-[468px] max-w-full text-green-800 lg:mt-6">
-        Contrary to most, we believe in long-term sight, not temporary growth. We believe in extreme
-        quality, not scrappy pivots. We believe in open, not locked. We fight for a world where
-        software liberates, not confines — ensuring technology serves, not subjugates.
-      </p>
+        <p className="mt-4 w-[468px] max-w-full text-green-800 lg:mt-6">
+          Contrary to most, we believe in long-term sight, not temporary growth. We believe in
+          extreme quality, not scrappy pivots. We believe in open, not locked. We fight for a world
+          where software liberates, not confines — ensuring technology serves, not subjugates.
+        </p>
 
-      <CallToAction
-        variant="secondary-inverted"
-        href="https://the-guild.dev/"
-        target="_blank"
-        rel="noreferrer"
-        className="max-xl:order-1 max-md:w-full xl:mt-12"
-      >
-        Visit The Guild
-        <ArrowIcon />
-      </CallToAction>
+        <CallToAction
+          variant="secondary-inverted"
+          href="https://the-guild.dev/"
+          target="_blank"
+          rel="noreferrer"
+          className="max-xl:order-1 max-md:w-full xl:mt-12"
+        >
+          Visit The Guild
+          <ArrowIcon />
+        </CallToAction>
 
-      <TeamGallery
-        className="w-[calc(100%+2rem)] max-xl:-mx-4 max-xl:px-4 max-xl:py-6 xl:w-[636px]"
-        style={{
-          '--size': '120px',
-        }}
-      />
+        <TeamGallery
+          className="max-xl:-mx-4 max-xl:max-w-[calc(100%-1rem)] max-xl:px-4 max-xl:py-6 max-lg:max-w-[calc(100%+2rem)] xl:w-[664px]"
+          style={{
+            '--size': '120px',
+          }}
+        />
+      </div>
     </section>
   );
 }
@@ -113,9 +114,9 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
     <ul
       {...props}
       className={cn(
-        'flex flex-row gap-2 max-lg:overflow-auto lg:flex-wrap lg:gap-4 xl:gap-8' +
-          ' shrink-0 xl:[&>:nth-child(8n-7)]:ml-[calc(var(--size)/2)]' +
-          ' grid-cols-6 items-stretch justify-items-stretch lg:max-xl:grid',
+        'flex flex-row gap-2 max-lg:overflow-auto lg:flex-wrap lg:gap-4' +
+          ' shrink-0 xl:[&>:nth-child(9n-8)]:ml-[calc(var(--size)/2)]' +
+          ' grid-cols-5 items-stretch justify-items-stretch lg:max-xl:grid',
         props.className,
       )}
     >
@@ -128,7 +129,7 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
 
 function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
   return (
-    <div className="relative flex flex-col">
+    <div className="flex flex-col">
       <a
         className={
           'absolute right-0 top-0 rounded-2xl border-2 bg-[#222530] p-[9px] text-white hover:border-blue-400 xl:rounded-full' +
@@ -147,11 +148,14 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
           <GlobeIcon className="size-[14px]" />
         )}
       </a>
-      <div className="aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 mix-blend-multiply xl:w-[var(--size)]">
+      <div className="relative aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 overflow-hidden rounded-2xl mix-blend-multiply xl:w-[var(--size)]">
+        <div className="absolute inset-0 size-full bg-blue-200" />
         <Image
           alt=""
-          className="rounded-2xl bg-blue-300 grayscale"
-          {...(typeof avatar === 'string' ? { src: avatar, width: 180, height: 180 } : avatar)}
+          className="rounded-2xl bg-black grayscale"
+          {...(typeof avatar === 'string' ? { src: avatar } : avatar)}
+          width={180}
+          height={180}
         />
       </div>
       <span className="text-green-1000 mt-2 block text-sm font-medium leading-5 lg:max-xl:block lg:max-xl:text-base">
