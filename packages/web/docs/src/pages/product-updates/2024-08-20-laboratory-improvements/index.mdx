@@ -1,7 +1,7 @@
 ---
 title: Laboratory Improvements
 description:
-  Laboratory received new look, tabs support, Query Builder plugin and uses GraphiQL v4 alpha.
+  The laboratory received a new look, tabs support, Query Builder plugin and uses GraphiQL v4 alpha.
 date: 2024-08-20
 authors: [dimitri]
 ---
@@ -44,44 +44,44 @@ was moved to the end of the toolbar.
 
 ### Full Screen Mode
 
-Users with wide screens can now benefit from the fullscreen mode. The button is located in place of
+Users with wide screens can now benefit from the fullscreen mode. The button is located in place of the
 GraphiQL logo.
 
 <Video src={fullScreenMode} alt="Full screen mode demo" />
 
 ### Tabs Support
 
-Laboratory now supports multiple tabs, you can open multiple tabs with different queries and switch
-between them as in regular GraphiQL. There is no longer requirement to mandatory save the query in
+Laboratory now supports multiple tabs, you can open tabs with different queries and switch
+between them as in regular GraphiQL. There is no longer a requirement to mandatory save the query in
 one of the collections, you can have a draft query which will be stored in local storage.
 
 <Video src={newTabs} alt="Tabs demo" />
 
-The differences Hive's tabs from regular GraphiQL tabs is better look, I inspired by UX and UI of
-Google Chrome tabs, and we loved new look so much, so we decided
-[to change them in next major of GraphiQL as well](https://github.com/graphql/graphiql/pull/3644).
+The difference Hive's tabs from regular GraphiQL tabs is the better look, I was inspired by the UX and UI of
+Google Chrome tabs, and we loved the new look so much, so we decided
+[to change them in the next major of GraphiQL as well](https://github.com/graphql/graphiql/pull/3644).
 
 Also,
 [tabs will be shown even if there is only a single tab](https://github.com/graphql/graphiql/pull/3713)
 as per Chrome tabs UX.
 
-And for comparison, below is how current GraphiQL tabs looks like:
+And for comparison, below is how current GraphiQL tabs look like:
 
 <Video src={oldTabs} alt="Current GraphiQL tabs demo" />
 
 ## Query Builder
 
-Laboratory received support of official GraphiQL query builder plugin, named
+The laboratory received the support of the official GraphiQL query builder plugin, named
 [`@graphiql/plugin-explorer`](https://github.com/graphql/graphiql/tree/main/packages/graphiql-plugin-explorer).
-While adding this plugin in laboratory, I discovered broken styles which I fixed
+While adding this plugin in the laboratory, I discovered broken styles which I fixed
 [for the core package as well](https://github.com/graphql/graphiql/pull/3633).
 
 <Video src={queryBuilder} alt="Query builder demo" />
 
 ## GraphiQL v4 Alpha
 
-While working on improvements for laboratory, I also cut a next major v4 alpha release of GraphiQL,
-which includes new tabs looks and migration from Webpack to Vite.
+While working on improvements for the laboratory, I also cut the next major v4 alpha release of GraphiQL,
+which includes a new tabs look and migration from Webpack to Vite.
 
 > 3 times different people worked on this migration, starting from 2022, and it was finally
 > migrated!
@@ -89,3 +89,9 @@ which includes new tabs looks and migration from Webpack to Vite.
 ![GraphiQL vite migration attempts](./graphiql-vite-prs.png)
 
 <p className="text-center text-sm italic">Vite migrations attempts</p>
+
+If you want to try GraphiQL v4 alpha, you can install it with your favourite package manager:
+
+```sh npm2yarn
+npm i graphiql@alpha
+```
