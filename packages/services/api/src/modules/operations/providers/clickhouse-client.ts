@@ -221,6 +221,165 @@ export class ClickHouse {
     return response;
   }
 
+  async postQuery(args: {
+    query: SqlStatement;
+    queryId: string;
+    timeout: number;
+  }): Promise<QueryResponse<unknown>> {
+    const startedAt = Date.now();
+    const executionId = args.queryId + '-' + Math.random().toString(16).substring(2);
+    const span = this.tracer.startSpan(`ClickHouse: ${args.queryId}`, {
+      kind: SpanKind.CLIENT,
+      attributes: {
+        'db.type': 'ClickHouse',
+        'db.query': args.query.sql,
+        'db.query.id': args.queryId,
+        'execution.id': executionId,
+      },
+    });
+    this.logger.debug(
+      `Executing ClickHouse Query (executionId: %s): %s`,
+      executionId,
+      printWithValues(args.query).replace(/\n/g, ' ').replace(/\s+/g, ' '),
+    );
+
+    let retries = 0;
+
+    const formData = new FormData();
+    formData.set('query', args.query.sql);
+
+    for (const [key, value] of Object.entries(toQueryParams(args.query))) {
+      formData.set(key, value);
+    }
+
+    const response = await this.httpClient
+      .post<QueryResponse<unknown>>(
+        this.endpoint,
+        {
+          body: formData,
+          headers: {
+            'Accept-Encoding': 'gzip',
+            Accept: 'application/json',
+          },
+          searchParams: {
+            default_format: 'JSON',
+            // Max execution time in seconds
+            max_execution_time: (this.config.requestTimeout ?? args.timeout) / 1000,
+            query_id: executionId,
+          },
+          username: this.config.username,
+          password: this.config.password,
+          decompress: true,
+          timeout: {
+            lookup: 1000,
+            connect: 1000,
+            secureConnect: 1000,
+            // override the provided timeout of a query with the globally configured timeout
+            request: this.config.requestTimeout ?? args.timeout,
+          },
+          retry: {
+            calculateDelay: info => {
+              span.setAttribute('retry.count', info.attemptCount);
+
+              if (info.attemptCount >= 6) {
+                // After 5 retries, stop.
+                return 0;
+              }
+
+              const delayBy = info.attemptCount * 250;
+              this.logger.error(
+                `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+                executionId,
+                info.error.code,
+                info.error.name,
+                info.error.message,
+              );
+
+              this.logger.debug(
+                `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
+                delayBy,
+                info.attemptCount,
+                info.error.message,
+                args.queryId,
+                executionId,
+              );
+
+              return delayBy;
+            },
+          },
+          responseType: 'json',
+          agent: {
+            http: httpAgent,
+            https: httpsAgent,
+          },
+          hooks: {
+            // `beforeRetry` runs first, then `beforeRequest`
+            beforeRequest: [
+              options => {
+                if (
+                  retries > 0 &&
+                  options.searchParams &&
+                  typeof options.searchParams === 'object' &&
+                  'query_id' in options.searchParams &&
+                  typeof options.searchParams.query_id === 'string'
+                ) {
+                  // We do it to avoid QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING error in ClickHouse
+                  // Context: https://clickhouse.com/docs/en/interfaces/http
+                  // > Running requests do not stop automatically if the HTTP connection is lost.
+                  // > The optional 'query_id' parameter can be passed as the query ID (any string).
+                  // More context: https://clickhouse.com/docs/en/operations/settings/settings#replace-running-query
+                  // > When using the HTTP interface, the 'query_id' parameter can be passed.
+                  // > If a query from the same user with the same 'query_id' already exists at this time,
+                  // > the behaviour depends on the 'replace_running_query' parameter.
+                  // > Default: throws QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING exception.
+                  options.searchParams.query_id = options.searchParams.query_id.replace(
+                    /-r\d$/,
+                    '-r' + retries,
+                  );
+                }
+              },
+            ],
+            beforeRetry: [
+              (_, retryCount) => {
+                retries = retryCount;
+              },
+            ],
+          },
+        },
+        span,
+      )
+      .then(response => {
+        if (response.exception) {
+          throw new Error(response.exception);
+        }
+        return response;
+      })
+      .catch(error => {
+        this.logger.error(
+          `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+          executionId,
+          error.code,
+          error.name,
+          error.message,
+        );
+        return Promise.reject(error);
+      })
+      .finally(() => {
+        this.logger.debug(
+          `Finished ClickHouse Query (executionId: %s, duration=%sms)`,
+          executionId,
+          Date.now() - startedAt,
+        );
+      });
+    const endedAt = (Date.now() - startedAt) / 1000;
+    this.config.onReadEnd?.(args.queryId, {
+      totalSeconds: endedAt,
+      elapsedSeconds: response.statistics?.elapsed,
+    });
+
+    return response;
+  }
+
   /** Please insert data with this function :) */
   async insert(args: {
     query: SqlStatement;
