@@ -24,12 +24,12 @@ import { QueryError } from '@/components/ui/query-error';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { graphql } from '@/gql';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
+import { useCollections } from '@/lib/hooks/laboratory/use-collections';
+import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
 import {
   operationCollectionsPlugin,
   TargetLaboratoryPageQuery,
-} from '@/lib/hooks/laboratory/operation-collections-plugin';
-import { useCollections } from '@/lib/hooks/laboratory/use-collections';
-import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
+} from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
