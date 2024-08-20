@@ -7,7 +7,7 @@ export type MaskingScrollviewFade = {
 
 export interface MaskingScrollviewProps {
   fade: MaskingScrollviewFade;
-  children?: React.ReactNode;
+  children: React.ReactNode;
   className?: string;
   outerClassName?: string;
 }
