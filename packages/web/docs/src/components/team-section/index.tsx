@@ -103,7 +103,7 @@ const team: TeamMember[] = [
     'https://github.com/YassinEldeeb',
   ],
   [
-    'Arda Tankirulu',
+    'Arda Tanrikulu',
     'https://avatars.githubusercontent.com/ardatan?v=4&s=180',
     'https://github.com/ardatan',
   ],
