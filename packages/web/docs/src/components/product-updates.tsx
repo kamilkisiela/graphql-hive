@@ -49,7 +49,7 @@ export const ProductUpdates = (props: { changelogs: Changelog[] }): ReactElement
 export async function getChangelogs(): Promise<Changelog[]> {
   const { pageMap } = await import('../../.next/static/chunks/nextra-page-map-.mjs');
 
-  const productUpdatesFolder = pageMap.find(item => item.route === '/product-updates').children;
+  const productUpdatesFolder = pageMap.find(item => item.route === '/product-updates')!.children!;
 
   return productUpdatesFolder
     .map(item => {

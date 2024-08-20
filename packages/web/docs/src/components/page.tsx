@@ -2,7 +2,7 @@ import { ReactElement, ReactNode, useCallback, useState } from 'react';
 import Head from 'next/head';
 import { useMounted } from '@theguild/components';
 
-const CookiesConsent = (): ReactElement => {
+const CookiesConsent = (): ReactElement | null => {
   const [show, setShow] = useState(() => localStorage.getItem('cookies') !== 'true');
 
   const accept = useCallback(() => {
