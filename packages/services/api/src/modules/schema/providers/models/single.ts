@@ -24,7 +24,7 @@ export class SingleModel {
     private orchestrator: SingleOrchestrator,
     private checks: RegistryChecks,
     private logger: Logger,
-  ) { }
+  ) {}
 
   async check({
     input,
@@ -80,9 +80,9 @@ export class SingleModel {
     const checksumResult = await this.checks.checksum({
       existing: comparedVersion
         ? {
-          schemas: comparedVersion.schemas,
-          contractNames: null,
-        }
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
         : null,
       incoming: {
         schemas,
@@ -211,9 +211,9 @@ export class SingleModel {
     const checksumCheck = await this.checks.checksum({
       existing: comparedVersion
         ? {
-          schemas: comparedVersion.schemas,
-          contractNames: null,
-        }
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
         : null,
       incoming: {
         schemas,
@@ -237,9 +237,9 @@ export class SingleModel {
       schemas: [
         baseSchema
           ? {
-            ...incoming,
-            sdl: baseSchema + ' ' + incoming.sdl,
-          }
+              ...incoming,
+              sdl: baseSchema + ' ' + incoming.sdl,
+            }
           : incoming,
       ],
       contracts: null,
