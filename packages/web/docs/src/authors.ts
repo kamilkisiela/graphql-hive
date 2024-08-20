@@ -26,4 +26,9 @@ export const authors: Record<string, Author> = {
     link: 'https://twitter.com/capajj',
     github: 'capaj',
   },
+  dimitri: {
+    name: 'Dimitri Postolov',
+    link: 'https://x.com/dimaMachina_',
+    github: 'dimaMachina',
+  },
 };

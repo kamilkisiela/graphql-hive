@@ -4,9 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "pnpm run generate-rss && next build && next-sitemap --config next-sitemap.config.cjs",
-    "dev": "next",
-    "generate-rss": "tsx ./scripts/rss-generator.ts"
+    "build": "next build && next-sitemap --config next-sitemap.config.cjs",
+    "dev": "next"
   },
   "dependencies": {
     "@next/env": "14.2.5",
@@ -14,7 +13,6 @@
     "@theguild/components": "6.6.3",
     "clsx": "2.1.1",
     "date-fns": "3.6.0",
-    "gray-matter": "4.0.3",
     "next": "14.2.5",
     "next-sitemap": "4.2.3",
     "next-themes": "*",
