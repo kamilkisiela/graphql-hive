@@ -1,12 +1,33 @@
 import { ReactElement } from 'react';
-import { useFormik } from 'formik';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { useMutation } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Heading } from '@/components/ui/heading';
-import { Modal, Select } from '@/components/v2';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { AlertType } from '@/gql/graphql';
+import {
+  AlertType,
+  CreateAlertModal_AlertChannelFragmentFragment,
+  CreateAlertModal_TargetFragmentFragment,
+} from '@/gql/graphql';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export const CreateAlertModal_AddAlertMutation = graphql(`
   mutation CreateAlertModal_AddAlertMutation($input: AddAlertInput!) {
@@ -41,6 +62,22 @@ export const CreateAlertModal_AlertChannelFragment = graphql(`
   }
 `);
 
+const createAlertModalFormSchema = z.object({
+  type: z.enum([AlertType.SchemaChangeNotifications]),
+  target: z
+    .string({
+      required_error: 'Target is required',
+    })
+    .min(1, 'Must select target'),
+  channel: z
+    .string({
+      required_error: 'Channel is required',
+    })
+    .min(1, 'Must select channel'),
+});
+
+type CreateAlertModalFormValues = z.infer<typeof createAlertModalFormSchema>;
+
 export const CreateAlertModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
@@ -50,134 +87,229 @@ export const CreateAlertModal = (props: {
   projectId: string;
 }): ReactElement => {
   const { isOpen, toggleModalOpen } = props;
+  const { toast } = useToast();
   const targets = useFragment(CreateAlertModal_TargetFragment, props.targets);
   const channels = useFragment(CreateAlertModal_AlertChannelFragment, props.channels);
   const [mutation, mutate] = useMutation(CreateAlertModal_AddAlertMutation);
 
-  const { handleSubmit, values, handleChange, errors, touched, isSubmitting } = useFormik({
-    initialValues: {
+  const form = useForm<CreateAlertModalFormValues>({
+    mode: 'onChange',
+    resolver: zodResolver(createAlertModalFormSchema),
+    defaultValues: {
       type: AlertType.SchemaChangeNotifications,
-      channel: '',
       target: '',
-    },
-    validationSchema: Yup.object().shape({
-      type: Yup.string().equals([AlertType.SchemaChangeNotifications]).required('Must select type'),
-      channel: Yup.lazy(() =>
-        Yup.string()
-          .min(1)
-          .equals(channels.map(channel => channel.id))
-          .required('Must select channel'),
-      ),
-      target: Yup.lazy(() =>
-        Yup.string()
-          .min(1)
-          .equals(targets.map(target => target.cleanId))
-          .required('Must select target'),
-      ),
-    }),
-    async onSubmit(values) {
-      const { error, data } = await mutate({
-        input: {
-          organization: props.organizationId,
-          project: props.projectId,
-          target: values.target,
-          channel: values.channel,
-          type: values.type,
-        },
-      });
-      if (!error && data?.addAlert) {
-        toggleModalOpen();
-      }
+      channel: '',
     },
   });
 
+  async function onSubmit(values: CreateAlertModalFormValues) {
+    const { error, data } = await mutate({
+      input: {
+        organization: props.organizationId,
+        project: props.projectId,
+        target: values.target,
+        channel: values.channel,
+        type: values.type,
+      },
+    });
+
+    const errorCombined = error?.message || data?.addAlert.error?.message || mutation.error;
+
+    if (errorCombined) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create alert',
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Alert created successfully',
+        variant: 'default',
+      });
+      toggleModalOpen();
+      form.reset();
+    }
+  }
+
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen}>
-      <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-        <Heading className="text-center">Create an alert</Heading>
-
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="name">
-            Type
-          </label>
-          <Select
-            name="type"
-            placeholder="Select alert type"
-            options={[
-              {
-                value: AlertType.SchemaChangeNotifications,
-                name: 'Schema Change Notifications',
-              },
-            ]}
-            value={values.type}
-            onChange={handleChange}
-            isInvalid={!!(touched.type && errors.type)}
-          />
-          {touched.type && errors.type && <div className="text-sm text-red-500">{errors.type}</div>}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="name">
-            Channel
-          </label>
-          <Select
-            name="channel"
-            placeholder="Select channel"
-            options={channels.map(channel => ({
-              value: channel.id,
-              name: channel.name,
-            }))}
-            value={values.channel}
-            onChange={handleChange}
-            isInvalid={!!(touched.channel && errors.channel)}
-          />
-          {touched.channel && errors.channel && (
-            <div className="text-sm text-red-500">{errors.channel}</div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <label className="text-sm font-semibold" htmlFor="name">
-            Target
-          </label>
-          <Select
-            name="target"
-            placeholder="Select target"
-            options={targets.map(target => ({
-              value: target.cleanId,
-              name: target.name,
-            }))}
-            value={values.target}
-            onChange={handleChange}
-            isInvalid={!!(touched.target && errors.target)}
-          />
-          {touched.target && errors.target && (
-            <div className="text-sm text-red-500">{errors.target}</div>
-          )}
-        </div>
-
-        {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
-
-        <div className="flex w-full gap-2">
-          <Button
-            type="button"
-            size="lg"
-            className="w-full justify-center"
-            onClick={toggleModalOpen}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            size="lg"
-            className="w-full justify-center"
-            variant="primary"
-            disabled={isSubmitting}
-          >
-            Create Alert
-          </Button>
-        </div>
-      </form>
-    </Modal>
+    <CreateAlertModalContent
+      isOpen={isOpen}
+      toggleModalOpen={toggleModalOpen}
+      onSubmit={onSubmit}
+      form={form}
+      channels={channels}
+      targets={targets}
+    />
   );
 };
+
+export function CreateAlertModalContent(props: {
+  form: UseFormReturn<z.infer<typeof createAlertModalFormSchema>>;
+  onSubmit: (values: CreateAlertModalFormValues) => void;
+  isOpen: boolean;
+  toggleModalOpen: () => void;
+  channels: CreateAlertModal_AlertChannelFragmentFragment[];
+  targets: CreateAlertModal_TargetFragmentFragment[];
+}) {
+  return (
+    <Dialog
+      open={props.isOpen}
+      onOpenChange={() => {
+        props.toggleModalOpen();
+        props.form.reset();
+      }}
+    >
+      <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
+        <Form {...props.form}>
+          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create an alert</DialogTitle>
+              <DialogDescription>
+                Create an alert to receive notifications when a schema change occurs.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-8">
+              <FormField
+                control={props.form.control}
+                name="type"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={async v => {
+                            await field.onChange(v);
+                          }}
+                        >
+                          <SelectTrigger>
+                            {field.value === AlertType.SchemaChangeNotifications
+                              ? 'Schema Change Notifications'
+                              : 'Select alert type'}
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            <SelectItem value={AlertType.SchemaChangeNotifications}>
+                              Schema Change Notifications
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={props.form.control}
+                name="channel"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Channel</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={async v => {
+                            await field.onChange(v);
+                          }}
+                        >
+                          <SelectTrigger>
+                            {props.channels.find(channel => channel.id === field.value)?.name ??
+                              'Select a Channel'}
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            {props.channels.length === 0 ? (
+                              <SelectItem
+                                value="No channels available - Please create a channel first"
+                                disabled
+                              >
+                                No channels available - Please create a channel first
+                              </SelectItem>
+                            ) : (
+                              props.channels.map(channel => (
+                                <SelectItem key={channel.id} value={channel.id}>
+                                  {channel.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={props.form.control}
+                name="target"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Target</FormLabel>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={async v => {
+                            await field.onChange(v);
+                          }}
+                        >
+                          <SelectTrigger>
+                            {props.targets.find(target => target.id === field.value)?.name ??
+                              'Select a Target'}
+                          </SelectTrigger>
+                          <SelectContent className="w-[--radix-select-trigger-width]">
+                            {props.targets.length === 0 ? (
+                              <SelectItem
+                                value="No targets available - Please create a target first"
+                                disabled
+                              >
+                                No targets available - Please create a target first
+                              </SelectItem>
+                            ) : (
+                              props.targets.map(target => (
+                                <SelectItem key={target.id} value={target.name}>
+                                  {target.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                size="lg"
+                className="w-full justify-center"
+                onClick={ev => {
+                  ev.preventDefault();
+                  props.toggleModalOpen();
+                  props.form.reset();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full justify-center"
+                variant="primary"
+                disabled={props.form.formState.isSubmitting || !props.form.formState.isValid}
+              >
+                Create Alert
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
