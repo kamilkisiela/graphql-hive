@@ -90,7 +90,7 @@ export const CreateAlertModal = (props: {
   const { toast } = useToast();
   const targets = useFragment(CreateAlertModal_TargetFragment, props.targets);
   const channels = useFragment(CreateAlertModal_AlertChannelFragment, props.channels);
-  const [, mutate] = useMutation(CreateAlertModal_AddAlertMutation);
+  const [mutation, mutate] = useMutation(CreateAlertModal_AddAlertMutation);
 
   const form = useForm<CreateAlertModalFormValues>({
     mode: 'onChange',
@@ -103,7 +103,7 @@ export const CreateAlertModal = (props: {
   });
 
   async function onSubmit(values: CreateAlertModalFormValues) {
-    const result = await mutate({
+    const { error, data } = await mutate({
       input: {
         organization: props.organizationId,
         project: props.projectId,
@@ -113,17 +113,18 @@ export const CreateAlertModal = (props: {
       },
     });
 
-    const error = result.error || result.data?.addAlert.error
-    if (error) {
+    const errorCombined = error?.message || data?.addAlert.error?.message || mutation.error;
+
+    if (errorCombined) {
       toast({
         title: 'Error',
-        description: error.message,
+        description: 'Failed to create alert',
         variant: 'destructive',
       });
     } else {
       toast({
         title: 'Success',
-        description: 'Alert created',
+        description: 'Alert created successfully',
         variant: 'default',
       });
       toggleModalOpen();
@@ -152,7 +153,13 @@ export function CreateAlertModalContent(props: {
   targets: CreateAlertModal_TargetFragmentFragment[];
 }) {
   return (
-    <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
+    <Dialog
+      open={props.isOpen}
+      onOpenChange={() => {
+        props.toggleModalOpen();
+        props.form.reset();
+      }}
+    >
       <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
         <Form {...props.form}>
           <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
@@ -263,7 +270,7 @@ export function CreateAlertModalContent(props: {
                               </SelectItem>
                             ) : (
                               props.targets.map(target => (
-                                <SelectItem key={target.id} value={target.id}>
+                                <SelectItem key={target.id} value={target.name}>
                                   {target.name}
                                 </SelectItem>
                               ))
