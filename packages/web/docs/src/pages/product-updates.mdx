@@ -1,11 +1,24 @@
 import { useData } from '@theguild/components'
-import { ProductUpdates } from '../components/product-updates'
+import { ProductUpdateTeaser } from '../components/product-updates'
 
 export { getStaticProps } from '../components/product-updates'
 
-export const ProductUpdatesPage = () => {
+export function ProductUpdatesPage() {
   const { changelogs } = useData()
-  return <ProductUpdates changelogs={changelogs} />
+  return (
+    <ol className="relative mt-12 border-l border-gray-200 dark:border-gray-700">
+      {changelogs.map(item => (
+        <ProductUpdateTeaser key={item.route} {...item} />
+      ))}
+    </ol>
+  )
 }
+
+<div className="[&>h1]:!text-left">
+  # Product Updates
+
+The most recent developments from GraphQL Hive.
+
+</div>
 
 <ProductUpdatesPage />

@@ -6,12 +6,43 @@ date: 2024-08-20
 authors: [dimitri]
 ---
 
-In the recent months I worked on improving the laboratory, its new look and new features. And here
-is what was improved.
+import fullScreenMode from './full-screen-mode.mp4'
 
-## New Look of Operations Collections Plugin
+In recent months I have worked on improving the Hive's laboratory, its new look and its new features. And
+here is what was improved.
 
-## Tabs Support
+## Operations Collections Plugin
+
+### New Look
+
+Hive's Operations collections plugin received a new look to make consistency with Hive UI, GraphiQL
+toolbars buttons "Copy Query" and "Merge fragments into query" were removed, "Prettify query" button
+was moved to the end of the toolbar.
+
+![Old look of Operations collections plugin](./operations-collections-plugin-old.png)
+
+<p className="text-center text-sm italic">Old look of Operations collections plugin</p>
+
+![New look of Operations collections plugin](./operations-collections-plugin-new.png)
+
+<p className="text-center text-sm italic">New look of Operations collections plugin</p>
+
+### Full Screen Mode
+
+Users with wide screens can now benefit from the fullscreen mode. The button is located in place of GraphiQL logo.
+
+<video autoPlay="autoplay" loop muted playsInline>
+  <source src={fullScreenMode} type="video/mp4"/>
+  Your browser does not support the video tag.
+</video>
+
+<p className="text-center text-sm italic">Full screen mode demo</p>
+
+### Tabs Support
+
+Laboratory now supports multiple tabs, you can open multiple tabs with different queries and switch
+between them as in regular GraphiQL. There is no longer requirement to mandatory save the query in one of the
+collections, you can have a draft query which will be stored in local storage.
 
 ## Query Builder
 

@@ -10,7 +10,7 @@ type Changelog = {
   route: string;
 };
 
-function ProductUpdateTeaser(props: Changelog) {
+export function ProductUpdateTeaser(props: Changelog): ReactElement {
   return (
     <li className="mb-10 ml-4">
       <div className="absolute -left-1.5 mt-1.5 size-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700" />
@@ -29,22 +29,6 @@ function ProductUpdateTeaser(props: Changelog) {
     </li>
   );
 }
-
-export const ProductUpdates = (props: { changelogs: Changelog[] }): ReactElement => {
-  return (
-    <>
-      <div className="pb-12">
-        <h1 className="!m-0 !text-left">Product Updates</h1>
-        <p>The most recent developments from GraphQL Hive.</p>
-      </div>
-      <ol className="relative border-l border-gray-200 dark:border-gray-700">
-        {props.changelogs.map(item => (
-          <ProductUpdateTeaser key={item.route} {...item} />
-        ))}
-      </ol>
-    </>
-  );
-};
 
 export async function getChangelogs(): Promise<Changelog[]> {
   const { pageMap } = await import('../../.next/static/chunks/nextra-page-map-.mjs');
