@@ -5,7 +5,9 @@ import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import { CallToAction } from '../call-to-action';
 import { Heading } from '../heading';
+import dimaPhoto from './dima.webp';
 import noamPhoto from './noam.webp';
+import saihajPhoto from './saihaj.webp';
 
 export function TeamSection({ className }: { className?: string }) {
   return (
@@ -54,11 +56,7 @@ const team: TeamMember[] = [
     'https://avatars.githubusercontent.com/enisdenjo?v=4&s=180',
     'https://github.com/enisdenjo',
   ],
-  [
-    'Dimitri Postolov',
-    'https://avatars.githubusercontent.com/dimaMachina?v=4&s=180',
-    'https://github.com/dimaMachina',
-  ],
+  ['Dimitri Postolov', dimaPhoto, 'https://github.com/dimaMachina'],
   [
     'Dotan Simha',
     'https://avatars.githubusercontent.com/dotansimha?v=4&s=180',
@@ -81,11 +79,7 @@ const team: TeamMember[] = [
     'https://github.com/n1ru4l',
   ],
   ['Noam Malka', noamPhoto, 'https://noam-malka.com/'],
-  [
-    'Saihajpreet Singh',
-    'https://avatars.githubusercontent.com/saihaj?v=4&s=180',
-    'https://github.com/saihaj',
-  ],
+  ['Saihajpreet Singh', saihajPhoto, 'https://github.com/saihaj'],
 
   [
     'Tuval Simha',
@@ -107,11 +101,11 @@ const team: TeamMember[] = [
     'https://avatars.githubusercontent.com/YassinEldeeb?v=4&s=180',
     'https://github.com/YassinEldeeb',
   ],
-  // [
-  //   'Arda Tankirulu',
-  //   'https://avatars.githubusercontent.com/ardatan?v=4&s=180',
-  //   'https://github.com/ardatan',
-  // ],
+  [
+    'Arda Tankirulu',
+    'https://avatars.githubusercontent.com/ardatan?v=4&s=180',
+    'https://github.com/ardatan',
+  ],
 ];
 
 function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
