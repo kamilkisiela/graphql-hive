@@ -9,6 +9,7 @@ authors: [dimitri]
 import fullScreenMode from './full-screen-mode.mp4'
 import newTabs from './tabs-new.mp4'
 import oldTabs from './tabs-old.mp4'
+import queryBuilder from './query-builder.mp4'
 
 export function Video({ src, alt }) {
   return (
@@ -64,10 +65,24 @@ Also,
 [tabs will be shown even if there is only a single tab](https://github.com/graphql/graphiql/pull/3713)
 as per Chrome tabs UX.
 
-And for comparison, below is how GraphiQL tabs look like now:
+And for comparison, below is how current GraphiQL tabs looks like:
 
-<Video src={oldTabs} alt="GraphiQL tabs demo" />
+<Video src={oldTabs} alt="Current GraphiQL tabs demo" />
 
 ## Query Builder
 
+Laboratory received support of official GraphiQL query builder plugin, named [`@graphiql/plugin-explorer`](https://github.com/graphql/graphiql/tree/main/packages/graphiql-plugin-explorer).
+While adding this plugin in laboratory, I discovered broken styles which I fixed [for the core package as well](https://github.com/graphql/graphiql/pull/3633).
+
+<Video src={queryBuilder} alt="Query builder demo" />
+
 ## GraphiQL v4 Alpha
+
+While working on improvements for laboratory, I also cut a next major v4 alpha release of GraphiQL, which includes
+new tabs looks and migration from Webpack to Vite.
+
+> 3 times different people worked on this migration, starting from 2022, and it was finally migrated!
+
+![GraphiQL vite migration attempts](./graphiql-vite-prs.png)
+
+<p className="text-center text-sm italic">Vite migrations attempts</p>
