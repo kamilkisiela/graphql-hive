@@ -55,7 +55,7 @@ docker run \
   -p 4318:4318 \
   -p 4317:4317 \
   otel/opentelemetry-collector-contrib \
-  --config otel-local-config.yaml;
+  --config otel-local-config.yaml
 ```
 
 ### Configure Hive to send traces to the OTLP Collector
@@ -64,7 +64,7 @@ To instruct Hive to send traces to the OTLP Collector, you need to set the follo
 variable:
 
 ```
-OPENTELEMETRY_COLLECTOR_ENDPOINT="http://localhost:4318/v1/traces"
+OPENTELEMETRY_COLLECTOR_ENDPOINT="http://localhost:4318"
 ```
 
 </Steps>

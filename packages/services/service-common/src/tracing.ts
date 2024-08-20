@@ -68,6 +68,7 @@ export class TracingInstance {
       resource: new Resource({
         [SEMRESATTRS_SERVICE_NAME]: this.options.serviceName,
       }),
+      resourceDetectors: [],
       contextManager,
       sampler: {
         shouldSample: (context, traceId, spanName, spanKind, attributes, links) => {
@@ -133,6 +134,7 @@ export class TracingInstance {
     return createSlonikInterceptor({
       shouldExcludeStatement: (_ctx, query) => {
         return (
+          query.sql.includes('Heartbeat') ||
           query.sql === 'SELECT EXISTS(SELECT 1)' ||
           query.sql === 'SELECT 1' ||
           query.sql === '/* Heartbeat */ SELECT 1' ||
