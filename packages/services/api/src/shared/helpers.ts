@@ -237,6 +237,13 @@ export function batchBy<TItem, TResult>(
     const tickArgs = [...currentBatch.args];
     const tickCallbacks = [...currentBatch.callbacks];
 
+    if (tickArgs.length !== tickCallbacks.length) {
+      for (const cb of tickCallbacks) {
+        cb.reject(new Error('Batch args and callbacks should have the same length.'));
+      }
+      throw new Error('Batch args and callbacks should have the same length.');
+    }
+
     loader(tickArgs).then(
       promises => {
         for (let i = 0; i < tickCallbacks.length; i++) {
@@ -293,6 +300,8 @@ export function batchBy<TItem, TResult>(
     const currentBatch = getBatchGroup(batchKey);
     scheduleExecutionOnNextTick();
     currentBatch.args.push(arg);
+    const d = Promise.withResolvers<TResult>();
+    currentBatch.callbacks.push({ resolve: d.resolve, reject: d.reject });
 
     // if the current batch is full, we already start loading it.
     if (currentBatch.callbacks.length >= maxBatchSize) {
@@ -300,8 +309,6 @@ export function batchBy<TItem, TResult>(
       startLoadingBatch(currentBatch);
     }
 
-    const d = Promise.withResolvers<TResult>();
-    currentBatch.callbacks.push({ resolve: d.resolve, reject: d.reject });
     return d.promise;
   };
 }
