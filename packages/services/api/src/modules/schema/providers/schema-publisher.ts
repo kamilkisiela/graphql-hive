@@ -4,6 +4,7 @@ import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
+import { ResourceLockedError } from 'redlock';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import { traceFn } from '@hive/service-common';
@@ -95,7 +96,12 @@ export type PublishInput = Types.SchemaPublishInput &
 
 type BreakPromise<T> = T extends Promise<infer U> ? U : never;
 
-type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>;
+type PublishResult =
+  | BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>
+  | {
+      readonly __typename: 'SchemaPublishRetry';
+      readonly reason: string;
+    };
 
 function registryLockId(targetId: string) {
   return `registry:lock:${targetId}`;
@@ -1065,29 +1071,61 @@ export class SchemaPublisher {
       input.target,
     );
 
-    return this.mutex.perform(
-      registryLockId(input.target),
-      {
-        signal,
-      },
-      async () => {
-        await this.authManager.ensureTargetAccess({
-          target: input.target,
-          project: input.project,
-          organization: input.organization,
-          scope: TargetAccessScope.REGISTRY_WRITE,
-        });
-        return this.distributedCache.wrap({
-          key: `schema:publish:${checksum}`,
-          ttlSeconds: 15,
-          executor: () =>
-            this.internalPublish({
-              ...input,
-              checksum,
-            }),
-        });
-      },
-    );
+    return this.mutex
+      .perform(
+        registryLockId(input.target),
+        {
+          /**
+           * The global request timeout is 60 seconds.
+           * We don't want to try acquiring the lock longer than 30 seconds.
+           * If it succeeds after 30 seconds,
+           * we have 30 seconds for actually running the business logic.
+           *
+           * If we would wait longer we risk the user facing 504 errors.
+           */
+          retries: 30,
+          retryDelay: 1_000,
+          signal,
+        },
+        async () => {
+          await this.authManager.ensureTargetAccess({
+            target: input.target,
+            project: input.project,
+            organization: input.organization,
+            scope: TargetAccessScope.REGISTRY_WRITE,
+          });
+          await new Promise<void>(resolve => {
+            const i = setInterval(() => {
+              console.log('wait wait wait');
+            }, 5000);
+
+            setTimeout(() => {
+              console.log('LETS GOOOOO');
+              clearInterval(i);
+              resolve();
+            }, 60_000);
+          });
+          return this.distributedCache.wrap({
+            key: `schema:publish:${checksum}`,
+            ttlSeconds: 15,
+            executor: () =>
+              this.internalPublish({
+                ...input,
+                checksum,
+              }),
+          });
+        },
+      )
+      .catch((error: unknown) => {
+        if (error instanceof ResourceLockedError && input.supportsRetry === true) {
+          return {
+            __typename: 'SchemaPublishRetry',
+            reason: 'Another schema publish is currently in progress.',
+          } satisfies PublishResult;
+        }
+
+        throw error;
+      });
   }
 
   public async updateVersionStatus(input: TargetSelector & { version: string; valid: boolean }) {

@@ -196,14 +196,23 @@ export default abstract class BaseCommand<T extends typeof Command> extends Comm
 
     return {
       async request<TResult, TVariables>(
-        operation: TypedDocumentNode<TResult, TVariables>,
-        ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
+        args: {
+          operation: TypedDocumentNode<TResult, TVariables>;
+          /** timeout in milliseconds */
+          timeout?: number;
+        } & (TVariables extends Record<string, never>
+          ? {
+              variables?: never;
+            }
+          : {
+              variables: TVariables;
+            }),
       ): Promise<TResult> {
         const response = await http.post(
           endpoint,
           JSON.stringify({
-            query: typeof operation === 'string' ? operation : print(operation),
-            variables,
+            query: typeof args.operation === 'string' ? args.operation : print(args.operation),
+            variables: args.variables,
           }),
           {
             logger: {
@@ -217,6 +226,7 @@ export default abstract class BaseCommand<T extends typeof Command> extends Comm
               },
             },
             headers: requestHeaders,
+            timeout: args.timeout,
           },
         );
 

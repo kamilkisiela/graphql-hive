@@ -97,14 +97,14 @@ export default class SchemaFetch extends Command<typeof SchemaFetch> {
       defaultValue: 'sdl',
     });
 
-    const result = await this.registryApi(endpoint, accessToken).request(
-      SchemaVersionForActionIdQuery,
-      {
+    const result = await this.registryApi(endpoint, accessToken).request({
+      operation: SchemaVersionForActionIdQuery,
+      variables: {
         actionId,
         includeSDL: sdlType === 'sdl',
         includeSupergraph: sdlType === 'supergraph',
       },
-    );
+    });
 
     if (result.schemaVersionForActionId == null) {
       return this.error(`No schema found for action id ${actionId}`);
