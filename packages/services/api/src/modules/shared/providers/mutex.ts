@@ -119,6 +119,8 @@ export class Mutex {
         throw err;
       });
 
+      logger.debug('Acquired lock (id=%s)', id);
+
     // If we acquired the lock but the request got canceled, we want to immediately release it,
     // so other pending requests can take over.
     if (signal.aborted) {
