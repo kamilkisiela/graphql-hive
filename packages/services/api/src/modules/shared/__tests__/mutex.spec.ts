@@ -15,7 +15,7 @@ it('should allow only one lock at a time', async ({ expect }) => {
   // second lock shouldnt resolve
   await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
-  unlock1();
+  await unlock1();
 
   // after the first lock releases, second one resolves
   await expect(lock2).resolves.toBeTruthy();
@@ -97,7 +97,7 @@ it('should keep auto-extending lock until unlock', async ({ expect }) => {
   // second lock still cannot be acquired resolve
   await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
-  unlock();
+  await unlock();
 
   // only after unlock can the second lock be acquired
   await expect(lock2).resolves.toBeTruthy();

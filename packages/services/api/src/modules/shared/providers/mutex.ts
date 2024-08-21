@@ -131,11 +131,11 @@ export class Mutex {
     // we have a global timeout of 90 seconds to avoid dead-licks
     const globalTimeout = setTimeout(() => {
       logger.error('Global lock timeout exceeded (id=%s)', id);
-      cleanup();
+      void cleanup();
     }, 90_000);
 
     /** cleanup timers and release the lock. */
-    async function cleanup() {
+    function cleanup() {
       if (extendTimeout === undefined) {
         return;
       }
@@ -146,7 +146,10 @@ export class Mutex {
 
       extendTimeout = undefined;
       if (lock.expiration > new Date().getTime()) {
-        await lock.release();
+        void lock.release().catch(err => {
+          logger.error('Failed to release lock (id=%s)', id);
+          console.error(err);
+        });
       }
     }
 
@@ -169,7 +172,7 @@ export class Mutex {
 
     logger.debug('Lock acquired (id=%s)', id);
 
-    extendLock(true);
+    await extendLock(true);
 
     return cleanup;
   }
