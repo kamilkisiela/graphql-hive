@@ -138,8 +138,8 @@ export function CreateOperationModal(props: {
 
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to create operation',
+        title: 'Failed to create operation',
+        description: error.message,
         variant: 'destructive',
       });
     } else {
