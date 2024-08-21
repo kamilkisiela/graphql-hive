@@ -80,7 +80,7 @@ export class Mutex {
       'error.message': error.message,
     }),
   })
-  private async lock(
+  async lock(
     id: string,
     {
       signal,
@@ -90,7 +90,8 @@ export class Mutex {
       autoExtendThreshold = 1_000,
     }: MutexLockOptions,
   ) {
-    this.logger.debug('Acquiring lock (id=%s)', id);
+    const { logger } = this;
+    logger.debug('Acquiring lock (id=%s)', id);
 
     // we try to acquire the lock
     let lock = await this.redlock
@@ -99,7 +100,7 @@ export class Mutex {
         retryDelay,
       })
       .catch(err => {
-        this.logger.debug('Acquiring lock failed (id=%s)', id);
+        logger.debug('Acquiring lock failed (id=%s)', id);
         if (signal.aborted) {
           throw new Error('Request has been aborted.');
         }
@@ -121,41 +122,56 @@ export class Mutex {
     // If we acquired the lock but the request got canceled, we want to immediately release it,
     // so other pending requests can take over.
     if (signal.aborted) {
-      this.logger.debug('Request has been aborted, release lock. (id=%s)', id);
+      logger.debug('Request has been aborted, release lock. (id=%s)', id);
       await lock.release();
       throw new Error('Request has been aborted.');
     }
 
-    this.logger.debug('Lock acquired (id=%s)', id);
+    let extendTimeout: NodeJS.Timeout | undefined;
+    // we have a global timeout of 90 seconds to avoid dead-licks
+    const globalTimeout = setTimeout(() => {
+      logger.error('Global lock timeout exceeded (id=%s)', id);
+      cleanup();
+    }, 90_000);
 
-    let timeout: NodeJS.Timeout;
+    /** cleanup timers and release the lock. */
+    async function cleanup() {
+      if (extendTimeout === undefined) {
+        return;
+      }
 
-    const extendLock = async (extend = true) => {
-      if (extend) {
-        this.logger.debug('Attempt extended lock (id=%s)', id);
+      logger.debug('Releasing lock (id=%s)', id);
+      clearTimeout(extendTimeout);
+      clearTimeout(globalTimeout);
+
+      extendTimeout = undefined;
+      if (lock.expiration > new Date().getTime()) {
+        await lock.release();
+      }
+    }
+
+    async function extendLock(isInitial = false) {
+      if (isInitial === false) {
+        logger.debug('Attempt extended lock (id=%s)', id);
         try {
           // NOTE: extending a lock creates a new lock instance, so we need to replace it here.
           lock = await lock.extend(duration);
-          this.logger.debug('Lock extend succeeded (id=%s)', id);
+          logger.debug('Lock extend succeeded (id=%s)', id);
         } catch (err) {
-          this.logger.error('Failed to extend lock (id=%s)', id);
+          logger.error('Failed to extend lock (id=%s)', id);
           console.error(err);
           return;
         }
       }
 
-      timeout = setTimeout(extendLock, lock.expiration - Date.now() - autoExtendThreshold);
-    };
+      extendTimeout = setTimeout(extendLock, lock.expiration - Date.now() - autoExtendThreshold);
+    }
 
-    extendLock(false);
+    logger.debug('Lock acquired (id=%s)', id);
 
-    return async () => {
-      this.logger.debug('Releasing lock (id=%s)', id);
-      clearTimeout(timeout);
-      if (lock.expiration > new Date().getTime()) {
-        await lock.release();
-      }
-    };
+    extendLock(true);
+
+    return cleanup;
   }
 
   public async perform<T>(
