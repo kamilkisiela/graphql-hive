@@ -60,10 +60,10 @@ export class Mutex {
     this.logger = logger.child({ service: 'Mutex' });
     this.redlock = new Redlock([redis]);
     this.redlock.on('error', err => {
+      // these errors will be reported directly by the locking mechanism
       if (err instanceof ResourceLockedError) {
         return;
       }
-      // these errors will be reported directly by the locking mechanism
       this.logger.error(err);
     });
   }
