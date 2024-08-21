@@ -95,7 +95,7 @@ export function CommunitySection({ className }: { className?: string }) {
 function CommunityCard(props: { title: string; description: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col">
-      <p className="text-white">{props.title}</p>
+      <p className="font-medium text-white">{props.title}</p>
       <p className="mb-4 mt-2 flex-1 text-white/80">{props.description}</p>
       {props.children}
     </div>
