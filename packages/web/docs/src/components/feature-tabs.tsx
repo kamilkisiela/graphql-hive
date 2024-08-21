@@ -46,8 +46,8 @@ export function FeatureTabs({ className }: { className?: string }) {
             ' group mx-4 mt-6 md:mx-0 md:mt-0' +
             ' max-sm:h-[58px] max-sm:focus-within:rounded-b-none' +
             ' max-sm:focus-within:pointer-events-none' + // <- blur on click of current
-            ' focus-within:has-[>:nth-child(2)[data-state="active"]]:translate-y-[-100%]' +
-            ' focus-within:has-[>:nth-child(3)[data-state="active"]]:translate-y-[-200%]' +
+            ' max-sm:focus-within:has-[>:nth-child(2)[data-state="active"]]:translate-y-[-100%]' +
+            ' max-sm:focus-within:has-[>:nth-child(3)[data-state="active"]]:translate-y-[-200%]' +
             ' relative z-10 overflow-hidden focus-within:overflow-visible'
           }
         >
