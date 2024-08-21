@@ -1,4 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { traceFn } from '@hive/service-common';
 import { SchemaChangeType } from '@hive/storage';
 import { SingleOrchestrator } from '../orchestrators/single';
 import { ConditionalBreakingChangeDiffConfig, RegistryChecks } from '../registry-checks';
@@ -26,6 +27,13 @@ export class SingleModel {
     private logger: Logger,
   ) {}
 
+  @traceFn('Single modern: check', {
+    initAttributes: args => ({
+      'hive.project.id': args.selector.project,
+      'hive.target.id': args.selector.target,
+      'hive.organization.id': args.selector.organization,
+    }),
+  })
   async check({
     input,
     selector,

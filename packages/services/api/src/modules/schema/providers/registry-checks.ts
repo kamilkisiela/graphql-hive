@@ -5,6 +5,7 @@ import hashObject from 'object-hash';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
+import { traceFn } from '@hive/service-common';
 import {
   HiveSchemaChangeModel,
   type RegistryServiceUrlChangeSerializableChange,
@@ -346,6 +347,7 @@ export class RegistryChecks {
     return existingSchemaResult.sdl ?? null;
   }
 
+  @traceFn('RegistryChecks.policyCheck')
   async policyCheck({
     selector,
     modifiedSdl,
@@ -397,6 +399,7 @@ export class RegistryChecks {
    * Diff incoming and existing SDL and generate a list of changes.
    * Uses usage stats to determine whether a change is safe or not (if available).
    */
+  @traceFn('RegistryChecks.diff')
   async diff(args: {
     /** The existing SDL */
     existingSdl: string | null;

@@ -1,5 +1,5 @@
 import { type MessagePort } from 'node:worker_threads';
-import { AwsClient } from '@hive/cdn-script/aws';
+import { AwsClient } from '../../cdn/providers/aws';
 import { ClickHouse } from '../../operations/providers/clickhouse-client';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';

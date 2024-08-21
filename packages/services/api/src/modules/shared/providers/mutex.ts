@@ -1,5 +1,6 @@
 import { Inject, Injectable } from 'graphql-modules';
 import Redlock, { ResourceLockedError } from 'redlock';
+import { traceFn } from '@hive/service-common';
 import { Logger } from './logger';
 import type { Redis } from './redis';
 import { REDIS_INSTANCE } from './redis';
@@ -56,6 +57,18 @@ export class Mutex {
     });
   }
 
+  @traceFn('Mutex.lock', {
+    initAttributes: (id, options) => ({
+      'lock.id': id,
+      'lock.duration': options.duration,
+      'lock.retries': options.retries,
+      'lock.retryDelay': options.retryDelay,
+      'lock.autoExtendThreshold': options.autoExtendThreshold,
+    }),
+    errorAttributes: error => ({
+      'error.message': error.message,
+    }),
+  })
   public lock(
     id: string,
     {
@@ -101,7 +114,7 @@ export class Mutex {
               'abort',
               event => {
                 // TODO: how to bubble this to the caller? the lock is basically released at this point
-                this.logger.error('Lock auto-extension failed (id=%s, event=%s)', id, event);
+                this.logger.error('Lock auto-extension failed (id=%s, event=%o)', id, event);
               },
               { once: true },
             );

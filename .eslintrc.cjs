@@ -199,7 +199,8 @@ module.exports = {
         tailwindcss: {
           callees: tailwindCallees,
           config: 'packages/web/app/tailwind.config.cjs',
-          whitelist: ['drag-none', 'graphiql-toolbar-icon', 'graphiql-toolbar-button'],
+          whitelist: ['drag-none'],
+          cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/dist/style.css'],
         },
       },
     },

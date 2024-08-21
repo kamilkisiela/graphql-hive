@@ -944,7 +944,7 @@ export class OperationsReader {
      * top_operations_by_coordinates -> get the top operations for schema coordinates, we need to right join operations_daily as coordinates_daily does not contain the client_names column
      */
     const results = await this.clickHouse
-      .query<unknown>({
+      .postQuery({
         queryId: '_getTopOperationsForSchemaCoordinates',
         query: sql`
           WITH "top_operations_by_coordinates" AS (
@@ -987,7 +987,7 @@ export class OperationsReader {
               "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
               AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
               AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
-              AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
+              AND "coordinates_daily"."coordinate" IN (${sql.longArray(args.schemaCoordinates, 'String')})
             HAVING "total" >= ${String(args.requestCountThreshold)}
             ORDER BY
               "total" DESC,
@@ -1077,7 +1077,6 @@ export class OperationsReader {
         schemaCoordinates,
       }).then(result => result.map(result => Promise.resolve(result)));
     },
-    20,
   );
 
   /** Result array retains the order of the input `args.schemaCoordinates`. */
@@ -1098,7 +1097,7 @@ export class OperationsReader {
     this.logger.debug('Fetching top clients for schema coordinates (args=%o)', args);
 
     const results = await this.clickHouse
-      .query<unknown>({
+      .postQuery({
         queryId: '_getTopClientsForSchemaCoordinates',
         query: sql`
           WITH "coordinates_to_client_name_mapping" AS (
@@ -1145,7 +1144,7 @@ export class OperationsReader {
               "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
               AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
               AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
-              AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
+              AND "coordinates_daily"."coordinate" IN (${sql.longArray(args.schemaCoordinates, 'String')})
             LIMIT 1
             BY
               "coordinates_daily"."coordinate",
@@ -1248,7 +1247,6 @@ export class OperationsReader {
         schemaCoordinates,
       }).then(result => result.map(result => Promise.resolve(result)));
     },
-    20,
   );
 
   async countClientVersions({
