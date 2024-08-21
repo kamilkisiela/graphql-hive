@@ -44,7 +44,7 @@ export interface MutexLockOptions {
 export class MutexResourceLockedError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MutexError';
+    this.name = 'MutexResourceLockedError';
   }
 }
 /**
