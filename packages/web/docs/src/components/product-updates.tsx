@@ -36,6 +36,7 @@ export async function getChangelogs(): Promise<Changelog[]> {
   const productUpdatesFolder = pageMap.find(item => item.route === '/product-updates')!.children!;
 
   return productUpdatesFolder
+    .slice(1) // cut `_meta.ts` which always comes first
     .map(item => {
       if (!item.children) {
         // Regular mdx page
