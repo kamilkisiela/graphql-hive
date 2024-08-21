@@ -153,7 +153,9 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
         <Image
           alt=""
           className="rounded-2xl bg-black grayscale"
-          {...(typeof avatar === 'string' ? { src: avatar } : avatar)}
+          {...(typeof avatar === 'string'
+            ? { src: avatar }
+            : { blurDataURL: avatar.blurDataURL, src: avatar.src })}
           width={180}
           height={180}
         />
