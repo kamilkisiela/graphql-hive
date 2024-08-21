@@ -35,12 +35,9 @@ function MainCards() {
         return (
           <li
             key={product.name}
-            className="text-green-1000 first-of-type:bg-green-1000 group relative flex-1 shrink-0 overflow-hidden rounded-2xl bg-blue-400 first-of-type:text-white"
+            className="text-green-1000 first-of-type:bg-green-1000 group relative flex-1 shrink-0 basis-[283.5px] overflow-hidden rounded-2xl bg-blue-400 first-of-type:text-white max-md:w-[283.5px]"
           >
-            <a
-              className="relative z-10 block flex-1 basis-[283.5px] p-8 max-md:w-[283.5px]"
-              href={product.href}
-            >
+            <a className="relative z-10 block flex-1 p-8" href={product.href}>
               {product.name}
               <Icon className="mt-8" />
               <ArrowIcon className="absolute bottom-8 right-8" />
@@ -77,7 +74,7 @@ function SecondaryCards() {
         return (
           <li
             key={product.name}
-            className="text-green-1000 bg-beige-200 hover:bg-beige-400 shrink-0 basis-[283.5px] rounded-2xl transition-colors duration-500"
+            className="text-green-1000 bg-beige-200 hover:bg-beige-400 shrink-0 basis-[283.5px] rounded-2xl transition-colors duration-500 max-sm:min-w-[283.5px]"
           >
             <a href={product.href} className="relative flex h-full flex-col p-8">
               <p>{product.name}</p>
