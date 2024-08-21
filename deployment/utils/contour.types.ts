@@ -787,6 +787,7 @@ export interface ContourValues {
       };
       [k: string]: unknown;
     };
+    defaultStorageClass?: string;
     imagePullSecrets?: unknown[];
     imageRegistry?: string;
     storageClass?: string;
