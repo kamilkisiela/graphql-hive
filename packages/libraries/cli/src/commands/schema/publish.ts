@@ -314,6 +314,7 @@ export default class SchemaPublish extends Command<typeof SchemaPublish> {
           }
         } else if (result.schemaPublish.__typename === 'SchemaPublishRetry') {
           this.log(result.schemaPublish.reason);
+          this.log('Waiting for other schema publishes to complete...');
           result = null;
         } else if (result.schemaPublish.__typename === 'SchemaPublishMissingServiceError') {
           this.fail(
