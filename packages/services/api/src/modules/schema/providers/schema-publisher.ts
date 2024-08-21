@@ -4,7 +4,6 @@ import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
-import { ResourceLockedError } from 'redlock';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import { traceFn } from '@hive/service-common';
@@ -33,7 +32,7 @@ import { ProjectManager } from '../../project/providers/project-manager';
 import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
 import { DistributedCache } from '../../shared/providers/distributed-cache';
 import { Logger } from '../../shared/providers/logger';
-import { Mutex } from '../../shared/providers/mutex';
+import { Mutex, MutexResourceLockedError } from '../../shared/providers/mutex';
 import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { toGraphQLSchemaCheck } from '../to-graphql-schema-check';
@@ -104,7 +103,7 @@ type PublishResult =
     };
 
 function registryLockId(targetId: string) {
-  return `registry:lock:${targetId}`;
+  return `registry-lock:${targetId}`;
 }
 
 function assertNonNull<T>(value: T | null, message: string): T {
@@ -1094,17 +1093,6 @@ export class SchemaPublisher {
             organization: input.organization,
             scope: TargetAccessScope.REGISTRY_WRITE,
           });
-          await new Promise<void>(resolve => {
-            const i = setInterval(() => {
-              console.log('wait wait wait');
-            }, 5000);
-
-            setTimeout(() => {
-              console.log('LETS GOOOOO');
-              clearInterval(i);
-              resolve();
-            }, 60_000);
-          });
           return this.distributedCache.wrap({
             key: `schema:publish:${checksum}`,
             ttlSeconds: 15,
@@ -1117,7 +1105,7 @@ export class SchemaPublisher {
         },
       )
       .catch((error: unknown) => {
-        if (error instanceof ResourceLockedError && input.supportsRetry === true) {
+        if (error instanceof MutexResourceLockedError && input.supportsRetry === true) {
           return {
             __typename: 'SchemaPublishRetry',
             reason: 'Another schema publish is currently in progress.',

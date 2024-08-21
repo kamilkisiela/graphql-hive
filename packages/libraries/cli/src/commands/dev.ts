@@ -479,7 +479,7 @@ export default class Dev extends Command<typeof Dev> {
 
   private async resolveSdlFromUrl(url: string) {
     const result = await this.graphql(url)
-      .request(ServiceIntrospectionQuery)
+      .request({ operation: ServiceIntrospectionQuery })
       .catch(error => {
         this.handleFetchError(error);
       });
