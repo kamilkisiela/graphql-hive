@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@envelop/core": "5.0.1",
+    "@envelop/core": "5.0.2",
     "@envelop/generic-auth": "7.0.0",
     "@envelop/graphql-jit": "8.0.3",
     "@envelop/graphql-modules": "6.0.0",
