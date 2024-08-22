@@ -1,5 +1,6 @@
+import { setTimeout as setTimeoutP } from 'node:timers/promises';
 import { Inject, Injectable } from 'graphql-modules';
-import Redlock, { ExecutionError, ResourceLockedError } from 'redlock';
+import Redlock, { ExecutionError, Lock, ResourceLockedError } from 'redlock';
 import { traceFn } from '@hive/service-common';
 import { Logger } from './logger';
 import type { Redis } from './redis';
@@ -93,31 +94,62 @@ export class Mutex {
     const { logger } = this;
     logger.debug('Acquiring lock (id=%s)', id);
 
-    // we try to acquire the lock
-    let lock = await this.redlock
-      .acquire([id], duration, {
-        retryCount: retries,
-        retryDelay,
-      })
-      .catch(err => {
+    const requestAbortedD = Promise.withResolvers<void>();
+    let retryCounter = 0;
+    let lockToAcquire: Lock | null = null;
+
+    signal.addEventListener(
+      'abort',
+      () => {
+        logger.debug('Request has been aborted (id=%s)', id);
+        requestAbortedD.reject(signal.reason);
+      },
+      { once: true },
+    );
+
+    // We try to acquire the lock until the retry counter is exceeded or the lock as been successfully acquired.
+    do {
+      // we avoid using any of the acquire settings for auto-extension, retrying, etc.
+      // because of the many bugs and weird API design choices in the redlock library.
+      // By manually handling the retries and lock extension we can abort acquiring the lock as soon as the incoming request has been canceled
+      lockToAcquire = await this.redlock
+        .acquire([id], duration, {
+          // we only want to try once to acquire the lock
+          // if we fail, we will retry manually with our own logic
+          retryCount: 0,
+        })
+        .catch((err: unknown) => {
+          // Note: This is kind of a workaround.
+          // The redlock library should not throw `ExecutionError`, but `ResourceLockedError`.
+          // We have our own error here for the Mutex.
+          // See https://github.com/mike-marcacci/node-redlock/issues/168
+          if (
+            err instanceof ExecutionError &&
+            err.message === 'The operation was unable to achieve a quorum during its retry window.'
+          ) {
+            return null;
+          }
+
+          logger.error('Error while acquiring lock (id=%s)', id);
+          console.error(err);
+          throw err;
+        });
+
+      if (lockToAcquire !== null) {
+        break;
+      }
+
+      retryCounter++;
+
+      if (retryCounter >= retries) {
         logger.debug('Acquiring lock failed (id=%s)', id);
-        if (signal.aborted) {
-          throw new Error('Request has been aborted.');
-        }
+        throw new MutexResourceLockedError(`Resource "${id}" is locked.`);
+      }
 
-        // Note: This is kind of a workaround.
-        // The redlock library should not throw `ExecutionError`, but `ResourceLockedError`.
-        // We have our own error here for the Mutex.
-        // See https://github.com/mike-marcacci/node-redlock/issues/168
-        if (
-          err instanceof ExecutionError &&
-          err.message === 'The operation was unable to achieve a quorum during its retry window.'
-        ) {
-          throw new MutexResourceLockedError(`Resource "${id}" is locked.`);
-        }
+      await Promise.race([requestAbortedD.promise, setTimeoutP(retryDelay)]);
+    } while (true);
 
-        throw err;
-      });
+    let lock: Lock = lockToAcquire;
 
     logger.debug('Acquired lock (id=%s)', id);
 
@@ -125,8 +157,11 @@ export class Mutex {
     // so other pending requests can take over.
     if (signal.aborted) {
       logger.debug('Request has been aborted, release lock. (id=%s)', id);
-      await lock.release();
-      throw new Error('Request has been aborted.');
+      await lock.release().catch(err => {
+        logger.debug('Error while releasing lock (id=%s)', id);
+        console.error(err);
+      });
+      throw signal.reason;
     }
 
     let extendTimeout: NodeJS.Timeout | undefined;
@@ -149,7 +184,7 @@ export class Mutex {
       extendTimeout = undefined;
       if (lock.expiration > new Date().getTime()) {
         void lock.release().catch(err => {
-          logger.error('Failed to release lock (id=%s)', id);
+          logger.error('Error while releasing lock (id=%s)', id);
           console.error(err);
         });
       }
