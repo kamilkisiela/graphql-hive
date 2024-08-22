@@ -37,10 +37,13 @@ export function EcosystemManagementSection({ className }: { className?: string }
             ))}
           </ul>
           <div className="flex flex-col gap-x-4 gap-y-2 md:flex-row">
-            <CallToAction href="/" variant="primary-inverted">
+            <CallToAction
+              href="https://the-guild.dev/graphql/hive/docs/use-cases/apollo-studio"
+              variant="primary-inverted"
+            >
               Migrate from Apollo
             </CallToAction>
-            <CallToAction href="/" variant="secondary">
+            <CallToAction href="https://github.com/the-guild-org" variant="secondary">
               <BookIcon />
               Explore the full Ecosystem
             </CallToAction>
@@ -264,7 +267,7 @@ function EdgeLabel(props: EdgeLabelProps) {
     <div
       className={
         'flex size-8 h-[var(--label-h)] items-center justify-center' +
-        ' cursor-default rounded bg-green-700 text-sm font-medium leading-[20px]'
+        ' cursor-default rounded bg-green-700 text-sm font-medium leading-5'
       }
       {...props}
     />
@@ -294,7 +297,7 @@ function Node({ title, description, children, highlighted, className, ...rest }:
       <div>
         <div className="font-medium text-green-100">{title}</div>
         {description && (
-          <div className="mt-0.5 text-sm leading-[20px] text-green-200">{description}</div>
+          <div className="mt-0.5 text-sm leading-5 text-green-200">{description}</div>
         )}
       </div>
     </div>

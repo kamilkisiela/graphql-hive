@@ -25,9 +25,13 @@ export function MaskingScrollview({
         // replace "mask" with "background" to debug it
         maskImage:
           fade === 'x'
-            ? `linear-gradient(to left, transparent, black 128px 25%, black 50%, transparent 50%),
+            ? scrolledSides.left && scrolledSides.right
+              ? 'none'
+              : `linear-gradient(to left, transparent, black 128px 25%, black 50%, transparent 50%),
                linear-gradient(to right, transparent, black 128px 25%, black 50%, transparent 50%)`
-            : `linear-gradient(to bottom, transparent, black 128px 25%, black 50%, transparent 50%),
+            : scrolledSides.top && scrolledSides.bottom
+              ? 'none'
+              : `linear-gradient(to bottom, transparent, black 128px 25%, black 50%, transparent 50%),
                linear-gradient(to top, transparent, black 128px 25%, black 50%, transparent 50%)`,
         maskSize:
           fade === 'x'

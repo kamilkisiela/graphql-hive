@@ -10,8 +10,8 @@ export function StatsItem(props: {
   decimal?: boolean;
 }) {
   return (
-    <div className="flex items-end gap-4 rounded-3xl border border-green-400 p-8 lg:flex-col lg:items-start lg:p-12">
-      <Heading as="div" size="xl" className="text-green-1000 text-[48px] lg:text-6xl">
+    <div className="flex items-end justify-between gap-4 rounded-3xl border border-green-400 p-8 lg:flex-col lg:items-start lg:p-12">
+      <Heading as="div" size="xl" className="text-green-1000 min-w-[120px] text-[48px] lg:text-6xl">
         <CountUp
           start={0}
           end={props.value}
@@ -24,7 +24,9 @@ export function StatsItem(props: {
         />
         {props.suffix}
       </Heading>
-      <div className="mb-3 font-medium sm:mb-3 md:mb-2 lg:mb-0">{props.label}</div>
+      <div className="mb-3 font-medium max-md:text-right sm:mb-3 md:mb-2 lg:mb-0">
+        {props.label}
+      </div>
     </div>
   );
 }
