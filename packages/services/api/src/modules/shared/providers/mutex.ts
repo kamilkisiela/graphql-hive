@@ -109,31 +109,36 @@ export class Mutex {
     // We try to acquire the lock until the retry counter is exceeded or the lock as been successfully acquired.
     do {
       logger.debug('Acquiring lock (id=%s, attempt=%n)', id, attemptCounter + 1);
-      // we avoid using any of the acquire settings for auto-extension, retrying, etc.
-      // because of the many bugs and weird API design choices in the redlock library.
-      // By manually handling the retries and lock extension we can abort acquiring the lock as soon as the incoming request has been canceled
-      lockToAcquire = await this.redlock
-        .acquire([id], duration, {
-          // we only want to try once to acquire the lock
-          // if we fail, we will retry manually with our own logic
-          retryCount: 0,
-        })
-        .catch((err: unknown) => {
-          // Note: This is kind of a workaround.
-          // The redlock library should not throw `ExecutionError`, but `ResourceLockedError`.
-          // We have our own error here for the Mutex.
-          // See https://github.com/mike-marcacci/node-redlock/issues/168
-          if (
-            err instanceof ExecutionError &&
-            err.message === 'The operation was unable to achieve a quorum during its retry window.'
-          ) {
-            return null;
-          }
 
-          logger.error('Error while acquiring lock (id=%s)', id);
-          console.error(err);
-          throw err;
-        });
+      lockToAcquire = await Promise.race([
+        // we avoid using any of the acquire settings for auto-extension, retrying, etc.
+        // because of the many bugs and weird API design choices in the redlock library.
+        // By manually handling the retries and lock extension we can abort acquiring the lock as soon as the incoming request has been canceled
+        this.redlock
+          .acquire([id], duration, {
+            // we only want to try once to acquire the lock
+            // if we fail, we will retry manually with our own logic
+            retryCount: 0,
+          })
+          .catch((err: unknown) => {
+            // Note: This is kind of a workaround.
+            // The redlock library should not throw `ExecutionError`, but `ResourceLockedError`.
+            // We have our own error here for the Mutex.
+            // See https://github.com/mike-marcacci/node-redlock/issues/168
+            if (
+              err instanceof ExecutionError &&
+              err.message ===
+                'The operation was unable to achieve a quorum during its retry window.'
+            ) {
+              return null;
+            }
+
+            logger.error('Error while acquiring lock (id=%s)', id);
+            console.error(err);
+            throw err;
+          }),
+        requestAbortedD.promise,
+      ]);
 
       if (lockToAcquire !== null) {
         break;
