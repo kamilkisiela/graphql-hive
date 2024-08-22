@@ -112,10 +112,13 @@ export default class SchemaDelete extends Command<typeof SchemaDelete> {
         env: 'HIVE_TOKEN',
       });
 
-      const result = await this.registryApi(endpoint, accessToken).request(schemaDeleteMutation, {
-        input: {
-          serviceName: service,
-          dryRun: flags.dryRun,
+      const result = await this.registryApi(endpoint, accessToken).request({
+        operation: schemaDeleteMutation,
+        variables: {
+          input: {
+            serviceName: service,
+            dryRun: flags.dryRun,
+          },
         },
       });
 

@@ -59,15 +59,15 @@ export default class AppCreate extends Command<typeof AppCreate> {
       throw new Error('Invalid manifest');
     }
 
-    const result = await this.registryApi(endpoint, accessToken).request(
-      CreateAppDeploymentMutation,
-      {
+    const result = await this.registryApi(endpoint, accessToken).request({
+      operation: CreateAppDeploymentMutation,
+      variables: {
         input: {
           appName: flags['name'],
           appVersion: flags['version'],
         },
       },
-    );
+    });
 
     if (result.createAppDeployment.error) {
       // TODO: better error message formatting :)
@@ -89,16 +89,16 @@ export default class AppCreate extends Command<typeof AppCreate> {
 
     const flush = async (force = false) => {
       if (buffer.length >= 100 || force) {
-        const result = await this.registryApi(endpoint, accessToken).request(
-          AddDocumentsToAppDeploymentMutation,
-          {
+        const result = await this.registryApi(endpoint, accessToken).request({
+          operation: AddDocumentsToAppDeploymentMutation,
+          variables: {
             input: {
               appName: flags['name'],
               appVersion: flags['version'],
               documents: buffer,
             },
           },
-        );
+        });
 
         if (result.addDocumentsToAppDeployment.error) {
           // TODO: better error message formatting :)

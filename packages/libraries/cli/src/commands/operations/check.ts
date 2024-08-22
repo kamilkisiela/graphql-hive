@@ -119,7 +119,9 @@ export default class OperationsCheck extends Command<typeof OperationsCheck> {
         return;
       }
 
-      const result = await this.registryApi(endpoint, accessToken).request(fetchLatestVersionQuery);
+      const result = await this.registryApi(endpoint, accessToken).request({
+        operation: fetchLatestVersionQuery,
+      });
 
       const sdl = result.latestValidVersion?.sdl;
 

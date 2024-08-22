@@ -37,15 +37,15 @@ export default class AppPublish extends Command<typeof AppPublish> {
       env: 'HIVE_TOKEN',
     });
 
-    const result = await this.registryApi(endpoint, accessToken).request(
-      ActivateAppDeploymentMutation,
-      {
+    const result = await this.registryApi(endpoint, accessToken).request({
+      operation: ActivateAppDeploymentMutation,
+      variables: {
         input: {
           appName: flags['name'],
           appVersion: flags['version'],
         },
       },
-    );
+    });
 
     if (result.activateAppDeployment.error) {
       throw new Error(result.activateAppDeployment.error.message);

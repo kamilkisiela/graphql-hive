@@ -296,6 +296,7 @@ export default gql`
 
   union SchemaPublishPayload =
     | SchemaPublishSuccess
+    | SchemaPublishRetry
     | SchemaPublishError
     | SchemaPublishMissingServiceError
     | SchemaPublishMissingUrlError
@@ -334,6 +335,10 @@ export default gql`
     Link GitHub version to a GitHub commit on a repository.
     """
     gitHub: SchemaPublishGitHubInput
+    """
+    Whether the CLI supports retrying the schema publish, in case acquiring the schema publish lock fails due to a busy queue.
+    """
+    supportsRetry: Boolean = False
   }
 
   input SchemaComposeInput {
@@ -593,6 +598,10 @@ export default gql`
     linkToWebsite: String
     message: String
     changes: SchemaChangeConnection
+  }
+
+  type SchemaPublishRetry {
+    reason: String!
   }
 
   type SchemaPublishError {

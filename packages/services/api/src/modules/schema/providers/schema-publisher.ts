@@ -32,7 +32,7 @@ import { ProjectManager } from '../../project/providers/project-manager';
 import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
 import { DistributedCache } from '../../shared/providers/distributed-cache';
 import { Logger } from '../../shared/providers/logger';
-import { Mutex } from '../../shared/providers/mutex';
+import { Mutex, MutexResourceLockedError } from '../../shared/providers/mutex';
 import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { toGraphQLSchemaCheck } from '../to-graphql-schema-check';
@@ -95,10 +95,15 @@ export type PublishInput = Types.SchemaPublishInput &
 
 type BreakPromise<T> = T extends Promise<infer U> ? U : never;
 
-type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>;
+type PublishResult =
+  | BreakPromise<ReturnType<SchemaPublisher['internalPublish']>>
+  | {
+      readonly __typename: 'SchemaPublishRetry';
+      readonly reason: string;
+    };
 
 function registryLockId(targetId: string) {
-  return `registry:lock:${targetId}`;
+  return `registry-lock:${targetId}`;
 }
 
 function assertNonNull<T>(value: T | null, message: string): T {
@@ -1065,29 +1070,50 @@ export class SchemaPublisher {
       input.target,
     );
 
-    return this.mutex.perform(
-      registryLockId(input.target),
-      {
-        signal,
-      },
-      async () => {
-        await this.authManager.ensureTargetAccess({
-          target: input.target,
-          project: input.project,
-          organization: input.organization,
-          scope: TargetAccessScope.REGISTRY_WRITE,
-        });
-        return this.distributedCache.wrap({
-          key: `schema:publish:${checksum}`,
-          ttlSeconds: 15,
-          executor: () =>
-            this.internalPublish({
-              ...input,
-              checksum,
-            }),
-        });
-      },
-    );
+    return this.mutex
+      .perform(
+        registryLockId(input.target),
+        {
+          /**
+           * The global request timeout is 60 seconds.
+           * We don't want to try acquiring the lock longer than 30 seconds.
+           * If it succeeds after 30 seconds,
+           * we have 30 seconds for actually running the business logic.
+           *
+           * If we would wait longer we risk the user facing 504 errors.
+           */
+          retries: 30,
+          retryDelay: 1_000,
+          signal,
+        },
+        async () => {
+          await this.authManager.ensureTargetAccess({
+            target: input.target,
+            project: input.project,
+            organization: input.organization,
+            scope: TargetAccessScope.REGISTRY_WRITE,
+          });
+          return this.distributedCache.wrap({
+            key: `schema:publish:${checksum}`,
+            ttlSeconds: 15,
+            executor: () =>
+              this.internalPublish({
+                ...input,
+                checksum,
+              }),
+          });
+        },
+      )
+      .catch((error: unknown) => {
+        if (error instanceof MutexResourceLockedError && input.supportsRetry === true) {
+          return {
+            __typename: 'SchemaPublishRetry',
+            reason: 'Another schema publish is currently in progress.',
+          } satisfies PublishResult;
+        }
+
+        throw error;
+      });
   }
 
   public async updateVersionStatus(input: TargetSelector & { version: string; valid: boolean }) {
