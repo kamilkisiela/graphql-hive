@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
@@ -21,26 +22,60 @@ export function FeatureTabs({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'border-beige-400 mx-auto w-[1200px] max-w-[calc(100%-4rem)] rounded-3xl border bg-white md:p-6',
+        'border-beige-400 mx-auto w-[1200px] max-w-full rounded-3xl bg-white' +
+          ' sm:max-w-[calc(100%-4rem)] sm:border md:p-6',
         className,
       )}
     >
-      <Tabs.Root defaultValue={tabs[0]}>
-        <Tabs.List className="bg-beige-200 mb-12 flex flex-row rounded-2xl">
-          {tabs.map((tab, i) => (
-            <Tabs.Trigger
-              key={tab}
-              value={tab}
-              className={
-                "data-[state='active']:text-green-1000 data-[state='active']:border-beige-600 data-[state='active']:bg-white" +
-                ' border border-transparent font-medium leading-6 text-green-800' +
-                ' flex flex-1 justify-center gap-2.5 rounded-[15px] p-2 md:p-4'
-              }
-            >
-              {icons[i]}
-              {tab}
-            </Tabs.Trigger>
-          ))}
+      <Head>
+        {[
+          observabilityClientsImage,
+          observabilityOperationsImage,
+          observabilityOverallImage,
+          registryExplorerImage,
+          registrySchemaChecksImage,
+          registryVersionControlSystemImage,
+        ].map(image => (
+          <link key={image.src} rel="preload" as="image" href={image.src} />
+        ))}
+      </Head>
+      <Tabs.Root defaultValue={tabs[0]} {...useSmallScreenTabsHandlers()}>
+        <Tabs.List
+          className={
+            'bg-beige-200 mb-12 flex flex-col rounded-2xl sm:flex-row' +
+            ' group mx-4 mt-6 md:mx-0 md:mt-0' +
+            ' max-sm:h-[58px] max-sm:focus-within:rounded-b-none'
+          }
+        >
+          {tabs.map((tab, i) => {
+            return (
+              <Tabs.Trigger
+                key={tab}
+                value={tab}
+                className={
+                  'rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
+                  ' border-transparent font-medium leading-6 text-green-800 sm:border' +
+                  ' flex flex-1 justify-center gap-2.5 p-4' +
+                  ' text-base sm:text-sm lg:text-base [&>svg]:shrink-0' +
+                  ' max-sm:rdx-state-inactive:hidden group-focus-within:rdx-state-inactive:flex [&[data-state="inactive"]>:last-child]:invisible' +
+                  ' rounded-lg sm:rounded-[15px]' +
+                  ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none max-sm:rdx-state-inactive:order-1 z-10' +
+                  ' max-sm:[&[data-state="active"]~:nth-child(3)]:rounded-b-lg max-sm:[&[data-state="active"]~:nth-child(3)]:border-b' +
+                  ' max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:rounded-b-lg max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:border-b' +
+                  ' max-sm:group-focus-within:border-beige-600 max-sm:rdx-state-active:border max-sm:group-focus-within:border-x' +
+                  ' max-sm:group-focus-within:rdx-state-active:rounded-b-none max-sm:group-focus-within:rdx-state-active:border-b-0' +
+                  ' max-sm:group-focus-within:aria-selected:z-20 max-sm:group-focus-within:aria-selected:ring-4' +
+                  ' max-sm:rdx-state-inactive:pointer-events-none max-sm:rdx-state-inactive:group-focus-within:pointer-events-auto' +
+                  // between 640px and 721px we still want tabs, but they won't fit with big padding
+                  ' sm:max-[721px]:p-2'
+                }
+              >
+                {icons[i]}
+                {tab}
+                <ChevronDownIcon className="ml-auto size-6 text-green-800 sm:hidden" />
+              </Tabs.Trigger>
+            );
+          })}
         </Tabs.List>
         <Tabs.Content value="Schema Registry" tabIndex={-1}>
           <Feature
@@ -173,62 +208,130 @@ function Feature(props: {
   const { icon, title, description, documentationLink, highlights } = props;
 
   return (
-    <>
-      <Head>
-        {highlights
-          ? highlights.map(highlight => (
-              <link key={highlight.image.src} rel="preload" as="image" href={highlight.image.src} />
-            ))
-          : null}
-      </Head>
-      <article className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
-          <header className="flex flex-col gap-4 md:gap-6">
-            <Stud>{icon}</Stud>
-            <Heading as="h2" size="md" className="text-green-1000">
-              {title}
-            </Heading>
-            <p className="leading-6 text-green-800">{description}</p>
-          </header>
-          <dl className="grid grid-cols-2 gap-4 md:gap-12">
-            {highlights.map((highlight, i) => {
-              return (
-                <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
-                  <dt className="text-green-1000 font-medium">{highlight.title}</dt>
-                  <dd className="mt-2 text-sm leading-[20px] text-green-800">
-                    {highlight.description}
-                  </dd>
-                </div>
-              );
-            })}
-          </dl>
-          <CallToAction variant="primary" href={documentationLink}>
-            Learn more
-            <ArrowIcon />
-          </CallToAction>
-        </div>
-        {highlights.map((highlight, i) => (
-          <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
-            {/* TODO: Chat with the designer about the mobile version of this again. */}
-            {/* <div className="relative px-4 sm:px-6 lg:hidden">
+    <article className="grid grid-cols-1 lg:grid-cols-2">
+      <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
+        <header className="flex flex-col gap-4 md:gap-6">
+          <Stud>{icon}</Stud>
+          <Heading as="h2" size="md" className="text-green-1000">
+            {title}
+          </Heading>
+          <p className="leading-6 text-green-800">{description}</p>
+        </header>
+        <dl className="grid grid-cols-2 gap-4 md:gap-12">
+          {highlights.map((highlight, i) => {
+            return (
+              <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
+                <dt className="text-green-1000 font-medium">{highlight.title}</dt>
+                <dd className="mt-2 text-sm leading-[20px] text-green-800">
+                  {highlight.description}
+                </dd>
+              </div>
+            );
+          })}
+        </dl>
+        <CallToAction variant="primary" href={documentationLink}>
+          Learn more
+          <ArrowIcon />
+        </CallToAction>
+      </div>
+      {highlights.map((highlight, i) => (
+        <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
+          {/* TODO: Chat with the designer about the mobile version of this again. */}
+          {/* <div className="relative px-4 sm:px-6 lg:hidden">
               <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
                 {highlight.description}
               </p>
             </div> */}
-            <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
-              {/* TODO: Use cropped images so we don't load too much without need. */}
-              <Image
-                width={925}
-                height={578}
-                src={highlight.image}
-                className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
-                role="presentation"
-                alt=""
-              />
-            </div>
+          <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
+            {/* TODO: Use cropped images so we don't load too much without need. */}
+            <Image
+              width={925}
+              height={578}
+              src={highlight.image}
+              className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
+              role="presentation"
+              alt=""
+            />
           </div>
-        ))}
-      </article>
-    </>
+        </div>
+      ))}
+    </article>
   );
+}
+
+function useSmallScreenTabsHandlers() {
+  const isSmallScreen = () => window.innerWidth < 640;
+  return {
+    onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+      const tabs = event.currentTarget.querySelectorAll('[role="tablist"] > [role="tab"]');
+      for (const tab of tabs) {
+        tab.ariaSelected = 'false';
+      }
+    },
+    onValueChange: () => {
+      if (!isSmallScreen()) return;
+      setTimeout(() => {
+        const activeElement = document.activeElement;
+        // This isn't a perfect dropdown for keyboard users, but we only render it on mobiles.
+        if (activeElement && activeElement instanceof HTMLElement && activeElement.role === 'tab') {
+          activeElement.blur();
+        }
+      }, 0);
+    },
+    // edge case, but people can plug in keyboards to phones
+    onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        !isSmallScreen() ||
+        (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Enter')
+      ) {
+        return;
+      }
+      event.preventDefault();
+
+      // We proceed only if the tablist is focused.
+      const activeElement = document.activeElement;
+      if (
+        !activeElement ||
+        !(activeElement instanceof HTMLElement) ||
+        activeElement.role !== 'tab'
+      ) {
+        return;
+      }
+
+      const items = activeElement.parentElement?.querySelectorAll(
+        '[role="tab"][data-state="inactive"]',
+      );
+      if (!items) {
+        return;
+      }
+
+      let index = Array.from(items).indexOf(activeElement);
+      for (const [i, item] of items.entries()) {
+        if (item.ariaSelected === 'true') {
+          index = i;
+        }
+        item.ariaSelected = 'false';
+      }
+
+      switch (event.key) {
+        case 'ArrowDown':
+          index = (index + 1) % items.length;
+          break;
+
+        case 'ArrowUp':
+          index = (index - 1 + items.length) % items.length;
+          break;
+
+        case 'Enter': {
+          const item = items[index];
+          if (item instanceof HTMLElement) {
+            item.focus();
+          }
+          break;
+        }
+      }
+
+      items[index].ariaSelected = 'true';
+    },
+  };
 }
