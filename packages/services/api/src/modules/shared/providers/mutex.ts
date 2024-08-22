@@ -92,10 +92,9 @@ export class Mutex {
     }: MutexLockOptions,
   ) {
     const { logger } = this;
-    logger.debug('Acquiring lock (id=%s)', id);
 
     const requestAbortedD = Promise.withResolvers<never>();
-    let retryCounter = 0;
+    let attemptCounter = 0;
     let lockToAcquire: Lock | null = null;
 
     signal.addEventListener(
@@ -109,6 +108,7 @@ export class Mutex {
 
     // We try to acquire the lock until the retry counter is exceeded or the lock as been successfully acquired.
     do {
+      logger.debug('Acquiring lock (id=%s, attempt=%n)', id, attemptCounter + 1);
       // we avoid using any of the acquire settings for auto-extension, retrying, etc.
       // because of the many bugs and weird API design choices in the redlock library.
       // By manually handling the retries and lock extension we can abort acquiring the lock as soon as the incoming request has been canceled
@@ -139,9 +139,9 @@ export class Mutex {
         break;
       }
 
-      retryCounter++;
+      attemptCounter++;
 
-      if (retryCounter >= retries) {
+      if (attemptCounter >= retries) {
         logger.debug('Acquiring lock failed (id=%s)', id);
         throw new MutexResourceLockedError(`Resource "${id}" is locked.`);
       }
