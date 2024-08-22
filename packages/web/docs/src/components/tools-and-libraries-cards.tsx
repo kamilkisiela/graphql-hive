@@ -28,16 +28,19 @@ function MainCards() {
   const icons = [HiveIcon, YogaIcon, MeshIcon, CodegenIcon];
 
   return (
-    <ul className="flex grid-cols-4 flex-row gap-[22px] overflow-auto max-sm:-mx-8 max-sm:px-8 lg:grid">
+    <ul className="-mx-12 flex grid-cols-2 flex-row gap-[22px] overflow-auto px-12 lg:grid xl:grid-cols-4">
       {products.map((product, i) => {
         const Icon = icons[i];
         const Decoration = cardDecorations[product.name];
         return (
           <li
             key={product.name}
-            className="text-green-1000 first-of-type:bg-green-1000 group relative shrink-0 overflow-hidden rounded-2xl bg-blue-400 first-of-type:text-white"
+            className="text-green-1000 first-of-type:bg-green-1000 group relative flex-1 shrink-0 overflow-hidden rounded-2xl bg-blue-400 first-of-type:text-white"
           >
-            <a className="relative block w-[283.5px] p-8" href={product.href}>
+            <a
+              className="relative z-10 block flex-1 basis-[283.5px] p-8 max-md:w-[283.5px]"
+              href={product.href}
+            >
               {product.name}
               <Icon className="mt-8" />
               <ArrowIcon className="absolute bottom-8 right-8" />
