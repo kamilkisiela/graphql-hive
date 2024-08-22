@@ -94,7 +94,7 @@ export class Mutex {
     const { logger } = this;
     logger.debug('Acquiring lock (id=%s)', id);
 
-    const requestAbortedD = Promise.withResolvers<void>();
+    const requestAbortedD = Promise.withResolvers<never>();
     let retryCounter = 0;
     let lockToAcquire: Lock | null = null;
 
@@ -147,6 +147,7 @@ export class Mutex {
       }
 
       await Promise.race([requestAbortedD.promise, setTimeoutP(retryDelay)]);
+      // eslint-disable-next-line no-constant-condition
     } while (true);
 
     let lock: Lock = lockToAcquire;
