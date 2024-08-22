@@ -5,8 +5,6 @@ const guildConfig = require('@theguild/eslint-config/base');
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
 const path = require('path');
 
-console.log('loaded eslint config', __filename);
-
 const SCHEMA_PATH = './packages/services/api/src/modules/*/module.graphql.ts';
 const OPERATIONS_PATHS = [
   './packages/web/app/**/*.ts',
