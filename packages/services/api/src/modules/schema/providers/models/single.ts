@@ -86,9 +86,9 @@ export class SingleModel {
     const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumResult = await this.checks.checksum({
-      existing: comparedVersion
+      existing: latest
         ? {
-            schemas: comparedVersion.schemas,
+            schemas: latest.schemas,
             contractNames: null,
           }
         : null,

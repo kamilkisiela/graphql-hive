@@ -532,9 +532,9 @@ export class SchemaPublisher {
         selector,
       });
 
-    const schemaVersionContracts = comparedSchemaVersion
+    const schemaVersionContracts = latestSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
-          schemaVersionId: comparedSchemaVersion.id,
+          schemaVersionId: latestSchemaVersion.id,
         })
       : null;
 
@@ -720,14 +720,18 @@ export class SchemaPublisher {
           })) ?? null,
       });
     } else if (checkResult.conclusion === SchemaCheckConclusion.Skip) {
-      if (!comparedVersion || !comparedSchemaVersion) {
+      // SchemaCheckConclusion.Skip is returned by the checksum check
+      // when the schema is the same as the previous one.
+      // To perform the check we take the previous version (not necessarily composable)
+      // and that's why we ensure that `latestVersion` and `latestSchemaVersion` are available.
+      if (!latestVersion || !latestSchemaVersion) {
         throw new Error('This cannot happen 1 :)');
       }
 
       const [compositeSchemaSdl, supergraphSdl, compositionErrors] = await Promise.all([
-        this.schemaVersionHelper.getCompositeSchemaSdl(comparedSchemaVersion),
-        this.schemaVersionHelper.getSupergraphSdl(comparedSchemaVersion),
-        this.schemaVersionHelper.getSchemaCompositionErrors(comparedSchemaVersion),
+        this.schemaVersionHelper.getCompositeSchemaSdl(latestSchemaVersion),
+        this.schemaVersionHelper.getSupergraphSdl(latestSchemaVersion),
+        this.schemaVersionHelper.getSchemaCompositionErrors(latestSchemaVersion),
       ]);
 
       schemaCheck = await this.storage.createSchemaCheck({
@@ -735,7 +739,7 @@ export class SchemaPublisher {
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
-        schemaVersionId: comparedVersion?.version ?? null,
+        schemaVersionId: latestVersion.version ?? null,
         breakingSchemaChanges: null,
         safeSchemaChanges: null,
         schemaPolicyWarnings: null,
@@ -845,14 +849,18 @@ export class SchemaPublisher {
 
       // SchemaCheckConclusion.Skip
 
-      if (!comparedVersion || !comparedSchemaVersion) {
+      // SchemaCheckConclusion.Skip is returned by the checksum check
+      // when the schema is the same as the previous one.
+      // To perform the check we take the previous version (not necessarily composable)
+      // and that's why we ensure that `latestVersion` and `latestSchemaVersion` are available.
+      if (!latestVersion || !latestSchemaVersion) {
         throw new Error('This cannot happen 2 :)');
       }
 
-      if (comparedSchemaVersion.isComposable) {
+      if (latestSchemaVersion.isComposable) {
         increaseSchemaCheckCountMetric('accepted');
         const contracts = await this.contracts.getContractVersionsForSchemaVersion({
-          schemaVersionId: comparedSchemaVersion.id,
+          schemaVersionId: latestSchemaVersion.id,
         });
         const failedContractCompositionCount =
           contracts?.edges.filter(edge => edge.node.schemaCompositionErrors !== null).length ?? 0;
@@ -881,7 +889,7 @@ export class SchemaPublisher {
         conclusion: SchemaCheckConclusion.Failure,
         changes: null,
         breakingChanges: null,
-        compositionErrors: comparedSchemaVersion.schemaCompositionErrors,
+        compositionErrors: latestSchemaVersion.schemaCompositionErrors,
         warnings: null,
         errors: null,
         schemaCheckId: schemaCheck?.id ?? null,
@@ -965,11 +973,15 @@ export class SchemaPublisher {
 
     // SchemaCheckConclusion.Skip
 
-    if (!comparedVersion || !comparedSchemaVersion) {
+    // SchemaCheckConclusion.Skip is returned by the checksum check
+    // when the schema is the same as the previous one.
+    // To perform the check we take the previous version (not necessarily composable)
+    // and that's why we ensure that `latestVersion` and `latestSchemaVersion` are available.
+    if (!latestVersion || !latestSchemaVersion) {
       throw new Error('This cannot happen 3 :)');
     }
 
-    if (comparedSchemaVersion.isComposable) {
+    if (latestSchemaVersion.isComposable) {
       increaseSchemaCheckCountMetric('accepted');
       return {
         __typename: 'SchemaCheckSuccess',
@@ -982,7 +994,7 @@ export class SchemaPublisher {
     }
 
     const contractVersions = await this.contracts.getContractVersionsForSchemaVersion({
-      schemaVersionId: comparedSchemaVersion.id,
+      schemaVersionId: latestSchemaVersion.id,
     });
 
     increaseSchemaCheckCountMetric('rejected');
@@ -992,7 +1004,7 @@ export class SchemaPublisher {
       changes: [],
       warnings: [],
       errors: [
-        ...(comparedSchemaVersion.schemaCompositionErrors?.map(error => ({
+        ...(latestSchemaVersion.schemaCompositionErrors?.map(error => ({
           message: error.message,
           source: error.source,
         })) ?? []),
@@ -1674,12 +1686,9 @@ export class SchemaPublisher {
       project,
       organization,
     );
-    const comparedSchemaVersion = compareToPreviousComposableVersion
-      ? latestComposableSchemaVersion
-      : latestSchemaVersion;
-    const schemaVersionContracts = comparedSchemaVersion
+    const schemaVersionContracts = latestSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
-          schemaVersionId: comparedSchemaVersion.id,
+          schemaVersionId: latestSchemaVersion.id,
         })
       : null;
 
