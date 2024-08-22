@@ -193,11 +193,11 @@ export class Mutex {
 
     async function extendLock(isInitial = false) {
       if (isInitial === false) {
-        logger.debug('Attempt extended lock (id=%s)', id);
+        logger.debug('Attempt extending lock (id=%s)', id);
         try {
           // NOTE: extending a lock creates a new lock instance, so we need to replace it here.
           lock = await lock.extend(duration);
-          logger.debug('Lock extend succeeded (id=%s)', id);
+          logger.debug('Lock extension succeeded (id=%s)', id);
         } catch (err) {
           logger.error('Failed to extend lock (id=%s)', id);
           console.error(err);
