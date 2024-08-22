@@ -37,7 +37,7 @@ export function CallToAction({ className, variant, ...rest }: CallToActionProps)
   return (
     <Anchor
       className={cn(
-        'relative block w-fit rounded-lg' +
+        'relative block rounded-lg sm:w-fit' +
           ' text-green-1000 px-6 py-3 font-medium leading-6' +
           ' relative flex flex-row items-center justify-center gap-2',
         'focus-visible:ring-0 focus-visible:ring-offset-0',
