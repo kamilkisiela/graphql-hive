@@ -42,9 +42,13 @@ export function FeatureTabs({ className }: { className?: string }) {
       <Tabs.Root defaultValue={tabs[0]} {...useSmallScreenTabsHandlers()}>
         <Tabs.List
           className={
-            'bg-beige-200 mb-12 flex flex-col rounded-2xl sm:flex-row' +
+            'sm:bg-beige-200 mb-12 flex flex-col sm:flex-row sm:rounded-2xl' +
             ' group mx-4 mt-6 md:mx-0 md:mt-0' +
-            ' max-sm:h-[58px] max-sm:focus-within:rounded-b-none'
+            ' max-sm:h-[58px] max-sm:focus-within:rounded-b-none' +
+            ' max-sm:focus-within:pointer-events-none' + // <- blur on click of current
+            ' max-sm:focus-within:has-[>:nth-child(2)[data-state="active"]]:translate-y-[-100%]' +
+            ' max-sm:focus-within:has-[>:nth-child(3)[data-state="active"]]:translate-y-[-200%]' +
+            ' relative z-10 overflow-hidden focus-within:overflow-visible'
           }
         >
           {tabs.map((tab, i) => {
@@ -59,11 +63,14 @@ export function FeatureTabs({ className }: { className?: string }) {
                   ' text-base sm:text-sm lg:text-base [&>svg]:shrink-0' +
                   ' max-sm:rdx-state-inactive:hidden group-focus-within:rdx-state-inactive:flex [&[data-state="inactive"]>:last-child]:invisible' +
                   ' rounded-lg sm:rounded-[15px]' +
-                  ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none max-sm:rdx-state-inactive:order-1 z-10' +
-                  ' max-sm:[&[data-state="active"]~:nth-child(3)]:rounded-b-lg max-sm:[&[data-state="active"]~:nth-child(3)]:border-b' +
-                  ' max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:rounded-b-lg max-sm:[&[data-state="inactive"]:first-child+&[data-state="inactive"]]:border-b' +
-                  ' max-sm:group-focus-within:border-beige-600 max-sm:rdx-state-active:border max-sm:group-focus-within:border-x' +
-                  ' max-sm:group-focus-within:rdx-state-active:rounded-b-none max-sm:group-focus-within:rdx-state-active:border-b-0' +
+                  ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none z-10' +
+                  ' max-sm:border-beige-600 max-sm:group-focus-within:rdx-state-inactive:border-y-beige-200 max-sm:border' +
+                  ' max-sm:group-focus-within:[&:last-child]:border-t-beige-200 max-sm:group-focus-within:[&:nth-child(3)]:rounded-t-none' +
+                  ' max-sm:group-focus-within:[&[data-state="inactive"]:first-child]:border-t-beige-600 max-sm:group-focus-within:[&[data-state="inactive"]:first-child]:rounded-t-lg' +
+                  ' max-sm:group-focus-within:[&:nth-child(2)]:rdx-state-active:rounded-none max-sm:group-focus-within:[&:nth-child(2)]:rdx-state-active:border-y-beige-200' +
+                  ' max-sm:group-focus-within:[[data-state="active"]+&:last-child]:border-b-beige-600 max-sm:group-focus-within:[[data-state="active"]+&:last-child]:rounded-b-lg' +
+                  ' max-sm:group-focus-within:[[data-state="inactive"]+&:last-child[data-state="inactive"]]:border-b-beige-600 max-sm:group-focus-within:[[data-state="inactive"]+&:last-child[data-state="inactive"]]:rounded-b-lg' +
+                  ' max-sm:group-focus-within:first:rdx-state-active:border-b-beige-200 max-sm:group-focus-within:first:rdx-state-active:rounded-b-none' +
                   ' max-sm:group-focus-within:aria-selected:z-20 max-sm:group-focus-within:aria-selected:ring-4' +
                   ' max-sm:rdx-state-inactive:pointer-events-none max-sm:rdx-state-inactive:group-focus-within:pointer-events-auto' +
                   // between 640px and 721px we still want tabs, but they won't fit with big padding
@@ -72,7 +79,7 @@ export function FeatureTabs({ className }: { className?: string }) {
               >
                 {icons[i]}
                 {tab}
-                <ChevronDownIcon className="ml-auto size-6 text-green-800 sm:hidden" />
+                <ChevronDownIcon className="ml-auto size-6 text-green-800 transition group-focus-within:rotate-90 sm:hidden" />
               </Tabs.Trigger>
             );
           })}
@@ -296,9 +303,7 @@ function useSmallScreenTabsHandlers() {
         return;
       }
 
-      const items = activeElement.parentElement?.querySelectorAll(
-        '[role="tab"][data-state="inactive"]',
-      );
+      const items = activeElement.parentElement?.querySelectorAll('[role="tab"]');
       if (!items) {
         return;
       }
@@ -323,7 +328,11 @@ function useSmallScreenTabsHandlers() {
         case 'Enter': {
           const item = items[index];
           if (item instanceof HTMLElement) {
-            item.focus();
+            if (item.dataset.state === 'active') {
+              item.blur();
+            } else {
+              item.focus();
+            }
           }
           break;
         }
