@@ -17,7 +17,7 @@ export function TeamSection({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="mx-auto flex grid-cols-1 flex-col flex-wrap justify-center lg:max-xl:w-max xl:h-[476px]">
+      <div className="mx-auto flex flex-col flex-wrap justify-center gap-x-2 lg:max-xl:w-max xl:h-[476px]">
         <Heading as="h3" size="md" className="text-green-1000 max-w-full text-balance xl:w-[468px]">
           Built by The Guild. Industry veterans.
         </Heading>
@@ -40,7 +40,7 @@ export function TeamSection({ className }: { className?: string }) {
         </CallToAction>
 
         <TeamGallery
-          className="max-xl:-mx-4 max-xl:max-w-[calc(100%-1rem)] max-xl:px-4 max-xl:py-6 max-lg:max-w-[calc(100%+2rem)] xl:w-[664px]"
+          className="max-xl:-mx-4 max-xl:max-w-[calc(100%-1rem)] max-xl:px-4 max-xl:py-6 max-lg:max-w-[calc(100%+2rem)] xl:ml-auto xl:w-[664px]"
           style={{
             '--size': '120px',
           }}
@@ -153,7 +153,9 @@ function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
         <Image
           alt=""
           className="rounded-2xl bg-black grayscale"
-          {...(typeof avatar === 'string' ? { src: avatar } : avatar)}
+          {...(typeof avatar === 'string'
+            ? { src: avatar }
+            : { blurDataURL: avatar.blurDataURL, src: avatar.src })}
           width={180}
           height={180}
         />

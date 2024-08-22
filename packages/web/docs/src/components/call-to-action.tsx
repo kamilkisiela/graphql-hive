@@ -20,6 +20,10 @@ const variantStyles = {
     'bg-green-800 hover:bg-green-700 text-white' +
       ' focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-green-800/40',
   ),
+  tertiary: cn(
+    'bg-transparent text-green-1000' +
+      ' focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-green-800',
+  ),
 };
 
 type CallToActionVariant = keyof typeof variantStyles;

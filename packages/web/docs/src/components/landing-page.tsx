@@ -8,6 +8,8 @@ import { CompanyTestimonialsSection } from './company-testimonials';
 import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
+import { FrequentlyAskedQuestions } from './frequently-asked-questions';
+import { GetYourAPIGameRightSection } from './get-your-api-game-right';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { InfoCard } from './info-card';
@@ -29,9 +31,13 @@ export function IndexPage(): ReactElement {
           body {
             background: #fff;
           }
+          #__next {
+            --nextra-primary-hue: 191deg;
+            --nextra-primary-saturation: 40%;
+          }
         `}
       </style>
-      <Page className="text-green-1000 mx-auto max-w-[90rem]">
+      <Page className="text-green-1000 mx-auto max-w-[90rem] overflow-hidden">
         <Hero className="mx-4 md:mx-6">
           <Heading
             as="h1"
@@ -90,6 +96,8 @@ export function IndexPage(): ReactElement {
         <TeamSection className="mx-4 md:mx-6" />
         <CommunitySection className="mx-4 mt-6 md:mx-6" />
         <ToolsAndLibrariesCards className="mx-4 mt-6 md:mx-6" />
+        <FrequentlyAskedQuestions className="mx-4 md:mx-6" />
+        <GetYourAPIGameRightSection className="mx-4 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
