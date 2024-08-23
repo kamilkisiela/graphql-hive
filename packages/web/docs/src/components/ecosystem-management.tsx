@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
-import { CallToAction } from './call-to-action';
+import { CallToAction } from '@theguild/components';
 import { CheckIcon } from './check-icon';
 import { HighlightDecoration } from '@theguild/components';
 import { Heading } from './heading';
