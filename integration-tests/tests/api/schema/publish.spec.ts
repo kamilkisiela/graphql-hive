@@ -3739,3 +3739,454 @@ test.concurrent(
     });
   },
 );
+
+describe.concurrent(
+  'schema publish should be ignored due to unchanged input schema and being compared to latest schema version',
+  () => {
+    test.concurrent('native federation', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject, setFeatureFlag } = await createOrg();
+      const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+      await setFeatureFlag('compareToPreviousComposableVersion', true);
+      await setNativeFederation(true);
+
+      const token = await createToken({
+        targetScopes: [
+          TargetAccessScope.Read,
+          TargetAccessScope.RegistryRead,
+          TargetAccessScope.RegistryWrite,
+          TargetAccessScope.Settings,
+        ],
+      });
+
+      const validSdl = /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          ping: String
+          pong: String
+          foo: User
+        }
+
+        type User {
+          id: ID!
+        }
+      `;
+
+      // here we use @tag without an argument to trigger a validation/composition error
+      const invalidSdl = /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          ping: String
+          pong: String
+          foo: User @tag
+        }
+
+        type User {
+          id: ID!
+        }
+      `;
+
+      // Publish schema with write rights
+      const validPublish = await token
+        .publishSchema({
+          sdl: validSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(validPublish.schemaPublish).toMatchObject({
+        valid: true,
+        linkToWebsite: expect.any(String),
+      });
+
+      const invalidPublish = await token
+        .publishSchema({
+          sdl: invalidSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(invalidPublish.schemaPublish).toMatchObject({
+        valid: false,
+        linkToWebsite: expect.any(String),
+      });
+
+      const invalidSdlCheck = await token
+        .checkSchema(invalidSdl, 'serviceA')
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(invalidSdlCheck.schemaCheck).toMatchObject({
+        valid: false,
+        __typename: 'SchemaCheckError',
+        changes: expect.objectContaining({
+          total: 0,
+        }),
+        errors: expect.objectContaining({
+          total: 1,
+        }),
+      });
+
+      const validSdlCheck = await token
+        .checkSchema(validSdl, 'serviceA')
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(validSdlCheck.schemaCheck).toMatchObject({
+        valid: true,
+        __typename: 'SchemaCheckSuccess',
+        changes: expect.objectContaining({
+          total: 0,
+        }),
+      });
+
+      const result = await token
+        .publishSchema({
+          sdl: validSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(result.schemaPublish).toMatchObject({
+        valid: true,
+        linkToWebsite: expect.any(String),
+      });
+
+      if (
+        !('linkToWebsite' in result.schemaPublish) ||
+        !('linkToWebsite' in invalidPublish.schemaPublish) ||
+        !('linkToWebsite' in validPublish.schemaPublish)
+      ) {
+        throw new Error('linkToWebsite not found');
+      }
+
+      // If the linkToWebsite is the same as one of the previous versions,
+      // the schema publish was ignored due to unchanged input schemas.
+      // It shouldn't be the case.
+      // That's what we're checking here.
+
+      expect(result.schemaPublish.linkToWebsite).not.toEqual(
+        invalidPublish.schemaPublish.linkToWebsite,
+      );
+
+      expect(result.schemaPublish.linkToWebsite).not.toEqual(
+        validPublish.schemaPublish.linkToWebsite,
+      );
+
+      const ignoredResult = await token
+        .publishSchema({
+          sdl: validSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      // This time the schema publish should be ignored
+      // and link to the previous version
+      expect(ignoredResult.schemaPublish).toMatchObject({
+        valid: true,
+        linkToWebsite: result.schemaPublish.linkToWebsite,
+      });
+    });
+
+    test.concurrent('legacy fed composition', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject, setFeatureFlag } = await createOrg();
+      const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+      await setFeatureFlag('compareToPreviousComposableVersion', false);
+      await setNativeFederation(false);
+
+      const token = await createToken({
+        targetScopes: [
+          TargetAccessScope.Read,
+          TargetAccessScope.RegistryRead,
+          TargetAccessScope.RegistryWrite,
+          TargetAccessScope.Settings,
+        ],
+      });
+
+      const validSdl = /* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+          foo: User
+        }
+
+        type User @key(fields: "id") {
+          id: ID!
+        }
+      `;
+
+      // @key(fields:) is invalid - should trigger a composition error
+      const invalidSdl = /* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+          foo: User
+        }
+
+        type User @key(fields: "uuid") {
+          id: ID!
+        }
+      `;
+
+      // Publish schema with write rights
+      const validPublish = await token
+        .publishSchema({
+          sdl: validSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(validPublish.schemaPublish).toMatchObject({
+        valid: true,
+        linkToWebsite: expect.any(String),
+      });
+
+      const invalidPublish = await token
+        .publishSchema({
+          sdl: invalidSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(invalidPublish.schemaPublish).toMatchObject({
+        valid: false,
+        linkToWebsite: expect.any(String),
+      });
+
+      const invalidSdlCheck = await token
+        .checkSchema(invalidSdl, 'serviceA')
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(invalidSdlCheck.schemaCheck).toMatchObject({
+        valid: false,
+        __typename: 'SchemaCheckError',
+        changes: expect.objectContaining({
+          total: 0,
+        }),
+        errors: expect.objectContaining({
+          total: 1,
+        }),
+      });
+
+      const validSdlCheck = await token
+        .checkSchema(validSdl, 'serviceA')
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(validSdlCheck.schemaCheck).toMatchObject({
+        valid: true,
+        __typename: 'SchemaCheckSuccess',
+        changes: expect.objectContaining({
+          total: 0,
+        }),
+      });
+
+      const result = await token
+        .publishSchema({
+          sdl: validSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(result.schemaPublish).toMatchObject({
+        valid: true,
+        linkToWebsite: expect.any(String),
+      });
+
+      if (
+        !('linkToWebsite' in result.schemaPublish) ||
+        !('linkToWebsite' in invalidPublish.schemaPublish) ||
+        !('linkToWebsite' in validPublish.schemaPublish)
+      ) {
+        throw new Error('linkToWebsite not found');
+      }
+
+      // If the linkToWebsite is the same as one of the previous versions,
+      // the schema publish was ignored due to unchanged input schemas.
+      // It shouldn't be the case.
+      // That's what we're checking here.
+
+      expect(result.schemaPublish.linkToWebsite).not.toEqual(
+        invalidPublish.schemaPublish.linkToWebsite,
+      );
+
+      expect(result.schemaPublish.linkToWebsite).not.toEqual(
+        validPublish.schemaPublish.linkToWebsite,
+      );
+
+      const ignoredResult = await token
+        .publishSchema({
+          sdl: validSdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      // This time the schema publish should be ignored
+      // and link to the previous version
+      expect(ignoredResult.schemaPublish).toMatchObject({
+        valid: true,
+        linkToWebsite: result.schemaPublish.linkToWebsite,
+      });
+    });
+
+    test.concurrent(
+      'legacy fed composition with compareToPreviousComposableVersion=true',
+      async () => {
+        const { createOrg } = await initSeed().createOwner();
+        const { createProject, setFeatureFlag } = await createOrg();
+        const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+        await setFeatureFlag('compareToPreviousComposableVersion', true);
+        await setNativeFederation(false);
+
+        const token = await createToken({
+          targetScopes: [
+            TargetAccessScope.Read,
+            TargetAccessScope.RegistryRead,
+            TargetAccessScope.RegistryWrite,
+            TargetAccessScope.Settings,
+          ],
+        });
+
+        const validSdl = /* GraphQL */ `
+          type Query {
+            ping: String
+            pong: String
+            foo: User
+          }
+
+          type User @key(fields: "id") {
+            id: ID!
+          }
+        `;
+
+        // @key(fields:) is invalid - should trigger a composition error
+        const invalidSdl = /* GraphQL */ `
+          type Query {
+            ping: String
+            pong: String
+            foo: User
+          }
+
+          type User @key(fields: "uuid") {
+            id: ID!
+          }
+        `;
+
+        // Publish schema with write rights
+        const validPublish = await token
+          .publishSchema({
+            sdl: validSdl,
+            service: 'serviceA',
+            url: 'http://localhost:4000',
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(validPublish.schemaPublish).toMatchObject({
+          valid: true,
+          linkToWebsite: expect.any(String),
+        });
+
+        const invalidPublish = await token
+          .publishSchema({
+            sdl: invalidSdl,
+            service: 'serviceA',
+            url: 'http://localhost:4000',
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(invalidPublish.schemaPublish).toMatchObject({
+          valid: false,
+          linkToWebsite: expect.any(String),
+        });
+
+        const invalidSdlCheck = await token
+          .checkSchema(invalidSdl, 'serviceA')
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(invalidSdlCheck.schemaCheck).toMatchObject({
+          valid: false,
+          __typename: 'SchemaCheckError',
+          changes: expect.objectContaining({
+            total: 0,
+          }),
+          errors: expect.objectContaining({
+            total: 1,
+          }),
+        });
+
+        const validSdlCheck = await token
+          .checkSchema(validSdl, 'serviceA')
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(validSdlCheck.schemaCheck).toMatchObject({
+          valid: true,
+          __typename: 'SchemaCheckSuccess',
+          changes: expect.objectContaining({
+            total: 0,
+          }),
+        });
+
+        const result = await token
+          .publishSchema({
+            sdl: validSdl,
+            service: 'serviceA',
+            url: 'http://localhost:4000',
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(result.schemaPublish).toMatchObject({
+          valid: true,
+          linkToWebsite: expect.any(String),
+        });
+
+        if (
+          !('linkToWebsite' in result.schemaPublish) ||
+          !('linkToWebsite' in invalidPublish.schemaPublish) ||
+          !('linkToWebsite' in validPublish.schemaPublish)
+        ) {
+          throw new Error('linkToWebsite not found');
+        }
+
+        // If the linkToWebsite is the same as one of the previous versions,
+        // the schema publish was ignored due to unchanged input schemas.
+        // It shouldn't be the case.
+        // That's what we're checking here.
+
+        expect(result.schemaPublish.linkToWebsite).not.toEqual(
+          invalidPublish.schemaPublish.linkToWebsite,
+        );
+
+        expect(result.schemaPublish.linkToWebsite).not.toEqual(
+          validPublish.schemaPublish.linkToWebsite,
+        );
+
+        const ignoredResult = await token
+          .publishSchema({
+            sdl: validSdl,
+            service: 'serviceA',
+            url: 'http://localhost:4000',
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        // This time the schema publish should be ignored
+        // and link to the previous version
+        expect(ignoredResult.schemaPublish).toMatchObject({
+          valid: true,
+          linkToWebsite: result.schemaPublish.linkToWebsite,
+        });
+      },
+    );
+  },
+);
