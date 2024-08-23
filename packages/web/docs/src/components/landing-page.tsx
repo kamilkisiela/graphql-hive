@@ -168,7 +168,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
             href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
             target="_blank"
             rel="noreferrer"
-            className="hover:underline"
+            className="hover:text-blue-700 hover:underline"
           >
             Persisted Documents
           </a>{' '}
