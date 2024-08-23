@@ -9,7 +9,7 @@ import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { FrequentlyAskedQuestions } from './frequently-asked-questions';
-import { GetYourAPIGameRightSection } from './get-your-api-game-right';
+import { GetYourAPIGameRightSection, ToolsAndLibrariesCards } from '@theguild/components/landing';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { InfoCard } from './info-card';
@@ -18,7 +18,6 @@ import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
 import { TeamSection } from './team-section';
-import { ToolsAndLibrariesCards } from './tools-and-libraries-cards';
 
 export function IndexPage(): ReactElement {
   return (
