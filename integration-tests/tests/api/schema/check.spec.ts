@@ -1694,50 +1694,172 @@ test.concurrent('contextId that has fewer than 1 characters is not allowed', asy
   });
 });
 
-test.concurrent(
+describe.concurrent(
   'schema check composition skip due to unchanged input schemas when being compared to failed schema version',
-  async () => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject, setFeatureFlag } = await createOrg();
-    const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
-    await setFeatureFlag('compareToPreviousComposableVersion', true);
-    await setNativeFederation(true);
+  () => {
+    test.concurrent('native federation', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject, setFeatureFlag } = await createOrg();
+      const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+      await setFeatureFlag('compareToPreviousComposableVersion', true);
+      await setNativeFederation(true);
 
-    const token = await createToken({
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-        TargetAccessScope.Settings,
-      ],
+      const token = await createToken({
+        targetScopes: [
+          TargetAccessScope.Read,
+          TargetAccessScope.RegistryRead,
+          TargetAccessScope.RegistryWrite,
+          TargetAccessScope.Settings,
+        ],
+      });
+
+      // here we use @tag without an argument to trigger a validation/composition error
+      const sdl = /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          ping: String
+          pong: String
+          foo: User @tag
+        }
+
+        type User {
+          id: ID!
+        }
+      `;
+
+      // Publish schema with write rights
+      await token
+        .publishSchema({
+          sdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      const result = await token.checkSchema(sdl, 'serviceA').then(r => r.expectNoGraphQLErrors());
+
+      expect(result.schemaCheck).toMatchObject({
+        valid: false,
+        __typename: 'SchemaCheckError',
+        changes: expect.objectContaining({
+          total: 0,
+        }),
+        errors: expect.objectContaining({
+          total: 1,
+        }),
+      });
     });
 
-    // here we use @tag without an argument to trigger a validation/composition error
-    const sdl = /* GraphQL */ `
-      extend schema
-        @link(url: "https://specs.apollo.dev/link/v1.0")
-        @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+    test.concurrent('legacy fed composition', async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject, setFeatureFlag } = await createOrg();
+      const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+      await setFeatureFlag('compareToPreviousComposableVersion', false);
+      await setNativeFederation(false);
 
-      type Query {
-        ping: String
-        pong: String
-        foo: User @tag
-      }
+      const token = await createToken({
+        targetScopes: [
+          TargetAccessScope.Read,
+          TargetAccessScope.RegistryRead,
+          TargetAccessScope.RegistryWrite,
+          TargetAccessScope.Settings,
+        ],
+      });
 
-      type User {
-        id: ID!
-      }
-    `;
+      // @key(fields:) is invalid - should trigger a composition error
+      const sdl = /* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+          foo: User
+        }
 
-    // Publish schema with write rights
-    await token
-      .publishSchema({
-        sdl,
-        service: 'serviceA',
-        url: 'http://localhost:4000',
-      })
-      .then(r => r.expectNoGraphQLErrors());
+        type User @key(fields: "uuid") {
+          id: ID!
+        }
+      `;
 
-    await token.checkSchema(sdl, 'serviceA').then(r => r.expectNoGraphQLErrors());
+      // Publish schema with write rights
+      await token
+        .publishSchema({
+          sdl,
+          service: 'serviceA',
+          url: 'http://localhost:4000',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      const result = await token.checkSchema(sdl, 'serviceA').then(r => r.expectNoGraphQLErrors());
+
+      expect(result.schemaCheck).toMatchObject({
+        valid: false,
+        __typename: 'SchemaCheckError',
+        changes: expect.objectContaining({
+          total: 0,
+        }),
+        errors: expect.objectContaining({
+          total: 1,
+        }),
+      });
+    });
+
+    test.concurrent(
+      'legacy fed composition with compareToPreviousComposableVersion=true',
+      async () => {
+        const { createOrg } = await initSeed().createOwner();
+        const { createProject, setFeatureFlag } = await createOrg();
+        const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+        await setFeatureFlag('compareToPreviousComposableVersion', true);
+        await setNativeFederation(false);
+
+        const token = await createToken({
+          targetScopes: [
+            TargetAccessScope.Read,
+            TargetAccessScope.RegistryRead,
+            TargetAccessScope.RegistryWrite,
+            TargetAccessScope.Settings,
+          ],
+        });
+
+        // @key(fields:) is invalid - should trigger a composition error
+        const sdl = /* GraphQL */ `
+          type Query {
+            ping: String
+            pong: String
+            foo: User
+          }
+
+          type User @key(fields: "uuid") {
+            id: ID!
+          }
+        `;
+
+        // Publish schema with write rights
+        await token
+          .publishSchema({
+            sdl,
+            service: 'serviceA',
+            url: 'http://localhost:4000',
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        const result = await token
+          .checkSchema(sdl, 'serviceA')
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(result.schemaCheck).toMatchObject({
+          valid: false,
+          __typename: 'SchemaCheckError',
+          changes: expect.objectContaining({
+            total: 0,
+          }),
+          errors: expect.objectContaining({
+            total: 1,
+          }),
+        });
+      },
+    );
   },
 );

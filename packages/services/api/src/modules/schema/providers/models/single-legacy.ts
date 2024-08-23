@@ -70,12 +70,12 @@ export class SingleLegacyModel {
     const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
-            schemas: latestVersion.schemas,
+            schema: latestVersion.schemas[0],
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });
@@ -181,12 +181,12 @@ export class SingleLegacyModel {
     const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
-            schemas: latestVersion.schemas,
+            schema: latestVersion.schemas[0],
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });
