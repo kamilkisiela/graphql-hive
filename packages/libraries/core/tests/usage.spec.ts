@@ -161,7 +161,7 @@ test('should send data to Hive', async () => {
     {},
   );
   await hive.dispose();
-  await waitFor(30);
+  await waitFor(20);
   http.done();
 
   expect(logger.getLogs()).toMatchInlineSnapshot(`
@@ -444,7 +444,7 @@ test('sendImmediately should not stop the schedule', async () => {
   await waitFor(100);
   // Let's check if the scheduled send task is still running
   await collect(args, {});
-  await waitFor(30);
+  await waitFor(20);
   expect(logger.getLogs()).toMatchInlineSnapshot(`
     [INF] [hive][usage] POST http://localhost/200 succeeded with status 200 (666ms).
     [INF] [hive][usage] Report sent!
