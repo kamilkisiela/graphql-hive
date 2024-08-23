@@ -141,16 +141,9 @@ For more information,
 
 ## Create an App Deployment
 
-To create an app deployment, you need to have
+To create an app deployment with the extracted persisted documents, you need to have
 [the Hive CLI installed](/docs/api-reference/cli#installation) and authenticated with your Hive
 target, on which you want to deploy your app.
-
-The persisted documents define all the possible operations that your app can execute against your
-GraphQL API.
-
-As long as the app is using these persisted documents is active, any change of the GraphQL API that
-alters the GraphQL schema as used by any of the persisted documents would break that specific app
-version and therefore be an unsafe/breaking change.
 
 > **Note:** The GraphQL operations being uploaded must pass validation against the target schema.
 > Otherwise, the app deployment creation will fail.
