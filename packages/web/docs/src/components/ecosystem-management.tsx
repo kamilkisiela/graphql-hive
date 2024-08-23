@@ -3,7 +3,7 @@ import { cn } from '../lib';
 import { BookIcon } from './book-icon';
 import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
-import { HighlightDecoration } from './decorations';
+import { HighlightDecoration } from '@theguild/components';
 import { Heading } from './heading';
 import styles from './ecosystem-management.module.css';
 

@@ -38,6 +38,7 @@ export interface CallToActionProps extends ComponentPropsWithoutRef<typeof Ancho
  * TODO: Move it to the components library?
  */
 export function CallToAction({ className, variant, ...rest }: CallToActionProps) {
+  console.log({ variant });
   return (
     <Anchor
       className={cn(
@@ -46,7 +47,7 @@ export function CallToAction({ className, variant, ...rest }: CallToActionProps)
           ' relative flex flex-row items-center justify-center gap-2',
         'focus-visible:ring-0 focus-visible:ring-offset-0',
         '[&:hover>:first-child]:inset-[-1px] [&:hover>:first-child]:rounded-[9px]',
-        variantStyles[variant],
+        variantStyles[vari ant],
         className,
       )}
       {...rest}

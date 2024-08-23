@@ -4,7 +4,8 @@ import '@theguild/components/style.css';
 import localFont from 'next/font/local';
 
 const neueMontreal = localFont({
-  // todo: swap to variable version
+  // TODO: Swap to variable version.
+  // TODO: We only use 400 and 500 weights, right?
   src: [
     { path: '../fonts/NeueMontreal-Light.otf', weight: '300' },
     { path: '../fonts/NeueMontreal-Light.otf', style: 'italic' },
