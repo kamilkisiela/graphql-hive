@@ -117,70 +117,31 @@ export class SchemaHelper {
     return createSchemaObject(schema);
   }
 
-  sortSchemas(schemas: CompositeSchema[]) {
-    return schemas.sort((a, b) => (a.service_name ?? '').localeCompare(b.service_name ?? ''));
-  }
-
   createChecksum(schema: SingleSchema | PushedCompositeSchema): string {
-    return this.createChecksumFromSchemas([schema] as [SingleSchema] | PushedCompositeSchema[]);
-  }
-
-  createChecksumFromSchemas(schemas: [SingleSchema] | PushedCompositeSchema[]): string {
     const hasher = createHash('md5');
 
-    for (const schema of schemas) {
-      hasher.update(print(sortDocumentNode(this.createSchemaObject(schema).document)), 'utf-8');
-      hasher.update(
-        `service_name: ${
-          'service_name' in schema && typeof schema.service_name === 'string'
-            ? schema.service_name
-            : ''
-        }`,
-        'utf-8',
-      );
-      hasher.update(
-        `service_url: ${
-          'service_url' in schema && typeof schema.service_url === 'string'
-            ? schema.service_url
-            : ''
-        }`,
-        'utf-8',
-      );
-      hasher.update(
-        `metadata: ${
-          'metadata' in schema && schema.metadata ? objectHash(JSON.parse(schema.metadata)) : ''
-        }`,
-        'utf-8',
-      );
-    }
+    hasher.update(print(sortDocumentNode(this.createSchemaObject(schema).document)), 'utf-8');
+    hasher.update(
+      `service_name: ${
+        'service_name' in schema && typeof schema.service_name === 'string'
+          ? schema.service_name
+          : ''
+      }`,
+      'utf-8',
+    );
+    hasher.update(
+      `service_url: ${
+        'service_url' in schema && typeof schema.service_url === 'string' ? schema.service_url : ''
+      }`,
+      'utf-8',
+    );
+    hasher.update(
+      `metadata: ${
+        'metadata' in schema && schema.metadata ? objectHash(JSON.parse(schema.metadata)) : ''
+      }`,
+      'utf-8',
+    );
 
     return hasher.digest('hex');
-  }
-
-  compare({
-    schemas,
-    latestVersion,
-  }: {
-    schemas: [SingleSchema] | PushedCompositeSchema[];
-    latestVersion: {
-      isComposable: boolean;
-      schemas: [SingleSchema] | PushedCompositeSchema[];
-    } | null;
-  }) {
-    const isInitial = latestVersion === null;
-
-    if (isInitial) {
-      return 'initial' as const;
-    }
-
-    const isModified =
-      this.createChecksumFromSchemas(schemas) !==
-      this.createChecksumFromSchemas(latestVersion.schemas);
-
-    if (!isModified) {
-      return 'unchanged' as const;
-    }
-
-    return 'modified' as const;
   }
 }

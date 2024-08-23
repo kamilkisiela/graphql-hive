@@ -88,12 +88,12 @@ export class SingleModel {
     const checksumResult = await this.checks.checksum({
       existing: latest
         ? {
-            schemas: latest.schemas,
+            schema: latest.schemas[0],
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });
@@ -216,12 +216,12 @@ export class SingleModel {
     const checksumCheck = await this.checks.checksum({
       existing: latest
         ? {
-            schemas: latest.schemas,
+            schema: latest.schemas[0],
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });

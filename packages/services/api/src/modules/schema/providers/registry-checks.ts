@@ -172,21 +172,27 @@ export class RegistryChecks {
     private operationsReader: OperationsReader,
   ) {}
 
+  /**
+   * Compare the incoming schema with the existing schema.
+   * In case of a Federated schema, it's a subgraph.
+   * Comparing the whole collection of subgraphs makes no sense,
+   * as the only element that is different is the subgraph that is updated.
+   * The rest of the subgraphs are inherited from the previous version, meaning they are the same.
+   */
   async checksum(args: {
     incoming: {
-      schemas: Schemas;
+      schema: SingleSchema | PushedCompositeSchema;
       contractNames: null | Array<string>;
     };
     existing: null | {
-      schemas: Schemas;
+      schema: SingleSchema | PushedCompositeSchema;
       contractNames: null | Array<string>;
     };
   }) {
     this.logger.debug(
-      'Checksum check (existingSchemaCount=%s, existingContractCount=%s, incomingSchemaCount=%s, existingContractCount=%s)',
-      args.existing?.schemas.length ?? null,
+      'Checksum check (existingSchema=%s, existingContractCount=%s, incomingContractCount=%s)',
+      args.existing?.schema ? 'yes' : 'no',
       args.existing?.contractNames?.length ?? null,
-      args.incoming.schemas.length,
       args.incoming.contractNames?.length ?? null,
     );
 
@@ -196,8 +202,8 @@ export class RegistryChecks {
     }
 
     const isSchemasModified =
-      this.helper.createChecksumFromSchemas(args.existing.schemas) !==
-      this.helper.createChecksumFromSchemas(args.incoming.schemas);
+      this.helper.createChecksum(args.existing.schema) !==
+      this.helper.createChecksum(args.incoming.schema);
 
     if (isSchemasModified) {
       this.logger.debug('Schema is modified.');

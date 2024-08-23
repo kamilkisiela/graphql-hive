@@ -78,21 +78,20 @@ export class CompositeLegacyModel {
     };
 
     const latestVersion = latest;
-    const schemas = latestVersion
-      ? swapServices(latestVersion.schemas, incoming).schemas
-      : [incoming];
+    const schemaSwapResult = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
+    const schemas = schemaSwapResult ? schemaSwapResult.schemas : [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const checksumCheck = await this.checks.checksum({
-      existing: latestVersion
+      existing: schemaSwapResult?.existing
         ? {
-            schemas: latestVersion.schemas,
+            schema: schemaSwapResult.existing,
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });
@@ -195,9 +194,9 @@ export class CompositeLegacyModel {
     const isFederation = project.type === ProjectType.FEDERATION;
     const orchestrator = isFederation ? this.federation : this.stitching;
     const latestVersion = latest;
-    const swap = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
-    const previousService = swap?.existing;
-    const schemas = swap?.schemas ?? [incoming];
+    const schemaSwapResult = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
+    const previousService = schemaSwapResult?.existing;
+    const schemas = schemaSwapResult?.schemas ?? [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
     const forced = input.force === true;
@@ -246,14 +245,14 @@ export class CompositeLegacyModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      existing: latestVersion
+      existing: schemaSwapResult?.existing
         ? {
-            schemas: latestVersion.schemas,
+            schema: schemaSwapResult.existing,
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });

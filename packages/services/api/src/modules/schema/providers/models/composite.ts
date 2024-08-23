@@ -98,7 +98,6 @@ export class CompositeModel {
     selector,
     latest,
     latestComposable,
-    schemaVersionContractNames,
     project,
     organization,
     baseSchema,
@@ -119,13 +118,13 @@ export class CompositeModel {
       isComposable: boolean;
       sdl: string | null;
       schemas: PushedCompositeSchema[];
+      contractNames: string[] | null;
     } | null;
     latestComposable: {
       isComposable: boolean;
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
-    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     project: Project;
     organization: Organization;
@@ -152,7 +151,8 @@ export class CompositeModel {
       metadata: null,
     };
 
-    const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
+    const schemaSwapResult = latest ? swapServices(latest.schemas, incoming) : null;
+    const schemas = schemaSwapResult ? schemaSwapResult.schemas : [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
     const compareToPreviousComposableVersion = shouldUseLatestComposableVersion(
@@ -163,14 +163,14 @@ export class CompositeModel {
     const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumCheck = await this.checks.checksum({
-      existing: latest
+      existing: schemaSwapResult?.existing
         ? {
-            schemas: latest.schemas,
-            contractNames: schemaVersionContractNames,
+            schema: schemaSwapResult.existing,
+            contractNames: latest?.contractNames ?? null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: contracts?.map(({ contract }) => contract.contractName) ?? null,
       },
     });
@@ -298,7 +298,6 @@ export class CompositeModel {
     organization,
     latest,
     latestComposable,
-    schemaVersionContractNames,
     baseSchema,
     contracts,
     conditionalBreakingChangeDiffConfig,
@@ -311,13 +310,13 @@ export class CompositeModel {
       isComposable: boolean;
       sdl: string | null;
       schemas: PushedCompositeSchema[];
+      contractNames: string[] | null;
     } | null;
     latestComposable: {
       isComposable: boolean;
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
-    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     contracts: Array<ContractInput> | null;
     conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
@@ -337,9 +336,9 @@ export class CompositeModel {
     };
 
     const latestVersion = latest;
-    const swap = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
-    const previousService = swap?.existing;
-    const schemas = swap?.schemas ?? [incoming];
+    const schemaSwapResult = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
+    const previousService = schemaSwapResult?.existing;
+    const schemas = schemaSwapResult?.schemas ?? [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
     const compareToLatestComposable = shouldUseLatestComposableVersion(
       target.id,
@@ -386,14 +385,14 @@ export class CompositeModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      existing: latest
+      existing: schemaSwapResult?.existing
         ? {
-            schemas: latest.schemas,
-            contractNames: schemaVersionContractNames,
+            schema: schemaSwapResult.existing,
+            contractNames: latest?.contractNames ?? null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: contracts?.map(contract => contract.contract.contractName) ?? null,
       },
     });
