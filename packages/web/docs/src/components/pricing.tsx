@@ -179,7 +179,7 @@ export function Pricing(): ReactElement {
                     href="https://the-guild.dev"
                     target="_blank"
                     rel="noreferrer"
-                    className="hover:text-blue-700 hover:underline"
+                    className="underline hover:text-blue-700"
                   >
                     The&nbsp;Guild
                   </a>
