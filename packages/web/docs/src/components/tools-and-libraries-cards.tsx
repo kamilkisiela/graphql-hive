@@ -1,9 +1,14 @@
-import { CodegenIcon, HiveIcon, MeshIcon, YogaIcon } from '@theguild/components';
+import {
+  CodegenIcon,
+  HighlightDecoration,
+  HiveIcon,
+  MeshIcon,
+  YogaIcon,
+} from '@theguild/components';
 import { PRODUCTS } from '@theguild/components/products';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
 import { CallToAction } from './call-to-action';
-import { HighlightDecoration } from './decorations';
 import { Heading } from './heading';
 
 export function ToolsAndLibrariesCards({ className }: { className?: string }) {

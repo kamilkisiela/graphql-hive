@@ -21,7 +21,16 @@ export function GetYourAPIGameRightSection({ className }: { className?: string }
           <CallToAction variant="secondary-inverted" href="https://app.graphql-hive.com/">
             Get started for free
           </CallToAction>
-          <CallToAction variant="tertiary" href="https://the-guild.dev/contact">
+          <CallToAction
+            variant="tertiary"
+            href="https://the-guild.dev/contact"
+            onClick={event => {
+              if (typeof window !== 'undefined' && '$crisp' in window) {
+                (window.$crisp as { push(cmd: string[]): void }).push(['do', 'chat:open']);
+                event.preventDefault();
+              }
+            }}
+          >
             Talk to us
           </CallToAction>
         </div>
