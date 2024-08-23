@@ -471,7 +471,7 @@ The code demonstrates how to send a persisted document request using Urql. Make 
 placeholders with your actual values.
 
 ```typescript filename="Urql Persisted Document Configuration"
-import { createClient, fetchExchange, mapExchange } from 'urql';
+import { createClient, fetchExchange, mapExchange } from 'urql'
 
 // replace <app_name>, <app_version>, and with your values
 const appVersionPrefix = '<app_name>~<app_version>~'
@@ -480,28 +480,26 @@ const urqlClient = createClient({
   url: '/graphql',
   exchanges: [
     mapExchange({
-          onOperation(op) {
-            if (op.query?.['__metadata__']?.['hash']) {
-              throw Error("Hash not available for document")
-            }
+      onOperation(op) {
+        if (op.query?.['__metadata__']?.['hash']) {
+          throw Error('Hash not available for document')
+        }
 
-            return {
-              ...op,
-              query: {
-                documentId:
-                  // GraphQL Code Generator Client Preset generates
-                  // the persisted document ID within the document node.
-                  // For other implementations return the hash prefixed with the app version.
-                  appVersionPrefix +
-                  op.query['__meta__']['hash'],
-                definitions: [],
-              },
-            };
-          },
-        })
-      : null,
-    fetchExchange,
-  ],
+        return {
+          ...op,
+          query: {
+            documentId:
+              // GraphQL Code Generator Client Preset generates
+              // the persisted document ID within the document node.
+              // For other implementations return the hash prefixed with the app version.
+              appVersionPrefix + op.query['__meta__']['hash'],
+            definitions: []
+          }
+        }
+      }
+    }),
+    fetchExchange
+  ]
 })
 ```
 
