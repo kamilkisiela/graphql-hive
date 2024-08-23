@@ -52,7 +52,7 @@ export function FrequentlyAskedQuestions({ className }: { className?: string }) 
                       <ChevronDownIcon className="size-5 transition duration-500 ease-in [[data-state='open']_&]:[transform:rotateX(180deg)]" />
                     </Accordion.Trigger>
                   </Accordion.Header>
-                  <Accordion.Content className="rdx-state-open:motion-safe:animate-accordion-down rdx-state-closed:motion-safe:animate-accordion-down overflow-hidden bg-white text-green-800 transition-all">
+                  <Accordion.Content className="rdx-state-open:motion-safe:animate-accordion-down rdx-state-closed:motion-safe:animate-accordion-up overflow-hidden bg-white text-green-800 transition-all">
                     {answer}
                   </Accordion.Content>
                 </li>
