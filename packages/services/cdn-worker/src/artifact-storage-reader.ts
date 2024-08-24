@@ -22,7 +22,7 @@ type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
 
 /** Timeout in milliseconds for S3 read calls. */
-const READ_TIMEOUT_MS = 20_000;
+const READ_TIMEOUT_MS = 5_000;
 
 const OperationS3BucketKeyModel = zod.tuple([
   zod.string().uuid(),
