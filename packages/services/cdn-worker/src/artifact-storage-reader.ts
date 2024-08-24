@@ -21,6 +21,9 @@ type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 
 export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
 
+/** Timeout in milliseconds for S3 read calls. */
+const READ_TIMEOUT_MS = 5_000;
+
 const OperationS3BucketKeyModel = zod.tuple([
   zod.string().uuid(),
   zod.string().min(1),
@@ -85,6 +88,7 @@ export class ArtifactStorageReader {
         headers: {
           'X-Amz-Expires': String(presignedUrlExpirationSeconds),
         },
+        timeout: READ_TIMEOUT_MS,
       },
     );
 
@@ -126,6 +130,7 @@ export class ArtifactStorageReader {
         aws: {
           signQuery: true,
         },
+        timeout: READ_TIMEOUT_MS,
       },
     );
     this.analytics?.track(
@@ -164,6 +169,7 @@ export class ArtifactStorageReader {
         aws: {
           signQuery: true,
         },
+        timeout: READ_TIMEOUT_MS,
       },
     );
     this.analytics?.track(
@@ -200,6 +206,7 @@ export class ArtifactStorageReader {
           signQuery: true,
         },
         headers,
+        timeout: READ_TIMEOUT_MS,
       },
     );
 
