@@ -25,13 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { HiveLogo } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Meta } from '@/components/ui/meta';
@@ -398,7 +392,7 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
                 </Form>
 
                 {query.data?.isGitHubIntegrationFeatureEnabled &&
-                  !project.isProjectNameInGitHubCheckEnabled ? (
+                !project.isProjectNameInGitHubCheckEnabled ? (
                   <GitHubIntegration
                     organizationId={props.organizationId}
                     organizationName={organization.name}

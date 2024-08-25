@@ -63,7 +63,6 @@ const classes = {
   modal: cn('w-[550px]'),
 };
 
-
 const OIDCIntegrationSection_OrganizationFragment = graphql(`
   fragment OIDCIntegrationSection_OrganizationFragment on Organization {
     id
