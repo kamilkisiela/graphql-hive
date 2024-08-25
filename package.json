@@ -71,7 +71,7 @@
     "@parcel/watcher": "2.4.1",
     "@sentry/cli": "2.33.1",
     "@swc/core": "1.7.18",
-    "@theguild/eslint-config": "0.12.0",
+    "@theguild/eslint-config": "0.12.1",
     "@theguild/prettier-config": "2.0.7",
     "@types/node": "20.16.1",
     "bob-the-bundler": "7.0.1",

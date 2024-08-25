@@ -104,8 +104,8 @@ importers:
         specifier: 1.7.18
         version: 1.7.18(@swc/helpers@0.5.11)
       '@theguild/eslint-config':
-        specifier: 0.12.0
-        version: 0.12.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)
+        specifier: 0.12.1
+        version: 0.12.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)
       '@theguild/prettier-config':
         specifier: 2.0.7
         version: 2.0.7(prettier@3.3.3)
@@ -7706,10 +7706,10 @@ packages:
       react: ^18.2.0
       react-dom: ^18.2.0
 
-  '@theguild/eslint-config@0.12.0':
-    resolution: {integrity: sha512-a9xlmrgK6aInWG3yvQuRtJlpg3hMwt631aZwjDoYTsf4p9RLUQDlrxTh0+g2Gv/MIS+iFMZ9SuNAydQB9QlKoQ==}
+  '@theguild/eslint-config@0.12.1':
+    resolution: {integrity: sha512-H/w0tiZ38Fc0OWRIDzrirp4dyP39kFXHNOj+eIs5AwCJ8gw//Sftk4Zf0HQQw+sdY/kkU54nl6tI/REswE7DZg==}
     peerDependencies:
-      eslint: ^8
+      eslint: ^8 || ^9
       typescript: ^5
 
   '@theguild/federation-composition@0.12.1':
@@ -24632,7 +24632,7 @@ snapshots:
       - graphql
       - utf-8-validate
 
-  '@theguild/eslint-config@0.12.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)':
+  '@theguild/eslint-config@0.12.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)':
     dependencies:
       '@rushstack/eslint-patch': 1.10.4
       '@typescript-eslint/eslint-plugin': 7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)
@@ -27623,7 +27623,7 @@ snapshots:
   eslint-plugin-es-x@7.5.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      '@eslint-community/regexpp': 4.9.0
+      '@eslint-community/regexpp': 4.11.0
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-compat-utils: 0.1.2(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
 
@@ -27712,7 +27712,7 @@ snapshots:
       eslint-plugin-es-x: 7.5.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       get-tsconfig: 4.7.5
       globals: 14.0.0
-      ignore: 5.3.0
+      ignore: 5.3.2
       is-builtin-module: 3.2.1
       minimatch: 9.0.5
       semver: 7.6.2
@@ -34761,7 +34761,7 @@ snapshots:
       concat-stream: 2.0.0
       debug: 4.3.6(supports-color@8.1.1)
       glob: 10.3.12
-      ignore: 5.3.0
+      ignore: 5.3.2
       is-empty: 1.2.0
       is-plain-obj: 4.1.0
       load-plugin: 6.0.1
