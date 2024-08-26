@@ -1,3 +1,5 @@
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../../auth/providers/organization-access';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
@@ -17,5 +19,25 @@ export const generateStripePortalLink: NonNullable<
     OrganizationAccessScope.SETTINGS,
   );
 
-  return injector.get(BillingProvider).generateStripePortalLink(organization.id);
+  const result = injector.get(BillingProvider).generateStripePortalLink(organization.id);
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'SUBSCRIPTION_UPDATED',
+      subscriptionUpdatedAuditLogSchema: {
+        updatedFields: JSON.stringify({
+          generateStripePortalLink: true,
+        }),
+      },
+    },
+    {
+      organizationId: organizationId,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
+
+  return result;
 };

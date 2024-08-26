@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { ProjectManager } from '../../providers/project-manager';
 import { ProjectNameModel } from '../../validation';
@@ -34,6 +36,25 @@ export const updateProjectName: NonNullable<MutationResolvers['updateProjectName
     organization: organizationId,
     project: projectId,
   });
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'PROJECT_SETTINGS_UPDATED',
+      projectSettingsUpdatedAuditLogSchema: {
+        projectId: projectId,
+        updatedFields: JSON.stringify({
+          name: input.name,
+        }),
+      },
+    },
+    {
+      organizationId: organizationId,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
 
   return {
     ok: {

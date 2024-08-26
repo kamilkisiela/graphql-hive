@@ -1,3 +1,5 @@
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { OrganizationManager } from '../../providers/organization-manager';
 import { OrganizationSlugModel } from '../../validation';
@@ -23,6 +25,24 @@ export const updateOrganizationSlug: NonNullable<
     slug: input.slug,
     organization: organizationId,
   });
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'ORGANIZATION_SETTINGS_UPDATED',
+      organizationSettingsUpdatedAuditLogSchema: {
+        updatedFields: JSON.stringify({
+          newSlug: input.slug,
+        }),
+      },
+    },
+    {
+      organizationId: organizationId,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
 
   if (result.ok) {
     return {

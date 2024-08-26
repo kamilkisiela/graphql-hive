@@ -1,4 +1,6 @@
 import { HiveError } from '../../../../shared/errors';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { CdnProvider } from '../../providers/cdn.provider';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
@@ -35,6 +37,27 @@ export const createCdnAccessToken: NonNullable<MutationResolvers['createCdnAcces
       },
     };
   }
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'TARGET_SETTINGS_UPDATED',
+      targetSettingsUpdatedAuditLogSchema: {
+        targetId: targetId,
+        projectId: projectId,
+        updatedFields: JSON.stringify({
+          createNewCdnAccessToken: true,
+          alias: input.alias,
+        }),
+      },
+    },
+    {
+      organizationId,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
 
   return {
     ok: {

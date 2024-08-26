@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../../auth/providers/organization-access';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
@@ -43,6 +44,23 @@ export const downgradeToHobby: NonNullable<MutationResolvers['downgradeToHobby']
         operations: USAGE_DEFAULT_LIMITATIONS.HOBBY.operations,
       },
     });
+
+    const currentUser = await injector.get(AuthManager).getCurrentUser();
+    injector.get(AuditLogManager).createLogAuditEvent(
+      {
+        eventType: 'SUBSCRIPTION_CANCELED',
+        subscriptionCanceledAuditLogSchema: {
+          newPlan: 'HOBBY',
+          previousPlan: 'PRO',
+        },
+      },
+      {
+        organizationId: organizationId,
+        userEmail: currentUser.email,
+        userId: currentUser.id,
+        user: currentUser,
+      },
+    );
 
     return {
       previousPlan: 'PRO',

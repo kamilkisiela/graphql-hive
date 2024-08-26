@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TokenManager } from '../../providers/token-manager';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
@@ -39,6 +41,27 @@ export const createToken: NonNullable<MutationResolvers['createToken']> = async 
     projectScopes: input.projectScopes,
     targetScopes: input.targetScopes,
   });
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'TARGET_SETTINGS_UPDATED',
+      targetSettingsUpdatedAuditLogSchema: {
+        targetId: target,
+        projectId: project,
+        updatedFields: JSON.stringify({
+          createNewToken: true,
+          name: input.name,
+        }),
+      },
+    },
+    {
+      organizationId: organization,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
 
   return {
     ok: {

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { InMemoryRateLimiter } from '../../../rate-limit/providers/in-memory-rate-limiter';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { OrganizationManager } from '../../providers/organization-manager';
@@ -30,9 +32,29 @@ export const inviteToOrganizationByEmail: NonNullable<
     };
   }
   const organization = await injector.get(IdTranslator).translateOrganizationId(input);
-  return await injector.get(OrganizationManager).inviteByEmail({
+
+  const response = await injector.get(OrganizationManager).inviteByEmail({
     organization,
     email: input.email,
     role: input.role,
   });
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'USER_INVITED',
+      userInvitedAuditLogSchema: {
+        inviteeEmail: input.email,
+        inviteeId: currentUser.id,
+      },
+    },
+    {
+      user: currentUser,
+      organizationId: organization,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+    },
+  );
+
+  return response;
 };

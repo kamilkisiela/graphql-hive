@@ -1,3 +1,5 @@
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { OrganizationManager } from '../../providers/organization-manager';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
@@ -21,6 +23,23 @@ export const leaveOrganization: NonNullable<MutationResolvers['leaveOrganization
       },
     };
   }
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'USER_REMOVED',
+      userRemovedAuditLogSchema: {
+        removedUserEmail: currentUser.email,
+        removedUserId: currentUser.id,
+      },
+    },
+    {
+      organizationId: organizationId,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
 
   return {
     ok: {
