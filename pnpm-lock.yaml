@@ -1115,8 +1115,8 @@ importers:
         specifier: 5.0.2
         version: 5.0.2
       '@envelop/generic-auth':
-        specifier: 7.0.0
-        version: 7.0.0(@envelop/core@5.0.2)(graphql@16.9.0)
+        specifier: 8.0.0
+        version: 8.0.0(@envelop/core@5.0.2)(graphql@16.9.0)
       '@envelop/graphql-jit':
         specifier: 8.0.3
         version: 8.0.3(@envelop/core@5.0.2)(graphql@16.9.0)
@@ -1127,8 +1127,8 @@ importers:
         specifier: 6.3.1
         version: 6.3.1(@envelop/core@5.0.2)(graphql@16.9.0)
       '@envelop/sentry':
-        specifier: 7.1.1
-        version: 7.1.1(@envelop/core@5.0.2)(@sentry/node@7.119.0)(graphql@16.9.0)
+        specifier: 9.0.0
+        version: 9.0.0(@envelop/core@5.0.2)(@sentry/node@7.119.0)(graphql@16.9.0)
       '@envelop/types':
         specifier: 5.0.0
         version: 5.0.0
@@ -3560,18 +3560,18 @@ packages:
     resolution: {integrity: sha512-tVL6OrMe6UjqLosiE+EH9uxh2TQC0469GwF4tE014ugRaDDKKVWwFwZe0TBMlcyHKh5MD4ZxktWo/1hqUxIuhw==}
     engines: {node: '>=18.0.0'}
 
-  '@envelop/extended-validation@4.0.0':
-    resolution: {integrity: sha512-pvJ/OL+C+lpNiiCXezHT+vP3PTq37MQicoOB1l5MdgOOZZWRAp0NDOgvEKcXUY7AWNpvNHgSE0QFSRfGwsfwFQ==}
+  '@envelop/extended-validation@4.1.0':
+    resolution: {integrity: sha512-S90LQanW+xg3Lkp2sNiHa2KJnXXpKLucKys05Wk5zpiV0vL0SDX+/cuV+tnDhShWJucunAGi34n8xFCXsUUOkA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@envelop/core': ^5.0.0
+      '@envelop/core': ^5.0.2
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@envelop/generic-auth@7.0.0':
-    resolution: {integrity: sha512-FxGzoSjIXJlv+aiVyhQ8oHoz41ol4gJe8KAzNX7FP3qrhldbrqcC5Q+J/VtNlo5jXYX0YuLHH6ehF80tQDZJ4Q==}
+  '@envelop/generic-auth@8.0.0':
+    resolution: {integrity: sha512-a2VN2Ej3Ur9t4pQiDedwfzkMJ03b3sNJNAsAkHvl3/YazV6T+veX21Lwc52MabyeXt+CEMP4Q6pVB0gCLZ6ZPg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      '@envelop/core': ^5.0.0
+      '@envelop/core': ^5.0.2
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
   '@envelop/graphql-jit@8.0.3':
@@ -3610,8 +3610,8 @@ packages:
       '@envelop/core': ^5.0.0
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@envelop/sentry@7.1.1':
-    resolution: {integrity: sha512-dNq56ZaMQSj7U9czMSdcL+HqBuJVTTYyzLrX2nBRukohdI+kvDi+ptfpfAKtOXT+1fuKTlzvLupXDMMVjPbB8Q==}
+  '@envelop/sentry@9.0.0':
+    resolution: {integrity: sha512-R1qgYKOiaDGc1MXRfJCzNs8z5lVuRK3liHquwR72HxawgXP2wEPzTJgqMo1M7s7pZEHgf2RvO6mYAUExbZNYlg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@envelop/core': ^5.0.0
@@ -19315,17 +19315,17 @@ snapshots:
       '@envelop/types': 5.0.0
       tslib: 2.7.0
 
-  '@envelop/extended-validation@4.0.0(@envelop/core@5.0.2)(graphql@16.9.0)':
+  '@envelop/extended-validation@4.1.0(@envelop/core@5.0.2)(graphql@16.9.0)':
     dependencies:
       '@envelop/core': 5.0.2
       '@graphql-tools/utils': 10.5.4(graphql@16.9.0)
       graphql: 16.9.0
       tslib: 2.7.0
 
-  '@envelop/generic-auth@7.0.0(@envelop/core@5.0.2)(graphql@16.9.0)':
+  '@envelop/generic-auth@8.0.0(@envelop/core@5.0.2)(graphql@16.9.0)':
     dependencies:
       '@envelop/core': 5.0.2
-      '@envelop/extended-validation': 4.0.0(@envelop/core@5.0.2)(graphql@16.9.0)
+      '@envelop/extended-validation': 4.1.0(@envelop/core@5.0.2)(graphql@16.9.0)
       '@graphql-tools/utils': 10.5.4(graphql@16.9.0)
       graphql: 16.9.0
       tslib: 2.7.0
@@ -19369,7 +19369,7 @@ snapshots:
       lru-cache: 10.2.0
       tslib: 2.7.0
 
-  '@envelop/sentry@7.1.1(@envelop/core@5.0.2)(@sentry/node@7.119.0)(graphql@16.9.0)':
+  '@envelop/sentry@9.0.0(@envelop/core@5.0.2)(@sentry/node@7.119.0)(graphql@16.9.0)':
     dependencies:
       '@envelop/core': 5.0.2
       '@sentry/node': 7.119.0
