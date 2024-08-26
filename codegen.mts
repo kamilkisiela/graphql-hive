@@ -80,6 +80,30 @@ const config: CodegenConfig = {
           ID: 'string',
         },
         mappers: {
+          AuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          UserInvitedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          UserJoinedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          UserRemovedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          OrganizationSettingsUpdatedAuditLog:
+            '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          OrganizationTransferredAuditLog:
+            '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          ProjectCreatedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          ProjectSettingsUpdatedAuditLog:
+            '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          ProjectDeletedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          TargetCreatedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          TargetSettingsUpdatedAuditLog:
+            '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          TargetDeletedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          SchemaPolicySettingsUpdatedAuditLog:
+            '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          SchemaCheckedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          SchemaPublishAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          SchemaDeletedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          RoleCreatedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          RoleAssignedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          RoleDeletedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
           SchemaChange: '../modules/schema/module.graphql.mappers#SchemaChangeMapper',
           SchemaChangeApproval:
             '../modules/schema/module.graphql.mappers#SchemaChangeApprovalMapper',

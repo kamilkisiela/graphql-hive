@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
+import { AuditLogManager } from '../audit-logs/providers/audit-logs-manager';
 import { AuthManager } from '../auth/providers/auth-manager';
 import {
   isOrganizationScope,
@@ -249,6 +250,23 @@ export const resolvers: OrganizationModule.Resolvers = {
       const organization = await injector.get(OrganizationManager).updateName({
         name: input.name,
         organization: organizationId,
+      });
+
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      const jsonUpdatedFields = JSON.stringify({
+        name: input.name,
+      });
+      await injector.get(AuditLogManager).createLogAuditEvent({
+        eventType: 'ORGANIZATION_SETTINGS_UPDATED',
+        eventTime: new Date().toISOString(),
+        organizationId: organizationId,
+        user: {
+          userEmail: currentUser.email,
+          userId: currentUser.id,
+        },
+        OrganizationSettingsUpdatedAuditLogSchema: {
+          updatedFields: jsonUpdatedFields,
+        },
       });
 
       return {
