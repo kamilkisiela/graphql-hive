@@ -5,6 +5,7 @@ import { type ArtifactStorageReader, type ArtifactsType } from './artifact-stora
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
 import { IsAppDeploymentActive } from './is-app-deployment-active';
 import type { KeyValidator } from './key-validation';
+import { logMsg } from './log';
 import { createResponse } from './tracked-response';
 
 export type GetArtifactActionFn = (
@@ -79,7 +80,9 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return new MissingAuthKeyResponse(analytics, request);
     }
 
+    logMsg('ArtifactRequestHandler::isKeyValid');
     const isValid = await deps.isKeyValid(targetId, headerKey);
+    logMsg('ArtifactRequestHandler::isKeyValid done');
 
     if (isValid) {
       return null;
@@ -89,6 +92,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   };
 
   async function handlerV1(request: itty.IRequest & Request) {
+    logMsg('ArtifactRequestHandler::handlerV1');
     const parseResult = ParamsModel.safeParse(request.params);
 
     if (parseResult.success === false) {
@@ -111,6 +115,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     /** Legacy handling for old client SDK versions. */
     if (params.artifactType === 'schema') {
+      logMsg('ArtifactRequestHandler::handlerV1 schema');
       return createResponse(
         analytics,
         'Found.',
@@ -138,12 +143,15 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const eTag = request.headers.get('if-none-match');
 
+    logMsg('ArtifactRequestHandler::handlerV1::generateArtifactReadUrl');
     const result = await deps.artifactStorageReader.generateArtifactReadUrl(
       params.targetId,
       params.contractName,
       params.artifactType,
       eTag,
     );
+
+    logMsg('ArtifactRequestHandler::handlerV1::generateArtifactReadUrl done');
 
     if (result.type === 'notModified') {
       return createResponse(
@@ -171,6 +179,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
         // and we're fetching the artifact from within the private network.
         // If they are the same, private and public locations will be the same.
+        logMsg('ArtifactRequestHandler::handlerV1::metadata');
         const metadataResponse = await fetch(result.location.private);
 
         if (!metadataResponse.ok) {
@@ -188,6 +197,8 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // Metadata in SINGLE projects is only Mesh's Metadata, and it always defines _schema
         const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
         const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
+
+        logMsg('ArtifactRequestHandler::handlerV1::metadata done');
 
         // Mesh's Metadata shared by Mesh is always an object.
         // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.

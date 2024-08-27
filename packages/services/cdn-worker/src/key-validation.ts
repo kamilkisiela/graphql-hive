@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { Analytics } from './analytics';
 import { type AwsClient } from './aws';
 import { decodeCdnAccessTokenSafe, isCDNAccessToken } from './cdn-token';
+import { logMsg } from './log';
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
@@ -62,7 +63,9 @@ const handleLegacyCDNAccessToken = async (args: {
         },
       );
 
+      logMsg('Legacy::KeyValidation::Cache::match');
       const response = await requestCache.match(cacheKey);
+      logMsg('Legacy::KeyValidation::Cache::match done');
 
       if (response) {
         const responseValue = await response.text();
@@ -97,15 +100,20 @@ const handleLegacyCDNAccessToken = async (args: {
           args.targetId,
         );
 
-        const promise = requestCache.put(
-          cacheKey,
-          new Response(isValid ? '1' : '0', {
-            status: 200,
-            headers: {
-              'Cache-Control': `s-maxage=${60 * 5}`,
-            },
-          }),
-        );
+        logMsg('Legacy::KeyValidation::Cache::put');
+        const promise = requestCache
+          .put(
+            cacheKey,
+            new Response(isValid ? '1' : '0', {
+              status: 200,
+              headers: {
+                'Cache-Control': `s-maxage=${60 * 5}`,
+              },
+            }),
+          )
+          .finally(() => {
+            logMsg('Legacy::KeyValidation::Cache::put done');
+          });
 
         if (args.waitUntil) {
           args.waitUntil(promise);
@@ -118,12 +126,14 @@ const handleLegacyCDNAccessToken = async (args: {
     }
   }
 
-  const key = await args.s3.client.fetch(
-    [args.s3.endpoint, args.s3.bucketName, 'cdn-legacy-keys', args.targetId].join('/'),
-    {
+  logMsg('Legacy::KeyValidation::fetch');
+  const key = await args.s3.client
+    .fetch([args.s3.endpoint, args.s3.bucketName, 'cdn-legacy-keys', args.targetId].join('/'), {
       method: 'GET',
-    },
-  );
+    })
+    .finally(() => {
+      logMsg('Legacy::KeyValidation::fetch done');
+    });
 
   args.analytics?.track(
     {
@@ -160,9 +170,11 @@ async function handleCDNAccessToken(
   targetId: string,
   accessToken: string,
 ) {
+  logMsg('CDNAccessToken');
   let withCache = (isValid: boolean) => Promise.resolve(isValid);
 
   {
+    logMsg('CDNAccessToken::getCache');
     const requestCache = await deps.getCache?.();
 
     if (requestCache) {
@@ -175,7 +187,10 @@ async function handleCDNAccessToken(
         },
       );
 
-      const response = await requestCache.match(cacheKey);
+      logMsg('CDNAccessToken::match');
+      const response = await requestCache.match(cacheKey).finally(() => {
+        logMsg('CDNAccessToken::match done');
+      });
 
       if (response) {
         const responseValue = await response.text();
@@ -210,15 +225,20 @@ async function handleCDNAccessToken(
           targetId,
         );
 
-        const promise = requestCache.put(
-          cacheKey,
-          new Response(isValid ? '1' : '0', {
-            status: 200,
-            headers: {
-              'Cache-Control': `s-maxage=${60 * 5}`,
-            },
-          }),
-        );
+        logMsg('CDNAccessToken::Cache::put');
+        const promise = requestCache
+          .put(
+            cacheKey,
+            new Response(isValid ? '1' : '0', {
+              status: 200,
+              headers: {
+                'Cache-Control': `s-maxage=${60 * 5}`,
+              },
+            }),
+          )
+          .finally(() => {
+            logMsg('CDNAccessToken::Cache::put');
+          });
 
         if (deps.waitUntil) {
           deps.waitUntil(promise);
@@ -231,24 +251,28 @@ async function handleCDNAccessToken(
     }
   }
 
+  logMsg('CDNAccessToken::decode');
   const decodeResult = decodeCdnAccessTokenSafe(accessToken);
 
   if (decodeResult.type === 'failure') {
+    logMsg('CDNAccessToken::decode failure');
     return withCache(false);
   }
 
   const s3KeyParts = ['cdn-keys', targetId, decodeResult.token.keyId];
 
-  const key = await deps.s3.client.fetch(
-    [deps.s3.endpoint, deps.s3.bucketName, ...s3KeyParts].join('/'),
-    {
+  logMsg('CDNAccessToken::get');
+  const key = await deps.s3.client
+    .fetch([deps.s3.endpoint, deps.s3.bucketName, ...s3KeyParts].join('/'), {
       method: 'GET',
       aws: {
         // This boolean makes Google Cloud Storage & AWS happy.
         signQuery: true,
       },
-    },
-  );
+    })
+    .finally(() => {
+      logMsg('CDNAccessToken::get done');
+    });
 
   deps.analytics?.track(
     {
@@ -263,7 +287,12 @@ async function handleCDNAccessToken(
     return withCache(false);
   }
 
-  const isValid = await bcrypt.compare(decodeResult.token.privateKey, await key.text());
+  logMsg('CDNAccessToken::bcrypt');
+  const isValid = await bcrypt
+    .compare(decodeResult.token.privateKey, await key.text())
+    .finally(() => {
+      logMsg('CDNAccessToken::bcrypt done');
+    });
 
   deps.analytics?.track(
     {

@@ -8,6 +8,7 @@ import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
 import { createIsAppDeploymentActive } from './is-app-deployment-active';
 import { createIsKeyValid } from './key-validation';
+import { logMsg } from './log';
 import { createResponse } from './tracked-response';
 
 type Env = {
@@ -67,12 +68,12 @@ const handler: ExportedHandler<Env> = {
 
     const handleRequest = createRequestHandler({
       async getArtifactAction(targetId, contractName, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(
-          targetId,
-          contractName,
-          artifactType,
-          eTag,
-        );
+        logMsg('LegacyHandler::generateArtifactReadUrl');
+        return artifactStorageReader
+          .generateArtifactReadUrl(targetId, contractName, artifactType, eTag)
+          .finally(() => {
+            logMsg('LegacyHandler::generateArtifactReadUrl done');
+          });
       },
       isKeyValid,
       analytics,
@@ -87,7 +88,9 @@ const handler: ExportedHandler<Env> = {
       },
     });
 
+    logMsg('Cache::open');
     const cache = await caches.open('cdn-responses');
+    logMsg('Cache::open done');
 
     const handleArtifactRequest = createArtifactRequestHandler({
       isKeyValid,
@@ -101,10 +104,18 @@ const handler: ExportedHandler<Env> = {
       requestCache: {
         get(request) {
           const cacheKey = new Request(request.url.toString(), request);
-          return cache.match(cacheKey);
+          logMsg('Cache::match');
+          return cache.match(cacheKey).finally(() => {
+            logMsg('Cache::match done');
+          });
         },
         set(request, response) {
-          ctx.waitUntil(cache.put(request, response.clone()));
+          logMsg('Cache::put');
+          ctx.waitUntil(
+            cache.put(request, response.clone()).finally(() => {
+              logMsg('Cache::put done');
+            }),
+          );
         },
       },
     });
@@ -143,15 +154,22 @@ const handler: ExportedHandler<Env> = {
     });
 
     try {
-      return await router.handle(request, sentry.captureException.bind(sentry)).then(response => {
-        if (response) {
-          return response;
-        }
-        return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
-      });
+      logMsg('Router::handle');
+      return await router
+        .handle(request, sentry.captureException.bind(sentry))
+        .then(response => {
+          if (response) {
+            return response;
+          }
+          return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
+        })
+        .finally(() => {
+          logMsg('Router::handle done');
+        });
     } catch (error) {
       console.error(error);
       sentry.captureException(error);
+      logMsg('UnexpectedError');
       return new UnexpectedError(analytics, request);
     }
   },

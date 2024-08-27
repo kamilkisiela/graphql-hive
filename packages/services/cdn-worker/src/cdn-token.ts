@@ -2,6 +2,7 @@
  * Note: This file needs to run both on Node.js and Cloudflare Workers.
  */
 import * as bc from 'bcryptjs';
+import { logMsg } from './log';
 
 export interface CDNToken {
   keyId: string;
@@ -56,7 +57,10 @@ export function decodeCdnAccessTokenSafe(token: string) {
  * Verify whether a CDN token is valid.
  */
 export async function verifyCdnToken(privateKey: string, privateKeyHash: string) {
-  return bc.compare(privateKey, privateKeyHash);
+  logMsg('verifyCdnToken');
+  return bc.compare(privateKey, privateKeyHash).finally(() => {
+    logMsg('verifyCdnToken done');
+  });
 }
 
 export function generatePrivateKey(): string {

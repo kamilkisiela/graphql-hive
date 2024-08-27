@@ -10,12 +10,16 @@ import {
   MissingTargetIDErrorResponse,
 } from './errors';
 import type { KeyValidator } from './key-validation';
+import { logMsg } from './log';
 import { createResponse } from './tracked-response';
 
 async function createETag(value: string) {
+  logMsg('createETag');
   const myText = new TextEncoder().encode(value);
   const myDigest = await crypto.subtle.digest({ name: 'SHA-256' }, myText);
   const hashArray = Array.from(new Uint8Array(myDigest));
+
+  logMsg('createETag done');
 
   return `"${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}"`;
 }
@@ -145,8 +149,11 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       etag: string,
     ) {
       const rawSdl = rawValue;
+      logMsg('introspection::buildSchema');
       const schema = buildSchema(rawSdl);
+      logMsg('introspection::introspectionFromSchema');
       const introspection = introspectionFromSchema(schema);
+      logMsg('introspection done');
 
       return createResponse(
         analytics,
@@ -277,19 +284,27 @@ export function createRequestHandler(deps: RequestHandlerDependencies) {
     const rawValueAction = await deps
       .getArtifactAction(targetId, null, storageKeyType, null)
       .catch(() => {
+        logMsg('ReadArtifactAction::retry');
         // Do an extra attempt to read the value from the store.
         // If we see that a single retry does not help, we should do a proper retry logic here.
         // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
         return deps.getArtifactAction(targetId, null, storageKeyType, null);
+      })
+      .finally(() => {
+        logMsg('ReadArtifactAction done');
       });
 
     if (rawValueAction.type === 'redirect') {
       // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
       // and we're fetching the artifact from within the private network.
       // If they are the same, private and public locations will be the same.
+      logMsg('ReadArtifactAction::fetchText');
       const rawValue = await deps
         .fetchText(rawValueAction.location.private)
-        .catch(() => deps.fetchText(rawValueAction.location.private));
+        .catch(() => deps.fetchText(rawValueAction.location.private))
+        .finally(() => {
+          logMsg('ReadArtifactAction::fetchText done');
+        });
 
       const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');

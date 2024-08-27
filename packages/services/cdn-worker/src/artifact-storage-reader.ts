@@ -1,6 +1,7 @@
 import zod from 'zod';
 import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
+import { logMsg } from './log';
 
 const presignedUrlExpirationSeconds = 60;
 
@@ -80,6 +81,7 @@ export class ArtifactStorageReader {
     public: string;
     private: string;
   }> {
+    logMsg('ArtifactStorageReader::generatePresignedGetUrl');
     const [signedUrl] = await this.s3.client.sign(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
@@ -91,6 +93,8 @@ export class ArtifactStorageReader {
         timeout: READ_TIMEOUT_MS,
       },
     );
+
+    logMsg('ArtifactStorageReader::generatePresignedGetUrl done');
 
     if (!this.publicUrl) {
       return {
@@ -117,6 +121,7 @@ export class ArtifactStorageReader {
     artifactType: ArtifactsType,
     etagValue: string | null,
   ) {
+    logMsg('ArtifactStorageReader::generateArtifactReadUrl');
     if (artifactType.startsWith('sdl')) {
       artifactType = 'sdl';
     }
@@ -133,6 +138,7 @@ export class ArtifactStorageReader {
         timeout: READ_TIMEOUT_MS,
       },
     );
+    logMsg('ArtifactStorageReader::generateArtifactReadUrl fetch made');
     this.analytics?.track(
       {
         type: 'r2',
