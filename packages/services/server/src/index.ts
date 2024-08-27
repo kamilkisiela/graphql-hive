@@ -539,7 +539,7 @@ export async function main() {
         bucketName: env.s3.bucketName,
       };
 
-      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl, null);
+      const artifactStorageReader = new ArtifactStorageReader(s3, null);
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),

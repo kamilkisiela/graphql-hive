@@ -56,7 +56,7 @@ const handler: ExportedHandler<Env> = {
       r2: env.R2_ANALYTICS,
     });
 
-    const artifactStorageReader = new ArtifactStorageReader(s3, null, analytics);
+    const artifactStorageReader = new ArtifactStorageReader(s3, analytics);
 
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
