@@ -269,21 +269,21 @@ export function validateOperationMapRecord(record: OperationMapRecord) {
   };
 }
 
-function isValidOperationBody(op: OperationMapRecord) {
-  const cached = validOperationBodyCache.get(op.operation);
+export function isValidOperationBody(operation: string) {
+  const cached = validOperationBodyCache.get(operation);
 
   if (typeof cached === 'boolean') {
     return cached;
   }
 
   try {
-    parse(op.operation, {
+    parse(operation, {
       noLocation: true,
     });
-    validOperationBodyCache.set(op.operation, true);
+    validOperationBodyCache.set(operation, true);
     return true;
   } catch (error) {
-    validOperationBodyCache.set(op.operation, false);
+    validOperationBodyCache.set(operation, false);
     return false;
   }
 }
@@ -304,7 +304,7 @@ export function validateOperation(operation: IncomingOperation, operationMap: Op
   }
 
   if (validate(operation)) {
-    if (!isValidOperationBody(operationMap[operation.operationMapKey])) {
+    if (!isValidOperationBody(operationMap[operation.operationMapKey].operation)) {
       return {
         valid: false,
         errors: [

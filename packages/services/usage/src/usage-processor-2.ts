@@ -10,6 +10,7 @@ import * as tb from '@sinclair/typebox';
 import * as tc from '@sinclair/typebox/compiler';
 import { invalidRawOperations, rawOperationsSize, totalOperations, totalReports } from './metrics';
 import { TokensResponse } from './tokens';
+import { isValidOperationBody } from './usage-processor-1';
 
 export function usageProcessorV2(
   logger: Logger,
@@ -74,7 +75,7 @@ export function usageProcessorV2(
 
   const newKeyMappings = new Map<OperationMapRecord, string>();
 
-  function getOperationMapRecord(operationMapKey: string): string | null {
+  function getOperationMapRecordKey(operationMapKey: string): string | null {
     const operationMapRecord = incoming.map[operationMapKey] as OperationMapRecord | undefined;
 
     if (!operationMapRecord) {
@@ -82,6 +83,10 @@ export function usageProcessorV2(
     }
 
     let newOperationMapKey = newKeyMappings.get(operationMapRecord);
+
+    if (!isValidOperationBody(operationMapRecord.operation)) {
+      return null;
+    }
 
     if (newOperationMapKey === undefined) {
       const sortedFields = operationMapRecord.fields.sort();
@@ -106,7 +111,7 @@ export function usageProcessorV2(
   }
 
   for (const operation of incomingOperations) {
-    const operationMapKey = getOperationMapRecord(operation.operationMapKey);
+    const operationMapKey = getOperationMapRecordKey(operation.operationMapKey);
 
     // if the record does not exist -> skip the operation
     if (operationMapKey === null) {
@@ -154,7 +159,7 @@ export function usageProcessorV2(
   }
 
   for (const operation of incomingSubscriptionOperations) {
-    const operationMapKey = getOperationMapRecord(operation.operationMapKey);
+    const operationMapKey = getOperationMapRecordKey(operation.operationMapKey);
 
     // if the record does not exist -> skip the operation
     if (operationMapKey === null) {
