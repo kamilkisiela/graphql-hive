@@ -78,13 +78,40 @@ const handler: ExportedHandler<Env> = {
       isKeyValid,
       analytics,
       async fetchText(url) {
-        const r = await fetch(url);
+        // Yeah, it's not globally defined, but it makes no sense to define it globally
+        // it's only used here and it's easier to see how it's used
+        const retries = 5;
+        const initRetryMs = 50;
 
-        if (r.ok) {
-          return r.text();
+        for (let i = 0; i <= retries; i++) {
+          const fetched = fetch(url, {
+            signal: AbortSignal.timeout(5000),
+          });
+
+          if (i === retries) {
+            const res = await fetched;
+            if (res.ok) {
+              return res.text();
+            }
+
+            throw new Error(`Failed to fetch ${url}, status: ${res.status}`);
+          }
+
+          try {
+            const res = await fetched;
+            if (res.ok) {
+              return res.text();
+            }
+          } catch (error) {
+            // Retry also when there's an exception
+            console.error(error);
+          }
+          await new Promise(resolve =>
+            setTimeout(resolve, Math.random() * initRetryMs * Math.pow(2, i)),
+          );
         }
 
-        throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+        throw new Error('An unknown error occurred, ensure retries is not negative');
       },
     });
 
