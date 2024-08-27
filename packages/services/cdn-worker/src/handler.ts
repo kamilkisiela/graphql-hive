@@ -10,16 +10,12 @@ import {
   MissingTargetIDErrorResponse,
 } from './errors';
 import type { KeyValidator } from './key-validation';
-import { logMsg } from './log';
 import { createResponse } from './tracked-response';
 
 async function createETag(value: string) {
-  logMsg('createETag');
   const myText = new TextEncoder().encode(value);
   const myDigest = await crypto.subtle.digest({ name: 'SHA-256' }, myText);
   const hashArray = Array.from(new Uint8Array(myDigest));
-
-  logMsg('createETag done');
 
   return `"${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}"`;
 }
