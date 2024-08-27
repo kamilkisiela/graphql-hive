@@ -19,7 +19,7 @@ import { deployPostgres } from './services/postgres';
 import { deployProxy } from './services/proxy';
 import { deployRateLimit } from './services/rate-limit';
 import { deployRedis } from './services/redis';
-import { deployS3 } from './services/s3';
+import { deployS3, deployS3Mirror } from './services/s3';
 import { deploySchema } from './services/schema';
 import { configureSentry } from './services/sentry';
 import { deploySentryEventsMonitor } from './services/sentry-events';
@@ -80,6 +80,7 @@ const postgres = deployPostgres();
 const redis = deployRedis({ environment });
 const kafka = deployKafka();
 const s3 = deployS3();
+const s3Mirror = deployS3Mirror();
 
 const cdn = deployCFCDN({
   s3,
@@ -240,6 +241,7 @@ const graphql = deployGraphQL({
   emails,
   supertokens,
   s3,
+  s3Mirror,
   zendesk,
   githubApp,
   sentry,
