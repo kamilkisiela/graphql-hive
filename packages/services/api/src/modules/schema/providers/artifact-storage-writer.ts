@@ -30,7 +30,7 @@ export class ArtifactStorageWriter {
   private logger: Logger;
 
   constructor(
-    @Inject(S3_CONFIG) private s3: S3Config,
+    @Inject(S3_CONFIG) private s3Mirrors: S3Config,
     logger: Logger,
   ) {
     this.logger = logger.child({ service: 'f' });
@@ -52,21 +52,25 @@ export class ArtifactStorageWriter {
     const key = buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName);
     const meta = artifactMeta[args.artifactType];
 
-    const result = await this.s3.client.fetch([this.s3.endpoint, this.s3.bucket, key].join('/'), {
-      method: 'PUT',
-      headers: {
-        'content-type': meta.contentType,
-      },
-      body: meta.preprocessor(args.artifact),
-      aws: {
-        // This boolean makes Google Cloud Storage & AWS happy.
-        signQuery: true,
-      },
-    });
+    await Promise.all(
+      this.s3Mirrors.map(async s3 => {
+        const result = await s3.client.fetch([s3.endpoint, s3.bucket, key].join('/'), {
+          method: 'PUT',
+          headers: {
+            'content-type': meta.contentType,
+          },
+          body: meta.preprocessor(args.artifact),
+          aws: {
+            // This boolean makes Google Cloud Storage & AWS happy.
+            signQuery: true,
+          },
+        });
 
-    if (result.statusCode !== 200) {
-      throw new Error(`Unexpected status code ${result.statusCode} when writing artifact.`);
-    }
+        if (result.statusCode !== 200) {
+          throw new Error(`Unexpected status code ${result.statusCode} when writing artifact.`);
+        }
+      }),
+    );
   }
 
   @traceFn('CDN: Delete Artifact', {
@@ -89,24 +93,28 @@ export class ArtifactStorageWriter {
     );
     const key = buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName);
 
-    const result = await this.s3.client.fetch([this.s3.endpoint, this.s3.bucket, key].join('/'), {
-      method: 'DELETE',
-      aws: {
-        // This boolean makes Google Cloud Storage & AWS happy.
-        signQuery: true,
-      },
-    });
+    await Promise.all(
+      this.s3Mirrors.map(async s3 => {
+        const result = await s3.client.fetch([s3.endpoint, s3.bucket, key].join('/'), {
+          method: 'DELETE',
+          aws: {
+            // This boolean makes Google Cloud Storage & AWS happy.
+            signQuery: true,
+          },
+        });
 
-    if (result.statusCode !== 204) {
-      this.logger.debug(
-        'Failed deleting artifact, S3 compatible storage returned unexpected status code. (targetId=%s, contractName=%s, artifactType=%s, statusCode=%s)',
-        args.targetId,
-        args.artifactType,
-        args.contractName,
-        result.statusCode,
-      );
-      throw new Error(`Unexpected status code ${result.statusCode} when deleting artifact.`);
-    }
+        if (result.statusCode !== 204) {
+          this.logger.debug(
+            'Failed deleting artifact, S3 compatible storage returned unexpected status code. (targetId=%s, contractName=%s, artifactType=%s, statusCode=%s)',
+            args.targetId,
+            args.artifactType,
+            args.contractName,
+            result.statusCode,
+          );
+          throw new Error(`Unexpected status code ${result.statusCode} when deleting artifact.`);
+        }
+      }),
+    );
 
     this.logger.debug(
       'Successfully deleted artifact. (targetId=%s, contractName=%s, artifactType=%s)',

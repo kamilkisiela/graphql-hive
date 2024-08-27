@@ -36,16 +36,18 @@ export function createWorker(
     };
   },
 ) {
-  const s3Config: S3Config = {
-    client: new AwsClient({
-      accessKeyId: env.s3.credentials.accessKeyId,
-      secretAccessKey: env.s3.credentials.secretAccessKey,
-      sessionToken: env.s3.credentials.sessionToken,
-      service: 's3',
-    }),
-    bucket: env.s3.bucketName,
-    endpoint: env.s3.endpoint,
-  };
+  const s3Config: S3Config = [
+    {
+      client: new AwsClient({
+        accessKeyId: env.s3.credentials.accessKeyId,
+        secretAccessKey: env.s3.credentials.secretAccessKey,
+        sessionToken: env.s3.credentials.sessionToken,
+        service: 's3',
+      }),
+      bucket: env.s3.bucketName,
+      endpoint: env.s3.endpoint,
+    },
+  ];
 
   const logger = baseLogger.child({
     source: 'PersistedDocumentsWorker',
