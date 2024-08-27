@@ -145,11 +145,8 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       etag: string,
     ) {
       const rawSdl = rawValue;
-      logMsg('introspection::buildSchema');
       const schema = buildSchema(rawSdl);
-      logMsg('introspection::introspectionFromSchema');
       const introspection = introspectionFromSchema(schema);
-      logMsg('introspection done');
 
       return createResponse(
         analytics,
