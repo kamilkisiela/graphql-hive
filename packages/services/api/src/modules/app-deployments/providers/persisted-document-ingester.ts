@@ -305,27 +305,25 @@ export class PersistedDocumentIngester {
 
       tasks.push(
         this.promiseQueue.add(async () => {
-          await Promise.all(
-            this.s3.map(async s3 => {
-              const response = await s3.client.fetch([s3.endpoint, s3.bucket, s3Key].join('/'), {
-                method: 'PUT',
-                headers: {
-                  'content-type': 'text/plain',
-                },
-                body: document.body,
-                aws: {
-                  // This boolean makes Google Cloud Storage & AWS happy.
-                  signQuery: true,
-                },
-              });
+          for (const s3 of this.s3) {
+            const response = await s3.client.fetch([s3.endpoint, s3.bucket, s3Key].join('/'), {
+              method: 'PUT',
+              headers: {
+                'content-type': 'text/plain',
+              },
+              body: document.body,
+              aws: {
+                // This boolean makes Google Cloud Storage & AWS happy.
+                signQuery: true,
+              },
+            });
 
-              if (response.statusCode !== 200) {
-                throw new Error(
-                  `Failed to upload operation to S3: [${response.statusCode}] ${response.statusMessage}`,
-                );
-              }
-            }),
-          );
+            if (response.statusCode !== 200) {
+              throw new Error(
+                `Failed to upload operation to S3: [${response.statusCode}] ${response.statusMessage}`,
+              );
+            }
+          }
         }),
       );
     }
