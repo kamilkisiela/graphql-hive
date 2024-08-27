@@ -108,32 +108,31 @@ export class CdnProvider {
       s3Key,
     );
 
-    // Check if key already exists
-    const headResponse = await this.s3Config.client.fetch(
-      [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/'),
-      {
+    for (const s3 of this.s3Config) {
+      // Check if key already exists
+      const headResponse = await s3.client.fetch([s3.endpoint, s3.bucket, s3Key].join('/'), {
         method: 'HEAD',
         aws: {
           // This boolean makes Google Cloud Storage & AWS happy.
           signQuery: true,
         },
-      },
-    );
+      });
 
-    if (headResponse.statusCode !== 404) {
-      this.logger.debug(
-        'Failed creating CDN access token. Head request on S3 returned unexpected status while checking token availability. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
-        args.organizationId,
-        args.projectId,
-        args.targetId,
-        headResponse.statusCode,
-      );
-      this.logger.debug(headResponse.body);
+      if (headResponse.statusCode !== 404) {
+        this.logger.debug(
+          'Failed creating CDN access token. Head request on S3 returned unexpected status while checking token availability. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
+          args.organizationId,
+          args.projectId,
+          args.targetId,
+          headResponse.statusCode,
+        );
+        this.logger.debug(headResponse.body);
 
-      return {
-        type: 'failure',
-        reason: 'Failed to generate key. Please try again later.',
-      } as const;
+        return {
+          type: 'failure',
+          reason: 'Failed to generate key. Please try again later.',
+        } as const;
+      }
     }
 
     this.logger.debug(
@@ -144,33 +143,32 @@ export class CdnProvider {
       s3Key,
     );
 
-    // put key onto s3 bucket
-    const putResponse = await this.s3Config.client.fetch(
-      [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/'),
-      {
+    for (const s3 of this.s3Config) {
+      // put key onto s3 bucket
+      const putResponse = await s3.client.fetch([s3.endpoint, s3.bucket, s3Key].join('/'), {
         method: 'PUT',
         body: privateKeyHash,
         aws: {
           // This boolean makes Google Cloud Storage & AWS happy.
           signQuery: true,
         },
-      },
-    );
+      });
 
-    if (putResponse.statusCode !== 200) {
-      this.logger.debug(
-        'Failed creating CDN Access Token. Head request on S3 returned unexpected status while creating token. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
-        args.organizationId,
-        args.projectId,
-        args.targetId,
-        headResponse.statusCode,
-      );
-      this.logger.error(putResponse.body);
+      if (putResponse.statusCode !== 200) {
+        this.logger.debug(
+          'Failed creating CDN Access Token. Head request on S3 returned unexpected status while creating token. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
+          args.organizationId,
+          args.projectId,
+          args.targetId,
+          putResponse.statusCode,
+        );
+        this.logger.error(putResponse.body);
 
-      return {
-        type: 'failure',
-        reason: 'Failed to generate key. Please try again later. 2',
-      } as const;
+        return {
+          type: 'failure',
+          reason: 'Failed to generate key. Please try again later. 2',
+        } as const;
+      }
     }
 
     this.logger.debug(
@@ -284,30 +282,32 @@ export class CdnProvider {
       } as const;
     }
 
-    const headResponse = await this.s3Config.client.fetch(
-      [this.s3Config.endpoint, this.s3Config.bucket, record.s3Key].join('/'),
-      {
-        method: 'DELETE',
-        aws: {
-          // This boolean makes Google Cloud Storage & AWS happy.
-          signQuery: true,
+    for (const s3 of this.s3Config) {
+      const deleteResponse = await s3.client.fetch(
+        [s3.endpoint, s3.bucket, record.s3Key].join('/'),
+        {
+          method: 'DELETE',
+          aws: {
+            // This boolean makes Google Cloud Storage & AWS happy.
+            signQuery: true,
+          },
         },
-      },
-    );
-
-    if (headResponse.statusCode !== 204) {
-      this.logger.debug(
-        'Delete CDN access token error. Head request on S3 failed. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
-        args.organizationId,
-        args.projectId,
-        args.targetId,
-        args.cdnAccessTokenId,
       );
 
-      return {
-        type: 'failure',
-        reason: 'Failed deleting CDN Access Token. Please try again later.',
-      } as const;
+      if (deleteResponse.statusCode !== 204) {
+        this.logger.debug(
+          'Delete CDN access token error. Head request on S3 failed. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
+          args.organizationId,
+          args.projectId,
+          args.targetId,
+          args.cdnAccessTokenId,
+        );
+
+        return {
+          type: 'failure',
+          reason: 'Failed deleting CDN Access Token. Please try again later.',
+        } as const;
+      }
     }
 
     await this.storage.deleteCDNAccessToken({
