@@ -279,7 +279,7 @@ export function createRequestHandler(deps: RequestHandlerDependencies) {
     if (rawValueAction.type === 'redirect') {
       // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
       // and we're fetching the artifact from within the private network.
-      // If they are the same, private and public locations will be the same.
+      // If they are the same, private and public locations will be the same
       const rawValue = await deps.fetchText(rawValueAction.location.private);
 
       const etag = await createETag(`${kvStorageKey}|${rawValue}`);
