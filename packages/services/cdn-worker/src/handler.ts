@@ -10,16 +10,12 @@ import {
   MissingTargetIDErrorResponse,
 } from './errors';
 import type { KeyValidator } from './key-validation';
-import { logMsg } from './log';
 import { createResponse } from './tracked-response';
 
 async function createETag(value: string) {
-  logMsg('createETag');
   const myText = new TextEncoder().encode(value);
   const myDigest = await crypto.subtle.digest({ name: 'SHA-256' }, myText);
   const hashArray = Array.from(new Uint8Array(myDigest));
-
-  logMsg('createETag done');
 
   return `"${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}"`;
 }
@@ -149,11 +145,8 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       etag: string,
     ) {
       const rawSdl = rawValue;
-      logMsg('introspection::buildSchema');
       const schema = buildSchema(rawSdl);
-      logMsg('introspection::introspectionFromSchema');
       const introspection = introspectionFromSchema(schema);
-      logMsg('introspection done');
 
       return createResponse(
         analytics,
@@ -281,20 +274,13 @@ export function createRequestHandler(deps: RequestHandlerDependencies) {
     analytics.track({ type: 'artifact', value: artifactType, version: 'v0' }, targetId);
 
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
-    const rawValueAction = await deps
-      .getArtifactAction(targetId, null, storageKeyType, null)
-      .finally(() => {
-        logMsg('ReadArtifactAction done');
-      });
+    const rawValueAction = await deps.getArtifactAction(targetId, null, storageKeyType, null);
 
     if (rawValueAction.type === 'redirect') {
       // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
       // and we're fetching the artifact from within the private network.
       // If they are the same, private and public locations will be the same.
-      logMsg('ReadArtifactAction::fetchText');
-      const rawValue = await deps.fetchText(rawValueAction.location.private).finally(() => {
-        logMsg('ReadArtifactAction::fetchText done');
-      });
+      const rawValue = await deps.fetchText(rawValueAction.location.private);
 
       const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');
