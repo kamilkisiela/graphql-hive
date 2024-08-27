@@ -27,6 +27,15 @@ export function createWorker(
         readonly sessionToken: string | undefined;
       };
     };
+    s3Mirror: {
+      readonly bucketName: string;
+      readonly endpoint: string;
+      readonly credentials: {
+        readonly accessKeyId: string;
+        readonly secretAccessKey: string;
+        readonly sessionToken: string | undefined;
+      };
+    } | null;
     clickhouse: {
       readonly host: string;
       readonly port: number;
@@ -48,6 +57,19 @@ export function createWorker(
       endpoint: env.s3.endpoint,
     },
   ];
+
+  if (env.s3Mirror) {
+    s3Config.push({
+      client: new AwsClient({
+        accessKeyId: env.s3Mirror.credentials.accessKeyId,
+        secretAccessKey: env.s3Mirror.credentials.secretAccessKey,
+        sessionToken: env.s3Mirror.credentials.sessionToken,
+        service: 's3',
+      }),
+      bucket: env.s3Mirror.bucketName,
+      endpoint: env.s3Mirror.endpoint,
+    });
+  }
 
   const logger = baseLogger.child({
     source: 'PersistedDocumentsWorker',

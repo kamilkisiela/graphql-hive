@@ -107,6 +107,7 @@ export function createRegistry({
   githubApp,
   cdn,
   s3,
+  s3Mirror,
   encryptionSecret,
   feedback,
   billing,
@@ -135,6 +136,13 @@ export function createRegistry({
     secretAccessKeyId: string;
     sessionToken?: string;
   };
+  s3Mirror: {
+    bucketName: string;
+    endpoint: string;
+    accessKeyId: string;
+    secretAccessKeyId: string;
+    sessionToken?: string;
+  } | null;
   encryptionSecret: string;
   feedback: {
     token: string;
@@ -150,16 +158,31 @@ export function createRegistry({
   organizationOIDC: boolean;
   pubSub: HivePubSub;
 }) {
-  const s3Config: S3Config = {
-    client: new AwsClient({
-      accessKeyId: s3.accessKeyId,
-      secretAccessKey: s3.secretAccessKeyId,
-      sessionToken: s3.sessionToken,
-      service: 's3',
-    }),
-    bucket: s3.bucketName,
-    endpoint: s3.endpoint,
-  };
+  const s3Config: S3Config = [
+    {
+      client: new AwsClient({
+        accessKeyId: s3.accessKeyId,
+        secretAccessKey: s3.secretAccessKeyId,
+        sessionToken: s3.sessionToken,
+        service: 's3',
+      }),
+      bucket: s3.bucketName,
+      endpoint: s3.endpoint,
+    },
+  ];
+
+  if (s3Mirror) {
+    s3Config.push({
+      client: new AwsClient({
+        accessKeyId: s3Mirror.accessKeyId,
+        secretAccessKey: s3Mirror.secretAccessKeyId,
+        sessionToken: s3Mirror.sessionToken,
+        service: 's3',
+      }),
+      bucket: s3Mirror.bucketName,
+      endpoint: s3Mirror.endpoint,
+    });
+  }
 
   const artifactStorageWriter = new ArtifactStorageWriter(s3Config, logger);
 
