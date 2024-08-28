@@ -380,9 +380,10 @@ const SettingsPageRenderer = (props: {
                 <CardHeader>
                   <CardTitle>Organization Name</CardTitle>
                   <CardDescription>
-                    Changing the name of your organization <span className="font-bold">won't</span>{' '}
-                    change the slug of your organization URL, and will invalidate any existing links
-                    to your organization.
+                    Changing the name of your organization will
+                    <span className="font-bold">not</span> change the slug of your organization URL,
+                    and will <span className="font-bold">not</span> invalidate any existing links to
+                    your organization.
                     <br />
                     <DocsLink
                       className="text-muted-foreground text-sm"
