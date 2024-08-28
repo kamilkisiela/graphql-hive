@@ -877,6 +877,9 @@ importers:
       toucan-js:
         specifier: 3.4.0
         version: 3.4.0
+      undici:
+        specifier: 6.19.8
+        version: 6.19.8
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -4161,6 +4164,7 @@ packages:
 
   '@fastify/vite@6.0.7':
     resolution: {integrity: sha512-+dRo9KUkvmbqdmBskG02SwigWl06Mwkw8SBDK1zTNH6vd4DyXbRvI7RmJEmBkLouSU81KTzy1+OzwHSffqSD6w==}
+    bundledDependencies: []
 
   '@floating-ui/core@1.2.6':
     resolution: {integrity: sha512-EvYTiXet5XqweYGClEmpu3BoxmsQ4hkj3QaYA6qEnigCWffTP3vNRwBReTdrwDwo7OoJ3wM8Uoe9Uk4n+d4hfg==}
