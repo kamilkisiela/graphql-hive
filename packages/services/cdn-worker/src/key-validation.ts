@@ -1,23 +1,17 @@
 import bcrypt from 'bcryptjs';
 import { Analytics } from './analytics';
-import { type AwsClient } from './aws';
+import { ArtifactStorageReader } from './artifact-storage-reader';
 import { decodeCdnAccessTokenSafe, isCDNAccessToken } from './cdn-token';
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
 
 type WaitUntil = (promise: Promise<void>) => void;
 
-type S3Config = {
-  client: AwsClient;
-  bucketName: string;
-  endpoint: string;
-};
-
 type GetCache = () => Promise<Cache | null>;
 
 type CreateKeyValidatorDeps = {
   waitUntil: null | WaitUntil;
-  s3: S3Config;
+  artifactStorageReader: ArtifactStorageReader;
   getCache: null | GetCache;
   analytics: null | Analytics;
 };
@@ -39,7 +33,7 @@ export const createIsKeyValid =
 const handleLegacyCDNAccessToken = async (args: {
   targetId: string;
   accessToken: string;
-  s3: S3Config;
+  artifactStorageReader: ArtifactStorageReader;
   getCache: null | GetCache;
   waitUntil: null | WaitUntil;
   analytics: null | Analytics;
@@ -118,21 +112,7 @@ const handleLegacyCDNAccessToken = async (args: {
     }
   }
 
-  const key = await args.s3.client.fetch(
-    [args.s3.endpoint, args.s3.bucketName, 'cdn-legacy-keys', args.targetId].join('/'),
-    {
-      method: 'GET',
-    },
-  );
-
-  args.analytics?.track(
-    {
-      type: 'r2',
-      statusCode: key.status,
-      action: 'GET cdn-legacy-keys',
-    },
-    args.targetId,
-  );
+  const key = await args.artifactStorageReader.readLegacyAccessKey(args.targetId);
 
   if (key.status !== 200) {
     return withCache(false);
@@ -237,27 +217,7 @@ async function handleCDNAccessToken(
     return withCache(false);
   }
 
-  const s3KeyParts = ['cdn-keys', targetId, decodeResult.token.keyId];
-
-  const key = await deps.s3.client.fetch(
-    [deps.s3.endpoint, deps.s3.bucketName, ...s3KeyParts].join('/'),
-    {
-      method: 'GET',
-      aws: {
-        // This boolean makes Google Cloud Storage & AWS happy.
-        signQuery: true,
-      },
-    },
-  );
-
-  deps.analytics?.track(
-    {
-      type: 'r2',
-      statusCode: key.status,
-      action: 'GET cdn-access-token',
-    },
-    targetId,
-  );
+  const key = await deps.artifactStorageReader.readAccessKey(targetId, decodeResult.token.keyId);
 
   if (key.status !== 200) {
     return withCache(false);

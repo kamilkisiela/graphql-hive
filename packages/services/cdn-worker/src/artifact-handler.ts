@@ -129,7 +129,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.artifactStorageReader.generateArtifactReadUrl(
+    const result = await deps.artifactStorageReader.readArtifact(
       params.targetId,
       params.contractName,
       params.artifactType,
