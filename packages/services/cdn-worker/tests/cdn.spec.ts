@@ -62,6 +62,7 @@ describe('CDN Worker', () => {
             } as any,
           },
           null,
+          null,
         ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
@@ -140,6 +141,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -236,6 +238,7 @@ describe('CDN Worker', () => {
             } as any,
           },
           null,
+          null,
         ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
@@ -314,6 +317,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -400,6 +404,7 @@ describe('CDN Worker', () => {
             } as any,
           },
           null,
+          null,
         ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
@@ -482,6 +487,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -651,6 +657,7 @@ describe('CDN Worker', () => {
               } as any,
             },
             null,
+            null,
           ),
         }),
         async getArtifactAction(targetId, _, artifactType) {
@@ -702,6 +709,7 @@ describe('CDN Worker', () => {
               } as any,
             },
             null,
+            null,
           ),
         }),
         async getArtifactAction(targetId, _, artifactType) {
@@ -750,6 +758,7 @@ describe('CDN Worker', () => {
                 },
               } as any,
             },
+            null,
             null,
           ),
         }),

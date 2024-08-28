@@ -15,10 +15,12 @@ export class CDNSecret extends ServiceSecret<{
 export function deployCFCDN({
   environment,
   s3,
+  s3Mirror,
   sentry,
 }: {
   environment: Environment;
   s3: S3;
+  s3Mirror: S3;
   sentry: Sentry;
 }) {
   const cfConfig = new pulumi.Config('cloudflareCustom');
@@ -35,6 +37,7 @@ export function deployCFCDN({
     sentryDsn: sentry.enabled && sentry.secret ? sentry.secret?.raw.dsn : '',
     release: environment.release,
     s3,
+    s3Mirror,
   });
 
   const deployedCdn = cdn.deploy();

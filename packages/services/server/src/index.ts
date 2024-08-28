@@ -539,7 +539,19 @@ export async function main() {
         bucketName: env.s3.bucketName,
       };
 
-      const artifactStorageReader = new ArtifactStorageReader(s3, null);
+      const s3Mirror = env.s3Mirror
+        ? {
+            client: new AwsClient({
+              accessKeyId: env.s3Mirror.credentials.accessKeyId,
+              secretAccessKey: env.s3Mirror.credentials.secretAccessKey,
+              service: 's3',
+            }),
+            endpoint: env.s3Mirror.endpoint,
+            bucketName: env.s3Mirror.bucketName,
+          }
+        : null;
+
+      const artifactStorageReader = new ArtifactStorageReader(s3, s3Mirror, null);
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({

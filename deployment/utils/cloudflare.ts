@@ -13,6 +13,7 @@ export class CloudflareCDN {
       sentryDsn: string | pulumi.Output<string>;
       release: string;
       s3: S3;
+      s3Mirror: S3;
     },
   ) {}
 
@@ -91,6 +92,22 @@ export class CloudflareCDN {
         {
           name: 'S3_BUCKET_NAME',
           text: this.config.s3.secret.raw.bucket,
+        },
+        {
+          name: 'S3_MIRROR_ENDPOINT',
+          text: this.config.s3Mirror.secret.raw.endpoint,
+        },
+        {
+          name: 'S3_MIRROR_ACCESS_KEY_ID',
+          text: this.config.s3Mirror.secret.raw.accessKeyId,
+        },
+        {
+          name: 'S3_MIRROR_SECRET_ACCESS_KEY',
+          text: this.config.s3Mirror.secret.raw.secretAccessKey,
+        },
+        {
+          name: 'S3_MIRROR_BUCKET_NAME',
+          text: this.config.s3Mirror.secret.raw.bucket,
         },
       ],
     });
