@@ -65,11 +65,16 @@ export class ArtifactStorageReader {
       endpoint: string;
       bucketName: string;
     },
+    // private s3Mirror: {
+    //   client: AwsClient;
+    //   endpoint: string;
+    //   bucketName: string;
+    // },
     private analytics: Analytics | null,
   ) {}
 
-  /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
-  async generateArtifactReadUrl(
+  /** Read an artifact from S3 */
+  async readArtifact(
     targetId: string,
     contractName: string | null,
     artifactType: ArtifactsType,
@@ -81,55 +86,52 @@ export class ArtifactStorageReader {
 
     const key = buildArtifactStorageKey(targetId, artifactType, contractName);
 
-    const headResponse = await this.s3.client.fetch(
+    const headers: HeadersInit = {};
+
+    if (etagValue) {
+      headers['if-none-match'] = etagValue;
+    }
+
+    const response = await this.s3.client.fetch(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
-        method: 'HEAD',
+        method: 'GET',
+        headers,
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
       },
     );
+
     this.analytics?.track(
       {
         type: 'r2',
-        statusCode: headResponse.status,
-        action: 'HEAD artifact',
+        statusCode: response.status,
+        action: 'GET artifact',
       },
       targetId,
     );
 
-    if (headResponse.status === 200) {
-      if (etagValue && headResponse.headers.get('etag') === etagValue) {
-        return { type: 'notModified' } as const;
-      }
-
-      const getResponse = await this.s3.client.fetch(
-        [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-        {
-          method: 'GET',
-          aws: {
-            signQuery: true,
-          },
-          timeout: READ_TIMEOUT_MS,
-        },
-      );
-
-      if (getResponse.ok) {
-        return {
-          type: 'response',
-          response: getResponse,
-        } as const;
-      }
-
-      throw new Error(`GET request failed with status ${getResponse.status}`);
-    }
-    if (headResponse.status === 404) {
+    if (response.status === 404) {
       return { type: 'notFound' } as const;
     }
-    const body = await headResponse.text();
-    throw new Error(`HEAD request failed with status ${headResponse.status}: ${body}`);
+
+    if (response.status === 304) {
+      return {
+        type: 'notModified',
+      } as const;
+    }
+
+    if (response.status === 200) {
+      return {
+        type: 'response',
+        response,
+      } as const;
+    }
+
+    const body = await response.text();
+    throw new Error(`GET request failed with status ${response.status}: ${body}`);
   }
 
   async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {

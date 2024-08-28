@@ -67,12 +67,7 @@ const handler: ExportedHandler<Env> = {
 
     const handleRequest = createRequestHandler({
       async getArtifactAction(targetId, contractName, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(
-          targetId,
-          contractName,
-          artifactType,
-          eTag,
-        );
+        return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
       },
       isKeyValid,
       analytics,

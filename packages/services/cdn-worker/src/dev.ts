@@ -28,12 +28,7 @@ const artifactStorageReader = new ArtifactStorageReader(s3, null);
 const handleRequest = createRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
   async getArtifactAction(targetId, contractName, artifactType, eTag) {
-    return artifactStorageReader.generateArtifactReadUrl(
-      targetId,
-      contractName,
-      artifactType,
-      eTag,
-    );
+    return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
   },
   async fetchText(url) {
     const r = await fetch(url);

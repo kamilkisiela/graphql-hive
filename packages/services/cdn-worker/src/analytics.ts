@@ -57,7 +57,7 @@ type Event =
   | {
       type: 'r2';
       action:
-        | 'HEAD artifact'
+        | 'GET artifact'
         | 'GET cdn-legacy-keys'
         | 'GET cdn-access-token'
         | 'GET persistedOperation'
