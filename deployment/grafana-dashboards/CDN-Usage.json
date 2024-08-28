@@ -456,6 +456,109 @@
     },
     {
       "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisWidth": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dtdurationms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": ["max", "min", "mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0-74868",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE timestamp >= toDateTime(1724821505) AND timestamp <= toDateTime(1724843105)\n\nGROUP BY\n    action,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "showFormattedSQL": false,
+          "skip_comments": true
+        }
+      ],
+      "title": "R2 calls (p95 latency)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
         "uid": "$Subscription"
       },
       "fieldConfig": {
@@ -1193,7 +1296,7 @@
       "type": "piechart"
     }
   ],
-  "refresh": "5s",
+  "refresh": "",
   "revision": 1,
   "schemaVersion": 39,
   "tags": ["hive", "cdn"],
