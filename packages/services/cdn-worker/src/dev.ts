@@ -23,7 +23,7 @@ const s3 = {
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
-const artifactStorageReader = new ArtifactStorageReader(s3, null);
+const artifactStorageReader = new ArtifactStorageReader(s3, null, null);
 
 const handleRequest = createRequestHandler({
   isKeyValid: createIsKeyValid({

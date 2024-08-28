@@ -1,9 +1,12 @@
 import { createHmac } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
+import { MockAgent, MockPool, fetch as undiciFetch } from 'undici';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { describe, expect, test } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { ArtifactStorageReader } from '../src/artifact-storage-reader';
+import { AwsClient } from '../src/aws';
+import { encodeCdnToken } from '../src/cdn-token';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
@@ -24,6 +27,24 @@ describe('CDN Worker', () => {
     const secretKeyData = encoder.encode(secret);
 
     return createHmac('sha256', secretKeyData).update(encoder.encode(targetId)).digest('base64');
+  }
+
+  async function createV2Token(targetId: string) {
+    const SECRET = '123456';
+    const tokenKeyId = 'secret-key';
+    const secret = createToken(SECRET, targetId);
+    const key = encodeCdnToken({
+      privateKey: secret,
+      keyId: tokenKeyId,
+    });
+
+    const hash = await bcrypt.hash(secret, await bcrypt.genSalt());
+
+    return {
+      key,
+      keyId: tokenKeyId,
+      hash,
+    };
   }
 
   test('in /schema and /metadata the response should contain content-type: application/json header', async () => {
@@ -61,6 +82,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -140,6 +162,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -236,6 +259,7 @@ describe('CDN Worker', () => {
             } as any,
           },
           null,
+          null,
         ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
@@ -314,6 +338,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -400,6 +425,7 @@ describe('CDN Worker', () => {
             } as any,
           },
           null,
+          null,
         ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
@@ -482,6 +508,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
         ),
       }),
@@ -651,6 +678,7 @@ describe('CDN Worker', () => {
               } as any,
             },
             null,
+            null,
           ),
         }),
         async getArtifactAction(targetId, _, artifactType) {
@@ -702,6 +730,7 @@ describe('CDN Worker', () => {
               } as any,
             },
             null,
+            null,
           ),
         }),
         async getArtifactAction(targetId, _, artifactType) {
@@ -751,6 +780,7 @@ describe('CDN Worker', () => {
               } as any,
             },
             null,
+            null,
           ),
         }),
         async getArtifactAction() {
@@ -772,6 +802,458 @@ describe('CDN Worker', () => {
       const response = await handleRequest(request);
       expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
+    });
+  });
+
+  describe('use S3', () => {
+    const mockAgent = new MockAgent();
+    let r2MockPool: MockPool;
+    let s3MockPool: MockPool;
+    const r2Endpoint = 'http://localhost:3002';
+    const s3Endpoint = 'http://localhost:3003';
+
+    const TIMEOUT = 200;
+    const DELAY = TIMEOUT + 100;
+
+    const mockedFetch = (input: any, init?: any) => {
+      // Use undici's fetch with custom dispatcher to mock the network
+      return undiciFetch(input as any, {
+        ...(init ?? {}),
+        dispatcher: mockAgent,
+      }) as Promise<Response>;
+    };
+
+    beforeEach(() => {
+      r2MockPool = mockAgent.get(r2Endpoint);
+      s3MockPool = mockAgent.get(s3Endpoint);
+    });
+
+    afterEach(async () => {
+      await r2MockPool?.close();
+      await s3MockPool?.close();
+      mockAgent.assertNoPendingInterceptors();
+    });
+    afterAll(() => mockAgent.close());
+
+    test('when fetching access key from R2 takes longer than a timeout', async () => {
+      const targetId = 'fake-target-id';
+      const services = [{ sdl: `type Query { dummy: String }` }];
+
+      const access = await createV2Token(targetId);
+
+      // Fetching the key from R2 takes longer than the timeout
+      r2MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/cdn-keys/${targetId}/${access.keyId}`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: access.hash,
+          };
+        })
+        .delay(DELAY);
+
+      s3MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/cdn-keys/${targetId}/${access.keyId}`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: access.hash,
+          };
+        });
+
+      s3MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/artifact/${targetId}/services`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: JSON.stringify(services),
+          };
+        });
+
+      const artifactStorageReader = new ArtifactStorageReader(
+        {
+          endpoint: r2Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 'r2-fake-access-key',
+            secretAccessKey: 'r2-fake-secret-key',
+            sessionToken: 'r2-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        {
+          endpoint: s3Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 's3-fake-access-key',
+            secretAccessKey: 's3-fake-secret-key',
+            sessionToken: 's3-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        null,
+        TIMEOUT,
+      );
+
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          analytics: null,
+          artifactStorageReader,
+        }),
+        async getArtifactAction(targetId, contractName, artifactType, eTag) {
+          return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
+        },
+        async fetchText(url) {
+          return mockedFetch(url).then(r => {
+            if (r.ok) {
+              return r.text();
+            }
+
+            throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+          });
+        },
+      });
+
+      const firstRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+        headers: {
+          'x-hive-cdn-key': access.key,
+        },
+      });
+
+      const response = await handleRequest(firstRequest);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual([{ sdl: `type Query { dummy: String }` }]);
+    });
+
+    test('when fetching artifact from R2 takes longer than a timeout', async () => {
+      const targetId = 'fake-target-id';
+      const services = [{ sdl: `type Query { dummy: String }` }];
+
+      const access = await createV2Token(targetId);
+
+      // Fetching the key is instant
+      r2MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/cdn-keys/${targetId}/${access.keyId}`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: access.hash,
+          };
+        });
+
+      // Fetching the artifact from R2 takes longer than the timeout
+      r2MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/artifact/${targetId}/services`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: JSON.stringify(services),
+          };
+        })
+        .delay(DELAY);
+
+      s3MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/artifact/${targetId}/services`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: JSON.stringify(services),
+          };
+        });
+
+      const artifactStorageReader = new ArtifactStorageReader(
+        {
+          endpoint: r2Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 'r2-fake-access-key',
+            secretAccessKey: 'r2-fake-secret-key',
+            sessionToken: 'r2-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        {
+          endpoint: s3Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 's3-fake-access-key',
+            secretAccessKey: 's3-fake-secret-key',
+            sessionToken: 's3-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        null,
+        TIMEOUT,
+      );
+
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          analytics: null,
+          artifactStorageReader,
+        }),
+        async getArtifactAction(targetId, contractName, artifactType, eTag) {
+          return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
+        },
+        async fetchText(url) {
+          return mockedFetch(url).then(r => {
+            if (r.ok) {
+              return r.text();
+            }
+
+            throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+          });
+        },
+      });
+
+      const firstRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+        headers: {
+          'x-hive-cdn-key': access.key,
+        },
+      });
+
+      const response = await handleRequest(firstRequest);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual([{ sdl: `type Query { dummy: String }` }]);
+    });
+
+    test('when R2 is down and access key fails to be fetched', async () => {
+      const targetId = 'fake-target-id';
+      const services = [{ sdl: `type Query { dummy: String }` }];
+
+      const access = await createV2Token(targetId);
+
+      // R2 is down and we fail to fetch the key
+      r2MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/cdn-keys/${targetId}/${access.keyId}`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 500,
+            data: 'Please try again later',
+          };
+        });
+
+      s3MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/cdn-keys/${targetId}/${access.keyId}`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: access.hash,
+          };
+        });
+
+      s3MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/artifact/${targetId}/services`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: JSON.stringify(services),
+          };
+        });
+
+      const artifactStorageReader = new ArtifactStorageReader(
+        {
+          endpoint: r2Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 'r2-fake-access-key',
+            secretAccessKey: 'r2-fake-secret-key',
+            sessionToken: 'r2-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        {
+          endpoint: s3Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 's3-fake-access-key',
+            secretAccessKey: 's3-fake-secret-key',
+            sessionToken: 's3-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        null,
+      );
+
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          analytics: null,
+          artifactStorageReader,
+        }),
+        async getArtifactAction(targetId, contractName, artifactType, eTag) {
+          return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
+        },
+        async fetchText(url) {
+          return mockedFetch(url).then(r => {
+            if (r.ok) {
+              return r.text();
+            }
+
+            throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+          });
+        },
+      });
+
+      const firstRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+        headers: {
+          'x-hive-cdn-key': access.key,
+        },
+      });
+
+      const response = await handleRequest(firstRequest);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual([{ sdl: `type Query { dummy: String }` }]);
+    });
+
+    test('when R2 is down after we got the access key', async () => {
+      const targetId = 'fake-target-id';
+      const services = [{ sdl: `type Query { dummy: String }` }];
+
+      const access = await createV2Token(targetId);
+
+      // R2 is down and we fail to fetch the key
+      r2MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/cdn-keys/${targetId}/${access.keyId}`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: access.hash,
+          };
+        });
+
+      r2MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/artifact/${targetId}/services`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 500,
+            data: 'We are so down',
+          };
+        });
+
+      s3MockPool
+        .intercept({
+          path(path) {
+            return path.startsWith(`/artifacts/artifact/${targetId}/services`);
+          },
+        })
+        .reply(() => {
+          return {
+            statusCode: 200,
+            data: JSON.stringify(services),
+          };
+        });
+
+      const artifactStorageReader = new ArtifactStorageReader(
+        {
+          endpoint: r2Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 'r2-fake-access-key',
+            secretAccessKey: 'r2-fake-secret-key',
+            sessionToken: 'r2-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        {
+          endpoint: s3Endpoint,
+          bucketName: 'artifacts',
+          client: new AwsClient({
+            accessKeyId: 's3-fake-access-key',
+            secretAccessKey: 's3-fake-secret-key',
+            sessionToken: 's3-fake-session-token',
+            service: 's3',
+            fetch: mockedFetch,
+          }),
+        },
+        null,
+      );
+
+      const handleRequest = createRequestHandler({
+        isKeyValid: createIsKeyValid({
+          getCache: null,
+          waitUntil: null,
+          analytics: null,
+          artifactStorageReader,
+        }),
+        async getArtifactAction(targetId, contractName, artifactType, eTag) {
+          return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
+        },
+        async fetchText(url) {
+          return mockedFetch(url).then(r => {
+            if (r.ok) {
+              return r.text();
+            }
+
+            throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+          });
+        },
+      });
+
+      const firstRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+        headers: {
+          'x-hive-cdn-key': access.key,
+        },
+      });
+
+      const response = await handleRequest(firstRequest);
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual([{ sdl: `type Query { dummy: String }` }]);
     });
   });
 });

@@ -49,6 +49,15 @@ type AwsRequestInit = RequestInit & {
    * Timeout in milliseconds for each fetch call.
    */
   timeout?: number;
+  /**
+   * Abort signal for the fetch call and potential retries.
+   * Retries will not be attempted if the signal is already aborted.
+   */
+  signal?: AbortSignal;
+  /**
+   * Overwrite the amount of retries
+   */
+  retries?: number;
   /** Hook being invoked for each attempt for gathering analytics or similar. */
   onAttempt?: (args: {
     /** attempt number */
@@ -68,6 +77,8 @@ type AwsRequestInit = RequestInit & {
           response: Response;
         };
   }) => void;
+  /** Custom verifying function on whether the response is okay. */
+  isResponseOk?: (response: Response) => boolean;
 };
 
 export type AWSClientConfig = {
@@ -126,9 +137,13 @@ export class AwsClient {
       input = url;
     }
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
+
     const signed = Object.assign(
       {
-        signal: init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
+        signal: anySignal([
+          init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
+          init?.signal,
+        ]),
       },
       init,
       await signer.sign(),
@@ -147,17 +162,27 @@ export class AwsClient {
   }
 
   async fetch(input: RequestInfo, init: AwsRequestInit): Promise<Response> {
-    for (let i = 0; i <= this.retries; i++) {
+    const maximumRetryCount = init.retries ?? this.retries;
+
+    for (let retryCounter = 0; retryCounter <= maximumRetryCount; retryCounter++) {
       const attemptStart = performance.now();
       try {
         const response = await this._fetch(...(await this.sign(input, init)));
         const duration = performance.now() - attemptStart;
-        init.onAttempt?.({ attempt: i, duration, result: { type: 'success', response } });
+        init.onAttempt?.({
+          attempt: retryCounter,
+          duration,
+          result: { type: 'success', response },
+        });
 
         if (
           (response.status < 500 && response.status !== 429 && response.status !== 499) ||
-          i === this.retries
+          retryCounter === maximumRetryCount
         ) {
+          if (init.isResponseOk && !init.isResponseOk(response)) {
+            throw new Error(`Response not okay, status: ${response.status}`);
+          }
+
           return response;
         }
       } catch (error) {
@@ -165,17 +190,21 @@ export class AwsClient {
         // Retry also when there's an exception
         console.error(error);
         init.onAttempt?.({
-          attempt: i,
+          attempt: retryCounter,
           duration,
           result: { type: 'error', error: error as Error },
         });
 
-        if (i === this.retries) {
+        if (
+          retryCounter === maximumRetryCount ||
+          // If the signal was aborted, we don't want to retry
+          init.signal?.aborted === true
+        ) {
           throw error;
         }
       }
       await new Promise(resolve =>
-        setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)),
+        setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, retryCounter)),
       );
     }
     throw new Error('An unknown error occurred, ensure retries is not negative');
@@ -504,4 +533,26 @@ function guessServiceRegion(url: URL, headers: Headers) {
   }
 
   return [HOST_SERVICES[service] || service, region];
+}
+
+function anySignal(signals: Array<AbortSignal | undefined>) {
+  const controller = new AbortController();
+
+  function onAbort(reason: unknown) {
+    controller.abort(reason);
+  }
+
+  for (const signal of signals) {
+    if (!signal) {
+      continue;
+    }
+
+    if (signal.aborted) {
+      onAbort(signal.reason);
+      break;
+    }
+    signal.addEventListener('abort', onAbort);
+  }
+
+  return controller.signal;
 }
