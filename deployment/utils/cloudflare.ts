@@ -55,6 +55,10 @@ export class CloudflareCDN {
           dataset: `hive_ha_cdn_r2_${this.config.envName}`,
         },
         {
+          name: 'S3_ANALYTICS',
+          dataset: `hive_ha_cdn_s3_${this.config.envName}`,
+        },
+        {
           name: 'RESPONSE_ANALYTICS',
           dataset: `hive_ha_cdn_response_${this.config.envName}`,
         },

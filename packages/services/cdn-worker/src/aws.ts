@@ -49,6 +49,25 @@ type AwsRequestInit = RequestInit & {
    * Timeout in milliseconds for each fetch call.
    */
   timeout?: number;
+  /** Hook being invoked for each attempt for gathering analytics or similar. */
+  onAttempt?: (args: {
+    /** attempt number */
+    attempt: number;
+    /** attempt duration in ms */
+    duration: number;
+    /** result */
+    result:
+      | {
+          // HTTP or other unexpected error
+          type: 'error';
+          error: Error;
+        }
+      | {
+          // HTTP response sent by upstream server
+          type: 'success';
+          response: Response;
+        };
+  }) => void;
 };
 
 export type AWSClientConfig = {
@@ -129,18 +148,31 @@ export class AwsClient {
 
   async fetch(input: RequestInfo, init: AwsRequestInit): Promise<Response> {
     for (let i = 0; i <= this.retries; i++) {
-      const fetched = this._fetch(...(await this.sign(input, init)));
-      if (i === this.retries) {
-        return fetched; // No need to await if we're returning anyway
-      }
+      const attemptStart = performance.now();
       try {
-        const res = await fetched;
-        if (res.status < 500 && res.status !== 429 && res.status !== 499) {
-          return res;
+        const response = await this._fetch(...(await this.sign(input, init)));
+        const duration = performance.now() - attemptStart;
+        init.onAttempt?.({ attempt: i, duration, result: { type: 'success', response } });
+
+        if (
+          (response.status < 500 && response.status !== 429 && response.status !== 499) ||
+          i === this.retries
+        ) {
+          return response;
         }
       } catch (error) {
+        const duration = performance.now() - attemptStart;
         // Retry also when there's an exception
         console.error(error);
+        init.onAttempt?.({
+          attempt: i,
+          duration,
+          result: { type: 'error', error: error as Error },
+        });
+
+        if (i === this.retries) {
+          throw error;
+        }
       }
       await new Promise(resolve =>
         setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)),

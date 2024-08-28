@@ -151,38 +151,29 @@ export class ArtifactStorageReader {
   async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {
     const key = buildAppDeploymentIsEnabledKey(targetId, appName, appVersion);
 
-    const start = performance.now();
-
-    const response = await this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+      {
         method: 'HEAD',
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
-      })
-      .catch((err: Error) => {
-        this.analytics?.track(
-          {
-            type: 'r2',
-            statusCodeOrErrCode: String(err.name ?? 'unknown'),
-            action: 'HEAD appDeploymentIsEnabled',
-            duration: performance.now() - start,
-          },
-          targetId,
-        );
-
-        throw err;
-      });
-
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCodeOrErrCode: response.status,
-        action: 'HEAD appDeploymentIsEnabled',
-        duration: performance.now() - start,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'HEAD appDeploymentIsEnabled',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-      targetId,
     );
 
     return response.status === 200;
@@ -202,39 +193,30 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const start = performance.now();
-
-    const response = await this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+      {
         method: 'GET',
         aws: {
           signQuery: true,
         },
         headers,
         timeout: READ_TIMEOUT_MS,
-      })
-      .catch((err: Error) => {
-        this.analytics?.track(
-          {
-            type: 'r2',
-            statusCodeOrErrCode: String(err.name ?? 'unknown'),
-            action: 'GET persistedOperation',
-            duration: performance.now() - start,
-          },
-          targetId,
-        );
-
-        throw err;
-      });
-
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCodeOrErrCode: response.status,
-        action: 'GET persistedOperation',
-        duration: performance.now() - start,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET persistedOperation',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-      targetId,
     );
 
     if (etagValue && response.status === 304) {
@@ -258,35 +240,26 @@ export class ArtifactStorageReader {
   }
 
   async readLegacyAccessKey(targetId: string) {
-    const start = performance.now();
-
-    const response = await this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'), {
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'),
+      {
         method: 'GET',
         timeout: READ_TIMEOUT_MS,
-      })
-      .catch(err => {
-        this.analytics?.track(
-          {
-            type: 'r2',
-            statusCodeOrErrCode: String(err.name ?? 'unknown'),
-            action: 'GET cdn-legacy-keys',
-            duration: performance.now() - start,
-          },
-          targetId,
-        );
-
-        throw err;
-      });
-
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCodeOrErrCode: response.status,
-        action: 'GET cdn-legacy-keys',
-        duration: performance.now() - start,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET cdn-legacy-keys',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-      targetId,
     );
 
     return response;
@@ -295,39 +268,30 @@ export class ArtifactStorageReader {
   async readAccessKey(targetId: string, keyId: string) {
     const s3KeyParts = ['cdn-keys', targetId, keyId];
 
-    const start = performance.now();
-
-    const response = await this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, ...s3KeyParts].join('/'), {
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, ...s3KeyParts].join('/'),
+      {
         method: 'GET',
         aws: {
           // This boolean makes Google Cloud Storage & AWS happy.
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
-      })
-      .catch(err => {
-        this.analytics?.track(
-          {
-            type: 'r2',
-            statusCodeOrErrCode: String(err.name ?? 'unknown'),
-            action: 'GET cdn-access-token',
-            duration: performance.now() - start,
-          },
-          targetId,
-        );
-
-        throw err;
-      });
-
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCodeOrErrCode: response.status,
-        action: 'GET cdn-access-token',
-        duration: performance.now() - start,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET cdn-access-token',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-      targetId,
     );
 
     return response;
