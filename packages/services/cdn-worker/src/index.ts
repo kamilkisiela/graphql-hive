@@ -32,6 +32,7 @@ type Env = {
   ERROR_ANALYTICS: AnalyticsEngine;
   RESPONSE_ANALYTICS: AnalyticsEngine;
   R2_ANALYTICS: AnalyticsEngine;
+  S3_ANALYTICS: AnalyticsEngine;
   KEY_VALIDATION_ANALYTICS: AnalyticsEngine;
 };
 
@@ -54,6 +55,7 @@ const handler: ExportedHandler<Env> = {
       keyValidation: env.KEY_VALIDATION_ANALYTICS,
       response: env.RESPONSE_ANALYTICS,
       r2: env.R2_ANALYTICS,
+      s3: env.S3_ANALYTICS,
     });
 
     const artifactStorageReader = new ArtifactStorageReader(s3, analytics);

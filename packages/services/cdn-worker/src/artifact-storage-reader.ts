@@ -65,11 +65,11 @@ export class ArtifactStorageReader {
       endpoint: string;
       bucketName: string;
     },
-    // private s3Mirror: {
-    //   client: AwsClient;
-    //   endpoint: string;
-    //   bucketName: string;
-    // },
+    private s3Mirror: {
+      client: AwsClient;
+      endpoint: string;
+      bucketName: string;
+    } | null,
     private analytics: Analytics | null,
   ) {}
 
@@ -92,15 +92,17 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
+    const response = await this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
         method: 'GET',
         headers,
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
+        retries: this.s3Mirror ? 1 : undefined,
+        isResponseOk: response =>
+          response.status === 200 || response.status === 304 || response.status === 404,
         onAttempt: args => {
           this.analytics?.track(
             {
@@ -115,8 +117,75 @@ export class ArtifactStorageReader {
             targetId,
           );
         },
-      },
-    );
+      })
+      .catch(err => {
+        if (this.s3Mirror) {
+          const controller = new AbortController();
+          return Promise.race([
+            this.s3.client.fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
+              method: 'GET',
+              headers,
+              aws: {
+                signQuery: true,
+              },
+              timeout: READ_TIMEOUT_MS,
+              signal: controller.signal,
+              isResponseOk: response =>
+                response.status === 200 || response.status === 304 || response.status === 404,
+              onAttempt: args => {
+                this.analytics?.track(
+                  {
+                    type: 'r2',
+                    statusCodeOrErrCode:
+                      args.result.type === 'error'
+                        ? String(args.result.error.name ?? 'unknown')
+                        : args.result.response.status,
+                    action: 'GET artifact',
+                    duration: args.duration,
+                  },
+                  targetId,
+                );
+              },
+            }),
+            this.s3Mirror.client.fetch(
+              [this.s3Mirror.endpoint, this.s3Mirror.bucketName, key].join('/'),
+              {
+                method: 'GET',
+                headers,
+                aws: {
+                  signQuery: true,
+                },
+                timeout: READ_TIMEOUT_MS,
+                signal: controller.signal,
+                isResponseOk: response =>
+                  response.status === 200 || response.status === 304 || response.status === 404,
+                onAttempt: args => {
+                  this.analytics?.track(
+                    {
+                      type: 's3',
+                      statusCodeOrErrCode:
+                        args.result.type === 'error'
+                          ? String(args.result.error.name ?? 'unknown')
+                          : args.result.response.status,
+                      action: 'GET artifact',
+                      duration: args.duration,
+                    },
+                    targetId,
+                  );
+                },
+              },
+            ),
+          ]).finally(() => {
+            // abort other pending requests
+            const error = new Error('Another request won the race.');
+            // change the name so we have some metrics for this on our analytics dashboard
+            error.name = 'AbortError';
+            controller.abort(error);
+          });
+        }
+
+        throw err;
+      });
 
     if (response.status === 404) {
       return { type: 'notFound' } as const;
@@ -150,6 +219,7 @@ export class ArtifactStorageReader {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
+        retries: 1,
         onAttempt: args => {
           this.analytics?.track(
             {
@@ -193,6 +263,7 @@ export class ArtifactStorageReader {
         },
         headers,
         timeout: READ_TIMEOUT_MS,
+        retries: 1,
         onAttempt: args => {
           this.analytics?.track(
             {
@@ -236,6 +307,7 @@ export class ArtifactStorageReader {
       {
         method: 'GET',
         timeout: READ_TIMEOUT_MS,
+        retries: 1,
         onAttempt: args => {
           this.analytics?.track(
             {
@@ -268,6 +340,7 @@ export class ArtifactStorageReader {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
+        retries: 1,
         onAttempt: args => {
           this.analytics?.track(
             {
