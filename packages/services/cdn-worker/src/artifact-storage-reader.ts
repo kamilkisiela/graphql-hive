@@ -2,8 +2,6 @@ import zod from 'zod';
 import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
 
-const presignedUrlExpirationSeconds = 60;
-
 export function buildArtifactStorageKey(
   targetId: string,
   artifactType: string,
