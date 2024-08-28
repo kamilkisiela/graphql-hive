@@ -55,7 +55,7 @@ type Event =
       value: [string, string] | [string];
     }
   | {
-      type: 'r2' | 's3';
+      type: 'r2';
       action:
         | 'GET artifact'
         | 'GET cdn-legacy-keys'
@@ -79,7 +79,6 @@ export function createAnalytics(
     error: AnalyticsEngine;
     keyValidation: AnalyticsEngine;
     r2: AnalyticsEngine;
-    s3: AnalyticsEngine;
     response: AnalyticsEngine;
   } | null = null,
 ) {
@@ -100,8 +99,7 @@ export function createAnalytics(
             blobs: event.value,
           });
         case 'r2':
-        case 's3':
-          return engines[event.type].writeDataPoint({
+          return engines.r2.writeDataPoint({
             blobs: [event.action, event.statusCodeOrErrCode.toString(), targetId],
             doubles: [event.duration],
             indexes: [targetId.substring(0, 32)],

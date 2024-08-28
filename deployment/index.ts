@@ -84,7 +84,6 @@ const s3Mirror = deployS3Mirror();
 
 const cdn = deployCFCDN({
   s3,
-  s3Mirror,
   sentry,
   environment,
 });

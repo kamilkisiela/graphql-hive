@@ -16,13 +16,6 @@ type Env = {
   S3_SECRET_ACCESS_KEY: string;
   S3_BUCKET_NAME: string;
   S3_SESSION_TOKEN?: string;
-
-  S3_MIRROR_ENDPOINT: string;
-  S3_MIRROR_ACCESS_KEY_ID: string;
-  S3_MIRROR_SECRET_ACCESS_KEY: string;
-  S3_MIRROR_BUCKET_NAME: string;
-  S3_MIRROR_SESSION_TOKEN?: string;
-
   SENTRY_DSN: string;
   /**
    * Name of the environment, e.g. staging, production
@@ -39,7 +32,6 @@ type Env = {
   ERROR_ANALYTICS: AnalyticsEngine;
   RESPONSE_ANALYTICS: AnalyticsEngine;
   R2_ANALYTICS: AnalyticsEngine;
-  S3_ANALYTICS: AnalyticsEngine;
   KEY_VALIDATION_ANALYTICS: AnalyticsEngine;
 };
 
@@ -56,27 +48,15 @@ const handler: ExportedHandler<Env> = {
       endpoint: env.S3_ENDPOINT,
     };
 
-    const s3Mirror = {
-      client: new AwsClient({
-        accessKeyId: env.S3_MIRROR_ACCESS_KEY_ID,
-        secretAccessKey: env.S3_MIRROR_SECRET_ACCESS_KEY,
-        sessionToken: env.S3_MIRROR_SESSION_TOKEN,
-        service: 's3',
-      }),
-      bucketName: env.S3_MIRROR_BUCKET_NAME,
-      endpoint: env.S3_MIRROR_ENDPOINT,
-    };
-
     const analytics = createAnalytics({
       usage: env.USAGE_ANALYTICS,
       error: env.ERROR_ANALYTICS,
       keyValidation: env.KEY_VALIDATION_ANALYTICS,
       response: env.RESPONSE_ANALYTICS,
       r2: env.R2_ANALYTICS,
-      s3: env.S3_ANALYTICS,
     });
 
-    const artifactStorageReader = new ArtifactStorageReader(s3, s3Mirror, analytics);
+    const artifactStorageReader = new ArtifactStorageReader(s3, analytics);
 
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
