@@ -73,6 +73,109 @@ export class ArtifactStorageReader {
     private analytics: Analytics | null,
   ) {}
 
+  /**
+   * Perform a request to S3, with retries and optional mirror.
+   * If the initial request to primary fails, a race between mirror and primary is performed.
+   * The first successful response is returned.
+   */
+  private request(args: {
+    /** S3 key in bucket */
+    key: string;
+    method: 'GET' | 'HEAD' | 'POST';
+    headers?: HeadersInit;
+    onAttempt: (args: {
+      /** whether the attempt is for the mirror */
+      isMirror: boolean;
+      /** attempt number */
+      attempt: number;
+      /** attempt duration in ms */
+      duration: number;
+      /** result */
+      result:
+        | {
+            // HTTP or other unexpected error
+            type: 'error';
+            error: Error;
+          }
+        | {
+            // HTTP response sent by upstream server
+            type: 'success';
+            response: Response;
+          };
+    }) => void;
+  }) {
+    return this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, args.key].join('/'), {
+        method: args.method,
+        headers: args.headers,
+        aws: {
+          signQuery: true,
+        },
+        timeout: READ_TIMEOUT_MS,
+        retries: this.s3Mirror ? 1 : undefined,
+        isResponseOk: response =>
+          response.status === 200 || response.status === 304 || response.status === 404,
+        onAttempt: args1 => {
+          args.onAttempt({
+            ...args1,
+            isMirror: false,
+          });
+        },
+      })
+      .catch(err => {
+        if (this.s3Mirror) {
+          const controller = new AbortController();
+          return Promise.race([
+            this.s3.client.fetch([this.s3.endpoint, this.s3.bucketName, args.key].join('/'), {
+              method: args.method,
+              headers: args.headers,
+              aws: {
+                signQuery: true,
+              },
+              timeout: READ_TIMEOUT_MS,
+              signal: controller.signal,
+              isResponseOk: response =>
+                response.status === 200 || response.status === 304 || response.status === 404,
+              onAttempt: args1 => {
+                args.onAttempt({
+                  ...args1,
+                  isMirror: false,
+                });
+              },
+            }),
+            this.s3Mirror.client.fetch(
+              [this.s3Mirror.endpoint, this.s3Mirror.bucketName, args.key].join('/'),
+              {
+                method: args.method,
+                headers: args.headers,
+                aws: {
+                  signQuery: true,
+                },
+                timeout: READ_TIMEOUT_MS,
+                signal: controller.signal,
+                isResponseOk: response =>
+                  response.status === 200 || response.status === 304 || response.status === 404,
+                onAttempt: args1 => {
+                  args.onAttempt({
+                    ...args1,
+                    isMirror: true,
+                  });
+                },
+              },
+            ),
+          ]).finally(() => {
+            // abort other pending requests
+            const error = new Error('Another request won the race.');
+            // change the name so we have some metrics for this on our analytics dashboard
+            error.name = 'AbortError';
+            controller.abort(error);
+          });
+        }
+
+        return Promise.reject(err);
+      });
+  }
+
   /** Read an artifact from S3 */
   async readArtifact(
     targetId: string,
@@ -92,100 +195,25 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const response = await this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
-        method: 'GET',
-        headers,
-        aws: {
-          signQuery: true,
-        },
-        timeout: READ_TIMEOUT_MS,
-        retries: this.s3Mirror ? 1 : undefined,
-        isResponseOk: response =>
-          response.status === 200 || response.status === 304 || response.status === 404,
-        onAttempt: args => {
-          this.analytics?.track(
-            {
-              type: 'r2',
-              statusCodeOrErrCode:
-                args.result.type === 'error'
-                  ? String(args.result.error.name ?? 'unknown')
-                  : args.result.response.status,
-              action: 'GET artifact',
-              duration: args.duration,
-            },
-            targetId,
-          );
-        },
-      })
-      .catch(err => {
-        if (this.s3Mirror) {
-          const controller = new AbortController();
-          return Promise.race([
-            this.s3.client.fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
-              method: 'GET',
-              headers,
-              aws: {
-                signQuery: true,
-              },
-              timeout: READ_TIMEOUT_MS,
-              signal: controller.signal,
-              isResponseOk: response =>
-                response.status === 200 || response.status === 304 || response.status === 404,
-              onAttempt: args => {
-                this.analytics?.track(
-                  {
-                    type: 'r2',
-                    statusCodeOrErrCode:
-                      args.result.type === 'error'
-                        ? String(args.result.error.name ?? 'unknown')
-                        : args.result.response.status,
-                    action: 'GET artifact',
-                    duration: args.duration,
-                  },
-                  targetId,
-                );
-              },
-            }),
-            this.s3Mirror.client.fetch(
-              [this.s3Mirror.endpoint, this.s3Mirror.bucketName, key].join('/'),
-              {
-                method: 'GET',
-                headers,
-                aws: {
-                  signQuery: true,
-                },
-                timeout: READ_TIMEOUT_MS,
-                signal: controller.signal,
-                isResponseOk: response =>
-                  response.status === 200 || response.status === 304 || response.status === 404,
-                onAttempt: args => {
-                  this.analytics?.track(
-                    {
-                      type: 's3',
-                      statusCodeOrErrCode:
-                        args.result.type === 'error'
-                          ? String(args.result.error.name ?? 'unknown')
-                          : args.result.response.status,
-                      action: 'GET artifact',
-                      duration: args.duration,
-                    },
-                    targetId,
-                  );
-                },
-              },
-            ),
-          ]).finally(() => {
-            // abort other pending requests
-            const error = new Error('Another request won the race.');
-            // change the name so we have some metrics for this on our analytics dashboard
-            error.name = 'AbortError';
-            controller.abort(error);
-          });
-        }
-
-        throw err;
-      });
+    const response = await this.request({
+      key,
+      method: 'GET',
+      headers,
+      onAttempt: args => {
+        this.analytics?.track(
+          {
+            type: args.isMirror ? 's3' : 'r2',
+            statusCodeOrErrCode:
+              args.result.type === 'error'
+                ? String(args.result.error.name ?? 'unknown')
+                : args.result.response.status,
+            action: 'GET artifact',
+            duration: args.duration,
+          },
+          targetId,
+        );
+      },
+    });
 
     if (response.status === 404) {
       return { type: 'notFound' } as const;
@@ -211,31 +239,24 @@ export class ArtifactStorageReader {
   async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {
     const key = buildAppDeploymentIsEnabledKey(targetId, appName, appVersion);
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
-        method: 'HEAD',
-        aws: {
-          signQuery: true,
-        },
-        timeout: READ_TIMEOUT_MS,
-        retries: 1,
-        onAttempt: args => {
-          this.analytics?.track(
-            {
-              type: 'r2',
-              statusCodeOrErrCode:
-                args.result.type === 'error'
-                  ? String(args.result.error.name ?? 'unknown')
-                  : args.result.response.status,
-              action: 'HEAD appDeploymentIsEnabled',
-              duration: args.duration,
-            },
-            targetId,
-          );
-        },
+    const response = await this.request({
+      key,
+      method: 'HEAD',
+      onAttempt: args => {
+        this.analytics?.track(
+          {
+            type: args.isMirror ? 's3' : 'r2',
+            statusCodeOrErrCode:
+              args.result.type === 'error'
+                ? String(args.result.error.name ?? 'unknown')
+                : args.result.response.status,
+            action: 'HEAD appDeploymentIsEnabled',
+            duration: args.duration,
+          },
+          targetId,
+        );
       },
-    );
+    });
 
     return response.status === 200;
   }
@@ -254,32 +275,25 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
-        method: 'GET',
-        aws: {
-          signQuery: true,
-        },
-        headers,
-        timeout: READ_TIMEOUT_MS,
-        retries: 1,
-        onAttempt: args => {
-          this.analytics?.track(
-            {
-              type: 'r2',
-              statusCodeOrErrCode:
-                args.result.type === 'error'
-                  ? String(args.result.error.name ?? 'unknown')
-                  : args.result.response.status,
-              action: 'GET persistedOperation',
-              duration: args.duration,
-            },
-            targetId,
-          );
-        },
+    const response = await this.request({
+      key,
+      method: 'GET',
+      headers,
+      onAttempt: args => {
+        this.analytics?.track(
+          {
+            type: args.isMirror ? 's3' : 'r2',
+            statusCodeOrErrCode:
+              args.result.type === 'error'
+                ? String(args.result.error.name ?? 'unknown')
+                : args.result.response.status,
+            action: 'GET persistedOperation',
+            duration: args.duration,
+          },
+          targetId,
+        );
       },
-    );
+    });
 
     if (etagValue && response.status === 304) {
       return { type: 'notModified' } as const;
@@ -302,28 +316,24 @@ export class ArtifactStorageReader {
   }
 
   async readLegacyAccessKey(targetId: string) {
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'),
-      {
-        method: 'GET',
-        timeout: READ_TIMEOUT_MS,
-        retries: 1,
-        onAttempt: args => {
-          this.analytics?.track(
-            {
-              type: 'r2',
-              statusCodeOrErrCode:
-                args.result.type === 'error'
-                  ? String(args.result.error.name ?? 'unknown')
-                  : args.result.response.status,
-              action: 'GET cdn-legacy-keys',
-              duration: args.duration,
-            },
-            targetId,
-          );
-        },
+    const response = await this.request({
+      key: ['cdn-legacy-keys', targetId].join('/'),
+      method: 'GET',
+      onAttempt: args => {
+        this.analytics?.track(
+          {
+            type: args.isMirror ? 's3' : 'r2',
+            statusCodeOrErrCode:
+              args.result.type === 'error'
+                ? String(args.result.error.name ?? 'unknown')
+                : args.result.response.status,
+            action: 'GET cdn-legacy-keys',
+            duration: args.duration,
+          },
+          targetId,
+        );
       },
-    );
+    });
 
     return response;
   }
@@ -331,32 +341,24 @@ export class ArtifactStorageReader {
   async readAccessKey(targetId: string, keyId: string) {
     const s3KeyParts = ['cdn-keys', targetId, keyId];
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, ...s3KeyParts].join('/'),
-      {
-        method: 'GET',
-        aws: {
-          // This boolean makes Google Cloud Storage & AWS happy.
-          signQuery: true,
-        },
-        timeout: READ_TIMEOUT_MS,
-        retries: 1,
-        onAttempt: args => {
-          this.analytics?.track(
-            {
-              type: 'r2',
-              statusCodeOrErrCode:
-                args.result.type === 'error'
-                  ? String(args.result.error.name ?? 'unknown')
-                  : args.result.response.status,
-              action: 'GET cdn-access-token',
-              duration: args.duration,
-            },
-            targetId,
-          );
-        },
+    const response = await this.request({
+      key: s3KeyParts.join('/'),
+      method: 'GET',
+      onAttempt: args => {
+        this.analytics?.track(
+          {
+            type: args.isMirror ? 'r2' : 's3',
+            statusCodeOrErrCode:
+              args.result.type === 'error'
+                ? String(args.result.error.name ?? 'unknown')
+                : args.result.response.status,
+            action: 'GET cdn-access-token',
+            duration: args.duration,
+          },
+          targetId,
+        );
       },
-    );
+    });
 
     return response;
   }
