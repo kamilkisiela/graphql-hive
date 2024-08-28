@@ -19,9 +19,6 @@ type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 
 export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
 
-/** Timeout in milliseconds for S3 read calls. */
-const READ_TIMEOUT_MS = 5_000;
-
 const OperationS3BucketKeyModel = zod.tuple([
   zod.string().uuid(),
   zod.string().min(1),
@@ -71,6 +68,8 @@ export class ArtifactStorageReader {
       bucketName: string;
     } | null,
     private analytics: Analytics | null,
+    /** Timeout in milliseconds for S3 read calls. */
+    private timeout: number = 5_000,
   ) {}
 
   /**
@@ -111,7 +110,7 @@ export class ArtifactStorageReader {
         aws: {
           signQuery: true,
         },
-        timeout: READ_TIMEOUT_MS,
+        timeout: this.timeout,
         retries: this.s3Mirror ? 1 : undefined,
         isResponseOk: response =>
           response.status === 200 || response.status === 304 || response.status === 404,
@@ -124,35 +123,59 @@ export class ArtifactStorageReader {
       })
       .catch(err => {
         if (this.s3Mirror) {
-          const controller = new AbortController();
-          return Promise.race([
-            this.s3.client.fetch([this.s3.endpoint, this.s3.bucketName, args.key].join('/'), {
-              method: args.method,
-              headers: args.headers,
-              aws: {
-                signQuery: true,
-              },
-              timeout: READ_TIMEOUT_MS,
-              signal: controller.signal,
-              isResponseOk: response =>
-                response.status === 200 || response.status === 304 || response.status === 404,
-              onAttempt: args1 => {
-                args.onAttempt({
-                  ...args1,
-                  isMirror: false,
-                });
-              },
-            }),
-            this.s3Mirror.client.fetch(
-              [this.s3Mirror.endpoint, this.s3Mirror.bucketName, args.key].join('/'),
-              {
+          // Use two AbortSignals to avoid a situation
+          // where Response.body is consumed,
+          // but the request was aborted after being resolved.
+          // When a fetch call is resolved successfully,
+          // but a shared AbortSignal.cancel() is called for two fetches,
+          // it causes an exception (can't read a response from an aborted requests)
+          // when Response.body is consumed.
+          const primaryController = new AbortController();
+          const mirrorController = new AbortController();
+
+          function abortOtherRequest(ctrl: AbortController) {
+            return (res: Response) => {
+              // abort other pending request
+              const error = new Error('Another request won the race.');
+              // change the name so we have some metrics for this on our analytics dashboard
+              error.name = 'AbortError';
+              ctrl.abort(error);
+
+              return res;
+            };
+          }
+
+          // Wait for the first successful response
+          // or reject if both requests fail
+          return Promise.any([
+            this.s3.client
+              .fetch([this.s3.endpoint, this.s3.bucketName, args.key].join('/'), {
                 method: args.method,
                 headers: args.headers,
                 aws: {
                   signQuery: true,
                 },
-                timeout: READ_TIMEOUT_MS,
-                signal: controller.signal,
+                timeout: this.timeout,
+                signal: primaryController.signal,
+                isResponseOk: response =>
+                  response.status === 200 || response.status === 304 || response.status === 404,
+                onAttempt: args1 => {
+                  args.onAttempt({
+                    ...args1,
+                    isMirror: false,
+                  });
+                },
+              })
+              .then(abortOtherRequest(mirrorController)),
+            this.s3Mirror.client
+              .fetch([this.s3Mirror.endpoint, this.s3Mirror.bucketName, args.key].join('/'), {
+                method: args.method,
+                headers: args.headers,
+                aws: {
+                  signQuery: true,
+                },
+                timeout: this.timeout,
+                signal: mirrorController.signal,
                 isResponseOk: response =>
                   response.status === 200 || response.status === 304 || response.status === 404,
                 onAttempt: args1 => {
@@ -161,15 +184,9 @@ export class ArtifactStorageReader {
                     isMirror: true,
                   });
                 },
-              },
-            ),
-          ]).finally(() => {
-            // abort other pending requests
-            const error = new Error('Another request won the race.');
-            // change the name so we have some metrics for this on our analytics dashboard
-            error.name = 'AbortError';
-            controller.abort(error);
-          });
+              })
+              .then(abortOtherRequest(primaryController)),
+          ]);
         }
 
         return Promise.reject(err);
