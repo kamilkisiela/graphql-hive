@@ -24,7 +24,7 @@ export function deployCFCDN({
   const cfConfig = new pulumi.Config('cloudflareCustom');
 
   const cdn = new CloudflareCDN({
-    envName: environment.envName,
+    envName: environment.envName === 'prod' ? 'production' : environment.envName,
     zoneId: cfConfig.require('zoneId'),
     // We can't cdn for staging env, since CF certificate only covers
     // one level of subdomains. See: https://community.cloudflare.com/t/ssl-handshake-error-cloudflare-proxy/175088
