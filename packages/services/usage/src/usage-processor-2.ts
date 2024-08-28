@@ -79,12 +79,28 @@ export function usageProcessorV2(
     const operationMapRecord = incoming.map[operationMapKey] as OperationMapRecord | undefined;
 
     if (!operationMapRecord) {
+      logger.warn(
+        `Detected invalid operation. Operation map key could not be found. (target=%s): %s`,
+        token.target,
+        operationMapKey,
+      );
+      invalidRawOperations
+        .labels({
+          reason: 'operation_map_key_not_found',
+        })
+        .inc(1);
       return null;
     }
 
     let newOperationMapKey = newKeyMappings.get(operationMapRecord);
 
     if (!isValidOperationBody(operationMapRecord.operation)) {
+      logger.warn(`Detected invalid operation (target=%s): %s`, operationMapKey);
+      invalidRawOperations
+        .labels({
+          reason: 'invalid_operation_body',
+        })
+        .inc(1);
       return null;
     }
 
@@ -115,16 +131,6 @@ export function usageProcessorV2(
 
     // if the record does not exist -> skip the operation
     if (operationMapKey === null) {
-      logger.warn(
-        `Detected invalid operation. Operation map key could not be found. (target=%s): %s`,
-        token.target,
-        operation.operationMapKey,
-      );
-      invalidRawOperations
-        .labels({
-          reason: 'operation_map_key_not_found',
-        })
-        .inc(1);
       continue;
     }
 
@@ -163,16 +169,6 @@ export function usageProcessorV2(
 
     // if the record does not exist -> skip the operation
     if (operationMapKey === null) {
-      logger.warn(
-        `Detected invalid operation. Operation map key could not be found. (target=%s): %s`,
-        token.target,
-        operation.operationMapKey,
-      );
-      invalidRawOperations
-        .labels({
-          reason: 'operation_map_key_not_found',
-        })
-        .inc(1);
       continue;
     }
 
