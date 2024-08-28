@@ -63,11 +63,8 @@ describe('CDN Worker', () => {
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -142,11 +139,8 @@ describe('CDN Worker', () => {
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -237,11 +231,8 @@ describe('CDN Worker', () => {
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -316,11 +307,8 @@ describe('CDN Worker', () => {
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -401,11 +389,8 @@ describe('CDN Worker', () => {
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -484,11 +469,8 @@ describe('CDN Worker', () => {
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -652,11 +634,8 @@ describe('CDN Worker', () => {
         async getArtifactAction(targetId, _, artifactType) {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
-                type: 'redirect',
-                location: {
-                  public: `target:${targetId}:${artifactType}`,
-                  private: `target:${targetId}:${artifactType}`,
-                },
+                type: 'response',
+                response: new Response(map.get(`target:${targetId}:${artifactType}`)),
               }
             : {
                 type: 'notFound',
@@ -703,11 +682,8 @@ describe('CDN Worker', () => {
         async getArtifactAction(targetId, _, artifactType) {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
-                type: 'redirect',
-                location: {
-                  public: `target:${targetId}:${artifactType}`,
-                  private: `target:${targetId}:${artifactType}`,
-                },
+                type: 'response',
+                response: new Response(map.get(`target:${targetId}:${artifactType}`)),
               }
             : {
                 type: 'notFound',

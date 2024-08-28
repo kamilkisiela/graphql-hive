@@ -2,8 +2,6 @@ import zod from 'zod';
 import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
 
-const presignedUrlExpirationSeconds = 60;
-
 export function buildArtifactStorageKey(
   targetId: string,
   artifactType: string,
@@ -61,54 +59,14 @@ export function buildAppDeploymentIsEnabledKey(
  * Read an artifact/app deployment operation from S3.
  */
 export class ArtifactStorageReader {
-  private publicUrl: URL | null;
-
   constructor(
     private s3: {
       client: AwsClient;
       endpoint: string;
       bucketName: string;
     },
-    /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
-    publicUrl: string | null,
     private analytics: Analytics | null,
-  ) {
-    this.publicUrl = publicUrl ? new URL(publicUrl) : null;
-  }
-
-  private async generatePresignedGetUrl(key: string): Promise<{
-    public: string;
-    private: string;
-  }> {
-    const [signedUrl] = await this.s3.client.sign(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
-        method: 'GET',
-        aws: { signQuery: true },
-        headers: {
-          'X-Amz-Expires': String(presignedUrlExpirationSeconds),
-        },
-        timeout: READ_TIMEOUT_MS,
-      },
-    );
-
-    if (!this.publicUrl) {
-      return {
-        public: signedUrl,
-        private: signedUrl,
-      };
-    }
-
-    const publicUrl = new URL(signedUrl);
-    publicUrl.protocol = this.publicUrl.protocol;
-    publicUrl.host = this.publicUrl.host;
-    publicUrl.port = this.publicUrl.port;
-
-    return {
-      public: publicUrl.toString(),
-      private: signedUrl,
-    };
-  }
+  ) {}
 
   /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
   async generateArtifactReadUrl(
@@ -123,7 +81,7 @@ export class ArtifactStorageReader {
 
     const key = buildArtifactStorageKey(targetId, artifactType, contractName);
 
-    const response = await this.s3.client.fetch(
+    const headResponse = await this.s3.client.fetch(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
         method: 'HEAD',
@@ -136,27 +94,42 @@ export class ArtifactStorageReader {
     this.analytics?.track(
       {
         type: 'r2',
-        statusCode: response.status,
+        statusCode: headResponse.status,
         action: 'HEAD artifact',
       },
       targetId,
     );
 
-    if (response.status === 200) {
-      if (etagValue && response.headers.get('etag') === etagValue) {
+    if (headResponse.status === 200) {
+      if (etagValue && headResponse.headers.get('etag') === etagValue) {
         return { type: 'notModified' } as const;
       }
 
-      return {
-        type: 'redirect',
-        location: await this.generatePresignedGetUrl(key),
-      } as const;
+      const getResponse = await this.s3.client.fetch(
+        [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+        {
+          method: 'GET',
+          aws: {
+            signQuery: true,
+          },
+          timeout: READ_TIMEOUT_MS,
+        },
+      );
+
+      if (getResponse.ok) {
+        return {
+          type: 'response',
+          response: getResponse,
+        } as const;
+      }
+
+      throw new Error(`GET request failed with status ${getResponse.status}`);
     }
-    if (response.status === 404) {
+    if (headResponse.status === 404) {
       return { type: 'notFound' } as const;
     }
-    const body = await response.text();
-    throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
+    const body = await headResponse.text();
+    throw new Error(`HEAD request failed with status ${headResponse.status}: ${body}`);
   }
 
   async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {

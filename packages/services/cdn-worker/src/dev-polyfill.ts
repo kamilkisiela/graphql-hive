@@ -10,8 +10,6 @@ export const env: Env = {
   S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY || '',
   // eslint-disable-next-line no-process-env
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || '',
-  // eslint-disable-next-line no-process-env
-  S3_PUBLIC_URL: process.env.S3_PUBLIC_URL || '',
   SENTRY_DSN: '',
   SENTRY_ENVIRONMENT: '',
   SENTRY_RELEASE: '',

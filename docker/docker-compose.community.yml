@@ -226,7 +226,6 @@ services:
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       S3_BUCKET_NAME: artifacts
-      S3_PUBLIC_URL: 'http://localhost:8083'
       CDN_AUTH_PRIVATE_KEY: ${CDN_AUTH_PRIVATE_KEY}
       CDN_API: '1'
       CDN_API_BASE_URL: 'http://localhost:8082'

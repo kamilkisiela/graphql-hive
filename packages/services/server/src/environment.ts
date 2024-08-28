@@ -152,7 +152,6 @@ const S3Model = zod.object({
   S3_SECRET_ACCESS_KEY: zod.string(),
   S3_SESSION_TOKEN: emptyString(zod.string().optional()),
   S3_BUCKET_NAME: zod.string(),
-  S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
 });
 
 const S3MirrorModel = zod.union([
@@ -448,7 +447,6 @@ export const env = {
   s3: {
     bucketName: s3.S3_BUCKET_NAME,
     endpoint: s3.S3_ENDPOINT,
-    publicUrl: s3.S3_PUBLIC_URL ?? null,
     credentials: {
       accessKeyId: s3.S3_ACCESS_KEY_ID,
       secretAccessKey: s3.S3_SECRET_ACCESS_KEY,
