@@ -92,23 +92,37 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
+    const start = performance.now();
+
+    const response = await this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
         method: 'GET',
         headers,
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
-      },
-    );
+      })
+      .catch((err: Error) => {
+        this.analytics?.track(
+          {
+            type: 'r2',
+            statusCodeOrErrCode: String(err.name ?? 'unknown'),
+            action: 'GET artifact',
+            duration: performance.now() - start,
+          },
+          targetId,
+        );
+
+        throw err;
+      });
 
     this.analytics?.track(
       {
         type: 'r2',
-        statusCode: response.status,
+        statusCodeOrErrCode: response.status,
         action: 'GET artifact',
+        duration: performance.now() - start,
       },
       targetId,
     );
@@ -137,21 +151,36 @@ export class ArtifactStorageReader {
   async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {
     const key = buildAppDeploymentIsEnabledKey(targetId, appName, appVersion);
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
+    const start = performance.now();
+
+    const response = await this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
         method: 'HEAD',
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
-      },
-    );
+      })
+      .catch((err: Error) => {
+        this.analytics?.track(
+          {
+            type: 'r2',
+            statusCodeOrErrCode: String(err.name ?? 'unknown'),
+            action: 'HEAD appDeploymentIsEnabled',
+            duration: performance.now() - start,
+          },
+          targetId,
+        );
+
+        throw err;
+      });
+
     this.analytics?.track(
       {
         type: 'r2',
-        statusCode: response.status,
+        statusCodeOrErrCode: response.status,
         action: 'HEAD appDeploymentIsEnabled',
+        duration: performance.now() - start,
       },
       targetId,
     );
@@ -173,23 +202,37 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const response = await this.s3.client.fetch(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
+    const start = performance.now();
+
+    const response = await this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
         method: 'GET',
         aws: {
           signQuery: true,
         },
         headers,
         timeout: READ_TIMEOUT_MS,
-      },
-    );
+      })
+      .catch((err: Error) => {
+        this.analytics?.track(
+          {
+            type: 'r2',
+            statusCodeOrErrCode: String(err.name ?? 'unknown'),
+            action: 'GET persistedOperation',
+            duration: performance.now() - start,
+          },
+          targetId,
+        );
+
+        throw err;
+      });
 
     this.analytics?.track(
       {
         type: 'r2',
-        statusCode: response.status,
+        statusCodeOrErrCode: response.status,
         action: 'GET persistedOperation',
+        duration: performance.now() - start,
       },
       targetId,
     );
@@ -212,5 +255,81 @@ export class ArtifactStorageReader {
 
     const body = await response.text();
     throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
+  }
+
+  async readLegacyAccessKey(targetId: string) {
+    const start = performance.now();
+
+    const response = await this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'), {
+        method: 'GET',
+        timeout: READ_TIMEOUT_MS,
+      })
+      .catch(err => {
+        this.analytics?.track(
+          {
+            type: 'r2',
+            statusCodeOrErrCode: String(err.name ?? 'unknown'),
+            action: 'GET cdn-legacy-keys',
+            duration: performance.now() - start,
+          },
+          targetId,
+        );
+
+        throw err;
+      });
+
+    this.analytics?.track(
+      {
+        type: 'r2',
+        statusCodeOrErrCode: response.status,
+        action: 'GET cdn-legacy-keys',
+        duration: performance.now() - start,
+      },
+      targetId,
+    );
+
+    return response;
+  }
+
+  async readAccessKey(targetId: string, keyId: string) {
+    const s3KeyParts = ['cdn-keys', targetId, keyId];
+
+    const start = performance.now();
+
+    const response = await this.s3.client
+      .fetch([this.s3.endpoint, this.s3.bucketName, ...s3KeyParts].join('/'), {
+        method: 'GET',
+        aws: {
+          // This boolean makes Google Cloud Storage & AWS happy.
+          signQuery: true,
+        },
+        timeout: READ_TIMEOUT_MS,
+      })
+      .catch(err => {
+        this.analytics?.track(
+          {
+            type: 'r2',
+            statusCodeOrErrCode: String(err.name ?? 'unknown'),
+            action: 'GET cdn-access-token',
+            duration: performance.now() - start,
+          },
+          targetId,
+        );
+
+        throw err;
+      });
+
+    this.analytics?.track(
+      {
+        type: 'r2',
+        statusCodeOrErrCode: response.status,
+        action: 'GET cdn-access-token',
+        duration: performance.now() - start,
+      },
+      targetId,
+    );
+
+    return response;
   }
 }

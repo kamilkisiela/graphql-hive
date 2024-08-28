@@ -82,7 +82,7 @@ export class AwsClient {
     this.service = args.service;
     this.region = args.region;
     this.cache = args.cache || new Map();
-    this.retries = args.retries != null ? args.retries : 10; // Up to 25.6 secs
+    this.retries = args.retries != null ? args.retries : 3;
     this.initRetryMs = args.initRetryMs || 50;
     this._fetch = args.fetch || fetch.bind(globalThis);
   }

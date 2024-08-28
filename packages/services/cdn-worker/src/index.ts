@@ -61,7 +61,7 @@ const handler: ExportedHandler<Env> = {
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
       getCache: () => caches.open('artifacts-auth'),
-      s3,
+      artifactStorageReader,
       analytics,
     });
 

@@ -26,7 +26,12 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 const artifactStorageReader = new ArtifactStorageReader(s3, null);
 
 const handleRequest = createRequestHandler({
-  isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
+  isKeyValid: createIsKeyValid({
+    artifactStorageReader,
+    getCache: null,
+    waitUntil: null,
+    analytics: null,
+  }),
   async getArtifactAction(targetId, contractName, artifactType, eTag) {
     return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
   },
@@ -42,7 +47,12 @@ const handleRequest = createRequestHandler({
 });
 
 const handleArtifactRequest = createArtifactRequestHandler({
-  isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
+  isKeyValid: createIsKeyValid({
+    artifactStorageReader,
+    getCache: null,
+    waitUntil: null,
+    analytics: null,
+  }),
   isAppDeploymentActive: createIsAppDeploymentActive({
     artifactStorageReader,
     getCache: null,
