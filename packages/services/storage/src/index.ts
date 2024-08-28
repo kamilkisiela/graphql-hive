@@ -3952,6 +3952,58 @@ export async function createStorage(
 
       return DocumentCollectionDocumentModel.parse(result);
     },
+    async getPreflightScript(args) {
+      const result = await pool.maybeOne(sql`/* getPreflightScript */
+      SELECT "id"
+           , "source_code"         as "sourceCode"
+           , "target_id"           as "targetId"
+           , "created_by_user_id"  as "createdByUserId"
+           , to_json("created_at") as "createdAt"
+           , to_json("updated_at") as "updatedAt"
+      FROM "document_preflight_scripts"
+      WHERE "target_id" = ${args.targetId}
+      `);
+
+      return result && PreflightScriptModel.parse(result);
+    },
+
+    async createPreflightScript(args) {
+      const result = await pool.maybeOne(sql`/* createPreflightScript */
+      INSERT INTO "document_preflight_scripts" ( "source_code"
+                                               , "target_id"
+                                               , "created_by_user_id")
+      VALUES (${args.sourceCode},
+              ${args.targetId},
+              ${args.createdByUserId})
+      RETURNING
+          "id"
+          , "source_code" as "sourceCode"
+          , "target_id" as "targetId"
+          , "created_by_user_id" as "createdByUserId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      return PreflightScriptModel.parse(result);
+    },
+    async updatePreflightScript(args) {
+      const result = await pool.maybeOne(sql`/* updatePreflightScript */
+      UPDATE
+          "document_preflight_scripts"
+      SET "source_code" = ${args.sourceCode}
+        , "updated_at"  = NOW()
+      WHERE "id" = ${args.id}
+      RETURNING
+          "id"
+          , "source_code" as "sourceCode"
+          , "target_id" as "targetId"
+          , "created_by_user_id" as "createdByUserId"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      return result && PreflightScriptModel.parse(result);
+    },
 
     async getDocumentCollection(args) {
       const result = await pool.maybeOne(sql`/* getDocumentCollection */
@@ -4963,6 +5015,15 @@ const DocumentCollectionDocumentModel = zod.object({
   headers: zod.string().nullable(),
   createdByUserId: zod.union([zod.string(), zod.null()]),
   documentCollectionId: zod.string(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+const PreflightScriptModel = zod.strictObject({
+  id: zod.string(),
+  sourceCode: zod.string(),
+  targetId: zod.string(),
+  createdByUserId: zod.union([zod.string(), zod.null()]),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
