@@ -805,7 +805,7 @@ describe('CDN Worker', () => {
     });
   });
 
-  describe.only('use S3', () => {
+  describe('use S3', () => {
     const mockAgent = new MockAgent();
     let r2MockPool: MockPool;
     let s3MockPool: MockPool;
