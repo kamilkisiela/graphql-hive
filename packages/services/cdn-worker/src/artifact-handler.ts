@@ -2,7 +2,7 @@ import * as itty from 'itty-router';
 import zod from 'zod';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactStorageReader, type ArtifactsType } from './artifact-storage-reader';
-import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
+import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import { IsAppDeploymentActive } from './is-app-deployment-active';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
@@ -13,16 +13,7 @@ export type GetArtifactActionFn = (
   artifactType: ArtifactsType,
   eTag: string | null,
 ) => Promise<
-  | { type: 'notModified' }
-  | { type: 'notFound' }
-  | { type: 'body'; body: string }
-  | {
-      type: 'redirect';
-      location: {
-        public: string;
-        private: string;
-      };
-    }
+  { type: 'notModified' } | { type: 'notFound' } | { type: 'response'; response: Response }
 >;
 
 type ArtifactRequestHandler = {
@@ -138,7 +129,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.artifactStorageReader.generateArtifactReadUrl(
+    const result = await deps.artifactStorageReader.readArtifact(
       params.targetId,
       params.contractName,
       params.artifactType,
@@ -161,7 +152,8 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
     }
 
-    if (result.type === 'redirect') {
+    if (result.type === 'response') {
+      const etag = result.response.headers.get('etag');
       if (params.artifactType === 'metadata') {
         // To not change a lot of logic and still reuse the etag bits, we
         // fetch metadata using the redirect location.
@@ -171,19 +163,8 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
         // and we're fetching the artifact from within the private network.
         // If they are the same, private and public locations will be the same.
-        const metadataResponse = await fetch(result.location.private);
 
-        if (!metadataResponse.ok) {
-          console.error(
-            'Failed to fetch metadata',
-            metadataResponse.status,
-            metadataResponse.statusText,
-          );
-
-          return new UnexpectedError(analytics, request);
-        }
-
-        const body = await metadataResponse.text();
+        const body = await result.response.clone().text();
 
         // Metadata in SINGLE projects is only Mesh's Metadata, and it always defines _schema
         const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
@@ -192,7 +173,6 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // Mesh's Metadata shared by Mesh is always an object.
         // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
         if (isMeshArtifact && hasTopLevelArray) {
-          const etag = metadataResponse.headers.get('etag');
           return createResponse(
             analytics,
             body.substring(1, body.length - 1),
@@ -211,11 +191,17 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
       return createResponse(
         analytics,
-        'Found.',
-        // We're using here a public location, because we expose the Location to the end user and
-        // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
-        // If they are the same, private and public locations will be the same.
-        { status: 302, headers: { Location: result.location.public } },
+        await result.response.text(),
+        {
+          status: 200,
+          headers: {
+            'Content-Type':
+              params.artifactType === 'metadata' || params.artifactType === 'services'
+                ? 'application/json'
+                : 'text/plain',
+            ...(etag ? { etag } : {}),
+          },
+        },
         params.targetId,
         request,
       );

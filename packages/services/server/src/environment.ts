@@ -152,8 +152,22 @@ const S3Model = zod.object({
   S3_SECRET_ACCESS_KEY: zod.string(),
   S3_SESSION_TOKEN: emptyString(zod.string().optional()),
   S3_BUCKET_NAME: zod.string(),
-  S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
 });
+
+const S3MirrorModel = zod.union([
+  zod.object({
+    S3_MIRROR: zod.union([zod.void(), zod.literal('0'), zod.literal('')]),
+  }),
+  zod.object({
+    S3_MIRROR: zod.literal('1'),
+    S3_MIRROR_ENDPOINT: zod.string().url(),
+    S3_MIRROR_ACCESS_KEY_ID: zod.string(),
+    S3_MIRROR_SECRET_ACCESS_KEY: zod.string(),
+    S3_MIRROR_SESSION_TOKEN: emptyString(zod.string().optional()),
+    S3_MIRROR_BUCKET_NAME: zod.string(),
+    S3_MIRROR_PUBLIC_URL: emptyString(zod.string().url().optional()),
+  }),
+]);
 
 const AuthGitHubConfigSchema = zod.union([
   zod.object({
@@ -244,6 +258,7 @@ const configs = {
   prometheus: PrometheusModel.safeParse(processEnv),
   hive: HiveModel.safeParse(processEnv),
   s3: S3Model.safeParse(processEnv),
+  s3Mirror: S3MirrorModel.safeParse(processEnv),
   log: LogModel.safeParse(processEnv),
   zendeskSupport: ZendeskSupportModel.safeParse(processEnv),
   tracing: OpenTelemetryConfigurationModel.safeParse(processEnv),
@@ -288,6 +303,7 @@ const cdnCf = extractConfig(configs.cdnCf);
 const cdnApi = extractConfig(configs.cdnApi);
 const hive = extractConfig(configs.hive);
 const s3 = extractConfig(configs.s3);
+const s3Mirror = extractConfig(configs.s3Mirror);
 const zendeskSupport = extractConfig(configs.zendeskSupport);
 const tracing = extractConfig(configs.tracing);
 const hivePersistedDocuments = extractConfig(configs.hivePersistedDocuments);
@@ -431,13 +447,25 @@ export const env = {
   s3: {
     bucketName: s3.S3_BUCKET_NAME,
     endpoint: s3.S3_ENDPOINT,
-    publicUrl: s3.S3_PUBLIC_URL ?? null,
     credentials: {
       accessKeyId: s3.S3_ACCESS_KEY_ID,
       secretAccessKey: s3.S3_SECRET_ACCESS_KEY,
       sessionToken: s3.S3_SESSION_TOKEN,
     },
   },
+  s3Mirror:
+    s3Mirror.S3_MIRROR === '1'
+      ? {
+          bucketName: s3Mirror.S3_MIRROR_BUCKET_NAME,
+          endpoint: s3Mirror.S3_MIRROR_ENDPOINT,
+          publicUrl: s3Mirror.S3_MIRROR_PUBLIC_URL ?? null,
+          credentials: {
+            accessKeyId: s3Mirror.S3_MIRROR_ACCESS_KEY_ID,
+            secretAccessKey: s3Mirror.S3_MIRROR_SECRET_ACCESS_KEY,
+            sessionToken: s3Mirror.S3_MIRROR_SESSION_TOKEN,
+          },
+        }
+      : null,
   organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {

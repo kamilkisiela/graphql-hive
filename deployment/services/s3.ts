@@ -21,4 +21,17 @@ export function deployS3() {
   return { secret };
 }
 
+export function deployS3Mirror() {
+  const s3Config = new pulumi.Config('s3');
+
+  const secret = new S3Secret('aws-s3', {
+    endpoint: s3Config.require('endpoint'),
+    bucket: s3Config.require('bucketName'),
+    accessKeyId: s3Config.requireSecret('accessKeyId'),
+    secretAccessKey: s3Config.requireSecret('secretAccessKey'),
+  });
+
+  return { secret };
+}
+
 export type S3 = ReturnType<typeof deployS3>;

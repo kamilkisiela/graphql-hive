@@ -56,34 +56,56 @@ const handler: ExportedHandler<Env> = {
       r2: env.R2_ANALYTICS,
     });
 
-    const artifactStorageReader = new ArtifactStorageReader(s3, null, analytics);
+    const artifactStorageReader = new ArtifactStorageReader(s3, analytics);
 
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
       getCache: () => caches.open('artifacts-auth'),
-      s3,
+      artifactStorageReader,
       analytics,
     });
 
     const handleRequest = createRequestHandler({
       async getArtifactAction(targetId, contractName, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(
-          targetId,
-          contractName,
-          artifactType,
-          eTag,
-        );
+        return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
       },
       isKeyValid,
       analytics,
       async fetchText(url) {
-        const r = await fetch(url);
+        // Yeah, it's not globally defined, but it makes no sense to define it globally
+        // it's only used here and it's easier to see how it's used
+        const retries = 5;
+        const initRetryMs = 50;
 
-        if (r.ok) {
-          return r.text();
+        for (let i = 0; i <= retries; i++) {
+          const fetched = fetch(url, {
+            signal: AbortSignal.timeout(5000),
+          });
+
+          if (i === retries) {
+            const res = await fetched;
+            if (res.ok) {
+              return res.text();
+            }
+
+            throw new Error(`Failed to fetch ${url}, status: ${res.status}`);
+          }
+
+          try {
+            const res = await fetched;
+            if (res.ok) {
+              return res.text();
+            }
+          } catch (error) {
+            // Retry also when there's an exception
+            console.error(error);
+          }
+          await new Promise(resolve =>
+            setTimeout(resolve, Math.random() * initRetryMs * Math.pow(2, i)),
+          );
         }
 
-        throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+        throw new Error('An unknown error occurred, ensure retries is not negative');
       },
     });
 

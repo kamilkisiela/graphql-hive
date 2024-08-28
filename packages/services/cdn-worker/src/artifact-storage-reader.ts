@@ -2,8 +2,6 @@ import zod from 'zod';
 import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
 
-const presignedUrlExpirationSeconds = 60;
-
 export function buildArtifactStorageKey(
   targetId: string,
   artifactType: string,
@@ -61,57 +59,22 @@ export function buildAppDeploymentIsEnabledKey(
  * Read an artifact/app deployment operation from S3.
  */
 export class ArtifactStorageReader {
-  private publicUrl: URL | null;
-
   constructor(
     private s3: {
       client: AwsClient;
       endpoint: string;
       bucketName: string;
     },
-    /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
-    publicUrl: string | null,
+    // private s3Mirror: {
+    //   client: AwsClient;
+    //   endpoint: string;
+    //   bucketName: string;
+    // },
     private analytics: Analytics | null,
-  ) {
-    this.publicUrl = publicUrl ? new URL(publicUrl) : null;
-  }
+  ) {}
 
-  private async generatePresignedGetUrl(key: string): Promise<{
-    public: string;
-    private: string;
-  }> {
-    const [signedUrl] = await this.s3.client.sign(
-      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
-      {
-        method: 'GET',
-        aws: { signQuery: true },
-        headers: {
-          'X-Amz-Expires': String(presignedUrlExpirationSeconds),
-        },
-        timeout: READ_TIMEOUT_MS,
-      },
-    );
-
-    if (!this.publicUrl) {
-      return {
-        public: signedUrl,
-        private: signedUrl,
-      };
-    }
-
-    const publicUrl = new URL(signedUrl);
-    publicUrl.protocol = this.publicUrl.protocol;
-    publicUrl.host = this.publicUrl.host;
-    publicUrl.port = this.publicUrl.port;
-
-    return {
-      public: publicUrl.toString(),
-      private: signedUrl,
-    };
-  }
-
-  /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
-  async generateArtifactReadUrl(
+  /** Read an artifact from S3 */
+  async readArtifact(
     targetId: string,
     contractName: string | null,
     artifactType: ArtifactsType,
@@ -123,40 +86,57 @@ export class ArtifactStorageReader {
 
     const key = buildArtifactStorageKey(targetId, artifactType, contractName);
 
+    const headers: HeadersInit = {};
+
+    if (etagValue) {
+      headers['if-none-match'] = etagValue;
+    }
+
     const response = await this.s3.client.fetch(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
-        method: 'HEAD',
+        method: 'GET',
+        headers,
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET artifact',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
     );
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCode: response.status,
-        action: 'HEAD artifact',
-      },
-      targetId,
-    );
 
-    if (response.status === 200) {
-      if (etagValue && response.headers.get('etag') === etagValue) {
-        return { type: 'notModified' } as const;
-      }
-
-      return {
-        type: 'redirect',
-        location: await this.generatePresignedGetUrl(key),
-      } as const;
-    }
     if (response.status === 404) {
       return { type: 'notFound' } as const;
     }
+
+    if (response.status === 304) {
+      return {
+        type: 'notModified',
+      } as const;
+    }
+
+    if (response.status === 200) {
+      return {
+        type: 'response',
+        response,
+      } as const;
+    }
+
     const body = await response.text();
-    throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
+    throw new Error(`GET request failed with status ${response.status}: ${body}`);
   }
 
   async isAppDeploymentEnabled(targetId: string, appName: string, appVersion: string) {
@@ -170,15 +150,21 @@ export class ArtifactStorageReader {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'HEAD appDeploymentIsEnabled',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-    );
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCode: response.status,
-        action: 'HEAD appDeploymentIsEnabled',
-      },
-      targetId,
     );
 
     return response.status === 200;
@@ -207,16 +193,21 @@ export class ArtifactStorageReader {
         },
         headers,
         timeout: READ_TIMEOUT_MS,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET persistedOperation',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-    );
-
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCode: response.status,
-        action: 'GET persistedOperation',
-      },
-      targetId,
     );
 
     if (etagValue && response.status === 304) {
@@ -237,5 +228,63 @@ export class ArtifactStorageReader {
 
     const body = await response.text();
     throw new Error(`HEAD request failed with status ${response.status}: ${body}`);
+  }
+
+  async readLegacyAccessKey(targetId: string) {
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, 'cdn-legacy-keys', targetId].join('/'),
+      {
+        method: 'GET',
+        timeout: READ_TIMEOUT_MS,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET cdn-legacy-keys',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
+      },
+    );
+
+    return response;
+  }
+
+  async readAccessKey(targetId: string, keyId: string) {
+    const s3KeyParts = ['cdn-keys', targetId, keyId];
+
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, ...s3KeyParts].join('/'),
+      {
+        method: 'GET',
+        aws: {
+          // This boolean makes Google Cloud Storage & AWS happy.
+          signQuery: true,
+        },
+        timeout: READ_TIMEOUT_MS,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET cdn-access-token',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
+      },
+    );
+
+    return response;
   }
 }

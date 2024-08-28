@@ -50,6 +50,7 @@ export function deployGraphQL({
   emails,
   supertokens,
   s3,
+  s3Mirror,
   zendesk,
   docker,
   postgres,
@@ -70,6 +71,7 @@ export function deployGraphQL({
   redis: Redis;
   cdn: CDN;
   s3: S3;
+  s3Mirror: S3;
   usage: Usage;
   usageEstimator: UsageEstimator;
   dbMigrations: DbMigrations;
@@ -151,6 +153,7 @@ export function deployGraphQL({
             observability.enabled && observability.tracingEndpoint
               ? observability.tracingEndpoint
               : '',
+          S3_MIRROR: '1',
         },
         exposesMetrics: true,
         port: 4000,
@@ -193,6 +196,11 @@ export function deployGraphQL({
       .withSecret('S3_SECRET_ACCESS_KEY', s3.secret, 'secretAccessKey')
       .withSecret('S3_BUCKET_NAME', s3.secret, 'bucket')
       .withSecret('S3_ENDPOINT', s3.secret, 'endpoint')
+      // S3 Mirror
+      .withSecret('S3_MIRROR_ACCESS_KEY_ID', s3Mirror.secret, 'accessKeyId')
+      .withSecret('S3_MIRROR_SECRET_ACCESS_KEY', s3Mirror.secret, 'secretAccessKey')
+      .withSecret('S3_MIRROR_BUCKET_NAME', s3Mirror.secret, 'bucket')
+      .withSecret('S3_MIRROR_ENDPOINT', s3Mirror.secret, 'endpoint')
       // Auth
       .withSecret('SUPERTOKENS_API_KEY', supertokens.secret, 'apiKey')
       .withSecret('AUTH_GITHUB_CLIENT_ID', githubOAuthSecret, 'clientId')

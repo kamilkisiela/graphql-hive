@@ -3,6 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, test } from 'vitest';
+import { ArtifactStorageReader } from '../src/artifact-storage-reader';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
@@ -48,26 +49,26 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
-        s3: {
-          endpoint: 'http://localhost:1337',
-          bucketName: 'artifacts',
-          client: {
-            async fetch() {
-              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                status: 200,
-              });
-            },
-          } as any,
-        },
+        artifactStorageReader: new ArtifactStorageReader(
+          {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            } as any,
+          },
+          null,
+        ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -127,26 +128,26 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
-        s3: {
-          endpoint: 'http://localhost:1337',
-          bucketName: 'artifacts',
-          client: {
-            async fetch() {
-              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                status: 200,
-              });
-            },
-          } as any,
-        },
+        artifactStorageReader: new ArtifactStorageReader(
+          {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            } as any,
+          },
+          null,
+        ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -222,26 +223,26 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
-        s3: {
-          endpoint: 'http://localhost:1337',
-          bucketName: 'artifacts',
-          client: {
-            async fetch() {
-              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                status: 200,
-              });
-            },
-          } as any,
-        },
+        artifactStorageReader: new ArtifactStorageReader(
+          {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            } as any,
+          },
+          null,
+        ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -301,26 +302,26 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
-        s3: {
-          endpoint: 'http://localhost:1337',
-          bucketName: 'artifacts',
-          client: {
-            async fetch() {
-              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                status: 200,
-              });
-            },
-          } as any,
-        },
+        artifactStorageReader: new ArtifactStorageReader(
+          {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            } as any,
+          },
+          null,
+        ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -386,26 +387,26 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
-        s3: {
-          endpoint: 'http://localhost:1337',
-          bucketName: 'artifacts',
-          client: {
-            async fetch() {
-              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                status: 200,
-              });
-            },
-          } as any,
-        },
+        artifactStorageReader: new ArtifactStorageReader(
+          {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            } as any,
+          },
+          null,
+        ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -469,26 +470,26 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
-        s3: {
-          endpoint: 'http://localhost:1337',
-          bucketName: 'artifacts',
-          client: {
-            async fetch() {
-              return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                status: 200,
-              });
-            },
-          } as any,
-        },
+        artifactStorageReader: new ArtifactStorageReader(
+          {
+            endpoint: 'http://localhost:1337',
+            bucketName: 'artifacts',
+            client: {
+              async fetch() {
+                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                  status: 200,
+                });
+              },
+            } as any,
+          },
+          null,
+        ),
       }),
       async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
-              type: 'redirect',
-              location: {
-                public: `target:${targetId}:${artifactType}`,
-                private: `target:${targetId}:${artifactType}`,
-              },
+              type: 'response',
+              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
             }
           : {
               type: 'notFound',
@@ -637,26 +638,26 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
-          s3: {
-            endpoint: 'http://localhost:1337',
-            bucketName: 'artifacts',
-            client: {
-              async fetch() {
-                return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
-                  status: 200,
-                });
-              },
-            } as any,
-          },
+          artifactStorageReader: new ArtifactStorageReader(
+            {
+              endpoint: 'http://localhost:1337',
+              bucketName: 'artifacts',
+              client: {
+                async fetch() {
+                  return new Response(await bcrypt.hash(token, await bcrypt.genSalt()), {
+                    status: 200,
+                  });
+                },
+              } as any,
+            },
+            null,
+          ),
         }),
         async getArtifactAction(targetId, _, artifactType) {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
-                type: 'redirect',
-                location: {
-                  public: `target:${targetId}:${artifactType}`,
-                  private: `target:${targetId}:${artifactType}`,
-                },
+                type: 'response',
+                response: new Response(map.get(`target:${targetId}:${artifactType}`)),
               }
             : {
                 type: 'notFound',
@@ -688,26 +689,26 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
-          s3: {
-            endpoint: 'http://localhost:1337',
-            bucketName: 'artifacts',
-            client: {
-              async fetch() {
-                return new Response(null, {
-                  status: 404,
-                });
-              },
-            } as any,
-          },
+          artifactStorageReader: new ArtifactStorageReader(
+            {
+              endpoint: 'http://localhost:1337',
+              bucketName: 'artifacts',
+              client: {
+                async fetch() {
+                  return new Response(null, {
+                    status: 404,
+                  });
+                },
+              } as any,
+            },
+            null,
+          ),
         }),
         async getArtifactAction(targetId, _, artifactType) {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
-                type: 'redirect',
-                location: {
-                  public: `target:${targetId}:${artifactType}`,
-                  private: `target:${targetId}:${artifactType}`,
-                },
+                type: 'response',
+                response: new Response(map.get(`target:${targetId}:${artifactType}`)),
               }
             : {
                 type: 'notFound',
@@ -737,17 +738,20 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
-          s3: {
-            endpoint: 'http://localhost:1337',
-            bucketName: 'artifacts',
-            client: {
-              async fetch() {
-                return new Response(await bcrypt.hash('foobars', await bcrypt.genSalt()), {
-                  status: 200,
-                });
-              },
-            } as any,
-          },
+          artifactStorageReader: new ArtifactStorageReader(
+            {
+              endpoint: 'http://localhost:1337',
+              bucketName: 'artifacts',
+              client: {
+                async fetch() {
+                  return new Response(await bcrypt.hash('foobars', await bcrypt.genSalt()), {
+                    status: 200,
+                  });
+                },
+              } as any,
+            },
+            null,
+          ),
         }),
         async getArtifactAction() {
           return {

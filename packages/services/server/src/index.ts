@@ -352,6 +352,15 @@ export async function main() {
         bucketName: env.s3.bucketName,
         endpoint: env.s3.endpoint,
       },
+      s3Mirror: env.s3Mirror
+        ? {
+            accessKeyId: env.s3Mirror.credentials.accessKeyId,
+            secretAccessKeyId: env.s3Mirror.credentials.secretAccessKey,
+            sessionToken: env.s3Mirror.credentials.sessionToken,
+            bucketName: env.s3Mirror.bucketName,
+            endpoint: env.s3Mirror.endpoint,
+          }
+        : null,
       encryptionSecret: env.encryptionSecret,
       feedback: {
         token: 'noop',
@@ -530,10 +539,15 @@ export async function main() {
         bucketName: env.s3.bucketName,
       };
 
-      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl, null);
+      const artifactStorageReader = new ArtifactStorageReader(s3, null);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
+        isKeyValid: createIsKeyValid({
+          artifactStorageReader,
+          analytics: null,
+          getCache: null,
+          waitUntil: null,
+        }),
         artifactStorageReader,
         isAppDeploymentActive: createIsAppDeploymentActive({
           artifactStorageReader,

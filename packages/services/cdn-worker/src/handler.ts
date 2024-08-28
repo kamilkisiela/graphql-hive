@@ -274,22 +274,10 @@ export function createRequestHandler(deps: RequestHandlerDependencies) {
     analytics.track({ type: 'artifact', value: artifactType, version: 'v0' }, targetId);
 
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
-    const rawValueAction = await deps
-      .getArtifactAction(targetId, null, storageKeyType, null)
-      .catch(() => {
-        // Do an extra attempt to read the value from the store.
-        // If we see that a single retry does not help, we should do a proper retry logic here.
-        // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
-        return deps.getArtifactAction(targetId, null, storageKeyType, null);
-      });
+    const rawValueAction = await deps.getArtifactAction(targetId, null, storageKeyType, null);
 
-    if (rawValueAction.type === 'redirect') {
-      // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
-      // and we're fetching the artifact from within the private network.
-      // If they are the same, private and public locations will be the same.
-      const rawValue = await deps
-        .fetchText(rawValueAction.location.private)
-        .catch(() => deps.fetchText(rawValueAction.location.private));
+    if (rawValueAction.type === 'response') {
+      const rawValue = await rawValueAction.response.text();
 
       const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');
