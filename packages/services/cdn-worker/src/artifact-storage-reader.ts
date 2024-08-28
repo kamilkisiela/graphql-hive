@@ -92,39 +92,30 @@ export class ArtifactStorageReader {
       headers['if-none-match'] = etagValue;
     }
 
-    const start = performance.now();
-
-    const response = await this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, key].join('/'), {
+    const response = await this.s3.client.fetch(
+      [this.s3.endpoint, this.s3.bucketName, key].join('/'),
+      {
         method: 'GET',
         headers,
         aws: {
           signQuery: true,
         },
         timeout: READ_TIMEOUT_MS,
-      })
-      .catch((err: Error) => {
-        this.analytics?.track(
-          {
-            type: 'r2',
-            statusCodeOrErrCode: String(err.name ?? 'unknown'),
-            action: 'GET artifact',
-            duration: performance.now() - start,
-          },
-          targetId,
-        );
-
-        throw err;
-      });
-
-    this.analytics?.track(
-      {
-        type: 'r2',
-        statusCodeOrErrCode: response.status,
-        action: 'GET artifact',
-        duration: performance.now() - start,
+        onAttempt: args => {
+          this.analytics?.track(
+            {
+              type: 'r2',
+              statusCodeOrErrCode:
+                args.result.type === 'error'
+                  ? String(args.result.error.name ?? 'unknown')
+                  : args.result.response.status,
+              action: 'GET artifact',
+              duration: args.duration,
+            },
+            targetId,
+          );
+        },
       },
-      targetId,
     );
 
     if (response.status === 404) {
