@@ -24,9 +24,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 47,
+  "id": 50,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "datasource": {
@@ -45,6 +44,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -102,6 +102,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -171,6 +172,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -210,6 +212,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -267,6 +270,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -306,6 +310,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -363,6 +368,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -432,6 +438,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -470,109 +477,8 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisWidth": 0,
             "barAlignment": 0,
             "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "fieldMinMax": false,
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "dtdurationms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 21
-      },
-      "id": 17,
-      "options": {
-        "legend": {
-          "calcs": ["max", "min", "mean"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.3.0-74868",
-      "targets": [
-        {
-          "datasource": {
-            "uid": "$Subscription"
-          },
-          "dateTimeColDataType": "timestamp",
-          "dateTimeType": "DATETIME",
-          "datetimeLoading": false,
-          "extrapolate": true,
-          "format": "time_series",
-          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
-          "intervalFactor": 1,
-          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    t\nORDER BY t\n",
-          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE timestamp >= toDateTime(1724821505) AND timestamp <= toDateTime(1724843105)\n\nGROUP BY\n    action,\n    t\nORDER BY t",
-          "refId": "A",
-          "round": "0s",
-          "showFormattedSQL": false,
-          "skip_comments": true
-        }
-      ],
-      "title": "R2 calls (p95 latency)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "uid": "$Subscription"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -617,6 +523,388 @@
         "x": 0,
         "y": 21
       },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0-74991",
+      "targets": [
+        {
+          "add_metadata": true,
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "editorMode": "builder",
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "interval": "",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_s3_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t\n",
+          "rawQuery": "/* grafana dashboard=CDN Usage, user=19 */\nSELECT\n    (intDiv(toUInt32(timestamp), 5) * 5) * 1000 AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_s3_ENV_NAME\n\nWHERE timestamp >= toDateTime(1724917446) AND timestamp <= toDateTime(1724921046)\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "S3 calls",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 2,
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 17,
+        "y": 21
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["percent"]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": ["mean"],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0-74991",
+      "targets": [
+        {
+          "add_metadata": true,
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "editorMode": "builder",
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "interval": "",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_s3_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t\n",
+          "rawQuery": "/* grafana dashboard=CDN Usage, user=19 */\nSELECT\n    (intDiv(toUInt32(timestamp), 5) * 5) * 1000 AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_s3_ENV_NAME\n\nWHERE timestamp >= toDateTime(1724917446) AND timestamp <= toDateTime(1724921046)\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "S3 calls",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "right",
+            "axisWidth": 120,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dtdurationms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": ["max", "min", "mean"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0-74991",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE timestamp >= toDateTime(1724821505) AND timestamp <= toDateTime(1724843105)\n\nGROUP BY\n    action,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "showFormattedSQL": false,
+          "skip_comments": true
+        }
+      ],
+      "title": "R2 calls (p95 latency)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "right",
+            "axisWidth": 120,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dtdurationms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": ["max", "min", "mean"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.0-74991",
+      "targets": [
+        {
+          "add_metadata": true,
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "editorMode": "builder",
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "interval": "",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_s3_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    t\nORDER BY t\n",
+          "rawQuery": "/* grafana dashboard=CDN Usage, user=19 */\nSELECT\n    (intDiv(toUInt32(timestamp), 30) * 30) * 1000 AS t,\n    blob1 AS action,\n    quantileWeighted(0.95, double1, _sample_interval) as p95\nFROM hive_ha_cdn_s2_ENV_NAME\n\nWHERE timestamp >= toDateTime(1724917446) AND timestamp <= toDateTime(1724921046)\n\nGROUP BY\n    action,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "showFormattedSQL": false,
+          "skip_comments": true
+        }
+      ],
+      "title": "S3 calls (p95 latency)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 17,
+        "x": 0,
+        "y": 56
+      },
       "id": 2,
       "options": {
         "legend": {
@@ -630,6 +918,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -677,7 +966,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 21
+        "y": 56
       },
       "id": 13,
       "options": {
@@ -698,6 +987,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -731,12 +1021,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisShow": false,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -767,7 +1058,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           }
@@ -778,7 +1070,7 @@
         "h": 6,
         "w": 17,
         "x": 0,
-        "y": 28
+        "y": 63
       },
       "id": 3,
       "options": {
@@ -793,6 +1085,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -840,7 +1133,7 @@
         "h": 6,
         "w": 7,
         "x": 17,
-        "y": 28
+        "y": 63
       },
       "id": 5,
       "options": {
@@ -861,6 +1154,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -894,12 +1188,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisShow": false,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -932,7 +1227,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "orange",
@@ -951,7 +1247,7 @@
         "h": 6,
         "w": 14,
         "x": 0,
-        "y": 34
+        "y": 69
       },
       "id": 6,
       "options": {
@@ -966,6 +1262,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -1013,7 +1310,7 @@
         "h": 6,
         "w": 8,
         "x": 14,
-        "y": 34
+        "y": 69
       },
       "id": 7,
       "options": {
@@ -1034,7 +1331,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "9.3.2-67a213dc85",
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -1072,7 +1369,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "#EAB839",
@@ -1091,7 +1389,7 @@
         "h": 6,
         "w": 2,
         "x": 22,
-        "y": 34
+        "y": 69
       },
       "id": 8,
       "options": {
@@ -1099,14 +1397,17 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": ["mean"],
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.2.0-60477",
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -1139,12 +1440,13 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisShow": false,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1175,7 +1477,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1190,7 +1493,7 @@
         "h": 7,
         "w": 17,
         "x": 0,
-        "y": 40
+        "y": 75
       },
       "id": 10,
       "options": {
@@ -1205,6 +1508,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -1252,7 +1556,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 40
+        "y": 75
       },
       "id": 4,
       "options": {
@@ -1273,6 +1577,7 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "11.3.0-74991",
       "targets": [
         {
           "datasource": {
@@ -1296,39 +1601,35 @@
       "type": "piechart"
     }
   ],
+  "preload": false,
   "refresh": "",
-  "revision": 1,
   "schemaVersion": 39,
   "tags": ["hive", "cdn"],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": false,
           "text": "CDN",
-          "value": "E4rnkso4z"
+          "value": "ZTe-Py5Vz"
         },
-        "hide": 0,
         "includeAll": false,
-        "multi": false,
         "name": "Subscription",
         "options": [],
         "query": "vertamedia-clickhouse-datasource",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "CDN Usage",
-  "uid": "iHmRSA-Vz",
-  "version": 2,
+  "uid": "0xuKHA-Vk",
+  "version": 33,
   "weekStart": ""
 }
