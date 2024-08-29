@@ -73,7 +73,7 @@ export class ArtifactStorageReader {
     private analytics: Analytics | null,
     breadcrumb: Breadcrumb | null,
     /** Timeout in milliseconds for S3 read calls. */
-    private timeout: number = 5_000,
+    private timeout: number = 2_000,
   ) {
     this.breadcrumb = breadcrumb ?? (() => {});
   }
