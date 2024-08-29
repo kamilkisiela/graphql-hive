@@ -58,16 +58,16 @@ export const extractSuperGraphInformation = traceInlineSync(
         const schemaCoordinate = `${node.name.value}.${fieldNode.name.value}`;
 
         const joinField = fieldNode.directives?.find(
-          (directive) =>
-            directive.name.value === "join__field" &&
+          directive =>
+            directive.name.value === 'join__field' &&
             !directive.arguments?.find(
-              (arg) =>
-                arg.name.value === "usedOverridden" &&
+              arg =>
+                arg.name.value === 'usedOverridden' &&
                 arg.value.kind === Kind.BOOLEAN &&
                 arg.value.value === true,
             ),
         );
-        const graphArg = joinField?.arguments?.find((arg) => arg.name.value === "graph");
+        const graphArg = joinField?.arguments?.find(arg => arg.name.value === 'graph');
 
         if (graphArg === undefined) {
           schemaCoordinateToServiceEnumValueMappings.set(
