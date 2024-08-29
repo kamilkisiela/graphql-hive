@@ -109,8 +109,10 @@ export class ArtifactStorageReader {
           };
     }) => void;
   }) {
+    const primaryObjectEndpoint = [this.s3.endpoint, this.s3.bucketName, args.key].join('/');
+
     return this.s3.client
-      .fetch([this.s3.endpoint, this.s3.bucketName, args.key].join('/'), {
+      .fetch(primaryObjectEndpoint, {
         method: args.method,
         headers: args.headers,
         aws: {
@@ -143,21 +145,28 @@ export class ArtifactStorageReader {
         const primaryController = new AbortController();
         const mirrorController = new AbortController();
 
-        function abortOtherRequest(ctrl: AbortController) {
+        const abortOtherRequest = (ctrl: AbortController, source: string) => {
           return (res: Response) => {
+            this.breadcrumb(`Successful fetch from "${source}", aborting other request`);
             // abort other pending request
             const error = new PendingRequestAbortedError();
             ctrl.abort(error);
 
             return res;
           };
-        }
+        };
+
+        const mirrorObjectEndpoint = [
+          this.s3Mirror.endpoint,
+          this.s3Mirror.bucketName,
+          args.key,
+        ].join('/');
 
         // Wait for the first successful response
         // or reject if both requests fail
         return Promise.any([
           this.s3.client
-            .fetch([this.s3.endpoint, this.s3.bucketName, args.key].join('/'), {
+            .fetch(primaryObjectEndpoint, {
               method: args.method,
               headers: args.headers,
               aws: {
@@ -174,9 +183,9 @@ export class ArtifactStorageReader {
                 });
               },
             })
-            .then(abortOtherRequest(mirrorController)),
+            .then(abortOtherRequest(mirrorController, 'primary')),
           this.s3Mirror.client
-            .fetch([this.s3Mirror.endpoint, this.s3Mirror.bucketName, args.key].join('/'), {
+            .fetch(mirrorObjectEndpoint, {
               method: args.method,
               headers: args.headers,
               aws: {
@@ -193,7 +202,7 @@ export class ArtifactStorageReader {
                 });
               },
             })
-            .then(abortOtherRequest(primaryController)),
+            .then(abortOtherRequest(primaryController, 'mirror')),
         ]);
       });
   }
@@ -229,6 +238,10 @@ export class ArtifactStorageReader {
       method: 'GET',
       headers,
       onAttempt: args => {
+        this.breadcrumb(
+          `Fetch attempt (source=${args.isMirror ? 'mirror' : 'primary'}, attempt=${args.attempt} duration=${args.duration}, result=${args.result.type}, key=${key})`,
+        );
+
         this.analytics?.track(
           {
             type: args.isMirror ? 's3' : 'r2',
@@ -274,6 +287,9 @@ export class ArtifactStorageReader {
       key,
       method: 'HEAD',
       onAttempt: args => {
+        this.breadcrumb(
+          `Fetch attempt (source=${args.isMirror ? 'mirror' : 'primary'}, attempt=${args.attempt} duration=${args.duration}, result=${args.result.type}, key=${key})`,
+        );
         this.analytics?.track(
           {
             type: args.isMirror ? 's3' : 'r2',
@@ -311,6 +327,9 @@ export class ArtifactStorageReader {
       method: 'GET',
       headers,
       onAttempt: args => {
+        this.breadcrumb(
+          `Fetch attempt (source=${args.isMirror ? 'mirror' : 'primary'}, attempt=${args.attempt} duration=${args.duration}, result=${args.result.type}, key=${key})`,
+        );
         this.analytics?.track(
           {
             type: args.isMirror ? 's3' : 'r2',
@@ -353,6 +372,9 @@ export class ArtifactStorageReader {
       key,
       method: 'GET',
       onAttempt: args => {
+        this.breadcrumb(
+          `Fetch attempt (source=${args.isMirror ? 'mirror' : 'primary'}, attempt=${args.attempt} duration=${args.duration}, result=${args.result.type}, key=${key})`,
+        );
         this.analytics?.track(
           {
             type: args.isMirror ? 's3' : 'r2',
@@ -379,6 +401,9 @@ export class ArtifactStorageReader {
       key,
       method: 'GET',
       onAttempt: args => {
+        this.breadcrumb(
+          `Fetch attempt (source=${args.isMirror ? 'mirror' : 'primary'}, attempt=${args.attempt} duration=${args.duration}, result=${args.result.type}, key=${key})`,
+        );
         this.analytics?.track(
           {
             type: args.isMirror ? 'r2' : 's3',
