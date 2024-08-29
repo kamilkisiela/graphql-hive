@@ -180,7 +180,7 @@ export class AwsClient {
           retryCounter === maximumRetryCount
         ) {
           if (init.isResponseOk && !init.isResponseOk(response)) {
-            throw new Error(`Response not okay, status: ${response.status}`);
+            throw new ResponseNotOkayError(response);
           }
 
           return response;
@@ -555,4 +555,13 @@ function anySignal(signals: Array<AbortSignal | undefined>) {
   }
 
   return controller.signal;
+}
+
+class ResponseNotOkayError extends Error {
+  response: Response;
+
+  constructor(response: Response) {
+    super(`Response not okay, status: ${response.status}`);
+    this.response = response;
+  }
 }
