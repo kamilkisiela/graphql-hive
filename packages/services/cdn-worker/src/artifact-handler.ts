@@ -197,9 +197,12 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         }
       }
 
+      breadcrumb('Reading response.text()');
+      const text = await result.response.text();
+      breadcrumb('Returning OK 200');
       return createResponse(
         analytics,
-        await result.response.text(),
+        text,
         {
           status: 200,
           headers: {

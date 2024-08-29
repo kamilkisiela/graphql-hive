@@ -257,6 +257,8 @@ export class ArtifactStorageReader {
       },
     });
 
+    this.breadcrumb(`Response status: ${response.status}`);
+
     if (response.status === 404) {
       return { type: 'notFound' } as const;
     }
@@ -276,7 +278,9 @@ export class ArtifactStorageReader {
 
     this.breadcrumb(`Failed to read artifact`);
 
-    const body = await response.text();
+    const body = await response
+      .text()
+      .catch(error => 'Failed to read response body due to ' + String(error));
     throw new Error(`GET request failed with status ${response.status}: ${body}`);
   }
 
