@@ -76,13 +76,46 @@ const handler: ExportedHandler<Env> = {
       s3: env.S3_ANALYTICS,
     });
 
-    const artifactStorageReader = new ArtifactStorageReader(s3, s3Mirror, analytics);
+    const sentry = new Toucan({
+      dsn: env.SENTRY_DSN,
+      environment: env.SENTRY_ENVIRONMENT,
+      release: env.SENTRY_RELEASE,
+      dist: 'cdn-worker',
+      context: ctx,
+      request,
+      requestDataOptions: {
+        allowedHeaders: [
+          'user-agent',
+          'cf-ipcountry',
+          'accept-encoding',
+          'accept',
+          'x-real-ip',
+          'cf-connecting-ip',
+        ],
+        allowedSearchParams: /(.*)/,
+      },
+    });
+
+    const artifactStorageReader = new ArtifactStorageReader(
+      s3,
+      s3Mirror,
+      analytics,
+      (message: string) => sentry.addBreadcrumb({ message }),
+    );
 
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
       getCache: () => caches.open('artifacts-auth'),
       artifactStorageReader,
       analytics,
+      breadcrumb(message: string) {
+        sentry.addBreadcrumb({
+          message,
+        });
+      },
+      captureException(error) {
+        sentry.captureException(error);
+      },
     });
 
     const handleRequest = createRequestHandler({
@@ -90,6 +123,11 @@ const handler: ExportedHandler<Env> = {
         return artifactStorageReader.readArtifact(targetId, contractName, artifactType, eTag);
       },
       isKeyValid,
+      breadcrumb(message: string) {
+        sentry.addBreadcrumb({
+          message,
+        });
+      },
       analytics,
       async fetchText(url) {
         // Yeah, it's not globally defined, but it makes no sense to define it globally
@@ -134,6 +172,9 @@ const handler: ExportedHandler<Env> = {
     const handleArtifactRequest = createArtifactRequestHandler({
       isKeyValid,
       analytics,
+      breadcrumb(message: string) {
+        sentry.addBreadcrumb({ message });
+      },
       artifactStorageReader,
       isAppDeploymentActive: createIsAppDeploymentActive({
         artifactStorageReader,
@@ -164,31 +205,16 @@ const handler: ExportedHandler<Env> = {
       // Legacy CDN Handlers
       .get('*', handleRequest);
 
-    const sentry = new Toucan({
-      dsn: env.SENTRY_DSN,
-      environment: env.SENTRY_ENVIRONMENT,
-      release: env.SENTRY_RELEASE,
-      dist: 'cdn-worker',
-      context: ctx,
-      request,
-      requestDataOptions: {
-        allowedHeaders: [
-          'user-agent',
-          'cf-ipcountry',
-          'accept-encoding',
-          'accept',
-          'x-real-ip',
-          'cf-connecting-ip',
-        ],
-        allowedSearchParams: /(.*)/,
-      },
-    });
-
     try {
       return await router.handle(request, sentry.captureException.bind(sentry)).then(response => {
         if (response) {
           return response;
         }
+
+        sentry.addBreadcrumb({
+          message: 'No response from router',
+        });
+
         return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
       });
     } catch (error) {

@@ -2,6 +2,7 @@ import * as itty from 'itty-router';
 import zod from 'zod';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactStorageReader, type ArtifactsType } from './artifact-storage-reader';
+import { createBreadcrumb, type Breadcrumb } from './breadcrumbs';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import { IsAppDeploymentActive } from './is-app-deployment-active';
 import type { KeyValidator } from './key-validation';
@@ -21,6 +22,7 @@ type ArtifactRequestHandler = {
   isKeyValid: KeyValidator;
   isAppDeploymentActive: IsAppDeploymentActive;
   analytics?: Analytics;
+  breadcrumb?: Breadcrumb;
   fallback?: (
     request: Request,
     params: { targetId: string; artifactType: string },
@@ -60,6 +62,7 @@ const authHeaderName = 'x-hive-cdn-key' as const;
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   const router = itty.Router<itty.IRequest & Request>();
   const analytics = deps.analytics ?? createAnalytics();
+  const breadcrumb = deps.breadcrumb ?? createBreadcrumb();
 
   const authenticate = async (
     request: itty.IRequest & Request,
@@ -100,8 +103,13 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const params = parseResult.data;
 
+    breadcrumb(
+      `Artifact v1 handler (type=${params.artifactType}, targetId=${params.targetId}, contractName=${params.contractName})`,
+    );
+
     /** Legacy handling for old client SDK versions. */
     if (params.artifactType === 'schema') {
+      breadcrumb('Redirecting from /schema to /services');
       return createResponse(
         analytics,
         'Found.',

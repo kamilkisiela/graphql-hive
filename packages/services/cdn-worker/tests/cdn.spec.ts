@@ -70,6 +70,8 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
+        breadcrumb: null,
+        captureException: console.error,
         artifactStorageReader: new ArtifactStorageReader(
           {
             endpoint: 'http://localhost:1337',
@@ -82,6 +84,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
           null,
         ),
@@ -150,6 +153,8 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
+        breadcrumb: null,
+        captureException: console.error,
         artifactStorageReader: new ArtifactStorageReader(
           {
             endpoint: 'http://localhost:1337',
@@ -162,6 +167,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
           null,
         ),
@@ -246,6 +252,8 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
+        breadcrumb: null,
+        captureException: console.error,
         artifactStorageReader: new ArtifactStorageReader(
           {
             endpoint: 'http://localhost:1337',
@@ -258,6 +266,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
           null,
         ),
@@ -326,6 +335,8 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
+        breadcrumb: null,
+        captureException: console.error,
         artifactStorageReader: new ArtifactStorageReader(
           {
             endpoint: 'http://localhost:1337',
@@ -338,6 +349,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
           null,
         ),
@@ -412,6 +424,8 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
+        breadcrumb: null,
+        captureException: console.error,
         artifactStorageReader: new ArtifactStorageReader(
           {
             endpoint: 'http://localhost:1337',
@@ -424,6 +438,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
           null,
         ),
@@ -496,6 +511,8 @@ describe('CDN Worker', () => {
         getCache: null,
         waitUntil: null,
         analytics: null,
+        breadcrumb: null,
+        captureException: console.error,
         artifactStorageReader: new ArtifactStorageReader(
           {
             endpoint: 'http://localhost:1337',
@@ -508,6 +525,7 @@ describe('CDN Worker', () => {
               },
             } as any,
           },
+          null,
           null,
           null,
         ),
@@ -665,6 +683,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader: new ArtifactStorageReader(
             {
               endpoint: 'http://localhost:1337',
@@ -677,6 +697,7 @@ describe('CDN Worker', () => {
                 },
               } as any,
             },
+            null,
             null,
             null,
           ),
@@ -717,6 +738,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader: new ArtifactStorageReader(
             {
               endpoint: 'http://localhost:1337',
@@ -729,6 +752,7 @@ describe('CDN Worker', () => {
                 },
               } as any,
             },
+            null,
             null,
             null,
           ),
@@ -767,6 +791,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader: new ArtifactStorageReader(
             {
               endpoint: 'http://localhost:1337',
@@ -779,6 +805,7 @@ describe('CDN Worker', () => {
                 },
               } as any,
             },
+            null,
             null,
             null,
           ),
@@ -906,6 +933,7 @@ describe('CDN Worker', () => {
           }),
         },
         null,
+        null,
         TIMEOUT,
       );
 
@@ -914,6 +942,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader,
         }),
         async getArtifactAction(targetId, contractName, artifactType, eTag) {
@@ -1013,6 +1043,7 @@ describe('CDN Worker', () => {
           }),
         },
         null,
+        null,
         TIMEOUT,
       );
 
@@ -1021,6 +1052,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader,
         }),
         async getArtifactAction(targetId, contractName, artifactType, eTag) {
@@ -1118,6 +1151,7 @@ describe('CDN Worker', () => {
           }),
         },
         null,
+        null,
       );
 
       const handleRequest = createRequestHandler({
@@ -1125,6 +1159,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader,
         }),
         async getArtifactAction(targetId, contractName, artifactType, eTag) {
@@ -1222,6 +1258,7 @@ describe('CDN Worker', () => {
           }),
         },
         null,
+        null,
       );
 
       const handleRequest = createRequestHandler({
@@ -1229,6 +1266,8 @@ describe('CDN Worker', () => {
           getCache: null,
           waitUntil: null,
           analytics: null,
+          breadcrumb: null,
+          captureException: console.error,
           artifactStorageReader,
         }),
         async getArtifactAction(targetId, contractName, artifactType, eTag) {
