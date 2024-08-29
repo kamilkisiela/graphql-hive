@@ -2,6 +2,7 @@ import { buildSchema, introspectionFromSchema } from 'graphql';
 import { Analytics, createAnalytics } from './analytics';
 import { GetArtifactActionFn } from './artifact-handler';
 import { ArtifactsType as ModernArtifactsType } from './artifact-storage-reader';
+import { Breadcrumb, createBreadcrumb } from './breadcrumbs';
 import {
   CDNArtifactNotFound,
   InvalidArtifactTypeResponse,
@@ -192,6 +193,7 @@ async function parseIncomingRequest(
   request: Request,
   keyValidator: KeyValidator,
   analytics: Analytics,
+  breadcrumb: Breadcrumb,
 ): Promise<
   | { error: Response }
   | {
@@ -239,6 +241,7 @@ async function parseIncomingRequest(
         legacyToModernArtifactTypeMap[artifactType],
     };
   } catch (e) {
+    breadcrumb(`Failed to validate key for ${targetId}, error: ${e}`);
     console.warn(`Failed to validate key for ${targetId}, error:`, e);
     return {
       error: new InvalidAuthKeyResponse(analytics, request),
@@ -255,15 +258,22 @@ interface RequestHandlerDependencies {
   isKeyValid: IsKeyValid;
   getArtifactAction: GetArtifactActionFn;
   analytics?: Analytics;
+  breadcrumb?: Breadcrumb;
   fetchText: (url: string) => Promise<string>;
 }
 
 export function createRequestHandler(deps: RequestHandlerDependencies) {
   const analytics = deps.analytics ?? createAnalytics();
+  const breadcrumb = deps.breadcrumb ?? createBreadcrumb();
   const artifactTypesHandlers = createArtifactTypesHandlers(analytics);
 
   return async (request: Request): Promise<Response> => {
-    const parsedRequest = await parseIncomingRequest(request, deps.isKeyValid, analytics);
+    const parsedRequest = await parseIncomingRequest(
+      request,
+      deps.isKeyValid,
+      analytics,
+      breadcrumb,
+    );
 
     if ('error' in parsedRequest) {
       return parsedRequest.error;
