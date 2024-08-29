@@ -9,6 +9,7 @@ export class CloudflareCDN {
     private config: {
       envName: string;
       zoneId: string;
+      accountId: string;
       cdnDnsRecord: string;
       sentryDsn: string | pulumi.Output<string>;
       release: string;
@@ -20,9 +21,11 @@ export class CloudflareCDN {
   deploy() {
     const kvStorage = new cf.WorkersKvNamespace('hive-ha-storage', {
       title: `hive-ha-cdn-${this.config.envName}`,
+      accountId: this.config.accountId,
     });
 
     const script = new cf.WorkerScript('hive-ha-worker', {
+      accountId: this.config.accountId,
       content: readFileSync(
         // eslint-disable-next-line no-process-env
         process.env.CDN_WORKER_ARTIFACT_PATH ||
@@ -31,6 +34,7 @@ export class CloudflareCDN {
       ),
       name: `hive-storage-cdn-${this.config.envName}`,
       module: true,
+      logpush: true,
       kvNamespaceBindings: [
         {
           // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
@@ -133,6 +137,7 @@ export class CloudflareBroker {
     private config: {
       envName: string;
       zoneId: string;
+      accountId: string;
       cdnDnsRecord: string;
       secretSignature: pulumi.Output<string>;
       sentryDsn: string | pulumi.Output<string>;
@@ -183,6 +188,7 @@ export class CloudflareBroker {
     }
 
     const script = new cf.WorkerScript('hive-broker-worker', {
+      accountId: this.config.accountId,
       content: readFileSync(
         // eslint-disable-next-line no-process-env
         process.env.BROKER_WORKER_ARTIFACT_PATH ||
