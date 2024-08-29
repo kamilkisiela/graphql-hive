@@ -551,14 +551,24 @@ export async function main() {
           }
         : null;
 
-      const artifactStorageReader = new ArtifactStorageReader(s3, s3Mirror, null);
+      const artifactStorageReader = new ArtifactStorageReader(s3, s3Mirror, null, null);
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({
           artifactStorageReader,
           analytics: null,
+          breadcrumb(message: string) {
+            server.log.debug(message);
+          },
           getCache: null,
           waitUntil: null,
+          captureException(error) {
+            captureException(error, {
+              extra: {
+                source: 'artifactRequestHandler',
+              },
+            });
+          },
         }),
         artifactStorageReader,
         isAppDeploymentActive: createIsAppDeploymentActive({
