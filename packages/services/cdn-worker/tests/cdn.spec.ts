@@ -93,7 +93,9 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'response',
-              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+              status: 200,
+              body: map.get(`target:${targetId}:${artifactType}`),
+              headers: new Headers(),
             }
           : {
               type: 'notFound',
@@ -176,7 +178,9 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'response',
-              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+              status: 200,
+              headers: new Headers(),
+              body: map.get(`target:${targetId}:${artifactType}`),
             }
           : {
               type: 'notFound',
@@ -275,7 +279,9 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'response',
-              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+              status: 200,
+              headers: new Headers(),
+              body: map.get(`target:${targetId}:${artifactType}`),
             }
           : {
               type: 'notFound',
@@ -358,7 +364,9 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'response',
-              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+              status: 200,
+              headers: new Headers(),
+              body: map.get(`target:${targetId}:${artifactType}`),
             }
           : {
               type: 'notFound',
@@ -447,7 +455,9 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'response',
-              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+              status: 200,
+              headers: new Headers(),
+              body: map.get(`target:${targetId}:${artifactType}`),
             }
           : {
               type: 'notFound',
@@ -534,7 +544,9 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'response',
-              response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+              status: 200,
+              headers: new Headers(),
+              body: map.get(`target:${targetId}:${artifactType}`),
             }
           : {
               type: 'notFound',
@@ -706,7 +718,9 @@ describe('CDN Worker', () => {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
                 type: 'response',
-                response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+                status: 200,
+                headers: new Headers(),
+                body: map.get(`target:${targetId}:${artifactType}`),
               }
             : {
                 type: 'notFound',
@@ -761,7 +775,9 @@ describe('CDN Worker', () => {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
                 type: 'response',
-                response: new Response(map.get(`target:${targetId}:${artifactType}`)),
+                status: 200,
+                headers: new Headers(),
+                body: map.get(`target:${targetId}:${artifactType}`),
               }
             : {
                 type: 'notFound',
