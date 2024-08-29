@@ -40,4 +40,5 @@ grafanaDashboards:params:
 Then, in the dashboard's JSON model file, you can use the variable name, as is (we do a simple
 string replacement).
 
-> The `ENV_NAME` is injected automatically, with the name of the Pulumi stack.
+> The `TABLE_SUFFIX` is injected automatically, with the name of the Pulumi stack ("prod" is
+> replaced with "production").
