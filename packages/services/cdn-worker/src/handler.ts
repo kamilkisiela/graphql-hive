@@ -287,7 +287,7 @@ export function createRequestHandler(deps: RequestHandlerDependencies) {
     const rawValueAction = await deps.getArtifactAction(targetId, null, storageKeyType, null);
 
     if (rawValueAction.type === 'response') {
-      const rawValue = rawValueAction.body;
+      const rawValue = await rawValueAction.response.text();
 
       const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');

@@ -272,12 +272,7 @@ export class ArtifactStorageReader {
     if (response.status === 200) {
       return {
         type: 'response',
-        status: response.status,
-        headers: response.headers,
-        body: await response.text().catch(error => {
-          this.breadcrumb('Error reading response body: ' + String(error));
-          return Promise.reject(error);
-        }),
+        response,
       } as const;
     }
 
