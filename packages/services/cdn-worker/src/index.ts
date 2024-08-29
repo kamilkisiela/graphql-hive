@@ -192,13 +192,8 @@ const handler: ExportedHandler<Env> = {
       },
     });
 
-    const { corsify, preflight } = itty.createCors();
-
     const router = itty
       .Router()
-      // Handles all OPTIONS and preflight requests.
-      // https://github.com/kwhitley/itty.dev/blob/v4.x/src/routes/itty-router/cors/%2Bpage.md#preflight-middleware
-      .all('*', preflight)
       .get(
         '/_health',
         () =>
@@ -210,29 +205,23 @@ const handler: ExportedHandler<Env> = {
       // Legacy CDN Handlers
       .get('*', handleRequest);
 
-    return (
-      router
-        .handle(request, sentry.captureException.bind(sentry))
-        .then(response => {
-          if (response) {
-            return response;
-          }
+    try {
+      return await router.handle(request, sentry.captureException.bind(sentry)).then(response => {
+        if (response) {
+          return response;
+        }
 
-          sentry.addBreadcrumb({
-            message: 'No response from router',
-          });
+        sentry.addBreadcrumb({
+          message: 'No response from router',
+        });
 
-          return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
-        })
-        .catch(error => {
-          console.error(error);
-          sentry.captureException(error);
-          return new UnexpectedError(analytics, request);
-        })
-        // Adds the appropriate CORS headers to any Response.
-        // https://github.com/kwhitley/itty.dev/blob/v4.x/src/routes/itty-router/cors/%2Bpage.md#corsify
-        .then(corsify)
-    );
+        return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
+      });
+    } catch (error) {
+      console.error(error);
+      sentry.captureException(error);
+      return new UnexpectedError(analytics, request);
+    }
   },
 };
 
