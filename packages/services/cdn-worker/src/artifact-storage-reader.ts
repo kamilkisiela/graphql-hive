@@ -1,6 +1,7 @@
 import zod from 'zod';
 import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
+import type { Breadcrumb } from './breadcrumbs';
 
 export function buildArtifactStorageKey(
   targetId: string,
@@ -56,6 +57,8 @@ export function buildAppDeploymentIsEnabledKey(
  * Read an artifact/app deployment operation from S3.
  */
 export class ArtifactStorageReader {
+  private breadcrumb: Breadcrumb;
+
   constructor(
     private s3: {
       client: AwsClient;
@@ -68,9 +71,12 @@ export class ArtifactStorageReader {
       bucketName: string;
     } | null,
     private analytics: Analytics | null,
+    breadcrumb: Breadcrumb | null,
     /** Timeout in milliseconds for S3 read calls. */
     private timeout: number = 5_000,
-  ) {}
+  ) {
+    this.breadcrumb = breadcrumb ?? (() => {});
+  }
 
   /**
    * Perform a request to S3, with retries and optional mirror.
@@ -122,9 +128,11 @@ export class ArtifactStorageReader {
         },
       })
       .catch(err => {
+        this.breadcrumb('Failed to fetch from primary');
         if (!this.s3Mirror) {
           return Promise.reject(err);
         }
+        this.breadcrumb('Fetching from primary and mirror now');
         // Use two AbortSignals to avoid a situation
         // where Response.body is consumed,
         // but the request was aborted after being resolved.
@@ -201,11 +209,18 @@ export class ArtifactStorageReader {
       artifactType = 'sdl';
     }
 
+    this.breadcrumb(
+      `Reading artifact (targetId=${targetId}, artifactType=${artifactType}, contractName=${contractName})`,
+    );
+
     const key = buildArtifactStorageKey(targetId, artifactType, contractName);
+
+    this.breadcrumb(`Reading artifact from S3 key: ${key}`);
 
     const headers: HeadersInit = {};
 
     if (etagValue) {
+      this.breadcrumb('if-none-match detected');
       headers['if-none-match'] = etagValue;
     }
 
@@ -245,6 +260,8 @@ export class ArtifactStorageReader {
         response,
       } as const;
     }
+
+    this.breadcrumb(`Failed to read artifact`);
 
     const body = await response.text();
     throw new Error(`GET request failed with status ${response.status}: ${body}`);
@@ -330,8 +347,10 @@ export class ArtifactStorageReader {
   }
 
   async readLegacyAccessKey(targetId: string) {
+    const key = ['cdn-legacy-keys', targetId].join('/');
+    this.breadcrumb(`Reading from S3 key: ${key}`);
     const response = await this.request({
-      key: ['cdn-legacy-keys', targetId].join('/'),
+      key,
       method: 'GET',
       onAttempt: args => {
         this.analytics?.track(
@@ -353,10 +372,11 @@ export class ArtifactStorageReader {
   }
 
   async readAccessKey(targetId: string, keyId: string) {
-    const s3KeyParts = ['cdn-keys', targetId, keyId];
+    const key = ['cdn-keys', targetId, keyId].join('/');
+    this.breadcrumb(`Reading from S3 key: ${key}`);
 
     const response = await this.request({
-      key: s3KeyParts.join('/'),
+      key,
       method: 'GET',
       onAttempt: args => {
         this.analytics?.track(
