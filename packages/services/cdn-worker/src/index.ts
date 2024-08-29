@@ -192,8 +192,11 @@ const handler: ExportedHandler<Env> = {
       },
     });
 
+    const { corsify, preflight } = itty.createCors();
+
     const router = itty
       .Router()
+      .all('*', preflight)
       .get(
         '/_health',
         () =>
@@ -205,8 +208,9 @@ const handler: ExportedHandler<Env> = {
       // Legacy CDN Handlers
       .get('*', handleRequest);
 
-    try {
-      return await router.handle(request, sentry.captureException.bind(sentry)).then(response => {
+    return router
+      .handle(request, sentry.captureException.bind(sentry))
+      .then(response => {
         if (response) {
           return response;
         }
@@ -216,12 +220,13 @@ const handler: ExportedHandler<Env> = {
         });
 
         return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
-      });
-    } catch (error) {
-      console.error(error);
-      sentry.captureException(error);
-      return new UnexpectedError(analytics, request);
-    }
+      })
+      .catch(error => {
+        console.error(error);
+        sentry.captureException(error);
+        return new UnexpectedError(analytics, request);
+      })
+      .then(corsify);
   },
 };
 
