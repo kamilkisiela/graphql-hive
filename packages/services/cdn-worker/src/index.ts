@@ -99,7 +99,7 @@ const handler: ExportedHandler<Env> = {
 
         for (let i = 0; i <= retries; i++) {
           const fetched = fetch(url, {
-            signal: AbortSignal.timeout(5000),
+            signal: AbortSignal.timeout(2_000),
           });
 
           if (i === retries) {

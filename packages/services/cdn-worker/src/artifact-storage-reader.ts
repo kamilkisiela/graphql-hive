@@ -69,7 +69,7 @@ export class ArtifactStorageReader {
     } | null,
     private analytics: Analytics | null,
     /** Timeout in milliseconds for S3 read calls. */
-    private timeout: number = 5_000,
+    private timeout: number = 2_000,
   ) {}
 
   /**
