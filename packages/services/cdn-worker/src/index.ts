@@ -156,7 +156,7 @@ const handler: ExportedHandler<Env> = {
             }
           } catch (error) {
             // Retry also when there's an exception
-            console.error(error);
+            console.warn(error);
           }
           await new Promise(resolve =>
             setTimeout(resolve, Math.random() * initRetryMs * Math.pow(2, i)),
