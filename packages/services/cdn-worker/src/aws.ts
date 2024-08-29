@@ -188,7 +188,7 @@ export class AwsClient {
       } catch (error) {
         const duration = performance.now() - attemptStart;
         // Retry also when there's an exception
-        console.error(error);
+        console.warn(error);
         init.onAttempt?.({
           attempt: retryCounter,
           duration,
