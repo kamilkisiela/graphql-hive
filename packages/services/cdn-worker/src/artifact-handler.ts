@@ -14,7 +14,9 @@ export type GetArtifactActionFn = (
   artifactType: ArtifactsType,
   eTag: string | null,
 ) => Promise<
-  { type: 'notModified' } | { type: 'notFound' } | { type: 'response'; response: Response }
+  | { type: 'notModified' }
+  | { type: 'notFound' }
+  | { type: 'response'; status: Response['status']; headers: Response['headers']; body: string }
 >;
 
 type ArtifactRequestHandler = {
@@ -161,7 +163,9 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     }
 
     if (result.type === 'response') {
-      const etag = result.response.headers.get('etag');
+      const etag = result.headers.get('etag');
+      const text = result.body;
+
       if (params.artifactType === 'metadata') {
         // To not change a lot of logic and still reuse the etag bits, we
         // fetch metadata using the redirect location.
@@ -172,18 +176,16 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // and we're fetching the artifact from within the private network.
         // If they are the same, private and public locations will be the same.
 
-        const body = await result.response.clone().text();
-
         // Metadata in SINGLE projects is only Mesh's Metadata, and it always defines _schema
-        const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
-        const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
+        const isMeshArtifact = text.includes(`"#/definitions/_schema"`);
+        const hasTopLevelArray = text.startsWith('[') && text.endsWith(']');
 
         // Mesh's Metadata shared by Mesh is always an object.
         // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
         if (isMeshArtifact && hasTopLevelArray) {
           return createResponse(
             analytics,
-            body.substring(1, body.length - 1),
+            text.substring(1, text.length - 1),
             {
               status: 200,
               headers: {
@@ -197,9 +199,6 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         }
       }
 
-      breadcrumb('Reading response.text()');
-      const text = await result.response.text();
-      breadcrumb('Returning OK 200');
       return createResponse(
         analytics,
         text,
