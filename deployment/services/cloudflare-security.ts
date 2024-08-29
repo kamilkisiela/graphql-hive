@@ -71,6 +71,7 @@ export function deployCloudFlareSecurityTransform(options: {
 
   return new cf.Ruleset('cloudflare-security-transform', {
     zoneId: cfConfig.require('zoneId'),
+    accountId: cfConfig.require('accountId'),
     description: 'Enforce security headers and CSP',
     name: `Security Transform (all envs)`,
     kind: 'zone',
