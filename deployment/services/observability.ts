@@ -3,7 +3,14 @@ import { serviceLocalHost } from '../utils/local-endpoint';
 import { Observability as ObservabilityInstance } from '../utils/observability';
 import { deployGrafana } from './grafana';
 
-export function deployObservability(config: { envName: string }) {
+export function deployObservability(config: {
+  envName: string;
+  /**
+   * Suffix for the table names (production, staging, dev).
+   * It can't be envName as "prod" is not a valid table suffix.
+   */
+  tableSuffix: string;
+}) {
   const observabilityConfig = new pulumi.Config('observability');
 
   if (!observabilityConfig.getBoolean('enabled')) {
@@ -41,7 +48,7 @@ export function deployObservability(config: { envName: string }) {
       host => `http://${host}:4318/v1/traces`,
     ),
     observability: observabilityInstance,
-    grafana: deployGrafana(config.envName),
+    grafana: deployGrafana(config.envName, config.tableSuffix),
     enabled: true,
   };
 }
