@@ -32,7 +32,7 @@ jobs:
     name: run-docker
     runs-on: ubuntu-22.04
     needs: build-rust
-    if: !github.event.pull_request.head.repo.fork
+    if: ${{ !github.event.pull_request.head.repo.fork }}
     steps:
       - name: Run Docker image
         run: |
