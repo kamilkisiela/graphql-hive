@@ -442,12 +442,11 @@ class PendingRequestAbortedError extends Error {
 function stringifyError(error: unknown) {
   if (error instanceof Error) {
     return error.stack ?? error.message;
-  } else if (
-    error instanceof Event ||
-    (error != null && typeof error === 'object' && 'type' in error)
-  ) {
-    return `Event: ${error.type}}`;
-  } else {
-    return String(error);
   }
+
+  if (error instanceof Event || (error != null && typeof error === 'object' && 'type' in error)) {
+    return `Event: ${error.type}}`;
+  }
+
+  return String(error);
 }
