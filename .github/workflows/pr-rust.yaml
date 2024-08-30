@@ -27,6 +27,58 @@ jobs:
       uploadJavaScriptArtifacts: false
     secrets: inherit
 
+  # Run Docker image
+  run-docker:
+    name: run-docker
+    runs-on: ubuntu-22.04
+    needs: build-rust
+    if: !github.event.pull_request.head.repo.fork
+    steps:
+      - name: Run Docker image
+        run: |
+          # Create router.yaml
+          cat << EOF > router.yaml
+          supergraph:
+            listen: 0.0.0.0:4000
+          health_check:
+            listen: 0.0.0.0:8088
+            enabled: true
+            path: /health
+          plugins:
+            hive.usage:
+              enabled: false
+          EOF
+
+          # Download supergraph
+          curl -sSL https://supergraph.demo.starstuff.dev/ > ./supergraph.graphql
+
+          # Run Docker image
+          docker run -p 4000:4000 -p 8088:8088 --name apollo_router_test -d \
+            --env HIVE_TOKEN="fake" \
+            --mount "type=bind,source=/$(pwd)/router.yaml,target=/dist/config/router.yaml" \
+            --mount "type=bind,source=/$(pwd)/supergraph.graphql,target=/dist/config/supergraph.graphql" \
+            ghcr.io/kamilkisiela/graphql-hive/apollo-router:${{ github.event.pull_request.head.sha }} \
+            --log debug \
+            --supergraph /dist/config/supergraph.graphql \
+            --config /dist/config/router.yaml
+
+          # Wait for the container to be ready
+          echo "Waiting for the container to be ready..."
+          sleep 20
+          HTTP_RESPONSE=$(curl --retry 5 --retry-delay 5 --max-time 30 --write-out "%{http_code}" --silent --output /dev/null "http://127.0.0.1:8088/health")
+
+          # Check if the HTTP response code is 200 (OK)
+          if [ $HTTP_RESPONSE -eq 200 ]; then
+            echo "Health check successful."
+            docker stop apollo_router_test
+            docker rm apollo_router_test
+            exit 0
+          else
+            echo "Health check failed with HTTP status code $HTTP_RESPONSE."
+            docker stop apollo_router_test
+            docker rm apollo_router_test
+            exit 1
+          fi
   # Builds binaries from Rust crates
   build-rust-binaries:
     name: build-rust-binaries
