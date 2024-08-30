@@ -275,7 +275,7 @@ export class ArtifactStorageReader {
         status: response.status,
         headers: response.headers,
         body: await response.text().catch(error => {
-          this.breadcrumb('Error reading response body: ' + String(error));
+          this.breadcrumb('Error reading response body: ' + stringifyError(error));
           return Promise.reject(error);
         }),
       } as const;
@@ -285,7 +285,7 @@ export class ArtifactStorageReader {
 
     const body = await response
       .text()
-      .catch(error => 'Failed to read response body due to ' + String(error));
+      .catch(error => 'Failed to read response body due to ' + stringifyError(error));
     throw new Error(`GET request failed with status ${response.status}: ${body}`);
   }
 
@@ -436,5 +436,18 @@ class PendingRequestAbortedError extends Error {
   constructor() {
     super('Pending request was aborted');
     this.name = 'PendingRequestAbortedError';
+  }
+}
+
+function stringifyError(error: unknown) {
+  if (error instanceof Error) {
+    return error.stack ?? error.message;
+  } else if (
+    error instanceof Event ||
+    (error != null && typeof error === 'object' && 'type' in error)
+  ) {
+    return `Event: ${error.type}}`;
+  } else {
+    return String(error);
   }
 }
