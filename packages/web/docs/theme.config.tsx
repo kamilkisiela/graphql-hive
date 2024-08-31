@@ -19,12 +19,10 @@ export default defineConfig({
     component: props => {
       const { route } = useRouter();
 
-      console.log('navbar props', props);
-
       return (
         <HiveNavigation
           // eslint-disable-next-line tailwindcss/no-custom-classname
-          className={route === '/' ? 'never-dark' : ''}
+          className={route === '/' ? 'never-dark max-w-[75rem]' : 'max-w-[90rem]'}
           companyMenuChildren={null}
           {...props}
         />
@@ -37,7 +35,10 @@ export default defineConfig({
 
       return (
         <HiveFooter
-          className={cn(route === '/' && 'never-dark', 'pt-[72px] [&>:first-child]:mx-4')}
+          className={cn(
+            route === '/' ? 'never-dark' : '[&>:first-child]:mx-0 [&>:first-child]:max-w-[90rem]',
+            'pt-[72px]',
+          )}
           resources={[
             {
               children: 'Privacy Policy',
