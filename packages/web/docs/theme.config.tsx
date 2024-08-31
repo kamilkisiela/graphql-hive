@@ -15,6 +15,16 @@ const HiveLogo = PRODUCTS.HIVE.logo;
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
+  color: {
+    hue: {
+      dark: 67.1,
+      light: 173,
+    },
+    saturation: {
+      dark: 100,
+      light: 40,
+    },
+  },
   navbar: {
     component: props => {
       const { route } = useRouter();

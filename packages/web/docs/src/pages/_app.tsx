@@ -2,6 +2,7 @@ import { ReactElement } from 'react';
 import { AppProps } from 'next/app';
 import '@theguild/components/style.css';
 import localFont from 'next/font/local';
+import '../search-results-contrast-fix.css';
 
 const neueMontreal = localFont({
   // TODO: Swap to variable version.
@@ -24,10 +25,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
       <style jsx global>{`
         :root {
           --font-sans: ${neueMontreal.style.fontFamily};
-        }
-        #__next {
-          --nextra-primary-hue: 67.1deg;
-          --nextra-primary-saturation: 100%;
         }
       `}</style>
       <Component {...pageProps} />

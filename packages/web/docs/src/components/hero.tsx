@@ -10,7 +10,7 @@ export function Hero(props: { children: ReactNode; className?: string }) {
   return (
     <div
       className={cn(
-        'bg-green-1000 relative flex max-w-[90rem] flex-col gap-6 overflow-hidden rounded-3xl px-4 py-6 sm:pb-28 sm:pt-12 md:gap-8 lg:pb-[168px] lg:pt-24',
+        'bg-green-1000 relative isolate flex max-w-[90rem] flex-col gap-6 overflow-hidden rounded-3xl px-4 py-6 sm:pb-28 sm:pt-12 md:gap-8 lg:pb-[168px] lg:pt-24',
         props.className,
       )}
     >

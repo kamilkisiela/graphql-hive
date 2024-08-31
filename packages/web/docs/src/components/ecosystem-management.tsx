@@ -1,9 +1,8 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { CallToAction, HighlightDecoration } from '@theguild/components';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
-import { CallToAction } from '@theguild/components';
 import { CheckIcon } from './check-icon';
-import { HighlightDecoration } from '@theguild/components';
 import { Heading } from './heading';
 import styles from './ecosystem-management.module.css';
 
@@ -11,7 +10,7 @@ export function EcosystemManagementSection({ className }: { className?: string }
   return (
     <section
       className={cn(
-        'bg-green-1000 relative overflow-hidden rounded-3xl text-white' +
+        'bg-green-1000 relative isolate overflow-hidden rounded-3xl text-white' +
           ' p-8 pb-[160px] sm:pb-[112px] md:p-[72px] md:pb-[112px] lg:pb-[72px]',
         className,
       )}

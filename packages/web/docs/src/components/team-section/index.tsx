@@ -12,7 +12,7 @@ export function TeamSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
+        'isolate rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
         className,
       )}
     >
