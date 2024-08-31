@@ -1,4 +1,4 @@
-.nextra-search-results ._text\-primary\-600 {
+:is(html[class~='light'] .nextra-search-results ._text\-primary\-600) {
   color: hsl(
     var(--nextra-primary-hue) var(--nextra-primary-saturation) 20% / var(--tw-text-opacity)
   );
