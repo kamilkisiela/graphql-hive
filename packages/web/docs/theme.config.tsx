@@ -9,6 +9,7 @@ import {
   useTheme,
 } from '@theguild/components';
 import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
+import { cn } from './src/lib';
 
 const HiveLogo = PRODUCTS.HIVE.logo;
 
@@ -17,6 +18,8 @@ export default defineConfig({
   navbar: {
     component: props => {
       const { route } = useRouter();
+
+      console.log('navbar props', props);
 
       return (
         <HiveNavigation
@@ -29,12 +32,12 @@ export default defineConfig({
     },
   },
   footer: {
-    component: props => {
+    component: _props => {
       const { route } = useRouter();
 
       return (
         <HiveFooter
-          className={route === '/' ? 'never-dark' : ''}
+          className={cn(route === '/' && 'never-dark', 'pt-[72px] [&>:first-child]:mx-4')}
           resources={[
             {
               children: 'Privacy Policy',
