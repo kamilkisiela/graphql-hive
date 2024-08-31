@@ -25,6 +25,10 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
         :root {
           --font-sans: ${neueMontreal.style.fontFamily};
         }
+        #__next {
+          --nextra-primary-hue: 159deg;
+          --nextra-primary-saturation: 70%;
+        }
       `}</style>
       <Component {...pageProps} />
     </>

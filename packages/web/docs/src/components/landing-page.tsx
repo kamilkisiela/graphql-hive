@@ -27,7 +27,6 @@ import { TeamSection } from './team-section';
 export function IndexPage(): ReactElement {
   return (
     <Tooltip.Provider>
-      {/* We're overriding --nextra vars because the landing page doesn't respect dark mode. */}
       <style global jsx>
         {`
           html {
