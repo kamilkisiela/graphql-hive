@@ -17,6 +17,7 @@ module.exports = {
         display: ['var(--font-sans)', ...fontFamily.sans],
       },
       colors: {
+        ...config.theme.extend.colors,
         primary: config.theme.extend.colors['hive-yellow'],
       },
       keyframes: {
