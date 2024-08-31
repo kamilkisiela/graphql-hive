@@ -74,6 +74,7 @@ module.exports = {
       },
       cyan: '#0acccc',
       purple: '#5f2eea',
+      blue: colors.sky,
       gray: colors.stone,
       magenta: '#f11197',
       orange: {
