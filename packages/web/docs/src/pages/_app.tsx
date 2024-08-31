@@ -26,8 +26,8 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
           --font-sans: ${neueMontreal.style.fontFamily};
         }
         #__next {
-          --nextra-primary-hue: 159deg;
-          --nextra-primary-saturation: 70%;
+          --nextra-primary-hue: 67.1deg;
+          --nextra-primary-saturation: 100%;
         }
       `}</style>
       <Component {...pageProps} />
