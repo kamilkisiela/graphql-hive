@@ -71,8 +71,6 @@ module.exports = {
         700: '#008c66',
         800: '#007052',
         900: '#005b43',
-        // workaround for ESLint not respecting Tailwind settings paths in CI
-        1000: '#005b43',
       },
       cyan: '#0acccc',
       purple: '#5f2eea',
