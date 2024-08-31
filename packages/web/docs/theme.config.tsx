@@ -1,28 +1,55 @@
 import { useRouter } from 'next/router';
-import { defineConfig, HiveFooter, Giscus, PRODUCTS, useConfig, useTheme } from '@theguild/components';
+import {
+  defineConfig,
+  Giscus,
+  HiveFooter,
+  HiveNavigation,
+  PRODUCTS,
+  useConfig,
+  useTheme,
+} from '@theguild/components';
 import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
 
 const HiveLogo = PRODUCTS.HIVE.logo;
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
+  navbar: {
+    component: props => {
+      const { route } = useRouter();
+
+      return (
+        <HiveNavigation
+          // eslint-disable-next-line tailwindcss/no-custom-classname
+          className={route === '/' ? 'never-dark' : ''}
+          companyMenuChildren={null}
+          {...props}
+        />
+      );
+    },
+  },
   footer: {
-    component: (
-      <HiveFooter
-        resources={[
-          {
-            children: 'Privacy Policy',
-            href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
-            title: 'Privacy Policy',
-          },
-          {
-            children: 'Terms of Use',
-            href: 'https://the-guild.dev/graphql/hive/terms-of-use.pdf',
-            title: 'Terms of Use',
-          },
-        ]}
-      />
-    ),
+    component: props => {
+      const { route } = useRouter();
+
+      return (
+        <HiveFooter
+          className={route === '/' ? 'never-dark' : ''}
+          resources={[
+            {
+              children: 'Privacy Policy',
+              href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
+              title: 'Privacy Policy',
+            },
+            {
+              children: 'Terms of Use',
+              href: 'https://the-guild.dev/graphql/hive/terms-of-use.pdf',
+              title: 'Terms of Use',
+            },
+          ]}
+        />
+      );
+    },
   },
 
   main({ children }) {

@@ -1,15 +1,20 @@
 import { ReactElement } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import {
+  ArchDecoration,
+  CallToAction,
+  GetYourAPIGameRightSection,
+  HighlightDecoration,
+  LargeHiveIconDecoration,
+  ToolsAndLibrariesCards,
+} from '@theguild/components';
 import { cn } from '../lib';
-import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
 import { CommunitySection } from './community-section';
 import { CompanyTestimonialsSection } from './company-testimonials';
-import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { FrequentlyAskedQuestions } from './frequently-asked-questions';
-import { GetYourAPIGameRightSection, ToolsAndLibrariesCards } from '@theguild/components/landing';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { InfoCard } from './info-card';
@@ -22,6 +27,7 @@ import { TeamSection } from './team-section';
 export function IndexPage(): ReactElement {
   return (
     <Tooltip.Provider>
+      {/* We're overriding --nextra vars because the landing page doesn't respect dark mode. */}
       <style global jsx>
         {`
           html {
@@ -33,6 +39,7 @@ export function IndexPage(): ReactElement {
           #__next {
             --nextra-primary-hue: 191deg;
             --nextra-primary-saturation: 40%;
+            --nextra-bg: 250, 250, 250;
           }
         `}
       </style>

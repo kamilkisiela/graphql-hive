@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
-import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
+import { CallToAction, DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
 import { cn } from '../lib';
-import { CallToAction } from './call-to-action';
 import { Heading } from './heading';
 import { MaskingScrollview } from './masking-scrollview';
 

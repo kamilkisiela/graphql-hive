@@ -1,9 +1,8 @@
 import Image, { StaticImageData } from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
-import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
+import { CallToAction, DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
 import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
-import { CallToAction } from '../call-to-action';
 import { Heading } from '../heading';
 import dimaPhoto from './dima.webp';
 import noamPhoto from './noam.webp';
