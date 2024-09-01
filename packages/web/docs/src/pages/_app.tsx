@@ -3,6 +3,7 @@ import { AppProps } from 'next/app';
 import '@theguild/components/style.css';
 import localFont from 'next/font/local';
 import '../search-results-contrast-fix.css';
+import '../components/navigation-menu/navbar-global-styles.css';
 
 const neueMontreal = localFont({
   // TODO: Swap to variable version.
@@ -25,12 +26,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
       <style jsx global>{`
         :root {
           --font-sans: ${neueMontreal.style.fontFamily};
-        }
-        #__next {
-          --nextra-navbar-height: 90px;
-        }
-        .nextra-sidebar-container.nextra-sidebar-container {
-          top: var(--nextra-navbar-height);
         }
       `}</style>
       <Component {...pageProps} />
