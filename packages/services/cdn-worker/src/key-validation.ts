@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { Analytics } from './analytics';
 import { ArtifactStorageReader } from './artifact-storage-reader';
+import type { Breadcrumb } from './breadcrumbs';
 import { decodeCdnAccessTokenSafe, isCDNAccessToken } from './cdn-token';
 
 export type KeyValidator = (targetId: string, headerKey: string) => Promise<boolean>;
@@ -14,6 +15,8 @@ type CreateKeyValidatorDeps = {
   artifactStorageReader: ArtifactStorageReader;
   getCache: null | GetCache;
   analytics: null | Analytics;
+  breadcrumb: null | Breadcrumb;
+  captureException: (error: Error) => void;
 };
 
 export const createIsKeyValid =
@@ -223,7 +226,20 @@ async function handleCDNAccessToken(
     return withCache(false);
   }
 
-  const isValid = await bcrypt.compare(decodeResult.token.privateKey, await key.text());
+  const isValid = await bcrypt
+    .compare(
+      decodeResult.token.privateKey,
+      await key.text().catch(error => {
+        deps.breadcrumb?.('Failed to read body of key: ' + error.message);
+        deps.captureException(error);
+        return Promise.reject(error);
+      }),
+    )
+    .catch(error => {
+      deps.breadcrumb?.(`Failed to compare keys: ${error.message}`);
+      deps.captureException(error);
+      return Promise.reject(error);
+    });
 
   deps.analytics?.track(
     {

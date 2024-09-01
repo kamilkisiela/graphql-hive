@@ -17,7 +17,6 @@ const rulesToExtends = Object.fromEntries(
       'import/first',
       'no-restricted-globals',
       '@typescript-eslint/no-unused-vars',
-      'unicorn/no-useless-fallback-in-spread',
       'unicorn/no-array-push-push',
       'no-else-return',
       'no-lonely-if',

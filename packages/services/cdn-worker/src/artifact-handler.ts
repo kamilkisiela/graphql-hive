@@ -2,6 +2,7 @@ import * as itty from 'itty-router';
 import zod from 'zod';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactStorageReader, type ArtifactsType } from './artifact-storage-reader';
+import { createBreadcrumb, type Breadcrumb } from './breadcrumbs';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import { IsAppDeploymentActive } from './is-app-deployment-active';
 import type { KeyValidator } from './key-validation';
@@ -13,7 +14,9 @@ export type GetArtifactActionFn = (
   artifactType: ArtifactsType,
   eTag: string | null,
 ) => Promise<
-  { type: 'notModified' } | { type: 'notFound' } | { type: 'response'; response: Response }
+  | { type: 'notModified' }
+  | { type: 'notFound' }
+  | { type: 'response'; status: Response['status']; headers: Response['headers']; body: string }
 >;
 
 type ArtifactRequestHandler = {
@@ -21,6 +24,7 @@ type ArtifactRequestHandler = {
   isKeyValid: KeyValidator;
   isAppDeploymentActive: IsAppDeploymentActive;
   analytics?: Analytics;
+  breadcrumb?: Breadcrumb;
   fallback?: (
     request: Request,
     params: { targetId: string; artifactType: string },
@@ -60,6 +64,7 @@ const authHeaderName = 'x-hive-cdn-key' as const;
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   const router = itty.Router<itty.IRequest & Request>();
   const analytics = deps.analytics ?? createAnalytics();
+  const breadcrumb = deps.breadcrumb ?? createBreadcrumb();
 
   const authenticate = async (
     request: itty.IRequest & Request,
@@ -100,8 +105,13 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const params = parseResult.data;
 
+    breadcrumb(
+      `Artifact v1 handler (type=${params.artifactType}, targetId=${params.targetId}, contractName=${params.contractName})`,
+    );
+
     /** Legacy handling for old client SDK versions. */
     if (params.artifactType === 'schema') {
+      breadcrumb('Redirecting from /schema to /services');
       return createResponse(
         analytics,
         'Found.',
@@ -153,7 +163,9 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     }
 
     if (result.type === 'response') {
-      const etag = result.response.headers.get('etag');
+      const etag = result.headers.get('etag');
+      const text = result.body;
+
       if (params.artifactType === 'metadata') {
         // To not change a lot of logic and still reuse the etag bits, we
         // fetch metadata using the redirect location.
@@ -164,18 +176,16 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // and we're fetching the artifact from within the private network.
         // If they are the same, private and public locations will be the same.
 
-        const body = await result.response.clone().text();
-
         // Metadata in SINGLE projects is only Mesh's Metadata, and it always defines _schema
-        const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
-        const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
+        const isMeshArtifact = text.includes(`"#/definitions/_schema"`);
+        const hasTopLevelArray = text.startsWith('[') && text.endsWith(']');
 
         // Mesh's Metadata shared by Mesh is always an object.
         // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
         if (isMeshArtifact && hasTopLevelArray) {
           return createResponse(
             analytics,
-            body.substring(1, body.length - 1),
+            text.substring(1, text.length - 1),
             {
               status: 200,
               headers: {
@@ -191,7 +201,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
       return createResponse(
         analytics,
-        await result.response.text(),
+        text,
         {
           status: 200,
           headers: {
