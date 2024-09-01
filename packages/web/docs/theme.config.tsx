@@ -3,11 +3,11 @@ import {
   defineConfig,
   Giscus,
   HiveFooter,
-  HiveNavigation,
   PRODUCTS,
   useConfig,
   useTheme,
 } from '@theguild/components';
+import { NavigationMenu } from './src/components/navigation-menu';
 import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
 import { cn } from './src/lib';
 
@@ -25,20 +25,7 @@ export default defineConfig({
       light: 40,
     },
   },
-  navbar: {
-    component: props => {
-      const { route } = useRouter();
-
-      return (
-        <HiveNavigation
-          // eslint-disable-next-line tailwindcss/no-custom-classname
-          className={route === '/' ? 'never-dark max-w-[75rem]' : 'max-w-[90rem]'}
-          companyMenuChildren={null}
-          {...props}
-        />
-      );
-    },
-  },
+  navbar: { component: NavigationMenu },
   footer: {
     component: _props => {
       const { route } = useRouter();
