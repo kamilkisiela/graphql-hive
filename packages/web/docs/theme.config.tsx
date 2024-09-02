@@ -33,7 +33,7 @@ export default defineConfig({
       return (
         <HiveFooter
           className={cn(
-            route !== '/' ? 'light' : '[&>:first-child]:mx-0 [&>:first-child]:max-w-[90rem]',
+            route === '/' ? 'light' : '[&>:first-child]:mx-0 [&>:first-child]:max-w-[90rem]',
             'pt-[72px]',
           )}
           resources={[
