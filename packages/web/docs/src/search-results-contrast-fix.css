@@ -1,5 +1,10 @@
 :is(html[class~='light'] .nextra-search-results ._text\-primary\-600) {
   color: hsl(
-    var(--nextra-primary-hue) var(--nextra-primary-saturation) 20% / var(--tw-text-opacity)
+    var(--nextra-primary-hue) var(--nextra-primary-saturation) 40% / var(--tw-text-opacity)
   );
+}
+
+html[class~='light'] .nextra-search-results {
+  background-color: white;
+  padding: 1rem 0;
 }
