@@ -4,7 +4,8 @@
   );
 }
 
-html[class~='light'] .nextra-search-results {
+.light .nextra-search-results {
+  @apply !border-green-200;
   background-color: white;
   padding: 1rem 0;
 }
