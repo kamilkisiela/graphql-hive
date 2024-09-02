@@ -8,7 +8,7 @@ export function NavigationMenu(props: ComponentPropsWithoutRef<typeof Navbar>) {
 
   return (
     <HiveNavigation
-      className={route === '/' ? 'never-dark max-w-[75rem]' : 'max-w-[90rem]'}
+      className={route === '/' ? 'light max-w-[75rem]' : 'max-w-[90rem]'}
       companyMenuChildren={<GraphQLConfCard image={graphQLConfLocalImage} />}
       {...props}
     />

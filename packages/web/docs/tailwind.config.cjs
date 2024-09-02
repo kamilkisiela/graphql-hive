@@ -6,6 +6,9 @@ const config = /** @type {any} */ (require('@theguild/tailwind-config'));
 const plugin = require('tailwindcss/plugin');
 const { fontFamily } = require('tailwindcss/defaultTheme');
 
+/**
+ * @type {import("tailwindcss").Config}
+ */
 module.exports = {
   ...config,
   theme: {
@@ -47,4 +50,5 @@ module.exports = {
       });
     }),
   ],
+  darkMode: ['variant', '&:not(.light *)'],
 };

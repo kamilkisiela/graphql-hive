@@ -42,7 +42,7 @@ export function IndexPage(): ReactElement {
           }
         `}
       </style>
-      <Page className="text-green-1000 mx-auto max-w-[90rem] overflow-hidden">
+      <Page className="text-green-1000 light mx-auto max-w-[90rem] overflow-hidden">
         <Hero className="mx-4 md:mx-6">
           <Heading
             as="h1"
