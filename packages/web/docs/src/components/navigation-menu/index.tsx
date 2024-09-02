@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef } from 'react';
 import { useRouter } from 'next/router';
-import { GraphQLConfCard, HiveNavigation, type Navbar } from '@theguild/components';
+import { GraphQLConfCard, HiveNavigation, PRODUCTS, type Navbar } from '@theguild/components';
 import graphQLConfLocalImage from './graphql-conf-image.webp';
 
 export function NavigationMenu(props: ComponentPropsWithoutRef<typeof Navbar>) {
@@ -10,6 +10,7 @@ export function NavigationMenu(props: ComponentPropsWithoutRef<typeof Navbar>) {
     <HiveNavigation
       className={route === '/' ? 'light max-w-[75rem]' : 'max-w-[90rem]'}
       companyMenuChildren={<GraphQLConfCard image={graphQLConfLocalImage} />}
+      productName={PRODUCTS.HIVE.name}
       {...props}
     />
   );
