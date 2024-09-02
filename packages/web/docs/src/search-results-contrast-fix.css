@@ -11,13 +11,13 @@
 }
 
 .light .nextra-search-results .dark\:_text-gray-400:is(html[class~='dark'] *) {
-  @apply !text-gray-600;
+  @apply !text-green-800;
 }
 
 .light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
-  @apply !text-gray-800;
+  @apply !text-green-1000;
 }
 
 .light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
-  @apply !text-gray-500;
+  @apply !text-green-800;
 }
