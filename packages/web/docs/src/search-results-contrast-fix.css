@@ -9,3 +9,15 @@
   background-color: white;
   padding: 1rem 0;
 }
+
+.light .nextra-search-results .dark\:_text-gray-400:is(html[class~='dark'] *) {
+  @apply !text-gray-600;
+}
+
+.light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
+  @apply !text-gray-800;
+}
+
+.light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
+  @apply !text-gray-500;
+}
