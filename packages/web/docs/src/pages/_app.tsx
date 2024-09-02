@@ -4,6 +4,7 @@ import '@theguild/components/style.css';
 import localFont from 'next/font/local';
 import '../search-results-contrast-fix.css';
 import '../components/navigation-menu/navbar-global-styles.css';
+import '../selection-styles.css';
 
 const neueMontreal = localFont({
   // TODO: Swap to variable version.
