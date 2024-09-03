@@ -102,7 +102,7 @@ export function IndexPage(): ReactElement {
         <CommunitySection className="mx-4 mt-6 md:mx-6" />
         <ToolsAndLibrariesCards className="mx-4 mt-6 md:mx-6" />
         <FrequentlyAskedQuestions className="mx-4 md:mx-6" />
-        <GetYourAPIGameRightSection className="mx-4 md:mx-6" />
+        <GetYourAPIGameRightSection className="mx-4 mb-6 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
