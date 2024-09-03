@@ -21,3 +21,9 @@
 .light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
   @apply !text-green-800;
 }
+
+@media not all and (min-width: 768px) {
+  .light .nextra-sidebar-container {
+    @apply !bg-white;
+  }
+}

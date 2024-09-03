@@ -27,6 +27,8 @@ import { TeamSection } from './team-section';
 export function IndexPage(): ReactElement {
   return (
     <Tooltip.Provider>
+      {/* .nextra-sidebar-container styles here are hacks. the Sidebar component should be pulled out customized and swapped */}
+      {/* it's needed because the landing page does not support dark mode by design */}
       <style global jsx>
         {`
           html {
@@ -38,12 +40,37 @@ export function IndexPage(): ReactElement {
           #__next {
             --nextra-primary-hue: 191deg;
             --nextra-primary-saturation: 40%;
-            --nextra-bg: 250, 250, 250;
+            --nextra-bg: 255, 255, 255;
+          }
+          .nextra-sidebar-container {
+            & input {
+              color: rgb(0, 52, 44);
+              background-color: rgb(248, 247, 246) !important;
+              border: 1px solid rgb(241, 238, 228);
+            }
+            & input::placeholder {
+              color: rgba(36, 88, 80, 0.9) !important;
+            }
+            & .dark\:_text-neutral-400:is(html[class~='dark'] *) {
+              color: rgb(36, 88, 80);
+            }
+            & .dark\:_bg-black\/50:is(html[class~='dark'] *) {
+              background-color: #fff;
+            }
+            & .dark\:before\:_bg-neutral-800:is(html[class~='dark'] *):before {
+              background-color: rgb(229, 231, 235);
+            }
+            & .nextra-search-results:is(html[class~='dark'] *) {
+              border-color: rgb(229, 231, 235);
+            }
+            & .nextra-sidebar-footer:is(html[class~='dark'] *) {
+              border-color: #e5e7eb;
+            }
           }
         `}
       </style>
       <Page className="text-green-1000 light mx-auto max-w-[90rem] overflow-hidden">
-        <Hero className="mx-4 md:mx-6">
+        <Hero className="mx-4 max-sm:mt-2 md:mx-6">
           <Heading
             as="h1"
             size="xl"
