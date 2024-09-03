@@ -33,7 +33,7 @@ export function StatsItem(props: {
 
 export function StatsList(props: { children: ReactNode; className?: string }) {
   return (
-    <section className={cn('p-6 sm:py-20 md:py-24', props.className)}>
+    <section className={cn('p-6 sm:py-20 md:py-24 xl:px-[120px]', props.className)}>
       <Heading as="h2" size="md" className="text-center">
         Living and breathing GraphQL
       </Heading>
