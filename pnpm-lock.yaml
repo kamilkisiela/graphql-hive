@@ -1998,8 +1998,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
-        specifier: file:theguild-components-7.0.0-hasparus.24.tgz
-        version: file:packages/web/docs/theguild-components-7.0.0-hasparus.24.tgz(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))
+        specifier: 7.0.0-alpha-20240903120420-e0e902bc3c1de56f76ffbda2cd72c14494421edb
+        version: 7.0.0-alpha-20240903120420-e0e902bc3c1de56f76ffbda2cd72c14494421edb(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -5215,8 +5215,8 @@ packages:
     resolution: {integrity: sha512-lH8bYk2kqfbKsht/Gejd8K+y069ZXPHBfrlcj1ptS6xlJbHhncHxpFyy57W+PTuCcN+MPGVjs+3CiufG8EUrCQ==}
     engines: {node: '>= 10'}
 
-  '@next/bundle-analyzer@14.2.5':
-    resolution: {integrity: sha512-BtBbI8VUnB7s4m9ut6CkeJ8Hyx+aq+86mbH+uAld7ZGG0/eH4+5hcPnkHKsQM/yj74iClazS0fninI8yZbIZWA==}
+  '@next/bundle-analyzer@14.2.7':
+    resolution: {integrity: sha512-Zz55BLjoNKiUjr8PJIMTXFQnbUEpk8qkXP5nmEcXvOorbruQOIdmkRa3sahlJZPWTjsZNpxwImhZf2yFMVMWeg==}
 
   '@next/env@13.5.6':
     resolution: {integrity: sha512-Yac/bV5sBGkkEXmAX5FWPS9Mmo2rthrOPRQQNfycJPkjUAUclomCPH7QFVCDQ4Mp2k2K1SSM6m0zrxYrOwtFQw==}
@@ -7781,9 +7781,8 @@ packages:
   '@theguild/buddy@0.1.0':
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
 
-  '@theguild/components@file:packages/web/docs/theguild-components-7.0.0-hasparus.24.tgz':
-    resolution: {integrity: sha512-E6N627eroqCXOQ8zYDhw0gBaPHUKO21kJTFpjzbkGZiUfWnr4iGsyqOkLUBojrKCFsz12dC/lMb0Xplge+oezg==, tarball: file:packages/web/docs/theguild-components-7.0.0-hasparus.24.tgz}
-    version: 7.0.0-hasparus.24
+  '@theguild/components@7.0.0-alpha-20240903120420-e0e902bc3c1de56f76ffbda2cd72c14494421edb':
+    resolution: {integrity: sha512-D4Hg22I02PqWrq26KaK/gKHKoHUCP5oDseIz3sPqMLQMmS13p3K4uSBWVFeajahXkQbWIHPLh9k7xRBvoQZyCg==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -21537,7 +21536,7 @@ snapshots:
       '@napi-rs/simple-git-win32-arm64-msvc': 0.1.17
       '@napi-rs/simple-git-win32-x64-msvc': 0.1.17
 
-  '@next/bundle-analyzer@14.2.5':
+  '@next/bundle-analyzer@14.2.7':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -24854,10 +24853,10 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@file:packages/web/docs/theguild-components-7.0.0-hasparus.24.tgz(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))':
+  '@theguild/components@7.0.0-alpha-20240903120420-e0e902bc3c1de56f76ffbda2cd72c14494421edb(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@next/bundle-analyzer': 14.2.5
+      '@next/bundle-analyzer': 14.2.7
       '@radix-ui/react-navigation-menu': 1.2.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/tailwind-config': 0.5.0(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))
       clsx: 2.1.1

@@ -3,6 +3,3 @@ build
 temp
 public/sitemap.xml
 public/changelog.json
-
-# temporary
-!theguild-components-7.0.0-hasparus.24.tgz
