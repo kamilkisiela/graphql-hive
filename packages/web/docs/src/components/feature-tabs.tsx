@@ -60,7 +60,7 @@ export function FeatureTabs({ className }: { className?: string }) {
                   'rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
                   ' border-transparent font-medium leading-6 text-green-800 sm:border' +
                   ' flex flex-1 justify-center gap-2.5 p-4' +
-                  ' text-base sm:text-sm lg:text-base [&>svg]:shrink-0' +
+                  ' text-base sm:text-xs lg:text-base [&>svg]:shrink-0 [@media(min-width:673px)]:text-sm' +
                   ' max-sm:rdx-state-inactive:hidden group-focus-within:rdx-state-inactive:flex [&[data-state="inactive"]>:last-child]:invisible' +
                   ' rounded-lg sm:rounded-[15px]' +
                   ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none z-10' +
