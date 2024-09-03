@@ -186,7 +186,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
 
 function UltimatePerformanceCards() {
   return (
-    <section className="px-4 py-6 sm:py-12 md:px-6">
+    <section className="px-4 py-6 sm:py-12 md:px-6 xl:px-[120px]">
       <Heading as="h3" size="md" className="text-balance text-center">
         GraphQL for the ultimate performance
       </Heading>
@@ -206,8 +206,8 @@ function UltimatePerformanceCards() {
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
         >
-          Accelerate feature improvements and experiments, by seamless decoupling of backend and
-          frontend environments.
+          Minimize unnecessary network calls that hinder your application’s speed. Hive leverages
+          GraphQL to enhance responsiveness and scales these benefits across your enterprise.
         </InfoCard>
         <InfoCard
           as="li"
