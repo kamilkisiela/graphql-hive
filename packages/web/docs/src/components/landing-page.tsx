@@ -51,7 +51,7 @@ export function IndexPage(): ReactElement {
           >
             Open-source GraphQL management platform
           </Heading>
-          <p className="mx-auto w-[512px] max-w-[80%] text-center font-medium leading-6 text-white/80">
+          <p className="mx-auto w-[512px] max-w-[80%] text-center leading-6 text-white/80">
             Your GraphQL API stack in one place: seamlessly integrate, customize, and secure all API
             environments without vendor lock-in.
           </p>
