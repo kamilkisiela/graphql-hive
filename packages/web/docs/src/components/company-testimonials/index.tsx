@@ -26,7 +26,7 @@ const testimonials: Testimonial[] = [
     company: 'nacelle',
     logo: NacelleLogo,
     text: "Our migration from Apollo to Hive was incredibly straightforward. In less than a month, we had about 20 services running on Hive in production. The process was smooth, and the Hive team's friendly demeanor made it even more pleasant. Although we haven't needed direct assistance with our implementation, their openness to feedback and generally nice attitude has fostered a sense of collaboration and partnership.",
-    picture: { src: nacelleIllustration, className: 'bg-[#340038]/[0.03] opacity-95' },
+    // picture: { src: nacelleIllustration, className: 'bg-[#340038]/[0.03] opacity-95' },
     // data: [
     //   { numbers: '65M+', description: 'daily events processed' },
     //   { numbers: '40%', description: 'more resource efficient' },
