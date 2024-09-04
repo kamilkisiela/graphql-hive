@@ -5165,7 +5165,6 @@ async function updateSchemaCoordinateStatus(
   const actions: Promise<unknown>[] = [];
 
   if (args.coordinatesDiff.deleted) {
-    console.log('DELETED', JSON.stringify(Array.from(args.coordinatesDiff.deleted)));
     // actions.push(
     //   trx.query(sql`/* schema_coordinate_status_deleted */
     //   DELETE FROM schema_coordinate_status
@@ -5180,7 +5179,6 @@ async function updateSchemaCoordinateStatus(
   }
 
   if (args.coordinatesDiff.added) {
-    console.log('ADDED', JSON.stringify(Array.from(args.coordinatesDiff.added)));
     // actions.push(
     //   trx.query(sql`/* schema_coordinate_status_inserted */
     //     INSERT INTO schema_coordinate_status
@@ -5204,7 +5202,6 @@ async function updateSchemaCoordinateStatus(
   }
 
   if (args.coordinatesDiff.undeprecated) {
-    console.log('UNDEPRECATED', JSON.stringify(Array.from(args.coordinatesDiff.undeprecated)));
     // actions.push(
     //   trx.query(sql`/* schema_coordinate_status_undeprecated */
     //   UPDATE schema_coordinate_status
@@ -5220,7 +5217,6 @@ async function updateSchemaCoordinateStatus(
   await Promise.all(actions);
 
   if (args.coordinatesDiff.deprecated) {
-    console.log('DEPRECATED', JSON.stringify(Array.from(args.coordinatesDiff.deprecated)));
     // await trx.query(sql`/* schema_coordinate_status_deprecated */
     //   UPDATE schema_coordinate_status
     //   SET deprecated_at = NOW(), deprecated_in_version_id = ${args.versionId}

@@ -15,16 +15,18 @@ export class CDNSecret extends ServiceSecret<{
 export function deployCFCDN({
   environment,
   s3,
+  s3Mirror,
   sentry,
 }: {
   environment: Environment;
   s3: S3;
+  s3Mirror: S3;
   sentry: Sentry;
 }) {
   const cfConfig = new pulumi.Config('cloudflareCustom');
 
   const cdn = new CloudflareCDN({
-    envName: environment.envName,
+    envName: environment.envName === 'prod' ? 'production' : environment.envName,
     zoneId: cfConfig.require('zoneId'),
     // We can't cdn for staging env, since CF certificate only covers
     // one level of subdomains. See: https://community.cloudflare.com/t/ssl-handshake-error-cloudflare-proxy/175088
@@ -35,6 +37,7 @@ export function deployCFCDN({
     sentryDsn: sentry.enabled && sentry.secret ? sentry.secret?.raw.dsn : '',
     release: environment.release,
     s3,
+    s3Mirror,
   });
 
   const deployedCdn = cdn.deploy();

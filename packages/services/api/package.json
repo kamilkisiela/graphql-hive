@@ -12,8 +12,8 @@
     "reflect-metadata": "^0.2.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.633.0",
-    "@aws-sdk/s3-request-presigner": "3.633.0",
+    "@aws-sdk/client-s3": "3.637.0",
+    "@aws-sdk/s3-request-presigner": "3.637.0",
     "@date-fns/utc": "1.2.0",
     "@graphql-hive/core": "workspace:*",
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
@@ -64,8 +64,8 @@
     "redlock": "5.0.0-beta.2",
     "slonik": "30.4.4",
     "supertokens-node": "15.2.1",
-    "tslib": "2.6.3",
-    "undici": "6.19.7",
+    "tslib": "2.7.0",
+    "undici": "6.19.8",
     "vitest": "2.0.5",
     "zod": "3.23.8",
     "zod-validation-error": "3.3.1"

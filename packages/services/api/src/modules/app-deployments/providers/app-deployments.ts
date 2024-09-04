@@ -388,30 +388,32 @@ export class AppDeployments {
       };
     }
 
-    const result = await this.s3.client.fetch(
-      [
-        this.s3.endpoint,
-        this.s3.bucket,
-        buildAppDeploymentIsEnabledKey(
-          appDeployment.targetId,
-          appDeployment.name,
-          appDeployment.version,
-        ),
-      ].join('/'),
-      {
-        method: 'PUT',
-        body: '1',
-        headers: {
-          'content-type': 'text/plain',
+    for (const s3 of this.s3) {
+      const result = await s3.client.fetch(
+        [
+          s3.endpoint,
+          s3.bucket,
+          buildAppDeploymentIsEnabledKey(
+            appDeployment.targetId,
+            appDeployment.name,
+            appDeployment.version,
+          ),
+        ].join('/'),
+        {
+          method: 'PUT',
+          body: '1',
+          headers: {
+            'content-type': 'text/plain',
+          },
+          aws: {
+            signQuery: true,
+          },
         },
-        aws: {
-          signQuery: true,
-        },
-      },
-    );
+      );
 
-    if (result.statusCode !== 200) {
-      throw new Error(`Failed to enable app deployment: ${result.statusMessage}`);
+      if (result.statusCode !== 200) {
+        throw new Error(`Failed to enable app deployment: ${result.statusMessage}`);
+      }
     }
 
     const updatedAppDeployment = await this.pool
@@ -527,36 +529,38 @@ export class AppDeployments {
       };
     }
 
-    const result = await this.s3.client.fetch(
-      [
-        this.s3.endpoint,
-        this.s3.bucket,
-        buildAppDeploymentIsEnabledKey(
-          appDeployment.targetId,
-          appDeployment.name,
-          appDeployment.version,
-        ),
-      ].join('/'),
-      {
-        method: 'DELETE',
-        aws: {
-          signQuery: true,
+    for (const s3 of this.s3) {
+      const result = await s3.client.fetch(
+        [
+          s3.endpoint,
+          s3.bucket,
+          buildAppDeploymentIsEnabledKey(
+            appDeployment.targetId,
+            appDeployment.name,
+            appDeployment.version,
+          ),
+        ].join('/'),
+        {
+          method: 'DELETE',
+          aws: {
+            signQuery: true,
+          },
         },
-      },
-    );
+      );
 
-    /** We receive a 204 status code if the DELETE operation was successful */
-    if (result.statusCode !== 204) {
-      this.logger.error(
-        'Failed to disable app deployment (organizationId=%s, targetId=%s, appDeploymentId=%s, statusCode=%s)',
-        args.organizationId,
-        args.targetId,
-        appDeployment.id,
-        result.statusCode,
-      );
-      throw new Error(
-        `Failed to disable app deployment. Request failed with status code "${result.statusMessage}".`,
-      );
+      /** We receive a 204 status code if the DELETE operation was successful */
+      if (result.statusCode !== 204) {
+        this.logger.error(
+          'Failed to disable app deployment (organizationId=%s, targetId=%s, appDeploymentId=%s, statusCode=%s)',
+          args.organizationId,
+          args.targetId,
+          appDeployment.id,
+          result.statusCode,
+        );
+        throw new Error(
+          `Failed to disable app deployment. Request failed with status code "${result.statusMessage}".`,
+        );
+      }
     }
 
     await this.clickhouse.query({

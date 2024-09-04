@@ -193,9 +193,15 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       }
       addPlugin(
         usePersistedOperations({
-          extractPersistedOperationId(body) {
+          extractPersistedOperationId(body, request) {
             if ('documentId' in body && typeof body.documentId === 'string') {
               return body.documentId;
+            }
+
+            const documentId = new URL(request.url).searchParams.get('documentId');
+
+            if (documentId) {
+              return documentId;
             }
 
             return null;

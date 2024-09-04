@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@envelop/core": "5.0.1",
+    "@envelop/core": "5.0.2",
     "@envelop/generic-auth": "7.0.0",
     "@envelop/graphql-jit": "8.0.3",
     "@envelop/graphql-modules": "6.0.0",
@@ -33,10 +33,10 @@
     "@hive/storage": "workspace:*",
     "@sentry/integrations": "7.114.0",
     "@sentry/node": "7.119.0",
-    "@swc/core": "1.7.12",
+    "@swc/core": "1.7.18",
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",
-    "@whatwg-node/server": "0.9.47",
+    "@whatwg-node/server": "0.9.49",
     "dotenv": "16.4.5",
     "fastify": "4.28.1",
     "got": "14.4.2",
@@ -49,7 +49,7 @@
     "reflect-metadata": "0.2.2",
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "15.2.1",
-    "tslib": "2.6.3",
+    "tslib": "2.7.0",
     "zod": "3.23.8"
   },
   "buildOptions": {

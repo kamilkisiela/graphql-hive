@@ -36,7 +36,6 @@ services:
       S3_ACCESS_KEY_ID: minioadmin
       S3_SECRET_ACCESS_KEY: minioadmin
       S3_BUCKET_NAME: artifacts
-      S3_PUBLIC_URL: 'http://localhost:8083'
 
   local_broker:
     image: node:22.6.0-alpine3.20
@@ -169,7 +168,6 @@ services:
       GITHUB_APP_PRIVATE_KEY: 5f938d51a065476c4dc1b04aeba13afb
       FEEDBACK_SLACK_TOKEN: ''
       FEEDBACK_SLACK_CHANNEL: '#hive'
-      S3_PUBLIC_URL: 'http://localhost:8083'
       USAGE_ESTIMATOR_ENDPOINT: '${USAGE_ESTIMATOR_ENDPOINT}'
       RATE_LIMIT_ENDPOINT: '${RATE_LIMIT_ENDPOINT}'
       EMAIL_PROVIDER: '${EMAIL_PROVIDER}'

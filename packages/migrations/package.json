@@ -22,7 +22,7 @@
     "@types/bcryptjs": "2.4.6",
     "@types/node": "20.16.1",
     "@types/pg": "8.11.6",
-    "@whatwg-node/fetch": "0.9.20",
+    "@whatwg-node/fetch": "0.9.21",
     "bcryptjs": "2.4.3",
     "copyfiles": "2.4.1",
     "dotenv": "16.4.5",
@@ -32,7 +32,7 @@
     "pg-promise": "11.9.1",
     "slonik": "30.4.4",
     "ts-node": "10.9.2",
-    "tslib": "2.6.3",
+    "tslib": "2.7.0",
     "typescript": "5.5.4",
     "zod": "3.23.8"
   },

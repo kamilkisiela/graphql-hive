@@ -4,7 +4,6 @@ export type Env = {
   S3_SECRET_ACCESS_KEY: string;
   S3_BUCKET_NAME: string;
   S3_SESSION_TOKEN?: string;
-  S3_PUBLIC_URL: string;
   /**
    * KV Storage for the CDN
    */

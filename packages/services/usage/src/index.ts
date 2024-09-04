@@ -155,12 +155,23 @@ async function main() {
         });
 
         if (
-          await rateLimit?.isRateLimited({
-            id: tokenInfo.target,
-            type: 'operations-reporting',
-            token,
-            entityType: 'target',
-          })
+          await rateLimit
+            ?.isRateLimited({
+              id: tokenInfo.target,
+              type: 'operations-reporting',
+              token,
+              entityType: 'target',
+            })
+            .catch(error => {
+              req.log.error('Failed to check rate limit (target=%s)', tokenInfo.target);
+              req.log.error(error);
+              Sentry.captureException(error, {
+                level: 'error',
+              });
+
+              // If we can't check rate limit, we should not drop the report
+              return false;
+            })
         ) {
           droppedReports
             .labels({ targetId: tokenInfo.target, orgId: tokenInfo.organization })
@@ -172,7 +183,13 @@ async function main() {
         }
 
         const retentionInfo =
-          (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target)) || null;
+          (await rateLimit?.getRetentionForTargetId?.(tokenInfo.target).catch(error => {
+            req.log.error(error);
+            Sentry.captureException(error, {
+              level: 'error',
+            });
+            return null;
+          })) || null;
 
         if (typeof retentionInfo !== 'number') {
           req.log.error(
