@@ -1998,8 +1998,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
-        specifier: 7.0.0-alpha-20240904124933-fce716ced63b217b5d52e2f99889980162f4b0cc
-        version: 7.0.0-alpha-20240904124933-fce716ced63b217b5d52e2f99889980162f4b0cc(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))
+        specifier: 7.0.0-alpha-20240904131207-2e594361758938bafac02968ea67b38815436e1d
+        version: 7.0.0-alpha-20240904131207-2e594361758938bafac02968ea67b38815436e1d(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -7781,8 +7781,8 @@ packages:
   '@theguild/buddy@0.1.0':
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
 
-  '@theguild/components@7.0.0-alpha-20240904124933-fce716ced63b217b5d52e2f99889980162f4b0cc':
-    resolution: {integrity: sha512-2vCmuzQln04clXFTebPfva1ZYuzuV7M7oiAKbD/T+sGVHFelcOfHC3LunMLJlePPcm9YkmBcG7AV/ABOSu+wDw==}
+  '@theguild/components@7.0.0-alpha-20240904131207-2e594361758938bafac02968ea67b38815436e1d':
+    resolution: {integrity: sha512-HNYmqtq6SEsbWIShpBbTpuKC2FLvYKrfw6MWk3tTAoBFOM3rfPAAT7MhsV+80zpBtByBWnToUIpVAFgIqBzVMQ==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -24853,7 +24853,7 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@7.0.0-alpha-20240904124933-fce716ced63b217b5d52e2f99889980162f4b0cc(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))':
+  '@theguild/components@7.0.0-alpha-20240904131207-2e594361758938bafac02968ea67b38815436e1d(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.5(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.12(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.12(@swc/helpers@0.5.11))(esbuild@0.23.0))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@next/bundle-analyzer': 14.2.7
