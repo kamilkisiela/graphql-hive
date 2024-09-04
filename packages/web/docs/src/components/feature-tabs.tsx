@@ -234,10 +234,12 @@ function Feature(props: {
             );
           })}
         </dl>
-        <CallToAction variant="primary" href={documentationLink}>
-          Learn more
-          <ArrowIcon />
-        </CallToAction>
+        {documentationLink && (
+          <CallToAction variant="primary" href={documentationLink}>
+            Learn more
+            <ArrowIcon />
+          </CallToAction>
+        )}
       </div>
       {highlights.map((highlight, i) => (
         <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>

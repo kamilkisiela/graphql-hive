@@ -81,25 +81,25 @@ function Illustration(props: { className?: string }) {
 
   useIsomorphicLayoutEffect(() => {
     intervalRef.current = setInterval(() => {
-      setHighlightedEdge(prev => (prev % 6) + 1);
+      setHighlightedEdge(prev => (prev! % 6) + 1);
     }, EDGE_HOVER_INTERVAL_TIME);
 
-    return () => clearInterval(intervalRef.current);
+    return () => clearInterval(intervalRef.current || undefined);
   }, []);
 
   const onPointerOverEdge = (event: React.PointerEvent<HTMLElement>) => {
-    const edgeNumber = parseInt(event.currentTarget.textContent);
+    const edgeNumber = parseInt(event.currentTarget.textContent!);
     if (Number.isNaN(edgeNumber) || edgeNumber < 1 || edgeNumber > 6) {
       return;
     }
 
-    clearInterval(intervalRef.current);
+    clearInterval(intervalRef.current || undefined);
     setHighlightedEdge(edgeNumber);
 
     // after 10 seconds, we'll start stepping through edges again
     intervalRef.current = setTimeout(() => {
       intervalRef.current = setInterval(() => {
-        setHighlightedEdge(prev => (prev % 6) + 1);
+        setHighlightedEdge(prev => (prev! % 6) + 1);
       }, EDGE_HOVER_INTERVAL_TIME);
     }, EDGE_HOVER_RESET_TIME);
   };
@@ -134,7 +134,7 @@ function Illustration(props: { className?: string }) {
           <Node
             title="Mesh"
             description="GraphQL Gateway"
-            highlighted={[1, 4, 5].includes(highlightedEdge)}
+            highlighted={[1, 4, 5].includes(highlightedEdge!)}
           >
             <svg viewBox="0 0 48 48" width={48} height={48}>
               <SafariLinearGradientDefs />
@@ -154,7 +154,7 @@ function Illustration(props: { className?: string }) {
             className="h-[var(--big-node-h)] w-[var(--node-w)] flex-col text-center"
             title="Hive"
             description="Decision-making engine"
-            highlighted={[3, 4, 6].includes(highlightedEdge)}
+            highlighted={[3, 4, 6].includes(highlightedEdge!)}
           >
             <svg className="size-[var(--big-logo-size)]">
               <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
@@ -172,7 +172,7 @@ function Illustration(props: { className?: string }) {
           <Node
             title="Yoga"
             description="GraphQL Subgraph"
-            highlighted={[5, 6].includes(highlightedEdge)}
+            highlighted={[5, 6].includes(highlightedEdge!)}
           >
             <svg width={48} height={48}>
               <use xlinkHref="/ecosystem-management.svg#yoga" />
@@ -204,7 +204,7 @@ function Illustration(props: { className?: string }) {
           <Node
             title="GraphQL client"
             className="justify-center"
-            highlighted={[1, 2].includes(highlightedEdge)}
+            highlighted={[1, 2].includes(highlightedEdge!)}
           />
           <Edge
             left
@@ -220,7 +220,7 @@ function Illustration(props: { className?: string }) {
             description={
               <span className="[@media(max-width:1438px)]:hidden">GraphQL Code Generation</span>
             }
-            highlighted={[2, 3].includes(highlightedEdge)}
+            highlighted={[2, 3].includes(highlightedEdge!)}
           >
             <svg width={48} height={48} viewBox="0 0 48 48">
               <use xlinkHref="/ecosystem-management.svg#codegen" />
@@ -231,7 +231,9 @@ function Illustration(props: { className?: string }) {
       <p className={cn('relative text-white/80', styles.text)}>
         {/* We use the longest text to ensure we have enough space. */}
         <span className="invisible">{longestEdgeText}</span>
-        <span className="absolute inset-0">{edgeTexts[highlightedEdge - 1]}</span>
+        <span className="absolute inset-0">
+          {highlightedEdge ?? edgeTexts[highlightedEdge! - 1]}
+        </span>
       </p>
     </div>
   );
