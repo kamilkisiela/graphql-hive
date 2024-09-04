@@ -211,14 +211,14 @@ https://graphql-hive.com`,
 function SocialPostCard({ post }: { post: SocialPost }) {
   const isDiscordLink = post.href.startsWith('https://discordapp.com/');
   const isGitHubLink = post.href.startsWith('https://github.com/');
-  const isTwitterLink = post.href.startsWith('https://twitter.com/');
+  const isTwitterLink = post.href.startsWith('https://x.com/');
 
   return (
     <div className="relative h-max rounded-2xl bg-green-900 p-6 text-green-200">
       <div className="flex flex-row items-center gap-2">
         <div className="relative">
           <a
-            className="absolute -left-1.5 -top-1.5 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
+            className="absolute -left-1.5 -top-1.5 z-10 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
             href={post.href}
             style={{
               backgroundColor: isDiscordLink ? '#5865F2' : '#222530',
@@ -239,7 +239,7 @@ function SocialPostCard({ post }: { post: SocialPost }) {
             alt={post.name}
             width={52}
             height={52}
-            className="rounded-full"
+            className="rounded-full opacity-85"
           />
         </div>
         <p className="text-sm">{post.name}</p>
