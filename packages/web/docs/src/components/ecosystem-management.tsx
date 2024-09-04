@@ -50,7 +50,7 @@ export function EcosystemManagementSection({ className }: { className?: string }
             </CallToAction>
           </div>
         </div>
-        <Illustration className="" />
+        <Illustration />
       </div>
       <DecorationIsolation>
         <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
@@ -232,7 +232,7 @@ function Illustration(props: { className?: string }) {
         {/* We use the longest text to ensure we have enough space. */}
         <span className="invisible">{longestEdgeText}</span>
         <span className="absolute inset-0">
-          {highlightedEdge ?? edgeTexts[highlightedEdge! - 1]}
+          {highlightedEdge !== null ? edgeTexts[highlightedEdge - 1] : null}
         </span>
       </p>
     </div>

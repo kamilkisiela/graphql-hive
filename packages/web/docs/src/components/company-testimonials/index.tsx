@@ -1,19 +1,21 @@
 import React, { Fragment, useRef } from 'react';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
 import { CallToAction } from '@theguild/components';
 import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import { KarrotLogo, NacelleLogo, WealthsimpleLogo, type LogoProps } from '../company-logos';
 import { Heading } from '../heading';
-import nacelleIllustration from './nacelle-illustration.svg';
+import karrotPicture from './karrot-picture.svg';
+import nacellePicture from './nacelle-picture.svg';
+import wealthsimplePicture from './wealthsimple-picture.webp';
 
 type Testimonial = {
   company: string;
   logo: (props: LogoProps) => React.ReactElement;
   text: string;
   picture?: {
-    src: string;
+    img: string | StaticImageData;
     className?: string;
   };
   person?: { name: string; title: string; image?: string };
@@ -26,7 +28,7 @@ const testimonials: Testimonial[] = [
     company: 'nacelle',
     logo: NacelleLogo,
     text: "Our migration from Apollo to Hive was incredibly straightforward. In less than a month, we had about 20 services running on Hive in production. The process was smooth, and the Hive team's friendly demeanor made it even more pleasant. Although we haven't needed direct assistance with our implementation, their openness to feedback and generally nice attitude has fostered a sense of collaboration and partnership.",
-    // picture: { src: nacelleIllustration, className: 'bg-[#340038]/[0.03] opacity-95' },
+    picture: { img: nacellePicture, className: 'bg-[#340038]/[0.03] opacity-95' },
     // data: [
     //   { numbers: '65M+', description: 'daily events processed' },
     //   { numbers: '40%', description: 'more resource efficient' },
@@ -37,6 +39,10 @@ const testimonials: Testimonial[] = [
     company: 'Karrot',
     logo: KarrotLogo,
     text: 'We use GraphQL Hive as schema registry and monitoring tool. As a schema registry, we can publish GraphQL Schema with decoupled any application code. As a monitoring tool, we can find useful metrics. For example operation latency, usage of deprecated field. The great thing about GraphQL Hive is that it is easy to use, we have already integrated many tools like Slack or Github.',
+    picture: {
+      img: karrotPicture,
+      className: 'bg-beige-100 p-6',
+    },
   },
   {
     company: 'Wealthsimple',
@@ -48,6 +54,9 @@ const testimonials: Testimonial[] = [
       />
     ),
     text: 'Hive enables Wealthsimple to build flexible and resilient GraphQL APIs. The GitHub integration provides feedback in a format developers are familiar with and conditional breaking changes enable us to focus our discussion on schema design rather than maintenance. Hive empowers us to confidently evolve our schemas by ensuring seamless API updates, detecting potential breaking changes, and guiding developers.',
+    picture: {
+      img: wealthsimplePicture,
+    },
   },
 ];
 
@@ -137,7 +146,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                 >
                   {picture && (
                     <Image
-                      src={picture.src}
+                      src={picture.img}
                       role="presentation"
                       alt=""
                       width={300}
