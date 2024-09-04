@@ -121,20 +121,18 @@ const meta: Record<string, DeepPartial<Item | MenuItem | PageItem>> = {
   'the-guild': {
     title: 'The Guild',
     type: 'menu',
-    items: [
-      {
+    items: {
+      'about-us': {
         title: 'About Us',
-        type: 'page',
         href: 'https://the-guild.dev/about-us',
         newWindow: true,
       },
-      {
+      'brand-assets': {
         title: 'Brand Assets',
-        type: 'page',
         href: 'https://the-guild.dev/logos',
         newWindow: true,
       },
-    ],
+    },
   },
   'graphql-foundation': {
     title: 'GraphQL Foundation',
