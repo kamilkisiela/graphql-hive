@@ -5,6 +5,7 @@ import localFont from 'next/font/local';
 import '../forced-light-mode-hacks.css';
 import '../components/navigation-menu/navbar-global-styles.css';
 import '../selection-styles.css';
+import '../sidebar-container-styles.css';
 
 const neueMontreal = localFont({
   // TODO: Swap to variable version.
