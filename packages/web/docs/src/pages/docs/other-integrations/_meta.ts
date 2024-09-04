@@ -1,6 +1,5 @@
 export default {
   'graphql-yoga': 'GraphQL Yoga',
-  'graphql-mesh': 'GraphQL Mesh',
   envelop: 'Envelop',
   'schema-stitching': 'Schema Stitching',
   'apollo-server': 'Apollo Server',

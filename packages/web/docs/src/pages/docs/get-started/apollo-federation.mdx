@@ -662,16 +662,39 @@ keep it safe.
 Hive Gateway is the Federation Gateway that seamlessly integrates with the Hive registry. You can
 run Hive Gateay either as a Docker image, binary or NPM package.
 
-<Tabs items={['Docker', 'Node.js Package']}>
+<Tabs items={['Binary', 'Docker', 'Node.js Package']}>
+  {/* Binary */}
+  <Tabs.Tab>
+  The single executable binary for the Hive Gateway is available without any dependencies. You can
+  download and setup the binary on your machine.
+
+```sh
+curl -sSL https://graphql-hive.com/install-gateway.sh | sh
+```
+
+Then you can run the Hive Gateway with the following command.
+
+```sh
+mesh-serve supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>"
+```
+
+| Parameter             | Description                      |
+| --------------------- | -------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target |
+| `hive_cdn_access_key` | The Hive CDN access key          |
+
+  </Tabs.Tab>
   {/* Docker */}
   <Tabs.Tab>
 
-The Docker image for GraphQL Mesh is published to the GitHub docker registry. You can simply run the
-following command to start a GraphQL Mesh gateway instance from your existing Hive target.
+The Docker image for Hive Gateway is published to the GitHub docker registry. You can simply run the
+following command to start a Hive Gateway instance from your existing Hive target.
 
 ```sh
 docker run --name hive-gateway -rm \
-  ghcr.io/ardatan/mesh-serve supergraph \
+  ghcr.io/ardatan/hive-gateway supergraph \
   "<hive_cdn_endpoint>" \
   --hive-cdn-key "<hive_cdn_access_key>"
 ```
@@ -687,16 +710,16 @@ docker run --name hive-gateway -rm \
 
   <Tabs.Tab>
 
-The Mesh CLI is available as a Node.js package. You can install it using your favorite package
+The Gateway CLI is available as a Node.js package. You can install it using your favorite package
 manager.
 
 ```sh npm2yarn
-npm install @graphql-mesh/serve-cli
+npm install @graphql-hive/gateway
 ```
 
-You can then run the Mesh CLI from your existing Hive target using the following command.
+You can then run the Gateway CLI from your existing Hive target using the following command.
 
-```sh filename="Run Mesh Gateway"
+```sh filename="Run Hive Gateway"
 npx mesh-serve supergraph \
   "<hive_cdn_endpoint>" \
   --hive-cdn-key "<hive_cdn_access_key>"
@@ -710,18 +733,18 @@ npx mesh-serve supergraph \
   </Tabs.Tab>
 </Tabs>
 
-If you now navigate to `http://localhost:4000`, you should see the GraphQL Mesh page with
+If you now navigate to `http://localhost:4000`, you should see the Hive Gateway page with
 information about the supergraph and subgraphs.
 
 import MeshLandingPageImage from '../../../../public/docs/pages/get-started/apollo-federation/mesh-landing-page.png'
 
 <NextImage
-  alt="GraphQL Mesh Landing Page"
+  alt="Hive Gateway Landing Page"
   src={MeshLandingPageImage}
   className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
-Now, if you navigate to `http://localhost:4000/graphql`, you should see the GrapihQL interface where
+Now, if you navigate to `http://localhost:4000/graphql`, you should see the GraphiQL interface where
 you can write and execute queries against the supergraph.
 
 #### Usage reporting
@@ -732,7 +755,23 @@ the API is being used.
 For this, we simply provide a usage reporting token in addition to our CDN access token. For this
 guide, we can simply re-use the registry token we already use for the CLI.
 
-<Tabs items={['Docker', 'Node.js Package']}>
+<Tabs items={['Binary', 'Docker', 'Node.js Package']}>
+  {/* Binary */}
+  <Tabs.Tab>
+```sh filename="Run Mesh Gateway with registry token"
+mesh-serve supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>" \
+  --hive-registry-token "<hive_registry_token>"
+```
+
+| Parameter               | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
+| `<hive_cdn_access_key>` | The Hive CDN access key                     |
+| `<hive_registry_token>` | The Hive registry token for usage reporting |
+
+</Tabs.Tab>
   {/* Docker */}
   <Tabs.Tab>
 
