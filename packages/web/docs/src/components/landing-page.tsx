@@ -3,6 +3,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import {
   ArchDecoration,
   CallToAction,
+  DecorationIsolation,
   GetYourAPIGameRightSection,
   HighlightDecoration,
   LargeHiveIconDecoration,
@@ -110,7 +111,7 @@ export function IndexPage(): ReactElement {
         <CommunitySection className="mx-4 mt-6 md:mx-6" />
         <ToolsAndLibrariesCards className="mx-4 mt-6 md:mx-6" />
         <FrequentlyAskedQuestions className="mx-4 md:mx-6" />
-        <GetYourAPIGameRightSection className="mx-4 mb-6 md:mx-6" />
+        <GetYourAPIGameRightSection className="mx-4 sm:mb-6 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
@@ -124,13 +125,15 @@ function GetStartedTodaySection({ className }: { className?: string }) {
         className,
       )}
     >
-      <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 sm:-left-1/4 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
-      <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
-      <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
+      <DecorationIsolation>
+        <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 sm:-left-1/4 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
+        <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
+        <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
+      </DecorationIsolation>
       <Heading as="h3" size="md" className="text-white">
         Get started today!
       </Heading>
-      <p className="mt-4 text-white/80">
+      <p className="relative mt-4 text-white/80">
         Start with a free Hobby plan that fits perfectly most side projects or try our Pro plan with
         30&nbsp;days trial period.
       </p>

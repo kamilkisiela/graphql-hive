@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CallToAction, HighlightDecoration } from '@theguild/components';
+import { CallToAction, DecorationIsolation, HighlightDecoration } from '@theguild/components';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
 import { CheckIcon } from './check-icon';
@@ -52,7 +52,9 @@ export function EcosystemManagementSection({ className }: { className?: string }
         </div>
         <Illustration className="" />
       </div>
-      <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
+      <DecorationIsolation>
+        <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
+      </DecorationIsolation>
     </section>
   );
 }

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import {
   ArchDecoration,
   ArchDecorationGradientDefs,
+  DecorationIsolation,
   HighlightDecoration,
 } from '@theguild/components';
 import { cn } from '../lib';
@@ -14,11 +15,15 @@ export function Hero(props: { children: ReactNode; className?: string }) {
         props.className,
       )}
     >
-      <ArchDecoration className="pointer-events-none absolute left-[-46px] top-[-20px] size-[200px] rotate-180 md:left-[-186px] md:top-[-76px] md:size-auto" />
-      <ArchDecoration className="pointer-events-none absolute bottom-0 right-[-53px] size-[200px] md:-bottom-32 md:size-auto lg:bottom-0 lg:right-[-72px]" />
-      <ArchDecorationGradientDefs />
+      <DecorationIsolation>
+        <ArchDecoration className="pointer-events-none absolute left-[-46px] top-[-20px] size-[200px] rotate-180 md:left-[-186px] md:top-[-76px] md:size-auto" />
+        <ArchDecoration className="pointer-events-none absolute bottom-0 right-[-53px] size-[200px] md:-bottom-32 md:size-auto lg:bottom-0 lg:right-[-72px]" />
+        <ArchDecorationGradientDefs />
+      </DecorationIsolation>
       {props.children}
-      <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
+      <DecorationIsolation>
+        <HighlightDecoration className="pointer-events-none absolute right-0 top-[-22px] overflow-visible" />
+      </DecorationIsolation>
     </div>
   );
 }
