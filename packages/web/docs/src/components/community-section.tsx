@@ -1,10 +1,21 @@
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
-import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
+import { CallToAction, DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
 import { cn } from '../lib';
-import { CallToAction } from './call-to-action';
 import { Heading } from './heading';
 import { MaskingScrollview } from './masking-scrollview';
+import Achrafash from './community-section/achrafash_.png';
+import ChimameRt from './community-section/chimame_rt.png';
+import Daniel2Color from './community-section/daniel2color.jpg';
+import FlexDinesh from './community-section/flexdinesh.jpg';
+import GetHackTeam from './community-section/gethackteam.jpg';
+import Malgamves from './community-section/malgamves.jpg';
+import Michlbrmly from './community-section/michbrmly.png';
+import NicolasKa3 from './community-section/NicolasKa3.jpg';
+import ReardenQL from './community-section/ReardenQL.jpg';
+import ScottBolinger from './community-section/scottboilinger.png';
+import TheWritingDev from './community-section/thewritingdev.png';
+import WhereIsCharly from './community-section/whereischarly.jpg';
 
 export function CommunitySection({ className }: { className?: string }) {
   return (
@@ -72,7 +83,7 @@ export function CommunitySection({ className }: { className?: string }) {
       >
         {Array.from({ length: 4 }).map((_, i) => (
           <div className="contents flex-col gap-6 sm:flex max-lg:[&>:last-child]:flex-1" key={i}>
-            {tempSocialPosts.map((post, j) =>
+            {socialPosts.map((post, j) =>
               j % 4 === i ? <SocialPostCard post={post} key={j} /> : null,
             )}
           </div>
@@ -109,40 +120,105 @@ type SocialPost = {
   href: string;
 };
 
-const tempSocialPosts: SocialPost[] = Array.from({ length: 10 })
-  .map((_, i) =>
-    i % 2 === 0
-      ? {
-          name: '@hasparus',
-          // todo: allowlist discordapp.com/avatars and githubusercontent.com in Next.js Image
-          avatar:
-            'https://cdn.discordapp.com/avatars/149150194007670784/c7b48fb6b91404b110d4c0ed8c063c5d.webp?size=64',
-          text: 'GraphQL Hive by @TheGuildDev has been a game-changer for our API management. The ability to monitor our GraphQL schema changes in real-time has significantly improved our workflow. The detailed insights and metrics provided allow us to quickly identify and resolve performance bottlenecks.',
-          href: 'https://discordapp.com/users/149150194007670784',
-        }
-      : {
-          name: '@hasparus',
-          avatar: 'https://avatars.githubusercontent.com/u/15332326?v=4&size=52',
-          text: 'GraphQL Hive by @TheGuildDev has been a game-changer for our API management. The ability to monitor our GraphQL schema changes in real-time has significantly improved our workflow. The detailed insights and metrics provided allow us to quickly identify and resolve performance bottlenecks.',
-          href: 'https://github.com/hasparus',
-        },
-  )
-  .map((post, i) => ({
-    ...post,
-    text: post.text.slice(0, Math.abs(Math.cos(i)) * post.text.length),
-  }));
+const SocialPost = {
+  fromTweet(href: string, text: string, avatar: StaticImageData | string): SocialPost {
+    // https://x.com/scottbolinger/status/1623466404610719744
+    const handle = href.split('/')[3];
+    return {
+      href,
+      avatar: typeof avatar === 'string' ? avatar : avatar.src,
+      name: `@${handle}`,
+      text,
+    };
+  },
+};
+
+const socialPosts: SocialPost[] = [
+  SocialPost.fromTweet(
+    'https://x.com/scottbolinger/status/1623466404610719744',
+    'Having fully typed API data is pretty awesome, thanks to urql and graphql-codegen',
+    ScottBolinger,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/thewritingdev/status/1705160937697689706',
+    "GraphQL Yoga by @TheGuildDev is THE way to start new GraphQL projects now. Especially since other similar projects are going the closed-source route, Yoga is the current champion of true Open Source. It's a batteries-included, cross-platform, and runs anywhere!!",
+    TheWritingDev,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/achrafash_/status/1526654279062278146',
+    'Yoga 2.0 makes it dead simple to build a GraphQL API in NextJS!! and no need to put `any` everywhere to make it work lol. ty @TheGuildDev 🙏',
+    Achrafash,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/NicolasKa3/status/1502204138188378114',
+    "Just contributed to @TheGuildDev by fixing a bug in the GraphQL TypeScript types generator. It's not much but it feels very good to give back 🥳",
+    NicolasKa3,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/flexdinesh/status/1602776469071355906',
+    'The smart folks at @TheGuildDev have introduced a compiler to write GraphQL schema. The extended file format is .graphxql. https://the-guild.dev/blog/graphqxl-language',
+    FlexDinesh,
+  ),
+  //
+  SocialPost.fromTweet(
+    'https://x.com/whereischarly/status/1349467930166239232',
+    "Sooo, I'm on a good way for `spotify-graphql@2.0.0` that will cover all endpoints of @Spotify API (queries + mutations) 🤓 Thanks to the combination of my `functional-json-schema` lib and GraphQL Mesh (@TheGuildDev), it's now so much easier to maintain ✨",
+    WhereIsCharly,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/gethackteam/status/1255062494411964416',
+    "If you're using REST APIs with Swagger or OpenAPI, make sure to check out GraphQL Mesh https://medium.com/the-guild/graphql-mesh-query-anything-run-anywhere-433c173863b5",
+    GetHackTeam,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/michlbrmly/status/1313037429314551809',
+    '@TheGuildDev Just updated a project from angular-apollo v1.5 -> v2. Really impressed with the use of schematics to automatically update Apollo Client, import paths etc. Nice work!',
+    Michlbrmly,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/malgamves/status/1272959879054049280',
+    "I was playing around with @strapijs's GraphQL API & got an error I'd never seen. According to @apollographql heuristic queries are a thing? Shoutout to @TheGuildDev 🧙🏿‍♂️for building GraphQL CodeGen, it's literally magic 🪄 Lost? I explain it all here 👇🏿 https://blog.logrocket.com/using-code-gen-to-avoid-heuristic-graphql-queries/",
+    Malgamves,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/ReardenQL/status/1263478563115859968',
+    "Super excited about GraphQL Tools' overhaul! Amazing work @TheGuildDev 👏",
+    ReardenQL,
+  ),
+  //
+  SocialPost.fromTweet(
+    'https://x.com/chimame_rt/status/1663577579557900289',
+    '私が寄稿したブログが公開されました。ありがとう！The @TheGuildDev blog I contributed to is now available. Thank you! @UriGoldshtein https://the-guild.dev/blog/graphql-yoga-worker',
+    ChimameRt,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/daniel2color/status/1408064880377143297',
+    `.
+@TheGuildDev
+ gave me a demo of GraphQL Hive as part of my research on GraphQL observability with Prisma
+
+It's an immensely useful tool:
+- Performance metrics 📈
+- Schema registry to track schema changes 🛠
+- GraphQL observability
+
+Can't wait to try it 🤩
+https://graphql-hive.com`,
+    Daniel2Color,
+  ),
+];
 
 function SocialPostCard({ post }: { post: SocialPost }) {
   const isDiscordLink = post.href.startsWith('https://discordapp.com/');
   const isGitHubLink = post.href.startsWith('https://github.com/');
-  const isTwitterLink = post.href.startsWith('https://twitter.com/');
+  const isTwitterLink = post.href.startsWith('https://x.com/');
 
   return (
-    <div className="rounded-2xl bg-green-900 p-6 text-green-200 max-sm:h-[stretch]">
+    <div className="relative h-max rounded-2xl bg-green-900 p-6 text-green-200">
       <div className="flex flex-row items-center gap-2">
         <div className="relative">
           <a
-            className="absolute -left-1.5 -top-1.5 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
+            className="absolute -left-1.5 -top-1.5 z-10 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
             href={post.href}
             style={{
               backgroundColor: isDiscordLink ? '#5865F2' : '#222530',
@@ -163,12 +239,12 @@ function SocialPostCard({ post }: { post: SocialPost }) {
             alt={post.name}
             width={52}
             height={52}
-            className="rounded-full"
+            className="rounded-full opacity-85"
           />
         </div>
         <p className="text-sm">{post.name}</p>
       </div>
-      <p className="mt-4 min-w-[220px]">{post.text}</p>
+      <p className="mt-4 min-w-[220px] max-w-full">{post.text}</p>
     </div>
   );
 }

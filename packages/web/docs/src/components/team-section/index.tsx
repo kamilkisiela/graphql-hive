@@ -1,9 +1,8 @@
 import Image, { StaticImageData } from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
-import { DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
+import { CallToAction, DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
 import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
-import { CallToAction } from '../call-to-action';
 import { Heading } from '../heading';
 import dimaPhoto from './dima.webp';
 import noamPhoto from './noam.webp';
@@ -13,7 +12,7 @@ export function TeamSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
+        'isolate rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
         className,
       )}
     >
@@ -129,10 +128,10 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
 
 function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
   return (
-    <div className="flex flex-col">
+    <div className="relative flex flex-col">
       <a
         className={
-          'absolute right-0 top-0 rounded-2xl border-2 bg-[#222530] p-[9px] text-white hover:border-blue-400 xl:rounded-full' +
+          'absolute right-0 top-0 rounded-2xl border-2 border-blue-400 bg-[#222530] p-[9px] text-white hover:border-transparent xl:rounded-full' +
           ' border-transparent xl:-translate-y-1/2 xl:translate-x-1/2' +
           ' max-xl:min-size-[var(--size)] ease duration-250 z-10 transition-colors max-xl:opacity-0'
         }

@@ -1,15 +1,21 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect, useLayoutEffect } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import {
+  ArchDecoration,
+  CallToAction,
+  DecorationIsolation,
+  GetYourAPIGameRightSection,
+  HighlightDecoration,
+  LargeHiveIconDecoration,
+  ToolsAndLibrariesCards,
+} from '@theguild/components';
 import { cn } from '../lib';
-import { CallToAction } from './call-to-action';
 import { CheckIcon } from './check-icon';
 import { CommunitySection } from './community-section';
 import { CompanyTestimonialsSection } from './company-testimonials';
-import { ArchDecoration, HighlightDecoration, LargeHiveIconDecoration } from './decorations';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { FrequentlyAskedQuestions } from './frequently-asked-questions';
-import { GetYourAPIGameRightSection } from './get-your-api-game-right';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { InfoCard } from './info-card';
@@ -18,9 +24,16 @@ import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
 import { TeamSection } from './team-section';
-import { ToolsAndLibrariesCards } from './tools-and-libraries-cards';
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function IndexPage(): ReactElement {
+  useIsomorphicLayoutEffect(() => {
+    // TODO: Accept a className for sidebar in the theme config?
+    const sidebarContainer = document.querySelector('.nextra-sidebar-container');
+    sidebarContainer?.parentElement?.classList.add('light');
+  }, []);
+
   return (
     <Tooltip.Provider>
       <style global jsx>
@@ -34,11 +47,12 @@ export function IndexPage(): ReactElement {
           #__next {
             --nextra-primary-hue: 191deg;
             --nextra-primary-saturation: 40%;
+            --nextra-bg: 255, 255, 255;
           }
         `}
       </style>
-      <Page className="text-green-1000 mx-auto max-w-[90rem] overflow-hidden">
-        <Hero className="mx-4 md:mx-6">
+      <Page className="text-green-1000 light mx-auto max-w-[90rem] overflow-hidden">
+        <Hero className="mx-4 max-sm:mt-2 md:mx-6">
           <Heading
             as="h1"
             size="xl"
@@ -46,7 +60,7 @@ export function IndexPage(): ReactElement {
           >
             Open-source GraphQL management platform
           </Heading>
-          <p className="mx-auto w-[512px] max-w-[80%] text-center font-medium leading-6 text-white/80">
+          <p className="mx-auto w-[512px] max-w-[80%] text-center leading-6 text-white/80">
             Your GraphQL API stack in one place: seamlessly integrate, customize, and secure all API
             environments without vendor lock-in.
           </p>
@@ -97,7 +111,7 @@ export function IndexPage(): ReactElement {
         <CommunitySection className="mx-4 mt-6 md:mx-6" />
         <ToolsAndLibrariesCards className="mx-4 mt-6 md:mx-6" />
         <FrequentlyAskedQuestions className="mx-4 md:mx-6" />
-        <GetYourAPIGameRightSection className="mx-4 md:mx-6" />
+        <GetYourAPIGameRightSection className="mx-4 sm:mb-6 md:mx-6" />
       </Page>
     </Tooltip.Provider>
   );
@@ -111,13 +125,15 @@ function GetStartedTodaySection({ className }: { className?: string }) {
         className,
       )}
     >
-      <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 sm:-left-1/4 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
-      <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
-      <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
+      <DecorationIsolation>
+        <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 sm:-left-1/4 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
+        <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
+        <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
+      </DecorationIsolation>
       <Heading as="h3" size="md" className="text-white">
         Get started today!
       </Heading>
-      <p className="mt-4 text-white/80">
+      <p className="relative mt-4 text-white/80">
         Start with a free Hobby plan that fits perfectly most side projects or try our Pro plan with
         30&nbsp;days trial period.
       </p>
@@ -168,7 +184,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
             href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
             target="_blank"
             rel="noreferrer"
-            className="hover:underline"
+            className="hover:text-blue-700 hover:underline"
           >
             Persisted Documents
           </a>{' '}
@@ -181,7 +197,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
 
 function UltimatePerformanceCards() {
   return (
-    <section className="px-4 py-6 sm:py-12 md:px-6">
+    <section className="px-4 py-6 sm:py-12 md:px-6 xl:px-[120px]">
       <Heading as="h3" size="md" className="text-balance text-center">
         GraphQL for the ultimate performance
       </Heading>
@@ -201,8 +217,8 @@ function UltimatePerformanceCards() {
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
         >
-          Accelerate feature improvements and experiments, by seamless decoupling of backend and
-          frontend environments.
+          Minimize unnecessary network calls that hinder your application’s speed. Hive leverages
+          GraphQL to enhance responsiveness and scales these benefits across your enterprise.
         </InfoCard>
         <InfoCard
           as="li"

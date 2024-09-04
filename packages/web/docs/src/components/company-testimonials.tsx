@@ -1,9 +1,9 @@
 import React, { Fragment, useRef } from 'react';
 import Image from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
+import { CallToAction } from '@theguild/components';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
-import { CallToAction } from './call-to-action';
 import { Heading } from './heading';
 import { MeetupLogo, type LogoProps } from './logos';
 

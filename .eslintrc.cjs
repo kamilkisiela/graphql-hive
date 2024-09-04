@@ -223,6 +223,7 @@ module.exports = {
         },
         tailwindcss: {
           callees: tailwindCallees,
+          whitelist: ['light'],
           config: path.join(__dirname, './packages/web/docs/tailwind.config.cjs'),
         },
       },

@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
-import { CallToAction } from './call-to-action';
+import { CallToAction } from '@theguild/components';
 import { Heading } from './heading';
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
@@ -9,7 +9,7 @@ function Tooltip({ content, children }: { content: string; children: ReactNode }
       <Trigger className="text-left">{children}</Trigger>
       <Content
         sideOffset={5}
-        className="bg-green-1000 rounded p-2 text-sm font-normal leading-4 text-white shadow"
+        className="bg-green-1000 z-20 rounded p-2 text-sm font-normal leading-4 text-white shadow"
       >
         {content}
         <Arrow className="fill-green-1000" />
@@ -179,7 +179,7 @@ export function Pricing(): ReactElement {
                     href="https://the-guild.dev"
                     target="_blank"
                     rel="noreferrer"
-                    className="transition-colors hover:underline"
+                    className="underline hover:text-blue-700"
                   >
                     The&nbsp;Guild
                   </a>

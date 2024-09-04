@@ -3,9 +3,9 @@ import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
+import { CallToAction } from '@theguild/components';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
-import { CallToAction } from './call-to-action';
 import { Heading } from './heading';
 import { Stud } from './stud';
 import observabilityClientsImage from '../../public/features/observability/clients.png';
@@ -22,7 +22,7 @@ export function FeatureTabs({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'border-beige-400 mx-auto w-[1200px] max-w-full rounded-3xl bg-white' +
+        'border-beige-400 isolate mx-auto w-[1200px] max-w-full rounded-3xl bg-white' +
           ' sm:max-w-[calc(100%-4rem)] sm:border md:p-6',
         className,
       )}
@@ -60,7 +60,7 @@ export function FeatureTabs({ className }: { className?: string }) {
                   'rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
                   ' border-transparent font-medium leading-6 text-green-800 sm:border' +
                   ' flex flex-1 justify-center gap-2.5 p-4' +
-                  ' text-base sm:text-sm lg:text-base [&>svg]:shrink-0' +
+                  ' text-base sm:text-xs lg:text-base [&>svg]:shrink-0 [@media(min-width:673px)]:text-sm' +
                   ' max-sm:rdx-state-inactive:hidden group-focus-within:rdx-state-inactive:flex [&[data-state="inactive"]>:last-child]:invisible' +
                   ' rounded-lg sm:rounded-[15px]' +
                   ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none z-10' +
