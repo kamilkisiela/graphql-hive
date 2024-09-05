@@ -133,7 +133,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
           <div
             /* mobile scrollview */
             ref={scrollviewRef}
-            className="-m-2 -mb-10 flex snap-x snap-mandatory gap-4 overflow-auto p-2 pb-10"
+            className="-m-2 -mb-10 flex snap-x snap-mandatory gap-4 overflow-auto p-2 lg:pb-10"
             onScroll={updateDotsOnScroll.current}
           >
             {testimonials.map(
@@ -143,11 +143,14 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                     key={company}
                     value={company}
                     tabIndex={-1}
-                    className={
+                    className={cn(
                       'relative flex w-full shrink-0 snap-center flex-col' +
-                      ' gap-6 data-[state="active"]:pb-[72px] md:flex-row md:gap-12 lg:data-[state="active"]:pb-0' +
-                      ' lg:data-[state="inactive"]:hidden'
-                    }
+                        ' gap-6 md:flex-row lg:gap-12' +
+                        ' lg:data-[state="inactive"]:hidden',
+                      caseStudyHref
+                        ? 'data-[state="active"]:pb-[72px] lg:data-[state="active"]:pb-0'
+                        : 'max-lg:pb-8',
+                    )}
                     forceMount // we mount everything, as we scroll through tabs on mobile
                   >
                     {picture && (
@@ -158,13 +161,13 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                         width={300}
                         height={300}
                         className={cn(
-                          'hidden size-[300px] shrink-0 rounded-3xl mix-blend-multiply xl:block',
+                          'hidden size-[300px] shrink-0 rounded-3xl mix-blend-multiply max-lg:mt-6 md:block',
                           picture.className,
                         )}
                       />
                     )}
-                    <article className="lg:relative" id={getTestimonialId(company)}>
-                      <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
+                    <article className="max-lg:mt-6 lg:relative" id={getTestimonialId(company)}>
+                      <Logo title={company} height={32} className="text-blue-1000 mb-6 lg:hidden" />
                       <blockquote className="blockquote-beige-300 lg:text-xl xl:text-2xl xl:leading-[32px]">
                         {text}
                       </blockquote>
