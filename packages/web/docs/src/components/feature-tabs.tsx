@@ -227,7 +227,11 @@ function Feature(props: {
         <dl className="grid grid-cols-2 gap-4 md:gap-12">
           {highlights.map((highlight, i) => {
             return (
-              <div key={highlight.title} onPointerOver={() => setActiveHighlight(i)}>
+              <div
+                key={highlight.title}
+                onPointerOver={() => setActiveHighlight(i)}
+                className="hover:bg-beige-100 -m-4 rounded-xl p-4"
+              >
                 <dt className="text-green-1000 font-medium">{highlight.title}</dt>
                 <dd className="mt-2 text-sm leading-5 text-green-800">{highlight.description}</dd>
               </div>
