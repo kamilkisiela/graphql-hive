@@ -58,11 +58,10 @@ export function IndexPage(): ReactElement {
             size="xl"
             className="mx-auto max-w-3xl text-balance text-center text-white"
           >
-            Open-source GraphQL management platform
+            Open-source GraphQL platform
           </Heading>
           <p className="mx-auto w-[512px] max-w-[80%] text-center leading-6 text-white/80">
-            Your GraphQL API stack in one place: seamlessly integrate, customize, and secure all API
-            environments without vendor lock-in.
+            Schema registry, analytics and gateway for GraphQL federation and other GraphQL APIs.
           </p>
           <HeroFeatures>
             <li>
@@ -167,11 +166,11 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
         </InfoCard>
         <InfoCard
           as="li"
-          heading="OIDC Login"
+          heading="Single Sign-On"
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full px-0 sm:basis-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
-          Integrated with popular providers like OKTA, to enable OpenID Connect login for maximum
+          Integrated with popular providers like Okta, to enable OpenID Connect login for maximum
           security.
         </InfoCard>
         <InfoCard

@@ -89,29 +89,29 @@ export function FeatureTabs({ className }: { className?: string }) {
             title="Schema Registry"
             icon={<SchemaRegistryIcon />}
             documentationLink="/docs/features/schema-registry"
-            description="A comprehensive Schema Registry to track and manage all changes in your GraphQL schemas."
+            description="Publish schemas, compose federated services, and detect backward-incompatible changes with ease."
             highlights={[
               {
                 title: 'Version Control System',
                 description:
-                  'Track modifications precisely across multiple environments from staging to production.',
+                  'Track schema modifications across multiple environments from development to production.',
                 image: registryVersionControlSystemImage,
               },
               {
                 title: 'Schema Checks',
                 description:
-                  'Enhance reliability in consumer apps with proactive detection for smooth API evolution.',
+                  'Identify and breaking changes before they reach production. Evolve your schema with confidence.',
                 image: registrySchemaChecksImage,
               },
               {
                 title: 'Composition Error Prevention',
                 description:
-                  'Safeguard your gateway’s operation, preventing systemic failures that could halt your enterprise processes.',
+                  'Avoid runtime errors by validating compatibility of all your subgraph schemas.',
                 image: registrySchemaChecksImage, // TODO: Replace with correct image
               },
               {
                 title: 'Schema Explorer',
-                description: 'Navigate and analyze the connections within your GraphQL schema.',
+                description: 'Navigate through your schema and check ownership and usage of types.',
                 image: registryExplorerImage,
               },
             ]}
@@ -127,18 +127,18 @@ export function FeatureTabs({ className }: { className?: string }) {
               {
                 title: 'GraphQL consumers',
                 description:
-                  'Track each GraphQL request source to monitor how the APIs are utilized, optimizing resource management.',
+                  'Track GraphQL requests to see how schema is utilized and by what applications.',
                 image: observabilityClientsImage,
               },
               {
                 title: 'Overall performance',
-                description: 'Global dashboard for an overarching view of your GraphQL API usage.',
+                description: 'Observe and analyze performance of your GraphQL API.',
                 image: observabilityOverallImage,
               },
               {
                 title: 'Query performance',
                 description:
-                  'Identify and analyze slow GraphQL operations to pinpoint performance bottlenecks.',
+                  'Identify slow GraphQL operations to pinpoint performance bottlenecks.',
                 image: observabilityOperationsImage,
               },
             ]}
@@ -148,7 +148,7 @@ export function FeatureTabs({ className }: { className?: string }) {
           <Feature
             title="Schema Management"
             icon={<SchemaManagementIcon />}
-            description="Optimize your GraphQL APIs for clear visibility and control over team modifications, ensuring cohesive and efficient evolution."
+            description="Evolve your GraphQL API with confidence."
             highlights={[
               {
                 title: 'Prevent breaking changes',
@@ -165,7 +165,7 @@ export function FeatureTabs({ className }: { className?: string }) {
               {
                 title: 'Schema Policy',
                 description:
-                  'Hive provides tools to lint, verify, and enforce coding best practices across your federated GraphQL architecture.',
+                  'Hive provides tools to lint, verify, and enforce best practices across your federated GraphQL architecture.',
                 image: observabilityOverallImage,
               },
             ]}
