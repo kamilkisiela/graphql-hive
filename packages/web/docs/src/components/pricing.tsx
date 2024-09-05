@@ -52,7 +52,7 @@ function Plan(props: {
                 href: '#',
                 onClick: event => {
                   event.preventDefault();
-                  props.linkOnClick();
+                  props.linkOnClick?.();
                 },
               }
             : { href: 'https://app.graphql-hive.com' })}

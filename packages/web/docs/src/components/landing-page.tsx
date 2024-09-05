@@ -12,6 +12,7 @@ import {
 import { cn } from '../lib';
 import { CheckIcon } from './check-icon';
 import { CommunitySection } from './community-section';
+import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './company-logos';
 import { CompanyTestimonialsSection } from './company-testimonials';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
@@ -19,7 +20,6 @@ import { FrequentlyAskedQuestions } from './frequently-asked-questions';
 import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { InfoCard } from './info-card';
-import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';

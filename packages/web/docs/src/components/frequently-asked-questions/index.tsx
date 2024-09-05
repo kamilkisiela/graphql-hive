@@ -39,6 +39,8 @@ export function FrequentlyAskedQuestions({ className }: { className?: string }) 
 
             const [question, answer] = texts;
 
+            if (!question) return null;
+
             return (
               <Accordion.Item
                 asChild

@@ -220,6 +220,8 @@ function SocialPostCard({ post }: { post: SocialPost }) {
           <a
             className="absolute -left-1.5 -top-1.5 z-10 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
             href={post.href}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               backgroundColor: isDiscordLink ? '#5865F2' : '#222530',
             }}
