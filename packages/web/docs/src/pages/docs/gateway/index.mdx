@@ -6,20 +6,16 @@ import { Callout, Cards } from '@theguild/components'
 
 # Hive Gateway
 
-Hive Gateway is a fully open-source MIT-licensed GraphQL gateway for any JavaScript environment and
-runtime such as Node.js, Bun, Deno, Google Cloud Functions, Azure Functions, Cloudflare Workers, and
-more.
+Hive Gateway is a fully open-source MIT-licensed GraphQL gateway that can act as a Apollo Federation
+Gateway or a Proxy Gateway for any GraphQL services.
 
-Hive Gateway is built on top of our existing libraries such as GraphQL Yoga, Envelop and so on, and
-it combines all of their functionalities such as
-[monitoring/tracing](/docs/gateway/features/monitoring-tracing),
-[caching](/docs/gateway/features/performance),
-[rate limiting](/docs/gateway/features/security/rate-limiting),
-[security layers](/docs/gateway/features/security) as a standalone tool.
+The Hive Gateway can be run as a standalone binary, a Docker Image, or as a JavaScript package (e.g.
+within Node.js, Bun, Deno, Google Cloud Functions, Azure Functions or Cloudflare Workers)
 
-Hive Gateway provides all of its features for free without any extra paid license;
+Hive Gateway provides the following features on top of your Federated GraphQL schema or proxied
+GraphQL schema:
 
-- GraphQL [Subscriptions](/docs/gateway/features/subscriptions) with WebSockets, HTTP Callbacks or
+- [GraphQL Subscriptions](/docs/gateway/features/subscriptions) with WebSockets, HTTP Callbacks or
   SSE
 - Automatic query and request batching to reduce the number of HTTP requests to your subgraph
 - [JSON Web Tokens (JWT)](/docs/gateway/features/auth/jwt) authentication between client and gateway
@@ -39,7 +35,7 @@ Hive Gateway provides all of its features for free without any extra paid licens
   Hive Registry or a selfhosting storage
 - [E2E HTTP Compression](/docs/gateway/features/performance/compression) from the client to the
   subgraph for better performance and resource management
-- [And more](/docs/gateway/features)...
+- [And more](/docs/gateway/features)
 
 <br />
 
