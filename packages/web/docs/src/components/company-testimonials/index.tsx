@@ -6,7 +6,7 @@ import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import { KarrotLogo, NacelleLogo, WealthsimpleLogo, type LogoProps } from '../company-logos';
 import { Heading } from '../heading';
-import karrotPicture from './karrot-picture.svg';
+import karrotPicture from './karrot-picture.webp';
 import nacellePicture from './nacelle-picture.svg';
 import wealthsimplePicture from './wealthsimple-picture.webp';
 
