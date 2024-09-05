@@ -1,4 +1,5 @@
 import React, { Fragment, useRef } from 'react';
+import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
 import { CallToAction } from '@theguild/components';
@@ -6,7 +7,7 @@ import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import { KarrotLogo, NacelleLogo, WealthsimpleLogo, type LogoProps } from '../company-logos';
 import { Heading } from '../heading';
-import karrotPicture from './karrot-picture.svg';
+import karrotPicture from './karrot-picture.webp';
 import nacellePicture from './nacelle-picture.svg';
 import wealthsimplePicture from './wealthsimple-picture.webp';
 
@@ -41,7 +42,6 @@ const testimonials: Testimonial[] = [
     text: 'We use GraphQL Hive as schema registry and monitoring tool. As a schema registry, we can publish GraphQL Schema with decoupled any application code. As a monitoring tool, we can find useful metrics. For example operation latency, usage of deprecated field. The great thing about GraphQL Hive is that it is easy to use, we have already integrated many tools like Slack or Github.',
     picture: {
       img: karrotPicture,
-      className: 'bg-beige-100 p-6',
     },
   },
   {
@@ -79,132 +79,144 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
   }, 50);
 
   return (
-    <section
-      className={cn(
-        'bg-beige-100 text-green-1000 relative overflow-hidden rounded-3xl px-4 py-6 md:p-10 lg:p-[72px]',
-        className,
-      )}
-    >
-      <Heading as="h2" size="md">
-        Loved by developers, trusted by business
-      </Heading>
-      <Tabs.Root
-        defaultValue={testimonials[0].company}
-        className="flex flex-col"
-        onValueChange={value => {
-          const id = getTestimonialId(value);
-          const element = document.getElementById(id);
-          if (element) {
-            element.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
-          }
-        }}
+    <>
+      <Head>
+        {/* not preloading nacelle, because it's rendered from the get go, but below the fold */}
+        <link rel="preload" href={karrotPicture.src} as="image" />
+        <link rel="preload" href={wealthsimplePicture.src} as="image" />
+      </Head>
+      <section
+        className={cn(
+          'bg-beige-100 text-green-1000 relative overflow-hidden rounded-3xl px-4 py-6 md:p-10 lg:p-[72px]',
+          className,
+        )}
       >
-        <Tabs.List
-          ref={tabsListRef}
-          className="lg:bg-beige-200 order-1 mt-4 flex flex-row justify-center rounded-2xl lg:order-first lg:my-16"
+        <Heading as="h2" size="md">
+          Loved by developers, trusted by business
+        </Heading>
+        <Tabs.Root
+          defaultValue={testimonials[0].company}
+          className="flex flex-col"
+          onValueChange={value => {
+            const id = getTestimonialId(value);
+            const element = document.getElementById(id);
+            if (element) {
+              element.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'nearest' });
+            }
+          }}
         >
-          {testimonials.map(testimonial => {
-            const Logo = testimonial.logo;
-            return (
-              <Tabs.Trigger
-                key={testimonial.company}
-                value={testimonial.company}
-                className={
-                  'flex-grow-0 [&[data-state="active"]>:first-child]:bg-blue-400' +
-                  ' lg:rdx-state-active:bg-white lg:flex-grow lg:bg-transparent' +
-                  ' justify-center p-0.5 lg:p-4' +
-                  ' rdx-state-active:text-green-1000 lg:rdx-state-active:border-beige-600' +
-                  ' border-transparent font-medium leading-6 text-green-800 lg:border' +
-                  ' flex flex-1 items-center justify-center rounded-[15px]'
-                }
-              >
-                <div className="size-2 rounded-full bg-blue-200 transition-colors lg:hidden" />
-                <Logo title={testimonial.company} height={32} className="hidden lg:block" />
-              </Tabs.Trigger>
-            );
-          })}
-        </Tabs.List>
-        <div
-          /* mobile scrollview */
-          ref={scrollviewRef}
-          className="-mb-10 flex snap-x snap-mandatory gap-4 overflow-auto pb-10"
-          onScroll={updateDotsOnScroll.current}
-        >
-          {testimonials.map(
-            ({ company, data, caseStudyHref, text, picture, person, logo: Logo }) => {
+          <Tabs.List
+            ref={tabsListRef}
+            className="lg:bg-beige-200 order-1 mt-4 flex flex-row justify-center rounded-2xl lg:order-first lg:my-16"
+          >
+            {testimonials.map(testimonial => {
+              const Logo = testimonial.logo;
               return (
-                <Tabs.Content
-                  key={company}
-                  value={company}
-                  tabIndex={-1}
+                <Tabs.Trigger
+                  key={testimonial.company}
+                  value={testimonial.company}
                   className={
-                    'relative flex w-full shrink-0 snap-center flex-col' +
-                    ' gap-6 data-[state="active"]:pb-[72px] md:flex-row md:gap-12 lg:data-[state="active"]:pb-0' +
-                    ' lg:data-[state="inactive"]:hidden'
+                    'flex-grow-0 [&[data-state="active"]>:first-child]:bg-blue-400' +
+                    ' lg:rdx-state-active:bg-white lg:flex-grow lg:bg-transparent' +
+                    ' justify-center p-0.5 lg:p-4' +
+                    ' rdx-state-active:text-green-1000 lg:rdx-state-active:border-beige-600' +
+                    ' border-transparent font-medium leading-6 text-green-800 lg:border' +
+                    ' flex flex-1 items-center justify-center rounded-[15px]'
                   }
-                  forceMount // we mount everything, as we scroll through tabs on mobile
                 >
-                  {picture && (
-                    <Image
-                      src={picture.img}
-                      role="presentation"
-                      alt=""
-                      width={300}
-                      height={300}
-                      className={cn(
-                        'hidden size-[300px] shrink-0 rounded-3xl mix-blend-multiply xl:block',
-                        picture.className,
-                      )}
-                    />
-                  )}
-                  <article className="lg:relative" id={getTestimonialId(company)}>
-                    <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
-                    <p className="lg:text-xl xl:text-2xl xl:leading-[32px]">{text}</p>
-                    {person && <TestimonialPerson className="mt-6" person={person} />}
-                    {caseStudyHref && (
-                      <CallToAction
-                        variant="primary"
-                        href={caseStudyHref}
-                        className="absolute bottom-0 w-full md:w-fit"
-                      >
-                        Read Case Study
-                        <ArrowIcon />
-                      </CallToAction>
-                    )}
-                  </article>
-                  {data && (
-                    <>
-                      <div /* divider */ className="bg-beige-600 hidden w-px md:block" />
-                      <ul className="flex gap-6 md:flex-col md:gap-12">
-                        {data.map(({ numbers, description }, i) => (
-                          <Fragment key={i}>
-                            <li>
-                              <span
-                                className={
-                                  'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
-                                  ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
-                                }
-                              >
-                                {numbers}
-                              </span>
-                              <span className="mt-2">{description}</span>
-                            </li>
-
-                            {i < data.length - 1 && (
-                              <div /* divider */ className="bg-beige-600 w-px md:hidden" />
-                            )}
-                          </Fragment>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </Tabs.Content>
+                  <div className="size-2 rounded-full bg-blue-200 transition-colors lg:hidden" />
+                  <Logo title={testimonial.company} height={32} className="hidden lg:block" />
+                </Tabs.Trigger>
               );
-            },
-          )}
-        </div>
-      </Tabs.Root>
-    </section>
+            })}
+          </Tabs.List>
+          <div
+            /* mobile scrollview */
+            ref={scrollviewRef}
+            className="-m-2 -mb-10 flex snap-x snap-mandatory gap-4 overflow-auto p-2 lg:pb-10"
+            onScroll={updateDotsOnScroll.current}
+          >
+            {testimonials.map(
+              ({ company, data, caseStudyHref, text, picture, person, logo: Logo }) => {
+                return (
+                  <Tabs.Content
+                    key={company}
+                    value={company}
+                    tabIndex={-1}
+                    className={cn(
+                      'relative flex w-full shrink-0 snap-center flex-col' +
+                        ' gap-6 md:flex-row lg:gap-12' +
+                        ' lg:data-[state="inactive"]:hidden',
+                      caseStudyHref
+                        ? 'data-[state="active"]:pb-[72px] lg:data-[state="active"]:pb-0'
+                        : 'max-lg:pb-8',
+                    )}
+                    forceMount // we mount everything, as we scroll through tabs on mobile
+                  >
+                    {picture && (
+                      <Image
+                        src={picture.img}
+                        role="presentation"
+                        alt=""
+                        width={300}
+                        height={300}
+                        className={cn(
+                          'hidden size-[300px] shrink-0 rounded-3xl mix-blend-multiply max-lg:mt-6 md:block',
+                          picture.className,
+                        )}
+                      />
+                    )}
+                    <article className="max-lg:mt-6 lg:relative" id={getTestimonialId(company)}>
+                      <Logo title={company} height={32} className="text-blue-1000 mb-6 lg:hidden" />
+                      <blockquote className="blockquote-beige-500 lg:text-xl xl:text-2xl xl:leading-[32px]">
+                        {text}
+                      </blockquote>
+                      {person && <TestimonialPerson className="mt-6" person={person} />}
+                      {caseStudyHref && (
+                        <CallToAction
+                          variant="primary"
+                          href={caseStudyHref}
+                          className="absolute bottom-0 w-full md:w-fit"
+                        >
+                          Read Case Study
+                          <ArrowIcon />
+                        </CallToAction>
+                      )}
+                    </article>
+                    {data && (
+                      <>
+                        <div /* divider */ className="bg-beige-600 hidden w-px md:block" />
+                        <ul className="flex gap-6 md:flex-col md:gap-12">
+                          {data.map(({ numbers, description }, i) => (
+                            <Fragment key={i}>
+                              <li>
+                                <span
+                                  className={
+                                    'block text-[40px] leading-[1.2] tracking-[-0.2px]' +
+                                    ' md:text-6xl md:leading-[1.1875] md:tracking-[-0.64px]'
+                                  }
+                                >
+                                  {numbers}
+                                </span>
+                                <span className="mt-2">{description}</span>
+                              </li>
+
+                              {i < data.length - 1 && (
+                                <div /* divider */ className="bg-beige-600 w-px md:hidden" />
+                              )}
+                            </Fragment>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </Tabs.Content>
+                );
+              },
+            )}
+          </div>
+        </Tabs.Root>
+      </section>
+    </>
   );
 }
 

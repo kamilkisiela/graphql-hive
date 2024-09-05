@@ -5,6 +5,7 @@
 const config = /** @type {any} */ (require('@theguild/tailwind-config'));
 const plugin = require('tailwindcss/plugin');
 const { fontFamily } = require('tailwindcss/defaultTheme');
+const { default: flattenColorPalette } = require('tailwindcss/lib/util/flattenColorPalette');
 
 /**
  * @type {import("tailwindcss").Config}
@@ -42,12 +43,42 @@ module.exports = {
   plugins: [
     require('tailwindcss-radix')({ variantPrefix: 'rdx' }),
     require('tailwindcss-animate'),
-    plugin(({ addUtilities }) => {
+    plugin(({ addUtilities, matchUtilities, theme }) => {
       addUtilities({
         '.mask-image-none': {
           'mask-image': 'none',
         },
       });
+      matchUtilities(
+        {
+          blockquote: color => ({
+            position: 'relative',
+            quotes: '"“" "”" "‘" "’"',
+            '&:before, &:after': {
+              position: 'absolute',
+              lineHeight: '1',
+              fontSize: '2.25em',
+              color,
+            },
+            '&:before': {
+              content: 'open-quote',
+              top: '0',
+              left: '0',
+              transform: 'translate(-90%, -0.5rem)',
+            },
+            '&:after': {
+              content: 'close-quote',
+              bottom: '0',
+              right: '0',
+              transform: 'translate(50%, calc(50% + 0.25rem))',
+            },
+          }),
+        },
+        {
+          values: flattenColorPalette(theme('colors')),
+          type: 'color',
+        },
+      );
     }),
   ],
   darkMode: ['variant', '&:not(.light *)'],
