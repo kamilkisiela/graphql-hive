@@ -16,11 +16,46 @@ Learn more about setting up app deployments and persisted documents on the Hive 
 After getting `endpoint` and `token` from Hive Registry, you can enable persisted documents in Hive
 Gateway.
 
-```sh filename="Run the Hive Gateway CLI"
-npx hive-gateway supergraph "<cdn_endpoint>" \
-  --hive-persisted-documents-token "<cdn_access_token>" \
-  < endpoint > --hive-persisted-documents-endpoint
+<Tabs items={['Binary', 'Docker', 'JavaScript Package']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run the Hive Gateway CLI" {3,4}
+hive-gateway supergraph "<cdn_endpoint>" \
+  --hive-persisted-documents-endpoint "<cdn_endpoint>" \
+  --hive-persisted-documents-token "<cdn_access_token>"
 ```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+```sh filename="Run the Hive Gateway CLI" {3,4}
+docker run --rm --name hive-gateway -p 4000:4000 \
+  ghcr.io/ardatan/hive-gateway supergraph "<cdn_endpoint>" \
+  --hive-persisted-documents-endpoint "<cdn_endpoint>" \
+  --hive-persisted-documents-token "<cdn_access_token>"
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+```sh filename="Run the Hive Gateway CLI" {3,4}
+npx hive-gateway supergraph "<cdn_endpoint>" \
+  --hive-persisted-documents-endpoint "<cdn_endpoint>" \
+  --hive-persisted-documents-token "<cdn_access_token>"
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 Instead of using the CLI you can also provide the same configuration via the `gateway.config.ts`
 file.
