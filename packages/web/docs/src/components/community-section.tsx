@@ -136,12 +136,23 @@ const SocialPost = {
 const socialPosts: SocialPost[] = [
   SocialPost.fromTweet(
     'https://x.com/malgamves/status/1272959879054049280',
-    "I was playing around with @strapijs's GraphQL API & got an error I'd never seen. According to @apollographql heuristic queries are a thing? Shoutout to @TheGuildDev 🧙🏿‍♂️for building GraphQL CodeGen, it's literally magic 🪄 Lost? I explain it all here 👇🏿 https://blog.logrocket.com/using-code-gen-to-avoid-heuristic-graphql-queries/",
+    `I was playing around with 
+@strapijs's GraphQL API & got an error I'd never seen
+
+According to @apollographql - heuristic queries are a thing?
+
+Shoutout to @TheGuildDev 🧙🏿‍♂️for building GraphQL CodeGen, it's literally magic 🪄
+
+Lost? I explain it all [here](https://blog.logrocket.com/using-code-gen-to-avoid-heuristic-graphql-queries/)`,
     Malgamves,
   ),
   SocialPost.fromTweet(
     'https://x.com/thewritingdev/status/1705160937697689706',
-    "GraphQL Yoga by @TheGuildDev is THE way to start new GraphQL projects now. Especially since other similar projects are going the closed-source route, Yoga is the current champion of true Open Source. It's a batteries-included, cross-platform, and runs anywhere!!",
+    `GraphQL Yoga by @TheGuildDev is THE way to start new GraphQL projects now. 
+
+Especially since other similar projects are going the closed-source route, Yoga is the current champion of true Open Source.
+
+It's a batteries-included, cross-platform, and runs anywhere!!`,
     TheWritingDev,
   ),
   SocialPost.fromTweet(
@@ -149,17 +160,44 @@ const socialPosts: SocialPost[] = [
     'Having fully typed API data is pretty awesome, thanks to urql and graphql-codegen',
     ScottBolinger,
   ),
-
   SocialPost.fromTweet(
     'https://x.com/achrafash_/status/1526654279062278146',
-    'Yoga 2.0 makes it dead simple to build a GraphQL API in NextJS!! and no need to put `any` everywhere to make it work lol. ty @TheGuildDev 🙏',
+    `Yoga 2.0 makes it dead simple to build a GraphQL API in NextJS!! 
+and no need to put \`any\` everywhere to make it work lol
+
+ty @TheGuildDev 🙏
+`,
     Achrafash,
   ),
   SocialPost.fromTweet(
+    'https://x.com/gethackteam/status/1255062494411964416',
+    "If you're using REST APIs with Swagger or OpenAPI, make sure to check out GraphQL Mesh https://medium.com/the-guild/graphql-mesh-query-anything-run-anywhere-433c173863b5",
+    GetHackTeam,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/NicolasKa3/status/1502204138188378114',
+    "Just contributed to @TheGuildDev by fixing a bug in the GraphQL TypeScript types generator. It's not much but it feels very good to give back 🥳",
+    NicolasKa3,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/flexdinesh/status/1602776469071355906',
+    `The smart folks at @TheGuildDev have introduced a compiler to write GraphQL schema. The extended file format is .graphxql.
+
+https://the-guild.dev/blog/graphqxl-language`,
+    FlexDinesh,
+  ),
+  //
+  SocialPost.fromTweet(
+    'https://x.com/whereischarly/status/1349467930166239232',
+    `Sooo, I'm on a good way for \`spotify-graphql@2.0.0\` that will cover all endpoints of 
+@Spotify API (queries + mutations) 🤓
+
+Thanks to the combination of my \`functional-json-schema\` lib and GraphQL Mesh (@TheGuildDev), it's now so much easier to maintain ✨`,
+    WhereIsCharly,
+  ),
+  SocialPost.fromTweet(
     'https://x.com/daniel2color/status/1408064880377143297',
-    `.
-@TheGuildDev
- gave me a demo of GraphQL Hive as part of my research on GraphQL observability with Prisma
+    `@TheGuildDev gave me a demo of GraphQL Hive as part of my research on GraphQL observability with Prisma
 
 It's an immensely useful tool:
 - Performance metrics 📈
@@ -169,27 +207,6 @@ It's an immensely useful tool:
 Can't wait to try it 🤩
 https://graphql-hive.com`,
     Daniel2Color,
-  ),
-  SocialPost.fromTweet(
-    'https://x.com/NicolasKa3/status/1502204138188378114',
-    "Just contributed to @TheGuildDev by fixing a bug in the GraphQL TypeScript types generator. It's not much but it feels very good to give back 🥳",
-    NicolasKa3,
-  ),
-  SocialPost.fromTweet(
-    'https://x.com/flexdinesh/status/1602776469071355906',
-    'The smart folks at @TheGuildDev have introduced a compiler to write GraphQL schema. The extended file format is .graphxql. https://the-guild.dev/blog/graphqxl-language',
-    FlexDinesh,
-  ),
-  //
-  SocialPost.fromTweet(
-    'https://x.com/whereischarly/status/1349467930166239232',
-    "Sooo, I'm on a good way for `spotify-graphql@2.0.0` that will cover all endpoints of @Spotify API (queries + mutations) 🤓 Thanks to the combination of my `functional-json-schema` lib and GraphQL Mesh (@TheGuildDev), it's now so much easier to maintain ✨",
-    WhereIsCharly,
-  ),
-  SocialPost.fromTweet(
-    'https://x.com/gethackteam/status/1255062494411964416',
-    "If you're using REST APIs with Swagger or OpenAPI, make sure to check out GraphQL Mesh https://medium.com/the-guild/graphql-mesh-query-anything-run-anywhere-433c173863b5",
-    GetHackTeam,
   ),
   SocialPost.fromTweet(
     'https://x.com/michlbrmly/status/1313037429314551809',
@@ -204,10 +221,37 @@ https://graphql-hive.com`,
   //
   SocialPost.fromTweet(
     'https://x.com/chimame_rt/status/1663577579557900289',
-    '私が寄稿したブログが公開されました。ありがとう！The @TheGuildDev blog I contributed to is now available. Thank you! @UriGoldshtein https://the-guild.dev/blog/graphql-yoga-worker',
+    `私が寄稿したブログが公開されました。ありがとう！
+
+The @TheGuildDev blog I contributed to is now available. Thank you! @UriGoldshtein
+
+https://the-guild.dev/blog/graphql-yoga-worker`,
     ChimameRt,
   ),
 ];
+
+// one could consider storing the posts in MDX and handling it with components
+for (const post of socialPosts) {
+  // wrap backticked `code` with <code>
+  post.text = post.text.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // replace URLs in text with anchors
+  post.text = post.text.replace(
+    /(\s)https?:\/\/(\S+)/g,
+    '$1<a href="https://$2" target="_blank" rel="noopener noreferrer">$2</a>',
+  );
+
+  // replace markdown links with HTML links
+  post.text = post.text.replace(
+    /\[(.*?)\]\((.*?)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+  );
+  // replace @mentions with links
+  post.text = post.text.replace(
+    /([\s(.])@(\w+)/g,
+    '$1<a href="https://x.com/$2" target="_blank" rel="noopener noreferrer">@$2</a>',
+  );
+}
 
 function SocialPostCard({ post }: { post: SocialPost }) {
   const isDiscordLink = post.href.startsWith('https://discordapp.com/');
@@ -247,7 +291,10 @@ function SocialPostCard({ post }: { post: SocialPost }) {
         </div>
         <p className="text-sm">{post.name}</p>
       </div>
-      <p className="mt-4 min-w-[220px] max-w-full">{post.text}</p>
+      <blockquote
+        className="mt-4 min-w-[220px] max-w-full whitespace-pre-line [&_a:hover]:underline [&_a]:text-blue-500 [&_code]:border-none"
+        dangerouslySetInnerHTML={{ __html: post.text }}
+      />
     </div>
   );
 }
