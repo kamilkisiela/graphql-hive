@@ -1,10 +1,11 @@
-import { Injectable } from 'graphql-modules';
+import { Injectable, Scope } from 'graphql-modules';
 import { ClickHouse, sql } from '../../operations/providers/clickhouse-client';
 import { Logger } from '../../shared/providers/logger';
 import { AuditLogEvent, auditLogSchema } from './audit-logs-types';
 
 // TODO: Error: No provider for ClickHouse! (AuditLogManager -> ClickHouse) - in Module "audit-logs" (Operation Scope)
 @Injectable({
+  scope: Scope.Operation,
   global: true,
 })
 export class AuditLogManager {
