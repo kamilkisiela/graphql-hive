@@ -274,7 +274,8 @@ function EdgeLabel(props: EdgeLabelProps) {
     <div
       className={
         'flex size-8 h-[var(--label-h)] items-center justify-center' +
-        ' cursor-default rounded bg-green-700 text-sm font-medium leading-5'
+        ' cursor-default rounded bg-green-700 text-sm font-medium leading-5' +
+        ' hover:ring-2 hover:ring-green-700'
       }
       {...props}
     />
