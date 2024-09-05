@@ -132,13 +132,12 @@ function Illustration(props: { className?: string }) {
         </Edge>
         <div>
           <Node
-            title="Hive"
-            description="GraphQL Gateway"
+            title="Gateway"
+            description="Hive Gateway"
             highlighted={[1, 4, 5].includes(highlightedEdge!)}
           >
-            <svg viewBox="0 0 48 48" width={48} height={48}>
-              <SafariLinearGradientDefs />
-              <use xlinkHref="/ecosystem-management.svg#mesh" />
+            <svg width={48} height={48}>
+              <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
             </svg>
           </Node>
           <Edge
@@ -153,7 +152,7 @@ function Illustration(props: { className?: string }) {
           <Node
             className="h-[var(--big-node-h)] w-[var(--node-w)] flex-col text-center"
             title="Hive"
-            description="Control Plane"
+            description="Registry and CDN"
             highlighted={[3, 4, 6].includes(highlightedEdge!)}
           >
             <svg className="size-[var(--big-logo-size)]">
@@ -202,10 +201,16 @@ function Illustration(props: { className?: string }) {
         </div>
         <div>
           <Node
-            title="GraphQL client"
-            className="justify-center"
+            title="Client"
+            description={
+              <span className="[@media(max-width:1438px)]:hidden">GraphQL client of choice</span>
+            }
             highlighted={[1, 2].includes(highlightedEdge!)}
-          />
+          >
+            <svg width={48} height={48} viewBox="0 0 100 100">
+              <use xlinkHref="/graphql-logo.svg#logo" />
+            </svg>
+          </Node>
           <Edge
             left
             className="flex h-[calc(var(--gap)+var(--big-node-h)/2-var(--node-h)/2)] flex-col items-center"

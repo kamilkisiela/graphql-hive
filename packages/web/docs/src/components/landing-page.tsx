@@ -153,7 +153,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
       className={cn('bg-beige-100 rounded-3xl px-4 pt-6 sm:py-24 md:px-6 md:py-[120px]', className)}
     >
       <Heading as="h3" size="md" className="text-balance sm:px-6 sm:text-center">
-        Enterprise-focused tools tailored for you.
+        Enterprise-focused tools tailored for you
       </Heading>
       <ul className="flex flex-row flex-wrap justify-center divide-y divide-solid sm:mt-6 sm:divide-x sm:divide-y-0 md:mt-16 md:px-6 xl:px-16">
         <InfoCard
@@ -162,7 +162,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
           icon={<PerformanceListItemIcon />}
           className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
-          Hive is completely open source, MIT licensed. You can host it on your own infrastructure!
+          Hive is completely open source, MIT licensed. You can host it on your own infrastructure.
         </InfoCard>
         <InfoCard
           as="li"
