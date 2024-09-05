@@ -1,0 +1,57 @@
+import { Callout, Cards, Tabs } from '@theguild/components'
+
+# Persisted Documents
+
+Persisted documents can be used on your GraphQL server or Gateway to reduce the payload size of your
+GraphQL requests and secure your GraphQL API by only allowing operations that are known and trusted
+by your Gateway.
+
+Hive Gateway can use the Hive Schema Registry as a source for persisted documents.
+
+Learn more about setting up app deployments and persisted documents on the Hive Dashboard
+[here](/docs/features/app-deployments).
+
+### Configuration
+
+After getting `endpoint` and `token` from Hive Registry, you can enable persisted documents in Hive
+Gateway.
+
+```sh filename="Run the Hive Gateway CLI"
+npx hive-gateway supergraph "<cdn_endpoint>" \
+  --hive-persisted-documents-token "<cdn_access_token>" \
+  < endpoint > --hive-persisted-documents-endpoint
+```
+
+Instead of using the CLI you can also provide the same configuration via the `gateway.config.ts`
+file.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  persistedDocuments: {
+    type: 'hive',
+    endpoint: '<cdn_endpoint>',
+    token: '<cdn-access-token>'
+  }
+})
+```
+
+#### Enabling Arbitrary Documents
+
+After enabling persisted documents on your Hive Gateway, any arbitary GraphQL documents that don't
+contain a `documentId` will be rejected. If you still want to allow executing arbitrary documents,
+you can set `allowArbitraryDocuments` to `true` in the configuration.
+
+```ts filename="gateway.config.ts" {8}
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  persistedDocuments: {
+    type: 'hive',
+    endpoint: '<cdn_endpoint>',
+    token: '<cdn-access-token>',
+    allowArbitraryDocuments: true
+  }
+})
+```
