@@ -111,7 +111,6 @@ function Illustration(props: { className?: string }) {
 
   const highlightIterators = useRef<{ node: number[]; index: number }>({ node: [], index: -1 });
   const onHighlightNode = (edges: number[]) => {
-    console.log('onPointerOverNode', edges);
     clearInterval(intervalRef.current || undefined);
 
     let previousIndex: number;
@@ -345,9 +344,6 @@ function Node({
   return (
     <div
       onPointerOver={event => {
-        console.log('hovered.current', hovered.current);
-        console.log('event.currentTarget', event.currentTarget);
-        console.log('event.target', event.target);
         if (hovered.current || event.currentTarget !== event.target) {
           return;
         }
