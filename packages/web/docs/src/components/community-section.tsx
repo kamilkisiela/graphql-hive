@@ -232,8 +232,8 @@ https://the-guild.dev/blog/graphql-yoga-worker`,
 
 // one could consider storing the posts in MDX and handling it with components
 for (const post of socialPosts) {
-  // wrap backticked `code` with <code>
-  post.text = post.text.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // wrap backticked `code` with monospace spans
+  post.text = post.text.replace(/`([^`]+)`/g, '<span class="code">$1</span>');
 
   // replace URLs in text with anchors
   post.text = post.text.replace(
@@ -292,7 +292,7 @@ function SocialPostCard({ post }: { post: SocialPost }) {
         <p className="text-sm">{post.name}</p>
       </div>
       <blockquote
-        className="mt-4 min-w-[220px] max-w-full whitespace-pre-line [&_a:hover]:underline [&_a]:text-blue-500 [&_code]:border-none"
+        className="mt-4 min-w-[220px] max-w-full whitespace-pre-line [&_.code]:font-mono [&_.code]:text-[0.9em] [&_a:hover]:underline [&_a]:text-blue-500"
         dangerouslySetInnerHTML={{ __html: post.text }}
       />
     </div>
