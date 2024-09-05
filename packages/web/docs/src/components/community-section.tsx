@@ -135,9 +135,9 @@ const SocialPost = {
 
 const socialPosts: SocialPost[] = [
   SocialPost.fromTweet(
-    'https://x.com/scottbolinger/status/1623466404610719744',
-    'Having fully typed API data is pretty awesome, thanks to urql and graphql-codegen',
-    ScottBolinger,
+    'https://x.com/malgamves/status/1272959879054049280',
+    "I was playing around with @strapijs's GraphQL API & got an error I'd never seen. According to @apollographql heuristic queries are a thing? Shoutout to @TheGuildDev 🧙🏿‍♂️for building GraphQL CodeGen, it's literally magic 🪄 Lost? I explain it all here 👇🏿 https://blog.logrocket.com/using-code-gen-to-avoid-heuristic-graphql-queries/",
+    Malgamves,
   ),
   SocialPost.fromTweet(
     'https://x.com/thewritingdev/status/1705160937697689706',
@@ -145,9 +145,30 @@ const socialPosts: SocialPost[] = [
     TheWritingDev,
   ),
   SocialPost.fromTweet(
+    'https://x.com/scottbolinger/status/1623466404610719744',
+    'Having fully typed API data is pretty awesome, thanks to urql and graphql-codegen',
+    ScottBolinger,
+  ),
+
+  SocialPost.fromTweet(
     'https://x.com/achrafash_/status/1526654279062278146',
     'Yoga 2.0 makes it dead simple to build a GraphQL API in NextJS!! and no need to put `any` everywhere to make it work lol. ty @TheGuildDev 🙏',
     Achrafash,
+  ),
+  SocialPost.fromTweet(
+    'https://x.com/daniel2color/status/1408064880377143297',
+    `.
+@TheGuildDev
+ gave me a demo of GraphQL Hive as part of my research on GraphQL observability with Prisma
+
+It's an immensely useful tool:
+- Performance metrics 📈
+- Schema registry to track schema changes 🛠
+- GraphQL observability
+
+Can't wait to try it 🤩
+https://graphql-hive.com`,
+    Daniel2Color,
   ),
   SocialPost.fromTweet(
     'https://x.com/NicolasKa3/status/1502204138188378114',
@@ -176,11 +197,6 @@ const socialPosts: SocialPost[] = [
     Michlbrmly,
   ),
   SocialPost.fromTweet(
-    'https://x.com/malgamves/status/1272959879054049280',
-    "I was playing around with @strapijs's GraphQL API & got an error I'd never seen. According to @apollographql heuristic queries are a thing? Shoutout to @TheGuildDev 🧙🏿‍♂️for building GraphQL CodeGen, it's literally magic 🪄 Lost? I explain it all here 👇🏿 https://blog.logrocket.com/using-code-gen-to-avoid-heuristic-graphql-queries/",
-    Malgamves,
-  ),
-  SocialPost.fromTweet(
     'https://x.com/ReardenQL/status/1263478563115859968',
     "Super excited about GraphQL Tools' overhaul! Amazing work @TheGuildDev 👏",
     ReardenQL,
@@ -190,21 +206,6 @@ const socialPosts: SocialPost[] = [
     'https://x.com/chimame_rt/status/1663577579557900289',
     '私が寄稿したブログが公開されました。ありがとう！The @TheGuildDev blog I contributed to is now available. Thank you! @UriGoldshtein https://the-guild.dev/blog/graphql-yoga-worker',
     ChimameRt,
-  ),
-  SocialPost.fromTweet(
-    'https://x.com/daniel2color/status/1408064880377143297',
-    `.
-@TheGuildDev
- gave me a demo of GraphQL Hive as part of my research on GraphQL observability with Prisma
-
-It's an immensely useful tool:
-- Performance metrics 📈
-- Schema registry to track schema changes 🛠
-- GraphQL observability
-
-Can't wait to try it 🤩
-https://graphql-hive.com`,
-    Daniel2Color,
   ),
 ];
 
