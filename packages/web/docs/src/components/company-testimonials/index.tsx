@@ -159,7 +159,9 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                   )}
                   <article className="lg:relative" id={getTestimonialId(company)}>
                     <Logo title={company} height={32} className="text-blue-1000 my-6 lg:hidden" />
-                    <p className="lg:text-xl xl:text-2xl xl:leading-[32px]">{text}</p>
+                    <blockquote className="blockquote lg:text-xl xl:text-2xl xl:leading-[32px]">
+                      {text}
+                    </blockquote>
                     {person && <TestimonialPerson className="mt-6" person={person} />}
                     {caseStudyHref && (
                       <CallToAction

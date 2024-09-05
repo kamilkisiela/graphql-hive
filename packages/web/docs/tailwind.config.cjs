@@ -47,6 +47,27 @@ module.exports = {
         '.mask-image-none': {
           'mask-image': 'none',
         },
+        '.blockquote': {
+          position: 'relative',
+          quotes: '"“" "”" "‘" "’"',
+          '&:before, &:after': {
+            position: 'absolute',
+            lineHeight: '1',
+            color: 'currentColor',
+          },
+          '&:before': {
+            content: 'open-quote',
+            top: '0',
+            left: '0',
+            transform: 'translate(-50%, -0.5rem)',
+          },
+          '&:after': {
+            content: 'close-quote',
+            bottom: '0',
+            right: '0',
+            transform: 'translate(50%, calc(50% + 0.25rem))',
+          },
+        },
       });
     }),
   ],
