@@ -87,13 +87,9 @@ function Illustration(props: { className?: string }) {
     return () => clearInterval(intervalRef.current || undefined);
   }, []);
 
-  const onPointerOverEdge = (event: React.PointerEvent<HTMLElement>) => {
-    const edgeNumber = parseInt(event.currentTarget.textContent!);
-    if (Number.isNaN(edgeNumber) || edgeNumber < 1 || edgeNumber > 6) {
-      return;
-    }
-
+  const highlightEdge = (edgeNumber: number) => {
     clearInterval(intervalRef.current || undefined);
+
     setHighlightedEdge(edgeNumber);
 
     // after 10 seconds, we'll start stepping through edges again
@@ -102,6 +98,39 @@ function Illustration(props: { className?: string }) {
         setHighlightedEdge(prev => (prev! % 6) + 1);
       }, EDGE_HOVER_INTERVAL_TIME);
     }, EDGE_HOVER_RESET_TIME);
+  };
+
+  const onPointerOverEdge = (event: React.PointerEvent<HTMLElement>) => {
+    const edgeNumber = parseInt(event.currentTarget.textContent!);
+    if (Number.isNaN(edgeNumber) || edgeNumber < 1 || edgeNumber > 6) {
+      return;
+    }
+
+    highlightEdge(edgeNumber);
+  };
+
+  const highlightIterators = useRef<{ node: number[]; index: number }>({ node: [], index: -1 });
+  const onHighlightNode = (edges: number[]) => {
+    console.log('onPointerOverNode', edges);
+    clearInterval(intervalRef.current || undefined);
+
+    let previousIndex: number;
+    if (highlightIterators.current.node.every((x, i) => edges[i] === x)) {
+      previousIndex = highlightIterators.current.index;
+    } else {
+      highlightIterators.current.node = edges;
+      previousIndex = -1;
+    }
+
+    let index = (previousIndex + 1) % edges.length;
+
+    // if edge under index is already highlighted, we move forward
+    if (highlightedEdge === edges[index]) {
+      index = (index + 1) % edges.length;
+    }
+
+    highlightIterators.current.index = index;
+    highlightEdge(edges[index]);
   };
 
   return (
@@ -134,7 +163,9 @@ function Illustration(props: { className?: string }) {
           <Node
             title="Mesh"
             description="GraphQL Gateway"
-            highlighted={[1, 4, 5].includes(highlightedEdge!)}
+            edges={[1, 4, 5]}
+            highlightedEdge={highlightedEdge}
+            onHighlight={onHighlightNode}
           >
             <svg viewBox="0 0 48 48" width={48} height={48}>
               <SafariLinearGradientDefs />
@@ -154,7 +185,9 @@ function Illustration(props: { className?: string }) {
             className="h-[var(--big-node-h)] w-[var(--node-w)] flex-col text-center"
             title="Hive"
             description="Decision-making engine"
-            highlighted={[3, 4, 6].includes(highlightedEdge!)}
+            edges={[3, 4, 6]}
+            highlightedEdge={highlightedEdge}
+            onHighlight={onHighlightNode}
           >
             <svg className="size-[var(--big-logo-size)]">
               <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
@@ -172,7 +205,9 @@ function Illustration(props: { className?: string }) {
           <Node
             title="Yoga"
             description="GraphQL Subgraph"
-            highlighted={[5, 6].includes(highlightedEdge!)}
+            edges={[5, 6]}
+            highlightedEdge={highlightedEdge}
+            onHighlight={onHighlightNode}
           >
             <svg width={48} height={48}>
               <use xlinkHref="/ecosystem-management.svg#yoga" />
@@ -204,7 +239,9 @@ function Illustration(props: { className?: string }) {
           <Node
             title="GraphQL client"
             className="justify-center"
-            highlighted={[1, 2].includes(highlightedEdge!)}
+            edges={[1, 2]}
+            highlightedEdge={highlightedEdge}
+            onHighlight={onHighlightNode}
           />
           <Edge
             left
@@ -220,7 +257,9 @@ function Illustration(props: { className?: string }) {
             description={
               <span className="[@media(max-width:1438px)]:hidden">GraphQL Code Generation</span>
             }
-            highlighted={[2, 3].includes(highlightedEdge!)}
+            edges={[2, 3]}
+            highlightedEdge={highlightedEdge}
+            onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 48 48">
               <use xlinkHref="/ecosystem-management.svg#codegen" />
@@ -285,16 +324,53 @@ function EdgeLabel(props: EdgeLabelProps) {
 interface NodeProps extends React.HTMLAttributes<HTMLElement> {
   title: string;
   description?: ReactNode;
-  highlighted: boolean;
+  edges: number[];
+  highlightedEdge: number | null;
+  onHighlight: (edges: number[]) => void;
 }
-function Node({ title, description, children, highlighted, className, ...rest }: NodeProps) {
+function Node({
+  title,
+  description,
+  children,
+  edges,
+  highlightedEdge,
+  className,
+  onHighlight,
+  ...rest
+}: NodeProps) {
+  const highlighted = edges.includes(highlightedEdge!);
+
+  const hovered = useRef(false);
+
   return (
     <div
+      onPointerOver={event => {
+        console.log('hovered.current', hovered.current);
+        console.log('event.currentTarget', event.currentTarget);
+        console.log('event.target', event.target);
+        if (hovered.current || event.currentTarget !== event.target) {
+          return;
+        }
+
+        hovered.current = true;
+
+        if (edges.includes(highlightedEdge!)) return;
+        onHighlight([edges[0]]);
+      }}
+      onPointerOut={event => {
+        if (
+          !event.currentTarget.contains(event.relatedTarget as Node) &&
+          event.currentTarget === event.target
+        ) {
+          hovered.current = false;
+        }
+      }}
+      onClick={() => onHighlight(edges)}
       className={cn(
         styles.node,
         'relative z-10 flex h-[var(--node-h)] items-center gap-2 rounded-2xl p-4 xl:gap-4 xl:p-[22px]' +
           ' bg-[linear-gradient(135deg,rgb(255_255_255/0.10),rgb(255_255_255/0.20))]' +
-          ' transition-colors duration-500 [&>svg]:flex-shrink-0',
+          ' cursor-pointer transition-colors duration-500 [&>svg]:flex-shrink-0',
         // todo: linear gradients don't transition, so we should add white/10 background layer'
         highlighted &&
           'bg-[linear-gradient(135deg,rgb(255_255_255_/0.2),rgb(255_255_255/0.3))] ring ring-green-300',
