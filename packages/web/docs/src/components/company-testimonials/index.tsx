@@ -127,7 +127,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
         <div
           /* mobile scrollview */
           ref={scrollviewRef}
-          className="-mb-10 flex snap-x snap-mandatory gap-4 overflow-auto pb-10"
+          className="-m-2 -mb-10 flex snap-x snap-mandatory gap-4 overflow-auto p-2 pb-10"
           onScroll={updateDotsOnScroll.current}
         >
           {testimonials.map(
