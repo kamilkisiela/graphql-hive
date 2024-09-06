@@ -171,6 +171,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48}>
+              <SafariLinearGradientDefs />
               <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
             </svg>
           </Node>
