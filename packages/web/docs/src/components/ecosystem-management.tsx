@@ -402,6 +402,9 @@ function Node({
   );
 }
 
+/**
+ * This must be included in any of the SVGs here so they work nicely in Safari.
+ */
 function SafariLinearGradientDefs() {
   return (
     <defs>
