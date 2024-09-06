@@ -161,7 +161,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                         width={300}
                         height={300}
                         className={cn(
-                          'hidden size-[300px] shrink-0 rounded-3xl mix-blend-multiply max-lg:mt-6 md:block',
+                          'hidden size-[300px] shrink-0 rounded-3xl object-cover mix-blend-multiply max-lg:mt-6 md:block',
                           picture.className,
                         )}
                       />
