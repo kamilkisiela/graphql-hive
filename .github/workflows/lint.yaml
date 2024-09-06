@@ -36,7 +36,7 @@ jobs:
       - name: eslint
         id: eslint
         run: |
-          pnpm lint || \
+          pnpm lint --cache-strategy content || \
           ( \
             echo "" && \
             echo "To fix it, run" && \
