@@ -4,18 +4,18 @@ import { CallToAction, DiscordIcon, GitHubIcon, Heading, TwitterIcon } from '@th
 import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import dimaPhoto from './dima.webp';
-import noamPhoto from './noam.webp';
+// import noamPhoto from './noam.webp';
 import saihajPhoto from './saihaj.webp';
 
 export function TeamSection({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        'isolate rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
+        'isolate max-w-full rounded-3xl bg-blue-400 px-4 py-6 lg:px-8 lg:py-16 xl:px-16 xl:py-[120px] [@media(min-width:1358px)]:px-24',
         className,
       )}
     >
-      <div className="mx-auto flex flex-col flex-wrap justify-center gap-x-2 lg:max-xl:w-max xl:h-[476px]">
+      <div className="mx-auto flex max-w-full flex-col flex-wrap justify-center gap-x-2 lg:max-xl:w-max xl:h-[476px]">
         <Heading as="h3" size="md" className="text-green-1000 max-w-full text-balance xl:w-[468px]">
           Built by The Guild. Industry veterans.
         </Heading>
@@ -77,7 +77,7 @@ const team: TeamMember[] = [
     'https://avatars.githubusercontent.com/n1ru4l?v=4&s=180',
     'https://github.com/n1ru4l',
   ],
-  ['Noam Malka', noamPhoto, 'https://noam-malka.com/'],
+  // ['Noam Malka', noamPhoto, 'https://noam-malka.com/'],
   ['Saihajpreet Singh', saihajPhoto, 'https://github.com/saihaj'],
 
   [
@@ -113,8 +113,10 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
       {...props}
       className={cn(
         'flex flex-row gap-2 max-lg:overflow-auto lg:flex-wrap lg:gap-4' +
-          ' shrink-0 xl:[&>:nth-child(9n-8)]:ml-[calc(var(--size)/2)]' +
-          ' grid-cols-5 items-stretch justify-items-stretch lg:max-xl:grid',
+          ' shrink-0 grid-cols-5 items-stretch justify-items-stretch lg:max-xl:grid',
+        team.length === 13
+          ? 'grid-cols-5 xl:[&>:nth-child(9n-8)]:ml-[calc(var(--size)/2)]'
+          : 'grid-cols-6 xl:[&>:nth-child(8n-7)]:ml-[calc(var(--size)/2)]',
         props.className,
       )}
     >
