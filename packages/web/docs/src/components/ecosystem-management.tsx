@@ -1,9 +1,13 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { CallToAction, DecorationIsolation, HighlightDecoration } from '@theguild/components';
+import {
+  CallToAction,
+  DecorationIsolation,
+  Heading,
+  HighlightDecoration,
+} from '@theguild/components';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
 import { CheckIcon } from './check-icon';
-import { Heading } from './heading';
 import styles from './ecosystem-management.module.css';
 
 export function EcosystemManagementSection({ className }: { className?: string }) {

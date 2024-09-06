@@ -2,11 +2,10 @@ import React, { Fragment, useRef } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import * as Tabs from '@radix-ui/react-tabs';
-import { CallToAction } from '@theguild/components';
+import { CallToAction, Heading } from '@theguild/components';
 import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import { KarrotLogo, NacelleLogo, WealthsimpleLogo, type LogoProps } from '../company-logos';
-import { Heading } from '../heading';
 import karrotPicture from './karrot-picture.webp';
 import nacellePicture from './nacelle-picture.svg';
 import wealthsimplePicture from './wealthsimple-picture.webp';
@@ -161,7 +160,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                         width={300}
                         height={300}
                         className={cn(
-                          'hidden size-[300px] shrink-0 rounded-3xl mix-blend-multiply max-lg:mt-6 md:block',
+                          'hidden size-[300px] shrink-0 rounded-3xl object-cover mix-blend-multiply max-lg:mt-6 md:block',
                           picture.className,
                         )}
                       />

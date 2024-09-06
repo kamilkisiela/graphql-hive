@@ -3,10 +3,9 @@ import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
-import { CallToAction } from '@theguild/components';
+import { CallToAction, Heading } from '@theguild/components';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
-import { Heading } from './heading';
 import { Stud } from './stud';
 import observabilityClientsImage from '../../public/features/observability/clients.png';
 import observabilityOperationsImage from '../../public/features/observability/operations.png';
@@ -247,12 +246,6 @@ function Feature(props: {
       </div>
       {highlights.map((highlight, i) => (
         <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
-          {/* TODO: Chat with the designer about the mobile version of this again. */}
-          {/* <div className="relative px-4 sm:px-6 lg:hidden">
-              <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
-                {highlight.description}
-              </p>
-            </div> */}
           <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
             {/* TODO: Use cropped images so we don't load too much without need. */}
             <Image
