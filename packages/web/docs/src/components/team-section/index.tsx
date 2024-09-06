@@ -1,6 +1,5 @@
 import Image, { StaticImageData } from 'next/image';
-import { GlobeIcon } from '@radix-ui/react-icons';
-import { CallToAction, DiscordIcon, GitHubIcon, Heading, TwitterIcon } from '@theguild/components';
+import { CallToAction, Heading } from '@theguild/components';
 import { cn } from '../../lib';
 import { ArrowIcon } from '../arrow-icon';
 import dimaPhoto from './dima.webp';
@@ -38,7 +37,10 @@ export function TeamSection({ className }: { className?: string }) {
         </CallToAction>
 
         <TeamGallery
-          className="max-xl:-mx-4 max-xl:max-w-[calc(100%-1rem)] max-xl:px-4 max-xl:py-6 max-lg:max-w-[calc(100%+2rem)] xl:ml-auto xl:w-[664px]"
+          className={cn(
+            'max-xl:-mx-4 max-xl:max-w-[calc(100%-1rem)] max-xl:px-4 max-xl:py-6 max-lg:max-w-[calc(100%+2rem)] xl:ml-auto',
+            team.length === 12 ? 'xl:w-[628px]' : 'xl:w-[664px]',
+          )}
           style={{
             '--size': '120px',
           }}
@@ -112,7 +114,7 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
     <ul
       {...props}
       className={cn(
-        'flex flex-row gap-2 max-lg:overflow-auto lg:flex-wrap lg:gap-4' +
+        'flex flex-row gap-2 max-lg:overflow-auto lg:flex-wrap lg:gap-6' +
           ' shrink-0 grid-cols-5 items-stretch justify-items-stretch lg:max-xl:grid',
         team.length === 13
           ? 'grid-cols-5 xl:[&>:nth-child(9n-8)]:ml-[calc(var(--size)/2)]'
@@ -129,40 +131,28 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
 
 function TeamAvatar({ data: [name, avatar, social] }: { data: TeamMember }) {
   return (
-    <div className="relative flex flex-col">
-      <a
-        className={
-          'absolute right-0 top-0 rounded-2xl border-2 border-blue-400 bg-[#222530] p-[9px] text-white hover:border-transparent xl:rounded-full' +
-          ' border-transparent xl:-translate-y-1/2 xl:translate-x-1/2' +
-          ' max-xl:min-size-[var(--size)] ease duration-250 z-10 transition-colors max-xl:opacity-0'
-        }
-        href={social}
-      >
-        {social.startsWith('https://github.com') ? (
-          <GitHubIcon className="size-[14px]" />
-        ) : social.startsWith('https://discord.com') ? (
-          <DiscordIcon className="size-[14px]" />
-        ) : social.startsWith('https://twitter.com') ? (
-          <TwitterIcon className="size-[14px]" />
-        ) : (
-          <GlobeIcon className="size-[14px]" />
-        )}
-      </a>
-      <div className="relative aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 overflow-hidden rounded-2xl mix-blend-multiply xl:w-[var(--size)]">
-        <div className="absolute inset-0 size-full bg-blue-200" />
+    <a
+      className="group relative flex flex-col focus-visible:outline-none focus-visible:ring-transparent focus-visible:ring-offset-transparent"
+      href={social}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <div className="relative aspect-square min-h-[var(--size)] w-auto min-w-[var(--size)] flex-1 overflow-hidden rounded-2xl mix-blend-multiply ring-blue-500/0 ring-offset-2 transition-all hover:ring-4 hover:ring-blue-500/15 group-focus:ring-blue-500/40 group-focus-visible:ring-4 xl:w-[var(--size)]">
+        <div className="absolute inset-0 size-full bg-blue-100" />
         <Image
           alt=""
-          className="rounded-2xl bg-black grayscale"
+          className="rounded-2xl bg-black brightness-100 grayscale transition-all duration-500 group-hover:scale-[1.03] group-hover:brightness-110"
           {...(typeof avatar === 'string'
             ? { src: avatar }
             : { blurDataURL: avatar.blurDataURL, src: avatar.src })}
           width={180}
           height={180}
         />
+        <div className="absolute inset-0 size-full bg-blue-500 opacity-10 transition-all group-hover:opacity-20" />
       </div>
       <span className="text-green-1000 mt-2 block text-sm font-medium leading-5 lg:max-xl:block lg:max-xl:text-base">
         {name}
       </span>
-    </div>
+    </a>
   );
 }
