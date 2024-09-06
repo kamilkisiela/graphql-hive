@@ -77,7 +77,7 @@ export function createWebhookJob({ config }: { config: Config }) {
       } catch (error) {
         config.logger.error('Failed to call webhook (job=%s)', job.name, error);
         // so we can re-try
-        throw error
+        throw error;
       }
     } else {
       config.logger.warn('Giving up on webhook (job=%s)', job.name);
