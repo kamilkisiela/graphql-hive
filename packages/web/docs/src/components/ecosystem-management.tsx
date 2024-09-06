@@ -176,7 +176,7 @@ function Illustration(props: { className?: string }) {
           >
             <svg width={48} height={48}>
               <SafariLinearGradientDefs />
-              <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
+              <use width="100%" height="100%" xlinkHref="./ecosystem-management.svg#hive" />
             </svg>
           </Node>
           <Edge
@@ -197,7 +197,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg className="size-[var(--big-logo-size)]">
-              <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
+              <use width="100%" height="100%" xlinkHref="./ecosystem-management.svg#hive" />
             </svg>
           </Node>
           <Edge
@@ -217,7 +217,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48}>
-              <use xlinkHref="/ecosystem-management.svg#yoga" />
+              <use xlinkHref="./ecosystem-management.svg#yoga" />
             </svg>
           </Node>
         </div>
@@ -253,7 +253,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 100 100">
-              <use xlinkHref="/graphql-logo.svg#logo" />
+              <use xlinkHref="./graphql-logo.svg#logo" />
             </svg>
           </Node>
           <Edge
@@ -275,7 +275,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 48 48">
-              <use xlinkHref="/ecosystem-management.svg#codegen" />
+              <use xlinkHref="./ecosystem-management.svg#codegen" />
             </svg>
           </Node>
         </div>
