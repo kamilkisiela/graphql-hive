@@ -5,6 +5,7 @@ import {
   CallToAction,
   DecorationIsolation,
   GetYourAPIGameRightSection,
+  Heading,
   HighlightDecoration,
   LargeHiveIconDecoration,
   ToolsAndLibrariesCards,
@@ -17,7 +18,6 @@ import { CompanyTestimonialsSection } from './company-testimonials';
 import { EcosystemManagementSection } from './ecosystem-management';
 import { FeatureTabs } from './feature-tabs';
 import { FrequentlyAskedQuestions } from './frequently-asked-questions';
-import { Heading } from './heading';
 import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
 import { InfoCard } from './info-card';
 import { Page } from './page';

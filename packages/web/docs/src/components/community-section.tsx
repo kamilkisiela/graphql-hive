@@ -1,8 +1,7 @@
 import Image, { StaticImageData } from 'next/image';
 import { GlobeIcon } from '@radix-ui/react-icons';
-import { CallToAction, DiscordIcon, GitHubIcon, TwitterIcon } from '@theguild/components';
+import { CallToAction, DiscordIcon, GitHubIcon, Heading, TwitterIcon } from '@theguild/components';
 import { cn } from '../lib';
-import { Heading } from './heading';
 import { MaskingScrollview } from './masking-scrollview';
 import Achrafash from './community-section/achrafash_.png';
 import ChimameRt from './community-section/chimame_rt.png';
