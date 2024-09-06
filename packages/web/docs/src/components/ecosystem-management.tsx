@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import {
   CallToAction,
   DecorationIsolation,
@@ -79,6 +80,9 @@ const EDGE_HOVER_INTERVAL_TIME = 5000;
 const EDGE_HOVER_RESET_TIME = 10_000;
 
 function Illustration(props: { className?: string }) {
+  const { basePath } = useRouter();
+  const svgPath = `${basePath}/ecosystem-management.svg`;
+
   const [highlightedEdge, setHighlightedEdge] = useState<number | null>(4);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -176,7 +180,7 @@ function Illustration(props: { className?: string }) {
           >
             <svg width={48} height={48}>
               <SafariLinearGradientDefs />
-              <use width="100%" height="100%" xlinkHref="./ecosystem-management.svg#hive" />
+              <use width="100%" height="100%" xlinkHref={`${svgPath}#hive`} />
             </svg>
           </Node>
           <Edge
@@ -197,7 +201,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg className="size-[var(--big-logo-size)]">
-              <use width="100%" height="100%" xlinkHref="./ecosystem-management.svg#hive" />
+              <use width="100%" height="100%" xlinkHref={`${svgPath}#hive`} />
             </svg>
           </Node>
           <Edge
@@ -217,7 +221,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48}>
-              <use xlinkHref="./ecosystem-management.svg#yoga" />
+              <use xlinkHref={`${svgPath}#yoga`} />
             </svg>
           </Node>
         </div>
@@ -253,7 +257,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 100 100">
-              <use xlinkHref="./graphql-logo.svg#logo" />
+              <use xlinkHref={`${basePath}/graphql-logo.svg#logo`} />
             </svg>
           </Node>
           <Edge
@@ -275,7 +279,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 48 48">
-              <use xlinkHref="./ecosystem-management.svg#codegen" />
+              <use xlinkHref={`${svgPath}#codegen`} />
             </svg>
           </Node>
         </div>

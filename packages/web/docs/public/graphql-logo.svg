@@ -1,13 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
   <defs>
-    <!-- Define the linear gradient that spans across the entire canvas -->
     <linearGradient id="myGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
       <stop offset="0%" stop-color="#A2C1C4" />
       <stop offset="100%" stop-color="#689093" />
     </linearGradient>
   </defs>
 
-  <!-- Group all elements together and apply the gradient to the group -->
   <g fill="url(#myGradient)" id="logo" width="100" height="100" viewBox="0 0 100 100">
     <path
       fill-rule="evenodd"
