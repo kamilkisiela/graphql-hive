@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import CountUp from 'react-countup';
+import { Heading } from '@theguild/components';
 import { cn } from '../lib';
-import { Heading } from './heading';
 
 export function StatsItem(props: {
   label: string;

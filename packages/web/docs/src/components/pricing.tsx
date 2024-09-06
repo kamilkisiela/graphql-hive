@@ -1,7 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
-import { CallToAction } from '@theguild/components';
-import { Heading } from './heading';
+import { CallToAction, Heading } from '@theguild/components';
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (

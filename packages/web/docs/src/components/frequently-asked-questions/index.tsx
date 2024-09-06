@@ -1,8 +1,8 @@
 import { Children, ComponentPropsWithoutRef } from 'react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { Heading } from '@theguild/components';
 import { cn } from '../../lib';
-import { Heading } from '../heading';
 import Questions from './questions.mdx';
 
 export function FrequentlyAskedQuestions({ className }: { className?: string }) {
