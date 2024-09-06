@@ -773,21 +773,23 @@ export const gatewayConfig = defineConfig({
   prometheus: {
     // Enable the metrics you want to expose
     // The following represent the default config of the plugin.
-    graphql_gateway_fetch_duration: true,
-    graphql_gateway_subgraph_execute_duration: true,
-    graphql_gateway_subgraph_execute_errors: true,
-    graphql_envelop_deprecated_field: true,
-    graphql_envelop_request: true,
-    graphql_envelop_request_duration: true,
-    graphql_envelop_request_time_summary: true,
-    graphql_envelop_phase_parse: true,
-    graphql_envelop_phase_validate: true,
-    graphql_envelop_phase_context: true,
-    graphql_envelop_error_result: true,
-    graphql_envelop_phase_execute: true,
-    graphql_envelop_phase_subscribe: true,
-    graphql_envelop_schema_change: true,
-    graphql_yoga_http_duration: true
+    metrics: {
+      graphql_gateway_fetch_duration: true,
+      graphql_gateway_subgraph_execute_duration: true,
+      graphql_gateway_subgraph_execute_errors: true,
+      graphql_envelop_deprecated_field: true,
+      graphql_envelop_request: true,
+      graphql_envelop_request_duration: true,
+      graphql_envelop_request_time_summary: true,
+      graphql_envelop_phase_parse: true,
+      graphql_envelop_phase_validate: true,
+      graphql_envelop_phase_context: true,
+      graphql_envelop_error_result: true,
+      graphql_envelop_phase_execute: true,
+      graphql_envelop_phase_subscribe: true,
+      graphql_envelop_schema_change: true,
+      graphql_yoga_http_duration: true,
+    },
   }
 })
 ```
@@ -846,8 +848,6 @@ filter is to include only `statusCode` with `200` value and `method` with `POST`
 for GraphQL requests, but it can also be `GET` depending on your client setup) value to get
 execution time of successful GraphQL requests only.
 
-To enable this metric, set the `http` option to `true`.
-
 This metric includes some useful labels to help you identify requests and group them together.
 
 | Label           | Description                                                                                                                                                                                                                                                                                                                                                                             |
@@ -871,8 +871,6 @@ This metric can provide insights into the network usage of your gateway. It does
 requests made to resolve GraphQL operation responses, but also include any other outgoing HTTP
 requests made by the gateway or one of its plugins. It will for example include requests made to
 fetch the supergraph schema from the configured Schema Registry.
-
-To enable this metric, set the `fetchMetrics` option to `true`.
 
 These metrics include some useful labels to help you identify requests and group them together.
 
@@ -901,8 +899,6 @@ queries made to resolve incoming operations as a
 This metric can provide insights into how the time is spent to resolve queries. It can help you
 identify bottlenecks in your subgraphs.
 
-To enable this metric, set the `subgraphExecute` option to `true`.
-
 | Label           | Description                                                                                                            |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `subgraphName`  | The name of the targeted subgraph.                                                                                     |
@@ -920,8 +916,6 @@ errors found in the response returned by the subgraph execution. It is exposed a
 
 This metric can help you identify subgraphs that are failing to execute operations. It can help
 identify issues with the subgraph itself or the communication between the gateway and the subgraph.
-
-To enable this metric, set the `subgraphExecuteErrors` option to `true`.
 
 | Label           | Description                                                                                                            |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -942,8 +936,6 @@ Since you don't have control over the parsing phase, this metric is mostly usefu
 attacks. A spike in this metric could indicate someone is trying to send malicious operations to
 your gateway.
 
-To enable this metric, set the `parse` option to `true`.
-
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
 | `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
@@ -958,8 +950,6 @@ This metric tracks the duration of the `validate` phase of the GraphQL execution
 time spent validating the incoming GraphQL operation. It is reported as a
 [histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
 
-To enable this metric, set the `validate` option to `true`.
-
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
 | `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
@@ -973,8 +963,6 @@ To enable this metric, set the `validate` option to `true`.
 This metric tracks the duration of the `context` phase of the GraphQL execution. It reports the time
 spent building the context object that will be passed to the executors. It is reported as a
 [histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
-
-To enable this metric, set the `contextBuilding` option to `true`.
 
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
@@ -994,8 +982,6 @@ the data from all sources required to construct the final response. It is report
 It is the metric that will give you the most insights into the performance of your gateway, since
 this is where most of the work is done.
 
-To enable this metric, set the `execute` option to `true`.
-
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
 | `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
@@ -1013,8 +999,6 @@ is reported as a [histogram](https://prometheus.io/docs/concepts/metric_types/#h
 It will notably include the time spent to setup upstream subscriptions with appropriate transport
 for each source.
 
-To enable this metric, set the `subscribe` option to `true`.
-
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
 | `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
@@ -1029,8 +1013,6 @@ This metric tracks the duration of the complete GraphQL operation execution. It 
 spent in the GraphQL specific processing, excluding the HTTP-level processing. It is reported as a
 [histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
 
-To enable this metric, set the `requestTotalDuration` option to `true`.
-
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
 | `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
@@ -1044,8 +1026,6 @@ To enable this metric, set the `requestTotalDuration` option to `true`.
 This metric provides a summary of the time spent on the GraphQL operation execution. It reports the
 same timing than [`graphql_envelop_request_duration`](#graphql_envelop_request_duration) but as a
 [summary](https://prometheus.io/docs/concepts/metric_types/#summary).
-
-To enable this metric, set the `requestSummary` option to `true`.
 
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
@@ -1064,8 +1044,6 @@ it counts all errors found in the final response constructed by the gateway afte
 subgraph responses, but it also includes errors from other GraphQL processing phases (parsing,
 validation and context building). It is exposed as a
 [counter](https://prometheus.io/docs/concepts/metric_types/#counter).
-
-To enable this metric, set the `errors` option to `true`.
 
 Depending on the phase when the error occurred, some labels may be missing. For example, if the
 error occurred during the context phase, only the `phase` label will be present.
@@ -1090,8 +1068,6 @@ It can differ from the number reported by
 [`graphql_yoga_http_duration_sum`](#graphql_yoga_http_duration) because a single HTTP request can
 contain multiple GraphQL operations if batching has been enabled.
 
-To enable this metric, set the `requestCount` option to `true`.
-
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
 | `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
@@ -1103,8 +1079,6 @@ To enable this metric, set the `requestCount` option to `true`.
   <summary>`graphql_envelop_deprecated_field` (default: **enabled**, type: **Counter**)</summary>
 
 This metric tracks the number of deprecated fields used in the GraphQL operation.
-
-To enable this metric, set the `deprecatedFields` option to `true`.
 
 | Label           | Description                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------- |
@@ -1124,8 +1098,6 @@ polling is enabled, this will include the schema reloads.
 If you are using a plugin that modifies the schema on the fly, be aware that this metric will also
 include updates made by those plugins. Which means that one schema update can actually trigger
 multiple schema changes.
-
-To enable this metric, set the `schemaChangeCount` option to `true`.
 
 </details>
 
