@@ -1,7 +1,7 @@
 ---
 description:
-  Monitoring and tracing are essential for debugging and understanding the performance of your Hive
-  Gateway.
+  Monitoring and tracing are essential for debugging and understanding the performance and overall
+  behavior of your Hive Gateway.
 ---
 
 import Image from 'next/image'
@@ -33,6 +33,8 @@ check but convey a different meaning:
 
 The difference is that a service can be _live_ but not _ready_ - for example, server has started and
 is accepting requests (alive), but the read replica it uses is still unavailable (not ready).
+
+Both endpoints are enabled by default.
 
 ### Liveliness
 
@@ -751,6 +753,28 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
+### Troubleshooting
+
+The default behavor of the plugin is to log errors and warnings to the console.
+
+You can customize this behavior by changing the value of the
+[`OTEL_LOG_LEVEL`](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/)
+environment variable on your gateway process/runtime.
+
+In addition, you can use the `Stdout` exporter to log the traces to the console:
+
+```ts filename="gateway.config.ts"
+import { createStdoutExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [createStdoutExporter()]
+  }
+})
+```
+
+This will log the traces to the console, which can be useful for debugging and troubleshooting.
+
 ## Prometheus Metrics
 
 [Prometheus](https://www.prometheus.io/) is a utility for producing, scraping and storage of metrics
@@ -788,8 +812,8 @@ export const gatewayConfig = defineConfig({
       graphql_envelop_phase_execute: true,
       graphql_envelop_phase_subscribe: true,
       graphql_envelop_schema_change: true,
-      graphql_yoga_http_duration: true,
-    },
+      graphql_yoga_http_duration: true
+    }
   }
 })
 ```
@@ -1133,6 +1157,19 @@ You can also use wildcards to instrument all the fields for a type. For example,
 root queries, you would use `Query.*`.
 
 </details>
+
+### Troubleshooting
+
+You can observe and troubleshoot the metrics by visiting the `/metrics` endpoint of your gateway.
+Run your gateway and execute a few GraphQL operations to produce some metrics.
+
+Then, use the following `curl` command will fetch the metrics from your gateway:
+
+```sh
+curl -v http://localhost:4000/metrics
+```
+
+> Change `http://localhost:4000` to the actual URL of your running gateway.
 
 ### Customizations
 
