@@ -164,7 +164,11 @@ function Illustration(props: { className?: string }) {
         </Edge>
         <div>
           <Node
-            title="Hive Gateway"
+            title={
+              <>
+                <span className={styles.smHidden}>Hive</span> Gateway
+              </>
+            }
             description="Gateway"
             edges={[1, 4, 5]}
             highlightedEdge={highlightedEdge}
@@ -330,8 +334,8 @@ function EdgeLabel(props: EdgeLabelProps) {
   );
 }
 
-interface NodeProps extends React.HTMLAttributes<HTMLElement> {
-  title: string;
+interface NodeProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
+  title: ReactNode;
   description?: ReactNode;
   edges: number[];
   highlightedEdge: number | null;
