@@ -9,6 +9,8 @@ export function Page(props: { children: ReactNode; className?: string }) {
     <>
       <div className={cn('flex h-full flex-col', props.className)}>{props.children}</div>
       {mounted && <CookiesConsent />}
+      {/* position Crisp button below the cookies banner */}
+      <style jsx>{' .crisp-client { z-index: 40 !important; '}</style>
     </>
   );
 }
