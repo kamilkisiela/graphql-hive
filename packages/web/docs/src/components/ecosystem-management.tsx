@@ -22,18 +22,18 @@ export function EcosystemManagementSection({ className }: { className?: string }
       <div className="relative mx-auto flex w-[1392px] max-w-full flex-col gap-x-4 gap-y-6 md:gap-y-12 lg:flex-row [@media(min-width:1400px)]:gap-x-[120px]">
         <div className="flex flex-col gap-12 lg:w-[488px]">
           <Heading as="h3" size="sm">
-            360° GraphQL Ecosystem Management
+            360° GraphQL Lifecycle
           </Heading>
           <ul className="mx-auto flex list-none flex-col gap-y-4 text-white/80 lg:gap-y-6">
             {[
-              'A complete ecosystem covering all your dev and management needs.',
-              'Full Federation Support out of the box. Drop-in replacement for Apollo GraphOS (Apollo Studio)',
+              'A complete ecosystem covering all your dev and production needs.',
+              'Full Apollo Federation Support. Drop-in replacement for Apollo GraphOS (Apollo Studio)',
               <>
                 Use tools of your choice — either dive into our full GraphQL ecosystem,
-                or&nbsp;build your own stack, connecting Apollo Federation, GraphQL Mesh, Stitching
-                and more.
+                or&nbsp;build your own stack, connecting GraphQL federation, Hive Gateway, GraphQL
+                Mesh and more.
               </>,
-              'Learn how to effortlessly migrate from Apollo and keep your GraphQL management vendor-unlocked.',
+              'Learn how to migrate from Apollo and keep your GraphQL stack vendor-unlocked.',
             ].map((text, i) => (
               <li key={i} className="flex items-start gap-4">
                 <CheckIcon className="mt-0.5 shrink-0 text-blue-400" />
@@ -50,7 +50,7 @@ export function EcosystemManagementSection({ className }: { className?: string }
             </CallToAction>
             <CallToAction href="https://github.com/the-guild-org" variant="secondary">
               <BookIcon />
-              Explore the full Ecosystem
+              Explore the ecosystem
             </CallToAction>
           </div>
         </div>
@@ -64,12 +64,12 @@ export function EcosystemManagementSection({ className }: { className?: string }
 }
 
 const edgeTexts = [
-  'Apps send requests to the Mesh Gateway which is the entrypoint to the internal GraphQL service/subgraph infrastructure.',
+  'Apps send requests to Hive Gateway that acts as the entrypoint to data from your GraphQL service/subgraphs.',
   'Developers that build the apps/api clients will use GraphQL Codegen for generating type-safe code that makes writing apps safer and faster.',
   'Codegen uses Hive to pull the GraphQL schema for generating the code.',
-  'Mesh pulls the composite schema / supergraph from the Hive schema registry that gives it all the information about the subgraphs and data available to server to the outside world/clients.',
-  'Mesh delegates GraphQL requests to the corresponding Yoga subgraphs within your internal network.',
-  'Check the subgraph schema against the Hive registry before deployment to ensure integrity. After deploying a new subgraph version, publish its schema to Hive, which generates the supergraph used by Mesh.',
+  'Hive Gateway pulls the composite schema / supergraph from the Hive schema registry that gives it all the information about the subgraphs and available data to serve to the outside world.',
+  'Hive Gateway delegates GraphQL requests to the corresponding Yoga subgraphs within your internal network.',
+  'Check the subgraph schema against the Hive registry before deployment to ensure integrity. After deploying a new subgraph version, publish its schema to Hive, to generate the supergraph used by Gateway.',
 ];
 const longestEdgeText = edgeTexts.reduce((a, b) => (a.length > b.length ? a : b));
 
@@ -164,15 +164,14 @@ function Illustration(props: { className?: string }) {
         </Edge>
         <div>
           <Node
-            title="Mesh"
-            description="GraphQL Gateway"
+            title="Hive Gateway"
+            description="Gateway"
             edges={[1, 4, 5]}
             highlightedEdge={highlightedEdge}
             onHighlight={onHighlightNode}
           >
-            <svg viewBox="0 0 48 48" width={48} height={48}>
-              <SafariLinearGradientDefs />
-              <use xlinkHref="/ecosystem-management.svg#mesh" />
+            <svg width={48} height={48}>
+              <use width="100%" height="100%" xlinkHref="/ecosystem-management.svg#hive" />
             </svg>
           </Node>
           <Edge
@@ -187,7 +186,7 @@ function Illustration(props: { className?: string }) {
           <Node
             className="h-[var(--big-node-h)] w-[var(--node-w)] flex-col text-center"
             title="Hive"
-            description="Decision-making engine"
+            description="Registry and CDN"
             edges={[3, 4, 6]}
             highlightedEdge={highlightedEdge}
             onHighlight={onHighlightNode}
@@ -240,12 +239,18 @@ function Illustration(props: { className?: string }) {
         </div>
         <div>
           <Node
-            title="GraphQL client"
-            className="justify-center"
+            title="Client"
+            description={
+              <span className="[@media(max-width:1438px)]:hidden">GraphQL client of choice</span>
+            }
             edges={[1, 2]}
             highlightedEdge={highlightedEdge}
             onHighlight={onHighlightNode}
-          />
+          >
+            <svg width={48} height={48} viewBox="0 0 100 100">
+              <use xlinkHref="/graphql-logo.svg#logo" />
+            </svg>
+          </Node>
           <Edge
             left
             className="flex h-[calc(var(--gap)+var(--big-node-h)/2-var(--node-h)/2)] flex-col items-center"
