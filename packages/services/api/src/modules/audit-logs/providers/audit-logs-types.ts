@@ -83,13 +83,11 @@ const SchemaDeletedAuditLogSchema = z.object({
 });
 
 const RoleCreatedAuditLogSchema = z.object({
-  projectId: z.string(),
   roleId: z.string(),
   roleName: z.string(),
 });
 
 const RoleAssignedAuditLogSchema = z.object({
-  projectId: z.string(),
   roleId: z.string(),
   roleName: z.string(),
   userIdAssigned: z.string(),
@@ -97,9 +95,14 @@ const RoleAssignedAuditLogSchema = z.object({
 });
 
 const RoleDeletedAuditLogSchema = z.object({
-  projectId: z.string(),
   roleId: z.string(),
   roleName: z.string(),
+});
+
+const RoleUpdatedAuditLogSchema = z.object({
+  roleId: z.string(),
+  roleName: z.string(),
+  updatedFields: z.string(),
 });
 
 export const auditLogSchema = z.discriminatedUnion('eventType', [
@@ -174,6 +177,10 @@ export const auditLogSchema = z.discriminatedUnion('eventType', [
   z.object({
     eventType: z.literal('ROLE_DELETED'),
     RoleDeletedAuditLogSchema,
+  }),
+  z.object({
+    eventType: z.literal('ROLE_UPDATED'),
+    RoleUpdatedAuditLogSchema,
   }),
 ]);
 

@@ -224,7 +224,6 @@ export const typeDefs = gql`
     user: AuditLogUserRecord!
     organizationId: String!
     eventType: String!
-    projectId: String!
     roleId: String!
     roleName: String!
   }
@@ -235,7 +234,6 @@ export const typeDefs = gql`
     user: AuditLogUserRecord!
     organizationId: String!
     eventType: String!
-    projectId: String!
     roleId: String!
     roleName: String!
     userIdAssigned: String!
@@ -248,8 +246,18 @@ export const typeDefs = gql`
     user: AuditLogUserRecord!
     organizationId: String!
     eventType: String!
-    projectId: String!
     roleId: String!
     roleName: String!
+  }
+
+  type RoleUpdatedAuditLog implements AuditLog {
+    id: ID!
+    eventTime: Date!
+    user: AuditLogUserRecord!
+    organizationId: String!
+    eventType: String!
+    roleId: String!
+    roleName: String!
+    updatedFields: JSON!
   }
 `;

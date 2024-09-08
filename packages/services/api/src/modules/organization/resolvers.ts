@@ -460,8 +460,7 @@ export const resolvers: OrganizationModule.Resolvers = {
       }
 
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).createMemberRole({
+      const result = await injector.get(OrganizationManager).createMemberRole({
         organizationId,
         name: inputValidation.data.name,
         description: inputValidation.data.description,
@@ -469,6 +468,27 @@ export const resolvers: OrganizationModule.Resolvers = {
         projectAccessScopes: input.projectAccessScopes,
         targetAccessScopes: input.targetAccessScopes,
       });
+
+      // Audit log event
+      if (result.ok) {
+        const currentUser = await injector.get(AuthManager).getCurrentUser();
+
+        await injector.get(AuditLogManager).createLogAuditEvent({
+          eventType: 'ROLE_CREATED',
+          eventTime: new Date().toISOString(),
+          organizationId,
+          user: {
+            userEmail: currentUser.email,
+            userId: currentUser.id,
+          },
+          RoleCreatedAuditLogSchema: {
+            roleName: inputValidation.data.name,
+            roleId: result.ok.createdRole.id,
+          },
+        });
+      }
+
+      return result;
     },
     async updateMemberRole(_, { input }, { injector }) {
       const inputValidation = createOrUpdateMemberRoleInputSchema.safeParse({
@@ -488,8 +508,7 @@ export const resolvers: OrganizationModule.Resolvers = {
         };
       }
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).updateMemberRole({
+      const result = await injector.get(OrganizationManager).updateMemberRole({
         organizationId,
         roleId: input.role,
         name: inputValidation.data.name,
@@ -498,23 +517,93 @@ export const resolvers: OrganizationModule.Resolvers = {
         projectAccessScopes: input.projectAccessScopes,
         targetAccessScopes: input.targetAccessScopes,
       });
+
+      // Audit log event
+      if (result.ok) {
+        const currentUser = await injector.get(AuthManager).getCurrentUser();
+
+        await injector.get(AuditLogManager).createLogAuditEvent({
+          eventType: 'ROLE_UPDATED',
+          eventTime: new Date().toISOString(),
+          organizationId,
+          user: {
+            userEmail: currentUser.email,
+            userId: currentUser.id,
+          },
+          RoleUpdatedAuditLogSchema: {
+            roleName: inputValidation.data.name,
+            roleId: input.role,
+            updatedFields: JSON.stringify({
+              name: inputValidation.data.name,
+              description: inputValidation.data.description,
+              organizationAccessScopes: input.organizationAccessScopes,
+              projectAccessScopes: input.projectAccessScopes,
+              targetAccessScopes: input.targetAccessScopes,
+            }),
+          },
+        });
+      }
+      return result;
     },
     async deleteMemberRole(_, { input }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).deleteMemberRole({
+      const result = await injector.get(OrganizationManager).deleteMemberRole({
         organizationId,
         roleId: input.role,
       });
+
+      // Audit log event
+      if (result.ok) {
+        const currentUser = await injector.get(AuthManager).getCurrentUser();
+
+        await injector.get(AuditLogManager).createLogAuditEvent({
+          eventType: 'ROLE_DELETED',
+          eventTime: new Date().toISOString(),
+          organizationId,
+          user: {
+            userEmail: currentUser.email,
+            userId: currentUser.id,
+          },
+          RoleDeletedAuditLogSchema: {
+            roleName: result.ok.updatedOrganization.name,
+            roleId: input.role,
+          },
+        });
+      }
+      return result;
     },
     async assignMemberRole(_, { input }, { injector }) {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
-
-      return injector.get(OrganizationManager).assignMemberRole({
+      const result = await injector.get(OrganizationManager).assignMemberRole({
         organizationId,
         userId: input.user,
         roleId: input.role,
       });
+
+      // Audit log event
+      if (result.ok) {
+        const currentUser = await injector.get(AuthManager).getCurrentUser();
+
+        await injector.get(AuditLogManager).createLogAuditEvent({
+          eventType: 'ROLE_ASSIGNED',
+          eventTime: new Date().toISOString(),
+          organizationId,
+          user: {
+            userEmail: currentUser.email,
+            userId: currentUser.id,
+          },
+          RoleAssignedAuditLogSchema: {
+            roleId: input.role,
+            roleName: result.ok.previousMemberRole
+              ? result.ok.previousMemberRole.name
+              : 'No Previous Role',
+            userEmailAssigned: result.ok.updatedMember.user.email,
+            userIdAssigned: input.user,
+          },
+        });
+      }
+
+      return result;
     },
     async migrateUnassignedMembers(_, { input }, { injector }) {
       const organizationIdFromInput =
