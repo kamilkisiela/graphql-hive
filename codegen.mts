@@ -104,6 +104,7 @@ const config: CodegenConfig = {
           RoleCreatedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
           RoleAssignedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
           RoleDeletedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
+          RoleUpdatedAuditLog: '../modules/audit-logs/module.graphql.mappers#AuditLogMapper',
           SchemaChange: '../modules/schema/module.graphql.mappers#SchemaChangeMapper',
           SchemaChangeApproval:
             '../modules/schema/module.graphql.mappers#SchemaChangeApprovalMapper',

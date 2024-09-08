@@ -11,15 +11,15 @@ export const SchemaCheckedAuditLog: SchemaCheckedAuditLogResolvers = {
     }
     throw new Error('Invalid eventType');
   },
-  schemaId: e => {
+  schemaSdl: e => {
     if (e.eventType === 'SCHEMA_CHECKED') {
-      return e.schemaId;
+      return e.schemaSdl;
     }
     throw new Error('Invalid eventType');
   },
-  schemaName: e => {
+  targetId: e => {
     if (e.eventType === 'SCHEMA_CHECKED') {
-      return e.schemaName;
+      return e.targetId;
     }
     throw new Error('Invalid eventType');
   },

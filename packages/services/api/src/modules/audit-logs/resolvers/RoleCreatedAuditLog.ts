@@ -5,12 +5,6 @@ export const RoleCreatedAuditLog: RoleCreatedAuditLogResolvers = {
   eventTime: e => e.eventTime,
   eventType: e => e.eventType,
   id: e => e.id,
-  projectId: e => {
-    if (e.eventType === 'ROLE_CREATED') {
-      return e.projectId;
-    }
-    throw new Error('Invalid eventType');
-  },
   roleId: e => {
     if (e.eventType === 'ROLE_CREATED') {
       return e.roleId;

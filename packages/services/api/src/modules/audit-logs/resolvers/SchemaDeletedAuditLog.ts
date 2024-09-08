@@ -11,9 +11,9 @@ export const SchemaDeletedAuditLog: SchemaDeletedAuditLogResolvers = {
     }
     throw new Error('Invalid eventType');
   },
-  schemaId: e => {
+  targetId: e => {
     if (e.eventType === 'SCHEMA_DELETED') {
-      return e.schemaId;
+      return e.targetId;
     }
     throw new Error('Invalid eventType');
   },
