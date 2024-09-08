@@ -11,9 +11,9 @@ export const SchemaPublishAuditLog: SchemaPublishAuditLogResolvers = {
     }
     throw new Error('Invalid eventType');
   },
-  schemaId: e => {
+  targetId: e => {
     if (e.eventType === 'SCHEMA_PUBLISH') {
-      return e.schemaId;
+      return e.targetId;
     }
     throw new Error('Invalid eventType');
   },
