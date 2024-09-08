@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
 import { TargetNameModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
-import { AuthManager } from '../../../auth/providers/auth-manager';
-import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']> = async (
   _,
@@ -50,7 +50,6 @@ export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']
     target: targetId,
   });
 
-
   // Audit Log Event
   const currentUser = await injector.get(AuthManager).getCurrentUser();
   const allUpdatedFields = JSON.stringify({
@@ -68,9 +67,9 @@ export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']
     TargetSettingsUpdatedAuditLogSchema: {
       projectId: projectId,
       targetId: targetId,
-      updatedFields: allUpdatedFields
-    }
-  })
+      updatedFields: allUpdatedFields,
+    },
+  });
 
   return {
     ok: {

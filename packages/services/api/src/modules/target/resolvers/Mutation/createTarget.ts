@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
 import { TargetNameModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
-import { AuthManager } from '../../../auth/providers/auth-manager';
-import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const createTarget: NonNullable<MutationResolvers['createTarget']> = async (
   _,
@@ -57,8 +57,8 @@ export const createTarget: NonNullable<MutationResolvers['createTarget']> = asyn
       projectId: target.projectId,
       targetId: target.id,
       targetName: target.name,
-    }
-  })
+    },
+  });
 
   return {
     ok: {

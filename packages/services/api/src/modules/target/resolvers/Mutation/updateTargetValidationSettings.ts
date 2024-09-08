@@ -1,11 +1,11 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
 import { PercentageModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
-import { AuthManager } from '../../../auth/providers/auth-manager';
-import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const updateTargetValidationSettings: NonNullable<
   MutationResolvers['updateTargetValidationSettings']
@@ -71,9 +71,9 @@ export const updateTargetValidationSettings: NonNullable<
     TargetSettingsUpdatedAuditLogSchema: {
       projectId: project,
       targetId: target,
-      updatedFields: allUpdatedFields
-    }
-  })
+      updatedFields: allUpdatedFields,
+    },
+  });
 
   return {
     ok: {

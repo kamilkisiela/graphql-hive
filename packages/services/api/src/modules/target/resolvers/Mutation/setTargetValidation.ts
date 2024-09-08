@@ -34,7 +34,7 @@ export const setTargetValidation: NonNullable<MutationResolvers['setTargetValida
   const currentUser = await injector.get(AuthManager).getCurrentUser();
   const allUpdatedFields = JSON.stringify({
     enabled: input.enabled,
-    graphqlEndpointUrl: result.graphqlEndpointUrl
+    graphqlEndpointUrl: result.graphqlEndpointUrl,
   });
 
   await injector.get(AuditLogManager).createLogAuditEvent({
@@ -48,9 +48,9 @@ export const setTargetValidation: NonNullable<MutationResolvers['setTargetValida
     TargetSettingsUpdatedAuditLogSchema: {
       projectId: project,
       targetId: target,
-      updatedFields: allUpdatedFields
-    }
-  })
+      updatedFields: allUpdatedFields,
+    },
+  });
 
-  return result
+  return result;
 };

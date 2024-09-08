@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { ProjectManager } from '../../providers/project-manager';
 import { ProjectNameModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
-import { AuthManager } from '../../../auth/providers/auth-manager';
-import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const updateProjectName: NonNullable<MutationResolvers['updateProjectName']> = async (
   _,

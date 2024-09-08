@@ -44,8 +44,8 @@ export const deleteTarget: NonNullable<MutationResolvers['deleteTarget']> = asyn
       projectId: target.projectId,
       targetId: target.id,
       targetName: target.name,
-    }
-  })
+    },
+  });
 
   return {
     selector: {

@@ -46,9 +46,9 @@ export const updateTargetGraphQLEndpointUrl: NonNullable<
     TargetSettingsUpdatedAuditLogSchema: {
       projectId: projectId,
       targetId: targetId,
-      updatedFields: allUpdatedFields
-    }
-  })
+      updatedFields: allUpdatedFields,
+    },
+  });
 
   return {
     ok: {

@@ -36,10 +36,9 @@ export const deleteProject: NonNullable<MutationResolvers['deleteProject']> = as
     },
     ProjectDeletedAuditLogSchema: {
       projectId: projectId,
-      projectName: deletedProject.name
+      projectName: deletedProject.name,
     },
   });
-
 
   return {
     selector: {

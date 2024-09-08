@@ -21,11 +21,10 @@ export const experimental__updateTargetSchemaComposition: NonNullable<
     nativeComposition: input.nativeComposition,
   });
 
-
   // Audit Log Event
   const currentUser = await injector.get(AuthManager).getCurrentUser();
   const allUpdatedFields = JSON.stringify({
-    nativeComposition: input.nativeComposition
+    nativeComposition: input.nativeComposition,
   });
 
   await injector.get(AuditLogManager).createLogAuditEvent({
@@ -39,9 +38,9 @@ export const experimental__updateTargetSchemaComposition: NonNullable<
     TargetSettingsUpdatedAuditLogSchema: {
       projectId: projectId,
       targetId: targetId,
-      updatedFields: allUpdatedFields
-    }
-  })
+      updatedFields: allUpdatedFields,
+    },
+  });
 
-  return result
+  return result;
 };
