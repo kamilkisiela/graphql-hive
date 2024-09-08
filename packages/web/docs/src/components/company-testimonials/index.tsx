@@ -165,7 +165,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                     )}
                     <article className="max-lg:mt-6 lg:relative" id={getTestimonialId(company)}>
                       <Logo title={company} height={32} className="text-blue-1000 mb-6 lg:hidden" />
-                      <blockquote className="blockquote-beige-500 lg:text-xl xl:text-2xl xl:leading-[32px]">
+                      <blockquote className="sm:blockquote-beige-500 lg:text-xl xl:text-2xl xl:leading-[32px]">
                         {text}
                       </blockquote>
                       {person && <TestimonialPerson className="mt-6" person={person} />}
