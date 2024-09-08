@@ -1,3 +1,5 @@
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { ProjectManager } from '../../providers/project-manager';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
@@ -21,6 +23,24 @@ export const deleteProject: NonNullable<MutationResolvers['deleteProject']> = as
     organization: organizationId,
     project: projectId,
   });
+
+  // Audit Log Event
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  await injector.get(AuditLogManager).createLogAuditEvent({
+    eventTime: new Date().toISOString(),
+    eventType: 'PROJECT_DELETED',
+    organizationId: organizationId,
+    user: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+    },
+    ProjectDeletedAuditLogSchema: {
+      projectId: projectId,
+      projectName: deletedProject.name
+    },
+  });
+
+
   return {
     selector: {
       organization: organizationId,

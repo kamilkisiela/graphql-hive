@@ -3,6 +3,8 @@ import { IdTranslator } from '../../../shared/providers/id-translator';
 import { ProjectManager } from '../../providers/project-manager';
 import { ProjectNameModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
+import { AuthManager } from '../../../auth/providers/auth-manager';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const updateProjectName: NonNullable<MutationResolvers['updateProjectName']> = async (
   _,
@@ -33,6 +35,25 @@ export const updateProjectName: NonNullable<MutationResolvers['updateProjectName
     name: input.name,
     organization: organizationId,
     project: projectId,
+  });
+
+  // Audit Log Event
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+
+  await injector.get(AuditLogManager).createLogAuditEvent({
+    eventTime: new Date().toISOString(),
+    eventType: 'PROJECT_SETTINGS_UPDATED',
+    organizationId: organizationId,
+    user: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+    },
+    ProjectSettingsUpdatedAuditLogSchema: {
+      projectId: projectId,
+      updatedFields: JSON.stringify({
+        name: input.name,
+      }),
+    },
   });
 
   return {
