@@ -3,6 +3,8 @@ import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
 import { TargetNameModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
+import { AuthManager } from '../../../auth/providers/auth-manager';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']> = async (
   _,
@@ -47,6 +49,28 @@ export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']
     project: projectId,
     target: targetId,
   });
+
+
+  // Audit Log Event
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  const allUpdatedFields = JSON.stringify({
+    name: input.name,
+  });
+
+  await injector.get(AuditLogManager).createLogAuditEvent({
+    eventTime: new Date().toISOString(),
+    eventType: 'TARGET_SETTINGS_UPDATED',
+    organizationId: organizationId,
+    user: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+    },
+    TargetSettingsUpdatedAuditLogSchema: {
+      projectId: projectId,
+      targetId: targetId,
+      updatedFields: allUpdatedFields
+    }
+  })
 
   return {
     ok: {

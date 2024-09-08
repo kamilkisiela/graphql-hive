@@ -4,6 +4,8 @@ import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
 import { PercentageModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
+import { AuthManager } from '../../../auth/providers/auth-manager';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 
 export const updateTargetValidationSettings: NonNullable<
   MutationResolvers['updateTargetValidationSettings']
@@ -48,6 +50,30 @@ export const updateTargetValidationSettings: NonNullable<
     targets: result.data.targets,
     excludedClients: result.data.excludedClients ?? [],
   });
+
+  // Audit Log Event
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  const allUpdatedFields = JSON.stringify({
+    period: input.period,
+    percentage: input.percentage,
+    targets: result.data.targets,
+    excludedClients: result.data.excludedClients ?? [],
+  });
+
+  await injector.get(AuditLogManager).createLogAuditEvent({
+    eventTime: new Date().toISOString(),
+    eventType: 'TARGET_SETTINGS_UPDATED',
+    organizationId: organization,
+    user: {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+    },
+    TargetSettingsUpdatedAuditLogSchema: {
+      projectId: project,
+      targetId: target,
+      updatedFields: allUpdatedFields
+    }
+  })
 
   return {
     ok: {
