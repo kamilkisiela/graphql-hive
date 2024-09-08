@@ -192,8 +192,8 @@ export const typeDefs = gql`
     organizationId: String!
     eventType: String!
     projectId: String!
-    schemaId: String!
-    schemaName: String!
+    targetId: String!
+    schemaSdl: String!
   }
 
   type SchemaPublishAuditLog implements AuditLog {
@@ -203,7 +203,7 @@ export const typeDefs = gql`
     organizationId: String!
     eventType: String!
     projectId: String!
-    schemaId: String!
+    targetId: String!
     schemaName: String!
   }
 
@@ -214,7 +214,7 @@ export const typeDefs = gql`
     organizationId: String!
     eventType: String!
     projectId: String!
-    schemaId: String!
+    targetId: String!
     schemaName: String!
   }
 

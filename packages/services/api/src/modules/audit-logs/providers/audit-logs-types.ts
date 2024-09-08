@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { User } from '../../../__generated__/types';
+import { target } from '../../target/resolvers/Query/target';
 
 const UserInvitedAuditLogSchema = z.object({
   inviteeId: z.string(),
@@ -64,19 +65,20 @@ const SchemaPolicySettingsUpdatedAuditLogSchema = z.object({
 
 const SchemaCheckedAuditLogSchema = z.object({
   projectId: z.string(),
-  schemaId: z.string(),
-  schemaName: z.string(),
+  targetId: z.string(),
+  schemaSdl: z.string(),
 });
 
 const SchemaPublishAuditLogSchema = z.object({
   projectId: z.string(),
-  schemaId: z.string(),
-  schemaName: z.string(),
+  targetId: z.string(),
+  schemaName: z.string().nullable().optional(),
+  schemaSdl: z.string(),
 });
 
 const SchemaDeletedAuditLogSchema = z.object({
   projectId: z.string(),
-  schemaId: z.string(),
+  targetId: z.string(),
   schemaName: z.string(),
 });
 

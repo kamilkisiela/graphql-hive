@@ -5,7 +5,7 @@ import { AuditLogEvent, auditLogSchema } from './audit-logs-types';
 
 // TODO: Error: No provider for ClickHouse! (AuditLogManager -> ClickHouse) - in Module "audit-logs" (Operation Scope)
 @Injectable({
-  scope: Scope.Operation,
+  scope: Scope.Singleton,
   global: true,
 })
 export class AuditLogManager {
