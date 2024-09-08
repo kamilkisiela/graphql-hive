@@ -11,6 +11,8 @@ import { BookIcon } from '../book-icon';
 import { CheckIcon } from '../check-icon';
 import styles from './ecosystem-management.module.css';
 
+const svgHref = new URL('./ecosystem-management.svg', import.meta.url).toString();
+
 export function EcosystemManagementSection({ className }: { className?: string }) {
   return (
     <section
@@ -81,7 +83,6 @@ const EDGE_HOVER_RESET_TIME = 10_000;
 
 function Illustration(props: { className?: string }) {
   const { basePath } = useRouter();
-  const svgPath = `${basePath}/ecosystem-management.svg`;
 
   const [highlightedEdge, setHighlightedEdge] = useState<number | null>(4);
 
@@ -180,7 +181,7 @@ function Illustration(props: { className?: string }) {
           >
             <svg width={48} height={48}>
               <SafariLinearGradientDefs />
-              <use width="100%" height="100%" xlinkHref={`${svgPath}#hive`} />
+              <use width="100%" height="100%" xlinkHref={`${svgHref}#hive`} />
             </svg>
           </Node>
           <Edge
@@ -201,7 +202,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg className="size-[var(--big-logo-size)]">
-              <use width="100%" height="100%" xlinkHref={`${svgPath}#hive`} />
+              <use width="100%" height="100%" xlinkHref={`${svgHref}#hive`} />
             </svg>
           </Node>
           <Edge
@@ -221,7 +222,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48}>
-              <use xlinkHref={`${svgPath}#yoga`} />
+              <use xlinkHref={`${svgHref}#yoga`} />
             </svg>
           </Node>
         </div>
@@ -279,7 +280,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 48 48">
-              <use xlinkHref={`${svgPath}#codegen`} />
+              <use xlinkHref={`${svgHref}#codegen`} />
             </svg>
           </Node>
         </div>
