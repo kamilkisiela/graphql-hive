@@ -1,8 +1,8 @@
 import { Callout } from '@theguild/components'
 
-# Authorisation and Authentication (JWT)
+# Authorization and Authentication
 
-Hive Gateway supports Authentication and Authorisation using JSON Web Tokens (JWT).
+Hive Gateway supports Authentication and Authorization using JSON Web Tokens (JWT).
 
 A [JSON Web Tokens (JWT)](https://jwt.io/) is a signed token containing arbitrary informations,
 commonly used for authentication. By being signed by the issuer of the token, it can be verified
@@ -22,6 +22,11 @@ use [HMAC Signature](/docs/gateway/features/security/hmac-signature) between you
 the subgraphs. This will ensure that the requests to the subgraphs are trusted and signed by the
 gateway, and no other entity can execute requests to the subgraph on behalf of the end-users.
 
+</Callout>
+
+<Callout>
+  You can refer to [Generic Auth plugin docs](https://www.npmjs.com/package/@envelop/generic-auth),
+  if you need a more customized auth setup without JWT.
 </Callout>
 
 ## How to use?
@@ -546,7 +551,9 @@ export const gatewayConfig = defineConfig({
 > `reject: { missingToken: false, invalidToken: false }` and handle the error in your resolvers. The
 > `context.jwt` will be `undefined` in case of missing or invalid token.
 
-### Granular Protection optionally with Auth Directives (`@authenticated`, `@requiresScopes` and `@policy`)
+## Granular Protection using Auth Directives (`@authenticated`, `@requiresScopes` and `@policy`)
+
+### Configuration
 
 By default, the JWT plugin protects the whole schema. If you want to use a granular protection by
 using Federation directives such as `@authenticated`, `@requiresScopes` and `@policy`, you can use
@@ -579,4 +586,98 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-[Learn more about granular protection of Generic Auth plugin](/docs/gateway/features/auth/generic-auth)
+### Protect a field using a field `@authenticated`
+
+In your GraphQL schema SDL, you can add `@authenticated` directive to your fields.
+
+```graphql
+# Import it from Federation spec
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.6", import: ["@authenticated"])
+
+type Query {
+  me: User! @authenticated
+  protectedField: String @authenticated
+  # publicField: String
+}
+```
+
+> You can apply that directive to any GraphQL `field` definition, not only to root fields.
+
+### Role/scope based authentication (RBAC) with `@requiresScope` directive
+
+You can use `@requiresScope` directive to protect your schema based on the user's role or scope.
+Here's an example of how you can use it:
+
+```graphql
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.5", import: ["@requiresScopes"])
+
+type Query {
+  me: User! @requiresScopes(scopes: [["read:user"]])
+  protectedField: String @requiresScopes(scopes: [["read:admin"]])
+  publicField: String
+}
+```
+
+By default, the plugin will try to extract available scopes for the current payload from `scope`
+property which is expected to be a string like `read:user read:admin`. However you can customize
+this behavior by providing a custom `extractScopes` function.
+
+```ts
+{
+  resolveUserFn,
+  validateUser,
+  mode: 'protect-granular',
+  // Set where to extract the payload
+  resolveUser: ctx => ctx.jwt?.payload,
+  extractScopes: jwtPayload => jwtPayload?.scopes // Expected to return an array of strings
+}
+```
+
+You can also apply `AND` or `OR` logic to the scopes:
+
+```graphql
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.5", import: ["@requiresScopes"])
+
+type Query {
+  # This field requires the user to have `read:user` OR `read:admin` scopes
+  me: User! @requiresScopes(scopes: [["read:user"], ["read:admin"]])
+  # This field requires the user to have `read:user` AND `read:admin` scopes
+  protectedField: String @requiresScopes(scopes: [["read:admin", "read:user"]])
+  publicField: String
+}
+```
+
+### `@policy` directive to fetch the roles from a policy service
+
+You can use the `@policy` directive to fetch the roles from a policy service. Here's an example of
+how you can use it:
+
+```graphql
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.5", import: ["@policy"])
+
+type Query {
+  me: User! @policy(policies: [["read:user"]])
+  protectedField: String @policy(policies: [["read:admin"]])
+  publicField: String
+}
+```
+
+It has the same logic with `@requiresScopes` but it can asynchronously fetch the roles from a
+source;
+
+```ts
+{
+  resolveUserFn,
+  validateUser,
+  mode: 'protect-granular',
+  fetchPolicies: async user => {
+    const res = await fetch('https://policy-service.com', {
+      headers: {
+        Authorization: `Bearer ${user.token}`
+      }
+    })
+    // Expected to return an array of strings
+    return res.json()
+  }
+}
+```
