@@ -6,9 +6,9 @@ import {
   Heading,
   HighlightDecoration,
 } from '@theguild/components';
-import { cn } from '../lib';
-import { BookIcon } from './book-icon';
-import { CheckIcon } from './check-icon';
+import { cn } from '../../lib';
+import { BookIcon } from '../book-icon';
+import { CheckIcon } from '../check-icon';
 import styles from './ecosystem-management.module.css';
 
 export function EcosystemManagementSection({ className }: { className?: string }) {
@@ -411,7 +411,7 @@ function Node({
 }
 
 /**
- * This must be included in any of the SVGs here so they work nicely in Safari.
+ * This must be included in one of the SVGs here so they work nicely in Safari.
  */
 function SafariLinearGradientDefs() {
   return (
