@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { User } from '../../../__generated__/types';
-import { target } from '../../target/resolvers/Query/target';
 
 const UserInvitedAuditLogSchema = z.object({
   inviteeId: z.string(),
