@@ -1,4 +1,4 @@
-import { Callout } from '@theguild/components'
+import { Callout, Tabs } from '@theguild/components'
 
 # Authorization and Authentication
 
@@ -254,7 +254,11 @@ export const gatewayConfig = defineConfig({
 
 ### In upstream GraphQL subgraphs
 
-#### GraphQL-Yoga
+<Tabs items={['GraphQL-Yoga', 'Apollo Server', 'Other GraphQL servers']}>
+
+{/* GraphQL-Yoga */}
+
+<Tabs.Tab>
 
 The JWT token and claims are forwarded to the upstream GraphQL subgraphs, using the `extensions`
 field.
@@ -287,7 +291,11 @@ like you would in the gateway.
 This makes the process of integrating JWT easier, and streamlined across the whole flow of
 execution.
 
-#### Apollo Server
+</Tabs.Tab>
+
+{/* Apollo Server */}
+
+<Tabs.Tab>
 
 With Apollo-Server, you can access the forwarded claims/token, using a custom Apollo-Server plugin
 that extracts `extensions` and injects it into the context:
@@ -308,7 +316,11 @@ const server = new ApolloServer({
 })
 ```
 
-#### Other GraphQL servers
+</Tabs.Tab>
+
+{/* Other GraphQL servers */}
+
+<Tabs.Tab>
 
 Other implementations for GraphQL subgraph servers can also access the JWT token and claims, by
 looking at the `extensions` field of the incoming request.
@@ -333,13 +345,21 @@ Hive Gateway, following this structure:
 }
 ```
 
+</Tabs.Tab>
+
+</Tabs>
+
 ## Additional Configuration
 
 ### Token lookup
 
 The plugin can be configured to look for the JWT token in different locations:
 
-#### HTTP Header
+<Tabs items={['HTTP Header', 'HTTP Cookie', 'Custom Function']}>
+
+{/* HTTP Header */}
+
+<Tabs.Tab>
 
 By default, the plugin will look for the token in the `authorization` header. You can configure the
 plugin to look for the token in a different header or with a different prefix.
@@ -358,7 +378,11 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-#### HTTP Cookie
+</Tabs.Tab>
+
+{/* HTTP Cookie */}
+
+<Tabs.Tab>
 
 You can configure the plugin to look for the token in a cookie. To do so, you need to enable cookie
 parsing in the gateway.
@@ -377,7 +401,11 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-#### Custom Function
+</Tabs.Tab>
+
+{/* Custom Function */}
+
+<Tabs.Tab>
 
 You can configure the plugin to use a custom function to look for the token:
 
@@ -397,7 +425,11 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-#### Multiple locations
+</Tabs.Tab>
+
+{/* Multiple locations */}
+
+<Tabs.Tab>
 
 You can configure the plugin to look for the token in multiple locations. The plugin will look for
 the token in the order you provide.
@@ -419,13 +451,21 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
+</Tabs.Tab>
+
+</Tabs>
+
 ---
 
 ### Signing Key providers
 
 The plugin can be configured to use different signing key providers:
 
-#### Inline
+<Tabs items={['Inline', 'Remote JWKS', 'Multiple providers']}>
+
+{/* Inline */}
+
+<Tabs.Tab>
 
 You can provide the signing key directly in the configuration.
 
@@ -447,7 +487,11 @@ export const gatewayConfig = defineConfig({
 > In case you are using an inline signing key provider, all `keyid` / `kid` will be allowed in
 > tokens.
 
-#### Remote JWKS
+</Tabs.Tab>
+
+{/* Remote JWKS */}
+
+<Tabs.Tab>
 
 You can configure the plugin to fetch the signing key from a remote JWKS endpoint.
 
@@ -470,7 +514,11 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-#### Multiple providers
+</Tabs.Tab>
+
+{/* Multiple providers */}
+
+<Tabs.Tab>
 
 When using multiple providers, the plugin will try to use the first available signing key.
 
@@ -495,6 +543,10 @@ export const gatewayConfig = defineConfig({
   }
 })
 ```
+
+</Tabs.Tab>
+
+</Tabs>
 
 ---
 
