@@ -195,7 +195,6 @@ export function FeatureTabs({ className }: { className?: string }) {
                   src={highlight.image}
                   placeholder="blur"
                   blurDataURL={highlight.image.blurDataURL}
-                  priority
                   className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
                   role="presentation"
                   alt=""
@@ -256,7 +255,7 @@ function Feature(props: {
         {highlights.map((highlight, i) => {
           return (
             <div
-              key={highlight.title}
+              key={i}
               onPointerOver={() => props.setActiveHighlight(highlight.title)}
               className="hover:bg-beige-100 -m-2 rounded-lg p-2 md:-m-4 md:rounded-xl md:p-4"
             >
