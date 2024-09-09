@@ -101,6 +101,7 @@ export function FeatureTabs({ className }: { className?: string }) {
         {...smallScreenTabHandlers}
         onValueChange={tab => {
           setCurrentTab(tab);
+          setActiveHighlight(highlights[tab][0].title);
           smallScreenTabHandlers.onValueChange();
         }}
         value={currentTab}
@@ -181,12 +182,12 @@ export function FeatureTabs({ className }: { className?: string }) {
               />
             </Tabs.Content>
           </>
-          <div className="relative mx-6 h-full flex-1 overflow-hidden rounded-3xl bg-blue-400 max-sm:h-[290px] sm:min-h-[400px] md:mr-0">
+          <div className="relative mx-4 h-full flex-1 overflow-hidden rounded-3xl bg-blue-400 max-sm:h-[290px] sm:min-h-[400px] md:ml-6 md:mr-0">
             {allHighlights.map((highlight, i) => (
               <div
                 key={i}
                 data-current={activeHighlight === highlight.title}
-                className="absolute inset-0 opacity-0 transition duration-300 ease-linear data-[current=true]:opacity-100"
+                className="absolute inset-0 opacity-0 transition delay-150 duration-150 ease-linear data-[current=true]:z-10 data-[current=true]:opacity-100 data-[current=true]:delay-0"
               >
                 <Image
                   width={925} // max rendered width is 880px
