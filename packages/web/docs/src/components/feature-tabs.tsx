@@ -1,5 +1,4 @@
 import { ReactNode, useState } from 'react';
-import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -108,7 +107,7 @@ export function FeatureTabs({ className }: { className?: string }) {
       >
         <Tabs.List
           className={
-            'sm:bg-beige-200 mb-12 flex flex-col sm:flex-row sm:rounded-2xl' +
+            'sm:bg-beige-200 mb-6 flex flex-col sm:flex-row sm:rounded-2xl md:mb-12' +
             ' group mx-4 mt-6 md:mx-0 md:mt-0' +
             ' max-sm:h-[58px] max-sm:focus-within:rounded-b-none' +
             ' max-sm:focus-within:pointer-events-none' + // <- blur on click of current
@@ -182,15 +181,16 @@ export function FeatureTabs({ className }: { className?: string }) {
               />
             </Tabs.Content>
           </>
-          {allHighlights.map((highlight, i) => (
-            <div
-              key={i}
-              className={cn('h-full', activeHighlight === highlight.title ? 'block' : 'hidden')}
-            >
-              <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
+          <div className="relative mx-6 h-full flex-1 overflow-hidden rounded-3xl bg-blue-400 max-sm:h-[290px] sm:min-h-[400px] md:mr-0">
+            {allHighlights.map((highlight, i) => (
+              <div
+                key={i}
+                data-current={activeHighlight === highlight.title}
+                className="absolute inset-0 opacity-0 transition duration-300 ease-linear data-[current=true]:opacity-100"
+              >
                 <Image
-                  width={925}
-                  height={578}
+                  width={925} // max rendered width is 880px
+                  height={578} // max rendered height is 618px, and the usual is 554px
                   src={highlight.image}
                   placeholder="blur"
                   blurDataURL={highlight.image.blurDataURL}
@@ -200,8 +200,8 @@ export function FeatureTabs({ className }: { className?: string }) {
                   alt=""
                 />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Tabs.Root>
     </section>
@@ -244,12 +244,12 @@ function Feature(props: {
 
   return (
     <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
-      <header className="flex flex-col gap-4 md:gap-6">
+      <header className="flex flex-wrap items-center gap-4 md:flex-col md:items-start md:gap-6">
         <Stud>{icon}</Stud>
-        <Heading as="h2" size="md" className="text-green-1000">
+        <Heading as="h2" size="md" className="text-green-1000 max-sm:text-2xl max-sm:leading-8">
           {title}
         </Heading>
-        <p className="leading-6 text-green-800">{description}</p>
+        <p className="basis-full leading-6 text-green-800">{description}</p>
       </header>
       <dl className="grid grid-cols-2 gap-4 md:gap-12">
         {highlights.map((highlight, i) => {
@@ -257,7 +257,7 @@ function Feature(props: {
             <div
               key={highlight.title}
               onPointerOver={() => props.setActiveHighlight(highlight.title)}
-              className="hover:bg-beige-100 -m-2 rounded-xl p-2 sm:-m-4 sm:p-4"
+              className="hover:bg-beige-100 -m-2 rounded-lg p-2 md:-m-4 md:rounded-xl md:p-4"
             >
               <dt className="text-green-1000 font-medium">{highlight.title}</dt>
               <dd className="mt-2 text-sm leading-5 text-green-800">{highlight.description}</dd>
