@@ -1,0 +1,128 @@
+import { Callout, Cards, Tabs } from '@theguild/components'
+
+# Usage Reporting
+
+Hive Gateway can send usage reports to a schema registry such as the Hive schema registry, but also
+other providers such Apollo GraphOS.
+
+<Tabs items={["Hive Schema Registry", "Apollo GraphOS"]}>
+
+{/* Hive Schema Registry */}
+
+<Tabs.Tab>
+
+The Hive Gateway can report usage metrics to the Hive schema registry, giving you
+[insights for executed GraphQL operations](/docs/dashboard/insights), and
+[field level usage information](/docs/dashboard/explorer), but also enabling
+[conditional breaking changes](http://localhost:3000/docs/management/targets#conditional-breaking-changes).
+Usage reporting works for both Apollo Federation and Proxy gateways.
+
+Before proceeding, make sure you have
+[created a registry token with write permissions on the Hive dashboard](/docs/management/targets#registry-access-tokens).
+
+<Tabs items={["Binary", "Docker", "JavaScript Package"]}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run Hive Gateway with Usage Reporting enabled." {4}
+hive-gateway supergraph \
+  http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph \
+  --hive-cdn-key "YOUR HIVE CDN KEY" \
+  --hive-registry-token "YOUR HIVE REGISTRY TOKEN"
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+```sh filename="Run Hive Gateway with Usage Reporting enabled." {5}
+docker run --rm --name hive-gateway -p 4000:4000 \
+  ghcr.io/ardatan/hive-gateway supergraph \
+  http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph \
+  --hive-cdn-key "YOUR HIVE CDN KEY" \
+  --hive-registry-token "YOUR HIVE REGISTRY TOKEN"
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+```sh filename="Run Hive Gateway with Usage Reporting enabled." {4}
+npx hive-gateway supergraph \
+  http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph \
+  --hive-cdn-key "YOUR HIVE CDN KEY" \
+  --hive-registry-token "YOUR HIVE REGISTRY TOKEN"
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+Alternatively, you can also provide the usage reporting configuration via the `gateway.config.ts`
+file.
+
+```ts filename="gateway.config.ts" {8}
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  reporting: {
+    // The reporting service type
+    type: 'hive',
+    // The registry token provided by Hive Registry
+    token: 'YOUR HIVE REGISTRY TOKEN'
+  }
+})
+```
+
+</Tabs.Tab>
+
+{/* Apollo GraphOS */}
+
+<Tabs.Tab>
+
+If you want to report usage metrics to a Apollo GraphOS, configure your `gateway.config.ts` file as
+following.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  reporting: {
+    type: 'graphos',
+    /**
+     * The graph ref of the managed federation graph.
+     * It is composed of the graph ID and the variant (`<YOUR_GRAPH_ID>@<VARIANT>`).
+     *
+     * If not provided, `APOLLO_GRAPH_REF` environment variable is used.
+     *
+     * You can find a a graph's ref at the top of its Schema Reference page in Apollo Studio.
+     */
+    graphRef: '<graph_id>[@<variant>]',
+    /**
+     * The API key to use to authenticate with the managed federation up link.
+     * It needs at least the `service:read` permission.
+     *
+     * If not provided, `APOLLO_KEY` environment variable will be used instead.
+     *
+     * [Learn how to create an API key](https://www.apollographql.com/docs/federation/v1/managed-federation/setup#4-connect-the-gateway-to-studio)
+     */
+    apiKey: '<api_key>',
+    /**
+     * Usage report endpoint
+     *
+     * Defaults to GraphOS endpoint (https://usage-reporting.api.apollographql.com/api/ingress/traces)
+     */
+    endpoint?: string;
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
