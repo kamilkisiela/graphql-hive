@@ -110,6 +110,11 @@ export default withGuildDocs({
       permanent: true,
     },
     {
+      source: '/docs/features/schema-policy',
+      destination: '/docs/schema-registry/schema-policy',
+      permanent: true,
+    },
+    {
       // SEO: Redirect to the new URL
       source: '/docs/self-hosting/federation-2',
       destination: '/docs/self-hosting/external-composition',

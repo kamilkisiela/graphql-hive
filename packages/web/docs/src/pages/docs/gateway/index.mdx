@@ -16,27 +16,26 @@ within Node.js, Bun, Deno, Google Cloud Functions, Azure Functions or Cloudflare
 Hive Gateway provides the following features on top of your Federated GraphQL schema or proxied
 GraphQL schema:
 
-- [GraphQL Subscriptions](/docs/gateway/features/subscriptions) with WebSockets, HTTP Callbacks or
-  SSE
+- [GraphQL Subscriptions](/docs/gateway/subscriptions) with WebSockets, HTTP Callbacks or SSE
 - Automatic query and request batching to reduce the number of HTTP requests to your subgraph
-- [JSON Web Tokens (JWT)](/docs/gateway/features/auth/jwt) authentication between client and gateway
-  also between gateway and subgraph
-- [Authorization](/docs/gateway/features/auth/generic-auth) on specific fields and types using
-  Federation Auth directives like `@authenticated` and `@skipAuth`
-- [Role-based Access Control (RBAC)](/docs/gateway/features/auth/generic-auth) either
-  programmatically or with directives `@requiresScope` and `@policy`
-- [Response Caching](/docs/gateway/features/performance/response-caching) based on either in memory
-  or Redis for distributed caching optionally with `@cacheControl` directive
-- [Security](/docs/gateway/features/security) features such as safelisting, depth limit etc
-- [Rate Limiting](/docs/gateway/features/security/rate-limiting) on specific fields and types either
-  programmatically or declaratively with `@rateLimit` directive
-- [Prometheus and OpenTelemetry integration](/docs/gateway/features/monitoring-tracing) with fully
-  customizable spans and attributes
-- [Persisted Documents](/docs/gateway/features/performance/persisted-operations) backed by either
-  Hive Registry or a selfhosting storage
-- [E2E HTTP Compression](/docs/gateway/features/performance/compression) from the client to the
-  subgraph for better performance and resource management
-- [And more](/docs/gateway/features)
+- [JSON Web Tokens (JWT)](/docs/gateway/other-features/authorization-authentication) authentication
+  between client and gateway also between gateway and subgraph
+- [Authorization](/docs/gateway/other-features/authorization-authentication) on specific fields and
+  types using Federation Auth directives like `@authenticated` and `@skipAuth`
+- [Role-based Access Control (RBAC)](/docs/gateway/other-features/authorization-authentication)
+  either programmatically or with directives `@requiresScope` and `@policy`
+- [Response Caching](/docs/gateway/other-features/performance/response-caching) based on either in
+  memory or Redis for distributed caching optionally with `@cacheControl` directive
+- [Security](/docs/gateway/other-features/security) features such as safelisting, depth limit etc
+- [Rate Limiting](/docs/gateway/other-features/security/rate-limiting) on specific fields and types
+  either programmatically or declaratively with `@rateLimit` directive
+- [Prometheus and OpenTelemetry integration](/docs/gateway/other-features/monitoring-tracing) with
+  fully customizable spans and attributes
+- [Persisted Documents](/docs/gateway/other-features/performance/persisted-operations) backed by
+  either Hive Registry or a selfhosting storage
+- [E2E HTTP Compression](/docs/gateway/other-features/performance/compression) from the client to
+  the subgraph for better performance and resource management
+- [And more](/docs/gateway/other-features)
 
 ## Installation
 

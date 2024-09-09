@@ -85,7 +85,7 @@ Instead of allowing any arbitrary GraphQL operation in production usage, we coul
 of operations that the server is allowed to execute. We can collect such a list by scanning the
 code-base and extracting the list of operations.
 
-[Learn more how to configure persisted operations](/docs/gateway/features/performance/persisted-operations)
+[Learn more how to configure persisted operations](/docs/gateway/other-features/performance/persisted-operations)
 
 ### Reject Malicious Operation Documents
 
@@ -117,10 +117,11 @@ operations and documents. Usually 800-2000 tokens seems like a sane default.
 
 You can limit the amount of allowed tokens per operation and automatically abort any further
 processing of a GraphQL operation document that exceeds the limit with the
-[Max Tokens Plugin](/docs/gateway/features/security/max-tokens).
+[Max Tokens Plugin](/docs/gateway/other-features/security/max-tokens).
 
-Also this can be combined with [Character Limit](/docs/gateway/features/security/character-limit)
-that limits the number of characters in the query and mutation documents.
+Also this can be combined with
+[Character Limit](/docs/gateway/other-features/security/character-limit) that limits the number of
+characters in the query and mutation documents.
 
 ### Gateway -> Subgraph HMAC Signing
 
@@ -136,15 +137,15 @@ We recommend using HMAC signing for requests between the Hive Gateway and the up
 where authentication plugins are involved, in order to ensure the gateway is the only entity that
 can execute requests to the subgraph on behalf of the end-users.
 
-You can use the [HMAC Signature plugin](/docs/gateway/features/security/hmac-signature) to perform
-requesting signing and verification.
+You can use the [HMAC Signature plugin](/docs/gateway/other-features/security/hmac-signature) to
+perform requesting signing and verification.
 
 ### Query Depth Limiting
 
 Sometimes persisted operations cannot be used. E.g. if you are building an API that is used by third
 party users. However, we can still apply some protection.
 
-[Learn more about Max Depth plugin here](/docs/gateway/features/security/max-depth)
+[Learn more about Max Depth plugin here](/docs/gateway/other-features/security/max-depth)
 
 This can prevent malicious API users executing GraphQL operations with deeply nested selection sets.
 You need to tweak the maximum depth an operation selection set is allowed to have based on your
@@ -155,8 +156,8 @@ schema and needs, as it could vary between users.
 Rate-limiting is a common practice with APIs, and with GraphQL it gets more complicated because of
 the flexibility of the graph and the ability to choose what fields to query.
 
-The [Rate Limit Plugin](/docs/gateway/features/security/rate-limiting) can be used to limit access
-to resources by field level.
+The [Rate Limit Plugin](/docs/gateway/other-features/security/rate-limiting) can be used to limit
+access to resources by field level.
 
 ## Prevent unwanted HTTP requests
 
@@ -167,14 +168,14 @@ browsers to give a web application running at one origin, access to selected res
 different origin. A web application makes a cross-origin HTTP request when it requests a resource
 that has a different origin (domain, protocol, or port) from its own.
 
-[Learn more about CORS plugin here](/docs/gateway/features/security/cors)
+[Learn more about CORS plugin here](/docs/gateway/other-features/security/cors)
 
 ### CSRF Prevention
 
 Cross-Site Request Forgery (CSRF) is an attack that forces an end user to execute unwanted actions
 on a web application in which they're currently authenticated.
 
-[Learn more about CSRF Prevention plugin here](/docs/gateway/features/security/csrf-prevention)
+[Learn more about CSRF Prevention plugin here](/docs/gateway/other-features/security/csrf-prevention)
 
 ## Prevent Leaking Sensitive Information
 
@@ -182,8 +183,8 @@ on a web application in which they're currently authenticated.
 
 If your schema includes sensitive information that you want to hide from the outside world,
 disabling the schema introspection is a possible solution. The
-[Disable Introspection Plugin](/docs/gateway/features/security/disable-introspection) plugin solves
-that in a single line of code!
+[Disable Introspection Plugin](/docs/gateway/other-features/security/disable-introspection) plugin
+solves that in a single line of code!
 
 ### Block Field Suggestions
 
@@ -192,7 +193,7 @@ fields that can be queried. This is a very useful feature for developers using G
 also be used by attackers to discover the schema of the server.
 
 You can block field suggestions with the
-[Block Field Suggestions Plugin](/docs/gateway/features/security/block-field-suggestions).
+[Block Field Suggestions Plugin](/docs/gateway/other-features/security/block-field-suggestions).
 
 ### Error Masking (enabled by default)
 
@@ -200,4 +201,4 @@ In most GraphQL servers any thrown error or rejected promise will result in the 
 leaking to the outside world. Some frameworks have custom logic for catching unexpected errors and
 mapping them to an unexpected error instead. In Hive Gateway, this is enabled by default.
 
-[Learn more about Error Masking](/docs/gateway/features/security/error-masking)
+[Learn more about Error Masking](/docs/gateway/other-features/security/error-masking)

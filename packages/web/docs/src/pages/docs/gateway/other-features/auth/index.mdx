@@ -8,10 +8,10 @@ Authentication is the process of identifying who is doing a request against your
 your own authentication solution is a crucial and important task as any flaws can result in severe
 security issues.
 
-- [JSON Web Tokens (JWT)](/docs/gateway/features/auth/jwt): Hive Gateway provides a plugin to easily
-  integrate JWT token verification into your API.
-- [Generic Auth](/docs/gateway/features/auth/generic-auth): In some cases using a third party auth
-  provider is not possible. But now worries, the generic auth plugin has you covered!
+- [JSON Web Tokens (JWT)](/docs/gateway/other-features/auth/jwt): Hive Gateway provides a plugin to
+  easily integrate JWT token verification into your API.
+- [Generic Auth](/docs/gateway/other-features/auth/generic-auth): In some cases using a third party
+  auth provider is not possible. But now worries, the generic auth plugin has you covered!
 
 ## Authorization
 
@@ -27,6 +27,6 @@ resolvers, however, for some use-cases it is possible to apply authorization rul
 execution is even happening. E.g. if we want to prevent the execution of a GraphQL operation that
 selects fields the viewer is not allowed to see.
 
-- [Operation Field Permissions](/docs/gateway/features/auth/operation-field-permissions): You can
-  automatically reject GraphQL operations that include specific field selections within the
+- [Operation Field Permissions](/docs/gateway/other-features/auth/operation-field-permissions): You
+  can automatically reject GraphQL operations that include specific field selections within the
   operations selection set.

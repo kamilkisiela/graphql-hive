@@ -661,7 +661,7 @@ export const gatewayConfig = defineConfig({
 ```
 
 > The `payload` object is the same as the one passed to the
-> [`onSubgraphHook` hook](/docs/gateway/features/custom-plugins#onsubgraphexecute).
+> [`onSubgraphHook` hook](/docs/gateway/other-features/custom-plugins#onsubgraphexecute).
 
 </details>
 
@@ -725,7 +725,7 @@ export const gatewayConfig = defineConfig({
 ```
 
 > The `payload` object is the same as the one passed to the
-> [`onFetch` hook](/docs/gateway/features/custom-plugins#onfetch).
+> [`onFetch` hook](/docs/gateway/other-features/custom-plugins#onfetch).
 
 </details>
 
@@ -843,8 +843,8 @@ For additional instructions, please refer to
 
 You will find the timing of each phase of the GraphQL execution. If you are not familiar with the
 lifecycle of a GraphQL operation in the gateway, please refer to the
-[Plugin Lifecycle page](/docs/gateway/features/custom-plugins#plugin-lifecycle). Each plugin hook
-has a corresponding metric which tracks timings as
+[Plugin Lifecycle page](/docs/gateway/other-features/custom-plugins#plugin-lifecycle). Each plugin
+hook has a corresponding metric which tracks timings as
 [histograms](https://prometheus.io/docs/concepts/metric_types/#histogram) or
 [summary](https://prometheus.io/docs/concepts/metric_types/#summary). You will also find some
 [counters](https://prometheus.io/docs/concepts/metric_types/#counter) to track the number of

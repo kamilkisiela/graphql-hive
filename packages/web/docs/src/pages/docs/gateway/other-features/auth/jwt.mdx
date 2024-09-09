@@ -16,8 +16,8 @@ using the `extensions` field.
 <Callout type="warning">
 
 When JWT is enabled and claims are forwarded to the upstream GraphQL subgraphs, you might want to
-use [HMAC Signature](/docs/gateway/features/security/hmac-signature) between your Hive Gateway and
-the subgraphs. This will ensure that the requests to the subgraphs are trusted and signed by the
+use [HMAC Signature](/docs/gateway/other-features/security/hmac-signature) between your Hive Gateway
+and the subgraphs. This will ensure that the requests to the subgraphs are trusted and signed by the
 gateway, and no other entity can execute requests to the subgraph on behalf of the end-users.
 
 </Callout>
@@ -209,8 +209,8 @@ You can use the injected payload with other plugins, to implement things like au
 user-identity based logic.
 
 For example, with a plugin like
-[Operation Field Permissions](/docs/gateway/features/security/auth/operation-field-permissions), you
-can use the `jwt` property of the context to access the decoded JWT token, and decide what
+[Operation Field Permissions](/docs/gateway/other-features/security/auth/operation-field-permissions),
+you can use the `jwt` property of the context to access the decoded JWT token, and decide what
 permissions to allow to the user based on identity or token claims:
 
 ```ts filename="gateway.config.ts"
@@ -548,8 +548,8 @@ export const gatewayConfig = defineConfig({
 
 By default, the JWT plugin protects the whole schema. If you want to use a granular protection by
 using Federation directives such as `@authenticated`, `@requiresScopes` and `@policy`, you can use
-[Generic Auth plugin](/docs/gateway/features/auth/generic-auth) to have a granular protection using
-with or without JWT.
+[Generic Auth plugin](/docs/gateway/other-features/auth/generic-auth) to have a granular protection
+using with or without JWT.
 
 With the following configuration, you can use the JWT plugin to extract the token and claims, and
 then use the Generic Auth plugin to protect the schema with the Federation directives:
@@ -577,4 +577,4 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-[Learn more about granular protection of Generic Auth plugin](/docs/gateway/features/auth/generic-auth)
+[Learn more about granular protection of Generic Auth plugin](/docs/gateway/other-features/auth/generic-auth)
