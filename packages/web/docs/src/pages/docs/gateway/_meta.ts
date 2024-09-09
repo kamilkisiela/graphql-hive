@@ -6,6 +6,7 @@ export default {
   'authorization-authentication': 'Authorization / Authentication',
   'schema-registry': 'Schema Registry',
   'monitoring-tracing': 'Monitoring/Tracing',
-  features: 'Features',
+  'defer-stream': 'Incremental Delivery (Defer & Stream)',
+  'other-features': 'Features',
   deployment: 'Deployment',
 };
