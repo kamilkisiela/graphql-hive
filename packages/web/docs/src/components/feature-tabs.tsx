@@ -194,6 +194,7 @@ export function FeatureTabs({ className }: { className?: string }) {
                   src={highlight.image}
                   placeholder="blur"
                   blurDataURL={highlight.image.blurDataURL}
+                  priority
                   className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
                   role="presentation"
                   alt=""
