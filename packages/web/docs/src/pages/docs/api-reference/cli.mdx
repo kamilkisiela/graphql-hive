@@ -2,8 +2,8 @@ import { Callout, Tabs } from '@theguild/components'
 
 # Hive CLI (Command Line Interface)
 
-You can perform [schema-registry actions](/docs/features/schema-registry#actions-on-schemas) on your
-Hive targets schemas using the Hive CLI.
+You can perform [schema-registry actions](/docs/schema-registry#actions-on-schemas) on your Hive
+targets schemas using the Hive CLI.
 
 ## Installation
 
@@ -82,7 +82,7 @@ file, or set it as `HIVE_TOKEN` environment variable.
 
 Further reading:
 
-- [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
+- [Publishing a schema to the Schema Registry](/docs/schema-registry#publish-a-schema)
 
 #### Single Schema Project
 
@@ -111,8 +111,8 @@ hive schema:publish --service reviews --url http://my-service.com/graphql schema
 Further reading:
 
 - [`schema:publish` API Reference](/docs/api-reference/cli#hive-schemapublish-file)
-- [Apollo Router integration](/docs/integrations/apollo-router)
-- [Apollo-Server integration](/docs/integrations/apollo-server)
+- [Apollo Router integration](/docs/other-integrations/apollo-router)
+- [Apollo-Server integration](/docs/other-integrations/apollo-server)
 
 #### Hive Metadata
 
@@ -176,7 +176,7 @@ hive schema:check --contextId "pr-123" "src/*.graphql"
 
 Further reading:
 
-- [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
+- [Publishing a schema to the Schema Registry](/docs/schema-registry#publish-a-schema)
 - [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
 
 ### Delete a schema

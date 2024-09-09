@@ -156,7 +156,7 @@ export function FeatureTabs({ className }: { className?: string }) {
               <Feature
                 title="Schema Registry"
                 icon={<SchemaRegistryIcon />}
-                documentationLink="/docs/features/schema-registry"
+                documentationLink="/docs/schema-registry"
                 description="Publish schemas, compose federated services, and detect backward-incompatible changes with ease."
                 highlights={highlights['Schema Registry']}
                 setActiveHighlight={setActiveHighlight}

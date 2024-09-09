@@ -53,7 +53,7 @@ For Hive Registry and Apollo GraphOS, you probably don't need to provide the `su
 - If you use Hive Registry, please refer to the dedicated section for
   [Fetching Supergraph from Hive Registry CDN](/docs/gateway/schema-registry/hive#publishing-subgraphs-to-hive-cdn)
 - If you use Apollo GraphOS, please refer to the dedicated section for
-  [Fetching Supergraph from Apollo GraphOS](/docs/gateway/schema-registry/apollo-graphos).
+  [Fetching Supergraph from Apollo GraphOS](/docs/gateway/supergraph-proxy-source).
 
 </Callout>
 
@@ -361,7 +361,7 @@ export const gatewayConfig = defineConfig({
 
 #### `batching`
 
-[See dedicated page](/docs/gateway/features/performance/request-batching)
+[See dedicated page](/docs/gateway/other-features/performance/request-batching)
 
 #### `fetchAPI` (Advanced usage only)
 
@@ -429,21 +429,21 @@ export const gatewayConfig = defineConfig({
 
 This is enabled by default for security reasons.
 
-[Learn more about Error Masking](/docs/gateway/features/security/error-masking)
+[Learn more about Error Masking](/docs/gateway/other-features/security/error-masking)
 
 #### `cache`
 
 Provide a cache storage for the server. By default, Hive Gateway uses an in-memory cache.
 
-[Learn more about Caching](/docs/gateway/features/performance)
+[Learn more about Caching](/docs/gateway/other-features/performance)
 
 #### `pubsub`
 
 Provide a PubSub instance for the server. By default, Hive Gateway uses an in-memory PubSub. In
 order to have a better scalability, you can provide a custom PubSub.
 
-[Learn more about Subscriptions and Webhooks to see if you need this option](/docs/gateway/features/subscriptions-webhooks)
+[Learn more about Subscriptions and Webhooks to see if you need this option](/docs/gateway/subscriptions#subscriptions-using-http-callback)
 
 #### `healthCheckEndpoint` and `readinessCheckEndpoint`
 
-[Learn more about Health Check and Readiness Check](/docs/gateway/features/monitoring-tracing/health-check)
+[Learn more about Health Check and Readiness Check](/docs/gateway/monitoring-tracing#healthcheck)

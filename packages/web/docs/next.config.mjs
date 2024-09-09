@@ -31,17 +31,17 @@ export default withGuildDocs({
     },
     {
       source: '/docs/features/publish-schema',
-      destination: '/docs/features/schema-registry#publish-a-schema',
+      destination: '/docs/schema-registry#publish-a-schema',
       permanent: true,
     },
     {
       source: '/docs/features/checking-schema',
-      destination: '/docs/features/schema-registry#check-a-schema',
+      destination: '/docs/schema-registry#check-a-schema',
       permanent: true,
     },
     {
       source: '/docs/features/delete-schema',
-      destination: '/docs/features/schema-registry#delete-a-service',
+      destination: '/docs/schema-registry#delete-a-service',
       permanent: true,
     },
     {
@@ -56,7 +56,7 @@ export default withGuildDocs({
     },
     {
       source: '/docs/features/schema-history',
-      destination: '/docs/features/schema-registry#schema-history-and-changelog',
+      destination: '/docs/schema-registry#schema-history-and-changelog',
       permanent: true,
     },
     {
@@ -90,10 +90,25 @@ export default withGuildDocs({
       permanent: true,
     },
     {
+      source: '/docs/features/schema-registry',
+      destination: '/docs/schema-registry',
+      permanent: true,
+    },
+    {
+      source: '/docs/management/external-schema-composition',
+      destination: '/docs/schema-registry/external-schema-composition',
+      permanent: true,
+    },
+    {
       // SEO: Redirect to the new URL
       source: '/docs/self-hosting/federation-2',
       destination: '/docs/self-hosting/external-composition',
       permanent: true,
+    },
+    {
+      source: '/docs/integrations/:path*',
+      destination: '/docs/other-integrations/:path*',
+      permanent: false,
     },
   ],
   swcMinify: true,
