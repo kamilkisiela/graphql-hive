@@ -46,7 +46,12 @@ export default withGuildDocs({
     },
     {
       source: '/docs/features/registry-usage',
-      destination: '/docs/features/high-availability-cdn',
+      destination: '/docs/high-availability-cdn',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/high-availability-cdn',
+      destination: '/docs/high-availability-cdn',
       permanent: true,
     },
     {

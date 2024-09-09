@@ -135,7 +135,7 @@ hive schema:publish schema.graphql --metadata '{ "someData": true }'
 
 Further reading:
 
-- [Fetching Hive Metadata from the CDN](/docs/features/high-availability-cdn)
+- [Fetching Hive Metadata from the CDN](/docs/high-availability-cdn)
 
 ### Check a schema
 
@@ -381,9 +381,8 @@ Sometimes it is useful to fetch a schema (SDL or Supergraph) from Hive, for exam
 local development. This can be done using the `schema:fetch` command.
 
 <Callout type="info">
-  Don't confuse this with the [high-availability CDN](/docs/features/high-availability-cdn.mdx).
-  This command is used to fetch a schema from the API where the CDN always represents the latest
-  valid schema.
+  Don't confuse this with the [high-availability CDN](/docs/high-availability-cdn). This command is
+  used to fetch a schema from the API where the CDN always represents the latest valid schema.
 </Callout>
 
 You can fetch a schema by using the action id (commit sha) that was used for publishing the schema
@@ -408,7 +407,7 @@ You can fetch the GraphQL schema from the CDN using the `artifact:fetch` command
 
 <Callout type="info">
   You can learn how to create a CDN access token in the [High-Availability CDN
-  documentation](/docs/features/high-availability-cdn).
+  documentation](/docs/high-availability-cdn).
 </Callout>
 
 ```bash
