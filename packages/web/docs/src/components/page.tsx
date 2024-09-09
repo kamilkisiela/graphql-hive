@@ -11,7 +11,7 @@ export function Page(props: { children: ReactNode; className?: string }) {
       {mounted && <CookiesConsent />}
       {/* position Crisp button below the cookies banner */}
       <style jsx global>
-        {' .crisp-client { z-index: 40 !important; '}
+        {' #crisp-chatbox { z-index: 40 !important; '}
       </style>
     </>
   );
