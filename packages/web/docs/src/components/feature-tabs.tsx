@@ -26,18 +26,6 @@ export function FeatureTabs({ className }: { className?: string }) {
         className,
       )}
     >
-      <Head>
-        {[
-          observabilityClientsImage,
-          observabilityOperationsImage,
-          observabilityOverallImage,
-          registryExplorerImage,
-          registrySchemaChecksImage,
-          registryVersionControlSystemImage,
-        ].map(image => (
-          <link key={image.src} rel="preload" as="image" href={image.src} />
-        ))}
-      </Head>
       <Tabs.Root defaultValue={tabs[0]} {...useSmallScreenTabsHandlers()}>
         <Tabs.List
           className={
@@ -251,9 +239,9 @@ function Feature(props: {
               width={925}
               height={578}
               src={highlight.image}
+              placeholder="blur"
               blurDataURL={highlight.image.blurDataURL}
               className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
-              // loading="eager"
               role="presentation"
               alt=""
             />
