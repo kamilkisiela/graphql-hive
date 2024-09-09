@@ -14,9 +14,81 @@ import registryExplorerImage from '../../public/features/registry/explorer.png';
 import registrySchemaChecksImage from '../../public/features/registry/schema-checks.png';
 import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.png';
 
+const tabs = ['Schema Registry', 'GraphQL Observability', 'Schema Management'];
+type Tab = (typeof tabs)[number];
+
+const highlights: Record<Tab, Highlight[]> = {
+  'Schema Registry': [
+    {
+      title: 'Version Control System',
+      description:
+        'Track schema modifications across multiple environments from development to production.',
+      image: registryVersionControlSystemImage,
+    },
+    {
+      title: 'Schema Checks',
+      description:
+        'Identify and breaking changes before they reach production. Evolve your schema with confidence.',
+      image: registrySchemaChecksImage,
+    },
+    {
+      title: 'Composition Error Prevention',
+      description: 'Avoid runtime errors by validating compatibility of all your subgraph schemas.',
+      image: registrySchemaChecksImage, // TODO: Replace with correct image
+    },
+    {
+      title: 'Schema Explorer',
+      description: 'Navigate through your schema and check ownership and usage of types.',
+      image: registryExplorerImage,
+    },
+  ],
+  'GraphQL Observability': [
+    {
+      title: 'GraphQL consumers',
+      description: 'Track GraphQL requests to see how schema is utilized and by what applications.',
+      image: observabilityClientsImage,
+    },
+    {
+      title: 'Overall performance',
+      description: 'Observe and analyze performance of your GraphQL API.',
+      image: observabilityOverallImage,
+    },
+    {
+      title: 'Query performance',
+      description: 'Identify slow GraphQL operations to pinpoint performance bottlenecks.',
+      image: observabilityOperationsImage,
+    },
+  ],
+  'Schema Management': [
+    {
+      title: 'Prevent breaking changes',
+      description:
+        'Integrated Schema Registry with GraphQL Monitoring for confident API evolution.',
+      image: observabilityOverallImage,
+    },
+    {
+      title: 'Detect unused fields',
+      description:
+        'Hive detects and removes unused fields in your GraphQL schema for efficiency and tidiness.',
+      image: observabilityOverallImage,
+    },
+    {
+      title: 'Schema Policy',
+      description:
+        'Hive provides tools to lint, verify, and enforce best practices across your federated GraphQL architecture.',
+      image: observabilityOverallImage,
+    },
+  ],
+};
+
+const allHighlights = Object.values(highlights).flat();
+
 export function FeatureTabs({ className }: { className?: string }) {
-  const tabs = ['Schema Registry', 'GraphQL Observability', 'Schema Management'];
+  const [currentTab, setCurrentTab] = useState<Tab>('Schema Registry');
   const icons = [<SchemaRegistryIcon />, <GraphQLObservabilityIcon />, <SchemaManagementIcon />];
+
+  const smallScreenTabHandlers = useSmallScreenTabsHandlers();
+  const [activeHighlight, setActiveHighlight] = useState(allHighlights[0].title);
 
   return (
     <section
@@ -26,7 +98,14 @@ export function FeatureTabs({ className }: { className?: string }) {
         className,
       )}
     >
-      <Tabs.Root defaultValue={tabs[0]} {...useSmallScreenTabsHandlers()}>
+      <Tabs.Root
+        {...smallScreenTabHandlers}
+        onValueChange={tab => {
+          setCurrentTab(tab);
+          smallScreenTabHandlers.onValueChange();
+        }}
+        value={currentTab}
+      >
         <Tabs.List
           className={
             'sm:bg-beige-200 mb-12 flex flex-col sm:flex-row sm:rounded-2xl' +
@@ -71,93 +150,58 @@ export function FeatureTabs({ className }: { className?: string }) {
             );
           })}
         </Tabs.List>
-        <Tabs.Content value="Schema Registry" tabIndex={-1}>
-          <Feature
-            title="Schema Registry"
-            icon={<SchemaRegistryIcon />}
-            documentationLink="/docs/features/schema-registry"
-            description="Publish schemas, compose federated services, and detect backward-incompatible changes with ease."
-            highlights={[
-              {
-                title: 'Version Control System',
-                description:
-                  'Track schema modifications across multiple environments from development to production.',
-                image: registryVersionControlSystemImage,
-              },
-              {
-                title: 'Schema Checks',
-                description:
-                  'Identify and breaking changes before they reach production. Evolve your schema with confidence.',
-                image: registrySchemaChecksImage,
-              },
-              {
-                title: 'Composition Error Prevention',
-                description:
-                  'Avoid runtime errors by validating compatibility of all your subgraph schemas.',
-                image: registrySchemaChecksImage, // TODO: Replace with correct image
-              },
-              {
-                title: 'Schema Explorer',
-                description: 'Navigate through your schema and check ownership and usage of types.',
-                image: registryExplorerImage,
-              },
-            ]}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="GraphQL Observability" tabIndex={-1}>
-          <Feature
-            title="GraphQL Observability"
-            icon={<GraphQLObservabilityIcon />}
-            documentationLink="/docs/features/usage-reporting"
-            description="Enhanced GraphQL Observability tools provide insights into API usage and user experience metrics."
-            highlights={[
-              {
-                title: 'GraphQL consumers',
-                description:
-                  'Track GraphQL requests to see how schema is utilized and by what applications.',
-                image: observabilityClientsImage,
-              },
-              {
-                title: 'Overall performance',
-                description: 'Observe and analyze performance of your GraphQL API.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Query performance',
-                description:
-                  'Identify slow GraphQL operations to pinpoint performance bottlenecks.',
-                image: observabilityOperationsImage,
-              },
-            ]}
-          />
-        </Tabs.Content>
-        <Tabs.Content value="Schema Management" tabIndex={-1}>
-          <Feature
-            title="Schema Management"
-            icon={<SchemaManagementIcon />}
-            description="Evolve your GraphQL API with confidence."
-            highlights={[
-              {
-                title: 'Prevent breaking changes',
-                description:
-                  'Integrated Schema Registry with GraphQL Monitoring for confident API evolution.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Detect unused fields',
-                description:
-                  'Hive detects and removes unused fields in your GraphQL schema for efficiency and tidiness.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Schema Policy',
-                description:
-                  'Hive provides tools to lint, verify, and enforce best practices across your federated GraphQL architecture.',
-                image: observabilityOverallImage,
-              },
-            ]}
-          />
-        </Tabs.Content>
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          <>
+            <Tabs.Content value="Schema Registry" tabIndex={-1}>
+              <Feature
+                title="Schema Registry"
+                icon={<SchemaRegistryIcon />}
+                documentationLink="/docs/features/schema-registry"
+                description="Publish schemas, compose federated services, and detect backward-incompatible changes with ease."
+                highlights={highlights['Schema Registry']}
+                setActiveHighlight={setActiveHighlight}
+              />
+            </Tabs.Content>
+            <Tabs.Content value="GraphQL Observability" tabIndex={-1}>
+              <Feature
+                title="GraphQL Observability"
+                icon={<GraphQLObservabilityIcon />}
+                documentationLink="/docs/features/usage-reporting"
+                description="Enhanced GraphQL Observability tools provide insights into API usage and user experience metrics."
+                highlights={highlights['GraphQL Observability']}
+                setActiveHighlight={setActiveHighlight}
+              />
+            </Tabs.Content>
+            <Tabs.Content value="Schema Management" tabIndex={-1}>
+              <Feature
+                title="Schema Management"
+                icon={<SchemaManagementIcon />}
+                description="Evolve your GraphQL API with confidence."
+                highlights={highlights['Schema Management']}
+                setActiveHighlight={setActiveHighlight}
+              />
+            </Tabs.Content>
+          </>
+          {allHighlights.map((highlight, i) => (
+            <div
+              key={i}
+              className={cn('h-full', activeHighlight === highlight.title ? 'block' : 'hidden')}
+            >
+              <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
+                <Image
+                  width={925}
+                  height={578}
+                  src={highlight.image}
+                  placeholder="blur"
+                  blurDataURL={highlight.image.blurDataURL}
+                  className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
+                  role="presentation"
+                  alt=""
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </Tabs.Root>
     </section>
   );
@@ -191,64 +235,42 @@ function Feature(props: {
   icon: ReactNode;
   title: string;
   description: string;
-  highlights: {
-    title: string;
-    description: string;
-    image: StaticImageData;
-  }[];
+  highlights: Highlight[];
   documentationLink?: string;
+  setActiveHighlight: (highlight: string) => void;
 }) {
-  const [activeHighlight, setActiveHighlight] = useState(0);
   const { icon, title, description, documentationLink, highlights } = props;
 
   return (
-    <article className="grid grid-cols-1 lg:grid-cols-2">
-      <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
-        <header className="flex flex-col gap-4 md:gap-6">
-          <Stud>{icon}</Stud>
-          <Heading as="h2" size="md" className="text-green-1000">
-            {title}
-          </Heading>
-          <p className="leading-6 text-green-800">{description}</p>
-        </header>
-        <dl className="grid grid-cols-2 gap-4 md:gap-12">
-          {highlights.map((highlight, i) => {
-            return (
-              <div
-                key={highlight.title}
-                onPointerOver={() => setActiveHighlight(i)}
-                className="hover:bg-beige-100 -m-2 rounded-xl p-2 sm:-m-4 sm:p-4"
-              >
-                <dt className="text-green-1000 font-medium">{highlight.title}</dt>
-                <dd className="mt-2 text-sm leading-5 text-green-800">{highlight.description}</dd>
-              </div>
-            );
-          })}
-        </dl>
-        {documentationLink && (
-          <CallToAction variant="primary" href={documentationLink}>
-            Learn more
-            <ArrowIcon />
-          </CallToAction>
-        )}
-      </div>
-      {highlights.map((highlight, i) => (
-        <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
-          <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
-            <Image
-              width={925}
-              height={578}
-              src={highlight.image}
-              placeholder="blur"
-              blurDataURL={highlight.image.blurDataURL}
-              className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
-              role="presentation"
-              alt=""
-            />
-          </div>
-        </div>
-      ))}
-    </article>
+    <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
+      <header className="flex flex-col gap-4 md:gap-6">
+        <Stud>{icon}</Stud>
+        <Heading as="h2" size="md" className="text-green-1000">
+          {title}
+        </Heading>
+        <p className="leading-6 text-green-800">{description}</p>
+      </header>
+      <dl className="grid grid-cols-2 gap-4 md:gap-12">
+        {highlights.map((highlight, i) => {
+          return (
+            <div
+              key={highlight.title}
+              onPointerOver={() => props.setActiveHighlight(highlight.title)}
+              className="hover:bg-beige-100 -m-2 rounded-xl p-2 sm:-m-4 sm:p-4"
+            >
+              <dt className="text-green-1000 font-medium">{highlight.title}</dt>
+              <dd className="mt-2 text-sm leading-5 text-green-800">{highlight.description}</dd>
+            </div>
+          );
+        })}
+      </dl>
+      {documentationLink && (
+        <CallToAction variant="primary" href={documentationLink}>
+          Learn more
+          <ArrowIcon />
+        </CallToAction>
+      )}
+    </div>
   );
 }
 
@@ -330,3 +352,9 @@ function useSmallScreenTabsHandlers() {
     },
   };
 }
+
+type Highlight = {
+  title: string;
+  description: string;
+  image: StaticImageData;
+};
