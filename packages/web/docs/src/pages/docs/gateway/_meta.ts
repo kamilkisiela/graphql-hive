@@ -1,6 +1,5 @@
 export default {
-  index: 'Introduction',
-  'getting-started': 'Getting Started',
+  index: 'Getting Started',
   'usage-reporting': 'Usage Reporting',
   'persisted-documents': 'Persisted Documents',
   'authorization-authentication': 'Authorization / Authentication',
