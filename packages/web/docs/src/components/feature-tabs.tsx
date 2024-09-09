@@ -229,7 +229,7 @@ function Feature(props: {
               <div
                 key={highlight.title}
                 onPointerOver={() => setActiveHighlight(i)}
-                className="hover:bg-beige-100 -m-4 rounded-xl p-4"
+                className="hover:bg-beige-100 -m-2 rounded-xl p-2 sm:-m-4 sm:p-4"
               >
                 <dt className="text-green-1000 font-medium">{highlight.title}</dt>
                 <dd className="mt-2 text-sm leading-5 text-green-800">{highlight.description}</dd>
@@ -247,12 +247,13 @@ function Feature(props: {
       {highlights.map((highlight, i) => (
         <div key={i} className={cn('h-full', activeHighlight === i ? 'block' : 'hidden')}>
           <div className="relative ml-6 h-full min-h-[400px] flex-1 overflow-hidden rounded-3xl bg-blue-400">
-            {/* TODO: Use cropped images so we don't load too much without need. */}
             <Image
               width={925}
               height={578}
               src={highlight.image}
+              blurDataURL={highlight.image.blurDataURL}
               className="absolute left-6 top-[24px] h-[calc(100%-24px)] rounded-tl-3xl object-cover object-left lg:left-[55px] lg:top-[108px] lg:h-[calc(100%-108px)]"
+              // loading="eager"
               role="presentation"
               alt=""
             />
