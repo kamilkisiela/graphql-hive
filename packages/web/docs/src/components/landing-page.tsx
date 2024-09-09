@@ -97,9 +97,9 @@ export function IndexPage(): ReactElement {
         <EcosystemManagementSection className="mx-4 md:mx-6" />
         <StatsList className="mt-6 md:mt-0">
           <StatsItem label="GitHub commits" value={6.2} suffix="K" decimal />
-          <StatsItem label="Active developers" value={5.7} suffix="K" decimal />
-          <StatsItem label="Registered schemas" value={225} suffix="K" />
-          <StatsItem label="Collected operations" value={315} suffix="B" />
+          <StatsItem label="Active developers" value={6.2} suffix="K" decimal />
+          <StatsItem label="Registered schemas" value={270} suffix="K" />
+          <StatsItem label="Collected operations" value={350} suffix="B" />
         </StatsList>
         <UltimatePerformanceCards />
         <CompanyTestimonialsSection className="mx-4 mt-6 md:mx-6" />
