@@ -6,6 +6,7 @@ export default {
   'authorization-authentication': 'Authorization / Authentication',
   'monitoring-tracing': 'Monitoring/Tracing',
   'defer-stream': 'Incremental Delivery (Defer & Stream)',
+  subscriptions: 'Subscriptions',
   'other-features': 'Features',
   deployment: 'Deployment',
 };

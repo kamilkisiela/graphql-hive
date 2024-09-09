@@ -266,8 +266,8 @@ field.
 To access the JWT token and claims in your upstream service resolvers/execution, you can use the
 `extensions` field of the incoming GraphQL request.
 
-If you are using [GraphQL-Yoga](the-guild.dev/graphql/yoga-server) for your upstream subgraph
-implementation, you can use a built-in utility for extracting it for you in an easy way:
+If you are using [GraphQL-Yoga](https://the-guild.dev/graphql/yoga-server) for your upstream
+subgraph implementation, you can use a built-in utility for extracting it for you in an easy way:
 
 ```ts filename="yoga-subgraph.ts"
 import { useForwardedJWT } from '@graphql-hive/gateway'

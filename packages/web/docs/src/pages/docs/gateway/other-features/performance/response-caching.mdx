@@ -65,7 +65,7 @@ The `@cacheControl` directive can be used to give to subgraphs the control over 
 for the fields and types they are defining. You can add this directive during composition.
 
 - [See here for Federation to learn more about the `@cacheControl` directive](https://www.apollographql.com/docs/federation/performance/caching/#using-cache-hints-with-subgraphs)
-- [See here for GraphQL Mesh to learn more about the `@cacheControl` in subgraph definitions](/docs/gateway/other-features/response-caching)
+- [See here for GraphQL Mesh to learn more about the `@cacheControl` in subgraph definitions](/docs/gateway/other-features/performance/response-caching)
 
 ## Session based caching
 
@@ -77,8 +77,8 @@ an user id within the encoded access token.
   Don't forget to validate the authentication token before using it as a session key.
   Allowing cached responses to be returned with unverified tokens can lead to data leaks.
 
-Please see the [Authorization/Auhtentication](/docs/gateway/other-features/authy) section for more
-information.
+Please see the [Authorization/Auhtentication](/docs/gateway/authorization-authentication) section
+for more information.
 
 </Callout>
 

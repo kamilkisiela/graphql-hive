@@ -180,7 +180,7 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
           className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
           <a
-            href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
+            href="https://the-guild.dev/graphql/hive/docs/schema-registry/app-deployments#publish-an-app-deployment"
             target="_blank"
             rel="noreferrer"
             className="hover:text-blue-700 hover:underline"
