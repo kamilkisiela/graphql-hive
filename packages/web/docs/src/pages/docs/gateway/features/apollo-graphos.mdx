@@ -1,10 +1,9 @@
-# Apollo GraphOS Integration
+# Apollo GraphOS
 
 import { Callout } from '@theguild/components'
 
-Apollo GraphOS is a schema registry that allows you to store and manage your supergraph schemas. You
-can use Hive Registry to serve your supergraph schemas stored in Apollo GraphOS, or send usage data
-to Apollo GraphOS.
+Hive Gateway can use the GraphOS schema registry for loading the supergraph and/or reporting usage
+metrics.
 
 ## Serve Supergraph from Apollo GraphOS
 
@@ -22,7 +21,7 @@ npx hive-gateway supergraph <graph_id>[@<variant>] --apollo-key <api_key>
 ```
 
 <Callout>
-  If you don’t know where to find these values, please refer to the [Apollo GraphOS
+  If you don't know where to find these values, please refer to the [Apollo GraphOS
   documentation](https://www.apollographql.com/docs/federation/managed-federation/setup/#4-connect-your-router-to-graphos).
 </Callout>
 
