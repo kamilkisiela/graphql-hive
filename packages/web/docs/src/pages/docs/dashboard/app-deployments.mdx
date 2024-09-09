@@ -227,7 +227,31 @@ by your Gateway.
 Hive serves as the source of truth for the allowed persisted documents and provides a CDN for
 fetching these documents as they are requested.
 
-<Tabs items={['GraphQL Yoga', 'Apollo Server', 'GraphQL Mesh', 'Custom Third-Party Integration']}>
+<Tabs items={['Hive Gateway', 'GraphQL Yoga', 'Apollo Server', 'Custom Third-Party Integration']}>
+
+{/* Hive Gateway */}
+
+<Tabs.Tab>
+
+For Hive Gateway you can use the Hive configuration for resolving persisted documents. Adjust your
+`gateway.config.ts` file as follows.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  persistedDocuments: {
+    type: 'hive',
+    endpoint: '<cdn_endpoint>',
+    token: '<cdn-access-token>'
+  }
+})
+```
+
+For further information, please refer to the
+[Hive Gateway documentation for persisted documents](/docs/gateway/persisted-documents).
+
+</Tabs.Tab>
 
 {/* GraphQL Yoga */}
 
@@ -299,36 +323,6 @@ const server = new ApolloServer({
 
 For further configuration options, please refer to the
 [Hive Client API reference](/docs/api-reference/client#persisted-documents).
-
-</Tabs.Tab>
-
-{/* GraphQL Mesh */}
-
-<Tabs.Tab>
-
-For GraphQL Mesh you can use the Hive configuration for resolving persisted documents. Adjust your
-`mesh.config.ts` file as follows.
-
-```typescript filename="mesh.config.ts" {7-13}
-import { defineConfig } from '@graphql-mesh/serve-cli'
-
-export default defineConfig({
-  hive: {
-    // The endpoint of CDN
-    endpoint: 'https://cdn.graphql-hive.com/<target_id>/supergraph',
-    experimental__persistedDocuments: {
-      cdn: {
-        // replace <target_id> and <cdn_access_token> with your values
-        endpoint: 'https://cdn.graphql-hive.com/<target_id>',
-        accessToken: '<cdn_access_token>'
-      }
-    }
-  }
-})
-```
-
-For further configuration options, please refer to the
-[Hive Client API reference](/docs/api-reference/client).
 
 </Tabs.Tab>
 
