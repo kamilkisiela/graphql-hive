@@ -258,7 +258,7 @@ function Illustration(props: { className?: string }) {
             onHighlight={onHighlightNode}
           >
             <svg width={48} height={48} viewBox="0 0 100 100">
-              <use xlinkHref={`${basePath}/graphql-logo.svg#logo`} />
+              <use xlinkHref={`${svgHref}#gql-logo`} />
             </svg>
           </Node>
           <Edge
