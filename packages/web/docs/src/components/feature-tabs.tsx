@@ -6,12 +6,12 @@ import { CallToAction, Heading } from '@theguild/components';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
 import { Stud } from './stud';
-import observabilityClientsImage from '../../public/features/observability/clients.png';
-import observabilityOperationsImage from '../../public/features/observability/operations.png';
-import observabilityOverallImage from '../../public/features/observability/overall.png';
-import registryExplorerImage from '../../public/features/registry/explorer.png';
-import registrySchemaChecksImage from '../../public/features/registry/schema-checks.png';
-import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.png';
+import observabilityClientsImage from '../../public/features/observability/clients.webp';
+import observabilityOperationsImage from '../../public/features/observability/operations.webp';
+import observabilityOverallImage from '../../public/features/observability/overall.webp';
+import registryExplorerImage from '../../public/features/registry/explorer.webp';
+import registrySchemaChecksImage from '../../public/features/registry/schema-checks.webp';
+import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.webp';
 
 const tabs = ['Schema Registry', 'GraphQL Observability', 'Schema Management'];
 type Tab = (typeof tabs)[number];
