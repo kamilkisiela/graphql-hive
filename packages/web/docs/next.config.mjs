@@ -56,7 +56,12 @@ export default withGuildDocs({
     },
     {
       source: '/docs/features/monitoring',
-      destination: '/docs/features/usage-reporting',
+      destination: '/docs/schema-registry/usage-reporting',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/usage-reporting',
+      destination: '/docs/schema-registry/usage-reporting',
       permanent: true,
     },
     {
