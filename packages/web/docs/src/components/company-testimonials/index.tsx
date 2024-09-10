@@ -104,7 +104,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
         >
           <Tabs.List
             ref={tabsListRef}
-            className="lg:bg-beige-200 order-1 mt-4 flex flex-row justify-center rounded-2xl lg:order-first lg:my-16"
+            className="lg:bg-beige-200 z-10 order-1 mt-4 flex flex-row justify-center rounded-2xl lg:order-first lg:my-16"
           >
             {testimonials.map(testimonial => {
               const Logo = testimonial.logo;
@@ -122,7 +122,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                   }
                 >
                   <div className="size-2 rounded-full bg-blue-200 transition-colors lg:hidden" />
-                  <Logo title={testimonial.company} height={32} className="hidden lg:block" />
+                  <Logo title={testimonial.company} height={32} className="max-lg:sr-only" />
                 </Tabs.Trigger>
               );
             })}
