@@ -14,7 +14,7 @@ In addition you can also proxy any GraphQL API, by either introspection or provi
 
 ## Supergraph
 
-<Tabs items={['Hive Schema Registry', 'Apollo GraphOS', 'Custom Source']}>
+<Tabs items={['Hive Schema Registry', 'Apollo GraphOS', 'Custom HTTP Source', 'Local File']}>
 
 {/* Hive Schema Registry */}
 
@@ -132,7 +132,7 @@ export const gatewayConfig = defineConfig({
 
 </Tabs.Tab>
 
-{/* Custom Source */}
+{/* Custom HTTP Source */}
 
 <Tabs.Tab>
 
@@ -157,6 +157,42 @@ export const gatewayConfig = defineConfig({
   ]
 })
 ```
+
+</Tabs.Tab>
+
+{/* Local File */}
+
+<Tabs.Tab>
+
+You can point to `supergraph.graphql` located in your file system.
+
+<Tabs items={['CLI', 'Configuration File']}>
+
+{/* CLI */}
+
+<Tabs.Tab>
+
+```sh
+hive-gateway supergraph ./supergraph.graphql
+```
+
+</Tabs.Tab>
+
+{/* Configuration file */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: './supergraph.graphql'
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 </Tabs.Tab>
 
