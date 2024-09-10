@@ -175,19 +175,12 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
         </InfoCard>
         <InfoCard
           as="li"
-          heading="Secure and efficient"
+          heading="Customizable User Roles and Permissions"
           icon={<PerformanceListItemIcon />}
           className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
-          <a
-            href="https://the-guild.dev/graphql/hive/docs/schema-registry/app-deployments#publish-an-app-deployment"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-blue-700 hover:underline"
-          >
-            Persisted Documents
-          </a>{' '}
-          secure and reduce traffic by hashing operations on app deployments.
+          Control user access with detailed, role-based permissions for enhanced security and
+          flexibility.
         </InfoCard>
       </ul>
     </section>
