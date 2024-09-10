@@ -215,10 +215,9 @@ The JWT plugin will inject the decoded token and payload into the context of Hiv
 You can use the injected payload with other plugins, to implement things like authorization or
 user-identity based logic.
 
-For example, with a plugin like
-[Operation Field Permissions](/docs/gateway/other-features/auth/operation-field-permissions), you
-can use the `jwt` property of the context to access the decoded JWT token, and decide what
-permissions to allow to the user based on identity or token claims:
+For example, with a plugin like Operation Field Permissions, you can use the `jwt` property of the
+context to access the decoded JWT token, and decide what permissions to allow to the user based on
+identity or token claims:
 
 ```ts filename="gateway.config.ts"
 import { useOperationFieldPermissions } from '@envelop/operation-field-permissions'
@@ -609,8 +608,7 @@ export const gatewayConfig = defineConfig({
 
 By default, the JWT plugin protects the whole schema. If you want to use a granular protection by
 using Federation directives such as `@authenticated`, `@requiresScopes` and `@policy`, you can use
-the [Generic Auth plugin](/docs/gateway/other-features/auth/generic-auth) to have a granular
-protection using with or without JWT.
+the Generic Auth plugin to have a granular protection using with or without JWT.
 
 With the following configuration, you can use the JWT plugin to extract the token and claims, and
 then use the Generic Auth plugin to protect the schema with the Federation directives:
