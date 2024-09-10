@@ -26,6 +26,9 @@ patchedDependencies:
   '@theguild/editor@1.2.5':
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
+  countup.js:
+    hash: nfqgtlg7dcp6sipx7lntl54mvi
+    path: patches/countup.js.patch
   eslint@8.57.0:
     hash: fjbpfrtrjd6idngyeqxnwopfva
     path: patches/eslint@8.57.0.patch
@@ -27144,7 +27147,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.5.4
 
-  countup.js@2.8.0: {}
+  countup.js@2.8.0(patch_hash=nfqgtlg7dcp6sipx7lntl54mvi): {}
 
   cpu-features@0.0.9:
     dependencies:
@@ -33463,7 +33466,7 @@ snapshots:
 
   react-countup@6.5.3(react@18.3.1):
     dependencies:
-      countup.js: 2.8.0
+      countup.js: 2.8.0(patch_hash=nfqgtlg7dcp6sipx7lntl54mvi)
       react: 18.3.1
 
   react-day-picker@8.10.1(date-fns@3.6.0)(react@18.3.1):
