@@ -89,7 +89,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
         )}
       >
         <Heading as="h2" size="md">
-          Loved by developers, trusted by business
+          Loved by developers, trusted by businesses
         </Heading>
         <Tabs.Root
           defaultValue={testimonials[0].company}

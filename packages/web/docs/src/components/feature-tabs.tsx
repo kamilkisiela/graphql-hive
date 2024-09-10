@@ -156,7 +156,7 @@ export function FeatureTabs({ className }: { className?: string }) {
               <Feature
                 title="Schema Registry"
                 icon={<SchemaRegistryIcon />}
-                documentationLink="/docs/features/schema-registry"
+                documentationLink="/docs/schema-registry"
                 description="Publish schemas, compose federated services, and detect backward-incompatible changes with ease."
                 highlights={highlights['Schema Registry']}
                 setActiveHighlight={setActiveHighlight}
@@ -166,7 +166,7 @@ export function FeatureTabs({ className }: { className?: string }) {
               <Feature
                 title="GraphQL Observability"
                 icon={<GraphQLObservabilityIcon />}
-                documentationLink="/docs/features/usage-reporting"
+                documentationLink="/docs/schema-registry/usage-reporting"
                 description="Enhanced GraphQL Observability tools provide insights into API usage and user experience metrics."
                 highlights={highlights['GraphQL Observability']}
                 setActiveHighlight={setActiveHighlight}
