@@ -209,8 +209,8 @@ function UltimatePerformanceCards() {
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
         >
-          Minimize unnecessary network calls that hinder your application’s speed. Hive leverages
-          GraphQL to enhance responsiveness and scales these benefits across your enterprise.
+          Minimize unnecessary network calls that hinder your application's speed. Use GraphQL to
+          enhance responsiveness and scales these benefits across your enterprise.
         </InfoCard>
         <InfoCard
           as="li"
@@ -218,8 +218,8 @@ function UltimatePerformanceCards() {
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full rounded-2xl md:rounded-3xl lg:basis-0"
         >
-          Reduce latency effectively with Hive by enabling frontend teams to obtain all required
-          data in a single request, maximizing GraphQL’s inherent performance benefits.
+          Streamline communication between frontend and backend by enabling precise data selection,
+          reducing unnecessary payloads and simplifying API interactions.
         </InfoCard>
       </ul>
     </section>
