@@ -80,8 +80,13 @@ export default withGuildDocs({
       permanent: true,
     },
     {
+      source: '/docs/management/external-schema-composition',
+      destination: '/docs/schema-registry/external-schema-composition',
+      permanent: true,
+    },
+    {
       source: '/docs/features/external-schema-composition',
-      destination: '/docs/management/external-schema-composition',
+      destination: '/docs/schema-registry/external-schema-composition',
       permanent: true,
     },
     {
@@ -107,6 +112,16 @@ export default withGuildDocs({
     {
       source: '/docs/management/external-schema-composition',
       destination: '/docs/schema-registry/external-schema-composition',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/laboratory',
+      destination: '/docs/dashboard/laboratory',
+      permanent: true,
+    },
+    {
+      source: '/docs/management/contracts',
+      destination: '/docs/schema-registry/contracts',
       permanent: true,
     },
     {

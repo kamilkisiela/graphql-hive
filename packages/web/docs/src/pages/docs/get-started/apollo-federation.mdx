@@ -389,8 +389,6 @@ docker run --name graphql-hive-cli --rm \
 You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
 meaning that the schema is compatible, valid and has no breaking changes:
 
-**TODO: Update logs**
-
 ```bash copy=false
 ℹ Detected 1 change
 
@@ -473,8 +471,6 @@ docker run --name graphql-hive-cli --rm \
 
 In that case, you'll notice that Hive CLI exists with a `1` exit code, meaning that the schema has
 breaking changes, and it's not compatible with the current schema in the registry:
-
-**TODO: Update logs**
 
 ```bash copy=false
 ✖ Detected 1 error
@@ -571,8 +567,6 @@ docker run --name graphql-hive-cli --rm \
 
 And now you can see that the schema check process has failed, due to conflicts and inconsistencies
 between the schemas:
-
-**TODO: Update logs**
 
 ```bash copy=false
 ✖ Detected 2 errors
@@ -832,8 +826,6 @@ gateways built-in GraphiQL interface.
 After executing the query, a few times, let's switch back to the Hive dashboard and navigate to the
 insights page.
 
-**TODO: INSERT PICTURES**
-
 Here we can now see the GraphQL operations from our Gateway being reported to the registry.
 
 ### Next Steps
@@ -845,6 +837,10 @@ reporting the usage data!
 From here you can continue to explore the Hive dashboard, or dive deeper into the documentation to
 learn about all the features of the Hive platform.
 
-**TODO: Link collection**
+<Cards>
+  <Cards.Card arrow title="Learn about the Schema Registry" href="/docs/schema-registry" />
+  <Cards.Card arrow title="Learn about Hive Gateway" href="/docs/gateway" />
+  <Cards.Card arrow title="CI/CD Integration" href="/docs/other-integrations/ci-cd" />
+</Cards>
 
 </Steps>
