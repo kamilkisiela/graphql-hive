@@ -31,3 +31,7 @@
 .light .nextra-sidebar-container .nextra-sidebar-footer:is(html[class~='dark'] *) {
   border-color: #e5e7eb;
 }
+
+._fixed._z-10:has(+ .nextra-sidebar-container) {
+  @apply md:hidden;
+}

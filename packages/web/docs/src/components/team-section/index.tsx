@@ -123,7 +123,9 @@ function TeamGallery(props: React.HTMLAttributes<HTMLElement>) {
       )}
     >
       {team.map((member, i) => (
-        <TeamAvatar key={i} data={member} />
+        <li key={i}>
+          <TeamAvatar data={member} />
+        </li>
       ))}
     </ul>
   );

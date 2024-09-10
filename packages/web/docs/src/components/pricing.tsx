@@ -62,9 +62,9 @@ function Plan(props: {
       <ul className="mt-8 text-green-800">
         {props.features.map((feature, i) =>
           feature === PlanFeaturesSeparator ? (
-            <div key={i} className="py-2 font-medium">
+            <li key={i} className="py-2 font-medium">
               Plus:
-            </div>
+            </li>
           ) : (
             <li key={i} className="border-green-200 py-2 [&+&]:border-t">
               {feature}

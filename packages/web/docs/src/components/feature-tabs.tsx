@@ -268,6 +268,9 @@ function Feature(props: {
       {documentationLink && (
         <CallToAction variant="primary" href={documentationLink}>
           Learn more
+          <span className="sr-only">
+            {/* descriptive text for screen readers and SEO audits */} about {props.title}
+          </span>
           <ArrowIcon />
         </CallToAction>
       )}
