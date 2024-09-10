@@ -20,6 +20,9 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
+  '@theguild/components':
+    hash: oskjo2y24bb7ptwj3nsbyin4w4
+    path: patches/@theguild__components.patch
   '@theguild/editor@1.2.5':
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
@@ -2018,7 +2021,7 @@ importers:
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
         specifier: 7.0.0-alpha-20240906131026-66c41355f58d6d009d54ea08f21d933f97fea6f2
-        version: 7.0.0-alpha-20240906131026-66c41355f58d6d009d54ea08f21d933f97fea6f2(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
+        version: 7.0.0-alpha-20240906131026-66c41355f58d6d009d54ea08f21d933f97fea6f2(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -25090,7 +25093,7 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@7.0.0-alpha-20240906131026-66c41355f58d6d009d54ea08f21d933f97fea6f2(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
+  '@theguild/components@7.0.0-alpha-20240906131026-66c41355f58d6d009d54ea08f21d933f97fea6f2(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@next/bundle-analyzer': 14.2.7
