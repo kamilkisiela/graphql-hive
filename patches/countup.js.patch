@@ -1,0 +1,13 @@
+diff --git a/src/countUp.ts b/src/countUp.ts
+index bff66c2e352dd642299ce4977c8809ce0ed1a6c6..1afe8849e12e36b0c4e2fd108657a8adb91d12de 100644
+--- a/src/countUp.ts
++++ b/src/countUp.ts
+@@ -105,8 +105,6 @@ export class CountUp {
+           window['onScrollFns'].forEach((fn) => fn());
+         };
+         this.handleScroll(this);
+-      } else {
+-        console.error(this.error, target);
+       }
+     }
+   }
