@@ -47,7 +47,7 @@ persisted queries) on your GraphQL Gateway or server, which provides the followi
 ```mermaid
 flowchart LR
     C["GraphQL API or Gateway
-(Yoga, Apollo Server, Mesh, Apollo Router)"]
+(Hive Gateway, GraphQL Yoga, Apollo Server, Apollo Router)"]
     B["Hive CDN"]
     D["App"]
 
@@ -227,7 +227,7 @@ by your Gateway.
 Hive serves as the source of truth for the allowed persisted documents and provides a CDN for
 fetching these documents as they are requested.
 
-<Tabs items={['Hive Gateway', 'GraphQL Yoga', 'Apollo Server', 'Custom Third-Party Integration']}>
+<Tabs items={['Hive Gateway', 'GraphQL Yoga', 'Apollo Server', 'Apollo Router', 'Custom Third-Party Integration']}>
 
 {/* Hive Gateway */}
 
@@ -323,6 +323,16 @@ const server = new ApolloServer({
 
 For further configuration options, please refer to the
 [Hive Client API reference](/docs/api-reference/client#persisted-documents).
+
+</Tabs.Tab>
+
+{/* Apollo Router */}
+
+<Tabs.Tab>
+
+Using the Hive Schema Registry for persisted documents with Apollo Router is currently not
+supported. Progress of the support is tracked in
+[this GitHub issue](https://github.com/kamilkisiela/graphql-hive/issues/5498).
 
 </Tabs.Tab>
 
