@@ -1,6 +1,6 @@
 # Hive Client for Apollo Server
 
-[Documentation](https://the-guild.dev/graphql/hive/docs/integrations/apollo-server)
+[Documentation](https://the-guild.dev/graphql/hive/docs/other-integrations/apollo-server)
 
 ---
 

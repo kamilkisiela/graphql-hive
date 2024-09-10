@@ -1,0 +1,6 @@
+name = "federation-demo"
+compatibility_date = "2024-04-03"
+node_compat = true
+
+[limits]
+cpu_ms = 100

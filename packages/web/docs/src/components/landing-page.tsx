@@ -175,19 +175,12 @@ function EnterpriseFocusedCards({ className }: { className?: string }) {
         </InfoCard>
         <InfoCard
           as="li"
-          heading="Secure and efficient"
+          heading="Customizable User Roles and Permissions"
           icon={<PerformanceListItemIcon />}
           className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
         >
-          <a
-            href="https://the-guild.dev/graphql/hive/docs/features/app-deployments#publish-an-app-deployment"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-blue-700 hover:underline"
-          >
-            Persisted Documents
-          </a>{' '}
-          secure and reduce traffic by hashing operations on app deployments.
+          Control user access with detailed, role-based permissions for enhanced security and
+          flexibility.
         </InfoCard>
       </ul>
     </section>
@@ -216,8 +209,8 @@ function UltimatePerformanceCards() {
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
         >
-          Minimize unnecessary network calls that hinder your application’s speed. Hive leverages
-          GraphQL to enhance responsiveness and scales these benefits across your enterprise.
+          Minimize unnecessary network calls that hinder your application's speed. Use GraphQL to
+          enhance responsiveness and scales these benefits across your enterprise.
         </InfoCard>
         <InfoCard
           as="li"
@@ -225,8 +218,8 @@ function UltimatePerformanceCards() {
           icon={<PerformanceListItemIcon />}
           className="flex-1 basis-full rounded-2xl md:rounded-3xl lg:basis-0"
         >
-          Reduce latency effectively with Hive by enabling frontend teams to obtain all required
-          data in a single request, maximizing GraphQL’s inherent performance benefits.
+          Streamline communication between frontend and backend by enabling precise data selection,
+          reducing unnecessary payloads and simplifying API interactions.
         </InfoCard>
       </ul>
     </section>

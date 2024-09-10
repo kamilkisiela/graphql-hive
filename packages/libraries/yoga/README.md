@@ -1,6 +1,6 @@
 # Hive Client for GraphQL Yoga
 
-[Documentation](https://the-guild.dev/graphql/hive/docs/integrations/graphql-yoga)
+[Documentation](https://the-guild.dev/graphql/hive/docs/other-integrations/graphql-yoga)
 
 ---
 

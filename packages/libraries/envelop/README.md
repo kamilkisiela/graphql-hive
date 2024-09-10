@@ -1,6 +1,6 @@
 # Hive Client for Envelop
 
-[Documentation](https://the-guild.dev/graphql/hive/docs/integrations/envelop)
+[Documentation](https://the-guild.dev/graphql/hive/docs/other-integrations/envelop)
 
 ---
 
