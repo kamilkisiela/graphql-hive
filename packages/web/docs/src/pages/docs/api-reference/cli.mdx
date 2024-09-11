@@ -2,8 +2,8 @@ import { Callout, Tabs } from '@theguild/components'
 
 # Hive CLI (Command Line Interface)
 
-You can perform [schema-registry actions](/docs/features/schema-registry#actions-on-schemas) on your
-Hive targets schemas using the Hive CLI.
+You can perform [schema-registry actions](/docs/schema-registry#actions-on-schemas) on your Hive
+targets schemas using the Hive CLI.
 
 ## Installation
 
@@ -73,7 +73,7 @@ You can also download a specific version of the binary:
 
 <Callout>
   We recommend publishing the schema from your CI/CD pipeline. You can find more information in out
-  [CI/CD Integration guide](../integrations/ci-cd.mdx).
+  [CI/CD Integration guide](/docs/other-integrations/ci-cd).
 </Callout>
 
 Start by setting your Hive token in
@@ -82,7 +82,7 @@ file, or set it as `HIVE_TOKEN` environment variable.
 
 Further reading:
 
-- [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
+- [Publishing a schema to the Schema Registry](/docs/schema-registry#publish-a-schema)
 
 #### Single Schema Project
 
@@ -111,8 +111,8 @@ hive schema:publish --service reviews --url http://my-service.com/graphql schema
 Further reading:
 
 - [`schema:publish` API Reference](/docs/api-reference/cli#hive-schemapublish-file)
-- [Apollo Router integration](/docs/integrations/apollo-router)
-- [Apollo-Server integration](/docs/integrations/apollo-server)
+- [Apollo Router integration](/docs/other-integrations/apollo-router)
+- [Apollo-Server integration](/docs/other-integrations/apollo-server)
 
 #### Hive Metadata
 
@@ -135,7 +135,7 @@ hive schema:publish schema.graphql --metadata '{ "someData": true }'
 
 Further reading:
 
-- [Fetching Hive Metadata from the CDN](/docs/features/high-availability-cdn)
+- [Fetching Hive Metadata from the CDN](/docs/high-availability-cdn)
 
 ### Check a schema
 
@@ -176,7 +176,7 @@ hive schema:check --contextId "pr-123" "src/*.graphql"
 
 Further reading:
 
-- [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
+- [Publishing a schema to the Schema Registry](/docs/schema-registry#publish-a-schema)
 - [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
 
 ### Delete a schema
@@ -381,9 +381,8 @@ Sometimes it is useful to fetch a schema (SDL or Supergraph) from Hive, for exam
 local development. This can be done using the `schema:fetch` command.
 
 <Callout type="info">
-  Don't confuse this with the [high-availability CDN](/docs/features/high-availability-cdn.mdx).
-  This command is used to fetch a schema from the API where the CDN always represents the latest
-  valid schema.
+  Don't confuse this with the [high-availability CDN](/docs/high-availability-cdn). This command is
+  used to fetch a schema from the API where the CDN always represents the latest valid schema.
 </Callout>
 
 You can fetch a schema by using the action id (commit sha) that was used for publishing the schema
@@ -408,7 +407,7 @@ You can fetch the GraphQL schema from the CDN using the `artifact:fetch` command
 
 <Callout type="info">
   You can learn how to create a CDN access token in the [High-Availability CDN
-  documentation](/docs/features/high-availability-cdn).
+  documentation](/docs/high-availability-cdn).
 </Callout>
 
 ```bash
@@ -436,8 +435,8 @@ hive schema:check schema.graphql --github
 ```
 
 <Callout>
-  Check our [CI/CD Integration guide](../integrations/ci-cd.mdx) for more information and GitHub
-  workflow examples.
+  Check our [CI/CD Integration guide](/docs/other-integrations/ci-cd) for more information and
+  GitHub workflow examples.
 </Callout>
 
 ## API Reference

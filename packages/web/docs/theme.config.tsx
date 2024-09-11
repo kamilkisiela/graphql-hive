@@ -1,26 +1,56 @@
 import { useRouter } from 'next/router';
-import { defineConfig, Footer, Giscus, PRODUCTS, useConfig, useTheme } from '@theguild/components';
+import {
+  defineConfig,
+  Giscus,
+  HiveFooter,
+  PRODUCTS,
+  useConfig,
+  useTheme,
+} from '@theguild/components';
+import { NavigationMenu } from './src/components/navigation-menu';
 import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
+import { cn } from './src/lib';
+
+const HiveLogo = PRODUCTS.HIVE.logo;
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
+  color: {
+    hue: {
+      dark: 67.1,
+      light: 173,
+    },
+    saturation: {
+      dark: 100,
+      light: 40,
+    },
+  },
+  navbar: { component: NavigationMenu },
   footer: {
-    component: (
-      <Footer
-        resources={[
-          {
-            children: 'Privacy Policy',
-            href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
-            title: 'Privacy Policy',
-          },
-          {
-            children: 'Terms of Use',
-            href: 'https://the-guild.dev/graphql/hive/terms-of-use.pdf',
-            title: 'Terms of Use',
-          },
-        ]}
-      />
-    ),
+    component: _props => {
+      const { route } = useRouter();
+
+      return (
+        <HiveFooter
+          className={cn(
+            route === '/' ? 'light' : '[&>:first-child]:mx-0 [&>:first-child]:max-w-[90rem]',
+            'pt-[72px]',
+          )}
+          resources={[
+            {
+              children: 'Privacy Policy',
+              href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
+              title: 'Privacy Policy',
+            },
+            {
+              children: 'Terms of Use',
+              href: 'https://the-guild.dev/graphql/hive/terms-of-use.pdf',
+              title: 'Terms of Use',
+            },
+          ]}
+        />
+      );
+    },
   },
 
   main({ children }) {
@@ -59,5 +89,5 @@ export default defineConfig({
   },
   description: 'Schema registry for your GraphQL workflows',
   websiteName: 'Hive',
-  logo: PRODUCTS.HIVE.logo({ className: 'w-8' }),
+  logo: <HiveLogo className="text-green-1000" />,
 });

@@ -1,0 +1,252 @@
+import { Tabs } from '@theguild/components'
+
+# Supergraph / Proxy Source
+
+Hive Gateway can retrieve a supergraph from a wide range of sources.
+
+This includes:
+
+- Hive Schema Schema Registry
+- Apollo GraphOS / Studio
+- Custom Sources
+
+In addition you can also proxy any GraphQL API, by either introspection or providing a schema file.
+
+## Supergraph
+
+<Tabs items={['Hive Schema Registry', 'Apollo GraphOS', 'Custom HTTP Source', 'Local File']}>
+
+{/* Hive Schema Registry */}
+
+<Tabs.Tab>
+
+Hive Gateway has built in support for fetching supergraphs from the Hive Schema Registry. You can
+either choose to provide the configuration via CLI parameters, environment variables or a
+configuration file.
+
+<Tabs items={['CLI', 'Configuration File']}>
+
+{/* CLI */}
+
+<Tabs.Tab>
+
+```sh
+hive-gateway supergraph <endpoint> --hive-cdn-key <api_key>
+```
+
+</Tabs.Tab>
+
+{/* Configuration File */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: {
+    // The CDN type.
+    type: 'hive',
+    // The endpoint of CDN
+    endpoint: '<endpoint>',
+    // The API key provided by Hive Registry
+    key: '<api_key>'
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+{/* Apollo GraphOS */}
+
+<Tabs.Tab>
+
+Hive Gateway has built in support for fetching supergraphs from the Apollo GraphOS Registry. You can
+either choose to provide the configuration via CLI parameters, environment variables or a
+configuration file.
+
+<Tabs items={['CLI', 'Configuration File']}>
+
+{/* CLI */}
+
+<Tabs.Tab>
+
+```sh
+hive-gateway supergraph <graph_id>[@<variant>] --apollo-key <api_key>
+```
+
+</Tabs.Tab>
+
+{/* Configuration File */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: {
+    type: 'graphos',
+    /**
+     * The graph ref of the managed federation graph.
+     * It is composed of the graph ID and the variant (`<YOUR_GRAPH_ID>@<VARIANT>`).
+     *
+     * If not provided, `APOLLO_GRAPH_REF` environment variable is used.
+     *
+     * You can find a a graph's ref at the top of its Schema Reference page in Apollo Studio.
+     */
+    graphRef: '<graph_id>[@<variant>]',
+    /**
+     * The API key to use to authenticate with the managed federation up link.
+     * It needs at least the `service:read` permission.
+     *
+     * If not provided, `APOLLO_KEY` environment variable will be used instead.
+     *
+     * [Learn how to create an API key](https://www.apollographql.com/docs/federation/v1/managed-federation/setup#4-connect-the-gateway-to-studio)
+     */
+    apiKey: '<api_key>',
+    /**
+     * The URL of the managed federation up link. When retrying after a failure, you should cycle through the default up links using this option.
+     *
+     * Uplinks are available in `DEFAULT_UPLINKS` constant.
+     *
+     * This options can also be defined using the `APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT` environment variable.
+     * It should be a comma separated list of up links, but only the first one will be used.
+     *
+     * Default: 'https://uplink.api.apollographql.com/' (Apollo's managed federation up link on GCP)
+     *
+     * Alternative: 'https://aws.uplink.api.apollographql.com/' (Apollo's managed federation up link on AWS)
+     */
+    upLink?: string;
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+{/* Custom HTTP Source */}
+
+<Tabs.Tab>
+
+You can provide a custom supergraph source, along with other options to customize the polling/retry
+behavior.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: () =>
+    // Fetch the supergraph from the schema registry
+    fetch('https://my-registry.com/supergraph.graphql', {
+      headers: {
+        Authorization: 'Bearer MY_TOKEN'
+      }
+    }).then(res => res.text()),
+
+  plugins: ctx => [
+    // You can also write your custom plugins to interact with the schema registry
+    useMyCustomPlugin(ctx)
+  ]
+})
+```
+
+</Tabs.Tab>
+
+{/* Local File */}
+
+<Tabs.Tab>
+
+You can point to `supergraph.graphql` located in your file system.
+
+<Tabs items={['CLI', 'Configuration File']}>
+
+{/* CLI */}
+
+<Tabs.Tab>
+
+```sh
+hive-gateway supergraph ./supergraph.graphql
+```
+
+</Tabs.Tab>
+
+{/* Configuration file */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: './supergraph.graphql'
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+</Tabs>
+
+### Polling
+
+You can configure the polling interval for the supergraph source.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: {
+    /* Supergraph Configuration */
+  },
+  // Poll the schema registry every 10 seconds
+  pollingInterval: 10_000
+})
+```
+
+## Proxy
+
+Instead of serving a supergraph, you can also use Hive Gateway to proxy any existing GraphQL API.
+This allows you to add features such as [usage reporting](/docs/gateway/usage-reporting) or
+[persisted documents](/docs/gateway/persisted-documents) without modifying your existing GraphQL
+API.
+
+<Tabs items={['CLI', 'Configuration File']}>
+
+{/* CLI */}
+
+<Tabs.Tab>
+
+```sh filename="Proxy GraphQL API"
+hive-gateway proxy https://example.com/graphql
+```
+
+</Tabs.Tab>
+
+{/* Configuration File */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  proxy: {
+    endpoint: 'https://example.com/graphql'
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>

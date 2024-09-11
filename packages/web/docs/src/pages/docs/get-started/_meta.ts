@@ -1,6 +1,6 @@
 export default {
   'first-steps': 'First Steps',
-  'single-project': 'Guide: Single Schema',
-  'schema-stitching': 'Guide: Schema-Stitching',
-  'apollo-federation': 'Guide: Apollo Federation',
+  'apollo-federation': 'Apollo Federation',
+  'single-project': 'Single Schema',
+  'schema-stitching': 'Schema-Stitching',
 };

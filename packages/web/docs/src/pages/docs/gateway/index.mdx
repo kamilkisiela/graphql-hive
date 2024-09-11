@@ -1,0 +1,345 @@
+---
+description:
+  Hive Gateway is the Apollo Federation Gateway and/or Proxy Gateway for your GraphQL services.
+---
+
+import { Callout, Cards, Tabs } from '@theguild/components'
+
+# Hive Gateway
+
+Hive Gateway is a fully open-source MIT-licensed GraphQL gateway that can act as a Apollo Federation
+Gateway or a Proxy Gateway for any GraphQL services.
+
+The Hive Gateway can be run as a standalone binary, a Docker Image, or as a JavaScript package (e.g.
+within Node.js, Bun, Deno, Google Cloud Functions, Azure Functions or Cloudflare Workers)
+
+Hive Gateway provides the following features on top of your Federated GraphQL schema or proxied
+GraphQL schema:
+
+- [GraphQL Subscriptions](/docs/gateway/subscriptions) with WebSockets, HTTP Callbacks or SSE
+- Automatic query and request batching to reduce the number of HTTP requests to your subgraph
+- [JSON Web Tokens (JWT)](/docs/gateway/authorization-authentication) authentication between client
+  and gateway also between gateway and subgraph
+- [Authorization](/docs/gateway/authorization-authentication) on specific fields and types using
+  Federation Auth directives like `@authenticated` and `@skipAuth`
+- [Role-based Access Control (RBAC)](/docs/gateway/authorization-authentication) either
+  programmatically or with directives `@requiresScope` and `@policy`
+- [Response Caching](/docs/gateway/other-features/performance/response-caching) based on either in
+  memory or Redis for distributed caching optionally with `@cacheControl` directive
+- [Security](/docs/gateway/other-features/security) features such as safelisting, depth limit etc
+- [Rate Limiting](/docs/gateway/other-features/security/rate-limiting) on specific fields and types
+  either programmatically or declaratively with `@rateLimit` directive
+- [Prometheus and OpenTelemetry integration](/docs/gateway/monitoring-tracing) with fully
+  customizable spans and attributes
+- [Persisted Documents](/docs/gateway/persisted-documents) backed by either Hive Registry or a
+  selfhosting storage
+- [E2E HTTP Compression](/docs/gateway/other-features/performance/compression) from the client to
+  the subgraph for better performance and resource management
+- [And more](/docs/gateway/other-features)
+
+## Installation
+
+Hive Gateway can be installed in different ways depending on your preference.
+
+<Tabs items={["Binary", "Docker", "JavaScript Package"]} >
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+This command will download the appropriate binary for your operating system.
+
+```sh
+curl -sSL https://graphql-hive.com/install-gateway.sh | sh
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+You can use the official Docker image to run Hive Gateway.
+
+```sh
+docker pull ghcr.io/ardatan/hive-gateway
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+To use the NPM package, you need to have [Node.js](https://nodejs.org) installed in your
+environment. Then, you can install Hive Gateway CLI with your preferred package manager.
+
+```sh npm2yarn
+npm i @graphql-hive/gateway
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Starting the Gateway
+
+Hive Gateway supports two different modes:
+
+- **Apollo Federation.** Serve a supergraph provided by a schema registry like
+  [Hive Registry](https://the-guild.dev/graphql/hive/docs/schema-registry), a composition tool like
+  [Apollo Rover](https://www.apollographql.com/docs/rover/),
+  [GraphQL Mesh](https://graphql-mesh.com/) or any other Federation compliant composition tool such
+  as [Apollo Rover](https://www.apollographql.com/docs/rover/) or schema registry
+  ([Hive Registry](https://the-guild.dev/graphql/hive),
+  [Apollo GraphOS](https://www.apollographql.com/docs/graphos/))
+- **Proxy a GraphQL API.** Hive Gateway can also act as a proxy to an existing GraphQL API.
+
+<Tabs items={["Apollo Federation", "Proxy"]}>
+
+{/* Apollo Federation */}
+
+<Tabs.Tab>
+
+To serve a Apollo Federation Gateway, we need to point the Gateway to either a local supergraph file
+or a supergraph served by our schema registry. For this example, we will serve a supergraph from the
+Hive schema registry.
+
+<Tabs items={["Binary", "Docker", "JavaScript Package"]}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run Apollo Federation Gateway with the Hive Gateway Binary"
+hive-gateway supergraph \
+  http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+```sh filename="Run Apollo Federation Gateway with the Hive Gateway Docker Image"
+docker run --rm --name hive-gateway -p 4000:4000 \
+  ghcr.io/ardatan/hive-gateway supergraph \
+  http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+If you installed the JavaScript package, you can use `npx` for running the CLI.
+
+```sh filename="Run Apollo Federation Gateway with npx"
+npx hive-gateway supergraph \
+  http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+{/* Proxy */}
+
+<Tabs.Tab>
+
+In order to proxy a GraphQL API, we need to provide the URL of the API when starting our Gateway.
+Optionally, we can also provide a schema file from either a local file or a schema registry, which
+will be used instead of instrospecting the proxied API.
+
+<Tabs items={["Binary", "Docker", "JavaScript Package"]}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary"
+hive-gateway proxy https://localhost:3000/graphql \
+  --hive-cdn-endpoint http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/sdl \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary"
+docker run --rm --name hive-gateway -p 4000:4000 \
+  ghcr.io/ardatan/hive-gateway proxy https://localhost:3000/graphql \
+  --hive-cdn-endpoint http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/sdl \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary"
+npx hive-gateway proxy https://localhost:3000/graphql \
+  --hive-cdn-endpoint http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/sdl \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+</Tabs>
+
+By default, Hive Gateway will start a server on port 4000. You can customize that behavior. For that
+please refer to our [CLI Reference](/docs/api-reference/gateway/cli).
+
+## Configuration File
+
+The Hive Gateway config file `gateway.config.ts` is used for enabling additional features such as
+authorization, authentication caching, rate limiting, and more. The recommended language for the
+configuration file is TypeScript.
+
+We can provide the CLI configuration parameters, also via the configuration file.
+
+<Tabs items={["Apollo Federation", "Proxy"]}>
+
+{/* Apollo Federation */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: {
+    type: 'hive',
+    endpoint:
+      'http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/supergraph',
+    key: 'YOUR HIVE CDN KEY'
+  }
+})
+```
+
+Hive Gateway will automatically load the default config file and apply the settings.
+
+<Tabs items={["Binary", "Docker", "JavaScript Package"]}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary using configuration file"
+hive-gateway supergraph
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For docker, we need to mount the configuration file into the container.
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary" {2}
+docker run --rm --name hive-gateway -p 4000:4000 \
+  -v $(pwd)/gateway.config.ts:/serve/gateway.config.ts \
+  ghcr.io/ardatan/hive-gateway supergraph
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary"
+npx hive-gateway supergraph
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+{/* Proxy */}
+
+<Tabs.Tab>
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  proxy: {
+    endpoint: 'http://localhost:3000/graphql'
+  }
+})
+```
+
+Hive Gateway will automatically load the default config file and apply the settings.
+
+<Tabs items={["Binary", "Docker", "JavaScript Package"]}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary using configuration file"
+hive-gateway proxy
+```
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+For docker, we need to mount the configuration file into the container.
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary" {2}
+docker run --rm --name hive-gateway -p 4000:4000 \
+  -v $(pwd)/gateway.config.ts:/serve/gateway.config.ts \
+  ghcr.io/ardatan/hive-gateway proxy https://localhost:3000/graphql \
+  --hive-cdn-endpoint http://cdn.graphql-hive.com/artifacts/v1/12713322-4f6a-459b-9d7c-8aa3cf039c2e/sdl \
+  --hive-cdn-key "YOUR HIVE CDN KEY"
+```
+
+</Tabs.Tab>
+
+{/* JavaScript Package */}
+
+<Tabs.Tab>
+
+```sh filename="Run Proxy Gateway with the Hive Gateway Binary"
+npx hive-gateway proxy
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Next steps
+
+After learning the first steps of Hive Gateway, you can explore the following topics.
+
+<Cards>
+  <Cards.Card arrow title="Set up Usage Reporting" href="/docs/gateway/usage-reporting" />
+  <Cards.Card arrow title="Set up Persisted Documents" href="/docs/gateway/persisted-documents" />
+</Cards>

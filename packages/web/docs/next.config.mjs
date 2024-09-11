@@ -31,32 +31,42 @@ export default withGuildDocs({
     },
     {
       source: '/docs/features/publish-schema',
-      destination: '/docs/features/schema-registry#publish-a-schema',
+      destination: '/docs/schema-registry#publish-a-schema',
       permanent: true,
     },
     {
       source: '/docs/features/checking-schema',
-      destination: '/docs/features/schema-registry#check-a-schema',
+      destination: '/docs/schema-registry#check-a-schema',
       permanent: true,
     },
     {
       source: '/docs/features/delete-schema',
-      destination: '/docs/features/schema-registry#delete-a-service',
+      destination: '/docs/schema-registry#delete-a-service',
       permanent: true,
     },
     {
       source: '/docs/features/registry-usage',
-      destination: '/docs/features/high-availability-cdn',
+      destination: '/docs/high-availability-cdn',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/high-availability-cdn',
+      destination: '/docs/high-availability-cdn',
       permanent: true,
     },
     {
       source: '/docs/features/monitoring',
-      destination: '/docs/features/usage-reporting',
+      destination: '/docs/schema-registry/usage-reporting',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/usage-reporting',
+      destination: '/docs/schema-registry/usage-reporting',
       permanent: true,
     },
     {
       source: '/docs/features/schema-history',
-      destination: '/docs/features/schema-registry#schema-history-and-changelog',
+      destination: '/docs/schema-registry#schema-history-and-changelog',
       permanent: true,
     },
     {
@@ -70,8 +80,13 @@ export default withGuildDocs({
       permanent: true,
     },
     {
+      source: '/docs/management/external-schema-composition',
+      destination: '/docs/schema-registry/external-schema-composition',
+      permanent: true,
+    },
+    {
       source: '/docs/features/external-schema-composition',
-      destination: '/docs/management/external-schema-composition',
+      destination: '/docs/schema-registry/external-schema-composition',
       permanent: true,
     },
     {
@@ -90,10 +105,45 @@ export default withGuildDocs({
       permanent: true,
     },
     {
+      source: '/docs/features/schema-registry',
+      destination: '/docs/schema-registry',
+      permanent: true,
+    },
+    {
+      source: '/docs/management/external-schema-composition',
+      destination: '/docs/schema-registry/external-schema-composition',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/laboratory',
+      destination: '/docs/dashboard/laboratory',
+      permanent: true,
+    },
+    {
+      source: '/docs/management/contracts',
+      destination: '/docs/schema-registry/contracts',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/schema-policy',
+      destination: '/docs/schema-registry/schema-policy',
+      permanent: true,
+    },
+    {
+      source: '/docs/features/app-deployments',
+      destination: '/docs/schema-registry/app-deployments',
+      permanent: true,
+    },
+    {
       // SEO: Redirect to the new URL
       source: '/docs/self-hosting/federation-2',
       destination: '/docs/self-hosting/external-composition',
       permanent: true,
+    },
+    {
+      source: '/docs/integrations/:path*',
+      destination: '/docs/other-integrations/:path*',
+      permanent: false,
     },
   ],
   swcMinify: true,

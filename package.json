@@ -80,7 +80,7 @@
     "eslint": "8.57.0",
     "eslint-plugin-cypress": "3.5.0",
     "eslint-plugin-hive": "file:rules",
-    "eslint-plugin-tailwindcss": "3.17.4",
+    "eslint-plugin-tailwindcss": "npm:@hasparus/eslint-plugin-tailwindcss@3.17.5",
     "fs-extra": "11.2.0",
     "graphql": "16.9.0",
     "jest-snapshot-serializer-raw": "2.0.0",
@@ -110,7 +110,10 @@
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch"
+      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch",
+      "@theguild/components": "patches/@theguild__components.patch",
+      "countup.js": "patches/countup.js.patch",
+      "nextra-theme-docs": "patches/nextra-theme-docs.patch"
     }
   }
 }

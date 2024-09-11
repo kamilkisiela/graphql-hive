@@ -1,7 +1,7 @@
 # Hive CLI (Command Line Interface)
 
 A CLI util to manage and control your GraphQL Hive. You can perform
-[schema-registry actions](https://the-guild.dev/graphql/hive/docs/features/schema-registry#actions-on-schemas)
+[schema-registry actions](https://the-guild.dev/graphql/hive/docs/schema-registry#actions-on-schemas)
 on your Hive targets using the Hive CLI.
 
 [![Version](https://img.shields.io/npm/v/@graphql-hive/cli.svg)](https://npmjs.org/package/@graphql-hive/cli)
