@@ -69,6 +69,7 @@ import { TargetInsightsCoordinatePage } from './pages/target-insights-coordinate
 import { TargetInsightsOperationPage } from './pages/target-insights-operation';
 import { TargetLaboratoryPage } from './pages/target-laboratory';
 import { TargetSettingsPage } from './pages/target-settings';
+import { OrganizationAuditLogsPage } from './pages/organization-audit-logs';
 
 if (globalThis.window) {
   SuperTokens.init(frontendConfig());
@@ -386,6 +387,15 @@ const organizationSubscriptionRoute = createRoute({
   component: function OrganizationSubscriptionRoute() {
     const { organizationId } = organizationSubscriptionRoute.useParams();
     return <OrganizationSubscriptionPage organizationId={organizationId} />;
+  },
+});
+
+const organizationAuditLogsRoute = createRoute({
+  getParentRoute: () => organizationRoute,
+  path: 'view/audit-logs',
+  component: function OrganizationAuditLogsRoute() {
+    const { organizationId } = organizationAuditLogsRoute.useParams();
+    return <OrganizationAuditLogsPage organizationId={organizationId} />;
   },
 });
 
@@ -818,6 +828,7 @@ const routeTree = root.addChildren([
       organizationSupportRoute,
       organizationSupportTicketRoute,
       organizationSubscriptionRoute,
+      organizationAuditLogsRoute,
       organizationSubscriptionManageRoute,
       organizationSubscriptionManageLegacyRoute,
       organizationMembersRoute,

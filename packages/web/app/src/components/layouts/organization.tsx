@@ -53,6 +53,7 @@ export enum Page {
   Policy = 'policy',
   Support = 'support',
   Subscription = 'subscription',
+  AuditLogs = 'audit-logs',
 }
 
 const OrganizationLayout_OrganizationFragment = graphql(`
@@ -207,6 +208,16 @@ export function OrganizationLayout({
                       </Link>
                     </TabsTrigger>
                   )}
+                {/* // TODO: Should decide about the scope of the audit logs */}
+                <TabsTrigger variant="menu" value={Page.AuditLogs} asChild>
+                  <Link
+                    to="/$organizationId/view/audit-logs"
+                    params={{ organizationId: currentOrganization.cleanId }}
+                  >
+                    Audit Logs
+                  </Link>
+                </TabsTrigger>
+
               </TabsList>
             </Tabs>
           ) : (
