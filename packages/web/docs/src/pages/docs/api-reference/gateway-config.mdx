@@ -386,7 +386,7 @@ export const gatewayConfig = defineConfig({
 })
 ```
 
-#### `logger`
+#### `logging`
 
 By default, Hive Gateway uses a simple logger that logs to the console by using standard `console`
 methods.
@@ -402,11 +402,11 @@ import { defineConfig } from '@graphql-hive/gateway'
 import { createLogger } from 'some-logger-library'
 
 export const gatewayConfig = defineConfig({
-  logger: createLogger()
+  logging: createLogger()
   // or
-  logger: 'info' // or 'debug' or 'warn' or 'error'
+  logging: 'info' // or 'debug' or 'warn' or 'error'
   // or
-  logger: false
+  logging: false
 })
 ```
 
