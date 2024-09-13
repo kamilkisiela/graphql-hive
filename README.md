@@ -1,13 +1,10 @@
-<!-- Uncomment guild banner when we remove GraphQL Conf -->
 <!-- Graphql logo readme banner START -->
-<!-- <p style="float: right; margin: 0 0 10px 10px;">
+<p style="float: right; margin: 0 0 10px 10px;">
   <a href="https://the-guild.dev">
     <img src="https://the-guild-org.github.io/press-kit/full-dark-logo.svg" alt="Created by The guild" style="width: 100px;"/>
   </a>
-</p> -->
+</p>
 <!-- Graphql logo readme banner END -->
-
-[![GraphQLConf 2024 Banner: September 10-12, San Francisco. Hosted by the GraphQL Foundation](https://github.com/user-attachments/assets/bdb8cd5d-5186-4ece-b06b-b00a499b7868)](https://graphql.org/conf/2024/?utm_source=github&utm_medium=graphql_hive&utm_campaign=readme)
 
 # GraphQL Hive
 
