@@ -12,7 +12,7 @@ networks:
 
 services:
   local_cdn:
-    image: node:22.6.0-alpine3.20
+    image: node:22.8.0-alpine3.20
     working_dir: /app
     command: ['node', 'index.js']
     networks:
@@ -38,7 +38,7 @@ services:
       S3_BUCKET_NAME: artifacts
 
   local_broker:
-    image: node:22.6.0-alpine3.20
+    image: node:22.8.0-alpine3.20
     working_dir: /app
     command: ['node', 'broker.js']
     networks:
@@ -78,7 +78,7 @@ services:
       SECRET: '${EXTERNAL_COMPOSITION_SECRET}'
 
   external_composition:
-    image: node:22.6.0-alpine3.20
+    image: node:22.8.0-alpine3.20
     working_dir: /app
     command: ['node', 'example.mjs']
     networks:
@@ -268,10 +268,10 @@ services:
 
   # It's not part of integration tests
   app:
-    image: node:22.6.0-alpine3.20
+    image: node:22.8.0-alpine3.20
     command: ['npx', 'http-server']
 
   # Redpand is used for integration tests, instead of Kafka. Zookeeper is no longer needed
   zookeeper:
-    image: node:22.6.0-alpine3.20
+    image: node:22.8.0-alpine3.20
     command: ['npx', 'http-server']
