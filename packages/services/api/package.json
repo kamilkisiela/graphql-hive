@@ -63,7 +63,7 @@
     "prom-client": "15.1.3",
     "redlock": "5.0.0-beta.2",
     "slonik": "30.4.4",
-    "supertokens-node": "15.2.1",
+    "supertokens-node": "15.2.3",
     "tslib": "2.7.0",
     "undici": "6.19.8",
     "vitest": "2.0.5",
