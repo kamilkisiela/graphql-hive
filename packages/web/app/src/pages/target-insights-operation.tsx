@@ -16,6 +16,7 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
+import { useSearchParamsFilter } from '@/lib/hooks/use-search-params-filters';
 
 const GraphQLOperationBody_OperationFragment = graphql(`
   fragment GraphQLOperationBody_OperationFragment on Operation {
@@ -69,7 +70,7 @@ function OperationView({
     dataRetentionInDays,
     defaultPreset: presetLast1Day,
   });
-  const [selectedClients, setSelectedClients] = useState<string[]>([]);
+  const [selectedClients, setSelectedClients] = useSearchParamsFilter<string[]>('clients', []);
   const operationsList = useMemo(() => [operationHash], [operationHash]);
 
   const [result] = useQuery({

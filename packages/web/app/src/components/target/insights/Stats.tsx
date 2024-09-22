@@ -27,6 +27,7 @@ import {
   useFormattedNumber,
   useFormattedThroughput,
 } from '@/lib/hooks';
+import { pick } from '@/lib/object';
 import { useChartStyles } from '@/utils';
 import { useRouter } from '@tanstack/react-router';
 import { OperationsFallback } from './Fallback';
@@ -567,12 +568,7 @@ function ClientsStats(props: {
             name: ev.value,
           },
           search(searchParams) {
-            if ('from' in searchParams && 'to' in searchParams) {
-              return {
-                from: searchParams.from,
-                to: searchParams.to,
-              };
-            }
+            return pick(searchParams, ['from', 'to']);
           },
         });
       }
