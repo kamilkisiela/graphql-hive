@@ -26,11 +26,11 @@ is active, you may specify an additional `--github` flag to report the results b
 Check Suite (for `schema:check` and `schema:publish` commands):
 
 ```bash
-hive schema:publish schema.graphql --github
+hive schema:publish path/to/schema.graphql --github
 ```
 
 ```bash
-hive schema:check schema.graphql --github
+hive schema:check path/to/schema.graphql --github
 ```
 
 ### GitHub Workflow for CI
@@ -46,15 +46,15 @@ jobs:
   check:
     runs-on: ubuntu-22.04
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: schema check
         env:
-          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+          # If you self-host your hive server:
+          HIVE_ENDPOINT: ${{ secrets.HIVE_ENDPOINT }}
         run: |
           curl -sSL https://graphql-hive.com/install.sh | sh
-          hive schema:check "schema.graphql" \
-            --registry.accessToken ${{ env.HIVE_TOKEN }} \
+          hive schema:check 'path/to/schema.graphql' \
+            --registry.accessToken '${{ secrets.HIVE_TOKEN }}' \
             --github
 ```
 
@@ -71,16 +71,15 @@ jobs:
   publish:
     runs-on: ubuntu-22.04
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: schema publish
         env:
-          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+          # If you self-host your hive server:
           HIVE_ENDPOINT: ${{ secrets.HIVE_ENDPOINT }}
         run: |
           curl -sSL https://graphql-hive.com/install.sh | sh
-          hive schema:publish "schema.graphql" \
-            --registry.accessToken ${{ env.HIVE_TOKEN }} \
+          hive schema:publish 'path/to/schema.graphql' \
+            --registry.accessToken '${{ secrets.HIVE_TOKEN }}' \
             --github
 ```
 
