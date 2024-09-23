@@ -352,6 +352,15 @@ export async function main() {
         bucketName: env.s3.bucketName,
         endpoint: env.s3.endpoint,
       },
+      s3Mirror: env.s3Mirror
+        ? {
+            accessKeyId: env.s3Mirror.credentials.accessKeyId,
+            secretAccessKeyId: env.s3Mirror.credentials.secretAccessKey,
+            sessionToken: env.s3Mirror.credentials.sessionToken,
+            bucketName: env.s3Mirror.bucketName,
+            endpoint: env.s3Mirror.endpoint,
+          }
+        : null,
       encryptionSecret: env.encryptionSecret,
       feedback: {
         token: 'noop',
@@ -530,10 +539,37 @@ export async function main() {
         bucketName: env.s3.bucketName,
       };
 
-      const artifactStorageReader = new ArtifactStorageReader(s3, env.s3.publicUrl, null);
+      const s3Mirror = env.s3Mirror
+        ? {
+            client: new AwsClient({
+              accessKeyId: env.s3Mirror.credentials.accessKeyId,
+              secretAccessKey: env.s3Mirror.credentials.secretAccessKey,
+              service: 's3',
+            }),
+            endpoint: env.s3Mirror.endpoint,
+            bucketName: env.s3Mirror.bucketName,
+          }
+        : null;
+
+      const artifactStorageReader = new ArtifactStorageReader(s3, s3Mirror, null, null);
 
       const artifactHandler = createArtifactRequestHandler({
-        isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
+        isKeyValid: createIsKeyValid({
+          artifactStorageReader,
+          analytics: null,
+          breadcrumb(message: string) {
+            server.log.debug(message);
+          },
+          getCache: null,
+          waitUntil: null,
+          captureException(error) {
+            captureException(error, {
+              extra: {
+                source: 'artifactRequestHandler',
+              },
+            });
+          },
+        }),
         artifactStorageReader,
         isAppDeploymentActive: createIsAppDeploymentActive({
           artifactStorageReader,

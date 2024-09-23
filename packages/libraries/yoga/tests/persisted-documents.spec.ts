@@ -266,7 +266,7 @@ test('arbitrary options are allowed with allowArbitraryDocuments=true (GraphQL o
   });
 });
 
-test('use persisted documents for subscription (GraphQL over HTTP "documentId")', async () => {
+test('use persisted documents for SSE GET (GraphQL over HTTP "documentId")', async () => {
   const httpScope = nock('http://artifacts-cdn.localhost', {
     reqheaders: {
       'X-Hive-CDN-Key': value => {
@@ -325,6 +325,80 @@ test('use persisted documents for subscription (GraphQL over HTTP "documentId")'
       documentId: 'client-name~client-version~hash',
     }),
   });
+
+  expect(response.status).toBe(200);
+  expect(await response.text()).toMatchInlineSnapshot(`
+    :
+
+    event: next
+    data: {"data":{"hi":"hi"}}
+
+    event: complete
+    data:
+  `);
+
+  httpScope.done();
+});
+
+test('use persisted documents for subscription over SSE (GraphQL over HTTP "documentId")', async () => {
+  const httpScope = nock('http://artifacts-cdn.localhost', {
+    reqheaders: {
+      'X-Hive-CDN-Key': value => {
+        expect(value).toBe('foo');
+        return true;
+      },
+    },
+  })
+    .get('/apps/client-name/client-version/hash')
+    .reply(200, 'subscription { hi }');
+
+  const yoga = createYoga({
+    schema: createSchema({
+      typeDefs: /* GraphQL */ `
+        type Query {
+          hi: String
+        }
+
+        type Subscription {
+          hi: String
+        }
+      `,
+      resolvers: {
+        Subscription: {
+          hi: {
+            async *subscribe() {
+              yield { hi: 'hi' };
+            },
+          },
+        },
+      },
+    }),
+    plugins: [
+      useHive({
+        enabled: false,
+        experimental__persistedDocuments: {
+          cdn: {
+            endpoint: 'http://artifacts-cdn.localhost',
+            accessToken: 'foo',
+          },
+        },
+        agent: {
+          logger,
+        },
+      }),
+    ],
+  });
+
+  const response = await yoga.fetch(
+    'http://localhost/graphql?documentId=client-name~client-version~hash',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      },
+    },
+  );
 
   expect(response.status).toBe(200);
   expect(await response.text()).toMatchInlineSnapshot(`

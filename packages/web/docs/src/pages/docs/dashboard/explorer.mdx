@@ -1,0 +1,31 @@
+import NextImage from 'next/image'
+import { Callout } from '@theguild/components'
+import schemaExplorerImage from '../../../../public/docs/pages/features/schema-explorer.png'
+
+# Schema Explorer
+
+The Hive Schema Explorer is a useful tool that can provide you with a comprehensive understanding of
+your GraphQL schema. Not only does it allow you to explore the different types and fields of your
+schema, but it also enables you to gain a deeper understanding of the arguments and their respective
+input types.
+
+<NextImage
+  alt="Schema Explorer"
+  src={schemaExplorerImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+## Schema Usage and Coverage
+
+With [Usage Reporting](/docs/schema-registry/usage-reporting) feature enabled, you'll be able to see
+an overview of the schema usage and coverage (for types, fields and input types), based on the
+GraphQL operations you report to Hive.
+
+This feature is useful if you wish to understand how your GraphQL schema is being used and queried,
+and understand the impact of changes you make to your schema.
+
+<Callout type="info">
+  The maximum duration is defined by the retention of your [Hive
+  plan](/docs/management/organizations#subscription-and-billing), and depends on the data you
+  already sent before to Hive.
+</Callout>

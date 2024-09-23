@@ -1,5 +1,14 @@
 # @graphql-hive/yoga
 
+## 0.38.0
+
+### Minor Changes
+
+- [#5568](https://github.com/kamilkisiela/graphql-hive/pull/5568)
+  [`581e84f`](https://github.com/kamilkisiela/graphql-hive/commit/581e84fce1af8c6b197fa0f2d018f6f3f4a4983e)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - support resolving `documentId` provided via search
+  params for GET request
+
 ## 0.37.0
 
 ### Minor Changes

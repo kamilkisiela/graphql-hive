@@ -4,7 +4,7 @@ import cdnTokenImage from '../../../../public/docs/pages/guides/cdn_token.png'
 import historyImage from '../../../../public/docs/pages/guides/history.png'
 import tokenImage from '../../../../public/docs/pages/guides/token.png'
 
-# Guide: Single Schema Project
+# Single Schema Project
 
 Once you've created a Hive project of type **Single Schema**, you can simply push your GraphQL
 schema to the registry. This guide will guide you through the basics of schema pushing, checking and
@@ -20,7 +20,7 @@ read GraphQL schemas from `.graphql` files in your local filesystem.
 <Callout type="info">
   **Using code-first approach to write your GraphQL schema?**
   
-  Please refer to the [Code-First Guide](/docs/integrations/code-first) to learn how to use the Hive with
+  Please refer to the [Code-First Guide](/docs/other-integrations/code-first) to learn how to use the Hive with
 code-first approach.
 
 </Callout>
@@ -265,8 +265,7 @@ The Hive Cloud service leverages the
 schema metadata. This means that your schema will be available from the nearest location to your
 GraphQL gateway, with 100% uptime, regardless of Hive's status. This ensures that everything
 required for your GraphQL API is always available, and reduces the risk of depending on Hive as a
-single point of failure.
-[You can read more about Hive's CDN here](/docs/features/high-availability-cdn).
+single point of failure. [You can read more about Hive's CDN here](/docs/high-availability-cdn).
 
 To get started with Hive's CDN access, you'll need to create a CDN token from your target's
 **Settings** page. You'll see a separate section for managing and creating CDN tokens, called **CDN
@@ -309,10 +308,10 @@ You should see that Hive CDN returns your full GraphQL schema as an output for t
 Now that you use the basic functionality of Hive as a schema registry, we recommend following other
 powerful features of Hive:
 
-- [CI/CD Integration](/docs/integrations/ci-cd)
-- [Usage Reporting and Monitoring](/docs/features/usage-reporting)
+- [CI/CD Integration](/docs/other-integrations/ci-cd)
+- [Usage Reporting and Monitoring](/docs/schema-registry/usage-reporting)
 - [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
 - [Alerts and Notifications](/docs/management/projects#alerts-and-notifications)
-- [Schema Policies](/docs/features/schema-policy)
+- [Schema Policies](/docs/schema-registry/schema-policy)
 
 </Steps>

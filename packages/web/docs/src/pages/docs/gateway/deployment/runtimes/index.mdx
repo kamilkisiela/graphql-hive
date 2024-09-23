@@ -1,0 +1,13 @@
+import { Callout } from '@theguild/components'
+
+# Server-side JavaScript Environments
+
+For Node.js and other Node-compliant environments, you can use Gateway CLI as described in the
+[Node.js guide](/docs/gateway/deployment/runtimes/nodejs). But if you want to use Hive Gateway with
+a server-side JavaScript environment that is not compatible with Node.js API, you can use the
+`createGatewayRuntime` function from `@graphql-hive/gateway` package.
+
+In this case, you have to pass your serve configuration inside `createGatewayRuntime` instead of
+exporting it `gatewayConfig` from `gateway.config.ts` file.
+
+See the guides on the left for examples with different server-side JavaScript environments.

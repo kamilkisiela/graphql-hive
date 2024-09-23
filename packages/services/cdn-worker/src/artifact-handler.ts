@@ -2,7 +2,8 @@ import * as itty from 'itty-router';
 import zod from 'zod';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactStorageReader, type ArtifactsType } from './artifact-storage-reader';
-import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
+import { createBreadcrumb, type Breadcrumb } from './breadcrumbs';
+import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import { IsAppDeploymentActive } from './is-app-deployment-active';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
@@ -15,14 +16,7 @@ export type GetArtifactActionFn = (
 ) => Promise<
   | { type: 'notModified' }
   | { type: 'notFound' }
-  | { type: 'body'; body: string }
-  | {
-      type: 'redirect';
-      location: {
-        public: string;
-        private: string;
-      };
-    }
+  | { type: 'response'; status: Response['status']; headers: Response['headers']; body: string }
 >;
 
 type ArtifactRequestHandler = {
@@ -30,6 +24,7 @@ type ArtifactRequestHandler = {
   isKeyValid: KeyValidator;
   isAppDeploymentActive: IsAppDeploymentActive;
   analytics?: Analytics;
+  breadcrumb?: Breadcrumb;
   fallback?: (
     request: Request,
     params: { targetId: string; artifactType: string },
@@ -69,6 +64,7 @@ const authHeaderName = 'x-hive-cdn-key' as const;
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   const router = itty.Router<itty.IRequest & Request>();
   const analytics = deps.analytics ?? createAnalytics();
+  const breadcrumb = deps.breadcrumb ?? createBreadcrumb();
 
   const authenticate = async (
     request: itty.IRequest & Request,
@@ -109,8 +105,13 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const params = parseResult.data;
 
+    breadcrumb(
+      `Artifact v1 handler (type=${params.artifactType}, targetId=${params.targetId}, contractName=${params.contractName})`,
+    );
+
     /** Legacy handling for old client SDK versions. */
     if (params.artifactType === 'schema') {
+      breadcrumb('Redirecting from /schema to /services');
       return createResponse(
         analytics,
         'Found.',
@@ -138,7 +139,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.artifactStorageReader.generateArtifactReadUrl(
+    const result = await deps.artifactStorageReader.readArtifact(
       params.targetId,
       params.contractName,
       params.artifactType,
@@ -161,7 +162,10 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
     }
 
-    if (result.type === 'redirect') {
+    if (result.type === 'response') {
+      const etag = result.headers.get('etag');
+      const text = result.body;
+
       if (params.artifactType === 'metadata') {
         // To not change a lot of logic and still reuse the etag bits, we
         // fetch metadata using the redirect location.
@@ -171,31 +175,17 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
         // and we're fetching the artifact from within the private network.
         // If they are the same, private and public locations will be the same.
-        const metadataResponse = await fetch(result.location.private);
-
-        if (!metadataResponse.ok) {
-          console.error(
-            'Failed to fetch metadata',
-            metadataResponse.status,
-            metadataResponse.statusText,
-          );
-
-          return new UnexpectedError(analytics, request);
-        }
-
-        const body = await metadataResponse.text();
 
         // Metadata in SINGLE projects is only Mesh's Metadata, and it always defines _schema
-        const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
-        const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
+        const isMeshArtifact = text.includes(`"#/definitions/_schema"`);
+        const hasTopLevelArray = text.startsWith('[') && text.endsWith(']');
 
         // Mesh's Metadata shared by Mesh is always an object.
         // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
         if (isMeshArtifact && hasTopLevelArray) {
-          const etag = metadataResponse.headers.get('etag');
           return createResponse(
             analytics,
-            body.substring(1, body.length - 1),
+            text.substring(1, text.length - 1),
             {
               status: 200,
               headers: {
@@ -211,11 +201,17 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
       return createResponse(
         analytics,
-        'Found.',
-        // We're using here a public location, because we expose the Location to the end user and
-        // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
-        // If they are the same, private and public locations will be the same.
-        { status: 302, headers: { Location: result.location.public } },
+        text,
+        {
+          status: 200,
+          headers: {
+            'Content-Type':
+              params.artifactType === 'metadata' || params.artifactType === 'services'
+                ? 'application/json'
+                : 'text/plain',
+            ...(etag ? { etag } : {}),
+          },
+        },
         params.targetId,
         request,
       );

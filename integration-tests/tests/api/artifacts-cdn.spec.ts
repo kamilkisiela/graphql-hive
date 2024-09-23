@@ -14,7 +14,7 @@ import { createSupergraphManager } from '@graphql-hive/apollo';
 import { graphql } from '../../testkit/gql';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
-import { getCDNPort, getServiceHost, KnownServices } from '../../testkit/utils';
+import { getServiceHost, KnownServices } from '../../testkit/utils';
 
 const s3Client = new S3Client({
   endpoint: 'http://127.0.0.1:9000',
@@ -250,9 +250,13 @@ function runArtifactsCDNTests(
         redirect: 'manual',
       });
 
-      expect(response.status).toBe(302);
-      expect(await response.text()).toBe('Found.');
-      expect(response.headers.get('location')).toBeDefined();
+      expect(response.status).toBe(200);
+      const body = await response.text();
+      expect(body).toMatchInlineSnapshot(`
+        type Query {
+          ping: String
+        }
+      `);
 
       const artifactContents = await fetchS3ObjectArtifact(
         'artifacts',
@@ -306,21 +310,8 @@ function runArtifactsCDNTests(
         redirect: 'manual',
       });
 
-      expect(response.status).toBe(302);
-      expect(await response.text()).toBe('Found.');
-      const locationHeader = response.headers.get('location');
-      expect(locationHeader).toBeDefined();
-      const locationUrl = new URL(locationHeader!);
-      expect(locationUrl.protocol).toBe('http:');
-      expect(locationUrl.hostname).toBe('localhost');
-      expect(locationUrl.port).toBe(getCDNPort().toString());
-
-      response = await fetch(locationHeader!, {
-        method: 'GET',
-        redirect: 'manual',
-      });
-      const body = await response.text();
       expect(response.status).toBe(200);
+      const body = await response.text();
       expect(body).toMatchInlineSnapshot(
         '[{"name":"ping","sdl":"type Query { ping: String }","url":"http://ping.com"}]',
       );
