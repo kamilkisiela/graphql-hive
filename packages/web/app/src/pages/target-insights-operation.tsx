@@ -1,4 +1,4 @@
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { AlertCircleIcon, RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { Section } from '@/components/common';
