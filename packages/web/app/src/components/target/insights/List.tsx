@@ -10,6 +10,7 @@ import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/gql/graphql';
 import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
+import { pick } from '@/lib/object';
 import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Link } from '@tanstack/react-router';
 import {
@@ -74,10 +75,11 @@ function OperationRow({
                   operationName: operation.name,
                   operationHash: operation.hash,
                 }}
-                search={{
+                search={searchParams => ({
+                  ...pick(searchParams, ['clients']),
                   from: selectedPeriod?.from ? encodeURIComponent(selectedPeriod.from) : undefined,
                   to: selectedPeriod?.to ? encodeURIComponent(selectedPeriod.to) : undefined,
-                }}
+                })}
               >
                 {operation.name}
               </Link>
