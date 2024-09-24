@@ -16,6 +16,7 @@ import { CHART_PRIMARY_COLOR } from '@/constants';
 import { graphql } from '@/gql';
 import { formatNumber, formatThroughput, toDecimal } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
+import { pick } from '@/lib/object';
 import { useChartStyles } from '@/utils';
 import { Link } from '@tanstack/react-router';
 
@@ -280,14 +281,7 @@ function ClientView(props: {
                               operationName: operation.name,
                               operationHash: operation.operationHash ?? '_',
                             }}
-                            search={searchParams => {
-                              if ('from' in searchParams && 'to' in searchParams) {
-                                return {
-                                  from: searchParams.from,
-                                  to: searchParams.to,
-                                };
-                              }
-                            }}
+                            search={searchParams => pick(searchParams, ['from', 'to'])}
                           >
                             {operation.name}
                           </Link>

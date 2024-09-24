@@ -29,7 +29,7 @@ export function OperationsFallback({
             <AlertCircleIcon className="size-4" />
             <AlertTitle>No stats available yet.</AlertTitle>
             <AlertDescription>
-              There is no information available for the selected date range.
+              There is no information available for the selected filters.
             </AlertDescription>
           </Alert>
         </div>

@@ -54,7 +54,7 @@ function OperationsFilter({
   }
 
   const [selectedItems, setSelectedItems] = useState<string[]>(() =>
-    selected?.length ? selected : getOperationHashes(),
+    getOperationHashes().filter(hash => selected?.includes(hash) ?? true),
   );
 
   const onSelect = useCallback(
@@ -401,7 +401,7 @@ function ClientsFilter({
   }
 
   const [selectedItems, setSelectedItems] = useState<string[]>(() =>
-    selected?.length ? selected : getClientNames(),
+    getClientNames().filter(name => selected?.includes(name) ?? true),
   );
 
   const onSelect = useCallback(
