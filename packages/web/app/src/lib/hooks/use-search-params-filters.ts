@@ -27,7 +27,7 @@ export function useSearchParamsFilter<TValue extends SearchParamsFilter>(
 }
 
 function serializeSearchValue(value: string | string[]) {
-  return value instanceof Array ? value.join(',') : value;
+  return Array.isArray(value) ? value.join(',') : value;
 }
 
 function deserializeSearchValue(value: string | null) {
