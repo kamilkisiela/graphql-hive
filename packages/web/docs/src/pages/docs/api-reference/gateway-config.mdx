@@ -115,6 +115,108 @@ And see the implementation of the default `transport` loading logic
 
 You can replace this logic by providing your own `transports`.
 
+### `transportEntries`
+
+Most Gateway Transports can be configured using the `transportEntries` option.
+
+This option is mostly used to customize the subscription transport to be used when it's not using
+the one used for queries and mutations. To learn more about subscriptions between gateway and
+upstream, please visit the [Subscriptions page](/graphql/hive/docs/gateway/subscriptions)
+
+Otherwise, all configuration is derived from subgraphs definition.
+
+#### Subgraph matcher
+
+Each subgraph's transport can be configured by adding a configuration object to the
+`transportEntries` map, using the subgraph's name as a key.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  transportEntries: {
+    subgraphName: {
+      // configuration for the 'subgraphName' subgraph transport.
+    }
+  }
+})
+```
+
+Most of the time, all subgraph using the same transport will have the same configuration. To avoid
+duplicating the configuration object for each subgraphs, you can use a transport matcher syntax
+`*.transportKind`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  transportEntries: {
+    '*.http': {
+      // configuration for all subgraph using the http transport.
+    }
+  }
+})
+```
+
+If you need to define a configuration for all subgraphs at once, you can use the wildcard matcher
+`*`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  transportEntries: {
+    '*': {
+      // configuration for all subgraph using the http transport.
+    }
+  }
+})
+```
+
+If a subgraph mathes multiple transport entries, the configurations are merged with priority for the
+most specific matcher (`subgraphName` > `*.transportKind` > `*`).
+
+#### `kind`
+
+The kind of transport to be used. This will be used by the `transports` loading mechanism to find
+the proper transport implementation.
+
+#### `location`
+
+The location of the subgraph. Can be either a absolute or a relative path. Defaults to the one
+defined in the subgraphs configuration.
+
+#### `headers`
+
+A list of headers entries to add (when applicable) to the upstream request. Values must be strings,
+and can be dynamic by including string interpolations.
+
+```ts filename="graphql.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  transportEntries: {
+    '*.http': {
+      headers: [
+        ['authorization', '{context.cookie.authorization}'],
+        ['correlation-id', '{context.header.correalation-id}']
+      ]
+    }
+  }
+})
+```
+
+#### `options`
+
+An additional option object specific to the transport kind. You can find the accepted option here in
+the specific documentation of each transport.
+
+#### `options.subscriptions`
+
+A special case of the `option` fields is `subcriptions`. It allows to override the transport options
+(including the kind) only for subscripions. Please see
+[Subscriptions page](/graphql/hive/docs/gateway/subscriptions) for more details.
+
 ### Subgraphs
 
 If you want to serve a single subgraph, you can provide the subgraph configuration as well. You can

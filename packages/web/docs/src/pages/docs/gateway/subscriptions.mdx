@@ -312,7 +312,7 @@ import { defineConfig, type HTTPCallbackTransportOptions } from '@graphql-hive/g
 
 export const gatewayConfig = defineConfig({
   transportEntries: {
-    '*.http': { // <-- Will be applied to products, views and stocks subgraphs
+    '*.http': { // <-- Will be applied to products, views and stocks subgraphs, but not stores.
       options: {
         subscriptions: {
           kind: 'ws',
