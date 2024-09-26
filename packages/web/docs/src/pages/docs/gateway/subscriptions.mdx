@@ -186,6 +186,13 @@ Hive Gateway can propagate the downstream client's `Authorization` header conten
 WebSocket connections through the
 [`ConnectionInit` message payload](https://github.com/graphql/graphql-over-http/blob/main/rfcs/GraphQLOverWebSocket.md#connectioninit).
 
+<Callout type="warning">
+  If either `connectionParams` or `headers` are used with dynamic values, it can drastically
+  increase the number of upstream WebSockets connections. <br />
+  Since `headers` and `connectionParams` can only be applied at connection time, a new connection is
+  required for each different set of values provided.
+</Callout>
+
 ```ts filename="gateway.config.ts"
 import { defineConfig, type WSTransportOptions } from '@graphql-hive/gateway'
 
