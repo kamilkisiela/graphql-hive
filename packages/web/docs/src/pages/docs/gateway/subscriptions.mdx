@@ -235,9 +235,7 @@ export const gatewayConfig = defineConfig({
         subscriptions: {
           kind: 'ws',
           location: '/subscriptions',
-          headers: [
-            ['authorization', '{context.headers.authorization}']
-          ]
+          headers: [['authorization', '{context.headers.authorization}']]
         }
       }
     }
@@ -246,8 +244,8 @@ export const gatewayConfig = defineConfig({
 ```
 
 <Callout>
-The headers will be sent only with the upgrade request.
-They will not be sent again during the lifecycle of the subscription.
+  The headers will be sent only with the upgrade request. They will not be sent again during the
+  lifecycle of the subscription.
 </Callout>
 
 ## Subscriptions using HTTP Callback
@@ -290,20 +288,23 @@ By default, subscriptions will use the same transport than queries and mutation.
 using the `transportEntries` option.
 
 The key of each entry determine which subgraph will be impacted:
- - `*`: all subgraphs
- - `*.{transportKind}`: all subgraphs using `transportKind`. For example, `*.http` will impact all subgraph using the `http` transport.
- - `{subgraphName}`: a specific subgraph.
 
-Configuration are inherited and merged from the least specific to the most specific matcher.
-Only exception is the `headers` which is not inherited for the `ws` transport.
+- `*`: all subgraphs
+- `*.{transportKind}`: all subgraphs using `transportKind`. For example, `*.http` will impact all
+  subgraph using the `http` transport.
+- `{subgraphName}`: a specific subgraph.
+
+Configuration are inherited and merged from the least specific to the most specific matcher. Only
+exception is the `headers` which is not inherited for the `ws` transport.
 
 ### Example
 
 Let be 4 subgraphs:
- - products: using `http` transport for queries, and HTTP callbacks for subscriptions
- - views: using `http` transport for queries, and WS for subscriptions
- - stocks: using `http` transport for queries, and WS for subscriptions
- - stores: using `mysql` transport
+
+- products: using `http` transport for queries, and HTTP callbacks for subscriptions
+- views: using `http` transport for queries, and WS for subscriptions
+- stocks: using `http` transport for queries, and WS for subscriptions
+- stores: using `mysql` transport
 
 The configuration will be:
 
@@ -312,7 +313,8 @@ import { defineConfig, type HTTPCallbackTransportOptions } from '@graphql-hive/g
 
 export const gatewayConfig = defineConfig({
   transportEntries: {
-    '*.http': { // <-- Will be applied to products, views and stocks subgraphs, but not stores.
+    '*.http': {
+      // <-- Will be applied to products, views and stocks subgraphs, but not stores.
       options: {
         subscriptions: {
           kind: 'ws',
@@ -321,10 +323,11 @@ export const gatewayConfig = defineConfig({
               token: '{context.headers.authorization}'
             }
           }
-        },
+        }
       }
     },
-    'products': { // <-- Will override the subscriptions configuration for products subgraph only
+    products: {
+      // <-- Will override the subscriptions configuration for products subgraph only
       options: {
         subscriptions: {
           kind: 'http-callback',
@@ -332,7 +335,7 @@ export const gatewayConfig = defineConfig({
           headers: [['authorization', 'context.headers.authorization']]
         }
       }
-    },
+    }
   }
 })
 ```
