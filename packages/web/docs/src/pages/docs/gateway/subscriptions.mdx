@@ -314,7 +314,7 @@ import { defineConfig, type HTTPCallbackTransportOptions } from '@graphql-hive/g
 export const gatewayConfig = defineConfig({
   transportEntries: {
     '*.http': {
-      // <-- Will be applied to products, views and stocks subgraphs, but not stores.
+      // Will be applied to products, views and stocks subgraphs, but not stores.
       options: {
         subscriptions: {
           kind: 'ws',
@@ -327,7 +327,7 @@ export const gatewayConfig = defineConfig({
       }
     },
     products: {
-      // <-- Will override the subscriptions configuration for products subgraph only
+      // Will override the subscriptions configuration for products subgraph only
       options: {
         subscriptions: {
           kind: 'http-callback',
