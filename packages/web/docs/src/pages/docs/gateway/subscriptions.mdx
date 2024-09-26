@@ -175,6 +175,11 @@ Downstream clients are still subscribing to Hive Gateway gateway through any sup
 protocol, but upstream Hive Gateway will use long-living WebSocket connections to the "products"
 service.
 
+<Callout>
+  WebSocket for communications between Hive Gateway and subgraphs are suboptimal compared to other
+  possible transports. We recommend using either SSE or HTTP Callbacks instead.
+</Callout>
+
 ### Propagation of authorization
 
 Hive Gateway can propagate the downstream client's `Authorization` header contents to the upstream
