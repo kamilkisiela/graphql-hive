@@ -136,6 +136,15 @@ export interface document_collections {
   updated_at: Date;
 }
 
+export interface document_preflight_scripts {
+  created_at: Date;
+  created_by_user_id: string | null;
+  id: string;
+  source_code: string;
+  target_id: string;
+  updated_at: Date;
+}
+
 export interface migration {
   date: Date;
   hash: string;
@@ -417,6 +426,7 @@ export interface DBTables {
   contracts: contracts;
   document_collection_documents: document_collection_documents;
   document_collections: document_collections;
+  document_preflight_scripts: document_preflight_scripts;
   migration: migration;
   oidc_integrations: oidc_integrations;
   organization_invitations: organization_invitations;

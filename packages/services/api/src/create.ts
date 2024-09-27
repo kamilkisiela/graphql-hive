@@ -29,6 +29,7 @@ import {
   SCHEMA_POLICY_SERVICE_CONFIG,
   SchemaPolicyServiceConfig,
 } from './modules/policy/providers/tokens';
+import { preflightScriptModule } from './modules/preflight-script';
 import { projectModule } from './modules/project';
 import { rateLimitModule } from './modules/rate-limit';
 import {
@@ -90,6 +91,7 @@ const modules = [
   schemaPolicyModule,
   collectionModule,
   appDeploymentsModule,
+  preflightScriptModule,
 ];
 
 export function createRegistry({

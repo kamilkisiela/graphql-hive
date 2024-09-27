@@ -1,6 +1,10 @@
-import { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
+import { ComponentProps, Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import type { editor } from 'monaco-editor';
+import { useMutation, useQuery } from 'urql';
+import { persist } from 'zustand/middleware';
+import { shallow } from 'zustand/shallow';
+import { createWithEqualityFn } from 'zustand/traditional';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,8 +17,10 @@ import {
 } from '@/components/ui/dialog';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
+import { graphql } from '@/gql';
 import { useToggle } from '@/lib/hooks';
-import { GraphiQLPlugin, useStorageContext } from '@graphiql/react';
+import { GraphiQLPlugin } from '@graphiql/react';
 import { Editor as MonacoEditor, OnMount } from '@monaco-editor/react';
 import {
   CrossCircledIcon,
@@ -23,8 +29,46 @@ import {
   Pencil1Icon,
   TriangleRightIcon,
 } from '@radix-ui/react-icons';
+import { useParams } from '@tanstack/react-router';
 import type { LogMessage } from './execute-script';
 import PreflightWorker from './worker?worker';
+
+const usePreflightScriptStore = createWithEqualityFn(
+  persist<{
+    script: string;
+    env: string;
+    disabled: boolean;
+    setScript: Dispatch<string>;
+    setDisabled: Dispatch<boolean>;
+    setEnv: Dispatch<string | undefined>;
+  }>(
+    set => ({
+      script: '',
+      env: '',
+      disabled: false,
+      setScript: script => set({ script }),
+      setDisabled: disabled => set({ disabled }),
+      setEnv: env => set({ env }),
+    }),
+    {
+      name: 'preflight-script-storage',
+    },
+  ),
+  shallow,
+);
+
+const usePreflightScriptState = () =>
+  usePreflightScriptStore(state => ({
+    script: state.script,
+    env: state.env,
+    disabled: state.disabled,
+  }));
+const usePreflightScriptActions = () =>
+  usePreflightScriptStore(state => ({
+    setScript: state.setScript,
+    setEnv: state.setEnv,
+    setDisabled: state.setDisabled,
+  }));
 
 const preflightWorker = new PreflightWorker();
 
@@ -45,12 +89,6 @@ export const preflightScriptPlugin: GraphiQLPlugin = {
   ),
   title: 'Preflight Script',
   content: PreflightScriptContent,
-};
-
-const storageKey = {
-  script: 'preflightScript:script',
-  env: 'preflightScript:env',
-  disabled: 'preflightScript:disabled',
 };
 
 const classes = {
@@ -100,14 +138,22 @@ type PreflightScriptResult = {
 };
 
 export async function executeScript(
-  script = localStorage.getItem(`graphiql:${storageKey.script}`)!,
-  env = localStorage.getItem(`graphiql:${storageKey.env}`)!,
+  script = usePreflightScriptStore.getState().script,
+  env = usePreflightScriptStore.getState().env,
 ): Promise<PreflightScriptResult> {
-  preflightWorker.postMessage({ script, environmentVariables: env ? JSON.parse(env) : {} });
+  const { disabled, setEnv } = usePreflightScriptStore.getState();
+  const environmentVariables = env ? JSON.parse(env) : {};
+
+  if (disabled) {
+    return { logs: [], environmentVariables };
+  }
+
+  preflightWorker.postMessage({ script, environmentVariables });
 
   return new Promise(resolve => {
     preflightWorker.onmessage = (event: MessageEvent<PreflightScriptResult>) => {
       const { logs, environmentVariables } = event.data;
+      setEnv(JSON.stringify(environmentVariables, null, 2));
       resolve({ logs, environmentVariables });
     };
     preflightWorker.onerror = error => {
@@ -117,29 +163,121 @@ export async function executeScript(
   });
 }
 
+const TargetQuery = graphql(`
+  query Target($selector: TargetSelectorInput!) {
+    target(selector: $selector) {
+      id
+      preflightScript {
+        id
+        sourceCode
+      }
+    }
+  }
+`);
+
+const CreatePreflightScriptMutation = graphql(`
+  mutation CreatePreflightScript(
+    $selector: TargetSelectorInput!
+    $input: CreatePreflightScriptInput!
+  ) {
+    data: createPreflightScript(selector: $selector, input: $input) {
+      ok {
+        preflightScript {
+          id
+          sourceCode
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+const UpdatePreflightScriptMutation = graphql(`
+  mutation UpdatePreflightScript(
+    $selector: TargetSelectorInput!
+    $input: UpdatePreflightScriptInput!
+  ) {
+    data: updatePreflightScript(selector: $selector, input: $input) {
+      ok {
+        preflightScript {
+          id
+          sourceCode
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
 function PreflightScriptContent() {
-  const storage = useStorageContext({ nonNull: true });
-  const [script, setScript] = useState(() => storage.get(storageKey.script) ?? '');
-  const [env, setEnv] = useState(() => storage.get(storageKey.env) ?? '');
   const [showModal, toggleShowModal] = useToggle();
-  const [enableScript, setEnableScript] = useState(
-    () => storage.get(storageKey.disabled) !== 'false',
+  const store = usePreflightScriptState();
+  const { env, disabled } = store;
+  const { setScript, setDisabled, setEnv } = usePreflightScriptActions();
+
+  const params = useParams({
+    from: '/authenticated/$organizationId/$projectId/$targetId',
+  });
+
+  const selector = {
+    organization: params.organizationId,
+    project: params.projectId,
+    target: params.targetId,
+  };
+  const [query, refetchQuery] = useQuery({
+    query: TargetQuery,
+    variables: { selector },
+  });
+  const [, mutateCreate] = useMutation(CreatePreflightScriptMutation);
+  const [, mutateUpdate] = useMutation(UpdatePreflightScriptMutation);
+
+  const preflightScript = query.data?.target?.preflightScript;
+  const { toast } = useToast();
+
+  const handleScriptChange = useCallback(
+    async (newValue = '') => {
+      const preflightId = preflightScript?.id;
+      const { data, error } = preflightId
+        ? await mutateUpdate({
+            selector,
+            input: { sourceCode: newValue, id: preflightId },
+          })
+        : await mutateCreate({
+            selector,
+            input: { sourceCode: newValue },
+          });
+      const err = error || data?.data?.error;
+
+      if (err) {
+        toast({
+          title: 'Error',
+          description: err.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const action = preflightId ? 'updated' : 'created';
+      if (!preflightId) {
+        refetchQuery({
+          requestPolicy: 'cache-and-network',
+        });
+      }
+      toast({
+        title: action[0].toUpperCase() + action.slice(1),
+        description: `Preflight script has been ${action} successfully`,
+        variant: 'default',
+      });
+      setScript(data!.data.ok!.preflightScript.sourceCode);
+    },
+    [preflightScript],
   );
 
-  const handleScriptChange = useCallback((newValue = '') => {
-    setScript(newValue);
-    storage.set(storageKey.script, newValue);
-  }, []);
-
-  const handleEnvChange = useCallback((newValue = '') => {
-    setEnv(newValue);
-    storage.set(storageKey.env, newValue);
-  }, []);
-
-  const handleScriptDisabledChange = useCallback((checked: boolean) => {
-    setEnableScript(checked);
-    storage.set(storageKey.disabled, String(checked));
-  }, []);
+  const script = preflightScript?.sourceCode;
 
   return (
     <>
@@ -151,7 +289,7 @@ function PreflightScriptContent() {
         scriptValue={script}
         onScriptValueChange={handleScriptChange}
         envValue={env}
-        onEnvValueChange={handleEnvChange}
+        onEnvValueChange={setEnv}
       />
       <div className="graphiql-doc-explorer-title flex items-center justify-between gap-4">
         Preflight Script
@@ -160,6 +298,7 @@ function PreflightScriptContent() {
           size="icon-sm"
           className="size-auto gap-1"
           onClick={toggleShowModal}
+          data-cy="preflight-script-modal-button"
         >
           <Pencil1Icon className="shrink-0" />
           Edit
@@ -171,20 +310,23 @@ function PreflightScriptContent() {
 
       <div className="flex items-center gap-2 text-sm">
         <Switch
-          checked={enableScript}
-          onCheckedChange={handleScriptDisabledChange}
+          checked={!disabled}
+          onCheckedChange={v => setDisabled(!v)}
           className="my-4"
+          data-cy="disable-preflight-script"
         />
-        <span className="w-6">{enableScript ? 'ON' : 'OFF'}</span>
+        <span className="w-6">{disabled ? 'OFF' : 'ON'}</span>
       </div>
 
-      {enableScript && (
+      {!disabled && (
         <MonacoEditor
           height={128}
           value={script}
-          onChange={handleScriptChange}
           {...monacoProps.script}
           className={classes.monacoMini}
+          wrapperProps={{
+            ['data-cy']: 'preflight-script-editor-mini',
+          }}
           options={{
             ...monacoProps.script.options,
             lineNumbers: 'off',
@@ -193,7 +335,7 @@ function PreflightScriptContent() {
         />
       )}
 
-      <Title className="mt-6 flex gap-2">
+      <Title className="mt-6 flex items-center gap-2">
         Environment variables{' '}
         <Badge className="text-xs" variant="outline">
           JSON
@@ -203,9 +345,12 @@ function PreflightScriptContent() {
       <MonacoEditor
         height={128}
         value={env}
-        onChange={handleEnvChange}
+        onChange={setEnv}
         {...monacoProps.env}
         className={classes.monacoMini}
+        wrapperProps={{
+          ['data-cy']: 'env-editor-mini',
+        }}
       />
     </>
   );
@@ -221,7 +366,7 @@ function PreflightScriptModal({
 }: {
   isOpen: boolean;
   toggle: () => void;
-  scriptValue: string;
+  scriptValue?: string;
   onScriptValueChange: (value?: string) => void;
   envValue: string;
   onEnvValueChange: (value?: string) => void;
@@ -247,11 +392,10 @@ function PreflightScriptModal({
   }, []);
 
   const handleRunScript = useCallback(async () => {
-    const { logs, environmentVariables } = await executeScript(
+    const { logs } = await executeScript(
       scriptEditorRef.current?.getValue() ?? '',
       envEditorRef.current?.getValue() ?? '',
     );
-    envEditorRef.current?.setValue(JSON.stringify(environmentVariables, null, 2));
     setLogs(prev =>
       // Add separator only after first run
       isScriptRan.current ? [...prev, { type: 'separator' }, ...logs] : logs,
@@ -291,6 +435,7 @@ function PreflightScriptModal({
                 size="icon-sm"
                 className="size-auto"
                 onClick={handleRunScript}
+                data-cy="run-preflight-script"
               >
                 <TriangleRightIcon className="shrink-0" /> Run Script
               </Button>
@@ -303,6 +448,9 @@ function PreflightScriptModal({
                 ...monacoProps.script.options,
                 wordWrap: 'wordWrapColumn',
               }}
+              wrapperProps={{
+                ['data-cy']: 'preflight-script-editor',
+              }}
             />
           </div>
           <div className="flex h-[inherit] flex-col">
@@ -310,6 +458,7 @@ function PreflightScriptModal({
             <section
               ref={consoleRef}
               className='h-1/2 overflow-hidden overflow-y-scroll bg-[#10151f] py-2.5 pl-[26px] pr-2.5 font-[Menlo,Monaco,"Courier_New",monospace] text-xs/[18px]'
+              data-cy="console-output"
             >
               {logs.map((log, index) => {
                 let type = '';
@@ -360,6 +509,9 @@ function PreflightScriptModal({
                 ...monacoProps.env.options,
                 wordWrap: 'wordWrapColumn',
               }}
+              wrapperProps={{
+                ['data-cy']: 'env-editor',
+              }}
             />
           </div>
         </div>
@@ -369,10 +521,15 @@ function PreflightScriptModal({
             Changes made to this Preflight Script will apply to all users on your team using this
             variant.
           </p>
-          <Button type="button" onClick={toggle}>
+          <Button type="button" onClick={toggle} data-cy="preflight-script-modal-cancel">
             Close
           </Button>
-          <Button type="button" variant="primary" onClick={handleSubmit}>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleSubmit}
+            data-cy="preflight-script-modal-submit"
+          >
             Save
           </Button>
         </DialogFooter>
