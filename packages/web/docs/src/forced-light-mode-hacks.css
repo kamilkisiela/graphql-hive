@@ -1,29 +1,62 @@
-:is(html[class~='light'] .nextra-search-results ._text\-primary\-600) {
+:is(html[class~='light'] .hive-search-results ._text\-primary\-600) {
   color: hsl(
     var(--nextra-primary-hue) var(--nextra-primary-saturation) 40% / var(--tw-text-opacity)
   );
 }
 
-.light .nextra-search-results {
+.light .hive-search-results {
   @apply !border-green-200;
   background-color: white;
   padding: 1rem 0;
 }
 
-.light .nextra-search-results .dark\:_text-gray-400:is(html[class~='dark'] *) {
+.light .hive-search-results .dark\:_text-gray-400:is(html[class~='dark'] *) {
   @apply !text-green-800;
 }
 
-.light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
+.light .hive-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
   @apply !text-green-1000;
 }
 
-.light .nextra-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
+.light .hive-search-results .dark\:_text-gray-300:is(html[class~='dark'] *) {
   @apply !text-green-800;
 }
 
 @media not all and (min-width: 768px) {
-  .light .nextra-sidebar-container {
+  .light .hive-search-results {
     @apply !bg-white;
   }
+}
+
+.hive-search-results {
+  --hive-meta-label-color: rgb(107, 114, 128);
+  --hive-meta-lettermark-bg: rgb(107, 114, 128);
+}
+
+.hive-search-results:not(.light *) {
+  --hive-meta-label-color: rgba(163, 163, 163);
+  --hive-meta-lettermark-bg: rgba(255, 255, 255, 0.1);
+}
+
+.light .hive-search-results .dark\:_text-neutral-400:is(html[class~='dark'] *) {
+  color: rgb(107, 114, 128);
+}
+
+.light .hive-search-results,
+.light .hive-search-results:is(html[class~='dark'] *) {
+  background-color: #fff;
+  border-color: #e5e7eb;
+}
+.light .hive-search-results .dark\:before\:_bg-neutral-800:is(html[class~='dark'] *):before {
+  background-color: rgb(229, 231, 235);
+}
+.light .hive-search-results .nextra-search-results:is(html[class~='dark'] *) {
+  border-color: rgb(229, 231, 235);
+}
+.light .hive-search-results .nextra-sidebar-footer:is(html[class~='dark'] *) {
+  border-color: #e5e7eb;
+}
+
+._fixed._z-10:has(+ .hive-search-results) {
+  @apply md:hidden;
 }
