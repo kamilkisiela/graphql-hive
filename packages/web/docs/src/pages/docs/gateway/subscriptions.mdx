@@ -27,6 +27,9 @@ The example is somewhat similar to
 [Apollo's documentation](https://www.apollographql.com/docs/router/executing-operations/subscription-support/#example-execution),
 except for that we use GraphQL Yoga here and significantly reduce the setup requirements.
 
+You can find this example
+[source on GitHub](https://github.com/ardatan/graphql-mesh/tree/master/e2e/federation-subscriptions-passthrough).
+
 ### Install dependencies
 
 ```ssh npm2yarn
@@ -136,7 +139,7 @@ curl 'http://localhost:4000/graphql' \
   --data-raw '{"query":"subscription OnProductPriceChanged { productPriceChanged { name price reviews { score } } }","operationName":"OnProductPriceChanged"}'
 ```
 
-## Subgraphs using WebSockets
+## Subscriptions using WebSockets
 
 If your subgraph uses WebSockets for subscriptions support
 ([like with Apollo Server](https://www.apollographql.com/docs/apollo-server/data/subscriptions/)),
@@ -175,11 +178,23 @@ Downstream clients are still subscribing to Hive Gateway gateway through any sup
 protocol, but upstream Hive Gateway will use long-living WebSocket connections to the "products"
 service.
 
-### `Authorization` header
+<Callout>
+  WebSocket for communications between Hive Gateway and subgraphs are suboptimal compared to other
+  possible transports. We recommend using either SSE or HTTP Callbacks instead.
+</Callout>
 
-Hive Gatewayr can propagate the downstream client's `Authorization` header contents to the upstream
+### Propagation of authorization
+
+Hive Gateway can propagate the downstream client's `Authorization` header contents to the upstream
 WebSocket connections through the
 [`ConnectionInit` message payload](https://github.com/graphql/graphql-over-http/blob/main/rfcs/GraphQLOverWebSocket.md#connectioninit).
+
+<Callout type="warning">
+  If either `connectionParams` or `headers` are used with dynamic values, it can drastically
+  increase the number of upstream WebSockets connections. <br />
+  Since `headers` and `connectionParams` can only be applied at connection time, a new connection is
+  required for each different set of values provided.
+</Callout>
 
 ```ts filename="gateway.config.ts"
 import { defineConfig, type WSTransportOptions } from '@graphql-hive/gateway'
@@ -220,6 +235,34 @@ The contents of the payload will be available in `graphql-ws` connectionParams:
   WebSockets](https://www.apollographql.com/docs/router/executing-operations/subscription-support/#websocket-auth-support).
 </Callout>
 
+It is also possible, but not recommended, to propagate HTTP headers by sending them alongside the
+WebSocket upgrade request.
+
+```ts filename="gateway.config.ts"
+import { defineConfig, type WSTransportOptions } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  supergraph: 'supergraph.graphql',
+  transportEntries: {
+    // use "*.http" to apply options to all subgraphs with HTTP
+    '*.http': {
+      options: {
+        subscriptions: {
+          kind: 'ws',
+          location: '/subscriptions',
+          headers: [['authorization', '{context.headers.authorization}']]
+        }
+      }
+    }
+  }
+})
+```
+
+<Callout>
+  The headers will be sent only with the upgrade request. They will not be sent again during the
+  lifecycle of the subscription.
+</Callout>
+
 ## Subscriptions using HTTP Callback
 
 If your subgraph uses
@@ -247,6 +290,64 @@ export const gatewayConfig = defineConfig({
             // Heartbeat interval to make sure the subgraph is still alive, and avoid hanging requests
             heartbeat_interval: 5000
           } satisfies HTTPCallbackTransportOptions
+        }
+      }
+    }
+  }
+})
+```
+
+## Subscriptions transport configuration
+
+By default, subscriptions will use the same transport than queries and mutation. This can be change
+using the `transportEntries` option.
+
+The key of each entry determine which subgraph will be impacted:
+
+- `*`: all subgraphs
+- `*.{transportKind}`: all subgraphs using `transportKind`. For example, `*.http` will impact all
+  subgraph using the `http` transport.
+- `{subgraphName}`: a specific subgraph.
+
+Configuration are inherited and merged from the least specific to the most specific matcher. Only
+exception is the `headers` which is not inherited for the `ws` transport.
+
+### Example
+
+Let be 4 subgraphs:
+
+- products: using `http` transport for queries, and HTTP callbacks for subscriptions
+- views: using `http` transport for queries, and WS for subscriptions
+- stocks: using `http` transport for queries, and WS for subscriptions
+- stores: using `mysql` transport
+
+The configuration will be:
+
+```ts filename="gateway.config.ts"
+import { defineConfig, type HTTPCallbackTransportOptions } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  transportEntries: {
+    '*.http': {
+      // Will be applied to products, views and stocks subgraphs, but not stores.
+      options: {
+        subscriptions: {
+          kind: 'ws',
+          options: {
+            connectionParams: {
+              token: '{context.headers.authorization}'
+            }
+          }
+        }
+      }
+    },
+    products: {
+      // Will override the subscriptions configuration for products subgraph only
+      options: {
+        subscriptions: {
+          kind: 'http-callback',
+          location: '/subscriptions',
+          headers: [['authorization', 'context.headers.authorization']]
         }
       }
     }
