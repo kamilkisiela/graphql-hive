@@ -15,4 +15,18 @@ information to the outside world can make you vulnerable for targeted attacks.
 
 In order to build secure applications, it is crucial to understand this concept.
 
+## Disable for development
+
+For development purpose, exposing errors to the client can be needed depending on your architecture.
+
+Error masking can be disabled using the `maskedErrors` option:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  maskedErrors: false
+})
+```
+
 {/* `TODO: Consider how to explain subgraph errors etc` */}
