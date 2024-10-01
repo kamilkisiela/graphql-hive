@@ -4,6 +4,7 @@ import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
 import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
 import { appDeploymentsModule } from './modules/app-deployments';
+import { APP_DEPLOYMENTS_ENABLED } from './modules/app-deployments/providers/app-deployments-enabled-token';
 import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
@@ -116,6 +117,7 @@ export function createRegistry({
   emailsEndpoint,
   organizationOIDC,
   pubSub,
+  appDeploymentsEnabled,
 }: {
   logger: Logger;
   storage: Storage;
@@ -157,6 +159,7 @@ export function createRegistry({
   emailsEndpoint?: string;
   organizationOIDC: boolean;
   pubSub: HivePubSub;
+  appDeploymentsEnabled: boolean;
 }) {
   const s3Config: S3Config = [
     {
@@ -281,6 +284,11 @@ export function createRegistry({
     {
       provide: OIDC_INTEGRATIONS_ENABLED,
       useValue: organizationOIDC,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: APP_DEPLOYMENTS_ENABLED,
+      useValue: appDeploymentsEnabled,
       scope: Scope.Singleton,
     },
     {
