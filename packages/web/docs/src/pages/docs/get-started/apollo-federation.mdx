@@ -5,12 +5,12 @@ import createAccessToken from '../../../../public/docs/pages/get-started/apollo-
 import cdnAccessTokenCreate from '../../../../public/docs/pages/get-started/apollo-federation/create-cdn-access-token.png'
 import createdAccessToken from '../../../../public/docs/pages/get-started/apollo-federation/created-access-token.png'
 import cdnAccessTokenCreated from '../../../../public/docs/pages/get-started/apollo-federation/created-cdn-access-token.png'
+import publishFirstSchemaVersionUi from '../../../../public/docs/pages/get-started/apollo-federation/publish-first-schema-version-ui.png'
+import publishSecondSchemaVersionUi from '../../../../public/docs/pages/get-started/apollo-federation/publish-second-schema-version-ui.png'
+import publishThirdSchemaVersionUi from '../../../../public/docs/pages/get-started/apollo-federation/publish-third-schema-version-ui.png'
 import registryTokenSettings from '../../../../public/docs/pages/get-started/apollo-federation/registry-token-settings.png'
 import targetOverview from '../../../../public/docs/pages/get-started/apollo-federation/target-overview.png'
 import cdnTokenImage from '../../../../public/docs/pages/guides/federation-cdn-token.png'
-import federationExplorerImage from '../../../../public/docs/pages/guides/federation-explorer.png'
-import federationHistoryImage from '../../../../public/docs/pages/guides/federation-history.png'
-import federationSchemaImage from '../../../../public/docs/pages/guides/federation-schema.png'
 
 import historyImage from '../../../../public/docs/pages/guides/history.png'
 import tokenImage from '../../../../public/docs/pages/guides/token.png'
@@ -238,8 +238,8 @@ If you'll get to your target's page on Hive dashboard, you should see that it wa
 new schema you just published 🎉
 
 <NextImage
-  alt="Federation Schema Published"
-  src={federationSchemaImage}
+  alt="First published schema version on the Hive dashboard"
+  src={publishFirstSchemaVersionUi}
   className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
@@ -308,6 +308,21 @@ docker run --name graphql-hive-cli --rm \
 
 </Tabs>
 
+If everything goes well, you should see the following output:
+
+```bash copy=false
+✔ Schema published
+```
+
+After the publish process, if we had over to the Hive dashboard, we can see our new schema version
+published.
+
+<NextImage
+  alt="Second published schema version on the Hive dashboard"
+  src={publishSecondSchemaVersionUi}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
 Last, we will publish the **Reviews** subgraph schema to Hive. Again, let's start by copying the
 schema to a local file.
 
@@ -370,7 +385,7 @@ docker run --name graphql-hive-cli --rm \
 
 </Tabs>
 
-If everything goes well, you should see the following output:
+Again, if everything goes well, you should see the following output:
 
 ```bash copy=false
 ✔ Schema published
@@ -379,10 +394,312 @@ If everything goes well, you should see the following output:
 On your target's **Explorer** page now, you'll be able to see the schema of all three subgraphs 🎉
 
 <NextImage
-  alt="Schema Explorer for Federation Projects"
-  src={federationExplorerImage}
+  alt="Third published schema version on the Hive dashboard"
+  src={publishThirdSchemaVersionUi}
   className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
+
+Congratulations on publishing and composing your first subgraphs with the Hive schema registry!
+
+### Hive Gateway
+
+The next step is to spin up our GraphQL gateway that will serve the federated GraphQL schema
+composed out of the subgraphs we published to the Hive schema registry.
+
+The Gateway will delegate the requests from the clients to the appropriate subgraph services, and
+then merge the results into a single response.
+
+The Hive schema registry publishes the supergraph (artifact of the composed schemas that contains
+all the information about the subgraphs and fields available) to the high-availability CDN on
+Cloudflare.
+
+The gateway can poll the supergraph from the CDN and serve the composed GraphQL schema.
+
+```mermaid
+
+flowchart LR
+    A["Hive Gateway"] -. Poll supergraph .-> C
+    subgraph hive [Hive]
+      direction TB
+      B[Registry] -. Publish supergraph .-> C["HA CDN
+        (on Cloudflare)"]
+    end
+    A --> X1[GraphQL subgraph]
+    A --> X2[GraphQL subgraph]
+    A --> X3[GraphQL subgraph]
+    X1 -.- D([Hive CLI])
+    X2 -.- D
+    X3 -.- D
+    subgraph ci [CI/CD]
+      D -- Publish schemas --> B
+    end
+
+```
+
+#### CDN Access
+
+For accessing the supergraph, we need to create the CDN access token from the Hive dashboard.
+
+Navigate to your target's settings page and select the **CDN Tokens** tab.
+
+<NextImage
+  alt="CDN Token Form"
+  src={cdnAccessTokenSettings}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+Click the **Create new CDN token** button, give your token a name and click **Create**.
+
+<NextImage
+  alt="CDN Token Form"
+  src={cdnAccessTokenCreate}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+There will be a confirmation screen showing the CDN token you just created. Make sure to copy it and
+keep it safe.
+
+<NextImage
+  alt="CDN Token Form"
+  src={cdnAccessTokenCreated}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+#### Run the Gateway
+
+Hive Gateway is the Federation Gateway that seamlessly integrates with the Hive registry. You can
+run Hive Gateay either as a Docker image, binary or NPM package.
+
+<Tabs items={['Binary', 'Docker', 'Node.js Package']}>
+  
+{/* Binary */}
+
+<Tabs.Tab>
+
+The single executable binary for the Hive Gateway is available without any dependencies. You can
+download and setup the binary on your machine.
+
+```sh
+curl -sSL https://graphql-hive.com/install-gateway.sh | sh
+```
+
+Then you can run the Hive Gateway with the following command.
+
+```sh
+hive-gateway supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>"
+```
+
+| Parameter             | Description                      |
+| --------------------- | -------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target |
+| `hive_cdn_access_key` | The Hive CDN access key          |
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+The Docker image for Hive Gateway is published to the GitHub docker registry. You can simply run the
+following command to start a Hive Gateway instance from your existing Hive target.
+
+```sh
+docker run --name hive-gateway -rm \
+  ghcr.io/ardatan/hive-gateway supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>"
+```
+
+| Parameter               | Description                      |
+| ----------------------- | -------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target |
+| `<hive_cdn_access_key>` | The Hive CDN access key          |
+
+</Tabs.Tab>
+
+{/* Node.js Package */}
+
+<Tabs.Tab>
+
+The Gateway CLI is available as a Node.js package. You can install it using your favorite package
+manager.
+
+```sh npm2yarn
+npm install @graphql-hive/gateway
+```
+
+You can then run the Gateway CLI from your existing Hive target using the following command.
+
+```sh filename="Run Hive Gateway"
+npx hive-gateway supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>"
+```
+
+| Parameter             | Description                      |
+| --------------------- | -------------------------------- |
+| `hive_cdn_endpoint`   | The endpoint of your Hive target |
+| `hive_cdn_access_key` | The Hive CDN access key          |
+
+</Tabs.Tab>
+
+</Tabs>
+
+If you now navigate to `http://localhost:4000`, you should see the Hive Gateway page with
+information about the supergraph and subgraphs.
+
+import HiveGatewayLandingPageImage from '../../../../public/docs/pages/get-started/apollo-federation/hive-gateway-landing-page.png'
+
+<NextImage
+  alt="Hive Gateway Landing Page"
+  src={HiveGatewayLandingPageImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+Now, if you navigate to `http://localhost:4000/graphql`, you should see the GraphiQL interface where
+you can write and execute queries against the supergraph.
+
+import HiveGatewayGraphiqlImage from '../../../../public/docs/pages/get-started/apollo-federation/hive-gateway-graphiql.png'
+
+<NextImage
+  alt="Hive Gateway GraphiQL"
+  src={HiveGatewayGraphiqlImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+Here you can execute GraphQL operations against the supergraph, which will be delegate to the single
+subgraph services.
+
+Here is a sample query to execute:
+
+```graphql filename="Sample Query using multiple Subgraphs"
+query TopProductsWithReview {
+  topProducts(first: 2) {
+    upc
+    name
+    price
+    reviews {
+      body
+      author {
+        id
+        username
+      }
+    }
+  }
+}
+```
+
+[Execute Query on Hive Gateway GraphiQL](http://localhost:4000/graphql?query=query+TopProductsWithReview+%7B%0A++topProducts%28first%3A+2%29+%7B%0A++++upc%0A++++name%0A++++price%0A++++reviews+%7B%0A++++++body%0A++++++author+%7B%0A++++++++id%0A++++++++username%0A++++++%7D%0A++++%7D%0A++%7D%0A%7D)
+
+#### Usage reporting
+
+Up next let's report the usage from our gateway to the registry, so we can see on the dashboard how
+the API is being used.
+
+For this, we simply provide a usage reporting token in addition to our CDN access token. For this
+guide, we can simply re-use the registry token we already use for the CLI.
+
+<Tabs items={['Binary', 'Docker', 'Node.js Package']}>
+
+{/* Binary */}
+
+<Tabs.Tab>
+
+```sh filename="Run Mesh Gateway with registry token"
+hive-gateway supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>" \
+  --hive-registry-token "<hive_registry_token>"
+```
+
+| Parameter               | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
+| `<hive_cdn_access_key>` | The Hive CDN access key                     |
+| `<hive_registry_token>` | The Hive registry token for usage reporting |
+
+</Tabs.Tab>
+
+{/* Docker */}
+
+<Tabs.Tab>
+
+The Docker image for Hive Gateway is published to the GitHub docker registry. You can simply run the
+following command to start a Hive Gateway instance from your existing Hive target.
+
+```sh
+docker run --name hive-gateway -rm \
+  ghcr.io/ardatan/hive-gateway supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>" \
+  --hive-registry-token "<hive_registry_token>"
+```
+
+| Parameter               | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
+| `<hive_cdn_access_key>` | The Hive CDN access key                     |
+| `<hive_registry_token>` | The Hive registry token for usage reporting |
+
+</Tabs.Tab>
+
+{/* Node.js Package */}
+
+<Tabs.Tab>
+
+```sh filename="Run Mesh Gateway with registry token"
+npx hive-gateway supergraph \
+  "<hive_cdn_endpoint>" \
+  --hive-cdn-key "<hive_cdn_access_key>" \
+  --hive-registry-token "<hive_registry_token>"
+```
+
+| Parameter               | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
+| `<hive_cdn_access_key>` | The Hive CDN access key                     |
+| `<hive_registry_token>` | The Hive registry token for usage reporting |
+
+</Tabs.Tab>
+
+</Tabs>
+
+After starting the gateway with the usage reporting token, we can no execute some queries using the
+gateways built-in GraphiQL interface.
+
+```graphql filename="Sample Query using multiple Subgraphs"
+query TopProductsWithReview {
+  topProducts(first: 2) {
+    upc
+    name
+    price
+    reviews {
+      body
+      author {
+        id
+        username
+      }
+    }
+  }
+}
+```
+
+[Execute Query on Hive Gateway GraphiQL](http://localhost:4000/graphql?query=query+TopProductsWithReview+%7B%0A++topProducts%28first%3A+2%29+%7B%0A++++upc%0A++++name%0A++++price%0A++++reviews+%7B%0A++++++body%0A++++++author+%7B%0A++++++++id%0A++++++++username%0A++++++%7D%0A++++%7D%0A++%7D%0A%7D)
+
+After executing the query, a few times, let's switch back to the Hive dashboard and navigate to the
+insights page.
+
+import HiveDashboardInsightsImage from '../../../../public/docs/pages/get-started/apollo-federation/hive-dashboard-insights.png'
+
+<NextImage
+  alt="Hive Gateway GraphiQL"
+  src={HiveDashboardInsightsImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
+
+Here we can now see the GraphQL operations from our Gateway being reported to the registry.
 
 ### Schema checks
 
@@ -668,259 +985,6 @@ Usually, you would run these checks in your subgraphs CI pipeline, to ensure tha
 schema integrates flawlessly with the other subgraphs in the federation project, where schema
 publishes are made within the Continious Deployment (CD) pipeline to actually publish the latest
 subgraph version to the schema registry.
-
-### Hive Gateway
-
-The next step is to spin up our GraphQL gateway that will serve the federated GraphQL schema
-composed out of the subgraphs we published to the schema registry.
-
-The Gateway will delegate the requests from the clients to the appropriate subgraph services, and
-then merge the results into a single response.
-
-The Hive schema registry publishes the supergraph (artifact of the composed schemas that contains
-all the information about the subgraphs and fields available) to the high-availability CDN on
-Cloudflare.
-
-The gateway can poll the supergraph from the CDN and serve the composed GraphQL schema.
-
-```mermaid
-
-flowchart LR
-    A["Hive Gateway"] -. Poll supergraph .-> C
-    subgraph hive [Hive]
-      direction TB
-      B[Registry] -. Publish supergraph .-> C["HA CDN
-        (on Cloudflare)"]
-    end
-    A --> X1[GraphQL subgraph]
-    A --> X2[GraphQL subgraph]
-    A --> X3[GraphQL subgraph]
-    X1 -.- D([Hive CLI])
-    X2 -.- D
-    X3 -.- D
-    subgraph ci [CI/CD]
-      D -- Publish schemas --> B
-    end
-
-```
-
-#### CDN Access
-
-For accessing the supergraph, we need to create the CDN access token from the Hive dashboard.
-
-Navigate to your target's settings page and select the **CDN Tokens** tab.
-
-<NextImage
-  alt="CDN Token Form"
-  src={cdnAccessTokenSettings}
-  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
-/>
-
-Click the **Create new CDN token** button, give your token a name and click **Create**.
-
-<NextImage
-  alt="CDN Token Form"
-  src={cdnAccessTokenCreate}
-  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
-/>
-
-There will be a confirmation screen showing the CDN token you just created. Make sure to copy it and
-keep it safe.
-
-<NextImage
-  alt="CDN Token Form"
-  src={cdnAccessTokenCreated}
-  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
-/>
-
-#### Run the Gateway
-
-Hive Gateway is the Federation Gateway that seamlessly integrates with the Hive registry. You can
-run Hive Gateay either as a Docker image, binary or NPM package.
-
-<Tabs items={['Binary', 'Docker', 'Node.js Package']}>
-  
-{/* Binary */}
-
-<Tabs.Tab>
-
-The single executable binary for the Hive Gateway is available without any dependencies. You can
-download and setup the binary on your machine.
-
-```sh
-curl -sSL https://graphql-hive.com/install-gateway.sh | sh
-```
-
-Then you can run the Hive Gateway with the following command.
-
-```sh
-hive-gateway supergraph \
-  "<hive_cdn_endpoint>" \
-  --hive-cdn-key "<hive_cdn_access_key>"
-```
-
-| Parameter             | Description                      |
-| --------------------- | -------------------------------- |
-| `hive_cdn_endpoint`   | The endpoint of your Hive target |
-| `hive_cdn_access_key` | The Hive CDN access key          |
-
-</Tabs.Tab>
-
-{/* Docker */}
-
-<Tabs.Tab>
-
-The Docker image for Hive Gateway is published to the GitHub docker registry. You can simply run the
-following command to start a Hive Gateway instance from your existing Hive target.
-
-```sh
-docker run --name hive-gateway -rm \
-  ghcr.io/ardatan/hive-gateway supergraph \
-  "<hive_cdn_endpoint>" \
-  --hive-cdn-key "<hive_cdn_access_key>"
-```
-
-| Parameter               | Description                      |
-| ----------------------- | -------------------------------- |
-| `<hive_cdn_endpoint>`   | The endpoint of your Hive target |
-| `<hive_cdn_access_key>` | The Hive CDN access key          |
-
-</Tabs.Tab>
-
-{/* Node.js Package */}
-
-<Tabs.Tab>
-
-The Gateway CLI is available as a Node.js package. You can install it using your favorite package
-manager.
-
-```sh npm2yarn
-npm install @graphql-hive/gateway
-```
-
-You can then run the Gateway CLI from your existing Hive target using the following command.
-
-```sh filename="Run Hive Gateway"
-npx hive-gateway supergraph \
-  "<hive_cdn_endpoint>" \
-  --hive-cdn-key "<hive_cdn_access_key>"
-```
-
-| Parameter             | Description                      |
-| --------------------- | -------------------------------- |
-| `hive_cdn_endpoint`   | The endpoint of your Hive target |
-| `hive_cdn_access_key` | The Hive CDN access key          |
-
-</Tabs.Tab>
-
-</Tabs>
-
-If you now navigate to `http://localhost:4000`, you should see the Hive Gateway page with
-information about the supergraph and subgraphs.
-
-import MeshLandingPageImage from '../../../../public/docs/pages/get-started/apollo-federation/mesh-landing-page.png'
-
-<NextImage
-  alt="Hive Gateway Landing Page"
-  src={MeshLandingPageImage}
-  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
-/>
-
-Now, if you navigate to `http://localhost:4000/graphql`, you should see the GraphiQL interface where
-you can write and execute queries against the supergraph.
-
-#### Usage reporting
-
-Up next let's report the usage from our gateway to the registry, so we can see on the dashboard how
-the API is being used.
-
-For this, we simply provide a usage reporting token in addition to our CDN access token. For this
-guide, we can simply re-use the registry token we already use for the CLI.
-
-<Tabs items={['Binary', 'Docker', 'Node.js Package']}>
-
-{/* Binary */}
-
-<Tabs.Tab>
-
-```sh filename="Run Mesh Gateway with registry token"
-hive-gateway supergraph \
-  "<hive_cdn_endpoint>" \
-  --hive-cdn-key "<hive_cdn_access_key>" \
-  --hive-registry-token "<hive_registry_token>"
-```
-
-| Parameter               | Description                                 |
-| ----------------------- | ------------------------------------------- |
-| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
-| `<hive_cdn_access_key>` | The Hive CDN access key                     |
-| `<hive_registry_token>` | The Hive registry token for usage reporting |
-
-</Tabs.Tab>
-
-{/* Docker */}
-
-<Tabs.Tab>
-
-The Docker image for Hive Gateway is published to the GitHub docker registry. You can simply run the
-following command to start a Hive Gateway instance from your existing Hive target.
-
-```sh
-docker run --name hive-gateway -rm \
-  ghcr.io/ardatan/hive-gateway supergraph \
-  "<hive_cdn_endpoint>" \
-  --hive-cdn-key "<hive_cdn_access_key>" \
-  --hive-registry-token "<hive_registry_token>"
-```
-
-| Parameter               | Description                                 |
-| ----------------------- | ------------------------------------------- |
-| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
-| `<hive_cdn_access_key>` | The Hive CDN access key                     |
-| `<hive_registry_token>` | The Hive registry token for usage reporting |
-
-</Tabs.Tab>
-
-{/* Node.js Package */}
-
-<Tabs.Tab>
-
-```sh filename="Run Mesh Gateway with registry token"
-npx hive-gateway supergraph \
-  "<hive_cdn_endpoint>" \
-  --hive-cdn-key "<hive_cdn_access_key>" \
-  --hive-registry-token "<hive_registry_token>"
-```
-
-| Parameter               | Description                                 |
-| ----------------------- | ------------------------------------------- |
-| `<hive_cdn_endpoint>`   | The endpoint of your Hive target            |
-| `<hive_cdn_access_key>` | The Hive CDN access key                     |
-| `<hive_registry_token>` | The Hive registry token for usage reporting |
-
-</Tabs.Tab>
-
-</Tabs>
-
-After starting the gateway with the usage reporting token, we can no execute some queries using the
-gateways built-in GraphiQL interface.
-
-```graphql
-{
-  topProducts {
-    upc
-    name
-    price
-  }
-}
-```
-
-[Execute Query on Hive Gateway GraphiQL](http://localhost:4000/graphql?query=%7B%0A++topProducts+%7B%0A++++upc%0A++++name%0A++++price%0A++%7D%0A%7D)
-
-After executing the query, a few times, let's switch back to the Hive dashboard and navigate to the
-insights page.
-
-Here we can now see the GraphQL operations from our Gateway being reported to the registry.
 
 ### Next Steps
 
