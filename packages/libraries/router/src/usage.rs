@@ -1,4 +1,4 @@
-use crate::agent::{AgentError, ExecutionReport, UsageAgent};
+use graphql_hive_core::agent::{AgentError, ExecutionReport, UsageAgent};
 use apollo_router::layers::ServiceBuilderExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
