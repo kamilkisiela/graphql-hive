@@ -233,8 +233,8 @@ services:
       LOG_LEVEL: debug
     depends_on:
       broker:
-        condition: service_started # Redpand is ready when it starts
-      tokens:
+        condition: service_started # Redpanda is ready when it starts
+      redis:
         condition: service_healthy
 
   usage-ingestor:
@@ -245,8 +245,6 @@ services:
     depends_on:
       broker:
         condition: service_started # Redpand is ready when it starts
-      tokens:
-        condition: service_healthy
 
   emails:
     environment:

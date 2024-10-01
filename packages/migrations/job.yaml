@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: schema-coordinate-version-migration
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - name: schema-coord-ver-mig
+          image: ghcr.io/kamilkisiela/graphql-hive/storage:92ee9fe9da2322b818d0758773f8f3d4554baf48
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: SCHEMA_COORDINATE_STATUS_MIGRATION
+              value: '1'
+            - name: CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD
+              value: '1'
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: host
+                  name: postgres
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: port
+                  name: postgres
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: postgres
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: postgres
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  key: database
+                  name: postgres
+            - name: POSTGRES_SSL
+              valueFrom:
+                secretKeyRef:
+                  key: ssl
+                  name: postgres
+            - name: CLICKHOUSE_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: host
+                  name: clickhouse
+            - name: CLICKHOUSE_PORT
+              valueFrom:
+                secretKeyRef:
+                  key: port
+                  name: clickhouse
+            - name: CLICKHOUSE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: clickhouse
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: clickhouse
+            - name: CLICKHOUSE_PROTOCOL
+              valueFrom:
+                secretKeyRef:
+                  key: protocol
+                  name: clickhouse
+      imagePullSecrets:
+        - name: image-pull-secret
+      restartPolicy: Never
+  backoffLimit: 0 # fail immediately on error
+  activeDeadlineSeconds: 604800 # 7 days

@@ -90,7 +90,7 @@ export class TokenManager {
 
   async deleteTokens(
     input: {
-      tokens: readonly string[];
+      tokens: string[];
     } & TargetSelector,
   ): Promise<readonly string[]> {
     await this.authManager.ensureTargetAccess({

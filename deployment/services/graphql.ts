@@ -36,7 +36,6 @@ export function deployGraphQL({
   clickhouse,
   image,
   environment,
-  tokens,
   webhooks,
   schema,
   schemaPolicy,
@@ -63,7 +62,6 @@ export function deployGraphQL({
   image: string;
   clickhouse: Clickhouse;
   environment: Environment;
-  tokens: Tokens;
   webhooks: Webhooks;
   schema: Schema;
   schemaPolicy: SchemaPolicy;
@@ -122,7 +120,6 @@ export function deployGraphQL({
           SENTRY: sentry.enabled ? '1' : '0',
           REQUEST_LOGGING: '0', // disabled
           BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
-          TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
           WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
           SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
           SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),

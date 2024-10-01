@@ -32,7 +32,6 @@ const EnvironmentModel = zod.object({
     .url(),
   RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
   SCHEMA_POLICY_ENDPOINT: emptyString(zod.string().url().optional()),
-  TOKENS_ENDPOINT: zod.string().url(),
   USAGE_ESTIMATOR_ENDPOINT: emptyString(zod.string().url().optional()),
   USAGE_ESTIMATOR_RETENTION_PURGE_INTERVAL_MINUTES: emptyString(NumberFromString.optional()),
   BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
@@ -330,9 +329,6 @@ export const env = {
   hiveServices: {
     webApp: {
       url: base.WEB_APP_URL,
-    },
-    tokens: {
-      endpoint: base.TOKENS_ENDPOINT,
     },
     rateLimit: base.RATE_LIMIT_ENDPOINT
       ? {

@@ -20,7 +20,6 @@ const emptyString = <T extends zod.ZodType>(input: T) => {
 
 const EnvironmentModel = zod.object({
   PORT: emptyString(NumberFromString.optional()),
-  TOKENS_ENDPOINT: zod.string().url(),
   RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
@@ -63,6 +62,12 @@ const KafkaModel = zod.union([
   }),
 ]);
 
+const RedisModel = zod.object({
+  REDIS_HOST: zod.string(),
+  REDIS_PORT: NumberFromString,
+  REDIS_PASSWORD: emptyString(zod.string().optional()),
+});
+
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
@@ -88,17 +93,16 @@ const LogModel = zod.object({
   ),
 });
 
+// eslint-disable-next-line no-process-env
+const processEnv = process.env;
+
 const configs = {
-  // eslint-disable-next-line no-process-env
-  base: EnvironmentModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  sentry: SentryModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  kafka: KafkaModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  prometheus: PrometheusModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  log: LogModel.safeParse(process.env),
+  base: EnvironmentModel.safeParse(processEnv),
+  sentry: SentryModel.safeParse(processEnv),
+  kafka: KafkaModel.safeParse(processEnv),
+  redis: RedisModel.safeParse(processEnv),
+  prometheus: PrometheusModel.safeParse(processEnv),
+  log: LogModel.safeParse(processEnv),
 };
 
 const environmentErrors: Array<string> = [];
@@ -125,6 +129,7 @@ function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Out
 const base = extractConfig(configs.base);
 const sentry = extractConfig(configs.sentry);
 const kafka = extractConfig(configs.kafka);
+const redis = extractConfig(configs.redis);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
 
@@ -135,9 +140,6 @@ export const env = {
     port: base.PORT ?? 5000,
   },
   hive: {
-    tokens: {
-      endpoint: base.TOKENS_ENDPOINT,
-    },
     rateLimit: base.RATE_LIMIT_ENDPOINT
       ? {
           endpoint: base.RATE_LIMIT_ENDPOINT,
@@ -174,6 +176,11 @@ export const env = {
       interval: kafka.KAFKA_BUFFER_INTERVAL,
       dynamic: kafka.KAFKA_BUFFER_DYNAMIC === '1',
     },
+  },
+  redis: {
+    host: redis.REDIS_HOST,
+    port: redis.REDIS_PORT,
+    password: redis.REDIS_PASSWORD ?? '',
   },
   log: {
     level: log.LOG_LEVEL ?? 'info',

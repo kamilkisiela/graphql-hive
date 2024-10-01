@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { hostname } from 'os';
+import { hostname } from 'node:os';
+import { Redis } from 'ioredis';
 import {
   createServer,
   registerShutdown,
@@ -59,16 +60,31 @@ async function main() {
       },
     });
 
+    const tokens = createTokens({
+      redisConnection: {
+        host: env.redis.host,
+        port: env.redis.port,
+        password: env.redis.password,
+        retryStrategy(times) {
+          return Math.min(times * 500, 2000);
+        },
+        reconnectOnError(error) {
+          server.log.warn('Redis reconnectOnError (error=%s)', error);
+          return 1;
+        },
+        db: 0,
+        maxRetriesPerRequest: null,
+        enableReadyCheck: false,
+      },
+      logger: server.log,
+    });
+
     const shutdown = registerShutdown({
       logger: server.log,
       async onShutdown() {
         await Promise.all([stop(), server.close()]);
+        await tokens.dispose();
       },
-    });
-
-    const tokens = createTokens({
-      endpoint: env.hive.tokens.endpoint,
-      logger: server.log,
     });
 
     const rateLimit = env.hive.rateLimit
@@ -277,7 +293,7 @@ async function main() {
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       handler(_, res) {
-        const isReady = readiness();
+        const isReady = readiness() === true;
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },

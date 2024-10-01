@@ -2,6 +2,7 @@ import { Interceptor, sql } from 'slonik';
 import { getPool, toDate, tokens } from './db';
 import type { Slonik } from './shared';
 
+// TODO: get rid of it
 export async function createTokenStorage(
   connection: string,
   maximumPoolSize: number,

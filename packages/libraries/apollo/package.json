@@ -38,6 +38,13 @@
     "./package.json": "./package.json"
   },
   "typings": "dist/typings/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./build/*.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "build": "node ../../../scripts/generate-version.mjs && bob build",
     "check:build": "bob check"

@@ -25,7 +25,6 @@ import { configureSentry } from './services/sentry';
 import { deploySentryEventsMonitor } from './services/sentry-events';
 import { configureSlackApp } from './services/slack-app';
 import { deploySuperTokens } from './services/supertokens';
-import { deployTokens } from './services/tokens';
 import { deployUsage } from './services/usage';
 import { deployUsageEstimation } from './services/usage-estimation';
 import { deployUsageIngestor } from './services/usage-ingestor';

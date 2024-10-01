@@ -49,7 +49,7 @@ import { DistributedCache } from './modules/shared/providers/distributed-cache';
 import { Emails, EMAILS_ENDPOINT } from './modules/shared/providers/emails';
 import { HttpClient } from './modules/shared/providers/http-client';
 import { IdTranslator } from './modules/shared/providers/id-translator';
-import { Logger } from './modules/shared/providers/logger';
+import { FASTIFY_LOGGER, FastifyLogger, Logger } from './modules/shared/providers/logger';
 import { Mutex } from './modules/shared/providers/mutex';
 import { PG_POOL_CONFIG } from './modules/shared/providers/pg-pool';
 import { HivePubSub, PUB_SUB_CONFIG } from './modules/shared/providers/pub-sub';
@@ -61,7 +61,7 @@ import { supportModule } from './modules/support';
 import { provideSupportConfig, SupportConfig } from './modules/support/providers/config';
 import { targetModule } from './modules/target';
 import { tokenModule } from './modules/token';
-import { TOKENS_CONFIG, TokensConfig } from './modules/token/providers/tokens';
+import { provideTokensCache } from './modules/token/providers/token-storage';
 import { usageEstimationModule } from './modules/usage-estimation';
 import {
   USAGE_ESTIMATION_SERVICE_CONFIG,
@@ -94,12 +94,12 @@ const modules = [
 
 export function createRegistry({
   app,
-  tokens,
   webhooks,
   schemaService,
   usageEstimationService,
   rateLimitService,
   schemaPolicyService,
+  fastifyLogger,
   logger,
   storage,
   clickHouse,
@@ -116,11 +116,11 @@ export function createRegistry({
   organizationOIDC,
   pubSub,
 }: {
+  fastifyLogger: FastifyLogger;
   logger: Logger;
   storage: Storage;
   clickHouse: ClickHouseConfig;
   redis: Redis;
-  tokens: TokensConfig;
   webhooks: WebhooksConfig;
   schemaService: SchemaServiceConfig;
   usageEstimationService: UsageEstimationServiceConfig;
@@ -181,6 +181,11 @@ export function createRegistry({
       scope: Scope.Singleton,
     },
     {
+      provide: FASTIFY_LOGGER,
+      useValue: fastifyLogger,
+      scope: Scope.Singleton,
+    },
+    {
       provide: Storage,
       useValue: storage,
       scope: Scope.Singleton,
@@ -188,11 +193,6 @@ export function createRegistry({
     {
       provide: CLICKHOUSE_CONFIG,
       useValue: clickHouse,
-      scope: Scope.Singleton,
-    },
-    {
-      provide: TOKENS_CONFIG,
-      useValue: tokens,
       scope: Scope.Singleton,
     },
     {
@@ -273,6 +273,7 @@ export function createRegistry({
     { provide: PUB_SUB_CONFIG, scope: Scope.Singleton, useValue: pubSub },
     encryptionSecretProvider(encryptionSecret),
     provideSchemaModuleConfig(schemaConfig),
+    provideTokensCache,
   ];
 
   if (emailsEndpoint) {
@@ -281,10 +282,10 @@ export function createRegistry({
       useValue: emailsEndpoint,
       scope: Scope.Singleton,
     });
-    modules.push(supportModule);
   }
 
   if (supportConfig) {
+    modules.push(supportModule);
     providers.push(provideSupportConfig(supportConfig));
   }
 

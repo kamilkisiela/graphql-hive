@@ -303,9 +303,6 @@ export async function main() {
             baseUrl: env.hiveServices.webApp.url,
           }
         : null,
-      tokens: {
-        endpoint: env.hiveServices.tokens.endpoint,
-      },
       billing: {
         endpoint: env.hiveServices.billing ? env.hiveServices.billing.endpoint : null,
       },
@@ -325,6 +322,7 @@ export async function main() {
       schemaPolicyService: {
         endpoint: env.hiveServices.schemaPolicy ? env.hiveServices.schemaPolicy.endpoint : null,
       },
+      fastifyLogger: server.log,
       logger,
       storage,
       redis,

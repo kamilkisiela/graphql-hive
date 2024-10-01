@@ -31,13 +31,6 @@
       "command": "pnpm dev"
     },
     {
-      "name": "tokens:dev",
-      "description": "Run tokens service",
-      "open": true,
-      "cwd": "packages/services/tokens",
-      "command": "pnpm dev"
-    },
-    {
       "name": "schema:dev",
       "description": "Run schema service",
       "open": true,

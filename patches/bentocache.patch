@@ -1,0 +1,54 @@
+diff --git a/package.json b/package.json
+index b8b1ac8eac2e7f23de0d103674b701034e457db2..f21b04270430b8d809376e65847f8a4972c6ea66 100644
+--- a/package.json
++++ b/package.json
+@@ -14,19 +14,36 @@
+     "tiered"
+   ],
+   "exports": {
+-    ".": "./build/index.js",
+-    "./drivers/redis": "./build/src/drivers/redis.js",
+-    "./drivers/memory": "./build/src/drivers/memory.js",
+-    "./drivers/file": "./build/src/drivers/file/file.js",
+-    "./drivers/dynamodb": "./build/src/drivers/dynamodb.js",
+-    "./drivers/base_driver": "./build/src/drivers/base_driver.js",
+-    "./drivers/database": "./build/src/drivers/database/database.js",
+-    "./drivers/knex": "./build/src/drivers/database/adapters/knex.js",
+-    "./drivers/kysely": "./build/src/drivers/database/adapters/kysely.js",
+-    "./drivers/orchid": "./build/src/drivers/database/adapters/orchid.js",
+-    "./types": "./build/src/types/main.js",
+-    "./plugins/*": "./build/plugins/*.js",
+-    "./test_suite": "./build/src/test_suite.js"
++    ".": {
++      "import": {
++        "types": "./build/index.d.ts",
++        "default": "./build/index.js"
++      },
++      "default": {
++        "types": "./build/index.d.ts",
++        "default": "./build/index.js"
++      }
++    },
++    "./drivers/redis": {
++      "import": {
++        "types": "./build/src/drivers/redis.d.ts",
++        "default": "./build/src/drivers/redis.js"
++      },
++      "default": {
++        "types": "./build/src/drivers/redis.d.ts",
++        "default": "./build/src/drivers/redis.js"
++      }
++    },
++    "./drivers/memory": {
++      "import": {
++        "types": "./build/src/drivers/memory.d.ts",
++        "default": "./build/src/drivers/memory.js"
++      },
++      "default": {
++        "types": "./build/src/drivers/memory.d.ts",
++        "default": "./build/src/drivers/memory.js"
++      }
++    }
+   },
+   "main": "build/index.js",
+   "files": [

@@ -6,6 +6,7 @@ import { Docker } from './docker';
 import { Environment } from './environment';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
+import { Redis } from './redis';
 import { Sentry } from './sentry';
 import { Tokens } from './tokens';
 
@@ -13,8 +14,8 @@ export type Usage = ReturnType<typeof deployUsage>;
 
 export function deployUsage({
   environment,
-  tokens,
   kafka,
+  redis,
   dbMigrations,
   rateLimit,
   image,
@@ -23,8 +24,8 @@ export function deployUsage({
 }: {
   image: string;
   environment: Environment;
-  tokens: Tokens;
   kafka: Kafka;
+  redis: Redis;
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
   docker: Docker;
@@ -56,7 +57,6 @@ export function deployUsage({
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
         KAFKA_TOPIC: kafka.config.topic,
-        TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
       },
       exposesMetrics: true,
@@ -70,18 +70,17 @@ export function deployUsage({
         maxReplicas,
       },
     },
-    [
-      dbMigrations,
-      tokens.deployment,
-      tokens.service,
-      rateLimit.deployment,
-      rateLimit.service,
-    ].filter(Boolean),
+    [dbMigrations, redis.deployment, redis.service, rateLimit.deployment, rateLimit.service].filter(
+      Boolean,
+    ),
   )
     .withSecret('KAFKA_SASL_USERNAME', kafka.secret, 'saslUsername')
     .withSecret('KAFKA_SASL_PASSWORD', kafka.secret, 'saslPassword')
     .withSecret('KAFKA_SSL', kafka.secret, 'ssl')
     .withSecret('KAFKA_BROKER', kafka.secret, 'endpoint')
+    .withSecret('REDIS_HOST', redis.secret, 'host')
+    .withSecret('REDIS_PORT', redis.secret, 'port')
+    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

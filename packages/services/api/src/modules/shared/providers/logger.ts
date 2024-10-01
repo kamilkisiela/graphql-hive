@@ -1,6 +1,10 @@
-import { Injectable } from 'graphql-modules';
+import { Injectable, InjectionToken } from 'graphql-modules';
+import type { FastifyBaseLogger } from 'packages/services/service-common/src/fastify';
 
 export type LogFn = (msg: string, ...args: unknown[]) => void;
+
+export type FastifyLogger = FastifyBaseLogger;
+export const FASTIFY_LOGGER = new InjectionToken<FastifyBaseLogger>('FastifyLogger');
 
 function notImplemented(method: string) {
   return () => {

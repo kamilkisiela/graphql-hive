@@ -22,7 +22,6 @@
     "@hive/schema": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
     "@hive/usage-ingestor": "workspace:*",
     "@hive/webhooks": "workspace:*",

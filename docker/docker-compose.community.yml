@@ -187,8 +187,6 @@ services:
         condition: service_completed_successfully
       s3_provision_buckets:
         condition: service_completed_successfully
-      tokens:
-        condition: service_healthy
       webhooks:
         condition: service_healthy
       emails:
@@ -214,7 +212,6 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
-      TOKENS_ENDPOINT: http://tokens:3003
       WEBHOOKS_ENDPOINT: http://webhooks:3005
       SCHEMA_ENDPOINT: http://schema:3002
       SCHEMA_POLICY_ENDPOINT: http://policy:3012
@@ -276,30 +273,6 @@ services:
       PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
       LOG_LEVEL: '${LOG_LEVEL:-debug}'
 
-  tokens:
-    image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
-    networks:
-      - 'stack'
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
-    environment:
-      NODE_ENV: production
-      POSTGRES_HOST: db
-      POSTGRES_USER: '${POSTGRES_USER}'
-      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: '${POSTGRES_DB}'
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: '${REDIS_PASSWORD}'
-      PORT: 3003
-      LOG_LEVEL: '${LOG_LEVEL:-debug}'
-      OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
-      SENTRY: '${SENTRY:-0}'
-      SENTRY_DSN: '${SENTRY_DSN:-}'
-      PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
-
   webhooks:
     image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
     networks:
@@ -347,19 +320,21 @@ services:
     depends_on:
       broker:
         condition: service_healthy
-      tokens:
+      redis:
         condition: service_healthy
     ports:
       - 8081:3006
     environment:
       NODE_ENV: production
-      TOKENS_ENDPOINT: http://tokens:3003
       KAFKA_CONNECTION_MODE: 'docker'
       KAFKA_TOPIC: 'usage_reports_v2'
       KAFKA_BROKER: broker:29092
       KAFKA_BUFFER_SIZE: 350
       KAFKA_BUFFER_INTERVAL: 1000
       KAFKA_BUFFER_DYNAMIC: '1'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
       PORT: 3006
       LOG_LEVEL: '${LOG_LEVEL:-debug}'
       SENTRY: '${SENTRY:-0}'
