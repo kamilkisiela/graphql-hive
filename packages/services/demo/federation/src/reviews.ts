@@ -77,19 +77,19 @@ const resolvers = {
     __resolveReference(user: User, context: Context) {
       return { ...user, ...context.usernames.find(u => u.id === user.id) };
     },
-    reviews(user: User, _: unknown, context: Context) {
+    reviews(user: User, _args: unknown, context: Context) {
       return context.reviews.filter(review => review.authorID === user.id);
     },
-    numberOfReviews(user: User) {
-      return reviews.filter(review => review.authorID === user.id).length;
+    numberOfReviews(user: User, _args: unknown, context: Context) {
+      return context.reviews.filter(review => review.authorID === user.id).length;
     },
-    username(user: User) {
-      const found = usernames.find(username => username.id === user.id);
+    username(user: User, _args: unknown, context: Context) {
+      const found = context.usernames.find(username => username.id === user.id);
       return found ? found.username : null;
     },
   },
   Product: {
-    reviews(product: { upc: string }, context: Context) {
+    reviews(product: { upc: string }, _args: unknown, context: Context) {
       return context.reviews.filter(review => review.product.upc === product.upc);
     },
   },
