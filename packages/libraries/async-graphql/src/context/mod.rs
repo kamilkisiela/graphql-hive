@@ -1,5 +1,8 @@
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
+#[cfg(feature = "axum")]
+pub mod axum;
+
 #[derive(Clone, Debug)]
 pub struct GraphQLHiveContext {
     pub(crate) client_name: Option<String>,
