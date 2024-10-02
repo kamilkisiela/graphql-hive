@@ -369,8 +369,7 @@ dependencies = [
 [[package]]
 name = "async-graphql"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ba6d24703c5adc5ba9116901b92ee4e4c0643c01a56c4fd303f3818638d7449"
+source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
  "async-graphql-derive",
  "async-graphql-parser",
@@ -403,8 +402,7 @@ dependencies = [
 [[package]]
 name = "async-graphql-derive"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a94c2d176893486bd37cd1b6defadd999f7357bf5804e92f510c08bcf16c538f"
+source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
  "Inflector",
  "async-graphql-parser",
@@ -422,15 +420,19 @@ name = "async-graphql-extension-graphql-hive"
 version = "0.0.1"
 dependencies = [
  "async-graphql",
+ "async-trait",
+ "derive_builder",
+ "graphql-hive-core",
+ "rand 0.8.5",
  "serde_json",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
 name = "async-graphql-parser"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79272bdbf26af97866e149f05b2b546edb5c00e51b5f916289931ed233e208ad"
+source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
  "async-graphql-value",
  "pest",
@@ -441,8 +443,7 @@ dependencies = [
 [[package]]
 name = "async-graphql-value"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef5ec94176a12a8cbe985cd73f2e54dc9c702c88c766bdef12f1f3a67cedbee1"
+source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
  "bytes",
  "indexmap 2.6.0",
@@ -1509,6 +1510,37 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "derive_builder"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd33f37ee6a119146a1781d3356a7c26028f83d779b2e04ecd45fdc75c76877b"
+dependencies = [
+ "derive_builder_macro",
+]
+
+[[package]]
+name = "derive_builder_core"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7431fa049613920234f22c47fdc33e6cf3ee83067091ea4277a3f8c4587aae38"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
+]
+
+[[package]]
+name = "derive_builder_macro"
+version = "0.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4abae7035bf79b9877b779505d8cf3749285b80c43941eda66604841889451dc"
+dependencies = [
+ "derive_builder_core",
+ "syn 2.0.48",
 ]
 
 [[package]]
