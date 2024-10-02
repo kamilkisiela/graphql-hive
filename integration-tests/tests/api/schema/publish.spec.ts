@@ -4190,3 +4190,55 @@ describe.concurrent(
     );
   },
 );
+
+test.concurrent(
+  'publishing schema with deprecated non-nullable input field fails due to validation errors',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Single);
+    const token = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    const sdl = /* GraphQL */ `
+      type Query {
+        a(b: B!): String
+      }
+
+      input B {
+        a: String! @deprecated(reason: "This field is deprecated")
+        b: String!
+      }
+    `;
+
+    const result = await token
+      .publishSchema({
+        sdl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish).toEqual({
+      __typename: 'SchemaPublishError',
+      changes: {
+        nodes: [],
+        total: 0,
+      },
+      errors: {
+        nodes: [
+          {
+            message: 'Required input field B.a cannot be deprecated.',
+          },
+        ],
+        total: 1,
+      },
+      linkToWebsite: null,
+      valid: false,
+    });
+  },
+);
