@@ -1867,7 +1867,7 @@ describe.concurrent(
 );
 
 test.concurrent(
-  'checking an invalid schema fails due to validation errors (deprecated non-nullable input field',
+  'checking an invalid schema fails due to validation errors (deprecated non-nullable input field)',
   async () => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
