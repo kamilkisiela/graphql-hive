@@ -1,3 +1,4 @@
+import { APP_DEPLOYMENTS_ENABLED } from '../providers/app-deployments-enabled-token';
 import type { OrganizationResolvers } from './../../../__generated__/types.next';
 
 /*
@@ -11,7 +12,9 @@ import type { OrganizationResolvers } from './../../../__generated__/types.next'
  */
 export const Organization: Pick<OrganizationResolvers, 'isAppDeploymentsEnabled' | '__isTypeOf'> = {
   /* Implement Organization resolver logic here */
-  isAppDeploymentsEnabled(appDeployment) {
-    return appDeployment.featureFlags.appDeployments;
+  isAppDeploymentsEnabled(appDeployment, _, { injector }) {
+    return (
+      injector.get<boolean>(APP_DEPLOYMENTS_ENABLED) || appDeployment.featureFlags.appDeployments
+    );
   },
 };

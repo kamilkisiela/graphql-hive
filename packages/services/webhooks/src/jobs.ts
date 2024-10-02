@@ -39,39 +39,45 @@ export function createWebhookJob({ config }: { config: Config }) {
         config.maxAttempts,
       );
 
-      if (config.requestBroker) {
-        await got.post(config.requestBroker.endpoint, {
-          headers: {
-            Accept: 'text/plain',
-            'x-hive-signature': config.requestBroker.signature,
-          },
-          timeout: {
-            request: 10_000,
-          },
-          json: {
-            url: job.data.endpoint,
-            method: 'POST',
+      try {
+        if (config.requestBroker) {
+          await got.post(config.requestBroker.endpoint, {
+            headers: {
+              Accept: 'text/plain',
+              'x-hive-signature': config.requestBroker.signature,
+            },
+            timeout: {
+              request: 10_000,
+            },
+            json: {
+              url: job.data.endpoint,
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(job.data.event),
+              resolveResponseBody: false,
+            },
+          });
+        } else {
+          await got.post(job.data.endpoint, {
             headers: {
               Accept: 'application/json',
               'Accept-Encoding': 'gzip, deflate, br',
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(job.data.event),
-            resolveResponseBody: false,
-          },
-        });
-      } else {
-        await got.post(job.data.endpoint, {
-          headers: {
-            Accept: 'application/json',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Content-Type': 'application/json',
-          },
-          timeout: {
-            request: 10_000,
-          },
-          json: job.data.event,
-        });
+            timeout: {
+              request: 10_000,
+            },
+            json: job.data.event,
+          });
+        }
+      } catch (error) {
+        config.logger.error('Failed to call webhook (job=%s)', job.name, error);
+        // so we can re-try
+        throw error;
       }
     } else {
       config.logger.warn('Giving up on webhook (job=%s)', job.name);

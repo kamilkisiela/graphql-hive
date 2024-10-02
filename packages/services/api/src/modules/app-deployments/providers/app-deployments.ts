@@ -14,6 +14,7 @@ import { Logger } from '../../shared/providers/logger';
 import { PG_POOL_CONFIG } from '../../shared/providers/pg-pool';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 import { Storage } from '../../shared/providers/storage';
+import { APP_DEPLOYMENTS_ENABLED } from './app-deployments-enabled-token';
 import { PersistedDocumentScheduler } from './persisted-document-scheduler';
 
 const AppDeploymentNameModel = z
@@ -47,6 +48,7 @@ export class AppDeployments {
     private storage: Storage,
     private schemaVersionHelper: SchemaVersionHelper,
     private persistedDocumentScheduler: PersistedDocumentScheduler,
+    @Inject(APP_DEPLOYMENTS_ENABLED) private appDeploymentsEnabled: Boolean,
   ) {
     this.logger = logger.child({ source: 'AppDeployments' });
   }
@@ -114,21 +116,25 @@ export class AppDeployments {
       args.appDeployment.version,
     );
 
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-        args.targetId,
-        args.appDeployment.name,
-        args.appDeployment.version,
-      );
-      return {
-        type: 'error' as const,
-        error: {
-          message: noAccessToAppDeploymentsMessage,
-          details: null,
-        },
-      };
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+          args.targetId,
+          args.appDeployment.name,
+          args.appDeployment.version,
+        );
+        return {
+          type: 'error' as const,
+          error: {
+            message: noAccessToAppDeploymentsMessage,
+            details: null,
+          },
+        };
+      }
     }
 
     const nameValidationResult = AppDeploymentNameModel.safeParse(args.appDeployment.name);
@@ -225,20 +231,23 @@ export class AppDeployments {
       body: string;
     }>;
   }) {
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        );
 
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-      );
-
-      return {
-        type: 'error' as const,
-        error: {
-          message: noAccessToAppDeploymentsMessage,
-          details: null,
-        },
-      };
+        return {
+          type: 'error' as const,
+          error: {
+            message: noAccessToAppDeploymentsMessage,
+            details: null,
+          },
+        };
+      }
     }
 
     // todo: validate input
@@ -337,16 +346,20 @@ export class AppDeployments {
   }) {
     this.logger.debug('activate app deployment (targetId=%s, appName=%s, appVersion=%s)');
 
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-      );
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        );
 
-      return {
-        type: 'error' as const,
-        message: noAccessToAppDeploymentsMessage,
-      };
+        return {
+          type: 'error' as const,
+          message: noAccessToAppDeploymentsMessage,
+        };
+      }
     }
 
     const appDeployment = await this.findAppDeployment({
@@ -473,16 +486,20 @@ export class AppDeployments {
   }) {
     this.logger.debug('activate app deployment (targetId=%s, appName=%s, appVersion=%s)');
 
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-      );
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        );
 
-      return {
-        type: 'error' as const,
-        message: noAccessToAppDeploymentsMessage,
-      };
+        return {
+          type: 'error' as const,
+          message: noAccessToAppDeploymentsMessage,
+        };
+      }
     }
 
     const appDeployment = await this.findAppDeployment({
