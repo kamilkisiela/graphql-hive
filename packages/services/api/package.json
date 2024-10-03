@@ -33,7 +33,7 @@
     "@sentry/types": "7.119.0",
     "@slack/web-api": "7.3.4",
     "@theguild/buddy": "0.1.0",
-    "@theguild/federation-composition": "0.12.1",
+    "@theguild/federation-composition": "0.14.0",
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",
     "@types/bcryptjs": "2.4.6",
