@@ -120,7 +120,7 @@ impl UsagePlugin {
 
         let excluded_operation_names: HashSet<String> = config
             .exclude
-            .unwrap_or_else(|| vec![])
+            .unwrap_or_default()
             .clone()
             .into_iter()
             .collect();
