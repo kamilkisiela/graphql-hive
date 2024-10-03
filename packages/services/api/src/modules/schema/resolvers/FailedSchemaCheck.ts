@@ -46,14 +46,4 @@ export const FailedSchemaCheck: FailedSchemaCheckResolvers = {
   conditionalBreakingChangeMetadata: (schemaCheck, _, { injector }) => {
     return injector.get(SchemaCheckManager).getConditionalBreakingChangeMetadata(schemaCheck);
   },
-  schemaPolicyErrors: ({ schemaPolicyErrors }) => {
-    // FIXME: @eddeee888 to fix mapper vs storage type
-    // https://github.com/kamilkisiela/graphql-hive/pull/5283/files#r1696911086
-    return schemaPolicyErrors as any;
-  },
-  schemaPolicyWarnings: ({ schemaPolicyWarnings }) => {
-    // FIXME: @eddeee888 check to fix mapper vs storage type
-    // https://github.com/kamilkisiela/graphql-hive/pull/5283/files#r1696911086
-    return schemaPolicyWarnings as any;
-  },
 };
