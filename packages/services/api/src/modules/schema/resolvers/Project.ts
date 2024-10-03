@@ -9,6 +9,7 @@ export const Project: Pick<
   | 'nativeFederationCompatibility'
   | 'registryModel'
   | 'schemaVersionsCount'
+  | '__isTypeOf'
 > = {
   externalSchemaComposition: project => {
     if (project.externalComposition.enabled && project.externalComposition.endpoint) {

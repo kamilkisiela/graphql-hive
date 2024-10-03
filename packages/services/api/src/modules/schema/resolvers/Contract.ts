@@ -13,6 +13,7 @@ export const Contract: Pick<
   | 'removeUnreachableTypesFromPublicApiSchema'
   | 'target'
   | 'viewerCanDisableContract'
+  | '__isTypeOf'
 > = {
   target: (contract, _, context) => {
     return context.injector.get(TargetManager).getTargetById({

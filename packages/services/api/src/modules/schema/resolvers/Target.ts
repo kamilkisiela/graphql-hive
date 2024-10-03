@@ -19,6 +19,7 @@ export const Target: Pick<
   | 'schemaVersion'
   | 'schemaVersions'
   | 'schemaVersionsCount'
+  | '__isTypeOf'
 > = {
   schemaVersions: async (target, args, { injector }) => {
     return injector.get(SchemaManager).getPaginatedSchemaVersionsForTargetId({
