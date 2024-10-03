@@ -27,7 +27,7 @@ pub struct HiveRegistryConfig {
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
 impl HiveRegistry {
-    pub fn new(user_config: Option<HiveRegistryConfig>) -> Result<()> {
+    pub fn setup(user_config: Option<HiveRegistryConfig>) -> Result<()> {
         let mut config = HiveRegistryConfig {
             endpoint: None,
             key: None,
@@ -86,13 +86,10 @@ impl HiveRegistry {
         }
 
         // Resolve values
-        let mut endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
-        let key = config.key.unwrap_or_else(|| "".to_string());
-        let poll_interval: u64 = match config.poll_interval {
-            Some(value) => value,
-            None => 10,
-        };
-        let accept_invalid_certs = config.accept_invalid_certs.unwrap_or_else(|| false);
+        let mut endpoint = config.endpoint.unwrap_or("".to_string());
+        let key = config.key.unwrap_or("".to_string());
+        let poll_interval: u64 = config.poll_interval.unwrap_or(10);
+        let accept_invalid_certs = config.accept_invalid_certs.unwrap_or(false);
 
         let logger = Logger::new();
 
@@ -174,7 +171,7 @@ impl HiveRegistry {
         headers.insert(
             reqwest::header::USER_AGENT,
             reqwest::header::HeaderValue::from_str(
-                format!("hive-apollo-router/{}", COMMIT.unwrap_or_else(|| "local")).as_str(),
+                format!("hive-apollo-router/{}", COMMIT.unwrap_or("local")).as_str(),
             )
             .unwrap(),
         );
@@ -245,7 +242,7 @@ impl HiveRegistry {
                     }
                 }
             }
-            Err(e) => self.logger.error(&format!("{}", e)),
+            Err(e) => self.logger.error(&e),
         }
     }
 }

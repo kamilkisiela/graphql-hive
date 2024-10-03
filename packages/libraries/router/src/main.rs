@@ -11,7 +11,7 @@ fn main() {
     register();
 
     // Initialize the Hive Registry and start the Apollo Router
-    match HiveRegistry::new(None).and(apollo_router::main()) {
+    match HiveRegistry::setup(None).and(apollo_router::main()) {
         Ok(_) => {}
         Err(e) => {
             eprintln!("{}", e);
