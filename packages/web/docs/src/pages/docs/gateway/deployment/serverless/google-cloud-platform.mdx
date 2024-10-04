@@ -58,10 +58,26 @@ npm i @google-cloud/functions-framework @graphql-hive/gateway graphql
 
 ### Usage
 
+#### Gateway runtime
+
+You can create a runnable `index.js` script that will be executed by Google Cloud Run Function to
+serve requests.
+
+See [Bundling Problems](/docs/gateway/deployment/serverless#bundling-problem) for more details about
+how to load the supergraph and `transports` option.
+
 ```js filename=index.js
 import { createGatewayRuntime } from '@graphql-hive/gateway'
+import http from '@graphql-mesh/transport-http'
+import supergraph from './supergraph.js'
 
-export const graphql = createGatewayRuntime(/* Configuration */)
+export const graphql = createGatewayRuntime({
+  // All options available in `gateway.config.ts` configuration can also be passed here.
+  supergraph,
+  transports: {
+    http // For example, http transport is required for subgraphs using standard GraphQL over HTTP.
+  }
+})
 ```
 
 You can now deploy your function with `gcloud` CLI:
