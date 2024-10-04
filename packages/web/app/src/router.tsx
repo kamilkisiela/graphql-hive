@@ -328,7 +328,7 @@ const joinOrganizationRoute = createRoute({
 
 const transferOrganizationRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
-  path: 'transfer/$organizationId/$code',
+  path: 'action/transfer/$organizationId/$code',
   component: function TransferOrganizationRoute() {
     const { organizationId, code } = transferOrganizationRoute.useParams();
     return <OrganizationTransferPage organizationId={organizationId} code={code} />;

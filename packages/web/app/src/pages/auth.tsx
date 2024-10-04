@@ -3,7 +3,7 @@ import { SiGithub } from 'react-icons/si';
 import { useSessionContext } from 'supertokens-auth-react/recipe/session';
 import { HiveLogo } from '@/components/ui/icon';
 import { Meta } from '@/components/ui/meta';
-import { Outlet } from '@tanstack/react-router';
+import { Link, Outlet } from '@tanstack/react-router';
 
 function ExternalLink(props: { href: string; children: React.ReactNode }) {
   return (
@@ -33,10 +33,12 @@ export function AuthPage() {
             <div className="grid h-full min-h-[100vh] items-center justify-center md:grid-cols-2 lg:max-w-none lg:grid-cols-3 lg:px-0">
               <div className="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
                 <div className="absolute inset-0 bg-[#101014]" />
-                <div className="relative z-20 flex items-center text-lg font-medium">
-                  <HiveLogo animated={false} className="mr-2 size-6" />
-                  GraphQL Hive
-                </div>
+                <Link to="/">
+                  <div className="relative z-20 flex items-center text-lg font-medium">
+                    <HiveLogo animated={false} className="mr-2 size-6" />
+                    GraphQL Hive
+                  </div>
+                </Link>
                 <div className="relative flex h-full flex-row items-center justify-center">
                   <div className="max-w-xs md:max-w-none">
                     <h1 className="text-balance font-light text-white md:text-2xl/tight lg:text-3xl/tight">
