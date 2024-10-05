@@ -15,13 +15,13 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Card } from '@/components/v2/card';
 import { Input } from '@/components/v2/input';
-import { Slider } from '@/components/v2/slider';
 import Stat from '@/components/v2/stat';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { Link } from '@tanstack/react-router';
+import { Slider } from '@/components/ui/slider';
 
 const ManageSubscriptionInner_OrganizationFragment = graphql(`
   fragment ManageSubscriptionInner_OrganizationFragment on Organization {
