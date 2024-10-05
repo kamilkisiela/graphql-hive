@@ -23,18 +23,18 @@ export const frontendConfig = () => {
   if (
     env.auth.okta !== null &&
     (env.auth.okta.hidden === false ||
-      globalThis.window?.location.pathname === '/auth/callback/okta' ||
+      window.location.pathname === '/auth/callback/okta' ||
       // Until we support the Okta Integration Network (OIN)
       // We want to hide the log in with Okta button on the hosted platform by default to not confuse people
       // We only want to show it conditionally in order to verify the integration is working for the OIN application process.
       (env.auth.okta.hidden === true &&
         // Only show Okta via query parameter
-        new URLSearchParams(globalThis.window?.location.search ?? '').get('show_okta') === '1'))
+        new URLSearchParams(window.location.search ?? '').get('show_okta') === '1'))
   ) {
     providers.push(ThirdPartyEmailPasswordReact.Okta.init());
   }
 
-  const url = new URL(globalThis.window.location.toString());
+  const url = new URL(window.location.toString());
 
   if (
     env.auth.oidc === true && // Open ID Connect linked to organization

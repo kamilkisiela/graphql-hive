@@ -529,7 +529,7 @@ export function TargetLaboratoryPage(props: {
 
 function useApiTabValueState(graphqlEndpointUrl: string | null) {
   const [state, setState] = useResetState<'mockApi' | 'linkedApi'>(() => {
-    const value = globalThis.window?.localStorage.getItem('hive:laboratory-tab-value');
+    const value = localStorage.getItem('hive:laboratory-tab-value');
     if (!value || !['mockApi', 'linkedApi'].includes(value)) {
       return graphqlEndpointUrl ? 'linkedApi' : 'mockApi';
     }
@@ -545,7 +545,7 @@ function useApiTabValueState(graphqlEndpointUrl: string | null) {
     state,
     useCallback(
       (state: 'mockApi' | 'linkedApi') => {
-        globalThis.window?.localStorage.setItem('hive:laboratory-tab-value', state);
+        localStorage.setItem('hive:laboratory-tab-value', state);
         setState(state);
       },
       [setState],
