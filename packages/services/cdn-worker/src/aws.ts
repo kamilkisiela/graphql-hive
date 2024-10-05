@@ -138,12 +138,19 @@ export class AwsClient {
     }
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
 
+    const signals: AbortSignal[] = [];
+
+    if (init?.timeout) {
+      signals.push(AbortSignal.timeout(init.timeout));
+    }
+
+    if (init?.signal) {
+      signals.push(init.signal);
+    }
+
     const signed = Object.assign(
       {
-        signal: anySignal([
-          init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
-          init?.signal,
-        ]),
+        signal: signals.length ? AbortSignal.any(signals) : undefined,
       },
       init,
       await signer.sign(),
@@ -533,28 +540,6 @@ function guessServiceRegion(url: URL, headers: Headers) {
   }
 
   return [HOST_SERVICES[service] || service, region];
-}
-
-function anySignal(signals: Array<AbortSignal | undefined>) {
-  const controller = new AbortController();
-
-  function onAbort(reason: unknown) {
-    controller.abort(reason);
-  }
-
-  for (const signal of signals) {
-    if (!signal) {
-      continue;
-    }
-
-    if (signal.aborted) {
-      onAbort(signal.reason);
-      break;
-    }
-    signal.addEventListener('abort', onAbort);
-  }
-
-  return controller.signal;
 }
 
 class ResponseNotOkayError extends Error {
