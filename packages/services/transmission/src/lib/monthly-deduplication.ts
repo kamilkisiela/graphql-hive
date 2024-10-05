@@ -1,4 +1,5 @@
-import { pgSql, Storage } from '@hive/api';
+import { pgSql } from '../../../api/src/index.js';
+import type { Storage } from '../../../api/src/modules/shared/providers/storage.js';
 import { createTask } from './utils.js';
 
 export const monthlyDeduplicationCleanupTask = createTask(null, async (_, helpers) => {

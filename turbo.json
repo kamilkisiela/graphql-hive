@@ -11,24 +11,24 @@
     "scripts/templates/runify-next.ts",
     "patches/*"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/core#build": {
+    "@graphql-hive/core#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/apollo#build": {
+    "@graphql-hive/apollo#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/yoga#build": {
+    "@graphql-hive/yoga#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/envelop#build": {
+    "@graphql-hive/envelop#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },

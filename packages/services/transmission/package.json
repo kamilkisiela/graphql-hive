@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "@sentry/node": "7.119.0",

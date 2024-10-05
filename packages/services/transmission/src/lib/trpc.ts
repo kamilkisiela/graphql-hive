@@ -1,8 +1,8 @@
 import type { Runner } from 'graphile-worker';
 import { z } from 'zod';
-import type { Storage } from '@hive/api';
 import { FastifyRequest, handleTRPCError } from '@hive/service-common';
 import { initTRPC } from '@trpc/server';
+import type { Storage } from '../../../api/src/modules/shared/providers/storage.js';
 import { addJob, type TaskSchemas } from '../tasks.js';
 import { ensureMonthlyDedupeKey, rollbackMonthlyDedupeKey } from './monthly-deduplication.js';
 

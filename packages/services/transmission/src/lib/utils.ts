@@ -10,7 +10,7 @@ import {
 } from 'graphile-worker';
 import type { Client } from 'pg';
 import { z, ZodSchema } from 'zod';
-import type { Storage } from '@hive/api';
+import type { Storage } from '../../../api/src/modules/shared/providers/storage.js';
 
 export const createTask = <ZodType extends ZodSchema | null>(
   schema: ZodType,
