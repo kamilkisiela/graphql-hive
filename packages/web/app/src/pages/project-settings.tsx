@@ -1,8 +1,8 @@
-import { ReactElement } from 'react';
-import { useFormik } from 'formik';
+import { ReactElement, useEffect } from 'react';
 import { ArrowBigDownDashIcon, CheckIcon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
-import * as Yup from 'yup';
+import { z } from 'zod';
 import { Page, ProjectLayout } from '@/components/layouts/project';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
@@ -25,17 +25,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { HiveLogo } from '@/components/ui/icon';
+import { Input } from '@/components/ui/input';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { useToast } from '@/components/ui/use-toast';
-import { Input } from '@/components/v2/input';
 import { graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useToggle } from '@/lib/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from '@tanstack/react-router';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
@@ -234,6 +236,18 @@ const ProjectSettingsPageQuery = graphql(`
   }
 `);
 
+const projectSettingsContentFormSchema = z.object({
+  name: z
+    .string({
+      required_error: 'Project name is required',
+    })
+    .min(2, { message: 'Project name must be at least 2 characters' })
+    .max(100, { message: 'Project name must be at most 100 characters' }),
+  enableReinitialize: z.boolean().optional(),
+});
+
+type ProjectSettingsContentFormValues = z.infer<typeof projectSettingsContentFormSchema>;
+
 function ProjectSettingsContent(props: { organizationId: string; projectId: string }) {
   const router = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
@@ -262,51 +276,63 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
 
   const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectNameMutation);
 
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
+  const form = useForm<ProjectSettingsContentFormValues>({
+    resolver: zodResolver(projectSettingsContentFormSchema),
+    defaultValues: {
+      name: project?.name ?? '',
       enableReinitialize: true,
-      initialValues: {
-        name: project?.name ?? '',
-      },
-      validationSchema: Yup.object({
-        name: Yup.string().required('Project name is required'),
-      }),
-      onSubmit: values =>
-        mutate({
-          input: {
-            organization: props.organizationId,
-            project: props.projectId,
-            name: values.name,
-          },
-        }).then(result => {
-          if (result?.data?.updateProjectName?.ok) {
-            toast({
-              variant: 'default',
-              title: 'Success',
-              description: 'Project name updated successfully',
-            });
+    },
+    mode: 'all',
+  });
 
-            const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
-            void router.navigate({
-              to: '/$organizationId/$projectId/view/settings',
-              params: {
-                organizationId: props.organizationId,
-                projectId: newProjectId,
-              },
-            });
-          } else if (result.error || result.data?.updateProjectName.error) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: result.error?.message || result.data?.updateProjectName.error?.message,
-            });
-          }
-        }),
+  useEffect(() => {
+    if (project?.name) {
+      form.setValue('name', project.name);
+    }
+  }, [project?.name]);
+
+  async function handleSubmit(values: ProjectSettingsContentFormValues) {
+    const result = await mutate({
+      input: {
+        organization: props.organizationId,
+        project: props.projectId,
+        name: values.name,
+      },
     });
+
+    if (result?.data?.updateProjectName?.ok) {
+      toast({
+        variant: 'default',
+        title: 'Success',
+        description: 'Project name updated successfully',
+      });
+
+      const newProjectId = result.data.updateProjectName.ok.updatedProject.cleanId;
+      void router.navigate({
+        to: '/$organizationId/$projectId/view/settings',
+        params: {
+          organizationId: props.organizationId,
+          projectId: newProjectId,
+        },
+      });
+    } else if (result.error || result.data?.updateProjectName.error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: result.error?.message || result.data?.updateProjectName.error?.message,
+      });
+    }
+  }
 
   if (query.error) {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
   }
+
+  const buttonDisabledState =
+    mutation.fetching ||
+    form.formState.isSubmitting ||
+    form.getFieldState('name').invalid ||
+    !form.getFieldState('name').isDirty;
 
   return (
     <ProjectLayout
@@ -325,53 +351,45 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
             {project && organization ? (
               <>
                 <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
-                <form onSubmit={handleSubmit}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Project Name</CardTitle>
-                      <CardDescription>
-                        Changing the name of your project will also change the slug of your project
-                        URL, and will invalidate any existing links to your project.
-                        <br />
-                        <DocsLink
-                          className="text-muted-foreground text-sm"
-                          href="/management/projects#rename-a-project"
-                        >
-                          You can read more about it in the documentation
-                        </DocsLink>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Input
-                        placeholder="Project name"
-                        name="name"
-                        value={values.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        disabled={isSubmitting}
-                        isInvalid={touched.name && !!errors.name}
-                        className="w-96"
-                      />
-                      {touched.name && (errors.name || mutation.error) && (
-                        <div className="mt-2 text-red-500">
-                          {errors.name ??
-                            mutation.error?.graphQLErrors[0]?.message ??
-                            mutation.error?.message}
-                        </div>
-                      )}
-                      {mutation.data?.updateProjectName.error && (
-                        <div className="mt-2 text-red-500">
-                          {mutation.data.updateProjectName.error.message}
-                        </div>
-                      )}
-                    </CardContent>
-                    <CardFooter>
-                      <Button type="submit" disabled={isSubmitting}>
-                        Save
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </form>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSubmit)}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Project Name</CardTitle>
+                        <CardDescription>
+                          Changing the name of your project will also change the slug of your
+                          project URL, and will invalidate any existing links to your project.
+                          <br />
+                          <DocsLink
+                            className="text-muted-foreground text-sm"
+                            href="/management/projects#rename-a-project"
+                          >
+                            You can read more about it in the documentation
+                          </DocsLink>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem className="w-96 py-2">
+                              <FormControl>
+                                <Input {...field} autoComplete="off" placeholder="Project name" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter>
+                        <Button type="submit" disabled={buttonDisabledState}>
+                          Save
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </form>
+                </Form>
 
                 {query.data?.isGitHubIntegrationFeatureEnabled &&
                 !project.isProjectNameInGitHubCheckEnabled ? (
