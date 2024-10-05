@@ -166,7 +166,7 @@ const emailProviderConfig =
             pass: email.EMAIL_PROVIDER_SMTP_AUTH_PASSWORD,
           },
           tls: {
-            rejectUnauthorized: !(email.EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED === '0'),
+            rejectUnauthorized: email.EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED !== '0',
           },
         } as const)
       : email.EMAIL_PROVIDER === 'sendmail'

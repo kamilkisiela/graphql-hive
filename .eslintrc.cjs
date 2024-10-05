@@ -126,6 +126,8 @@ module.exports = {
           },
         ],
         '@typescript-eslint/no-floating-promises': 'error',
+        'sonarjs/no-unused-collection': 'warn',
+        'sonarjs/no-inverted-boolean-check': 'warn',
         ...rulesToExtends,
         'no-lonely-if': 'off',
         'object-shorthand': 'off',
