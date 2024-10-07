@@ -2,7 +2,6 @@ import { createApplication, Scope } from 'graphql-modules';
 import { Redis } from 'ioredis';
 import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
-import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
 import { appDeploymentsModule } from './modules/app-deployments';
 import { APP_DEPLOYMENTS_ENABLED } from './modules/app-deployments/providers/app-deployments-enabled-token';
 import { authModule } from './modules/auth';
@@ -47,7 +46,7 @@ import { sharedModule } from './modules/shared';
 import { ActivityManager } from './modules/shared/providers/activity-manager';
 import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
 import { DistributedCache } from './modules/shared/providers/distributed-cache';
-import { Emails, EMAILS_ENDPOINT } from './modules/shared/providers/emails';
+import { Emails } from './modules/shared/providers/emails';
 import { HttpClient } from './modules/shared/providers/http-client';
 import { IdTranslator } from './modules/shared/providers/id-translator';
 import { Logger } from './modules/shared/providers/logger';
@@ -58,6 +57,7 @@ import { REDIS_INSTANCE } from './modules/shared/providers/redis';
 import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
 import { WEB_APP_URL } from './modules/shared/providers/tokens';
+import { Transmission, TRANSMISSION_ENDPOINT } from './modules/shared/providers/transmission';
 import { supportModule } from './modules/support';
 import { provideSupportConfig, SupportConfig } from './modules/support/providers/config';
 import { targetModule } from './modules/target';
@@ -96,7 +96,7 @@ const modules = [
 export function createRegistry({
   app,
   tokens,
-  webhooks,
+  transmission,
   schemaService,
   usageEstimationService,
   rateLimitService,
@@ -114,7 +114,6 @@ export function createRegistry({
   billing,
   schemaConfig,
   supportConfig,
-  emailsEndpoint,
   organizationOIDC,
   pubSub,
   appDeploymentsEnabled,
@@ -124,7 +123,9 @@ export function createRegistry({
   clickHouse: ClickHouseConfig;
   redis: Redis;
   tokens: TokensConfig;
-  webhooks: WebhooksConfig;
+  transmission: {
+    endpoint: string;
+  };
   schemaService: SchemaServiceConfig;
   usageEstimationService: UsageEstimationServiceConfig;
   rateLimitService: RateLimitServiceConfig;
@@ -156,7 +157,6 @@ export function createRegistry({
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
   supportConfig: SupportConfig | null;
-  emailsEndpoint?: string;
   organizationOIDC: boolean;
   pubSub: HivePubSub;
   appDeploymentsEnabled: boolean;
@@ -197,6 +197,7 @@ export function createRegistry({
     DistributedCache,
     CryptoProvider,
     Emails,
+    Transmission,
     {
       provide: ArtifactStorageWriter,
       useValue: artifactStorageWriter,
@@ -227,8 +228,8 @@ export function createRegistry({
       scope: Scope.Singleton,
     },
     {
-      provide: WEBHOOKS_CONFIG,
-      useValue: webhooks,
+      provide: TRANSMISSION_ENDPOINT,
+      useValue: transmission.endpoint,
       scope: Scope.Singleton,
     },
     {
@@ -306,17 +307,9 @@ export function createRegistry({
     provideSchemaModuleConfig(schemaConfig),
   ];
 
-  if (emailsEndpoint) {
-    providers.push({
-      provide: EMAILS_ENDPOINT,
-      useValue: emailsEndpoint,
-      scope: Scope.Singleton,
-    });
-    modules.push(supportModule);
-  }
-
   if (supportConfig) {
     providers.push(provideSupportConfig(supportConfig));
+    modules.push(supportModule);
   }
 
   return createApplication({

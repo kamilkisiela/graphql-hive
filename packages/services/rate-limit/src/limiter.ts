@@ -57,7 +57,7 @@ export function createRateLimiter(config: {
   rateEstimator: {
     endpoint: string;
   };
-  emails?: {
+  transmission: {
     endpoint: string;
   };
   storage: {
@@ -73,7 +73,7 @@ export function createRateLimiter(config: {
       }),
     ],
   });
-  const emails = createEmailScheduler(config.emails);
+  const emails = createEmailScheduler(config.transmission.endpoint);
 
   const { logger } = config;
   const postgres$ = createPostgreSQLStorage(

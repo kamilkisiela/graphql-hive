@@ -8,7 +8,6 @@ import { deployCloudFlareSecurityTransform } from './services/cloudflare-securit
 import { deployDatabaseCleanupJob } from './services/database-cleanup';
 import { deployDbMigrations } from './services/db-migrations';
 import { configureDocker } from './services/docker';
-import { deployEmails } from './services/emails';
 import { prepareEnvironment } from './services/environment';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
@@ -26,10 +25,10 @@ import { deploySentryEventsMonitor } from './services/sentry-events';
 import { configureSlackApp } from './services/slack-app';
 import { deploySuperTokens } from './services/supertokens';
 import { deployTokens } from './services/tokens';
+import { deployTransmission } from './services/transmission';
 import { deployUsage } from './services/usage';
 import { deployUsageEstimation } from './services/usage-estimation';
 import { deployUsageIngestor } from './services/usage-ingestor';
-import { deployWebhooks } from './services/webhooks';
 import { configureZendesk } from './services/zendesk';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { isDefined } from './utils/helpers';
@@ -127,22 +126,12 @@ const tokens = deployTokens({
   observability,
 });
 
-const webhooks = deployWebhooks({
-  image: docker.factory.getImageId('webhooks', imagesTag),
+const transmission = deployTransmission({
+  image: docker.factory.getImageId('transmission', imagesTag),
   environment,
-  heartbeat: heartbeatsConfig.get('webhooks'),
+  heartbeat: heartbeatsConfig.get('transmission'),
   broker,
   docker,
-  redis,
-  sentry,
-  observability,
-});
-
-const emails = deployEmails({
-  image: docker.factory.getImageId('emails', imagesTag),
-  docker,
-  environment,
-  redis,
   sentry,
   observability,
 });
@@ -174,7 +163,7 @@ const rateLimit = deployRateLimit({
   environment,
   dbMigrations,
   usageEstimator,
-  emails,
+  transmission,
   postgres,
   sentry,
   observability,
@@ -232,7 +221,7 @@ const graphql = deployGraphQL({
   image: docker.factory.getImageId('server', imagesTag),
   docker,
   tokens,
-  webhooks,
+  transmission,
   schema,
   schemaPolicy,
   dbMigrations,
@@ -242,7 +231,6 @@ const graphql = deployGraphQL({
   usageEstimator,
   rateLimit,
   billing,
-  emails,
   supertokens,
   s3,
   s3Mirror,
@@ -330,7 +318,6 @@ export const usageApiServiceId = usage.service.id;
 export const usageIngestorApiServiceId = usageIngestor.service.id;
 export const tokensApiServiceId = tokens.service.id;
 export const schemaApiServiceId = schema.service.id;
-export const webhooksApiServiceId = webhooks.service.id;
 
 export const appId = app.deployment.id;
 export const publicIp = proxy!.status.loadBalancer.ingress[0].ip;

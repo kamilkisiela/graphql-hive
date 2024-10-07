@@ -73,7 +73,7 @@ async function main() {
         interval: env.limitCacheUpdateIntervalMs,
       },
       rateEstimator: env.hiveServices.usageEstimator,
-      emails: env.hiveServices.emails ?? undefined,
+      transmission: env.hiveServices.transmission,
       storage: {
         connectionString: createConnectionString(env.postgres),
         additionalInterceptors: tracing ? [tracing.instrumentSlonik()] : undefined,

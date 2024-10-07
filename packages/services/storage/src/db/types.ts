@@ -136,6 +136,11 @@ export interface document_collections {
   updated_at: Date;
 }
 
+export interface job_monthly_deduplication {
+  created_at: Date;
+  key: string;
+}
+
 export interface migration {
   date: Date;
   hash: string;
@@ -417,6 +422,7 @@ export interface DBTables {
   contracts: contracts;
   document_collection_documents: document_collection_documents;
   document_collections: document_collections;
+  job_monthly_deduplication: job_monthly_deduplication;
   migration: migration;
   oidc_integrations: oidc_integrations;
   organization_invitations: organization_invitations;

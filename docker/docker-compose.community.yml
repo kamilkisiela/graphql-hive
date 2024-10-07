@@ -189,9 +189,7 @@ services:
         condition: service_completed_successfully
       tokens:
         condition: service_healthy
-      webhooks:
-        condition: service_healthy
-      emails:
+      transmission:
         condition: service_healthy
       schema:
         condition: service_healthy
@@ -215,10 +213,9 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
       TOKENS_ENDPOINT: http://tokens:3003
-      WEBHOOKS_ENDPOINT: http://webhooks:3005
       SCHEMA_ENDPOINT: http://schema:3002
       SCHEMA_POLICY_ENDPOINT: http://policy:3012
-      EMAILS_ENDPOINT: http://emails:3011
+      TRANSMISSION_ENDPOINT: http://transmission:3005
       ENCRYPTION_SECRET: '${HIVE_ENCRYPTION_SECRET}'
       WEB_APP_URL: '${HIVE_APP_BASE_URL}'
       PORT: 3001
@@ -299,41 +296,28 @@ services:
       SENTRY_DSN: '${SENTRY_DSN:-}'
       PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
 
-  webhooks:
-    image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
+  transmission:
+    image: '${DOCKER_REGISTRY}transmission${DOCKER_TAG}'
     networks:
       - 'stack'
     depends_on:
-      redis:
+      db:
         condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - 3005:3005
     environment:
       NODE_ENV: production
       PORT: 3005
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: '${REDIS_PASSWORD}'
       LOG_LEVEL: '${LOG_LEVEL:-debug}'
-      OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
-      SENTRY: '${SENTRY:-0}'
-      SENTRY_DSN: '${SENTRY_DSN:-}'
-      PROMETHEUS_METRICS: '${PROMETHEUS_METRICS:-}'
-
-  emails:
-    image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
-    networks:
-      - 'stack'
-    depends_on:
-      redis:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 3011
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      POSTGRES_HOST: db
+      POSTGRES_USER: '${POSTGRES_USER}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: '${POSTGRES_DB}'
       EMAIL_FROM: no-reply@graphql-hive.com
       EMAIL_PROVIDER: sendmail
-      LOG_LEVEL: '${LOG_LEVEL:-debug}'
       OPENTELEMETRY_COLLECTOR_ENDPOINT: '${OPENTELEMETRY_COLLECTOR_ENDPOINT:-}'
       SENTRY: '${SENTRY:-0}'
       SENTRY_DSN: '${SENTRY_DSN:-}'
