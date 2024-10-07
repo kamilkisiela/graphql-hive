@@ -1173,13 +1173,30 @@ curl -v http://localhost:4000/metrics
 
 ### Customizations
 
-<Tabs items={["Introspection Queries", "Metric Name", "Metric Config", "Registry"]}>
+<Tabs items={["Introspection Queries", "Labels", "Metric Name", "Metric Config", "Registry"]}>
 
 <Tabs.Tab>
 
 By default, all operations are instrumented, including introspection queries. It is possible to
 ignore introspection queries for all metrics prefixed by `graphql_envelop_` by setting the
 `skipIntrospection` option to `true`.
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+By default, all labels are enabled, but each one can be disabled to reduce cardinality:
+
+```ts filename="gateway.confing.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  prometheus: {
+    labels: {
+      url: false // remove `url` labels from all relevant metrics
+    }
+  }
+})
+```
 
 </Tabs.Tab>
 
@@ -1193,7 +1210,9 @@ import { defineConfig } from '@graphql-hive/gateway'
 
 export const gatewayConfig = defineConfig({
   prometheus: {
-    graphql_yoga_http_duration: 'http_request_duration'
+    metrics: {
+      graphql_yoga_http_duration: 'http_request_duration'
+    }
   }
 })
 ```
@@ -1226,23 +1245,25 @@ import { register as registry } from 'prom-client'
 
 export const gatewayConfig = defineConfig({
   prometheus: {
-    graphql_yoga_http_duration: createHistogram({
-      registry,
-      histogram: {
-        name: 'graphql_yoga_http_duration',
-        help: 'Time spent on HTTP connection',
-        labels: ['method', 'statusCode', 'operationName', 'operationType'],
-        buckets: [0.1, 5, 15, 50, 100, 500],
-      }
-      fillLabelsFn(params, { request, response }) {
-        return {
-          method: request.method,
-          statusCode: response.status,
-          operationType: params.operationType,
-          operationName: params.operationName || 'Anonymous',
-        };
-      }
-    })
+    metrics: {
+      graphql_yoga_http_duration: createHistogram({
+        registry,
+        histogram: {
+          name: 'graphql_yoga_http_duration',
+          help: 'Time spent on HTTP connection',
+          labels: ['method', 'statusCode', 'operationName', 'operationType'],
+          buckets: [0.1, 5, 15, 50, 100, 500],
+        }
+        fillLabelsFn(params, { request, response }) {
+          return {
+            method: request.method,
+            statusCode: response.status,
+            operationType: params.operationType,
+            operationName: params.operationName || 'Anonymous',
+          };
+        }
+      })
+    }
   }
 })
 ```
@@ -1268,7 +1289,7 @@ export const gatewayConfig = defineConfig({
 
 </Tabs.Tab>
 
-</Tabs>
+</Tabs.Tab>
 
 ## StatsD
 
