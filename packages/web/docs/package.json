@@ -14,7 +14,7 @@
     "@radix-ui/react-icons": "1.3.0",
     "@radix-ui/react-tabs": "1.1.0",
     "@radix-ui/react-tooltip": "1.1.2",
-    "@theguild/components": "7.0.0-alpha-20241007181017-cf0584df7115e011ee6aa20b7665cb73d272f902",
+    "@theguild/components": "7.0.0-alpha-20241007190731-258f43bd95b9339da2b0204478cb9a307db5779d",
     "clsx": "2.1.1",
     "date-fns": "3.6.0",
     "gray-matter": "4.0.3",
