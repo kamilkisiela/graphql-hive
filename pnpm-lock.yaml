@@ -2026,8 +2026,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
-        specifier: 7.0.0-alpha-20240927170506-6010ecc2256631841c7e6fb9441e7248f612cb1c
-        version: 7.0.0-alpha-20240927170506-6010ecc2256631841c7e6fb9441e7248f612cb1c(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
+        specifier: 7.0.0-alpha-20241007181017-cf0584df7115e011ee6aa20b7665cb73d272f902
+        version: 7.0.0-alpha-20241007181017-cf0584df7115e011ee6aa20b7665cb73d272f902(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -7977,8 +7977,8 @@ packages:
   '@theguild/buddy@0.1.0':
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
 
-  '@theguild/components@7.0.0-alpha-20240927170506-6010ecc2256631841c7e6fb9441e7248f612cb1c':
-    resolution: {integrity: sha512-2s+uK1MTOCr1z7btEgp1vyf6Tg10AVPXEBX303G4H+qVO4YU+yfFYF+Cit6W7n6j7rF9y6ravJv2mF1Gzu3HxA==}
+  '@theguild/components@7.0.0-alpha-20241007181017-cf0584df7115e011ee6aa20b7665cb73d272f902':
+    resolution: {integrity: sha512-64kn6LRY/DnzRWmKCe/5Y4jRsAFDCe/y9TKWydFUnBt6qsbioNO/rs8pfI7A9qfhhiSN1tG0s3IhXkFNwnRKgQ==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -21880,7 +21880,7 @@ snapshots:
       remark-parse: 11.0.0
       remark-rehype: 11.1.0
       source-map: 0.7.4
-      unified: 11.0.4
+      unified: 11.0.5
       unist-util-position-from-estree: 2.0.0
       unist-util-stringify-position: 4.0.0
       unist-util-visit: 5.0.0
@@ -25206,7 +25206,7 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@7.0.0-alpha-20240927170506-6010ecc2256631841c7e6fb9441e7248f612cb1c(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
+  '@theguild/components@7.0.0-alpha-20241007181017-cf0584df7115e011ee6aa20b7665cb73d272f902(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.6(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@next/bundle-analyzer': 14.2.13
@@ -25257,8 +25257,8 @@ snapshots:
       '@typescript-eslint/parser': 7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-config-prettier: 9.1.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-jsonc: 2.11.1(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       eslint-plugin-mdx: 3.0.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
@@ -28285,13 +28285,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       debug: 4.3.6(supports-color@8.1.1)
       enhanced-resolve: 5.17.0
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
-      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       fast-glob: 3.3.2
       get-tsconfig: 4.7.5
       is-core-module: 2.13.1
@@ -28314,7 +28314,7 @@ snapshots:
       remark-stringify: 11.0.0
       synckit: 0.8.6
       tslib: 2.7.0
-      unified: 11.0.4
+      unified: 11.0.5
       unified-engine: 11.2.0
       unist-util-visit: 5.0.0
       uvu: 0.5.6
@@ -28322,14 +28322,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       debug: 3.2.7(supports-color@8.1.1)
     optionalDependencies:
       '@typescript-eslint/parser': 7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4)
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
     transitivePeerDependencies:
       - supports-color
 
@@ -28345,7 +28345,7 @@ snapshots:
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-compat-utils: 0.1.2(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
 
-  eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
+  eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)):
     dependencies:
       array-includes: 3.1.7
       array.prototype.findlastindex: 1.2.3
@@ -28355,7 +28355,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint-plugin-import@2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))(typescript@5.5.4))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)))(eslint@8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva))
       hasown: 2.0.0
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -33931,7 +33931,7 @@ snapshots:
       '@types/mdast': 4.0.1
       mdast-util-frontmatter: 2.0.1
       micromark-extension-frontmatter: 2.0.0
-      unified: 11.0.4
+      unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
@@ -33942,7 +33942,7 @@ snapshots:
       micromark-extension-gfm: 3.0.0
       remark-parse: 11.0.0
       remark-stringify: 11.0.0
-      unified: 11.0.4
+      unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
@@ -33951,7 +33951,7 @@ snapshots:
       '@types/mdast': 4.0.1
       mdast-util-math: 3.0.0
       micromark-extension-math: 3.1.0
-      unified: 11.0.4
+      unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
@@ -33973,7 +33973,7 @@ snapshots:
       '@types/mdast': 4.0.1
       mdast-util-from-markdown: 2.0.0
       micromark-util-types: 2.0.0
-      unified: 11.0.4
+      unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
@@ -33989,21 +33989,21 @@ snapshots:
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.1
       mdast-util-to-hast: 13.2.0
-      unified: 11.0.4
+      unified: 11.0.5
       vfile: 6.0.1
 
   remark-smartypants@3.0.2:
     dependencies:
       retext: 9.0.0
       retext-smartypants: 6.1.0
-      unified: 11.0.4
+      unified: 11.0.5
       unist-util-visit: 5.0.0
 
   remark-stringify@11.0.0:
     dependencies:
       '@types/mdast': 4.0.1
       mdast-util-to-markdown: 2.1.0
-      unified: 11.0.4
+      unified: 11.0.5
 
   remedial@1.0.8: {}
 
@@ -34076,7 +34076,7 @@ snapshots:
     dependencies:
       '@types/nlcst': 2.0.3
       parse-latin: 7.0.0
-      unified: 11.0.4
+      unified: 11.0.5
 
   retext-smartypants@6.1.0:
     dependencies:
@@ -34088,14 +34088,14 @@ snapshots:
     dependencies:
       '@types/nlcst': 2.0.3
       nlcst-to-string: 4.0.0
-      unified: 11.0.4
+      unified: 11.0.5
 
   retext@9.0.0:
     dependencies:
       '@types/nlcst': 2.0.3
       retext-latin: 4.0.0
       retext-stringify: 4.0.0
-      unified: 11.0.4
+      unified: 11.0.5
 
   retry@0.12.0: {}
 
