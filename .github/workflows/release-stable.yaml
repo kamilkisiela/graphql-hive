@@ -56,8 +56,8 @@ jobs:
         run: |
           echo '${{steps.changesets.outputs.publishedPackages}}' > cli-ver.json
           VERSION=`echo $(jq -r '.[] | select(.name | endswith("@graphql-hive/cli")).version' cli-ver.json)`
-          echo "cli_version=$VERSION" >> $GITHUB_OUTPUT
-          echo "cli_publish=true" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "publish=true" >> $GITHUB_OUTPUT
 
       - name: extract published hive version
         if:
@@ -67,8 +67,8 @@ jobs:
         run: |
           echo '${{steps.changesets.outputs.publishedPackages}}' > hive-ver.json
           VERSION=`echo $(jq -r '.[] | select(.name == "hive").version' hive-ver.json)`
-          echo "hive_version=$VERSION" >> $GITHUB_OUTPUT
-          echo "hive_publish=true" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "publish=true" >> $GITHUB_OUTPUT
 
       # Needed for `oclif pack win`
       - name: Install NSIS
