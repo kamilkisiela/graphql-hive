@@ -1,7 +1,11 @@
-:is(html[class~='light'] .hive-search-results ._text\-primary\-600) {
-  color: hsl(
-    var(--nextra-primary-hue) var(--nextra-primary-saturation) 40% / var(--tw-text-opacity)
-  );
+.nextra-sidebar-container {
+  --hive-meta-label-color: rgb(107, 114, 128);
+  --hive-meta-lettermark-bg: rgb(107, 114, 128);
+}
+
+.nextra-sidebar-container:not(.light *) {
+  --hive-meta-label-color: rgba(163, 163, 163);
+  --hive-meta-lettermark-bg: rgba(255, 255, 255, 0.1);
 }
 
 .light .hive-search-results {
@@ -28,16 +32,6 @@
   }
 }
 
-.hive-search-results {
-  --hive-meta-label-color: rgb(107, 114, 128);
-  --hive-meta-lettermark-bg: rgb(107, 114, 128);
-}
-
-.hive-search-results:not(.light *) {
-  --hive-meta-label-color: rgba(163, 163, 163);
-  --hive-meta-lettermark-bg: rgba(255, 255, 255, 0.1);
-}
-
 .light .hive-search-results .dark\:_text-neutral-400:is(html[class~='dark'] *) {
   color: rgb(107, 114, 128);
 }
@@ -47,12 +41,16 @@
   background-color: #fff;
   border-color: #e5e7eb;
 }
+
 .light .hive-search-results .dark\:before\:_bg-neutral-800:is(html[class~='dark'] *):before {
   background-color: rgb(229, 231, 235);
 }
+
+.light .hive-search-results .nextra-search-results,
 .light .hive-search-results .nextra-search-results:is(html[class~='dark'] *) {
   border-color: rgb(229, 231, 235);
 }
+
 .light .hive-search-results .nextra-sidebar-footer:is(html[class~='dark'] *) {
   border-color: #e5e7eb;
 }
