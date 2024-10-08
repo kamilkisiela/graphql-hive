@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { CircleHelpIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useSessionContext } from 'supertokens-auth-react/recipe/session';
@@ -102,11 +102,14 @@ export function AuthSSOPage(props: { redirectToPath: string }) {
     },
     disabled: sso.isPending,
   });
+
+  useEffect(() => {
+    form.setFocus('slug', { shouldSelect: true });
+  }, [sso.isPending]);
   const { toast } = useToast();
 
   const onSubmit = useCallback(
     (data: SSOFormValues) => {
-      sso.reset();
       sso.mutate({
         slug: data.slug,
       });
@@ -143,7 +146,7 @@ export function AuthSSOPage(props: { redirectToPath: string }) {
                 <FormField
                   control={form.control}
                   name="slug"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel className="flex flex-row items-center gap-x-2">
                         Organization slug{' '}
@@ -163,7 +166,7 @@ export function AuthSSOPage(props: { redirectToPath: string }) {
                         </TooltipProvider>
                       </FormLabel>
                       <FormControl>
-                        <Input placeholder="acme" {...field} />
+                        <Input placeholder="acme" {...form.register('slug')} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
