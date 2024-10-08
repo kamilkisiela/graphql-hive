@@ -27,7 +27,7 @@ const TypeFilter_AllTypes = graphql(`
     target(selector: { organization: $organization, project: $project, target: $target }) {
       __typename
       id
-      latestSchemaVersion {
+      latestValidSchemaVersion {
         __typename
         id
         valid
@@ -81,7 +81,7 @@ export function TypeFilter(props: {
     requestPolicy: 'cache-first',
   });
 
-  const allNamedTypes = query.data?.target?.latestSchemaVersion?.explorer?.types;
+  const allNamedTypes = query.data?.target?.latestValidSchemaVersion?.explorer?.types;
   const types = useMemo(
     () =>
       allNamedTypes?.map(t => ({

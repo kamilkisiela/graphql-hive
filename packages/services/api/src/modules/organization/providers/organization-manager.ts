@@ -721,7 +721,7 @@ export class OrganizationManager {
                 <mj-text>
                   ${member.user.displayName} wants to transfer the ownership of the <strong>${organization.name}</strong> organization.
                 </mj-text>
-                <mj-button href="https://app.graphql-hive.com/action/transfer/${organization.cleanId}/${code}">
+                <mj-button href="${mjml.raw(this.appBaseUrl)}/action/transfer/${organization.cleanId}/${code}">
                   Accept the transfer
                 </mj-button>
                 <mj-text align="center">

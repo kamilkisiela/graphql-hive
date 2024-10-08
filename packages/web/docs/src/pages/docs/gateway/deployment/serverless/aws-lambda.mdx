@@ -10,17 +10,32 @@ the AWS cloud. Hive Gateway is platform agnostic so they can fit together easily
   Edge](/docs/gateway/deployment/serverless) page.
 </Callout>
 
-```ts
-import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
-import { createGatewayRuntime } from '@graphql-hive/gateway'
+See [Bundling Problems](/docs/gateway/deployment/serverless#bundling-problem) for more details about
+how to load the supergraph and `transports` option.
 
-const serveRuntime = createGatewayRuntime(/* Your configuration */)
+```js filename="gateway.ts"
+import { createGatewayRuntime } from '@graphql-hive/gateway'
+import http from '@graphql-mesh/transport-http'
+import supergraph from './supergraph.js'
+
+export const gateway = createGatewayRuntime({
+  // All options available in `gateway.config.ts` configuration can also be passed here.
+  supergraph,
+  transports: {
+    http // For example, http transport is required for subgraphs using standard GraphQL over HTTP.
+  }
+})
+```
+
+```ts filename="index.ts"
+import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
+import { gateway } from './gateway'
 
 export async function handler(
   event: APIGatewayEvent,
   lambdaContext: Context
 ): Promise<APIGatewayProxyResult> {
-  const response = await serveRuntime.fetch(
+  const response = await gateway.fetch(
     event.path +
       '?' +
       new URLSearchParams((event.queryStringParameters as Record<string, string>) || {}).toString(),

@@ -14,14 +14,29 @@ configuring or maintaining infrastructure.
   Edge](/docs/gateway/deployment/serverless) page.
 </Callout>
 
-```ts
-import { createGatewayRuntime } from '@graphql-hive/gateway'
+See [Bundling Problems](/docs/gateway/deployment/serverless#bundling-problem) for more details about
+how to load the supergraph and `transports` option.
 
-const gatewayRuntime = createGatewayRuntime({
-  // gatewayConfig
+```ts filename="index.js"
+import { createGatewayRuntime } from '@graphql-hive/gateway'
+import http from '@graphql-mesh/transport-http'
+import supergraph from './supergraph'
+
+export const gateway = createGatewayRuntime({
+  // All options available in `gateway.config.ts` configuration can also be passed here.
+  supergraph,
+  transports: {
+    http // For example, http transport is required for subgraphs using standard GraphQL over HTTP.
+  }
 })
 
-export default { fetch: gatewayRuntime }
+export default { fetch: gateway }
+```
+
+```js filename="supergraph.js"
+export default /* GraphQL */ `
+  PLACE YOUR SUPERGRAPH SDL HERE
+`
 ```
 
 <Callout>
