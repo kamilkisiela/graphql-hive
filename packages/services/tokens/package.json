@@ -1,6 +1,5 @@
 {
   "name": "@hive/tokens",
-  "version": "0.0.0",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -23,7 +22,7 @@
     "pino-pretty": "11.2.2",
     "reflect-metadata": "0.2.2",
     "tiny-lru": "8.0.2",
-    "tslib": "2.6.3",
+    "tslib": "2.7.0",
     "zod": "3.23.8"
   },
   "buildOptions": {

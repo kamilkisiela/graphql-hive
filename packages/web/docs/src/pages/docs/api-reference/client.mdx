@@ -14,11 +14,11 @@ import { Tabs } from '@theguild/components'
 Here's a list of official libraries for JavaScript and NodeJS:
 
 - `@graphql-hive/yoga` ([npm](https://npmjs.com/package/@graphql-hive/yoga),
-  [guide](../integrations/graphql-yoga)) - Integration with GraphQL Yoga.
+  [guide](/docs/other-integrations/graphql-yoga)) - Integration with GraphQL Yoga.
 - `@graphql-hive/apollo` ([npm](https://npmjs.com/package/@graphql-hive/apollo),
-  [guide](../integrations/apollo-server)) - Integration with Apollo Server.
+  [guide](/docs/other-integrations/apollo-server)) - Integration with Apollo Server.
 - `@graphql-hive/envelop` ([npm](https://npmjs.com/package/@graphql-hive/envelop),
-  [guide](../integrations/envelop)) - Integration with Envelop.
+  [guide](/docs/other-integrations/envelop)) - Integration with Envelop.
 - `@graphql-hive/core` ([npm](https://npmjs.com/package/@graphql-hive/core)) - core library for
   interacting with Hive's **Schema Registry** and **Usage Reporting**.
 
@@ -26,12 +26,16 @@ You can refer to the following guides for getting started within your project, t
 page for configuring the client to your needs.
 
 <Cards>
-  <Cards.Card arrow title="GraphQL Yoga" href="/docs/integrations/graphql-yoga" />
-  <Cards.Card arrow title="Envelop" href="/docs/integrations/envelop" />
-  <Cards.Card arrow title="Schema-Stitching Gateway" href="/docs/integrations/schema-stitching" />
-  <Cards.Card arrow title="Apollo-Server" href="/docs/integrations/apollo-server" />
-  <Cards.Card arrow title="Apollo Gateway" href="/docs/integrations/apollo-gateway" />
-  <Cards.Card arrow title="GraphQL Mesh" href="/docs/integrations/graphql-mesh" />
+  <Cards.Card arrow title="Hive Gateway" href="/docs/gateway" />
+  <Cards.Card arrow title="GraphQL Yoga" href="/docs/other-integrations/graphql-yoga" />
+  <Cards.Card arrow title="Envelop" href="/docs/other-integrations/envelop" />
+  <Cards.Card
+    arrow
+    title="Schema-Stitching Gateway"
+    href="/docs/other-integrations/schema-stitching"
+  />
+  <Cards.Card arrow title="Apollo-Server" href="/docs/other-integrations/apollo-server" />
+  <Cards.Card arrow title="Apollo Gateway" href="/docs/other-integrations/apollo-gateway" />
 </Cards>
 
 #### Configuration
@@ -316,7 +320,7 @@ useHive({
 #### Persisted Documents
 
 Hive client supports resolving persisted documents. For getting started please refer to our
-[App Deployments (Persisted Documents) documentation](/docs/features/app-deployments).
+[App Deployments (Persisted Documents) documentation](/docs/schema-registry/app-deployments).
 
 ##### Basic Configuration
 
@@ -429,7 +433,7 @@ The [`graphql-hive` gem](https://github.com/charlypoly/graphql-ruby-hive) allows
 Refer to the following guides for integration with your project:
 
 <Cards>
-  <Cards.Card arrow title="GraphQL-Ruby" href="/docs/integrations/graphql-ruby" />
+  <Cards.Card arrow title="GraphQL-Ruby" href="/docs/other-integrations/graphql-ruby" />
 </Cards>
 
 ### PHP Client
@@ -438,7 +442,7 @@ The [Lighthouse Hive](https://github.com/stayallive/lighthouse-graphql-hive) is 
 integration can be used to measure and collect data against all your GraphQL operations.
 
 <Cards>
-  <Cards.Card arrow title="Lighthouse (Laravel)" href="/docs/integrations/lighthouse" />
+  <Cards.Card arrow title="Lighthouse (Laravel)" href="/docs/other-integrations/lighthouse" />
 </Cards>
 
 ### Rust Client
@@ -446,5 +450,5 @@ integration can be used to measure and collect data against all your GraphQL ope
 Refer to the following guides for integration with your Rust project:
 
 <Cards>
-  <Cards.Card arrow title="Apollo Router" href="/docs/integrations/apollo-router" />
+  <Cards.Card arrow title="Apollo Router" href="/docs/other-integrations/apollo-router" />
 </Cards>

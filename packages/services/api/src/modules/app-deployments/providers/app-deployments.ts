@@ -14,6 +14,7 @@ import { Logger } from '../../shared/providers/logger';
 import { PG_POOL_CONFIG } from '../../shared/providers/pg-pool';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 import { Storage } from '../../shared/providers/storage';
+import { APP_DEPLOYMENTS_ENABLED } from './app-deployments-enabled-token';
 import { PersistedDocumentScheduler } from './persisted-document-scheduler';
 
 const AppDeploymentNameModel = z
@@ -47,6 +48,7 @@ export class AppDeployments {
     private storage: Storage,
     private schemaVersionHelper: SchemaVersionHelper,
     private persistedDocumentScheduler: PersistedDocumentScheduler,
+    @Inject(APP_DEPLOYMENTS_ENABLED) private appDeploymentsEnabled: Boolean,
   ) {
     this.logger = logger.child({ source: 'AppDeployments' });
   }
@@ -114,21 +116,25 @@ export class AppDeployments {
       args.appDeployment.version,
     );
 
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-        args.targetId,
-        args.appDeployment.name,
-        args.appDeployment.version,
-      );
-      return {
-        type: 'error' as const,
-        error: {
-          message: noAccessToAppDeploymentsMessage,
-          details: null,
-        },
-      };
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+          args.targetId,
+          args.appDeployment.name,
+          args.appDeployment.version,
+        );
+        return {
+          type: 'error' as const,
+          error: {
+            message: noAccessToAppDeploymentsMessage,
+            details: null,
+          },
+        };
+      }
     }
 
     const nameValidationResult = AppDeploymentNameModel.safeParse(args.appDeployment.name);
@@ -225,20 +231,23 @@ export class AppDeployments {
       body: string;
     }>;
   }) {
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        );
 
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-      );
-
-      return {
-        type: 'error' as const,
-        error: {
-          message: noAccessToAppDeploymentsMessage,
-          details: null,
-        },
-      };
+        return {
+          type: 'error' as const,
+          error: {
+            message: noAccessToAppDeploymentsMessage,
+            details: null,
+          },
+        };
+      }
     }
 
     // todo: validate input
@@ -337,16 +346,20 @@ export class AppDeployments {
   }) {
     this.logger.debug('activate app deployment (targetId=%s, appName=%s, appVersion=%s)');
 
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-      );
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        );
 
-      return {
-        type: 'error' as const,
-        message: noAccessToAppDeploymentsMessage,
-      };
+        return {
+          type: 'error' as const,
+          message: noAccessToAppDeploymentsMessage,
+        };
+      }
     }
 
     const appDeployment = await this.findAppDeployment({
@@ -388,30 +401,32 @@ export class AppDeployments {
       };
     }
 
-    const result = await this.s3.client.fetch(
-      [
-        this.s3.endpoint,
-        this.s3.bucket,
-        buildAppDeploymentIsEnabledKey(
-          appDeployment.targetId,
-          appDeployment.name,
-          appDeployment.version,
-        ),
-      ].join('/'),
-      {
-        method: 'PUT',
-        body: '1',
-        headers: {
-          'content-type': 'text/plain',
+    for (const s3 of this.s3) {
+      const result = await s3.client.fetch(
+        [
+          s3.endpoint,
+          s3.bucket,
+          buildAppDeploymentIsEnabledKey(
+            appDeployment.targetId,
+            appDeployment.name,
+            appDeployment.version,
+          ),
+        ].join('/'),
+        {
+          method: 'PUT',
+          body: '1',
+          headers: {
+            'content-type': 'text/plain',
+          },
+          aws: {
+            signQuery: true,
+          },
         },
-        aws: {
-          signQuery: true,
-        },
-      },
-    );
+      );
 
-    if (result.statusCode !== 200) {
-      throw new Error(`Failed to enable app deployment: ${result.statusMessage}`);
+      if (result.statusCode !== 200) {
+        throw new Error(`Failed to enable app deployment: ${result.statusMessage}`);
+      }
     }
 
     const updatedAppDeployment = await this.pool
@@ -471,16 +486,20 @@ export class AppDeployments {
   }) {
     this.logger.debug('activate app deployment (targetId=%s, appName=%s, appVersion=%s)');
 
-    const organization = await this.storage.getOrganization({ organization: args.organizationId });
-    if (organization.featureFlags.appDeployments === false) {
-      this.logger.debug(
-        'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
-      );
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organization: args.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        this.logger.debug(
+          'organization has no access to app deployments (targetId=%s, appName=%s, appVersion=%s)',
+        );
 
-      return {
-        type: 'error' as const,
-        message: noAccessToAppDeploymentsMessage,
-      };
+        return {
+          type: 'error' as const,
+          message: noAccessToAppDeploymentsMessage,
+        };
+      }
     }
 
     const appDeployment = await this.findAppDeployment({
@@ -527,36 +546,38 @@ export class AppDeployments {
       };
     }
 
-    const result = await this.s3.client.fetch(
-      [
-        this.s3.endpoint,
-        this.s3.bucket,
-        buildAppDeploymentIsEnabledKey(
-          appDeployment.targetId,
-          appDeployment.name,
-          appDeployment.version,
-        ),
-      ].join('/'),
-      {
-        method: 'DELETE',
-        aws: {
-          signQuery: true,
+    for (const s3 of this.s3) {
+      const result = await s3.client.fetch(
+        [
+          s3.endpoint,
+          s3.bucket,
+          buildAppDeploymentIsEnabledKey(
+            appDeployment.targetId,
+            appDeployment.name,
+            appDeployment.version,
+          ),
+        ].join('/'),
+        {
+          method: 'DELETE',
+          aws: {
+            signQuery: true,
+          },
         },
-      },
-    );
+      );
 
-    /** We receive a 204 status code if the DELETE operation was successful */
-    if (result.statusCode !== 204) {
-      this.logger.error(
-        'Failed to disable app deployment (organizationId=%s, targetId=%s, appDeploymentId=%s, statusCode=%s)',
-        args.organizationId,
-        args.targetId,
-        appDeployment.id,
-        result.statusCode,
-      );
-      throw new Error(
-        `Failed to disable app deployment. Request failed with status code "${result.statusMessage}".`,
-      );
+      /** We receive a 204 status code if the DELETE operation was successful */
+      if (result.statusCode !== 204) {
+        this.logger.error(
+          'Failed to disable app deployment (organizationId=%s, targetId=%s, appDeploymentId=%s, statusCode=%s)',
+          args.organizationId,
+          args.targetId,
+          appDeployment.id,
+          result.statusCode,
+        );
+        throw new Error(
+          `Failed to disable app deployment. Request failed with status code "${result.statusMessage}".`,
+        );
+      }
     }
 
     await this.clickhouse.query({

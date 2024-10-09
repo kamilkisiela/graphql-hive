@@ -342,14 +342,17 @@ export default class Dev extends Command<typeof Dev> {
     onError: (message: string) => void | never;
   }) {
     const result = await this.registryApi(input.registry, input.token)
-      .request(CLI_SchemaComposeMutation, {
-        input: {
-          useLatestComposableVersion: !input.unstable__forceLatest,
-          services: input.services.map(service => ({
-            name: service.name,
-            url: service.url,
-            sdl: service.sdl,
-          })),
+      .request({
+        operation: CLI_SchemaComposeMutation,
+        variables: {
+          input: {
+            useLatestComposableVersion: !input.unstable__forceLatest,
+            services: input.services.map(service => ({
+              name: service.name,
+              url: service.url,
+              sdl: service.sdl,
+            })),
+          },
         },
       })
       .catch(error => {
@@ -476,7 +479,7 @@ export default class Dev extends Command<typeof Dev> {
 
   private async resolveSdlFromUrl(url: string) {
     const result = await this.graphql(url)
-      .request(ServiceIntrospectionQuery)
+      .request({ operation: ServiceIntrospectionQuery })
       .catch(error => {
         this.handleFetchError(error);
       });

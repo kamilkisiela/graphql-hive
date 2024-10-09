@@ -1,5 +1,13 @@
 # @graphql-hive/envelop
 
+## 0.33.8
+
+### Patch Changes
+
+- Updated dependencies
+  [[`3ffdb6e`](https://github.com/kamilkisiela/graphql-hive/commit/3ffdb6e9466deb3c3aa09eea1445fc4caf698fd5)]:
+  - @graphql-hive/core@0.8.0
+
 ## 0.33.7
 
 ### Patch Changes

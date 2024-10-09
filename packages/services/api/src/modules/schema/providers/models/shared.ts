@@ -43,7 +43,10 @@ export const SchemaCheckConclusion = {
    */
   Failure: 'FAILURE',
   /**
-   * Skipped as the schemas have not changed from the compared schema version
+   * Skipped as the schemas have not changed from the latest schema version
+   *
+   * At this point, the schema is not checked for breaking changes or composition errors,
+   * these are passed from the latest schema version (not necessarily the latest composable version).
    */
   Skip: 'SKIP',
 } as const;

@@ -17,7 +17,7 @@ const config: CodegenConfig = {
         resolverGeneration: 'minimal',
         resolverMainFileMode: 'modules',
         resolverTypesPath: './__generated__/types.next.ts',
-        blacklistedModules: ['collection', 'lab', 'operations', 'organization', 'schema'],
+        blacklistedModules: ['collection', 'schema'],
         scalarsOverrides: {
           Date: { type: 'string' },
           SafeInt: { type: 'number' },
@@ -41,7 +41,11 @@ const config: CodegenConfig = {
           resolversNonOptionalTypename: {
             interfaceImplementingType: true,
             unionMember: true,
-            excludeTypes: ['TokenInfoPayload'],
+            excludeTypes: [
+              'TokenInfoPayload',
+              'OrganizationByInviteCodePayload',
+              'JoinOrganizationPayload',
+            ],
           },
         },
       },

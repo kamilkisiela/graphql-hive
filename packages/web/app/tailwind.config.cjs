@@ -32,6 +32,7 @@ module.exports = {
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
+      inherit: 'inherit',
       white: '#fcfcfc',
       black: '#0b0d11',
       emerald: colors.emerald,
@@ -105,7 +106,7 @@ module.exports = {
           foreground: 'hsl(var(--secondary-foreground))',
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
+          DEFAULT: 'rgb(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
         muted: {
@@ -306,8 +307,8 @@ function asd() {
 }
 
 function addVariablesForColors({ addBase, theme }) {
-  let allColors = flattenColorPalette(theme('colors'));
-  let newVars = Object.fromEntries(
+  const allColors = flattenColorPalette(theme('colors'));
+  const newVars = Object.fromEntries(
     Object.entries(allColors).map(([key, val]) => [`--${key}`, val]),
   );
 

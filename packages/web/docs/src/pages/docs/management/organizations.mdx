@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout } from '@theguild/components'
+import { Callout, Tabs } from '@theguild/components'
 import orgImage from '../../../../public/docs/pages/first-steps/org.png'
 import newOrgImage from '../../../../public/docs/pages/management/create-an-organization-button.png'
 import orgCustomRoleImage from '../../../../public/docs/pages/management/org-custom-role.png'
@@ -164,7 +164,7 @@ information about this type of integration.
 
 Hive offers a free tier for all users, and a paid tier for organizations that needs more data
 storage to store large volume of GraphQL operations sent through
-[Usage Reporting](/docs/features/usage-reporting) feature.
+[Usage Reporting](/docs/schema-registry/usage-reporting) feature.
 
 To manage your plan and subscription, use the **Subscription** tab under your organization's page.
 From there, you can upgrade your plan, view invoices, change your payment method, and cancel your
@@ -182,6 +182,23 @@ for your needs. You can modify your plan and resevered quota any time during the
   For the **Enterprise** plan, please reach our to us, and we'll be happy to help you with your
   custom needs.
 </a>
+
+#### How do I update my billing information?
+
+<Tabs items={['Hobby', 'Pro', 'Enterprise']}>
+  <Tabs.Tab>Not applicable</Tabs.Tab>
+  <Tabs.Tab>
+   1. Go to the **Subscription** tab under your organization's page.
+   2. Click on **Manage Subscription**.
+   3. Click on **Stripe Billing dashboard**.
+   4. Go to **Billing Information** section and click on **Update Information**.
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+    1. Go to the **Support** tab under your organization's page.
+    2. Create a **new ticket**.
+  </Tabs.Tab>
+</Tabs>
 
 ### Rename an organization
 

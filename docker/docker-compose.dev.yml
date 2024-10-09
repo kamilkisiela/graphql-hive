@@ -73,7 +73,7 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:24.7-alpine
+    image: clickhouse/clickhouse-server:24.8-alpine
     mem_limit: 2048m
     environment:
       CLICKHOUSE_USER: test
@@ -93,7 +93,7 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.3.19
+    image: redpandadata/redpanda:v23.3.20
     mem_limit: 300m
     mem_reservation: 100m
     container_name: broker

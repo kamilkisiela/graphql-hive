@@ -1,0 +1,34 @@
+import { Callout } from '@theguild/components'
+
+# Deploying Hive Gateway to Azure Functions
+
+Azure Functions is a serverless environment that supports JavaScript. Hive Gateway is platform
+agnostic and can be deployed to Azure Functions as well.
+
+<Callout>
+  Before you start, make sure you read the [Serverless / On the
+  Edge](/docs/gateway/deployment/serverless) page.
+</Callout>
+
+See [Bundling Problems](/docs/gateway/deployment/serverless#bundling-problem) for more details about
+how to load the supergraph and `transports` option.
+
+```ts
+import { app } from '@azure/functions'
+import { createGatewayRuntime } from '@graphql-hive/gateway'
+import http from '@graphql-mesh/transport-http'
+import supergraph from './supergraph'
+
+export const gateway = createGatewayRuntime({
+  // All options available in `gateway.config.ts` configuration can also be passed here.
+  supergraph,
+  transports: {
+    http // For example, http transport is required for subgraphs using standard GraphQL over HTTP.
+  }
+})
+
+app.http('graphql', {
+  method: ['GET', 'POST'],
+  gateway
+})
+```

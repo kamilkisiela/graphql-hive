@@ -3,6 +3,7 @@
 const guildConfig = require('@theguild/eslint-config/base');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
+const path = require('path');
 
 const SCHEMA_PATH = './packages/services/api/src/modules/*/module.graphql.ts';
 const OPERATIONS_PATHS = [
@@ -17,7 +18,6 @@ const rulesToExtends = Object.fromEntries(
       'import/first',
       'no-restricted-globals',
       '@typescript-eslint/no-unused-vars',
-      'unicorn/no-useless-fallback-in-spread',
       'unicorn/no-array-push-push',
       'no-else-return',
       'no-lonely-if',
@@ -38,6 +38,9 @@ const HIVE_RESTRICTED_SYNTAX = [
 
 const tailwindCallees = ['clsx', 'cn', 'cva', 'cx'];
 
+/**
+ * @type {import('eslint').Linter.Config}
+ */
 module.exports = {
   ignorePatterns: [
     'scripts',
@@ -198,7 +201,7 @@ module.exports = {
       settings: {
         tailwindcss: {
           callees: tailwindCallees,
-          config: 'packages/web/app/tailwind.config.cjs',
+          config: path.join(__dirname, './packages/web/app/tailwind.config.cjs'),
           whitelist: ['drag-none'],
           cssFiles: ['packages/web/app/src/index.css', 'node_modules/graphiql/dist/style.css'],
         },
@@ -219,7 +222,8 @@ module.exports = {
         },
         tailwindcss: {
           callees: tailwindCallees,
-          config: 'packages/web/docs/tailwind.config.cjs',
+          whitelist: ['light'],
+          config: path.join(__dirname, './packages/web/docs/tailwind.config.cjs'),
         },
       },
     },

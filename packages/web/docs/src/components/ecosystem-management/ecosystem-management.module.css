@@ -1,0 +1,53 @@
+.container {
+  container-type: inline-size;
+}
+
+.vars {
+  --node-w: 96px;
+  --big-node-h: 112px;
+  --node-h: 112px;
+  --label-h: 32px;
+  --gap: 80px;
+  --big-logo-size: 48px;
+  --node-desc-display: none;
+}
+
+@container (width >= 586px) {
+  .vars {
+    --node-w: 240px;
+    --big-node-h: 222px;
+    --node-h: 96px;
+    --big-logo-size: 112px;
+    --node-desc-display: block;
+  }
+}
+
+.text {
+  margin-top: 1.5rem;
+}
+
+@container (width >= 480px) {
+  .text {
+    margin-top: 0;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 144px;
+    width: 250px;
+  }
+}
+
+@container (width >= 720px) {
+  .text {
+    right: 48px;
+  }
+}
+
+@container (width < 586px) {
+  .node {
+    flex-direction: column;
+  }
+  .smHidden {
+    display: none;
+  }
+}

@@ -2,8 +2,6 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setOutput } from '@actions/core';
 
-const GITHUB_REPOSITORY = ensureEnv('GITHUB_REPOSITORY');
-
 const [localVersion, latestStableVersion] = await Promise.all([
   fetchLocalVersion(),
   fetchLatestVersion(),
@@ -41,27 +39,19 @@ function ensureEnv(name: string): string {
 }
 
 async function fetchLatestVersion() {
-  const versionsResponse = await fetch('https://crates.io/api/v1/crates/apollo-router/versions', {
-    method: 'GET',
-  });
+  const latestResponse = await fetch(
+    'https://api.github.com/repos/apollographql/router/releases/latest',
+    {
+      method: 'GET',
+    },
+  );
 
-  if (!versionsResponse.ok) {
+  if (!latestResponse.ok) {
     throw new Error('Failed to fetch versions');
   }
 
-  const { versions } = await versionsResponse.json();
-
-  let latestStableVersion: string | undefined;
-  const stableRegex = /^(\d+\.\d+\.\d+)$/;
-
-  for (const version of versions) {
-    if (!stableRegex.test(version.num)) {
-      continue;
-    }
-
-    latestStableVersion = version.num;
-    break;
-  }
+  const latest = await latestResponse.json();
+  const latestStableVersion = latest.name.replace('v', '');
 
   if (!latestStableVersion) {
     throw new Error('Failed to find latest stable version');
@@ -95,7 +85,7 @@ async function isPullRequestOpen(latestStableVersion: string) {
 
   setOutput('title', prTitle);
 
-  const prResponse = await fetch(`https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls`);
+  const prResponse = await fetch(`https://api.github.com/repos/apollographql/router/pulls`);
 
   if (!prResponse.ok) {
     throw new Error('Failed to fetch PRs');

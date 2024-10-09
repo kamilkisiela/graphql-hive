@@ -15,7 +15,7 @@ it('should allow only one lock at a time', async ({ expect }) => {
   // second lock shouldnt resolve
   await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
-  unlock1();
+  await unlock1();
 
   // after the first lock releases, second one resolves
   await expect(lock2).resolves.toBeTruthy();
@@ -29,43 +29,6 @@ it('should allow different locks at any time', async ({ expect }) => {
   await expect(mutex.lock('1', { signal })).resolves.toBeTruthy();
   await expect(mutex.lock('2', { signal })).resolves.toBeTruthy();
   await expect(mutex.lock('3', { signal })).resolves.toBeTruthy();
-});
-
-it('should cancel locking on abort signal', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
-
-  const [signal, abort] = createSignal();
-
-  const unlock1 = await mutex.lock('1', { signal });
-
-  const lock2 = mutex.lock('1', { signal });
-
-  abort();
-
-  await expect(lock2).rejects.toMatchInlineSnapshot('[Error: Locking aborted]');
-
-  unlock1();
-
-  // make sure that the aborted lock does not lock
-  await expect(mutex.lock('1', { signal: createSignal()[0] })).resolves.toBeTruthy();
-});
-
-it('should unlock on abort signal', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
-
-  const [signal, abort] = createSignal();
-
-  await mutex.lock('1', { signal });
-
-  const lock2 = mutex.lock('1', { signal: createSignal()[0] });
-
-  // second lock shouldnt resolve
-  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
-
-  abort();
-
-  // first lock is aborted, second one should resolve now
-  await expect(lock2).resolves.toBeTruthy();
 });
 
 it('should release lock in perform after return', async ({ expect }) => {
@@ -134,7 +97,7 @@ it('should keep auto-extending lock until unlock', async ({ expect }) => {
   // second lock still cannot be acquired resolve
   await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
-  unlock();
+  await unlock();
 
   // only after unlock can the second lock be acquired
   await expect(lock2).resolves.toBeTruthy();

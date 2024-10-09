@@ -1,6 +1,5 @@
 {
   "name": "@hive/stripe-billing",
-  "version": "0.0.0",
   "type": "module",
   "description": "A microservice for Hive Cloud, that syncs usage information to Stripe (metered billing)",
   "license": "MIT",

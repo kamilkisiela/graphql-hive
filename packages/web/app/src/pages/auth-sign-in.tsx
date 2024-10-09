@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaRegUserCircle } from 'react-icons/fa';
 import { SiGithub, SiGoogle, SiOkta } from 'react-icons/si';
@@ -81,6 +81,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
   const [lastAuthMethod, setLastAuthMethod] = useLastAuthMethod();
   const router = useRouter();
   const { toast } = useToast();
+
   const emailPasswordSignIn = useMutation({
     mutationFn: superEmailPasswordSignIn,
     onSuccess(data) {
@@ -133,6 +134,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
       });
     },
   });
+
   const thirdPartySignIn = useMutation({
     async mutationFn(provider: 'github' | 'google' | 'okta') {
       await startAuthFlowForProvider(provider, props.redirectToPath);
@@ -146,7 +148,9 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
       });
     },
   });
+
   const isPending = emailPasswordSignIn.isPending || thirdPartySignIn.isPending;
+
   const form = useForm({
     mode: 'onSubmit',
     resolver: zodResolver(SignInFormSchema),
@@ -156,6 +160,12 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
     },
     disabled: isPending,
   });
+
+  useEffect(() => {
+    if (emailPasswordSignIn.isPending === false) {
+      form.setFocus('email', { shouldSelect: true });
+    }
+  }, [emailPasswordSignIn.isPending]);
 
   const onSubmit = useCallback(
     (data: SignInFormValues) => {
@@ -199,11 +209,15 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
                   <FormField
                     control={form.control}
                     name="email"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="m@example.com" type="email" {...field} />
+                          <Input
+                            placeholder="m@example.com"
+                            type="email"
+                            {...form.register('email')}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -212,7 +226,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
                   <FormField
                     control={form.control}
                     name="password"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <div className="flex items-center">
                           <FormLabel>Password</FormLabel>
@@ -229,7 +243,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
                           </Link>
                         </div>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input type="password" {...form.register('password')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

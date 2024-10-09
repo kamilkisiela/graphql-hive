@@ -35,6 +35,7 @@ import {
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useToggle } from '@/lib/hooks';
 import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
+import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Slot } from '@radix-ui/react-slot';
 import { Link, useRouter } from '@tanstack/react-router';
@@ -226,6 +227,8 @@ export function OrganizationLayout({
                 organizationId={props.organizationId}
                 isOpen={isModalOpen}
                 toggleModalOpen={toggleModalOpen}
+                // reset the form every time it is closed
+                key={String(isModalOpen)}
               />
             </>
           ) : null}
@@ -382,20 +385,20 @@ export function CreateProjectModalContent(props: {
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="container w-4/5 max-w-[600px] md:w-3/5">
         <Form {...props.form}>
-          <form className="space-y-8" onSubmit={props.form.handleSubmit(props.onSubmit)}>
-            <DialogHeader>
+          <form onSubmit={props.form.handleSubmit(props.onSubmit)}>
+            <DialogHeader className="mb-8">
               <DialogTitle>Create a project</DialogTitle>
               <DialogDescription>
                 A Hive <b>project</b> represents a <b>GraphQL API</b> running a GraphQL schema.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-8">
+            <div>
               <FormField
                 control={props.form.control}
                 name="projectName"
                 render={({ field }) => {
                   return (
-                    <FormItem>
+                    <FormItem className="mt-0">
                       <FormLabel>Name of your project</FormLabel>
                       <FormControl>
                         <Input placeholder="My GraphQL API" autoComplete="off" {...field} />
@@ -410,29 +413,38 @@ export function CreateProjectModalContent(props: {
                 name="projectType"
                 render={({ field }) => {
                   return (
-                    <FormItem>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="pt-2"
-                      >
+                    <FormItem className="mt-2">
+                      <FormLabel>Project Type</FormLabel>
+                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value}>
                         <ProjectTypeCard
                           type={ProjectType.Single}
-                          title="Single"
-                          description="Monolithic GraphQL schema developed as a standalone"
-                          icon={<BoxIcon />}
+                          title="Monolith"
+                          description="Single GraphQL schema developed as a monolith"
+                          icon={
+                            <BoxIcon
+                              className={cn(field.value === ProjectType.Single && 'text-white')}
+                            />
+                          }
                         />
                         <ProjectTypeCard
                           type={ProjectType.Federation}
                           title="Federation"
                           description="Project developed according to Apollo Federation specification"
-                          icon={<BlocksIcon />}
+                          icon={
+                            <BlocksIcon
+                              className={cn(field.value === ProjectType.Federation && 'text-white')}
+                            />
+                          }
                         />
                         <ProjectTypeCard
                           type={ProjectType.Stitching}
                           title="Stitching"
                           description="Project that stitches together multiple GraphQL APIs"
-                          icon={<FoldVerticalIcon />}
+                          icon={
+                            <FoldVerticalIcon
+                              className={cn(field.value === ProjectType.Stitching && 'text-white')}
+                            />
+                          }
                         />
                       </RadioGroup>
                     </FormItem>
@@ -440,7 +452,7 @@ export function CreateProjectModalContent(props: {
                 }}
               />
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-8">
               <Button
                 className="w-full"
                 type="submit"

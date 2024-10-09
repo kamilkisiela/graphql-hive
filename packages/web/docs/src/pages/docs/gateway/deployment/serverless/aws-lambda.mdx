@@ -1,0 +1,64 @@
+import { Callout } from '@theguild/components'
+
+# Deploying Hive Gateway to AWS Lambda
+
+AWS Lambda is a serverless computing platform that makes it easy to build applications that run on
+the AWS cloud. Hive Gateway is platform agnostic so they can fit together easily.
+
+<Callout>
+  Before you start, make sure you read the [Serverless / On the
+  Edge](/docs/gateway/deployment/serverless) page.
+</Callout>
+
+See [Bundling Problems](/docs/gateway/deployment/serverless#bundling-problem) for more details about
+how to load the supergraph and `transports` option.
+
+```js filename="gateway.ts"
+import { createGatewayRuntime } from '@graphql-hive/gateway'
+import http from '@graphql-mesh/transport-http'
+import supergraph from './supergraph.js'
+
+export const gateway = createGatewayRuntime({
+  // All options available in `gateway.config.ts` configuration can also be passed here.
+  supergraph,
+  transports: {
+    http // For example, http transport is required for subgraphs using standard GraphQL over HTTP.
+  }
+})
+```
+
+```ts filename="index.ts"
+import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda'
+import { gateway } from './gateway'
+
+export async function handler(
+  event: APIGatewayEvent,
+  lambdaContext: Context
+): Promise<APIGatewayProxyResult> {
+  const response = await gateway.fetch(
+    event.path +
+      '?' +
+      new URLSearchParams((event.queryStringParameters as Record<string, string>) || {}).toString(),
+    {
+      method: event.httpMethod,
+      headers: event.headers as HeadersInit,
+      body: event.body
+        ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8')
+        : undefined
+    },
+    {
+      event,
+      lambdaContext
+    }
+  )
+
+  const responseHeaders = Object.fromEntries(response.headers.entries())
+
+  return {
+    statusCode: response.status,
+    headers: responseHeaders,
+    body: await response.text(),
+    isBase64Encoded: false
+  }
+}
+```

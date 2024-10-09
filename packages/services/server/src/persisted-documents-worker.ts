@@ -38,4 +38,5 @@ function createLogger(bindings: Record<string, unknown> = {}): Logger {
 createWorker(parentPort, createLogger(), {
   clickhouse: env.clickhouse,
   s3: env.s3,
+  s3Mirror: env.s3Mirror,
 });

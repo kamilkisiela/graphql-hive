@@ -1,632 +1,235 @@
-import { ReactElement, ReactNode, useState } from 'react';
-import Head from 'next/head';
-import Image, { StaticImageData } from 'next/image';
-import Link from 'next/link';
-import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiPhone, FiServer, FiTruck } from 'react-icons/fi';
+import { ReactElement, useEffect, useLayoutEffect } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import {
+  ArchDecoration,
+  CallToAction,
+  DecorationIsolation,
+  GetYourAPIGameRightSection,
+  Heading,
+  HighlightDecoration,
+  LargeHiveIconDecoration,
+  ToolsAndLibrariesCards,
+} from '@theguild/components';
 import { cn } from '../lib';
-import { BookIcon } from './book-icon';
-import { HereTrustedBy, Hero, HeroLinks, HeroSubtitle, HeroTitle } from './hero';
-import { Highlights, HighlightTextLink } from './highlights';
-import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
+import { CheckIcon } from './check-icon';
+import { CommunitySection } from './community-section';
+import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './company-logos';
+import { CompanyTestimonialsSection } from './company-testimonials';
+import { EcosystemManagementSection } from './ecosystem-management';
+import { FeatureTabs } from './feature-tabs';
+import { FrequentlyAskedQuestions } from './frequently-asked-questions';
+import { Hero, HeroFeatures, HeroLinks, TrustedBy } from './hero';
+import { InfoCard } from './info-card';
 import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
-import observabilityClientsImage from '../../public/features/observability/clients.png';
-import observabilityOperationsImage from '../../public/features/observability/operations.png';
-import observabilityOverallImage from '../../public/features/observability/overall.png';
-import registryExplorerImage from '../../public/features/registry/explorer.png';
-import registrySchemaChecksImage from '../../public/features/registry/schema-checks.png';
-import registryVersionControlSystemImage from '../../public/features/registry/version-control-system.png';
+import { TeamSection } from './team-section';
 
-const classes = {
-  link: cn(
-    'inline-block rounded-lg bg-gray-100 px-6 py-3 font-medium text-gray-600 shadow-sm hover:bg-gray-200',
-  ),
-  feature: cn('w-full', 'even:bg-gray-50', 'odd:bg-white'),
-  root: cn('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
-  content: cn('flex flex-col text-black'),
-  title: cn('text-xl font-semibold'),
-  description: cn('text-gray-600'),
-};
-
-const gradients: [string, string][] = [
-  ['#ff9472', '#f2709c'],
-  ['#4776e6', '#8e54e9'],
-  ['#f857a6', '#ff5858'],
-  ['#4ac29a', '#bdfff3'],
-  ['#00c6ff', '#0072ff'],
-];
-
-function pickGradient(i: number): [string, string] {
-  const gradient = gradients[i % gradients.length];
-
-  if (!gradient) {
-    throw new Error('No gradient found');
-  }
-
-  return gradient;
-}
-
-const renderFeatures = ({
-  title,
-  description,
-  documentationLink,
-}: {
-  title: string;
-  description: ReactNode;
-  documentationLink?: string;
-}) => (
-  <div className={classes.root} key={title}>
-    <div className={classes.content}>
-      <h3 className={cn(classes.title, 'text-lg')}>{title}</h3>
-      <p className={cn(classes.description, 'text-sm')}>{description}</p>
-      {documentationLink ? (
-        <Link
-          href={documentationLink}
-          className="group mt-2 inline-flex items-center gap-x-2 text-sm underline-offset-8 transition hover:underline"
-        >
-          <div>
-            <BookIcon size={16} />
-          </div>
-          <div>Learn more</div>
-        </Link>
-      ) : null}
-    </div>
-  </div>
-);
-
-function Highlight(
-  props: {
-    title: string;
-    description: ReactNode;
-    documentationLink?: string;
-    startColor: string;
-    endColor: string;
-  } & (
-    | {
-        active: boolean;
-        index: number;
-        onClick(i: number): void;
-      }
-    | {}
-  ),
-) {
-  return (
-    <div
-      className={cn(
-        classes.root,
-        'relative p-2 transition lg:p-8',
-        'onClick' in props ? 'cursor-pointer' : '',
-      )}
-      onClick={'onClick' in props ? () => props.onClick(props.index) : () => {}}
-    >
-      {props.documentationLink ? null : (
-        <div
-          className={cn(
-            'absolute inset-0 border-b-2 lg:border-b-0 lg:border-l-4',
-            'active' in props && props.active ? 'opacity-100' : 'opacity-0 hover:opacity-50',
-          )}
-          style={{
-            borderColor: props.startColor,
-          }}
-        />
-      )}
-      <div
-        className={cn(
-          classes.content,
-          'w-full lg:w-auto',
-          'onClick' in props ? 'gap-y-2' : 'gap-y-4',
-        )}
-      >
-        <h3
-          className={cn(
-            classes.title,
-            'text-base lg:text-lg',
-            'onClick' in props ? 'text-center lg:text-left' : '',
-          )}
-        >
-          {props.title}
-        </h3>
-        <p
-          className={cn(
-            classes.description,
-            'text-sm',
-            'onClick' in props ? 'hidden lg:block' : '',
-          )}
-        >
-          {props.description}
-        </p>
-        {props.documentationLink ? (
-          <Link
-            href={props.documentationLink}
-            className="group mt-2 inline-flex items-center gap-x-2 text-sm underline-offset-8 transition hover:underline"
-          >
-            <div>
-              <BookIcon size={16} />
-            </div>
-            <div>Learn more</div>
-          </Link>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function Feature(props: {
-  title: string;
-  description: ReactNode;
-  highlights?: {
-    title: string;
-    description: string;
-    image: StaticImageData;
-  }[];
-  imagelessHighlights?: {
-    title: string;
-    description: string;
-    documentationLink: string;
-  }[];
-  gradient: number;
-  documentationLink?: string;
-}) {
-  const [activeHighlight, setActiveHighlight] = useState(0);
-  const { title, description, gradient, documentationLink, highlights, imagelessHighlights } =
-    props;
-  const [start, end] = pickGradient(gradient);
-
-  return (
-    <>
-      <Head>
-        {highlights
-          ? highlights.map(highlight => (
-              <link key={highlight.image.src} rel="preload" as="image" href={highlight.image.src} />
-            ))
-          : null}
-      </Head>
-      <div className={cn(classes.feature, 'relative overflow-hidden')}>
-        <div>
-          <div
-            className="absolute top-0 h-px w-full opacity-25"
-            style={{
-              backgroundImage: `linear-gradient(90deg, ${end}, ${start})`,
-            }}
-          />
-          <div
-            className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-            style={{
-              backgroundImage: `linear-gradient(180deg, ${end}, ${start})`,
-            }}
-          />
-          <div
-            className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-            style={{
-              backgroundImage: `linear-gradient(180deg, ${start}, ${end})`,
-            }}
-          />
-        </div>
-        <div className="pb-28 pt-20 sm:py-32">
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl md:mx-auto md:text-center xl:max-w-none">
-              <h2
-                className="bg-clip-text text-4xl font-semibold leading-normal tracking-tight text-transparent"
-                style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
-              >
-                {title}
-              </h2>
-              <div className="mt-6 text-lg tracking-tight text-gray-600">{description}</div>
-              {documentationLink ? (
-                <div className="pt-12">
-                  <Link
-                    href={documentationLink}
-                    className="group inline-flex items-center gap-x-2 font-semibold underline-offset-8 transition hover:underline"
-                    style={{
-                      color: start,
-                    }}
-                  >
-                    <div>
-                      <BookIcon size={16} />
-                    </div>
-                    <div>Learn more</div>
-                  </Link>
-                </div>
-              ) : null}
-            </div>
-            {imagelessHighlights ? (
-              <div className="mt-16 flex flex-col justify-center pt-10 sm:gap-y-6 md:mt-20 lg:flex-row lg:pt-0">
-                {imagelessHighlights.map(highlight => (
-                  <Highlight
-                    {...highlight}
-                    endColor={end}
-                    startColor={start}
-                    key={highlight.title}
-                  />
-                ))}
-              </div>
-            ) : null}
-            {highlights ? (
-              <div className="mt-0 grid grid-cols-1 items-center gap-y-2 pt-10 sm:gap-y-6 md:mt-20 lg:mt-16 lg:grid-cols-12 lg:pt-0">
-                <div className="flex w-full overflow-x-auto pb-4 sm:mx-0 sm:overflow-visible sm:pb-0 lg:col-span-5 lg:w-auto">
-                  <div className="w-full">
-                    <div className="flex flex-row justify-evenly gap-x-0 lg:flex-col lg:gap-y-12">
-                      {highlights.map((highlight, i) => (
-                        <Highlight
-                          {...highlight}
-                          endColor={end}
-                          startColor={start}
-                          key={highlight.title}
-                          index={i}
-                          active={activeHighlight === i}
-                          onClick={setActiveHighlight}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div className="hidden lg:block" />
-                <div className="lg:col-span-6">
-                  {highlights.map((highlight, i) => (
-                    <div key={i} className={cn(activeHighlight === i ? 'block' : 'hidden')}>
-                      <div className="relative sm:px-6 lg:hidden">
-                        <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
-                          {highlight.description}
-                        </p>
-                      </div>
-                      <div
-                        className="mt-10 w-[45rem] rounded-lg p-4 sm:w-auto lg:mt-0 lg:w-[67.8125rem] lg:p-12"
-                        style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
-                      >
-                        <Image src={highlight.image} className="rounded-xl" alt={title} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function IndexPage(): ReactElement {
+  useIsomorphicLayoutEffect(() => {
+    // TODO: Accept a className for sidebar in the theme config?
+    const sidebarContainer = document.querySelector('.nextra-sidebar-container');
+    sidebarContainer?.parentElement?.classList.add('light');
+  }, []);
+
   return (
     <Tooltip.Provider>
-      <Page>
-        <Hero>
-          <HeroTitle>Open GraphQL Platform</HeroTitle>
-          <HeroSubtitle>
-            Prevent breaking changes, monitor performance of your GraphQL API, and manage your API
-            gateway
-          </HeroSubtitle>
-          <HeroLinks>
-            <>
-              <a
-                href="https://app.graphql-hive.com"
-                className={cn(
-                  'inline-block rounded-lg px-6 py-3 font-medium text-white shadow-sm',
-                  'bg-yellow-500 hover:bg-yellow-500/75',
-                )}
-              >
-                Start for free
-              </a>
-              <Link href="/docs" className={classes.link}>
-                Documentation
-              </Link>
-              <a
-                className={cn(classes.link, 'flex flex-row items-center gap-2')}
-                href="https://github.com/kamilkisiela/graphql-hive"
-              >
-                <FiGithub /> Star on GitHub
-              </a>
-              <a
-                className={cn(classes.link, 'flex flex-row items-center gap-2')}
-                href="#"
-                onClick={() => {
-                  (window as any).$crisp?.push(['do', 'chat:open']);
-                }}
-              >
-                <FiPhone /> Talk to us
-              </a>
-            </>
-          </HeroLinks>
-          <HereTrustedBy>
-            <MeetupLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={32}
-            />
-            <LinktreeLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={22}
-            />
-            <KarrotLogo
-              height={28}
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-            />
-            <AligentLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={32}
-            />
-            <SoundYXZLogo
-              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
-              height={32}
-            />
-          </HereTrustedBy>
-        </Hero>
-        <div className="relative even:bg-gray-50">
-          <div>
-            <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
-          </div>
-          <StatsList>
-            <StatsItem label="Happy users" value={5.7} suffix="K" decimal />
-            <StatsItem label="Registered Schemas" value={225} suffix="K" />
-            <StatsItem label="Collected Operations" value={315} suffix="B" />
-            <StatsItem label="GitHub Commits" value={6.2} suffix="K" decimal />
-          </StatsList>
-        </div>
-        <div className="flex flex-col">
-          <Feature
-            title="Schema Registry"
-            documentationLink="/docs/features/schema-registry"
-            description={
-              <>
-                <p>Push GraphQL schema to the registry and track the history of changes.</p>
-                <p>All your GraphQL services in one place.</p>
-              </>
-            }
-            highlights={[
-              {
-                title: 'Version Control System',
-                description:
-                  'Track every modification of your GraphQL API across different environments, such as staging and production.',
-                image: registryVersionControlSystemImage,
-              },
-              {
-                title: 'Schema checks',
-                description:
-                  'Detect breaking changes and composition errors, prevent them from being deployed.',
-                image: registrySchemaChecksImage,
-              },
-              {
-                title: 'Schema explorer',
-                description:
-                  'Navigate through your GraphQL schema and understand which types and fields are referenced from which subgraphs.',
-                image: registryExplorerImage,
-              },
-            ]}
-            gradient={0}
-          />
-          <div className={cn(classes.feature, 'relative overflow-hidden')}>
-            <div>
-              <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
-              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-50 to-gray-300 opacity-15 blur-3xl" />
-              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-300 to-gray-50 opacity-15 blur-3xl" />
-            </div>
-            <div className="py-24">
-              <h2 className="base:mr-1 mb-12 ml-1 text-center text-3xl font-semibold leading-normal tracking-tight text-black">
-                Perfect fit for your GraphQL Gateway
-              </h2>
-              <Highlights
-                items={[
-                  {
-                    title: 'Manage your Gateway',
-                    description: (
-                      <>
-                        Connect to{' '}
-                        <HighlightTextLink href="/docs/get-started/apollo-federation">
-                          Apollo Federation
-                        </HighlightTextLink>
-                        ,{' '}
-                        <HighlightTextLink href="/docs/integrations/graphql-mesh">
-                          GraphQL Mesh
-                        </HighlightTextLink>
-                        ,{' '}
-                        <HighlightTextLink href="/docs/integrations/schema-stitching">
-                          Stitching
-                        </HighlightTextLink>{' '}
-                        and more.
-                      </>
-                    ),
-                    icon: <FiServer strokeWidth={1} className="size-full" />,
-                    documentationLink: '/docs/get-started/apollo-federation',
-                  },
-                  {
-                    title: 'Global Edge Network',
-                    description: 'Access the registry from any place on earth within milliseconds.',
-                    icon: <FiGlobe strokeWidth={1} className="size-full" />,
-                    documentationLink: '/docs/features/high-availability-cdn',
-                  },
-                  {
-                    title: 'Apollo Studio alternative',
-                    description:
-                      'GraphQL Hive is a drop-in replacement for Apollo Studio (Apollo GraphOS).',
-                    icon: <FiPackage strokeWidth={1} className="size-full" />,
-                    documentationLink: '/docs/use-cases/apollo-studio',
-                  },
-                ]}
-              />
-            </div>
-          </div>
-          <Feature
-            title="GraphQL Observability"
-            documentationLink="/docs/features/usage-reporting"
-            description={
-              <p>
-                Be aware of how your GraphQL API is used and what is the experience of its final
-                users.
-              </p>
-            }
-            highlights={[
-              {
-                title: 'GraphQL consumers',
-                description:
-                  'Track every source of GraphQL requests and see how the API is consumed.',
-                image: observabilityClientsImage,
-              },
-              {
-                title: 'Overall performance',
-                description: 'Get a global overview of the usage of GraphQL API.',
-                image: observabilityOverallImage,
-              },
-              {
-                title: 'Query performance',
-                description: 'Detect slow GraphQL Operations and identify the culprits.',
-                image: observabilityOperationsImage,
-              },
-            ]}
-            gradient={1}
-          />
-          <Feature
-            title="Schema Management"
-            description={<p>Maintain GraphQL API across many teams without concerns.</p>}
-            gradient={2}
-            imagelessHighlights={[
-              {
-                title: 'Prevent breaking changes',
-                description:
-                  'Combination of Schema Registry and GraphQL Monitoring helps you evolve GraphQL API with confidence.',
-                documentationLink: '/docs/management/targets#conditional-breaking-changes',
-              },
-              {
-                title: 'Detect unused fields',
-                description:
-                  'Helps you understand the coverage of GraphQL schema and safely remove the unused part.',
-                documentationLink: '/docs/features/usage-reporting',
-              },
-              {
-                title: 'Schema Policy',
-                description:
-                  'Lint, verify, and enforce best practices across the entire federated graph.',
-                documentationLink: '/docs/features/schema-policy',
-              },
-            ]}
-          />
-          <div
-            className="relative overflow-hidden"
-            style={{
-              backgroundImage: `linear-gradient(-70deg, ${gradients[4][1]}, ${gradients[4][0]})`,
-            }}
+      <style global jsx>
+        {`
+          html {
+            scroll-behavior: smooth;
+          }
+          body {
+            background: #fff;
+          }
+          #__next {
+            --nextra-primary-hue: 191deg;
+            --nextra-primary-saturation: 40%;
+            --nextra-bg: 255, 255, 255;
+          }
+        `}
+      </style>
+      <Page className="text-green-1000 light mx-auto max-w-[90rem] overflow-hidden">
+        <Hero className="mx-4 max-sm:mt-2 md:mx-6">
+          <Heading
+            as="h1"
+            size="xl"
+            className="mx-auto max-w-3xl text-balance text-center text-white"
           >
-            <div>
-              <div className="absolute top-0 h-px w-full bg-blue-900 opacity-25" />
-            </div>
-            <div className="py-24">
-              <div className="mx-auto max-w-lg text-center text-white">
-                <h2 className="text-3xl font-semibold leading-normal tracking-tight">
-                  Get started today
-                </h2>
-                <p className="mt-4 text-lg tracking-tight">
-                  Start with a free Hobby plan that fits perfectly most side projects or try our Pro
-                  plan with 30 days trial period.
-                </p>
-                <a
-                  href="https://app.graphql-hive.com"
-                  className={cn(
-                    'mt-12 rounded-md px-6 py-3 text-sm font-medium text-black shadow-sm',
-                    'bg-white hover:bg-blue-50',
-                    'inline-flex flex-row items-center gap-2',
-                  )}
-                >
-                  <FiLogIn /> Enter Hive
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className={cn(classes.feature, 'relative overflow-hidden')}>
-            <div>
-              <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
-              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-600 to-gray-900 opacity-15 blur-3xl" />
-              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-900 to-gray-600 opacity-15 blur-3xl" />
-            </div>
-            <div className="py-24">
-              <h2 className="mb-12 text-center text-3xl font-semibold leading-normal tracking-tight text-black">
-                Fits your infrastructure
-              </h2>
-              <Highlights
-                items={[
-                  {
-                    title: 'GitHub Integration',
-                    description: 'Our CLI integrates smoothly with GitHub Actions / repositories.',
-                    icon: <FiGithub strokeWidth={1} className="size-full" />,
-                    documentationLink: '/docs/integrations/ci-cd#github-check-suites',
-                  },
-                  {
-                    title: 'Works with every CI/CD',
-                    description: 'Connect GraphQL Hive CLI to CI/CD of your choice.',
-                    icon: <FiTruck strokeWidth={1} className="size-full" />,
-                    documentationLink: '/docs/integrations/ci-cd',
-                  },
-                  {
-                    title: 'On-premise or Cloud',
-                    description:
-                      'GraphQL Hive is MIT licensed, you can host it on your own infrastructure.',
-                    icon: <FiServer strokeWidth={1} className="size-full" />,
-                    documentationLink: '/docs/self-hosting/get-started',
-                  },
-                ]}
-              />
-            </div>
-          </div>
-          <div className={cn(classes.feature, 'relative overflow-hidden')}>
-            <div>
-              <div
-                className="absolute top-0 h-px w-full opacity-25"
-                style={{
-                  backgroundImage: `linear-gradient(90deg, ${gradients[3][1]}, ${gradients[3][0]})`,
-                }}
-              />
-              <div
-                className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-                style={{
-                  backgroundImage: `linear-gradient(180deg, ${gradients[3][0]}, ${gradients[3][1]})`,
-                }}
-              />
-              <div
-                className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
-                style={{
-                  backgroundImage: `linear-gradient(180deg, ${gradients[3][1]}, ${gradients[3][0]})`,
-                }}
-              />
-            </div>
-            <div className="py-24">
-              <div className="container mx-auto box-border flex flex-col gap-y-24 px-6">
-                <div className="text-center">
-                  <h2
-                    className="mb-6 bg-clip-text text-5xl font-semibold leading-normal text-transparent"
-                    style={{
-                      backgroundImage: `linear-gradient(-70deg, ${gradients[3][1]}, ${gradients[3][0]})`,
-                    }}
-                  >
-                    Open-Source
-                  </h2>
-                  <p className="text-lg leading-7 text-gray-600">Built entirely in public.</p>
-                </div>
-                <div className="mx-auto box-border grid max-w-screen-lg grid-cols-2 gap-12 px-6">
-                  {[
-                    {
-                      title: 'Public roadmap',
-                      description: 'Influence the future of GraphQL Hive.',
-                    },
-                    {
-                      title: 'Cloud and Self-Hosted',
-                      description: 'MIT licensed, host it on your own infrastructure.',
-                    },
-                    {
-                      title: 'Available for free',
-                      description: 'Free Hobby plan that fits perfectly for most side projects.',
-                    },
-                    {
-                      title: 'Community',
-                      description: 'Implement your own features with our help.',
-                    },
-                  ].map(renderFeatures)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <Pricing gradient={gradients[4]} />
+            Open-source GraphQL platform
+          </Heading>
+          <p className="mx-auto w-[512px] max-w-[80%] text-center leading-6 text-white/80">
+            Schema registry, analytics and gateway for GraphQL federation and other GraphQL APIs.
+          </p>
+          <HeroFeatures>
+            <li>
+              <CheckIcon className="text-blue-400" />
+              Fully open-source
+            </li>
+            <li>
+              <CheckIcon className="text-blue-400" />
+              No vendor lock
+            </li>
+            <li>
+              <CheckIcon className="text-blue-400" />
+              Can be self-hosted!
+            </li>
+          </HeroFeatures>
+          <HeroLinks>
+            <CallToAction variant="primary-inverted" href="https://app.graphql-hive.com">
+              Get started for free
+            </CallToAction>
+            <CallToAction variant="secondary" href="/#pricing">
+              View Pricing
+            </CallToAction>
+          </HeroLinks>
+        </Hero>
+        <FeatureTabs className="relative mt-6 sm:mt-[-72px]" />
+        <TrustedBy className="mx-auto my-8 md:my-16 lg:my-24">
+          <MeetupLogo title="Meetup" height={32} className="translate-y-[5px]" />
+          <LinktreeLogo title="Linktree" height={22} />
+          <KarrotLogo title="Karrot" height={28} />
+          <AligentLogo title="Aligent" height={32} />
+          <SoundYXZLogo title="SoundXYZ" height={32} />
+        </TrustedBy>
+        <EcosystemManagementSection className="mx-4 md:mx-6" />
+        <StatsList className="mt-6 md:mt-0">
+          <StatsItem label="GitHub commits" value={6.2} suffix="K" decimal />
+          <StatsItem label="Active developers" value={6.2} suffix="K" decimal />
+          <StatsItem label="Registered schemas" value={270} suffix="K" />
+          <StatsItem label="Collected operations" value={350} suffix="B" />
+        </StatsList>
+        <UltimatePerformanceCards />
+        <CompanyTestimonialsSection className="mx-4 mt-6 md:mx-6" />
+        <GetStartedTodaySection className="mx-4 mt-6 md:mx-6" />
+        <EnterpriseFocusedCards className="mx-4 mt-6 md:mx-6" />
+        <Pricing />
+        <TeamSection className="mx-4 md:mx-6" />
+        <CommunitySection className="mx-4 mt-6 md:mx-6" />
+        <ToolsAndLibrariesCards className="mx-4 mt-6 md:mx-6" />
+        <FrequentlyAskedQuestions className="mx-4 md:mx-6" />
+        <GetYourAPIGameRightSection className="mx-4 sm:mb-6 md:mx-6" />
       </Page>
     </Tooltip.Provider>
+  );
+}
+
+function GetStartedTodaySection({ className }: { className?: string }) {
+  return (
+    <section
+      className={cn(
+        'relative overflow-hidden rounded-3xl bg-[#003834] p-12 text-center sm:p-24',
+        className,
+      )}
+    >
+      <DecorationIsolation>
+        <ArchDecoration className="absolute -left-1/2 -top-1/2 rotate-180 sm:-left-1/4 md:left-[-105px] md:top-[-109px] [&>path]:fill-none" />
+        <HighlightDecoration className="absolute -left-1 -top-16 size-[600px] -scale-x-100 overflow-visible" />
+        <LargeHiveIconDecoration className="absolute bottom-0 right-8 hidden lg:block" />
+      </DecorationIsolation>
+      <Heading as="h3" size="md" className="text-white">
+        Get started today!
+      </Heading>
+      <p className="relative mt-4 text-white/80">
+        Start with a free Hobby plan that fits perfectly most side projects or try our Pro plan with
+        30&nbsp;days trial period.
+      </p>
+      <CallToAction
+        variant="primary-inverted"
+        className="mx-auto mt-8"
+        href="https://app.graphql-hive.com/"
+      >
+        Enter Hive
+      </CallToAction>
+    </section>
+  );
+}
+
+function EnterpriseFocusedCards({ className }: { className?: string }) {
+  return (
+    <section
+      className={cn('bg-beige-100 rounded-3xl px-4 pt-6 sm:py-24 md:px-6 md:py-[120px]', className)}
+    >
+      <Heading as="h3" size="md" className="text-balance sm:px-6 sm:text-center">
+        Enterprise-focused tools tailored for you
+      </Heading>
+      <ul className="flex flex-row flex-wrap justify-center divide-y divide-solid sm:mt-6 sm:divide-x sm:divide-y-0 md:mt-16 md:px-6 xl:px-16">
+        <InfoCard
+          as="li"
+          heading="Cloud and Self-Hosted"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
+        >
+          Hive is completely open source, MIT licensed. You can host it on your own infrastructure.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Single Sign-On"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full px-0 sm:basis-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
+        >
+          Integrated with popular providers like Okta, to enable OpenID Connect login for maximum
+          security.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Customizable User Roles and Permissions"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 px-0 sm:px-8 sm:py-0 md:px-8 md:py-0"
+        >
+          Control user access with detailed, role-based permissions for enhanced security and
+          flexibility.
+        </InfoCard>
+      </ul>
+    </section>
+  );
+}
+
+function UltimatePerformanceCards() {
+  return (
+    <section className="px-4 py-6 sm:py-12 md:px-6 xl:px-[120px]">
+      <Heading as="h3" size="md" className="text-balance text-center">
+        GraphQL for the ultimate performance
+      </Heading>
+      <ul className="mt-6 flex flex-row flex-wrap justify-center gap-2 md:mt-16 md:gap-6">
+        <InfoCard
+          as="li"
+          heading="Deliver improvements faster"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 rounded-2xl md:rounded-3xl"
+        >
+          Accelerate feature improvements and experiments, by seamless decoupling of backend and
+          frontend environments.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Network efficiency"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full rounded-2xl md:basis-0 md:rounded-3xl"
+        >
+          Minimize unnecessary network calls that hinder your application's speed. Use GraphQL to
+          enhance responsiveness and scales these benefits across your enterprise.
+        </InfoCard>
+        <InfoCard
+          as="li"
+          heading="Optimized data retrieval"
+          icon={<PerformanceListItemIcon />}
+          className="flex-1 basis-full rounded-2xl md:rounded-3xl lg:basis-0"
+        >
+          Streamline communication between frontend and backend by enabling precise data selection,
+          reducing unnecessary payloads and simplifying API interactions.
+        </InfoCard>
+      </ul>
+    </section>
+  );
+}
+
+function PerformanceListItemIcon() {
+  return (
+    <svg width="24" height="24" fill="currentColor">
+      <path d="M5.25 7.5a2.25 2.25 0 1 1 3 2.122v4.756a2.251 2.251 0 1 1-1.5 0V9.622A2.25 2.25 0 0 1 5.25 7.5Zm9.22-2.03a.75.75 0 0 1 1.06 0l.97.97.97-.97a.75.75 0 1 1 1.06 1.06l-.97.97.97.97a.75.75 0 0 1-1.06 1.06l-.97-.97-.97.97a.75.75 0 1 1-1.06-1.06l.97-.97-.97-.97a.75.75 0 0 1 0-1.06Zm2.03 5.03a.75.75 0 0 1 .75.75v3.128a2.251 2.251 0 1 1-1.5 0V11.25a.75.75 0 0 1 .75-.75Z" />
+    </svg>
   );
 }

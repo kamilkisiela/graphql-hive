@@ -1,5 +1,22 @@
 # @graphql-hive/cli
 
+## 0.43.0
+
+### Minor Changes
+
+- [#5474](https://github.com/kamilkisiela/graphql-hive/pull/5474)
+  [`3850ad2`](https://github.com/kamilkisiela/graphql-hive/commit/3850ad24d421631a56676cc1bff5d0c4a3d28a49)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Introduce schema publish retries, when being
+  blocked by other concurrent schema publishes.
+
+## 0.42.1
+
+### Patch Changes
+
+- Updated dependencies
+  [[`3ffdb6e`](https://github.com/kamilkisiela/graphql-hive/commit/3ffdb6e9466deb3c3aa09eea1445fc4caf698fd5)]:
+  - @graphql-hive/core@0.8.0
+
 ## 0.42.0
 
 ### Minor Changes

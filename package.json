@@ -1,6 +1,5 @@
 {
   "name": "graphql-hive",
-  "version": "0.0.0",
   "type": "module",
   "repository": {
     "type": "git",
@@ -13,7 +12,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@9.7.1",
+  "packageManager": "pnpm@9.8.0",
   "engines": {
     "node": ">=22",
     "pnpm": ">=9.4.0"
@@ -46,7 +45,7 @@
     "test": "vitest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "test:integration": "cd integration-tests && pnpm test:integration",
-    "typecheck": "pnpm run -r --filter '!@hive/deployment' typecheck",
+    "typecheck": "pnpm run -r --filter '!hive' typecheck",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "workspace": "pnpm run --filter $1 $2"
   },
@@ -67,11 +66,11 @@
     "@graphql-eslint/eslint-plugin": "3.20.1",
     "@graphql-inspector/cli": "4.0.3",
     "@manypkg/get-packages": "2.2.2",
-    "@next/eslint-plugin-next": "14.2.5",
+    "@next/eslint-plugin-next": "14.2.6",
     "@parcel/watcher": "2.4.1",
     "@sentry/cli": "2.33.1",
-    "@swc/core": "1.7.12",
-    "@theguild/eslint-config": "0.12.0",
+    "@swc/core": "1.7.18",
+    "@theguild/eslint-config": "0.12.1",
     "@theguild/prettier-config": "2.0.7",
     "@types/node": "20.16.1",
     "bob-the-bundler": "7.0.1",
@@ -80,7 +79,7 @@
     "eslint": "8.57.0",
     "eslint-plugin-cypress": "3.5.0",
     "eslint-plugin-hive": "file:rules",
-    "eslint-plugin-tailwindcss": "3.17.4",
+    "eslint-plugin-tailwindcss": "npm:@hasparus/eslint-plugin-tailwindcss@3.17.5",
     "fs-extra": "11.2.0",
     "graphql": "16.9.0",
     "jest-snapshot-serializer-raw": "2.0.0",
@@ -92,8 +91,8 @@
     "rimraf": "4.4.1",
     "ts-node": "10.9.2",
     "tsup": "8.2.4",
-    "tsx": "4.17.0",
-    "turbo": "1.13.4",
+    "tsx": "4.18.0",
+    "turbo": "2.1.3",
     "typescript": "5.5.4",
     "vite-tsconfig-paths": "5.0.1",
     "vitest": "2.0.5"
@@ -110,7 +109,10 @@
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch"
+      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch",
+      "@theguild/components": "patches/@theguild__components.patch",
+      "countup.js": "patches/countup.js.patch",
+      "nextra-theme-docs": "patches/nextra-theme-docs.patch"
     }
   }
 }

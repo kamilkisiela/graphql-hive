@@ -1,6 +1,5 @@
 {
   "name": "@hive/service-common",
-  "version": "0.0.0",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -20,7 +19,7 @@
     "@opentelemetry/sdk-node": "0.52.1",
     "@opentelemetry/sdk-trace-base": "1.25.1",
     "@opentelemetry/sdk-trace-node": "1.25.1",
-    "@opentelemetry/semantic-conventions": "1.25.1",
+    "@opentelemetry/semantic-conventions": "1.26.0",
     "@sentry/node": "7.119.0",
     "@sentry/types": "7.119.0",
     "@sentry/utils": "7.119.0",

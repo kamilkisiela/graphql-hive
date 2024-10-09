@@ -1,8 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies -- cypress SHOULD be a dev dependency
 import fs from 'node:fs';
 import { defineConfig } from 'cypress';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import pg from 'pg';
 
 const isCI = Boolean(process.env.CI);
 
@@ -15,25 +13,7 @@ export default defineConfig({
     POSTGRES_URL: 'postgresql://postgres:postgres@localhost:5432/registry',
   },
   e2e: {
-    setupNodeEvents(on, config) {
-      on('task', {
-        async connectDB(query: string) {
-          const dbUrl = new URL(config.env.POSTGRES_URL);
-          const client = new pg.Client({
-            user: dbUrl.username,
-            password: dbUrl.password,
-            host: dbUrl.hostname,
-            database: dbUrl.pathname.slice(1),
-            port: Number(dbUrl.port),
-            ssl: false,
-          });
-          await client.connect();
-          const res = await client.query(query);
-          await client.end();
-          return res.rows;
-        },
-      });
-
+    setupNodeEvents(on) {
       on('after:spec', (_, results) => {
         if (results && results.video) {
           // Do we have failures for any retry attempts?
