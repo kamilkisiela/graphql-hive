@@ -1,6 +1,5 @@
 {
   "name": "@hive/tokens",
-  "version": "0.0.0",
   "type": "module",
   "license": "MIT",
   "private": true,
