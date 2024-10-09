@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -16,6 +16,7 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { graphql } from '@/gql';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
+import { useSearchParamsFilter } from '@/lib/hooks/use-search-params-filters';
 
 function OperationsView({
   organizationCleanId,
@@ -28,8 +29,11 @@ function OperationsView({
   targetCleanId: string;
   dataRetentionInDays: number;
 }): ReactElement {
-  const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
-  const [selectedClients, setSelectedClients] = useState<string[]>([]);
+  const [selectedOperations, setSelectedOperations] = useSearchParamsFilter<string[]>(
+    'operations',
+    [],
+  );
+  const [selectedClients, setSelectedClients] = useSearchParamsFilter<string[]>('clients', []);
   const dateRangeController = useDateRangeController({
     dataRetentionInDays,
     defaultPreset: presetLast7Days,

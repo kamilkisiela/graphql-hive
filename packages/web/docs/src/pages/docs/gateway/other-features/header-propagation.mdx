@@ -1,0 +1,43 @@
+# Header Propagation
+
+Hive Gateway can forward headers from the incoming request to the outgoing request, also you can
+forward the headers from the upstream responses to the client.
+
+## From the client to the subgraphs
+
+You can configure headers to be propagated from the incoming request to the outgoing request. You
+can do either per subgraph or globally.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  propagateHeaders: {
+    fromClientToSubgraphs({ request, subgraphName }) {
+      if (subgraphName === 'subgraph1') {
+        return {
+          'x-custom-header': request.headers.get('x-custom-header')
+        }
+      }
+    }
+  }
+})
+```
+
+## From the subgraphs to the client
+
+You can configure headers to be propagated from the upstream responses to the client.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  propagateHeaders: {
+    fromSubgraphsToClient({ response }) {
+      return {
+        'x-custom-header': response.headers.get('x-custom-header')
+      }
+    }
+  }
+})
+```

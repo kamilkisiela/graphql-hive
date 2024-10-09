@@ -1,0 +1,1418 @@
+---
+description:
+  Monitoring and tracing are essential for debugging and understanding the performance and overall
+  behavior of your Hive Gateway.
+---
+
+import Image from 'next/image'
+import { Table, Td, Th, Tr } from 'nextra/components'
+import { Callout, Cards, Tabs } from '@theguild/components'
+
+# Monitoring and Tracing
+
+If something is not working as it should within your GraphQL gateway, you would not want it to go
+unnoticed.
+
+Monitoring and tracing are essential for debugging and understanding the performance of your
+gateway.
+
+You can use Gateway plugins to trace and monitor your gateway's execution flow together with all
+outgoing HTTP calls and internal query planning.
+
+## Healthcheck
+
+Hive Gateway is aware of the usefulness of a health check and gives the user maximum possibilities
+to use the built-in check.
+
+There are two types of health checks: **liveliness** and **readiness**, they both _are_ a health
+check but convey a different meaning:
+
+- **Liveliness** checks whether the service is alive and running
+- **Readiness** checks whether the upstream services are ready to perform work and execute GraphQL
+  operations
+
+The difference is that a service can be _live_ but not _ready_ - for example, server has started and
+is accepting requests (alive), but the read replica it uses is still unavailable (not ready).
+
+Both endpoints are enabled by default.
+
+### Liveliness
+
+By default, you can check whether the gateway is alive by issuing a request to the `/healthcheck`
+endpoint and expecting the response `200 OK`. A successful response is just `200 OK` without a body.
+
+You can change this endpoint through the `healthCheckEndpoint` option:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  healthCheckEndpoint: '/healthcheck'
+})
+```
+
+### Readiness
+
+For readiness check, Hive Gateway offers another endpoint (`/readiness`) which checks whether the
+services powering your gateway are ready to perform work. It returns `200 OK` if all the services
+are ready to execute GraphQL operations.
+
+It returns `200 OK` if all the services are ready to perform work.
+
+You can customize the readiness check endpoint through the `readinessCheckEndpoint` option:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  readinessCheckEndpoint: '/readiness'
+})
+```
+
+## OpenTelemetry Traces
+
+Hive Gateway supports OpenTelemetry for tracing and monitoring your gateway.
+
+[OpenTelemetry](https://opentelemetry.io/) is a set of APIs, libraries, agents, and instrumentation
+to provide observability to your applications.
+
+The following are available to use with this plugin:
+
+- HTTP request: tracks the incoming HTTP request and the outgoing HTTP response
+- GraphQL Lifecycle tracing: tracks the GraphQL execution lifecycle (parse, validate and execution).
+- Upstream HTTP calls: tracks the outgoing HTTP requests made by the GraphQL execution.
+- Context propagation: propagates the trace context between the incoming HTTP request and the
+  outgoing HTTP requests.
+
+![image](https://github.com/user-attachments/assets/74918ade-8d7c-44ee-89b2-e10a13ffc4ad)
+
+### Usage Example
+
+```ts filename="gateway.config.ts"
+import { createStdoutExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      // A simple output to the console.
+      // You can add more exporters here, please see documentation below for more examples.
+      createStdoutExporter()
+    ],
+    serviceName: 'my-custom-service-name', // Optional, the name of your service
+    tracer: myCustomTracer, // Optional, a custom tracer to use
+    inheritContext: true, // Optional, whether to inherit the context from the incoming request
+    propagateContext: true, // Optional, whether to propagate the context to the outgoing requests
+    // Optional config to customize the spans. By default all spans are enabled.
+    spans: {
+      http: true, // Whether to track the HTTP request/response
+      graphqlParse: true, // Whether to track the GraphQL parse phase
+      graphqlValidate: true, // Whether to track the GraphQL validate phase
+      graphqlExecute: true, // Whether to track the GraphQL execute phase
+      subgraphExecute: true, // Whether to track the subgraph execution phase
+      upstreamFetch: true // Whether to track the upstream HTTP requests
+    }
+  }
+})
+```
+
+### Exporters
+
+You may use one of the following exporters to send the traces to a backend, or create an configure
+custom exporters and processors.
+
+To use a custom exporter that is not listen below, please refer to
+[Customer Exporters in OpenTelemetry documentation](https://opentelemetry.io/docs/languages/js/exporters/#custom-exporters).
+
+In addition, you can fully customize the plugin's Tracer with any kind of OpenTelemetry
+[tracer](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#tracer),
+and integrate it to any tracing/metric platform that supports this standard.
+
+<Tabs items={["Stdout", "OTLP (HTTP)", "OTLP (gRPC)", "Jaeger", "NewRelic", "Datadog", "Zipkin"]}>
+
+{/* Stdout */}
+
+<Tabs.Tab>
+
+A simple exporter that writes the spans to the `stdout` of the process.
+
+```ts filename="gateway.config.ts"
+import { createStdoutExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [createStdoutExporter()]
+  }
+})
+```
+
+</Tabs.Tab>
+
+{/* OTLP (HTTP) */}
+
+<Tabs.Tab>
+
+An exporter that writes the spans to an OTLP-supported backend using HTTP.
+
+```ts filename="gateway.config.ts"
+import { createOtlpHttpExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      createOtlpHttpExporter({
+        url: 'http://my-otlp-backend:4318'
+        // ...
+        // additional options to pass to @opentelemetry/exporter-trace-otlp-http
+        // https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-http
+      })
+    ]
+  }
+})
+```
+
+</Tabs.Tab>
+
+{/* OTLP (gRPC) */}
+
+<Tabs.Tab>
+
+An exporter that writes the spans to an OTLP-supported backend using gRPC.
+
+```ts filename="gateway.config.ts"
+import { createOtlpGrpcExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      createOtlpGrpcExporter({
+        url: 'http://my-otlp-backend:4317'
+        // ...
+        // additional options to pass to @opentelemetry/exporter-trace-otlp-grpc
+        // https://www.npmjs.com/package/@opentelemetry/exporter-trace-otlp-grpc
+      })
+    ]
+  }
+})
+```
+
+</Tabs.Tab>
+
+{/* Jaeger */}
+
+<Tabs.Tab>
+
+[Jaeger](https://www.jaegertracing.io/) supports [OTLP over HTTP/gRPC](#otlp-over-http), so you can
+use it by pointing the `createOtlpHttpExporter`/`createOtlpGrpcExporter` to the Jaeger endpoint:
+
+```ts filename="gateway.config.ts"
+import { createOtlpHttpExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      createOtlpHttpExporter({
+        url: 'http://my-jaeger-backend:4318'
+      })
+    ]
+  }
+})
+```
+
+> Your Jaeger instance needs to have OTLP ingestion enabeld, so verify that you have the
+> `COLLECTOR_OTLP_ENABLED=true` environment variable set, and that ports `4317` and `4318` are
+> acessible.
+
+To test this integration, you can run a local Jaeger instance using Docker:
+
+```
+docker run -d --name jaeger \
+  -e COLLECTOR_OTLP_ENABLED=true \
+  -p 5778:5778 \
+  -p 16686:16686 \
+  -p 4317:4317 \
+  -p 4318:4318 \
+  jaegertracing/all-in-one:latest
+```
+
+</Tabs.Tab>
+
+{/* NewRelic */}
+
+<Tabs.Tab>
+
+[NewRelic](https://newrelic.com/) supports [OTLP over HTTP/gRPC](#otlp-over-http), so you can use it
+by configuring the `createOtlpHttpExporter`/`createOtlpGrpcExporter` to the NewRelic endpoint:
+
+```ts filename="gateway.config.ts"
+import { createOtlpHttpExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      createOtlpHttpExporter({
+        url: 'http://<newrelic-endpoint>:4318'
+      })
+    ]
+  }
+})
+```
+
+> For additional information and NewRelic ingestion endpoints, see
+> [**New Relic OTLP endpoint**](https://docs.newrelic.com/docs/opentelemetry/best-practices/opentelemetry-otlp/).
+
+</Tabs.Tab>
+
+{/* Datadog */}
+
+<Tabs.Tab>
+
+[DataDog Agent](https://docs.datadoghq.com/agent/) supports [OTLP over HTTP/gRPC](#otlp-over-http),
+so you can use it by pointing the `createOtlpHttpExporter` to the DataDog Agent endpoint:
+
+```ts filename="gateway.config.ts"
+import { createOtlpHttpExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      createOtlpHttpExporter({
+        url: 'http://<datadog-agent-host>:4318'
+      })
+    ]
+  }
+})
+```
+
+> For additional information, see
+> [**OpenTelemetry in Datadog**](https://docs.datadoghq.com/opentelemetry/interoperability/otlp_ingest_in_the_agent/?tab=host#enabling-otlp-ingestion-on-the-datadog-agent).
+
+</Tabs.Tab>
+
+{/* Zipkin */}
+
+<Tabs.Tab>
+
+[Zipkin](https://zipkin.io/) is using a custom protocol to send the spans, so you can use the Zipkin
+exporter to send the spans to a Zipkin backend:
+
+```ts filename="gateway.config.ts"
+import { createZipkinExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      createZipkinExporter({
+        url: 'http://<zipkin-host>:9411/api/v2/spans'
+        // ...
+        // additional options to pass to @opentelemetry/exporter-zipkin
+        // https://www.npmjs.com/package/@opentelemetry/exporter-zipkin
+      })
+    ]
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+### Batching
+
+All built-in processors allow you to configure batching options by an additional argument to the
+factory function.
+
+The following configuration are allowed:
+
+- `true` (default): enables batching and use
+  [`BatchSpanProcessor`](https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor)
+  default config.
+- `object`: enables batching and use
+  [`BatchSpanProcessor`](https://opentelemetry.io/docs/specs/otel/trace/sdk/#batching-processor)
+  with the provided configuration.
+- `false` - disables batching and use
+  [`SimpleSpanProcessor`](https://opentelemetry.io/docs/specs/otel/trace/sdk/#simple-processor)
+
+> By default, the batch processor will send the spans every 5 seconds or when the buffer is full.
+>
+> `{ scheduledDelayMillis: 5000, maxQueueSize: 2048, exportTimeoutMillis: 30000, maxExportBatchSize: 512 }`
+
+> You can learn more about the batching options in the
+> [Picking the right span processor](https://opentelemetry.io/docs/languages/js/instrumentation/#picking-the-right-span-processor)
+> page.
+
+### Reported Spans
+
+The plugin exports OpenTelemetry spans for the following operations:
+
+<details>
+
+<summary>HTTP Server</summary>
+
+<Callout>
+  This span is created for each incoming HTTP request, and acts as a root span for the entire
+  request. Disabling this span will also disable the other hooks and spans.
+</Callout>
+
+By default, the plugin will a root span for the HTTP layer as a span (`METHOD /path`) with the
+following attributes for the HTTP request:
+
+- `http.method`: The HTTP method
+- `http.url`: The HTTP URL
+- `http.route`: The HTTP status code
+- `http.scheme`: The HTTP scheme
+- `http.host`: The HTTP host
+- `net.host.name`: The hostname
+- `http.user_agent`: The HTTP user agent (based on the `User-Agent` header)
+- `http.client_ip`: The HTTP connecting IP (based on the `X-Forwarded-For` header)
+
+And the following attributes for the HTTP response:
+
+- `http.status_code`: The HTTP status code
+
+> An error in the this phase will be reported as an
+> [error span](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/) with the
+> HTTP status text and as an OpenTelemetry
+> [`Exception`](https://opentelemetry.io/docs/specs/otel/trace/exceptions/).
+
+You may disable this by setting `spans.http` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      http: false
+    }
+  }
+})
+```
+
+Or, you may filter the spans by setting the `spans` configuration to a function:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      http: payload => {
+        // Filter the spans based on the payload
+        return true
+      }
+    }
+  }
+})
+```
+
+> The `payload` object is the same as the one passed to the
+> [`onRequest` hook](https://github.com/ardatan/whatwg-node/blob/master/packages/server/src/plugins/types.ts#L16-L25).
+
+</details>
+
+<details>
+
+<summary>GraphQL Parse</summary>
+
+By default, the plugin will report the validation phase as a span (`graphql.validate`) with the
+following attributes:
+
+- `graphql.document`: The GraphQL query string
+- `graphql.operation.name`: The operation name
+
+> An error in the parse phase will be reported as an
+> [error span](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/), including
+> the error message and as an OpenTelemetry
+> [`Exception`](https://opentelemetry.io/docs/specs/otel/trace/exceptions/).
+
+You may disable this by setting `spans.graphqlParse` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      graphqlParse: false
+    }
+  }
+})
+```
+
+Or, you may filter the spans by setting the `spans` configuration to a function:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      graphqlParse: payload => {
+        // Filter the spans based on the payload
+        return true
+      }
+    }
+  }
+})
+```
+
+> The `payload` object is the same as the one passed to the
+> [`onParse` hook](https://the-guild.dev/graphql/envelop/v4/plugins/lifecycle#before).
+
+</details>
+
+<details>
+
+<summary>GraphQL Validate</summary>
+
+By default, the plugin will report the validation phase as a span (`graphql.validate`) with the
+following attributes:
+
+- `graphql.document`: The GraphQL query string
+- `graphql.operation.name`: The operation name
+
+> An error in the validate phase will be reported as an
+> [error span](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/), including
+> the error message and as an OpenTelemetry
+> [`Exception`](https://opentelemetry.io/docs/specs/otel/trace/exceptions/).
+
+You may disable this by setting `spans.graphqlValidate` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      graphqlValidate: false
+    }
+  }
+})
+```
+
+Or, you may filter the spans by setting the `spans` configuration to a function:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      graphqlValidate: payload => {
+        // Filter the spans based on the payload
+        return true
+      }
+    }
+  }
+})
+```
+
+> The `payload` object is the same as the one passed to the
+> [`onValidate` hook](https://the-guild.dev/graphql/envelop/v4/plugins/lifecycle#before-1).
+
+</details>
+
+<details>
+
+<summary>GraphQL Execute</summary>
+
+By default, the plugin will report the execution phase as a span (`graphql.execute`) with the
+following attributes:
+
+- `graphql.document`: The GraphQL query string
+- `graphql.operation.name`: The operation name
+- `graphql.operation.type`: The operation type (`query`/`mutation`/`subscription`)
+
+> An error in the execute phase will be reported as an
+> [error span](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-spans/), including
+> the error message and as an OpenTelemetry
+> [`Exception`](https://opentelemetry.io/docs/specs/otel/trace/exceptions/).
+
+You may disable this by setting `spans.graphqlExecute` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      graphqlExecute: false
+    }
+  }
+})
+```
+
+Or, you may filter the spans by setting the `spans` configuration to a function:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      graphqlExecute: payload => {
+        // Filter the spans based on the payload
+        return true
+      }
+    }
+  }
+})
+```
+
+> The `payload` object is the same as the one passed to the
+> [`onExecute` hook](https://the-guild.dev/graphql/envelop/v4/plugins/lifecycle#before-3).
+
+</details>
+
+<details>
+
+<summary>Subgraph Execute</summary>
+
+By default, the plugin will report the subgraph execution phase as a span (`subgraph.execute`) with
+the following attributes:
+
+- `graphql.document`: The GraphQL query string executed to the upstream
+- `graphql.operation.name`: The operation name
+- `graphql.operation.type`: The operation type (`query`/`mutation`/`subscription`)
+- `gateway.upstream.subgraph.name`: The name of the upstream subgraph
+
+In addition, the span will include the following attributes for the HTTP requests;
+
+- `http.method`: The HTTP method
+- `http.url`: The HTTP URL
+- `http.route`: The HTTP status code
+- `http.scheme`: The HTTP scheme
+- `net.host.name`: The hostname
+- `http.host`: The HTTP host
+
+And the following attributes for the HTTP response:
+
+- `http.status_code`: The HTTP status code
+
+You may disable this by setting `spans.subgraphExecute` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      subgraphExecute: false
+    }
+  }
+})
+```
+
+Or, you may filter the spans by setting the `spans.subgraphExecute` configuration to a function:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      subgraphExecute: payload => {
+        // Filter the spans based on the payload
+        return true
+      }
+    }
+  }
+})
+```
+
+> The `payload` object is the same as the one passed to the
+> [`onSubgraphHook` hook](/docs/gateway/other-features/custom-plugins#onsubgraphexecute).
+
+</details>
+
+<details>
+
+<summary>Upstream Fetch</summary>
+
+By default, the plugin will report the upstream fetch phase as a span (`http.fetch`) with the
+information about outgoing HTTP calls.
+
+The following attributes are included in the span:
+
+- `http.method`: The HTTP method
+- `http.url`: The HTTP URL
+- `http.route`: The HTTP status code
+- `http.scheme`: The HTTP scheme
+- `net.host.name`: The hostname
+- `http.host`: The HTTP host
+
+And the following attributes for the HTTP response:
+
+- `http.status_code`: The HTTP status code
+
+You may disable this by setting `spans.upstreamFetch` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      upstreamFetch: false
+    }
+  }
+})
+```
+
+Or, you may filter the spans by setting the `spans.upstreamFetch` configuration to a function:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    spans: {
+      /* ... */
+      upstreamFetch: payload => {
+        // Filter the spans based on the payload
+        return true
+      }
+    }
+  }
+})
+```
+
+> The `payload` object is the same as the one passed to the
+> [`onFetch` hook](/docs/gateway/other-features/custom-plugins#onfetch).
+
+</details>
+
+### Context Propagation
+
+By default, the plugin will
+[propagate the trace context](https://opentelemetry.io/docs/concepts/context-propagation/) between
+the incoming HTTP request and the outgoing HTTP requests.
+
+You may disable this by setting `inheritContext` or `propagateContext` to `false`:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [
+      /* ... */
+    ],
+    // Controls the propagation of the trace context between the incoming HTTP request and Hive Gateway
+    inheritContext: false,
+    // Controls the propagation of the trace context between Hive Gateway and the upstream HTTP requests
+    propagateContext: false
+  }
+})
+```
+
+### Troubleshooting
+
+The default behavor of the plugin is to log errors and warnings to the console.
+
+You can customize this behavior by changing the value of the
+[`OTEL_LOG_LEVEL`](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/)
+environment variable on your gateway process/runtime.
+
+In addition, you can use the `Stdout` exporter to log the traces to the console:
+
+```ts filename="gateway.config.ts"
+import { createStdoutExporter, defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  openTelemetry: {
+    exporters: [createStdoutExporter()]
+  }
+})
+```
+
+This will log the traces to the console, which can be useful for debugging and troubleshooting.
+
+## Prometheus Metrics
+
+[Prometheus](https://www.prometheus.io/) is a utility for producing, scraping and storage of metrics
+from services and utilities.
+
+You can use this feature of the gateway to expose and collect metrics from all phases of your
+GraphQL execution including internal query planning and outgoing HTTP requests.
+
+The metrics gathered are then exposed in a format that Prometheus can scrape on a regular basis on
+an HTTP endpoint (`/metrics` by default).
+
+### Usage Example
+
+Add its configuration to your `gateway.config.ts` file.
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  prometheus: {
+    // Enable the metrics you want to expose
+    // The following represent the default config of the plugin.
+    metrics: {
+      graphql_gateway_fetch_duration: true,
+      graphql_gateway_subgraph_execute_duration: true,
+      graphql_gateway_subgraph_execute_errors: true,
+      graphql_envelop_deprecated_field: true,
+      graphql_envelop_request: true,
+      graphql_envelop_request_duration: true,
+      graphql_envelop_request_time_summary: true,
+      graphql_envelop_phase_parse: true,
+      graphql_envelop_phase_validate: true,
+      graphql_envelop_phase_context: true,
+      graphql_envelop_error_result: true,
+      graphql_envelop_phase_execute: true,
+      graphql_envelop_phase_subscribe: true,
+      graphql_envelop_schema_change: true,
+      graphql_yoga_http_duration: true
+    }
+  }
+})
+```
+
+You can now start your Hive Gateway and make some requests to it. The plugin will start collecting
+metrics, and you can access them by visiting the `/metrics` endpoint.
+
+In most cases, you'll need to setup a Prometheus server to scrape the metrics from your gateway, we
+recommend using the official
+[Prometheus Server](https://prometheus.io/docs/prometheus/latest/getting_started/) or tools like
+[Vector](https://vector.dev/docs/setup/installation/).
+
+### Grafana Dashboard
+
+If you are using Grafana to visualize your metrics, you can
+[import the published Grafana dashboard for Grafana's marketplace](https://grafana.com/grafana/dashboards/21777),
+or
+[you can use/import this dashboard JSON file directly](https://github.com/ardatan/graphql-mesh/blob/master/packages/plugins/prometheus/grafana.json)
+to easily visualuze the metrics for your gateway.
+
+![image](https://github.com/user-attachments/assets/d72ef00b-90c2-4fb2-9bc4-851cec0eaf0b)
+
+For additional instructions, please refer to
+[Import dashboards insturction in Grafana documentation](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/).
+
+### Reported Metrics
+
+You will find the timing of each phase of the GraphQL execution. If you are not familiar with the
+lifecycle of a GraphQL operation in the gateway, please refer to the
+[Plugin Lifecycle page](/docs/gateway/other-features/custom-plugins#plugin-lifecycle). Each plugin
+hook has a corresponding metric which tracks timings as
+[histograms](https://prometheus.io/docs/concepts/metric_types/#histogram) or
+[summary](https://prometheus.io/docs/concepts/metric_types/#summary). You will also find some
+[counters](https://prometheus.io/docs/concepts/metric_types/#counter) to track the number of
+requests, errors, and other useful information.
+
+To enable a metric, set the corresponding option to `true` in the `metrics` option's object. You can
+also provide a string to customize the metric name, or an object to provide more options (see
+[`siimon/prom-client` documentation](https://github.com/siimon/prom-client#custom-metrics)).
+Histogram metrics can be passed an array of numbers to configure buckets.
+
+<details>
+  <summary>`graphql_yoga_http_duration` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of incoming (downstream) HTTP requests. It reports the time spent to
+process each incoming request as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+It is useful to track the responsiveness of your gateway. A spike in this metric could indicate a
+performance issue and that further investigation is needed.
+
+Please note that this metric is not specific to GraphQL, it tracks all incoming HTTP requests.
+
+You can use labels to have a better understanding of the requests and group them together. A common
+filter is to include only `statusCode` with `200` value and `method` with `POST` (the default method
+for GraphQL requests, but it can also be `GET` depending on your client setup) value to get
+execution time of successful GraphQL requests only.
+
+This metric includes some useful labels to help you identify requests and group them together.
+
+| Label           | Description                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `method`        | The HTTP method used to request the gateway endpoint.<br/><br/> Since GraphQL usually only uses `POST` requests, this can be used to filter out GraphiQL-related requests. <br/><br/> It can be any HTTP verb, including disallowed ones. Which means this metric can also be used to track malformed or malicious requests.                                                            |
+| `statusCode`    | The HTTP status code returned by the gateway.<br/><br/>You probably want to filter out non-`200` responses to have a view of the successful requests.<br/><br/>This can help you identify which requests are failing and why. Since GraphQL errors are returned as `200 OK` responses, this can be useful to track errors that are not related to the GraphQL, like malformed requests. |
+| `operationName` | If available, the name of the GraphQL operation requested, otherwise `Anonymous`.<br/><br/>This can help you identify which operations are slow or failing.<br/><br/>We recommend you always provide an operation name to your queries and mutations to help performance analysis and bug tracking.                                                                                     |
+| `operationType` | The type of the GraphQL operation requested. It can be one of `query`, `mutation`, or `subscription`.<br/><br/>This can help you differentiate read and write performance of the system. It can for example help understand cache impact.                                                                                                                                               |
+| `url`           | The URL of the request. Useful to filter graphql endpoint metrics (`/graphql` by default).                                                                                                                                                                                                                                                                                              |
+
+</details>
+
+<details>
+  <summary>`graphql_gateway_fetch_duration` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of outgoing HTTP requests. It reports the time spent on each request
+made using the `fetch` function provided by the gateway. It is reported as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+This metric can provide insights into the network usage of your gateway. It does not only include
+requests made to resolve GraphQL operation responses, but also include any other outgoing HTTP
+requests made by the gateway or one of its plugins. It will for example include requests made to
+fetch the supergraph schema from the configured Schema Registry.
+
+These metrics include some useful labels to help you identify requests and group them together.
+
+Since they can be heavy, `requestHeaders` and `responseHeaders` are disabled by default. You can
+either set those options to `true` in the `label` configuration object to include all headers in the
+label, but you can also provide a list of header names to include.
+
+| Label             | Description                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| `url`             | The URL of the upstream request.                                                            |
+| `method`          | The HTTP method of the upstream request.                                                    |
+| `statusCode`      | The status code of the upstream response.                                                   |
+| `statusText`      | The status text of the upstream response.                                                   |
+| `requestHeaders`  | Disabled by default. A JSON encoded object containing the headers of the upstream request.  |
+| `responseHeaders` | Disabled by default. A JSON encoded object containing the headers of the upstream response. |
+
+</details>
+
+<details>
+  <summary>`graphql_gateway_subgraph_execute_duration` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of subgraph execution. It reports the time spent on each subgraph
+queries made to resolve incoming operations as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+This metric can provide insights into how the time is spent to resolve queries. It can help you
+identify bottlenecks in your subgraphs.
+
+| Label           | Description                                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `subgraphName`  | The name of the targeted subgraph.                                                                                     |
+| `operationType` | The type of the GraphQL operation executed by the subgraph. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation executed by the subgraph. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_gateway_subgraph_execute_errors` (default: **enabled**, type: **Counter**)</summary>
+
+This metric tracks the number of errors that occurred during the subgraph execution. It counts all
+errors found in the response returned by the subgraph execution. It is exposed as a
+[counter](https://prometheus.io/docs/concepts/metric_types/#counter).
+
+This metric can help you identify subgraphs that are failing to execute operations. It can help
+identify issues with the subgraph itself or the communication between the gateway and the subgraph.
+
+| Label           | Description                                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `subgraphName`  | The name of the targeted subgraph.                                                                                     |
+| `operationType` | The type of the GraphQL operation executed by the subgraph. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation executed by the subgraph. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_phase_parse` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of the `parse` phase of the GraphQL execution. It reports the time
+spent parsing the incoming GraphQL operation. It is reported as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+Since you don't have control over the parsing phase, this metric is mostly useful to track potential
+attacks. A spike in this metric could indicate someone is trying to send malicious operations to
+your gateway.
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_phase_validate` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of the `validate` phase of the GraphQL execution. It reports the
+time spent validating the incoming GraphQL operation. It is reported as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_phase_context` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of the `context` phase of the GraphQL execution. It reports the time
+spent building the context object that will be passed to the executors. It is reported as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_phase_execute` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of the `execute` phase of the GraphQL execution. It reports the time
+spent actually resolving the response of the incoming operation. This includes the gathering of all
+the data from all sources required to construct the final response. It is reported as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+It is the metric that will give you the most insights into the performance of your gateway, since
+this is where most of the work is done.
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_phase_subscribe` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of the `subscribe` phase of the GraphQL execution. It reports the
+time spent initiating a subscription (which doesn't include actually sending the first response). It
+is reported as a [histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+It will notably include the time spent to setup upstream subscriptions with appropriate transport
+for each source.
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_request_duration` (default: **enabled**, type: **Histogram**)</summary>
+
+This metric tracks the duration of the complete GraphQL operation execution. It reports the time
+spent in the GraphQL specific processing, excluding the HTTP-level processing. It is reported as a
+[histogram](https://prometheus.io/docs/concepts/metric_types/#histogram).
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_request_time_summary` (default: **enabled**, type: **Summary**)</summary>
+
+This metric provides a summary of the time spent on the GraphQL operation execution. It reports the
+same timing than [`graphql_envelop_request_duration`](#graphql_envelop_request_duration) but as a
+[summary](https://prometheus.io/docs/concepts/metric_types/#summary).
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_error_result` (default: **enabled**, type: **Counter**)</summary>
+
+This metric tracks the number of errors that was returned by the GraphQL execution.
+
+Similarly to [`graphql_gateway_subgraph_execute_errors`](#graphql_gateway_subgraph_execute_errors),
+it counts all errors found in the final response constructed by the gateway after it gathered all
+subgraph responses, but it also includes errors from other GraphQL processing phases (parsing,
+validation and context building). It is exposed as a
+[counter](https://prometheus.io/docs/concepts/metric_types/#counter).
+
+Depending on the phase when the error occurred, some labels may be missing. For example, if the
+error occurred during the context phase, only the `phase` label will be present.
+
+| Label           | Description                                                                                                                                                           |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `path`          | The path of the field that caused the error. It can be `undefined` if the error is not related to a given field.                                                      |
+| `phase`         | The phase of the GraphQL execution where the error occurred. It can be `parse`, `validate`, `context`, `execute` (for every operation types including subscriptions). |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`.                                                               |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.                                                                   |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_request` (default: **enabled**, type: **Counter**)</summary>
+
+This metric tracks the number of GraphQL operations executed. It counts all operations, either
+failed or successful, including subscriptions. It is exposed as a
+[counter](https://prometheus.io/docs/concepts/metric_types/#counter).
+
+It can differ from the number reported by
+[`graphql_yoga_http_duration_sum`](#graphql_yoga_http_duration) because a single HTTP request can
+contain multiple GraphQL operations if batching has been enabled.
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_deprecated_field` (default: **enabled**, type: **Counter**)</summary>
+
+This metric tracks the number of deprecated fields used in the GraphQL operation.
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `fieldName`     | The name of the deprecated field that has been used.                                                    |
+| `typeName`      | The name of the parent type of the deprecated field that has been used.                                 |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_schema_change` (default: **enabled**, type: **Counter**)</summary>
+
+This metric tracks the number of schema changes that have occurred since the gateway started. When
+polling is enabled, this will include the schema reloads.
+
+If you are using a plugin that modifies the schema on the fly, be aware that this metric will also
+include updates made by those plugins. Which means that one schema update can actually trigger
+multiple schema changes.
+
+</details>
+
+<details>
+  <summary>`graphql_envelop_execute_resolver` (default: **disabled**, type: **Histogram**)</summary>
+
+<Callout type="warning">
+  Enabling resolvers level metrics will introduce significant overhead. It is recommended to enable
+  this metric only for debugging purposes.
+</Callout>
+
+This metric tracks the duration of each resolver execution. It reports the time spent only on
+additional resolvers, not on fields that are resolved by a subgraph. It is up to the subgraph server
+to implement resolver level metrics, the gateway can't remotely track their execution time.
+
+| Label           | Description                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `operationType` | The type of the GraphQL operation requested. This can be one of `query`, `mutation`, or `subscription`. |
+| `operationName` | The name of the GraphQL operation requested. It will be `Anonymous` if no `operationName` is found.     |
+| `fieldName`     | The name of the field being resolved.                                                                   |
+| `typeName`      | The name of the parent type of the field being resolved.                                                |
+| `returnType`    | The name of the return type of the field being resolved.                                                |
+
+**Filter resolvers to instrument**
+
+To mitigate the cost of instrumenting all resolvers, you can explicitly list the fields that should
+be instrumented by providing a list of field names to the `instrumentResolvers` option.
+
+It is a list of strings in the form of `TypeName.fieldName`. For example, to instrument the `hello`
+root query, you would use `Query.hello`.
+
+You can also use wildcards to instrument all the fields for a type. For example, to instrument all
+root queries, you would use `Query.*`.
+
+</details>
+
+### Troubleshooting
+
+You can observe and troubleshoot the metrics by visiting the `/metrics` endpoint of your gateway.
+Run your gateway and execute a few GraphQL operations to produce some metrics.
+
+Then, use the following `curl` command will fetch the metrics from your gateway:
+
+```sh
+curl -v http://localhost:4000/metrics
+```
+
+> Change `http://localhost:4000` to the actual URL of your running gateway.
+
+### Customizations
+
+<Tabs items={["Introspection Queries", "Labels", "Metric Name", "Metric Config", "Registry"]}>
+
+<Tabs.Tab>
+
+By default, all operations are instrumented, including introspection queries. It is possible to
+ignore introspection queries for all metrics prefixed by `graphql_envelop_` by setting the
+`skipIntrospection` option to `true`.
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+By default, all labels are enabled, but each one can be disabled to reduce cardinality:
+
+```ts filename="gateway.confing.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  prometheus: {
+    labels: {
+      url: false // remove `url` labels from all relevant metrics
+    }
+  }
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+By providing a string, you can change the name of the metric. For example, to change the name of the
+name of the `graphql_yoga_http_duration` metric to `http_request_duration`, you would use:
+
+```ts filename="gateway.config.ts"
+import { defineConfig } from '@graphql-hive/gateway'
+
+export const gatewayConfig = defineConfig({
+  prometheus: {
+    metrics: {
+      graphql_yoga_http_duration: 'http_request_duration'
+    }
+  }
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+By providing an object, you can customize the metric configuration. These configuration objects
+should be created using the provided factories for each metric type (`createCounter`,
+`createHistogram`, `createSummary`).
+
+<Callout type="info">
+  By providing a custom configuration, the default configuration is completely overridden. This means
+  you need to provide all options, including the name and the labels.
+
+You can look at the source code of the plugin to see the default configuration for each metric to
+use it as a base.
+
+</Callout>
+
+Available options depend on the metric type, and full details about them can be found in the
+[`siimon/prom-client` documentation](https://github.com/siimon/prom-client#custom-metric).
+
+For example, you can customize the buckets of the `graphql_yoga_http_duration` histogram metric:
+
+```ts filename="gateway.config.ts"
+import { defineConfig, createHistogram } from '@graphql-hive/gateway'
+import { register as registry } from 'prom-client'
+
+export const gatewayConfig = defineConfig({
+  prometheus: {
+    metrics: {
+      graphql_yoga_http_duration: createHistogram({
+        registry,
+        histogram: {
+          name: 'graphql_yoga_http_duration',
+          help: 'Time spent on HTTP connection',
+          labels: ['method', 'statusCode', 'operationName', 'operationType'],
+          buckets: [0.1, 5, 15, 50, 100, 500],
+        }
+        fillLabelsFn(params, { request, response }) {
+          return {
+            method: request.method,
+            statusCode: response.status,
+            operationType: params.operationType,
+            operationName: params.operationName || 'Anonymous',
+          };
+        }
+      })
+    }
+  }
+})
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+You can customize the client’s registry by passing a custom registry to the `registry` option.
+
+```ts filename="gateway.config.ts"
+import { Registry } from 'prom-client'
+import { defineConfig } from '@graphql-hive/gateway'
+
+const myRegistry = new Registry()
+
+export const gatewayConfig = defineConfig({
+  prometheus: {
+    registry: myRegistry
+  }
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## StatsD
+
+You can use `@graphql-mesh/plugin-statsd` plugin to collect and send metrics to Datadog's DogStatsD
+and InfluxDB's Telegraf StatsD services.
+
+```sh npm2yarn
+npm i @graphql-mesh/plugin-statsd hot-shots
+```
+
+Compatible with:
+
+- Datadog's DogStatsD server
+- InfluxDB's Telegraf StatsD server
+- Etsy's StatsD serve
+
+Available metrics:
+
+- `graphql.operations.count` - the number of performed operations (including failures)
+- `graphql.operations.error.count` - the number of failed operations
+- `graphql.operations.latency` - a histogram of response times (in milliseconds)
+- `graphql.delegations.count` - the number of delegated operations to the sources
+- `graphql.delegations.error.count` - the number of failed delegated operations
+- `graphql.delegations.latency` - a histogram of delegated response times (in milliseconds)
+- `graphql.fetch.count` - the number of outgoing HTTP requests
+- `graphql.fetch.error.count` - the number of failed outgoing HTTP requests
+- `graphql.fetch.latency` - a histogram of outgoing HTTP response times (in milliseconds)
+
+> You can also customize the `graphql` prefix and add custom tags to the metrics.
+
+### Usage Example
+
+```ts filename="gateway.config.ts"
+import { StatsD } from 'hot-shots'
+import { defineConfig } from '@graphql-hive/gateway'
+import useStatsD from '@graphql-mesh/plugin-statsd'
+
+export const gatewayConfig = defineConfig({
+  plugins: pluginCtx => [
+    useStatsD({
+      ...pluginCtx,
+      // Configure `hot-shots` if only you need. You don't need to pass this if you don't need to configure it.
+      client: new StatsD({
+        port: 8020
+      }),
+      // results in `my-graphql-gateway.operations.count` instead of `graphql.operations.count`
+      prefix: 'my-graphql-gateway',
+      // If you wish to disable introspection logging
+      skipIntrospection: true
+    })
+  ]
+})
+```
+
+## Sentry
+
+This plugin collects errors and performance tracing for your execution flow, and reports it to
+[Sentry](https://sentry.io).
+
+This is how it looks like in Sentry for error tracking:
+
+![Example](https://raw.githubusercontent.com/n1ru4l/envelop/main/packages/plugins/sentry/error1.png)
+![Example](https://raw.githubusercontent.com/n1ru4l/envelop/main/packages/plugins/sentry/error2.png)
+
+> The operation name, document, variables are collected on errors, and the breadcrumbs that led to
+> the error. You can also add any custom values that you need.
+
+To get started with Sentry, you need to create a new project in Sentry and get the DSN:
+
+1. Start by creating an account and a project in https://sentry.io
+2. Follow the instructions to setup your Sentry instance in your application.
+3. Setup Sentry global instance configuration.
+4. Setup the Envelop plugin.
+
+Then, install the following plugin in your project:
+
+```sh
+yarn add @sentry/node @sentry/tracing @envelop/sentry
+```
+
+### Usage Example
+
+```ts filename="gateway.config.ts"
+import { useSentry } from '@envelop/sentry'
+import { defineConfig } from '@graphql-hive/gateway'
+// do this only once in you entry file.
+import '@sentry/tracing'
+
+export const gatewayConfig = defineConfig({
+  plugins: () => [
+    useSentry({
+      includeRawResult: false, // set to `true` in order to include the execution result in the metadata collected
+      includeResolverArgs: false, // set to `true` in order to include the args passed to resolvers
+      includeExecuteVariables: false, // set to `true` in order to include the operation variables values
+      appendTags: args => {}, // if you wish to add custom "tags" to the Sentry transaction created per operation
+      configureScope: (args, scope) => {}, // if you wish to modify the Sentry scope
+      skip: executionArgs => {} // if you wish to modify the skip specific operations
+    })
+  ]
+})
+```
+
+### Configuration
+
+- `startTransaction` (default: `true`) - Starts a new transaction for every GraphQL Operation. When
+  disabled, an already existing Transaction will be used.
+- `renameTransaction` (default: `false`) - Renames Transaction.
+- `includeRawResult` (default: `false`) - Adds result of each resolver and operation to Span's data
+  (available under "result")
+- `includeExecuteVariables` (default: `false`) - Adds operation's variables to a Scope (only in case
+  of errors)
+- `appendTags` - See example above. Allow you to manipulate the tags reports on the Sentry
+  transaction.
+- `configureScope` - See example above. Allow you to manipulate the tags reports on the Sentry
+  transaction.
+- `transactionName` (default: operation name) - Produces a name of Transaction (only when
+  "renameTransaction" or "startTransaction" are enabled) and description of created Span.
+- `traceparentData` (default: `{}`) - Adds tracing data to be sent to Sentry - this includes
+  traceId, parentId and more.
+- `operationName` - Produces a "op" (operation) of created Span.
+- `skip` (default: none) - Produces a "op" (operation) of created Span.
+- `skipError` (default: ignored `GraphQLError`) - Indicates whether or not to skip Sentry exception
+  reporting for a given error. By default, this plugin skips all `GraphQLError` errors and does not
+  report it to Sentry.
+- `eventIdKey` (default: `'sentryEventId'`) - The key in the error's extensions field used to expose
+  the generated Sentry event id. Set to `null` to disable.

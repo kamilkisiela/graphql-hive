@@ -1,13 +1,10 @@
-<!-- Uncomment guild banner when we remove GraphQL Conf -->
 <!-- Graphql logo readme banner START -->
-<!-- <p style="float: right; margin: 0 0 10px 10px;">
+<p style="float: right; margin: 0 0 10px 10px;">
   <a href="https://the-guild.dev">
     <img src="https://the-guild-org.github.io/press-kit/full-dark-logo.svg" alt="Created by The guild" style="width: 100px;"/>
   </a>
-</p> -->
+</p>
 <!-- Graphql logo readme banner END -->
-
-[![GraphQLConf 2024 Banner: September 10-12, San Francisco. Hosted by the GraphQL Foundation](https://github.com/user-attachments/assets/bdb8cd5d-5186-4ece-b06b-b00a499b7868)](https://graphql.org/conf/2024/?utm_source=github&utm_medium=graphql_hive&utm_campaign=readme)
 
 # GraphQL Hive
 
@@ -18,6 +15,7 @@ from standalone APIs to composed schemas (Federation, Stitching).
   ([status page](https://status.graphql-hive.com))
 - [Read the announcement blog post](https://the-guild.dev/blog/announcing-graphql-hive-public)
 - [Read the docs](https://the-guild.dev/graphql/hive/docs)
+- [View the changelog for self-hosting](./deployments/CHANGELOG.md)
 
 ## Built for the community, for all GraphQL APIs
 
@@ -52,6 +50,8 @@ experience of its final users**.
 
 GraphQL Hive is completely open-source under the MIT license, meaning that you are free to host on
 your own infrastructure.
+
+- [Changelog](./deployments/CHANGELOG.md)
 
 GraphQL Hive helps you get a global overview of the usage of your GraphQL API with:
 

@@ -4,6 +4,7 @@ import { adminModule } from './modules/admin';
 import { alertsModule } from './modules/alerts';
 import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
 import { appDeploymentsModule } from './modules/app-deployments';
+import { APP_DEPLOYMENTS_ENABLED } from './modules/app-deployments/providers/app-deployments-enabled-token';
 import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
@@ -107,6 +108,7 @@ export function createRegistry({
   githubApp,
   cdn,
   s3,
+  s3Mirror,
   encryptionSecret,
   feedback,
   billing,
@@ -115,6 +117,7 @@ export function createRegistry({
   emailsEndpoint,
   organizationOIDC,
   pubSub,
+  appDeploymentsEnabled,
 }: {
   logger: Logger;
   storage: Storage;
@@ -135,6 +138,13 @@ export function createRegistry({
     secretAccessKeyId: string;
     sessionToken?: string;
   };
+  s3Mirror: {
+    bucketName: string;
+    endpoint: string;
+    accessKeyId: string;
+    secretAccessKeyId: string;
+    sessionToken?: string;
+  } | null;
   encryptionSecret: string;
   feedback: {
     token: string;
@@ -149,17 +159,33 @@ export function createRegistry({
   emailsEndpoint?: string;
   organizationOIDC: boolean;
   pubSub: HivePubSub;
+  appDeploymentsEnabled: boolean;
 }) {
-  const s3Config: S3Config = {
-    client: new AwsClient({
-      accessKeyId: s3.accessKeyId,
-      secretAccessKey: s3.secretAccessKeyId,
-      sessionToken: s3.sessionToken,
-      service: 's3',
-    }),
-    bucket: s3.bucketName,
-    endpoint: s3.endpoint,
-  };
+  const s3Config: S3Config = [
+    {
+      client: new AwsClient({
+        accessKeyId: s3.accessKeyId,
+        secretAccessKey: s3.secretAccessKeyId,
+        sessionToken: s3.sessionToken,
+        service: 's3',
+      }),
+      bucket: s3.bucketName,
+      endpoint: s3.endpoint,
+    },
+  ];
+
+  if (s3Mirror) {
+    s3Config.push({
+      client: new AwsClient({
+        accessKeyId: s3Mirror.accessKeyId,
+        secretAccessKey: s3Mirror.secretAccessKeyId,
+        sessionToken: s3Mirror.sessionToken,
+        service: 's3',
+      }),
+      bucket: s3Mirror.bucketName,
+      endpoint: s3Mirror.endpoint,
+    });
+  }
 
   const artifactStorageWriter = new ArtifactStorageWriter(s3Config, logger);
 
@@ -258,6 +284,11 @@ export function createRegistry({
     {
       provide: OIDC_INTEGRATIONS_ENABLED,
       useValue: organizationOIDC,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: APP_DEPLOYMENTS_ENABLED,
+      useValue: appDeploymentsEnabled,
       scope: Scope.Singleton,
     },
     {

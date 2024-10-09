@@ -1,4 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { traceFn } from '@hive/service-common';
 import { SchemaChangeType } from '@hive/storage';
 import { SingleOrchestrator } from '../orchestrators/single';
 import { ConditionalBreakingChangeDiffConfig, RegistryChecks } from '../registry-checks';
@@ -26,6 +27,13 @@ export class SingleModel {
     private logger: Logger,
   ) {}
 
+  @traceFn('Single modern: check', {
+    initAttributes: args => ({
+      'hive.project.id': args.selector.project,
+      'hive.target.id': args.selector.target,
+      'hive.organization.id': args.selector.organization,
+    }),
+  })
   async check({
     input,
     selector,
@@ -78,14 +86,14 @@ export class SingleModel {
     const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumResult = await this.checks.checksum({
-      existing: comparedVersion
+      existing: latest
         ? {
-            schemas: comparedVersion.schemas,
+            schema: latest.schemas[0],
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });
@@ -206,14 +214,14 @@ export class SingleModel {
     const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumCheck = await this.checks.checksum({
-      existing: comparedVersion
+      existing: latest
         ? {
-            schemas: comparedVersion.schemas,
+            schema: latest.schemas[0],
             contractNames: null,
           }
         : null,
       incoming: {
-        schemas,
+        schema: incoming,
         contractNames: null,
       },
     });

@@ -50,7 +50,7 @@ jobs:
 
       - name: cypress
         timeout-minutes: 6
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v6
         env:
           CI: true
         with:

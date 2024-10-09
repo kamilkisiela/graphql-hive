@@ -200,7 +200,7 @@ export default class SchemaCheck extends Command<typeof SchemaCheck> {
         if (!git.pullRequestNumber) {
           this.warn(
             "Could not resolve pull request number. Are you running this command on a 'pull_request' event?\n" +
-              'See https://the-guild.dev/graphql/hive/docs/integrations/ci-cd#github-workflow-for-ci',
+              'See https://the-guild.dev/graphql/hive/docs/other-integrations/ci-cd#github-workflow-for-ci',
           );
         }
 
@@ -211,21 +211,24 @@ export default class SchemaCheck extends Command<typeof SchemaCheck> {
         };
       }
 
-      const result = await this.registryApi(endpoint, accessToken).request(schemaCheckMutation, {
-        input: {
-          service,
-          sdl: minifySchema(sdl),
-          github,
-          meta:
-            !!commit && !!author
-              ? {
-                  commit,
-                  author,
-                }
-              : null,
-          contextId: flags.contextId ?? undefined,
+      const result = await this.registryApi(endpoint, accessToken).request({
+        operation: schemaCheckMutation,
+        variables: {
+          input: {
+            service,
+            sdl: minifySchema(sdl),
+            github,
+            meta:
+              !!commit && !!author
+                ? {
+                    commit,
+                    author,
+                  }
+                : null,
+            contextId: flags.contextId ?? undefined,
+          },
+          usesGitHubApp,
         },
-        usesGitHubApp,
       });
 
       if (result.schemaCheck.__typename === 'SchemaCheckSuccess') {

@@ -55,14 +55,17 @@ type Event =
       value: [string, string] | [string];
     }
   | {
-      type: 'r2';
+      type: 'r2' | 's3';
       action:
-        | 'HEAD artifact'
+        | 'GET artifact'
         | 'GET cdn-legacy-keys'
         | 'GET cdn-access-token'
         | 'GET persistedOperation'
         | 'HEAD appDeploymentIsEnabled';
-      statusCode: number;
+      // Either 3 digit status code or error code e.g. timeout, http error etc.
+      statusCodeOrErrCode: number | string;
+      /** duration in milliseconds */
+      duration: number;
     }
   | {
       type: 'response';
@@ -76,6 +79,7 @@ export function createAnalytics(
     error: AnalyticsEngine;
     keyValidation: AnalyticsEngine;
     r2: AnalyticsEngine;
+    s3: AnalyticsEngine;
     response: AnalyticsEngine;
   } | null = null,
 ) {
@@ -96,8 +100,10 @@ export function createAnalytics(
             blobs: event.value,
           });
         case 'r2':
-          return engines.r2.writeDataPoint({
-            blobs: [event.action, event.statusCode.toString(), targetId],
+        case 's3':
+          return engines[event.type].writeDataPoint({
+            blobs: [event.action, event.statusCodeOrErrCode.toString(), targetId],
+            doubles: [event.duration],
             indexes: [targetId.substring(0, 32)],
           });
         case 'response':

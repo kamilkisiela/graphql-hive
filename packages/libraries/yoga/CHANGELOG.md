@@ -1,5 +1,29 @@
 # @graphql-hive/yoga
 
+## 0.38.0
+
+### Minor Changes
+
+- [#5568](https://github.com/kamilkisiela/graphql-hive/pull/5568)
+  [`581e84f`](https://github.com/kamilkisiela/graphql-hive/commit/581e84fce1af8c6b197fa0f2d018f6f3f4a4983e)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - support resolving `documentId` provided via search
+  params for GET request
+
+## 0.37.0
+
+### Minor Changes
+
+- [#5401](https://github.com/kamilkisiela/graphql-hive/pull/5401)
+  [`3ffdb6e`](https://github.com/kamilkisiela/graphql-hive/commit/3ffdb6e9466deb3c3aa09eea1445fc4caf698fd5)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Deduplicate persisted document lookups from the
+  registry for reducing the amount of concurrent HTTP requests.
+
+### Patch Changes
+
+- Updated dependencies
+  [[`3ffdb6e`](https://github.com/kamilkisiela/graphql-hive/commit/3ffdb6e9466deb3c3aa09eea1445fc4caf698fd5)]:
+  - @graphql-hive/core@0.8.0
+
 ## 0.36.0
 
 ### Minor Changes

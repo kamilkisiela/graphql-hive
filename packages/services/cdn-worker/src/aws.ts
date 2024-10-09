@@ -49,6 +49,36 @@ type AwsRequestInit = RequestInit & {
    * Timeout in milliseconds for each fetch call.
    */
   timeout?: number;
+  /**
+   * Abort signal for the fetch call and potential retries.
+   * Retries will not be attempted if the signal is already aborted.
+   */
+  signal?: AbortSignal;
+  /**
+   * Overwrite the amount of retries
+   */
+  retries?: number;
+  /** Hook being invoked for each attempt for gathering analytics or similar. */
+  onAttempt?: (args: {
+    /** attempt number */
+    attempt: number;
+    /** attempt duration in ms */
+    duration: number;
+    /** result */
+    result:
+      | {
+          // HTTP or other unexpected error
+          type: 'error';
+          error: Error;
+        }
+      | {
+          // HTTP response sent by upstream server
+          type: 'success';
+          response: Response;
+        };
+  }) => void;
+  /** Custom verifying function on whether the response is okay. */
+  isResponseOk?: (response: Response) => boolean;
 };
 
 export type AWSClientConfig = {
@@ -82,7 +112,7 @@ export class AwsClient {
     this.service = args.service;
     this.region = args.region;
     this.cache = args.cache || new Map();
-    this.retries = args.retries != null ? args.retries : 10; // Up to 25.6 secs
+    this.retries = args.retries != null ? args.retries : 3;
     this.initRetryMs = args.initRetryMs || 50;
     this._fetch = args.fetch || fetch.bind(globalThis);
   }
@@ -107,9 +137,20 @@ export class AwsClient {
       input = url;
     }
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
+
+    const signals: AbortSignal[] = [];
+
+    if (init?.timeout) {
+      signals.push(AbortSignal.timeout(init.timeout));
+    }
+
+    if (init?.signal) {
+      signals.push(init.signal);
+    }
+
     const signed = Object.assign(
       {
-        signal: init?.timeout ? AbortSignal.timeout(init.timeout) : undefined,
+        signal: signals.length ? AbortSignal.any(signals) : undefined,
       },
       init,
       await signer.sign(),
@@ -128,22 +169,49 @@ export class AwsClient {
   }
 
   async fetch(input: RequestInfo, init: AwsRequestInit): Promise<Response> {
-    for (let i = 0; i <= this.retries; i++) {
-      const fetched = this._fetch(...(await this.sign(input, init)));
-      if (i === this.retries) {
-        return fetched; // No need to await if we're returning anyway
-      }
+    const maximumRetryCount = init.retries ?? this.retries;
+
+    for (let retryCounter = 0; retryCounter <= maximumRetryCount; retryCounter++) {
+      const attemptStart = performance.now();
       try {
-        const res = await fetched;
-        if (res.status < 500 && res.status !== 429 && res.status !== 499) {
-          return res;
+        const response = await this._fetch(...(await this.sign(input, init)));
+        const duration = performance.now() - attemptStart;
+        init.onAttempt?.({
+          attempt: retryCounter,
+          duration,
+          result: { type: 'success', response },
+        });
+
+        if (
+          (response.status < 500 && response.status !== 429 && response.status !== 499) ||
+          retryCounter === maximumRetryCount
+        ) {
+          if (init.isResponseOk && !init.isResponseOk(response)) {
+            throw new ResponseNotOkayError(response);
+          }
+
+          return response;
         }
       } catch (error) {
+        const duration = performance.now() - attemptStart;
         // Retry also when there's an exception
-        console.error(error);
+        console.warn(error);
+        init.onAttempt?.({
+          attempt: retryCounter,
+          duration,
+          result: { type: 'error', error: error as Error },
+        });
+
+        if (
+          retryCounter === maximumRetryCount ||
+          // If the signal was aborted, we don't want to retry
+          init.signal?.aborted === true
+        ) {
+          throw error;
+        }
       }
       await new Promise(resolve =>
-        setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)),
+        setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, retryCounter)),
       );
     }
     throw new Error('An unknown error occurred, ensure retries is not negative');
@@ -472,4 +540,13 @@ function guessServiceRegion(url: URL, headers: Headers) {
   }
 
   return [HOST_SERVICES[service] || service, region];
+}
+
+class ResponseNotOkayError extends Error {
+  response: Response;
+
+  constructor(response: Response) {
+    super(`Response not okay, status: ${response.status}`);
+    this.response = response;
+  }
 }

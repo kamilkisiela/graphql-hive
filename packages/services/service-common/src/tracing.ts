@@ -68,6 +68,7 @@ export class TracingInstance {
       resource: new Resource({
         [SEMRESATTRS_SERVICE_NAME]: this.options.serviceName,
       }),
+      resourceDetectors: [],
       contextManager,
       sampler: {
         shouldSample: (context, traceId, spanName, spanKind, attributes, links) => {
@@ -133,6 +134,7 @@ export class TracingInstance {
     return createSlonikInterceptor({
       shouldExcludeStatement: (_ctx, query) => {
         return (
+          query.sql.includes('Heartbeat') ||
           query.sql === 'SELECT EXISTS(SELECT 1)' ||
           query.sql === 'SELECT 1' ||
           query.sql === '/* Heartbeat */ SELECT 1' ||
@@ -191,6 +193,7 @@ export class TracingInstance {
 
             return {
               'request.id': request.headers['x-request-id'] || request.id,
+              'cloudflare.ray.id': request.headers['cf-ray'],
               [SEMATTRS_HTTP_METHOD]: request.method,
               [SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH]: request.headers['content-length'],
               [SEMATTRS_HTTP_ROUTE]: request.url,

@@ -1,5 +1,7 @@
+import { setTimeout as setTimeoutP } from 'node:timers/promises';
 import { Inject, Injectable } from 'graphql-modules';
-import Redlock, { ResourceLockedError } from 'redlock';
+import Redlock, { ExecutionError, Lock, ResourceLockedError } from 'redlock';
+import { traceFn } from '@hive/service-common';
 import { Logger } from './logger';
 import type { Redis } from './redis';
 import { REDIS_INSTANCE } from './redis';
@@ -39,6 +41,17 @@ export interface MutexLockOptions {
   autoExtendThreshold?: number;
 }
 
+/** Error indicating that a resource is locked and the lock can not be acquired within the provided time frame. */
+export class MutexResourceLockedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MutexResourceLockedError';
+  }
+}
+/**
+ * Perform an action under a mutex lock,ensuring that only one action is performed at a time for a given resource for
+ * preventing race conditions and ensures data integrity by managing concurrent access to the locked resources.
+ */
 @Injectable()
 export class Mutex {
   private logger: Logger;
@@ -56,66 +69,155 @@ export class Mutex {
     });
   }
 
-  public lock(
+  @traceFn('Mutex.lock', {
+    initAttributes: (id, options) => ({
+      'lock.id': id,
+      'lock.duration': options.duration,
+      'lock.retries': options.retries,
+      'lock.retryDelay': options.retryDelay,
+      'lock.autoExtendThreshold': options.autoExtendThreshold,
+    }),
+    errorAttributes: error => ({
+      'error.message': error.message,
+    }),
+  })
+  async lock(
     id: string,
     {
       signal,
       duration = 10_000,
-      retries = 60,
-      retryDelay = 1000,
-      autoExtendThreshold = 500,
+      retries = 30,
+      retryDelay = 1_000,
+      autoExtendThreshold = 1_000,
     }: MutexLockOptions,
-  ): Promise<() => void> {
-    return new Promise((acquired, notAcquired) => {
-      this.logger.debug('Acquiring lock (id=%s)', id);
+  ) {
+    const { logger } = this;
 
-      let unlock!: () => void;
-      const l = Promise.race([
-        new Promise<void>(resolve => {
-          signal.addEventListener(
-            'abort',
-            () => {
-              this.logger.warn('Lock aborted (id=%s)', id);
-              // reject lock acquire
-              notAcquired(new Error('Locking aborted'));
-              // but resolve lock (so that redlock releases)
-              resolve();
-            },
-            { once: true },
-          );
-        }),
-        new Promise<void>(resolve => (unlock = resolve)),
+    const requestAbortedD = Promise.withResolvers<never>();
+    let attemptCounter = 0;
+    let lockToAcquire: Lock | null = null;
+
+    signal.addEventListener(
+      'abort',
+      () => {
+        logger.debug('Request has been aborted (id=%s)', id);
+        requestAbortedD.reject(signal.reason);
+      },
+      { once: true },
+    );
+
+    // We try to acquire the lock until the retry counter is exceeded or the lock as been successfully acquired.
+    do {
+      logger.debug('Acquiring lock (id=%s, attempt=%n)', id, attemptCounter + 1);
+
+      lockToAcquire = await Promise.race([
+        // we avoid using any of the acquire settings for auto-extension, retrying, etc.
+        // because of the many bugs and weird API design choices in the redlock library.
+        // By manually handling the retries and lock extension we can abort acquiring the lock as soon as the incoming request has been canceled
+        this.redlock
+          .acquire([id], duration, {
+            // we only want to try once to acquire the lock
+            // if we fail, we will retry manually with our own logic
+            retryCount: 0,
+          })
+          .catch((err: unknown) => {
+            // Note: This is kind of a workaround.
+            // The redlock library should not throw `ExecutionError`, but `ResourceLockedError`.
+            // We have our own error here for the Mutex.
+            // See https://github.com/mike-marcacci/node-redlock/issues/168
+            if (
+              err instanceof ExecutionError &&
+              err.message ===
+                'The operation was unable to achieve a quorum during its retry window.'
+            ) {
+              return null;
+            }
+
+            logger.error('Error while acquiring lock (id=%s)', id);
+            console.error(err);
+            throw err;
+          }),
+        requestAbortedD.promise,
       ]);
 
-      this.redlock
-        .using(
-          [id],
-          duration,
-          {
-            retryCount: retries,
-            retryDelay,
-            automaticExtensionThreshold: autoExtendThreshold,
-          },
-          autoExtensionFailSignal => {
-            autoExtensionFailSignal.addEventListener(
-              'abort',
-              event => {
-                // TODO: how to bubble this to the caller? the lock is basically released at this point
-                this.logger.error('Lock auto-extension failed (id=%s, event=%s)', id, event);
-              },
-              { once: true },
-            );
-            this.logger.debug('Lock acquired (id=%s)', id);
-            acquired(() => {
-              this.logger.debug('Releasing lock (id=%s)', id);
-              unlock();
-            });
-            return l;
-          },
-        )
-        // nothing in the lock usage throws, so the error can only be a failed acquire
-        .catch(notAcquired);
-    });
+      if (lockToAcquire !== null) {
+        break;
+      }
+
+      attemptCounter++;
+
+      if (attemptCounter >= retries) {
+        logger.debug('Acquiring lock failed (id=%s)', id);
+        throw new MutexResourceLockedError(`Resource "${id}" is locked.`);
+      }
+
+      await Promise.race([requestAbortedD.promise, setTimeoutP(retryDelay)]);
+      // eslint-disable-next-line no-constant-condition
+    } while (true);
+
+    let lock: Lock = lockToAcquire;
+
+    logger.debug('Acquired lock (id=%s)', id);
+
+    // If we acquired the lock but the request got canceled, we want to immediately release it,
+    // so other pending requests can take over.
+    if (signal.aborted) {
+      logger.debug('Request has been aborted, release lock. (id=%s)', id);
+      await lock.release().catch(err => {
+        logger.debug('Error while releasing lock (id=%s)', id);
+        console.error(err);
+      });
+      throw signal.reason;
+    }
+
+    let extendTimeout: NodeJS.Timeout | undefined;
+    // we have a global timeout of 90 seconds to avoid dead-licks
+    const globalTimeout = setTimeout(() => {
+      logger.error('Global lock timeout exceeded (id=%s)', id);
+      void cleanup();
+    }, 90_000);
+
+    /** cleanup timers and release the lock. */
+    function cleanup() {
+      if (extendTimeout === undefined) {
+        return;
+      }
+
+      logger.debug('Releasing lock (id=%s)', id);
+      clearTimeout(extendTimeout);
+      clearTimeout(globalTimeout);
+
+      extendTimeout = undefined;
+      if (lock.expiration > new Date().getTime()) {
+        void lock.release().catch(err => {
+          logger.error('Error while releasing lock (id=%s)', id);
+          console.error(err);
+        });
+      }
+    }
+
+    async function extendLock(isInitial = false) {
+      if (isInitial === false) {
+        logger.debug('Attempt extending lock (id=%s)', id);
+        try {
+          // NOTE: extending a lock creates a new lock instance, so we need to replace it here.
+          lock = await lock.extend(duration);
+          logger.debug('Lock extension succeeded (id=%s)', id);
+        } catch (err) {
+          logger.error('Failed to extend lock (id=%s)', id);
+          console.error(err);
+          return;
+        }
+      }
+
+      extendTimeout = setTimeout(extendLock, lock.expiration - Date.now() - autoExtendThreshold);
+    }
+
+    logger.debug('Lock acquired (id=%s)', id);
+
+    await extendLock(true);
+
+    return cleanup;
   }
 
   public async perform<T>(
@@ -127,7 +229,7 @@ export class Mutex {
     try {
       return await action();
     } finally {
-      unlock();
+      await unlock();
     }
   }
 }

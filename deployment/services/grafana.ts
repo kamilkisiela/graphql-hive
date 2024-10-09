@@ -5,7 +5,11 @@ import * as pulumi from '@pulumi/pulumi';
 
 const dashboardDirectory = join(__dirname, '../grafana-dashboards/');
 
-export function deployGrafana(envName: string) {
+/**
+ * @param envName name of the stack (prod, staging, dev)
+ * @param tableSuffix suffix for the table names (production, staging, dev)
+ */
+export function deployGrafana(envName: string, tableSuffix: string) {
   const availableFiles = readdirSync(dashboardDirectory)
     .filter(f => f.endsWith('.json'))
     // Temp workaround
@@ -17,7 +21,7 @@ export function deployGrafana(envName: string) {
   const params = new pulumi.Config('grafanaDashboards').requireObject<Record<string, string>>(
     'params',
   );
-  params['ENV_NAME'] = envName;
+  params['TABLE_SUFFIX'] = tableSuffix;
 
   const dashboards = availableFiles.map(filePath => {
     const fullPath = join(dashboardDirectory, filePath);
