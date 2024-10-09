@@ -1850,7 +1850,7 @@ importers:
         version: 4.3.1(vite@5.4.6(@types/node@20.16.1)(less@4.2.0)(terser@5.31.1))
       autoprefixer:
         specifier: 10.4.20
-        version: 10.4.20(postcss@8.4.47)
+        version: 10.4.20(postcss@8.4.41)
       class-variance-authority:
         specifier: 0.7.0
         version: 0.7.0
@@ -2026,8 +2026,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
-        specifier: 7.0.0-alpha-20241007190731-258f43bd95b9339da2b0204478cb9a307db5779d
-        version: 7.0.0-alpha-20241007190731-258f43bd95b9339da2b0204478cb9a307db5779d(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
+        specifier: 7.0.0-alpha-20241009120639-7a49a4f4b209d43cb449b3b61b8de46a0b1bc552
+        version: 7.0.0-alpha-20241009120639-7a49a4f4b209d43cb449b3b61b8de46a0b1bc552(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -7980,8 +7980,8 @@ packages:
   '@theguild/buddy@0.1.0':
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
 
-  '@theguild/components@7.0.0-alpha-20241007190731-258f43bd95b9339da2b0204478cb9a307db5779d':
-    resolution: {integrity: sha512-6cXnFuB4E21vzw9VfeM0CCQL9bIKOBmaSa+NSNdx9f4IC35r23MmIZTbIIkzm0f/UR6lifPhuOqoVcbdvMKzyA==}
+  '@theguild/components@7.0.0-alpha-20241009120639-7a49a4f4b209d43cb449b3b61b8de46a0b1bc552':
+    resolution: {integrity: sha512-cc4NOlxtTvfmhmh6TZJ5bazvy88PeYdIH79XDAai/gTIxRCHRD+cdJVRzrKlb6ZwxSf4xK6AwFrbdMF/1DXRiA==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -13430,21 +13430,21 @@ packages:
       sass:
         optional: true
 
-  nextra-theme-docs@3.0.0-alpha.41:
-    resolution: {integrity: sha512-D/1mgTg0DkUMZyLxh7e848b21iyL7Cw7Kz0L06Ms2jbeFdTymm4j6aK+J0CmY9Sf4jqF/Pk4C1/WCw4xvkJP1g==}
+  nextra-theme-docs@3.0.7:
+    resolution: {integrity: sha512-qh3Df6EHbJUK7Z7KBwtXs949Tz+heyAfC+Vu/jxw/guRHW0gTEFSdl3+9eCwaWmjJq9KGly9QOjgi8fcgOy0UA==}
     peerDependencies:
       next: '>=13'
-      nextra: 3.0.0-alpha.41
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
+      nextra: 3.0.7
+      react: '>=18'
+      react-dom: '>=18'
 
-  nextra@3.0.0-alpha.41:
-    resolution: {integrity: sha512-KdnMv/DH1/I+al826L9eWGalCtB+PONgKYqM6M4lHGAEGPvgtpI/fNKWQOkjlIlp+u7PbRuTkgAV7DZqgg6fFw==}
+  nextra@3.0.7:
+    resolution: {integrity: sha512-DzDS+hin8Jaqf6a4W/f4+qRNr1wdnzpbdc5szIIcck7g0BC4PX3ritwiH11YeAVGU1TFITnuSlMmu3DhC4aLlQ==}
     engines: {node: '>=18'}
     peerDependencies:
       next: '>=13'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
+      react: '>=18'
+      react-dom: '>=18'
 
   nlcst-to-string@4.0.0:
     resolution: {integrity: sha512-YKLBCcUYKAg0FNlOBT6aI91qFmSiFKiluk655WzPF+DDMA02qIyy8uiRqI8QXtcFpEvll12LpL5MXqEmAZ+dcA==}
@@ -25219,7 +25219,7 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@7.0.0-alpha-20241007190731-258f43bd95b9339da2b0204478cb9a307db5779d(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
+  '@theguild/components@7.0.0-alpha-20241009120639-7a49a4f4b209d43cb449b3b61b8de46a0b1bc552(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@next/bundle-analyzer': 14.2.13
@@ -25229,8 +25229,8 @@ snapshots:
       fuzzy: 0.1.3
       next: 14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-videos: 1.5.0(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
-      nextra: 3.0.0-alpha.41(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
-      nextra-theme-docs: 3.0.0-alpha.41(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.0-alpha.41(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      nextra: 3.0.7(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+      nextra-theme-docs: 3.0.7(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.7(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-paginate: 8.2.0(react@18.3.1)
@@ -26391,16 +26391,6 @@ snapshots:
       normalize-range: 0.1.2
       picocolors: 1.0.1
       postcss: 8.4.41
-      postcss-value-parser: 4.2.0
-
-  autoprefixer@10.4.20(postcss@8.4.47):
-    dependencies:
-      browserslist: 4.23.3
-      caniuse-lite: 1.0.30001651
-      fraction.js: 4.3.7
-      normalize-range: 0.1.2
-      picocolors: 1.0.1
-      postcss: 8.4.47
       postcss-value-parser: 4.2.0
 
   available-typed-arrays@1.0.5: {}
@@ -29609,7 +29599,7 @@ snapshots:
       debounce-promise: 3.1.2
       graphql: 16.9.0
       nullthrows: 1.1.1
-      vscode-languageserver-types: 3.17.2
+      vscode-languageserver-types: 3.17.5
 
   graphql-modules@2.3.0(graphql@16.9.0):
     dependencies:
@@ -32233,7 +32223,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  nextra-theme-docs@3.0.0-alpha.41(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.0-alpha.41(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  nextra-theme-docs@3.0.7(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.7(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@headlessui/react': 2.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx: 2.1.1
@@ -32241,13 +32231,13 @@ snapshots:
       flexsearch: 0.7.43
       next: 14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-themes: 0.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      nextra: 3.0.0-alpha.41(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+      nextra: 3.0.7(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       scroll-into-view-if-needed: 3.1.0
       zod: 3.23.8
 
-  nextra@3.0.0-alpha.41(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4):
+  nextra@3.0.7(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4):
     dependencies:
       '@headlessui/react': 2.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mdx-js/mdx': 3.0.1
