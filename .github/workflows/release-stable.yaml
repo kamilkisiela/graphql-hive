@@ -46,7 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GUILD_BOT_TOKEN }}
 
-      - name: extract published version
+      - name: extract published cli version
         if:
           steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages,
           '"@graphql-hive/cli"')
@@ -79,7 +79,7 @@ jobs:
           VERSION: ${{ steps.cli.outputs.version }}
         run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION
 
-  publish_docker:
+  publish_docker_cli:
     needs: [publish]
     uses: ./.github/workflows/dockerize-cli.yaml
     if: ${{ needs.publish.outputs.publish == 'true' }}
