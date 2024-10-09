@@ -11,7 +11,7 @@ jobs:
     with:
       imageTag: ${{ github.sha }}
       publishSourceMaps: true
-      publishLatest: true
+      publishLatest: false
       targets: build
       uploadJavaScriptArtifacts: true
     secrets: inherit
