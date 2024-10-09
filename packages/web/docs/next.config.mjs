@@ -1,5 +1,3 @@
-/* eslint-disable no-process-env */
-
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
@@ -8,6 +6,9 @@ export default withGuildDocs({
   eslint: {
     ignoreDuringBuilds: true,
   },
+  nextraConfig: /** @satisfies import("nextra").NextraConfig */ ({
+    autoImportThemeStyle: false,
+  }),
   redirects: async () => [
     {
       source: '/docs/get-started/organizations',
