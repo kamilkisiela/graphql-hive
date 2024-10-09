@@ -39,12 +39,16 @@ export async function getChangelogs(): Promise<Changelog[]> {
     .slice(1) // cut `_meta.ts` which always comes first
     .map(item => {
       if (!item.children) {
+        if (!('title' in item.frontMatter!)) {
+          throw new Error(`Incorrect Front matter on page ${item.route}`);
+        }
+
         // Regular mdx page
         return {
           title: item.frontMatter.title,
           date: item.frontMatter.date.toISOString(),
           description: item.frontMatter.description,
-          route: item.route,
+          route: item.route!,
         };
       }
       // Folder
@@ -53,11 +57,15 @@ export async function getChangelogs(): Promise<Changelog[]> {
         throw new Error('Changelog folder must have an "index.mdx" page');
       }
 
+      if (!('date' in indexPage.frontMatter!)) {
+        throw new Error(`Incorrect Front matter on page ${item.route}`);
+      }
+
       return {
         title: indexPage.frontMatter.title,
         date: indexPage.frontMatter.date.toISOString(),
         description: indexPage.frontMatter.description,
-        route: indexPage.route,
+        route: indexPage.route!,
       };
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
