@@ -1,11 +1,10 @@
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
 import { CallToAction, Heading } from '@theguild/components';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
-import { Stud } from './stud';
 import observabilityClientsImage from '../../public/features/observability/clients.webp';
 import observabilityOperationsImage from '../../public/features/observability/operations.webp';
 import observabilityOverallImage from '../../public/features/observability/overall.webp';
