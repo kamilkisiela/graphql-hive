@@ -4190,3 +4190,142 @@ describe.concurrent(
     );
   },
 );
+
+test.concurrent(
+  'publishing schema with deprecated non-nullable input field fails due to validation errors',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Single);
+    const token = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    const sdl = /* GraphQL */ `
+      type Query {
+        a(b: B!): String
+      }
+
+      input B {
+        a: String! @deprecated(reason: "This field is deprecated")
+        b: String!
+      }
+    `;
+
+    const result = await token
+      .publishSchema({
+        sdl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish).toEqual({
+      __typename: 'SchemaPublishError',
+      changes: {
+        nodes: [],
+        total: 0,
+      },
+      errors: {
+        nodes: [
+          {
+            message: 'Required input field B.a cannot be deprecated.',
+          },
+        ],
+        total: 1,
+      },
+      linkToWebsite: null,
+      valid: false,
+    });
+  },
+);
+
+test.concurrent(
+  'publishing a valid schema onto a broken schema succeeds (prior schema has deprecated non-nullable input)',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project, target } = await createProject(ProjectType.Single);
+    const token = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    const brokenSdl = /* GraphQL */ `
+      type Query {
+        a(b: B!): String
+      }
+
+      input B {
+        a: String! @deprecated(reason: "This field is deprecated")
+        b: String!
+      }
+    `;
+
+    // we need to manually insert a broken schema version into the database
+    // as we fixed the issue that allows publishing such a broken version
+
+    const conn = connectionString();
+    const storage = await createStorage(conn, 2);
+    await storage.createVersion({
+      schema: brokenSdl,
+      author: 'Jochen',
+      async actionFn() {},
+      base_schema: null,
+      commit: '123',
+      changes: [],
+      compositeSchemaSDL: null,
+      conditionalBreakingChangeMetadata: null,
+      contracts: null,
+      coordinatesDiff: null,
+      diffSchemaVersionId: null,
+      github: null,
+      metadata: null,
+      logIds: [],
+      project: project.id,
+      service: null,
+      organization: organization.id,
+      previousSchemaVersion: null,
+      valid: true,
+      schemaCompositionErrors: [],
+      supergraphSDL: null,
+      tags: null,
+      target: target.id,
+      url: null,
+    });
+    await storage.destroy();
+
+    const validSdl = /* GraphQL */ `
+      type Query {
+        a(b: B!): String
+      }
+
+      input B {
+        a: String @deprecated(reason: "This field is deprecated")
+        b: String!
+      }
+    `;
+
+    const result = await token
+      .publishSchema({
+        sdl: validSdl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish).toEqual({
+      __typename: 'SchemaPublishSuccess',
+      changes: null,
+      initial: false,
+      linkToWebsite: expect.any(String),
+      message: '',
+      valid: true,
+    });
+  },
+);

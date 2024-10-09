@@ -10,14 +10,25 @@ agnostic and can be deployed to Azure Functions as well.
   Edge](/docs/gateway/deployment/serverless) page.
 </Callout>
 
+See [Bundling Problems](/docs/gateway/deployment/serverless#bundling-problem) for more details about
+how to load the supergraph and `transports` option.
+
 ```ts
 import { app } from '@azure/functions'
 import { createGatewayRuntime } from '@graphql-hive/gateway'
+import http from '@graphql-mesh/transport-http'
+import supergraph from './supergraph'
 
-const handler = createGatewayRuntime(/* Your configuration */)
+export const gateway = createGatewayRuntime({
+  // All options available in `gateway.config.ts` configuration can also be passed here.
+  supergraph,
+  transports: {
+    http // For example, http transport is required for subgraphs using standard GraphQL over HTTP.
+  }
+})
 
 app.http('graphql', {
   method: ['GET', 'POST'],
-  handler
+  gateway
 })
 ```

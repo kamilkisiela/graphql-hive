@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaRegUserCircle } from 'react-icons/fa';
 import { SiGithub, SiGoogle, SiOkta } from 'react-icons/si';
@@ -150,6 +150,11 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
     },
     disabled: isPending,
   });
+
+  useEffect(() => {
+    form.setFocus('firstName', { shouldSelect: true });
+  }, [signUp.isPending]);
+
   const { toast } = useToast();
 
   const onSubmit = useCallback(
@@ -210,11 +215,11 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
                     <FormField
                       control={form.control}
                       name="firstName"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel>First name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Max" {...field} />
+                            <Input placeholder="Max" {...form.register('firstName')} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -223,11 +228,11 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
                     <FormField
                       control={form.control}
                       name="lastName"
-                      render={({ field }) => (
+                      render={() => (
                         <FormItem>
                           <FormLabel>Last name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Robinson" {...field} />
+                            <Input placeholder="Robinson" {...form.register('lastName')} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -237,11 +242,15 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
                   <FormField
                     control={form.control}
                     name="email"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="m@example.com" type="email" {...field} />
+                          <Input
+                            placeholder="m@example.com"
+                            type="email"
+                            {...form.register('email')}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -250,11 +259,11 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
                   <FormField
                     control={form.control}
                     name="password"
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input type="password" {...field} />
+                          <Input type="password" {...form.register('password')} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

@@ -11,6 +11,7 @@ import {
   parse,
   print,
   printSchema,
+  validateSchema,
   visit,
 } from 'graphql';
 import { validateSDL } from 'graphql/validation/validate.js';
@@ -823,11 +824,39 @@ const createFederation: (
   };
 };
 
+function validateSingleSDL(document: DocumentNode): Array<{
+  message: string;
+  source: CompositionErrorSource;
+}> {
+  const errors = validateSDL(document);
+
+  if (errors.length) {
+    return errors.map(errorWithSource('graphql'));
+  }
+
+  try {
+    const schema = buildASTSchema(document);
+    const errors = validateSchema(schema);
+
+    if (errors.length) {
+      return errors.map(errorWithSource('graphql'));
+    }
+  } catch (err: unknown) {
+    if (err instanceof GraphQLError) {
+      return [errorWithSource('graphql')(err)];
+    }
+    throw err;
+  }
+
+  return [];
+}
+
 function createSingle(): Orchestrator {
   return {
     async composeAndValidate(schemas) {
       const schema = schemas[0];
-      const errors = validateSDL(parse(schema.raw)).map(errorWithSource('graphql'));
+      const schemaAst = parse(schema.raw);
+      const errors = validateSingleSDL(schemaAst);
 
       return {
         errors,

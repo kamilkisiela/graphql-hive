@@ -53,9 +53,12 @@ const priorityVariants = cva(
 );
 
 export const priorityDescription: Record<SupportTicketPriority, string> = {
-  [SupportTicketPriority.Normal]: 'Minor business impact or general questions',
-  [SupportTicketPriority.High]: 'Major business impact',
-  [SupportTicketPriority.Urgent]: 'Critical business impact',
+  [SupportTicketPriority.Normal]:
+    'Minor problems or general questions with little to no impact on functionality, often involving small nuisances or easily bypassed errors.',
+  [SupportTicketPriority.High]:
+    'Problems that significantly hinder functionality, resulting in severe performance degradation while the platform remains operational.',
+  [SupportTicketPriority.Urgent]:
+    'Problems that halt essential functionality, preventing critical business operations with no workarounds available.',
 };
 
 export function Priority({
