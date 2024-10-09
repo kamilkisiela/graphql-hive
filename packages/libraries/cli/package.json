@@ -70,7 +70,7 @@
     "@types/env-ci": "3.1.4",
     "@types/mkdirp": "2.0.0",
     "graphql": "16.9.0",
-    "oclif": "4.13.6",
+    "oclif": "4.15.6",
     "rimraf": "4.4.1",
     "tsx": "4.18.0",
     "typescript": "5.5.4"
