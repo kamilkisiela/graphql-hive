@@ -13,10 +13,8 @@ jobs:
       AWS_S3_ENDPOINT: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
 
     outputs:
-      cli_publish: ${{ steps.cli.outputs.publish }}
-      cli_version: ${{ steps.cli.outputs.version }}
-      hive_publish: ${{ steps.hive.outputs.publish }}
-      hive_version: ${{ steps.hive.outputs.version }}
+      publish: ${{ steps.cli.outputs.publish }}
+      version: ${{ steps.cli.outputs.version }}
 
     steps:
       - name: checkout
@@ -59,17 +57,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "publish=true" >> $GITHUB_OUTPUT
 
-      - name: extract published hive version
-        if:
-          steps.changesets.outputs.published && contains(steps.changesets.outputs.publishedPackages,
-          '"hive"')
-        id: hive
-        run: |
-          echo '${{steps.changesets.outputs.publishedPackages}}' > hive-ver.json
-          VERSION=`echo $(jq -r '.[] | select(.name == "hive").version' hive-ver.json)`
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "publish=true" >> $GITHUB_OUTPUT
-
       # Needed for `oclif pack win`
       - name: Install NSIS
         run: |
@@ -95,19 +82,7 @@ jobs:
   publish_docker_cli:
     needs: [publish]
     uses: ./.github/workflows/dockerize-cli.yaml
-    if: ${{ needs.publish.outputs.cli_publish == 'true' }}
+    if: ${{ needs.publish.outputs.publish == 'true' }}
     with:
-      cliVersion: ${{ needs.publish.outputs.cli_version }}
-    secrets: inherit
-
-  publish_docker:
-    needs: [publish]
-    if: ${{ needs.publish.outputs.hive_publish == 'true' }}
-    uses: ./.github/workflows/build-and-dockerize.yaml
-    with:
-      imageTag: ${{ needs.publish.outputs.hive_version }}
-      publishSourceMaps: true
-      publishLatest: true
-      targets: build
-      uploadJavaScriptArtifacts: true
+      cliVersion: ${{ needs.publish.outputs.version }}
     secrets: inherit
