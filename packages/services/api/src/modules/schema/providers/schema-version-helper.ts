@@ -271,11 +271,15 @@ export class SchemaVersionHelper {
   }
 
   async getIsFirstComposableVersion(schemaVersion: SchemaVersion) {
+    if (!schemaVersion.isComposable) {
+      return false;
+    }
+
     if (schemaVersion.recordVersion === '2024-01-10') {
       return schemaVersion.diffSchemaVersionId === null;
     }
 
-    if (schemaVersion.hasPersistedSchemaChanges && schemaVersion.isComposable) {
+    if (schemaVersion.hasPersistedSchemaChanges) {
       const previousVersion = await this.getPreviousDiffableSchemaVersion(schemaVersion);
       if (previousVersion === null) {
         return true;
