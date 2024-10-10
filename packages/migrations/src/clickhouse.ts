@@ -166,6 +166,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/008-daily-operations-log'),
     import('./clickhouse-actions/009-ttl-1-year'),
     import('./clickhouse-actions/010-app-deployment-operations'),
+    import('./clickhouse-actions/011-audit-logs'),
   ]);
 
   async function actionRunner(action: Action, index: number) {

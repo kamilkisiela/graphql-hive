@@ -1,3 +1,6 @@
+import * as Sentry from '@sentry/node';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
