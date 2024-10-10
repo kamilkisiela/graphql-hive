@@ -1,6 +1,5 @@
 import type { Item, MenuItem, PageItem } from 'nextra/normalize-pages';
-import { PRODUCTS } from '@theguild/components';
-import { SIX_HIGHLIGHTED_PRODUCTS } from '@theguild/components/products';
+import { PRODUCTS, SIX_HIGHLIGHTED_PRODUCTS } from '@theguild/components/products';
 import { cn } from '../lib';
 
 const meta: Record<string, DeepPartial<Item | MenuItem | PageItem>> = {
