@@ -35,6 +35,8 @@ function Channels(props: {
   organizationId: string;
   projectId: string;
   channels: FragmentType<typeof ChannelsTable_AlertChannelFragment>[];
+  userHasSlackIntegration: boolean;
+  hasAccessToSettingsIntegration: string[];
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [isModalOpen, toggleModalOpen] = useToggle();
@@ -90,6 +92,8 @@ function Channels(props: {
           projectId={props.projectId}
           isOpen={isModalOpen}
           toggleModalOpen={toggleModalOpen}
+          userHasSlackIntegration={props.userHasSlackIntegration}
+          hasAccessToSettingsIntegration={props.hasAccessToSettingsIntegration}
         />
       )}
     </Card>
@@ -169,6 +173,7 @@ const ProjectAlertsPage_OrganizationFragment = graphql(`
     cleanId
     me {
       id
+      organizationAccessScopes
       ...CanAccessProject_MemberFragment
     }
   }
@@ -179,6 +184,7 @@ const ProjectAlertsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         ...ProjectAlertsPage_OrganizationFragment
+        hasSlackIntegration
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
@@ -215,6 +221,9 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
     ProjectAlertsPage_OrganizationFragment,
     currentOrganization,
   );
+  const userHasSlackIntegration =
+    query.data?.organization?.organization?.hasSlackIntegration ?? false;
+  const hasAccessToSettingsIntegration = organizationForAlerts?.me.organizationAccessScopes ?? [];
 
   const hasAccess = useProjectAccess({
     scope: ProjectAccessScope.Alerts,
@@ -250,6 +259,8 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
               organizationId={props.organizationId}
               projectId={props.projectId}
               channels={channels}
+              userHasSlackIntegration={userHasSlackIntegration}
+              hasAccessToSettingsIntegration={hasAccessToSettingsIntegration}
             />
             <Alerts
               organizationId={props.organizationId}
