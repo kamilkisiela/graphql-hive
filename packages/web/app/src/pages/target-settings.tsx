@@ -488,6 +488,9 @@ const ConditionalBreakingChanges = (props: {
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
   const { toast } = useToast();
+  const retentionInDays =
+    targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30;
+  const defaultDays = retentionInDays >= 30 ? 30 : 7;
 
   const {
     handleSubmit,
@@ -503,7 +506,7 @@ const ConditionalBreakingChanges = (props: {
     enableReinitialize: true,
     initialValues: {
       percentage: settings?.percentage || 0,
-      period: settings?.period || 0,
+      period: settings?.period || defaultDays,
       targets: settings?.targets.map(t => t.id) || [],
       excludedClients: settings?.excludedClients ?? [],
     },
@@ -511,7 +514,7 @@ const ConditionalBreakingChanges = (props: {
       percentage: Yup.number().min(0).max(100).required(),
       period: Yup.number()
         .min(1)
-        .max(targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30)
+        .max(retentionInDays)
         .test('double-precision', 'Invalid precision', num => {
           if (typeof num !== 'number') {
             return false;
@@ -621,7 +624,7 @@ const ConditionalBreakingChanges = (props: {
               size="small"
               type="number"
               min="1"
-              max={targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30}
+              max={retentionInDays}
               className="mx-2 !inline-flex !w-16"
             />
             days.
