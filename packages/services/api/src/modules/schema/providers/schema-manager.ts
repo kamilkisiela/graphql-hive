@@ -588,7 +588,7 @@ export class SchemaManager {
     this.logger.debug('Updating base schema (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
-      scope: TargetAccessScope.REGISTRY_READ,
+      scope: TargetAccessScope.REGISTRY_WRITE,
     });
     await this.storage.updateBaseSchema(selector, newBaseSchema);
   }
