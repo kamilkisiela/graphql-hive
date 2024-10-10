@@ -1136,11 +1136,26 @@ function TargetSettingsContent(props: {
 
   const targetForSettings = useFragment(TargetSettingsPage_TargetFragment, currentTarget);
 
-  const canAccessTokens = canAccessTarget(
-    TargetAccessScope.TokensRead,
+  const hasTokensWriteAccess = canAccessTarget(
+    TargetAccessScope.TokensWrite,
     organizationForSettings?.me ?? null,
   );
-  const canDelete = canAccessTarget(TargetAccessScope.Delete, organizationForSettings?.me ?? null);
+  const hasReadAccess = canAccessTarget(
+    TargetAccessScope.Read,
+    organizationForSettings?.me ?? null,
+  );
+  const hasDeleteAccess = canAccessTarget(
+    TargetAccessScope.Delete,
+    organizationForSettings?.me ?? null,
+  );
+  const hasSettingsAccess = canAccessTarget(
+    TargetAccessScope.Settings,
+    organizationForSettings?.me ?? null,
+  );
+  const hasRegistryWriteAccess = canAccessTarget(
+    TargetAccessScope.RegistryWrite,
+    organizationForSettings?.me ?? null,
+  );
 
   if (query.error) {
     return <QueryError organizationId={props.organizationId} error={query.error} />;
@@ -1189,7 +1204,7 @@ function TargetSettingsContent(props: {
           <PageLayoutContent>
             {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
               <div className="space-y-12">
-                {props.page === 'general' ? (
+                {props.page === 'general' && hasSettingsAccess ? (
                   <>
                     <TargetName
                       targetName={currentTarget.name}
@@ -1203,7 +1218,7 @@ function TargetSettingsContent(props: {
                       organizationId={currentOrganization.cleanId}
                       graphqlEndpointUrl={currentTarget.graphqlEndpointUrl ?? null}
                     />
-                    {canDelete && (
+                    {hasDeleteAccess && (
                       <TargetDelete
                         targetId={currentTarget.cleanId}
                         projectId={currentProject.cleanId}
@@ -1212,7 +1227,7 @@ function TargetSettingsContent(props: {
                     )}
                   </>
                 ) : null}
-                {props.page === 'cdn' && canAccessTokens ? (
+                {props.page === 'cdn' && hasReadAccess ? (
                   <CDNAccessTokens
                     me={organizationForSettings.me}
                     organizationId={props.organizationId}
@@ -1220,7 +1235,7 @@ function TargetSettingsContent(props: {
                     targetId={props.targetId}
                   />
                 ) : null}
-                {props.page === 'registry-token' && canAccessTokens ? (
+                {props.page === 'registry-token' && hasTokensWriteAccess ? (
                   <RegistryAccessTokens
                     me={organizationForSettings.me}
                     organizationId={props.organizationId}
@@ -1228,14 +1243,14 @@ function TargetSettingsContent(props: {
                     targetId={props.targetId}
                   />
                 ) : null}
-                {props.page === 'breaking-changes' ? (
+                {props.page === 'breaking-changes' && hasSettingsAccess ? (
                   <ConditionalBreakingChanges
                     organizationId={props.organizationId}
                     projectId={props.projectId}
                     targetId={props.targetId}
                   />
                 ) : null}
-                {props.page === 'base-schema' ? (
+                {props.page === 'base-schema' && hasRegistryWriteAccess ? (
                   <ExtendBaseSchema
                     baseSchema={targetForSettings?.baseSchema ?? ''}
                     organizationId={props.organizationId}
@@ -1243,7 +1258,7 @@ function TargetSettingsContent(props: {
                     targetId={props.targetId}
                   />
                 ) : null}
-                {props.page === 'schema-contracts' ? (
+                {props.page === 'schema-contracts' && hasSettingsAccess ? (
                   <SchemaContracts
                     organizationId={props.organizationId}
                     projectId={props.projectId}
