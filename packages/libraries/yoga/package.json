@@ -60,7 +60,7 @@
     "@whatwg-node/fetch": "0.9.21",
     "graphql-ws": "5.16.0",
     "graphql-yoga": "5.7.0",
-    "nock": "14.0.0-beta.7",
+    "nock": "14.0.0-beta.15",
     "vitest": "2.0.5",
     "ws": "8.18.0"
   },
