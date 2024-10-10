@@ -101,8 +101,27 @@ export default class AppCreate extends Command<typeof AppCreate> {
         });
 
         if (result.addDocumentsToAppDeployment.error) {
-          // TODO: better error message formatting :)
-          throw new Error(result.addDocumentsToAppDeployment.error.message);
+          if (result.addDocumentsToAppDeployment.error.details) {
+            const affectedOperation = buffer.at(
+              result.addDocumentsToAppDeployment.error.details.index,
+            );
+
+            const maxCharacters = 40;
+
+            if (affectedOperation) {
+              const truncatedBody = (
+                affectedOperation.body.length > maxCharacters - 3
+                  ? affectedOperation.body.substring(0, maxCharacters) + '...'
+                  : affectedOperation.body
+              ).replace(/\n/g, '\\n');
+              this.infoWarning(
+                `Failed uploading document: ${result.addDocumentsToAppDeployment.error.details.message}` +
+                  `\nOperation hash: ${affectedOperation?.hash}` +
+                  `\nOperation body: ${truncatedBody}`,
+              );
+            }
+          }
+          this.error(result.addDocumentsToAppDeployment.error.message);
         }
         buffer = [];
       }
@@ -157,6 +176,11 @@ const AddDocumentsToAppDeploymentMutation = graphql(/* GraphQL */ `
       }
       error {
         message
+        details {
+          index
+          message
+          __typename
+        }
       }
     }
   }
