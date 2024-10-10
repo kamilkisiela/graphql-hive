@@ -15,7 +15,7 @@
     "@aws-sdk/s3-request-presigner": "3.637.0",
     "@date-fns/utc": "1.2.0",
     "@graphql-hive/core": "workspace:*",
-    "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
+    "@graphql-inspector/core": "6.1.0",
     "@hive/cdn-script": "workspace:*",
     "@hive/emails": "workspace:*",
     "@hive/schema": "workspace:*",

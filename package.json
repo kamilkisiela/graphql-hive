@@ -64,7 +64,7 @@
     "@graphql-codegen/typescript-resolvers": "4.2.1",
     "@graphql-codegen/urql-introspection": "3.0.0",
     "@graphql-eslint/eslint-plugin": "3.20.1",
-    "@graphql-inspector/cli": "4.0.3",
+    "@graphql-inspector/cli": "5.0.6",
     "@manypkg/get-packages": "2.2.2",
     "@next/eslint-plugin-next": "14.2.6",
     "@parcel/watcher": "2.4.1",
