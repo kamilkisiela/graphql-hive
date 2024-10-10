@@ -6,7 +6,6 @@ import type {
   SchemaVersion,
 } from '@hive/storage';
 import type { SchemaError } from '../../__generated__/types';
-import type { PaginatedSchemaVersionConnection } from '../../modules/shared/providers/storage';
 import type { DateRange, PushedCompositeSchema, SingleSchema } from '../../shared/entities';
 import type { PromiseOrValue } from '../../shared/helpers';
 import type { SuperGraphInformation } from './lib/federation-super-graph';
@@ -24,7 +23,22 @@ export type SchemaChangeApprovalMapper = SchemaCheckApprovalMetadata;
 export type SchemaErrorConnectionMapper = readonly SchemaError[];
 export type SchemaWarningConnectionMapper = readonly SchemaCheckWarning[];
 export type SchemaConnectionMapper = readonly SchemaMapper[];
-export type SchemaVersionConnectionMapper = PaginatedSchemaVersionConnection;
+export type SchemaVersionConnectionMapper = Readonly<{
+  edges: ReadonlyArray<{
+    cursor: string;
+    node: SchemaVersion & {
+      organization: string;
+      project: string;
+      target: string;
+    };
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
 export interface SchemaVersionMapper extends SchemaVersion {
   project: string;
   target: string;
