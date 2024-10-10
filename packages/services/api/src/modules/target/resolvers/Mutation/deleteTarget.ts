@@ -31,32 +31,23 @@ export const deleteTarget: NonNullable<MutationResolvers['deleteTarget']> = asyn
     target: targetId,
   });
 
-  // Audit Log Event
-  try {
-    const currentUser = await injector.get(AuthManager).getCurrentUser();
-    await injector.get(AuditLogManager).createLogAuditEvent({
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
       eventType: 'TARGET_DELETED',
-      organizationId: target.orgId,
-      user: {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        user: currentUser,
-      },
       targetDeletedAuditLogSchema: {
-        projectId: target.projectId,
         targetId: target.id,
         targetName: target.name,
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create audit log event', error);
-    Sentry.captureException(error, {
-      extra: {
-        selector,
-        deletedTarget: target,
-      },
-    });
-  }
+        projectId: projectId,
+      }
+    },
+    {
+      organizationId: organizationId,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    }
+  )
 
   return {
     selector: {

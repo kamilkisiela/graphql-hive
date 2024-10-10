@@ -44,34 +44,23 @@ export const createTarget: NonNullable<MutationResolvers['createTarget']> = asyn
     name: input.name,
   });
 
-  // Audit Log Event
-  try {
-    const currentUser = await injector.get(AuthManager).getCurrentUser();
-    await injector.get(AuditLogManager).createLogAuditEvent({
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
       eventType: 'TARGET_CREATED',
-      organizationId: target.orgId,
-      user: {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        user: currentUser,
-      },
       targetCreatedAuditLogSchema: {
-        projectId: target.projectId,
+        projectId: project,
         targetId: target.id,
         targetName: target.name,
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create audit log event', error);
-    Sentry.captureException(error, {
-      extra: {
-        input,
-        organization,
-        project,
-        target,
-      },
-    });
-  }
+      }
+    },
+    {
+      organizationId: input.organization,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    }
+  )
 
   return {
     ok: {

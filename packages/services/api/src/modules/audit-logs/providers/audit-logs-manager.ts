@@ -1,11 +1,15 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
-import { QueryAuditLogsArgs } from '../../../__generated__/types.next';
 import { ClickHouse, sql } from '../../operations/providers/clickhouse-client';
 import { Logger } from '../../shared/providers/logger';
 import { AuditLogEvent, auditLogSchema } from './audit-logs-types';
+import * as Sentry from '@sentry/node';
+import { User } from '../../../shared/entities';
+import { QueryAuditLogsArgs } from '../../../__generated__/types.next';
+import { SqlValue } from '../../operations/providers/sql';
 
-export const auditLogDbObject = z.object({
+
+export const AUDIT_LOG_CLICKHOUSE_OBJECT = z.object({
   id: z.string(),
   event_time: z.string(),
   user_id: z.string(),
@@ -15,11 +19,16 @@ export const auditLogDbObject = z.object({
   metadata: z.string().transform(x => JSON.parse(x)),
 });
 
-export type AuditLogModel = z.infer<typeof auditLogDbObject>;
+export type AuditLogModel = z.infer<typeof AUDIT_LOG_CLICKHOUSE_OBJECT>;
 
-const auditLogCount = z.object({
-  'COUNT()': z.string(),
-});
+const AUDIT_LOG_CLICKHOUSE_ARRAY = z.array(AUDIT_LOG_CLICKHOUSE_OBJECT);
+
+type AuditLogRecordEvent = {
+  userId: string;
+  userEmail: string;
+  organizationId: string;
+  user: User & { isAdmin: boolean } | null;
+}
 
 @Injectable({
   scope: Scope.Operation,
@@ -35,14 +44,19 @@ export class AuditLogManager {
     this.logger = logger.child({ source: 'AuditLogsManager' });
   }
 
-  async createLogAuditEvent(event: AuditLogEvent): Promise<void> {
+  createLogAuditEvent(event: AuditLogEvent, record: AuditLogRecordEvent): void {
+    void this.internalCreateLogAuditEvent(event, record);
+  }
+
+  private async internalCreateLogAuditEvent(event: AuditLogEvent, record: AuditLogRecordEvent): Promise<void> {
     try {
-      const { eventType, organizationId, user } = event;
-      this.logger.info('Creating a log audit event (event=%o)', event);
+      const { eventType } = event;
+      const { organizationId, userEmail, userId } = record;
+      this.logger.debug('Creating a log audit event (event=%o)', event);
 
       const parsedEvent = auditLogSchema.parse(event);
       const metadata = {
-        user: user.user,
+        user: record.user,
         ...parsedEvent,
       };
 
@@ -51,8 +65,8 @@ export class AuditLogManager {
 
       const values = [
         eventTime,
-        user.userId,
-        user.userEmail,
+        userId,
+        userEmail,
         organizationId,
         eventType,
         eventMetadata,
@@ -68,52 +82,83 @@ export class AuditLogManager {
         queryId: 'create-audit-log',
       });
     } catch (error) {
-      console.error(error);
+      this.logger.error('Failed to create audit log event', error);
+      Sentry.captureException(error, {
+        extra: {
+          event,
+        },
+      });
     }
   }
 
-  async getPaginatedAuditLogs(props: QueryAuditLogsArgs): Promise<AuditLogModel[]> {
+  async getPaginatedAuditLogs(props: QueryAuditLogsArgs): Promise<{ total: number, data: AuditLogModel[] }> {
     this.logger.info(
-      'Getting paginated audit logs (limit=%s, offset=%s)',
-      props.limit,
-      props.offset,
+      'Getting paginated audit logs (limit=%s, offset=%s, orgId=%s, userId=%s, action=%s)',
+      props.selector.organization,
+      props.filter?.endDate,
+      props.filter?.startDate,
+      props.filter?.userId,
     );
 
-    const limit = props.limit ?? 25; // Default to 25 if limit is undefined
-    const sqlLimit = sql.raw(limit.toString());
-    const offset = props.offset ?? 0; // Default to 0 if offset is undefined
-    const sqlOffset = sql.raw(offset.toString());
+    // Handle the limit and offset for pagination
+    let limit: SqlValue[] = [];
+    let offset: SqlValue[] = [];
+    if (props?.pagination?.limit) {
+      limit.push(sql`LIMIT ${String(props.pagination.limit)}`);
+    } else {
+      limit.push(sql`LIMIT 25`);
+    }
+    if (props?.pagination?.offset) {
+      offset.push(sql`OFFSET ${String(props.pagination.offset)}`);
+    } else {
+      offset.push(sql`OFFSET 0`);
+    }
+
+
+    const where: SqlValue[] = [];
+    if (props.selector.organization) {
+      where.push(sql`organization_id = ${props.selector.organization}`);
+    } else {
+      // Handle case where organization_id is not provided
+      this.logger.warn('No organization_id provided in query');
+    }
+
+    if (props.filter) {
+      // if (props.filter?.startDate) {
+      //   const dateIso = new Date(props.filter.startDate).toISOString();
+      //   where.push(sql`event_time >= ${dateIso}`);
+      // }
+      // if (props.filter?.endDate) {
+      //   const dateIso = new Date(props.filter.endDate).toISOString();
+      //   where.push(sql`event_time <= ${dateIso}`);
+      // }
+      if (props.filter?.userId) {
+        where.push(sql`user_id = ${props.filter.userId}`);
+      }
+    }
+
+    const whereClause = where.length > 0
+      ? sql`WHERE ${sql.join(where, ' AND ')}`
+      : sql``;
+
+    console.log("whereClause", whereClause);
+    console.log("limit", limit);
+    console.log("offset", offset);
 
     const result = await this.clickHouse.query({
       query: sql`
         SELECT *
         FROM audit_log
+        ${whereClause}
         ORDER BY event_time DESC
-        LIMIT ${sqlLimit}
-        OFFSET ${sqlOffset}
       `,
       queryId: 'get-audit-logs',
       timeout: 5000,
     });
 
-    const model = z.array(auditLogDbObject);
-    return model.parse(result.data);
-  }
-
-  async getAuditLogsCount(): Promise<number> {
-    this.logger.info('Getting audit logs count');
-
-    const result = await this.clickHouse.query({
-      query: sql`
-      SELECT COUNT(*)
-      FROM audit_log
-      `,
-      queryId: 'get-audit-logs-count',
-      timeout: 5000,
-    });
-
-    const parsed = auditLogCount.parse(result.data[0]);
-    const resultParseInt = parseInt(parsed['COUNT()']);
-    return resultParseInt;
+    return {
+      total: result.rows,
+      data: AUDIT_LOG_CLICKHOUSE_ARRAY.parse(result.data)
+    }
   }
 }

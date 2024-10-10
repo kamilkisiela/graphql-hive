@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { User } from '../../../shared/entities';
 
 const userInvitedAuditLogSchema = z.object({
   inviteeId: z.string(),
@@ -20,6 +19,11 @@ const organizationSettingsUpdatedAuditLogSchema = z.object({
 });
 
 const organizationTransferredAuditLogSchema = z.object({
+  newOwnerId: z.string(),
+  newOwnerEmail: z.string(),
+});
+
+const organizationTransferredRequestAuditLogSchema = z.object({
   newOwnerId: z.string(),
   newOwnerEmail: z.string(),
 });
@@ -65,20 +69,20 @@ const schemaPolicySettingsUpdatedAuditLogSchema = z.object({
 const schemaCheckedAuditLogSchema = z.object({
   projectId: z.string(),
   targetId: z.string(),
-  schemaSdl: z.string(),
+  checkId: z.string().nullable(),
 });
 
 const schemaPublishAuditLogSchema = z.object({
   projectId: z.string(),
   targetId: z.string(),
-  schemaName: z.string(),
-  schemaSdl: z.string(),
+  serviceName: z.string().nullable(),
+  schemaVersionId: z.string().nullable(),
 });
 
 const schemaDeletedAuditLogSchema = z.object({
   projectId: z.string(),
   targetId: z.string(),
-  schemaName: z.string(),
+  serviceName: z.string(),
 });
 
 const roleCreatedAuditLogSchema = z.object({
@@ -124,6 +128,10 @@ export const auditLogSchema = z.discriminatedUnion('eventType', [
   z.object({
     eventType: z.literal('ORGANIZATION_TRANSFERRED'),
     organizationTransferredAuditLogSchema,
+  }),
+  z.object({
+    eventType: z.literal('ORGANIZATION_TRANSFERRED_REQUEST'),
+    organizationTransferredRequestAuditLogSchema,
   }),
   z.object({
     eventType: z.literal('PROJECT_CREATED'),
@@ -183,11 +191,4 @@ export const auditLogSchema = z.discriminatedUnion('eventType', [
   }),
 ]);
 
-export type AuditLogEvent = z.infer<typeof auditLogSchema> & {
-  user: {
-    userId: string;
-    userEmail: string;
-    user: (User & { isAdmin: boolean }) | null;
-  };
-  organizationId: string;
-};
+export type AuditLogEvent = z.infer<typeof auditLogSchema>

@@ -6,6 +6,7 @@ export type UserJoinedAuditLogMapper = AuditLogModel;
 export type UserRemovedAuditLogMapper = AuditLogModel;
 export type OrganizationSettingsUpdatedAuditLogMapper = AuditLogModel;
 export type OrganizationTransferredAuditLogMapper = AuditLogModel;
+export type OrganizationTransferredRequestAuditLogMapper = AuditLogModel;
 export type ProjectCreatedAuditLogMapper = AuditLogModel;
 export type ProjectSettingsUpdatedAuditLogMapper = AuditLogModel;
 export type ProjectDeletedAuditLogMapper = AuditLogModel;

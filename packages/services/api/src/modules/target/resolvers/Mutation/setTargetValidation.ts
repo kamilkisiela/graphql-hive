@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/node';
 import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
@@ -33,35 +32,6 @@ export const setTargetValidation: NonNullable<MutationResolvers['setTargetValida
     }),
     injector.get(AuthManager).getCurrentUser(),
   ]);
-
-  // Audit Log Event
-  try {
-    await injector.get(AuditLogManager).createLogAuditEvent({
-      eventType: 'TARGET_SETTINGS_UPDATED',
-      organizationId: organization,
-      user: {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        user: currentUser,
-      },
-      targetSettingsUpdatedAuditLogSchema: {
-        projectId: project,
-        targetId: target,
-        updatedFields: JSON.stringify({
-          enabled: input.enabled,
-          graphqlEndpointUrl: result.graphqlEndpointUrl,
-        }),
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create audit log event', error);
-    Sentry.captureException(error, {
-      extra: {
-        input,
-        result,
-      },
-    });
-  }
 
   return result;
 };

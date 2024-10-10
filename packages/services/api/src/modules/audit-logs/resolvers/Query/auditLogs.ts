@@ -1,26 +1,24 @@
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { AuditLogManager } from '../../providers/audit-logs-manager';
 import type { QueryResolvers } from './../../../../__generated__/types.next';
 
-export const auditLogs: NonNullable<QueryResolvers['auditLogs']> = async (_parent, arg, ctx) => {
-  const countAuditLogs = await ctx.injector.get(AuditLogManager).getAuditLogsCount();
-  if (countAuditLogs === 0) {
-    return {
-      nodes: [],
-      total: 0,
-      __typename: 'AuditLogConnection',
-    };
+export const auditLogs: NonNullable<QueryResolvers['auditLogs']> = async (_parent, args, ctx) => {
+
+  const isAdmin = ctx.injector.get(AuthManager).getCurrentUser()?.then(user => user.isAdmin);
+  if (!isAdmin) {
+    throw new Error('You are not authorized to perform this action');
   }
 
-  const { limit, offset, filter } = arg;
+  const { selector, filter, pagination } = args
   const auditLogs = await ctx.injector.get(AuditLogManager).getPaginatedAuditLogs({
-    filter,
-    limit,
-    offset,
-  });
+    selector: selector,
+    filter: filter,
+    pagination: pagination,
+  })
 
   return {
-    nodes: auditLogs,
-    total: countAuditLogs,
+    nodes: auditLogs.data,
+    total: auditLogs.total,
     __typename: 'AuditLogConnection',
   };
 };

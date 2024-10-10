@@ -52,41 +52,6 @@ export const updateTargetValidationSettings: NonNullable<
     excludedClients: result.data.excludedClients ?? [],
   });
 
-  // Audit Log Event
-  try {
-    const currentUser = await injector.get(AuthManager).getCurrentUser();
-
-    await injector.get(AuditLogManager).createLogAuditEvent({
-      eventType: 'TARGET_SETTINGS_UPDATED',
-      organizationId: organization,
-      user: {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        user: currentUser,
-      },
-      targetSettingsUpdatedAuditLogSchema: {
-        projectId: project,
-        targetId: target,
-        updatedFields: JSON.stringify({
-          period: input.period,
-          percentage: input.percentage,
-          targets: result.data.targets,
-          excludedClients: result.data.excludedClients ?? [],
-        }),
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create audit log event', error);
-    Sentry.captureException(error, {
-      extra: {
-        input,
-        organization,
-        project,
-        target,
-      },
-    });
-  }
-
   return {
     ok: {
       target: await targetManager.getTarget({

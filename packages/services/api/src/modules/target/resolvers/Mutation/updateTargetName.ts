@@ -51,37 +51,6 @@ export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']
     target: targetId,
   });
 
-  // Audit Log Event
-  try {
-    const currentUser = await injector.get(AuthManager).getCurrentUser();
-    await injector.get(AuditLogManager).createLogAuditEvent({
-      eventType: 'TARGET_SETTINGS_UPDATED',
-      organizationId: organizationId,
-      user: {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        user: currentUser,
-      },
-      targetSettingsUpdatedAuditLogSchema: {
-        projectId: projectId,
-        targetId: targetId,
-        updatedFields: JSON.stringify({
-          name: input.name,
-        }),
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create audit log event', error);
-    Sentry.captureException(error, {
-      extra: {
-        input,
-        organizationId,
-        projectId,
-        targetId,
-      },
-    });
-  }
-
   return {
     ok: {
       selector: {

@@ -22,35 +22,5 @@ export const experimental__updateTargetSchemaComposition: NonNullable<
     nativeComposition: input.nativeComposition,
   });
 
-  // Audit Log Event
-  try {
-    const currentUser = await injector.get(AuthManager).getCurrentUser();
-
-    await injector.get(AuditLogManager).createLogAuditEvent({
-      eventType: 'TARGET_SETTINGS_UPDATED',
-      organizationId: organizationId,
-      user: {
-        userId: currentUser.id,
-        userEmail: currentUser.email,
-        user: currentUser,
-      },
-      targetSettingsUpdatedAuditLogSchema: {
-        projectId: projectId,
-        targetId: targetId,
-        updatedFields: JSON.stringify({
-          nativeComposition: input.nativeComposition,
-        }),
-      },
-    });
-  } catch (error) {
-    console.error('Failed to create audit log event', error);
-    Sentry.captureException(error, {
-      extra: {
-        input,
-        result,
-      },
-    });
-  }
-
   return result;
 };
