@@ -3,7 +3,7 @@ use graphql_parser::schema::{parse_schema, Document};
 use reqwest::Client;
 use serde::Serialize;
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{hash_map, HashMap, VecDeque},
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -67,7 +67,7 @@ pub struct ExecutionReport {
     pub operation_name: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct State {
     buffer: VecDeque<ExecutionReport>,
     schema: Document<'static, String>,
@@ -88,15 +88,6 @@ impl State {
 
     pub fn drain(&mut self) -> Vec<ExecutionReport> {
         self.buffer.drain(0..).collect::<Vec<ExecutionReport>>()
-    }
-}
-
-impl Default for State {
-    fn default() -> Self {
-        Self {
-            buffer: VecDeque::new(),
-            schema: Default::default(),
-        }
     }
 }
 
@@ -197,21 +188,13 @@ impl UsageAgent {
             let operation = self
                 .processor
                 .lock()
-                .map_err(|e| {
-                    AgentError::Lock(
-                        e.to_string(),
-                    )
-                })?
+                .map_err(|e| AgentError::Lock(e.to_string()))?
                 .process(
                     &op.operation_body,
                     &self
                         .state
                         .lock()
-                        .map_err(|e| {
-                            AgentError::Lock(
-                                e.to_string(),
-                            )
-                        })?
+                        .map_err(|e| AgentError::Lock(e.to_string()))?
                         .schema,
                 );
             match operation {
@@ -245,15 +228,12 @@ impl UsageAgent {
                                     }),
                                 }),
                             });
-                            if !report.map.contains_key(&hash) {
-                                report.map.insert(
-                                    hash,
-                                    OperationMapRecord {
-                                        operation: operation.operation,
-                                        operationName: non_empty_string(op.operation_name),
-                                        fields: operation.coordinates,
-                                    },
-                                );
+                            if let hash_map::Entry::Vacant(e) = report.map.entry(hash) {
+                                e.insert(OperationMapRecord {
+                                    operation: operation.operation,
+                                    operationName: non_empty_string(op.operation_name),
+                                    fields: operation.coordinates,
+                                });
                             }
                             report.size += 1;
                         }
@@ -272,9 +252,7 @@ impl UsageAgent {
         let size = self
             .state
             .lock()
-            .map_err(|e| {
-                AgentError::Lock(e.to_string())
-            })?
+            .map_err(|e| AgentError::Lock(e.to_string()))?
             .push(execution_report);
 
         self.flush_if_full(size)?;
@@ -298,7 +276,7 @@ impl UsageAgent {
                 )
                 .header(
                     reqwest::header::USER_AGENT,
-                    format!("hive-apollo-router/{}", COMMIT.unwrap_or_else(|| "local")),
+                    format!("hive-apollo-router/{}", COMMIT.unwrap_or("local")),
                 )
                 .json(&report)
                 .send()
