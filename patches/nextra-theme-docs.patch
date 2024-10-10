@@ -1,9 +1,18 @@
 diff --git a/dist/index.js b/dist/index.js
-index 788fff4cb15ddd9ea3d19493cc80dd69951caca6..5efca5acdbf794d5e01d1355d7af37103e46a1c2 100644
+index f22610da5326a76663a9d3cdecc7410b18d0f9f0..826f93e222643edf49b4ed09411e838e8ea20384 100644
 --- a/dist/index.js
 +++ b/dist/index.js
-@@ -1500,8 +1500,8 @@ var classes3 = {
- function FolderImpl({ item, anchors }) {
+@@ -827,7 +827,7 @@ function Search({
+         transition: true,
+         anchor: { to: "top end", gap: 10, padding: 16 },
+         className: ({ open }) => cn6(
+-          "nextra-scrollbar max-md:_h-full",
++          "hive-search-results nextra-scrollbar max-md:_h-full",
+           "_border _border-gray-200 _text-gray-100 dark:_border-neutral-800",
+           "_z-20 _rounded-xl _py-2.5 _shadow-xl",
+           "contrast-more:_border contrast-more:_border-gray-900 contrast-more:dark:_border-gray-50",
+@@ -1562,8 +1562,8 @@ var classes3 = {
+ function FolderImpl({ item, anchors, onFocus }) {
    const routeOriginal = useFSRoute3();
    const [route] = routeOriginal.split("#");
 -  const active = [route, route + "/"].includes(item.route + "/");
@@ -11,5 +20,5 @@ index 788fff4cb15ddd9ea3d19493cc80dd69951caca6..5efca5acdbf794d5e01d1355d7af3710
 +  const active = item.route && [route, route + "/"].includes(item.route + "/");
 +  const activeRouteInside = active || (route !== '/' && item.route !== '') && route.startsWith(item.route + "/");
    const focusedRoute = useContext5(FocusedItemContext);
-   const focusedRouteInside = !!(focusedRoute == null ? void 0 : focusedRoute.startsWith(item.route + "/"));
+   const focusedRouteInside = focusedRoute.startsWith(item.route + "/");
    const level = useContext5(FolderLevelContext);
