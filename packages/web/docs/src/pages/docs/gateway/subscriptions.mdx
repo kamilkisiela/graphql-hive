@@ -16,6 +16,10 @@ protocols:
 - [GraphQL over WebSocket](https://github.com/graphql/graphql-over-http/blob/main/rfcs/GraphQLOverWebSocket.md)
 - [HTTP Callback](https://www.apollographql.com/docs/router/executing-operations/subscription-callback-protocol/)
 
+Clients connecting to the Hive Gateway must use the:
+
+- [GraphQL over SSE](https://github.com/graphql/graphql-over-http/blob/main/rfcs/GraphQLOverSSE.md)
+
 ## Example
 
 We'll implement two
@@ -174,9 +178,9 @@ Now simply start Hive Gateway with:
 hive-gateway supergraph
 ```
 
-Downstream clients are still subscribing to Hive Gateway gateway through any supported subscriptions
-protocol, but upstream Hive Gateway will use long-living WebSocket connections to the "products"
-service.
+Downstream clients are subscribing to Hive Gateway gateway through the
+[GraphQL over SSE protocol](https://github.com/graphql/graphql-over-http/blob/main/rfcs/GraphQLOverSSE.md),
+but upstream Hive Gateway will use long-living WebSocket connections to the "products" service.
 
 <Callout>
   WebSocket for communications between Hive Gateway and subgraphs are suboptimal compared to other
