@@ -41,7 +41,7 @@ const OperationValidationInputModel = zod
   .partial()
   .passthrough();
 
-async function validateTargetAccess(
+export async function validateTargetAccess(
   injector: Injector,
   selector: TargetSelectorInput,
   scope: TargetAccessScope = TargetAccessScope.REGISTRY_READ,

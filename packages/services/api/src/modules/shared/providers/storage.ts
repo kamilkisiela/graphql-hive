@@ -32,6 +32,7 @@ import type {
   OrganizationMemberRole,
   PaginatedDocumentCollectionOperations,
   PaginatedDocumentCollections,
+  PreflightScript,
   Project,
   Schema,
   SchemaLog,
@@ -699,6 +700,16 @@ export interface Storage {
     description: string;
     createdByUserId: string | null;
   }): Promise<DocumentCollection>;
+
+  getPreflightScript(_: { targetId: string }): Promise<PreflightScript | null>;
+
+  createPreflightScript(_: {
+    targetId: string;
+    sourceCode: string;
+    createdByUserId: string | null;
+  }): Promise<PreflightScript>;
+
+  updatePreflightScript(_: { id: string; sourceCode: string }): Promise<PreflightScript | null>;
 
   /**
    * Returns null if the document collection does not exist (did not get deleted).
