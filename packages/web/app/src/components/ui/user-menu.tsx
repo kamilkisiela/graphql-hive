@@ -54,7 +54,6 @@ const UserMenu_OrganizationConnectionFragment = graphql(`
     nodes {
       id
       cleanId
-      name
       me {
         ...UserMenu_MemberFragment
       }
@@ -114,7 +113,6 @@ export function UserMenu(props: {
           toggleModalOpen={toggleLeaveOrganizationModalOpen}
           isOpen={isLeaveOrganizationModalOpen}
           organizationId={currentOrganization.cleanId}
-          organizationName={currentOrganization.name}
         />
       ) : null}
       <div className="flex flex-row items-center gap-8">
@@ -175,7 +173,7 @@ export function UserMenu(props: {
                           organizationId: org.cleanId,
                         }}
                       >
-                        {org.name}
+                        {org.cleanId}
                       </Link>
                     </DropdownMenuItem>
                   ))}
@@ -291,9 +289,8 @@ export function LeaveOrganizationModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   organizationId: string;
-  organizationName: string;
 }) {
-  const { organizationId, organizationName } = props;
+  const { organizationId } = props;
   const [, mutate] = useMutation(LeaveOrganizationModal_LeaveOrganizationMutation);
   const notify = useNotifications();
 
@@ -323,7 +320,7 @@ export function LeaveOrganizationModal(props: {
     <LeaveOrganizationModalContent
       isOpen={props.isOpen}
       toggleModalOpen={props.toggleModalOpen}
-      organizationName={organizationName}
+      organizationCleanId={organizationId}
       onSubmit={onSubmit}
     />
   );
@@ -332,19 +329,19 @@ export function LeaveOrganizationModal(props: {
 export function LeaveOrganizationModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationName: string;
+  organizationCleanId: string;
   onSubmit: () => void;
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
-          <DialogTitle>Leave {props.organizationName}?</DialogTitle>
+          <DialogTitle>Leave {props.organizationCleanId}?</DialogTitle>
           <DialogDescription>
             Are you sure you want to leave this organization?
             <br />
             You will lose access to{' '}
-            <span className="font-semibold text-white">{props.organizationName}</span>.
+            <span className="font-semibold text-white">{props.organizationCleanId}</span>.
           </DialogDescription>
           <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
         </DialogHeader>

@@ -334,7 +334,7 @@ test.concurrent('check usage from two selected targets', async ({ expect }) => {
 
   const productionTargetResult = await createTarget(
     {
-      name: 'target2',
+      slug: 'target2',
       organization: organization.cleanId,
       project: project.cleanId,
     },

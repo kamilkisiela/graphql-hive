@@ -2,8 +2,10 @@ import { ComponentProps, PropsWithoutRef, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO } from 'date-fns';
 import { useFormik } from 'formik';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
+import { z } from 'zod';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
@@ -21,6 +23,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { DocsLink } from '@/components/ui/docs-note';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Meta } from '@/components/ui/meta';
 import {
   NavLayout,
@@ -34,16 +38,17 @@ import { Spinner } from '@/components/ui/spinner';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { useToast } from '@/components/ui/use-toast';
 import { Combobox } from '@/components/v2/combobox';
-import { Input } from '@/components/v2/input';
 import { Switch } from '@/components/v2/switch';
 import { Table, TBody, Td, Tr } from '@/components/v2/table';
 import { Tag } from '@/components/v2/tag';
+import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from '@tanstack/react-router';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -55,7 +60,6 @@ const TargetSettings_TargetValidationSettingsFragment = graphql(`
     targets {
       id
       cleanId
-      name
     }
     excludedClients
   }
@@ -414,7 +418,7 @@ const TargetSettingsPage_TargetSettingsQuery = graphql(`
     targets(selector: $targetsSelector) {
       nodes {
         id
-        name
+        cleanId
       }
     }
     organization(selector: $organizationSelector) {
@@ -601,14 +605,12 @@ const ConditionalBreakingChanges = (props: {
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.percentage}
-              isInvalid={touched.percentage && !!errors.percentage}
               disabled={isSubmitting}
-              size="small"
               type="number"
               min="0"
               max="100"
               step={0.01}
-              className="mx-2 !inline-flex !w-16"
+              className="mx-2 !inline-flex w-16"
             />
             % of traffic in the past
             <Input
@@ -616,13 +618,11 @@ const ConditionalBreakingChanges = (props: {
               onChange={handleChange}
               onBlur={handleBlur}
               value={values.period}
-              isInvalid={touched.period && !!errors.period}
               disabled={isSubmitting}
-              size="small"
               type="number"
               min="1"
               max={targetSettings.data?.organization?.organization?.rateLimit.retentionInDays ?? 30}
-              className="mx-2 !inline-flex !w-16"
+              className="mx-2 !inline-flex w-16"
             />
             days.
           </div>
@@ -700,7 +700,7 @@ const ConditionalBreakingChanges = (props: {
                       }}
                       onBlur={() => setFieldTouched('targets', true)}
                     />{' '}
-                    {pt.name}
+                    {pt.cleanId}
                   </div>
                 ))}
               </div>
@@ -742,113 +742,124 @@ const ConditionalBreakingChanges = (props: {
   );
 };
 
-function TargetName(props: {
-  targetName: string | null;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
-}) {
+const SlugFormSchema = z.object({
+  slug: z
+    .string({
+      required_error: 'Target slug is required',
+    })
+    .min(1, 'Target slug is required')
+    .max(50, 'Slug must be less than 50 characters')
+    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers and dashes'),
+});
+type SlugFormValues = z.infer<typeof SlugFormSchema>;
+
+function TargetSlug(props: { organizationId: string; projectId: string; targetId: string }) {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetNameMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
-      enableReinitialize: true,
-      initialValues: {
-        name: props.targetName || '',
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Target name is required'),
-      }),
-      onSubmit: values =>
-        mutate({
+  const [_slugMutation, slugMutate] = useMutation(TargetSettingsPage_UpdateTargetSlugMutation);
+  const slugForm = useForm({
+    mode: 'all',
+    resolver: zodResolver(SlugFormSchema),
+    defaultValues: {
+      slug: props.targetId,
+    },
+  });
+
+  const onSlugFormSubmit = useCallback(
+    async (data: SlugFormValues) => {
+      try {
+        const result = await slugMutate({
           input: {
             organization: props.organizationId,
             project: props.projectId,
             target: props.targetId,
-            name: values.name,
+            slug: data.slug,
           },
-        }).then(result => {
-          if (result?.data?.updateTargetName?.ok) {
-            toast({
-              variant: 'default',
-              title: 'Success',
-              description: 'Target name updated successfully',
-            });
+        });
 
-            const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
-            void router.navigate({
-              to: '/$organizationId/$projectId/$targetId/settings',
-              params: {
-                organizationId: props.organizationId,
-                projectId: props.projectId,
-                targetId: newTargetId,
-              },
-              search: {
-                page: subPages[0].key,
-              },
-            });
-          } else if (result.error || result.data?.updateTargetName.error?.message) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: result.error?.message || result.data?.updateTargetName.error?.message,
-            });
-          }
-        }),
-    });
+        const error = result.error || result.data?.updateTargetSlug.error;
+
+        if (result.data?.updateTargetSlug?.ok) {
+          toast({
+            variant: 'default',
+            title: 'Success',
+            description: 'Target slug updated',
+          });
+          void router.navigate({
+            to: '/$organizationId/$projectId/$targetId/settings',
+            params: {
+              organizationId: props.organizationId,
+              projectId: props.projectId,
+              targetId: result.data.updateTargetSlug.ok.target.cleanId,
+            },
+            search: {
+              page: 'general',
+            },
+          });
+        } else if (error) {
+          slugForm.setError('slug', error);
+        }
+      } catch (error) {
+        console.error('error', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to update target slug',
+        });
+      }
+    },
+    [slugMutate],
+  );
 
   return (
-    <SubPageLayout>
-      <SubPageLayoutHeader
-        subPageTitle="Target Name"
-        description={
-          <>
-            <CardDescription>
-              Changing the name of your target will also change the slug of your target URL, and
-              will invalidate any existing links to your target.
-            </CardDescription>
-            <CardDescription>
-              <DocsLink
-                href="/management/targets#rename-a-target"
-                className="text-gray-500 hover:text-gray-300"
-              >
-                You can read more about it in the documentation
-              </DocsLink>
-            </CardDescription>
-          </>
-        }
-      />
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-row items-center gap-x-2">
-          <Input
-            placeholder="Target name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            disabled={isSubmitting}
-            isInvalid={touched.name && !!errors.name}
-            className="w-96"
+    <Form {...slugForm}>
+      <form onSubmit={slugForm.handleSubmit(onSlugFormSubmit)}>
+        <SubPageLayout>
+          <SubPageLayoutHeader
+            subPageTitle="Target Slug"
+            description={
+              <CardDescription>
+                This is your target's URL namespace on Hive. Changing it{' '}
+                <span className="font-bold">will</span> invalidate any existing links to your
+                target.
+                <br />
+                {/* TODO: document it */}
+                <DocsLink
+                  className="text-muted-foreground text-sm"
+                  href="/management/targets#change-slug-of-target"
+                >
+                  You can read more about it in the documentation
+                </DocsLink>
+              </CardDescription>
+            }
           />
-          <Button type="submit" disabled={isSubmitting}>
-            Save
-          </Button>
-        </div>
-
-        {touched.name && (errors.name || mutation.error) && (
-          <div className="mt-2 text-red-500">
-            {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
+          <div>
+            <FormField
+              control={slugForm.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className="flex items-center">
+                      <div className="border-input text-muted-foreground h-10 rounded-md rounded-r-none border-y border-l bg-gray-900 px-3 py-2 text-sm">
+                        {env.appBaseUrl.replace(/https?:\/\//i, '')}/{props.organizationId}/
+                        {props.projectId}/
+                      </div>
+                      <Input placeholder="slug" className="w-48 rounded-l-none" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button disabled={slugForm.formState.isSubmitting} className="px-10" type="submit">
+              Save
+            </Button>
           </div>
-        )}
-        {mutation.data?.updateTargetName.error?.inputErrors?.name && (
-          <div className="mt-2 text-red-500">
-            {mutation.data.updateTargetName.error.inputErrors.name}
-          </div>
-        )}
+        </SubPageLayout>
       </form>
-    </SubPageLayout>
+    </Form>
   );
 }
 
@@ -939,59 +950,56 @@ function GraphQLEndpointUrl(props: {
           </>
         }
       />
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-row items-center gap-x-2">
-          <Input
-            placeholder="Endpoint Url"
-            name="graphqlEndpointUrl"
-            value={values.graphqlEndpointUrl}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            disabled={isSubmitting}
-            isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
-            className="w-96"
-          />
-          <Button type="submit" disabled={isSubmitting}>
-            Save
-          </Button>
-        </div>
-        {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
-          <div className="mt-2 text-red-500">
-            {errors.graphqlEndpointUrl ??
-              mutation.error?.graphQLErrors[0]?.message ??
-              mutation.error?.message}
+      <div>
+        <form onSubmit={handleSubmit}>
+          <div className="flex flex-row items-center gap-x-2">
+            <Input
+              placeholder="Endpoint Url"
+              name="graphqlEndpointUrl"
+              value={values.graphqlEndpointUrl}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isSubmitting}
+              className="w-96"
+            />
+            <Button type="submit" disabled={isSubmitting}>
+              Save
+            </Button>
           </div>
-        )}
-        {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
-          <div className="mt-2 text-red-500">
-            {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
-          </div>
-        )}
-      </form>
+          {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
+            <div className="mt-2 text-red-500">
+              {errors.graphqlEndpointUrl ??
+                mutation.error?.graphQLErrors[0]?.message ??
+                mutation.error?.message}
+            </div>
+          )}
+          {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
+            <div className="mt-2 text-red-500">
+              {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
+            </div>
+          )}
+        </form>
+      </div>
     </SubPageLayout>
   );
 }
 
-const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
-  mutation TargetSettingsPage_UpdateTargetName($input: UpdateTargetNameInput!) {
-    updateTargetName(input: $input) {
+const TargetSettingsPage_UpdateTargetSlugMutation = graphql(`
+  mutation TargetSettingsPage_UpdateTargetSlugMutation($input: UpdateTargetSlugInput!) {
+    updateTargetSlug(input: $input) {
       ok {
         selector {
           organization
           project
           target
         }
-        updatedTarget {
+        target {
           id
           cleanId
-          name
         }
       }
       error {
         message
-        inputErrors {
-          name
-        }
       }
     }
   }
@@ -1000,7 +1008,7 @@ const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
 const TargetSettingsPage_TargetFragment = graphql(`
   fragment TargetSettingsPage_TargetFragment on Target {
     id
-    name
+    cleanId
     baseSchema
   }
 `);
@@ -1074,7 +1082,6 @@ const TargetSettingsPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       cleanId
-      name
       graphqlEndpointUrl
       ...TargetSettingsPage_TargetFragment
     }
@@ -1206,8 +1213,7 @@ function TargetSettingsContent(props: {
               <div className="space-y-12">
                 {props.page === 'general' && hasSettingsAccess ? (
                   <>
-                    <TargetName
-                      targetName={currentTarget.name}
+                    <TargetSlug
                       targetId={currentTarget.cleanId}
                       projectId={currentProject.cleanId}
                       organizationId={currentOrganization.cleanId}

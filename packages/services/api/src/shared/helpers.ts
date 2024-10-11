@@ -312,3 +312,12 @@ export function batchBy<TItem, TResult>(
     return d.promise;
   };
 }
+
+export function assertOk<TOk extends { ok: true }, TNot extends { ok: false; message: string }>(
+  result: TOk | TNot,
+  message: string,
+): asserts result is TOk {
+  if (!result.ok) {
+    throw new Error(`${message}: ${result.message}`);
+  }
+}

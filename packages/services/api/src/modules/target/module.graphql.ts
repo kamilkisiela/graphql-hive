@@ -8,7 +8,7 @@ export default gql`
 
   extend type Mutation {
     createTarget(input: CreateTargetInput!): CreateTargetResult!
-    updateTargetName(input: UpdateTargetNameInput!): UpdateTargetNameResult!
+    updateTargetSlug(input: UpdateTargetSlugInput!): UpdateTargetSlugResult!
     deleteTarget(selector: TargetSelectorInput!): DeleteTargetPayload!
     updateTargetValidationSettings(
       input: UpdateTargetValidationSettingsInput!
@@ -58,23 +58,25 @@ export default gql`
     error: UpdateTargetGraphQLEndpointUrlError
   }
 
-  type UpdateTargetNameResult {
-    ok: UpdateTargetNameOk
-    error: UpdateTargetNameError
+  input UpdateTargetSlugInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    slug: String!
   }
 
-  type UpdateTargetNameOk {
+  type UpdateTargetSlugResult {
+    ok: UpdateTargetSlugOk
+    error: UpdateTargetSlugError
+  }
+
+  type UpdateTargetSlugOk {
     selector: TargetSelector!
-    updatedTarget: Target!
+    target: Target!
   }
 
-  type UpdateTargetNameInputErrors {
-    name: String
-  }
-
-  type UpdateTargetNameError implements Error {
+  type UpdateTargetSlugError implements Error {
     message: String!
-    inputErrors: UpdateTargetNameInputErrors!
   }
 
   type CreateTargetResult {
@@ -83,7 +85,7 @@ export default gql`
   }
 
   type CreateTargetInputErrors {
-    name: String
+    slug: String
   }
 
   type CreateTargetError implements Error {
@@ -156,7 +158,7 @@ export default gql`
   type Target {
     id: ID!
     cleanId: ID!
-    name: String!
+    name: String! @deprecated(reason: "Use the 'cleanId' field instead.")
     project: Project!
     """
     The endpoint url of the target's explorer instance.
@@ -177,14 +179,7 @@ export default gql`
   input CreateTargetInput {
     organization: ID!
     project: ID!
-    name: String!
-  }
-
-  input UpdateTargetNameInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-    name: String!
+    slug: String!
   }
 
   type DeleteTargetPayload {

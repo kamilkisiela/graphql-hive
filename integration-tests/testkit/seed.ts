@@ -38,6 +38,7 @@ import {
   fetchVersions,
   getOrganization,
   getOrganizationMembers,
+  getOrganizationProjects,
   inviteToOrganization,
   joinOrganization,
   publishSchema,
@@ -91,8 +92,8 @@ export function initSeed() {
         ownerEmail,
         ownerToken,
         async createOrg() {
-          const orgName = generateUnique();
-          const orgResult = await createOrganization({ name: orgName }, ownerToken).then(r =>
+          const orgSlug = generateUnique();
+          const orgResult = await createOrganization({ slug: orgSlug }, ownerToken).then(r =>
             r.expectNoGraphQLErrors(),
           );
 
@@ -177,6 +178,20 @@ export function initSeed() {
 
               return members;
             },
+            async projects() {
+              const projectsResult = await getOrganizationProjects(
+                { organization: organization.cleanId },
+                ownerToken,
+              ).then(r => r.expectNoGraphQLErrors());
+
+              const projects = projectsResult.organization?.organization.projects.nodes;
+
+              if (!projects) {
+                throw new Error(`Could not get projects for org ${organization.cleanId}`);
+              }
+
+              return projects;
+            },
             async createProject(
               projectType: ProjectType = ProjectType.Single,
               options?: {
@@ -188,7 +203,7 @@ export function initSeed() {
                 {
                   organization: organization.cleanId,
                   type: projectType,
-                  name: generateUnique(),
+                  slug: generateUnique(),
                 },
                 ownerToken,
               ).then(r => r.expectNoGraphQLErrors());

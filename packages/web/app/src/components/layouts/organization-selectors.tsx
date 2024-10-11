@@ -6,7 +6,6 @@ const OrganizationSelector_OrganizationConnectionFragment = graphql(`
   fragment OrganizationSelector_OrganizationConnectionFragment on OrganizationConnection {
     nodes {
       id
-      name
       cleanId
     }
   }
@@ -40,13 +39,13 @@ export function OrganizationSelector(props: {
     >
       <SelectTrigger variant="default">
         <div className="font-medium" data-cy="organization-picker-current">
-          {currentOrganization?.name}
+          {currentOrganization?.cleanId}
         </div>
       </SelectTrigger>
       <SelectContent>
         {organizations.map(org => (
           <SelectItem key={org.cleanId} value={org.cleanId}>
-            {org.name}
+            {org.cleanId}
           </SelectItem>
         ))}
       </SelectContent>

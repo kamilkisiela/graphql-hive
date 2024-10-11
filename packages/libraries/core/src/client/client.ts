@@ -75,16 +75,13 @@ export function createHive(options: HivePluginOptions): HiveClient {
                     name
                   }
                   organization {
-                    name
                     cleanId
                   }
                   project {
-                    name
                     type
                     cleanId
                   }
                   target {
-                    name
                     cleanId
                   }
                   canReportSchema: hasTargetScope(scope: REGISTRY_WRITE)

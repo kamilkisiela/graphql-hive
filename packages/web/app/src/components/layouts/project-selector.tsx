@@ -6,12 +6,10 @@ const ProjectSelector_OrganizationConnectionFragment = graphql(`
   fragment ProjectSelector_OrganizationConnectionFragment on OrganizationConnection {
     nodes {
       id
-      name
       cleanId
       projects {
         nodes {
           id
-          name
           cleanId
         }
       }
@@ -46,7 +44,7 @@ export function ProjectSelector(props: {
           params={{ organizationId: props.currentOrganizationCleanId }}
           className="max-w-[200px] shrink-0 truncate font-medium"
         >
-          {currentOrganization.name}
+          {currentOrganization.cleanId}
         </Link>
       ) : (
         <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
@@ -67,12 +65,12 @@ export function ProjectSelector(props: {
             }}
           >
             <SelectTrigger variant="default">
-              <div className="font-medium">{currentProject.name}</div>
+              <div className="font-medium">{currentProject.cleanId}</div>
             </SelectTrigger>
             <SelectContent>
               {projects.map(project => (
                 <SelectItem key={project.cleanId} value={project.cleanId}>
-                  {project.name}
+                  {project.cleanId}
                 </SelectItem>
               ))}
             </SelectContent>

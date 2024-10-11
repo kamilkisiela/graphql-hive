@@ -13,16 +13,13 @@ const myTokenInfoQuery = graphql(/* GraphQL */ `
           name
         }
         organization {
-          name
           cleanId
         }
         project {
-          name
           type
           cleanId
         }
         target {
-          name
           cleanId
         }
         canPublishSchema: hasTargetScope(scope: REGISTRY_WRITE)
@@ -103,9 +100,9 @@ export default class WhoAmI extends Command<typeof WhoAmI> {
       const print = createPrinter({
         'Token name:': [colors.bold(tokenInfo.token.name)],
         ' ': [''],
-        'Organization:': [colors.bold(organization.name), colors.dim(organizationUrl)],
-        'Project:': [colors.bold(project.name), colors.dim(projectUrl)],
-        'Target:': [colors.bold(target.name), colors.dim(targetUrl)],
+        'Organization:': [colors.bold(organization.cleanId), colors.dim(organizationUrl)],
+        'Project:': [colors.bold(project.cleanId), colors.dim(projectUrl)],
+        'Target:': [colors.bold(target.cleanId), colors.dim(targetUrl)],
         '  ': [''],
         'Access to schema:publish': [tokenInfo.canPublishSchema ? access.yes : access.not],
         'Access to schema:check': [tokenInfo.canCheckSchema ? access.yes : access.not],

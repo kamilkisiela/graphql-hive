@@ -29,7 +29,7 @@ export { OperationsReader } from './modules/operations/providers/operations-read
 export { ClickHouse, sql } from './modules/operations/providers/clickhouse-client';
 export {
   organizationAdminScopes,
-  reservedOrganizationNames,
+  reservedOrganizationSlugs as reservedOrganizationNames,
 } from './modules/organization/providers/organization-config';
 export { CryptoProvider } from './modules/shared/providers/crypto';
 export {

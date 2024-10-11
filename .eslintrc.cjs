@@ -85,6 +85,7 @@ module.exports = {
       plugins: ['@graphql-eslint'],
       rules: {
         '@graphql-eslint/require-id-when-available': 'error',
+        '@graphql-eslint/no-deprecated': 'error',
       },
     },
     {

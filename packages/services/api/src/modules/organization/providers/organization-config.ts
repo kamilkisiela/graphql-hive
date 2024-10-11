@@ -4,7 +4,7 @@ import {
   TargetAccessScope,
 } from '../../auth/providers/scopes';
 
-export const reservedOrganizationNames = [
+export const reservedOrganizationSlugs = [
   'registry',
   'server',
   'usage',
