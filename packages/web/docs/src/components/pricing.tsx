@@ -85,7 +85,7 @@ export function Pricing(): ReactElement {
       <div className="mx-auto box-border w-full max-w-[1200px]">
         <header className="px-6">
           <Heading as="h2" size="md" className="text-green-1000 text-center">
-            <a id="pricing">Pricing</a>
+            Pricing
           </Heading>
           <p className="mx-auto mt-4 max-w-xl text-balance text-center text-green-800 lg:text-wrap">
             All features are available on all plans — including the free&nbsp;plan. Our pricing is
