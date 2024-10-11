@@ -132,6 +132,7 @@ export const TargetLayout = ({
     TargetAccessScope.RegistryRead,
     currentOrganization?.me ?? null,
   );
+  const hasReadAccess = canAccessTarget(TargetAccessScope.Read, currentOrganization?.me ?? null);
   const hasSettingsAccess = canAccessTarget(
     TargetAccessScope.Settings,
     currentOrganization?.me ?? null,
@@ -145,7 +146,8 @@ export const TargetLayout = ({
     currentOrganization?.me ?? null,
   );
 
-  const canAccessSettingsPage = hasSettingsAccess || hasRegistryWriteAccess || hasTokensWriteAccess;
+  const canAccessSettingsPage =
+    hasReadAccess || hasSettingsAccess || hasRegistryWriteAccess || hasTokensWriteAccess;
 
   return (
     <>
