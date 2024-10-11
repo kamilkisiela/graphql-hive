@@ -1156,15 +1156,53 @@ describe('changes with usage data', () => {
       // because it will cause existing queries
       // that use this enum value to error
       beforeReportedOperation: 'SchemaCheckError',
-      // it's not a breaking change, because our system does not see any usage of the enum.
-      // It's because the reported operation collects these coordinates:
-      // 'Query.feed', 'Post.id', 'Post.type'
-      // From the system's perspective, Post.type is a leaf field,
-      // meaning it does not care if it was an enum or a scalar.
-      // Post.type could resolve "Image" or "Video" enum values,
-      // but after replacing the enum with a String scalar,
-      // it could still resolve the same values.
       afterReportedOperation: 'SchemaCheckError',
+    },
+    reportOperation: {
+      operation: 'query feed { feed { id type } }',
+      operationName: 'feed',
+      fields: 'auto-collect',
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'adding a new value to a used enum value is NOT a breaking change',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        feed: Post
+      }
+
+      enum Media {
+        Image
+        Video
+      }
+
+      type Post {
+        id: ID!
+        title: String!
+        type: Media
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        feed: Post
+      }
+
+      enum Media {
+        Image
+        Video
+        Audio
+      }
+
+      type Post {
+        id: ID!
+        title: String!
+        type: Media
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      beforeReportedOperation: 'SchemaCheckSuccess',
+      afterReportedOperation: 'SchemaCheckSuccess',
     },
     reportOperation: {
       operation: 'query feed { feed { id type } }',
