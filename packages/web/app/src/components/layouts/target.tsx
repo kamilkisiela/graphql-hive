@@ -128,14 +128,26 @@ export const TargetLayout = ({
 
   useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
 
-  const canAccessSchema = canAccessTarget(
+  const hasRegistryReadAccess = canAccessTarget(
     TargetAccessScope.RegistryRead,
     currentOrganization?.me ?? null,
   );
-  const canAccessSettings = canAccessTarget(
+  const hasReadAccess = canAccessTarget(TargetAccessScope.Read, currentOrganization?.me ?? null);
+  const hasSettingsAccess = canAccessTarget(
     TargetAccessScope.Settings,
     currentOrganization?.me ?? null,
   );
+  const hasRegistryWriteAccess = canAccessTarget(
+    TargetAccessScope.RegistryWrite,
+    currentOrganization?.me ?? null,
+  );
+  const hasTokensWriteAccess = canAccessTarget(
+    TargetAccessScope.TokensWrite,
+    currentOrganization?.me ?? null,
+  );
+
+  const canAccessSettingsPage =
+    hasReadAccess || hasSettingsAccess || hasRegistryWriteAccess || hasTokensWriteAccess;
 
   return (
     <>
@@ -169,7 +181,7 @@ export const TargetLayout = ({
           {currentOrganization && currentProject && currentTarget ? (
             <Tabs className="flex h-full grow flex-col" value={page}>
               <TabsList variant="menu">
-                {canAccessSchema && (
+                {hasRegistryReadAccess && (
                   <>
                     <TabsTrigger variant="menu" value={Page.Schema} asChild>
                       <Link
@@ -259,7 +271,7 @@ export const TargetLayout = ({
                     </TabsTrigger>
                   </>
                 )}
-                {canAccessSettings && (
+                {canAccessSettingsPage && (
                   <TabsTrigger variant="menu" value={Page.Settings} asChild>
                     <Link
                       to="/$organizationId/$projectId/$targetId/settings"
