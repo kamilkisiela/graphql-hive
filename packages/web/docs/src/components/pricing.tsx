@@ -5,7 +5,7 @@ import { CallToAction, Heading } from '@theguild/components';
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
     <Root delayDuration={0}>
-      <Trigger className="text-left">{children}</Trigger>
+      <Trigger className="hive-focus rounded text-left">{children}</Trigger>
       <Content
         sideOffset={5}
         className="bg-green-1000 z-20 rounded p-2 text-sm font-normal leading-4 text-white shadow"
