@@ -1,0 +1,423 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 8ca339a2ba2031f0c1e22f1d099fa9a571492107..463cf8f2ef9b2c62d7a197708d6ffba4c880b036 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,6 +1,6 @@
+ import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+ import * as React from "react";
+-import { createContext, useContext, useRef, useState, useEffect, forwardRef, useCallback, useMemo, useLayoutEffect } from "react";
++import { createContext, useContext, useRef, useState, useEffect, forwardRef, useMemo, useCallback, useLayoutEffect } from "react";
+ import { clsx } from "clsx";
+ import { print, astFromValue, isSchema, buildClientSchema, validateSchema, getIntrospectionQuery, isNamedType, isObjectType, isInputObjectType, isScalarType, isEnumType, isInterfaceType, isUnionType, isNonNullType, isListType, isAbstractType, isType, parse, visit } from "graphql";
+ import { StorageAPI, HistoryStore, formatResult, isObservable, formatError, isAsyncIterable, fetcherReturnToPromise, isPromise, mergeAst, fillLeafs, getSelectedOperationName } from "@graphiql/toolkit";
+@@ -40,7 +40,7 @@ function createContextHook(context) {
+ const StorageContext = createNullableContext("StorageContext");
+ function StorageContextProvider(props) {
+   const isInitialRender = useRef(true);
+-  const [storage, setStorage] = useState(new StorageAPI(props.storage));
++  const [storage, setStorage] = useState(() => new StorageAPI(props.storage));
+   useEffect(() => {
+     if (isInitialRender.current) {
+       isInitialRender.current = false;
+@@ -465,68 +465,42 @@ const Tooltip = Object.assign(TooltipRoot, {
+   Provider: T.Provider
+ });
+ const HistoryContext = createNullableContext("HistoryContext");
+-function HistoryContextProvider(props) {
+-  var _a;
++function HistoryContextProvider({
++  maxHistoryLength = DEFAULT_HISTORY_LENGTH,
++  children
++}) {
+   const storage = useStorageContext();
+-  const historyStore = useRef(
+-    new HistoryStore(
++  const [historyStore] = useState(
++    () => (
+       // Fall back to a noop storage when the StorageContext is empty
+-      storage || new StorageAPI(null),
+-      props.maxHistoryLength || DEFAULT_HISTORY_LENGTH
++      new HistoryStore(storage || new StorageAPI(null), maxHistoryLength)
+     )
+   );
+-  const [items, setItems] = useState(((_a = historyStore.current) == null ? void 0 : _a.queries) || []);
+-  const addToHistory = useCallback(
+-    (operation) => {
+-      var _a2;
+-      (_a2 = historyStore.current) == null ? void 0 : _a2.updateHistory(operation);
+-      setItems(historyStore.current.queries);
+-    },
+-    []
+-  );
+-  const editLabel = useCallback(
+-    (operation, index) => {
+-      historyStore.current.editLabel(operation, index);
+-      setItems(historyStore.current.queries);
+-    },
+-    []
+-  );
+-  const toggleFavorite = useCallback(
+-    (operation) => {
+-      historyStore.current.toggleFavorite(operation);
+-      setItems(historyStore.current.queries);
+-    },
+-    []
+-  );
+-  const setActive = useCallback(
+-    (item) => {
+-      return item;
+-    },
+-    []
+-  );
+-  const deleteFromHistory = useCallback((item, clearFavorites = false) => {
+-    historyStore.current.deleteHistory(item, clearFavorites);
+-    setItems(historyStore.current.queries);
+-  }, []);
++  const [items, setItems] = useState(() => historyStore.queries || []);
+   const value = useMemo(
+     () => ({
+-      addToHistory,
+-      editLabel,
++      addToHistory(operation) {
++        historyStore.updateHistory(operation);
++        setItems(historyStore.queries);
++      },
++      editLabel(operation, index) {
++        historyStore.editLabel(operation, index);
++        setItems(historyStore.queries);
++      },
+       items,
+-      toggleFavorite,
+-      setActive,
+-      deleteFromHistory
++      toggleFavorite(operation) {
++        historyStore.toggleFavorite(operation);
++        setItems(historyStore.queries);
++      },
++      setActive: (item) => item,
++      deleteFromHistory(item, clearFavorites) {
++        historyStore.deleteHistory(item, clearFavorites);
++        setItems(historyStore.queries);
++      }
+     }),
+-    [
+-      addToHistory,
+-      editLabel,
+-      items,
+-      toggleFavorite,
+-      setActive,
+-      deleteFromHistory
+-    ]
++    [items, historyStore]
+   );
+-  return /* @__PURE__ */ jsx(HistoryContext.Provider, { value, children: props.children });
++  return /* @__PURE__ */ jsx(HistoryContext.Provider, { value, children });
+ }
+ const useHistoryContext = createContextHook(HistoryContext);
+ const DEFAULT_HISTORY_LENGTH = 20;
+@@ -714,7 +688,8 @@ function ExecutionContextProvider({
+   fetcher,
+   getDefaultFieldNames,
+   children,
+-  operationName
++  operationName,
++  onModifyHeaders
+ }) {
+   if (!fetcher) {
+     throw new TypeError(
+@@ -777,6 +752,9 @@ function ExecutionContextProvider({
+         errorMessageParse: "Headers are invalid JSON",
+         errorMessageType: "Headers are not a JSON object."
+       });
++      if (onModifyHeaders) {
++        headers = await onModifyHeaders(headers);
++      }
+     } catch (error) {
+       setResponse(error instanceof Error ? error.message : `${error}`);
+       return;
+@@ -999,9 +977,9 @@ function mergeIncrementalResult(executionResult, incrementalResult) {
+     }
+   }
+ }
++const isMacOs = typeof navigator !== "undefined" && navigator.userAgent.includes("Mac");
+ const DEFAULT_EDITOR_THEME = "graphiql";
+ const DEFAULT_KEY_MAP = "sublime";
+-const isMacOs = typeof navigator !== "undefined" && navigator.platform.toLowerCase().indexOf("mac") === 0;
+ const commonKeys = {
+   // Persistent search box in Query Editor
+   [isMacOs ? "Cmd-F" : "Ctrl-F"]: "findPersistent",
+@@ -1599,7 +1577,7 @@ function Search() {
+                   onFocus: handleFocus,
+                   onBlur: handleFocus,
+                   onChange: (event) => setSearchValue(event.target.value),
+-                  placeholder: "⌘ K",
++                  placeholder: `${isMacOs ? "⌘" : "Ctrl"} K`,
+                   ref: inputRef,
+                   value: searchValue,
+                   "data-cy": "doc-explorer-input"
+@@ -3063,14 +3041,16 @@ function useSetEditorValues({
+   );
+ }
+ function createTab({
++  id,
++  title,
+   query = null,
+   variables = null,
+   headers = null
+-} = {}) {
++}) {
+   return {
+-    id: guid(),
++    id: id || guid(),
+     hash: hashFromTabContents({ query, variables, headers }),
+-    title: query && fuzzyExtractOperationName(query) || DEFAULT_TITLE,
++    title: title || query && fuzzyExtractOperationName(query) || DEFAULT_TITLE,
+     query,
+     variables,
+     headers,
+@@ -3088,8 +3068,7 @@ function setPropertiesInActiveTab(state, partialTab) {
+       const newTab = { ...tab, ...partialTab };
+       return {
+         ...newTab,
+-        hash: hashFromTabContents(newTab),
+-        title: newTab.operationName || (newTab.query ? fuzzyExtractOperationName(newTab.query) : void 0) || DEFAULT_TITLE
++        hash: hashFromTabContents(newTab)
+       };
+     })
+   };
+@@ -3311,32 +3290,36 @@ function EditorContextProvider(props) {
+     responseEditor,
+     defaultHeaders
+   });
+-  const addTab = useCallback(() => {
+-    setTabState((current) => {
+-      const updatedValues = synchronizeActiveTabValues(current);
+-      const updated = {
+-        tabs: [
+-          ...updatedValues.tabs,
+-          createTab({
+-            headers: defaultHeaders,
+-            query: defaultQuery ?? DEFAULT_QUERY
+-          })
+-        ],
+-        activeTabIndex: updatedValues.tabs.length
+-      };
+-      storeTabs(updated);
+-      setEditorValues(updated.tabs[updated.activeTabIndex]);
+-      onTabChange == null ? void 0 : onTabChange(updated);
+-      return updated;
+-    });
+-  }, [
+-    defaultHeaders,
+-    defaultQuery,
+-    onTabChange,
+-    setEditorValues,
+-    storeTabs,
+-    synchronizeActiveTabValues
+-  ]);
++  const addTab = useCallback(
++    (_tabState) => {
++      setTabState((current) => {
++        const updatedValues = synchronizeActiveTabValues(current);
++        const updated = {
++          tabs: [
++            ...updatedValues.tabs,
++            createTab({
++              ..._tabState,
++              headers: defaultHeaders,
++              query: defaultQuery ?? DEFAULT_QUERY
++            })
++          ],
++          activeTabIndex: updatedValues.tabs.length
++        };
++        storeTabs(updated);
++        setEditorValues(updated.tabs[updated.activeTabIndex]);
++        onTabChange == null ? void 0 : onTabChange(updated);
++        return updated;
++      });
++    },
++    [
++      defaultHeaders,
++      defaultQuery,
++      onTabChange,
++      setEditorValues,
++      storeTabs,
++      synchronizeActiveTabValues
++    ]
++  );
+   const changeTab = useCallback(
+     (index) => {
+       setTabState((current) => {
+@@ -3432,6 +3415,7 @@ function EditorContextProvider(props) {
+   const value = useMemo(
+     () => ({
+       ...tabState,
++      setTabState,
+       addTab,
+       changeTab,
+       moveTab,
+@@ -3743,9 +3727,10 @@ function GraphiQLProvider({
+   storage,
+   validationRules,
+   variables,
+-  visiblePlugin
++  visiblePlugin,
++  onModifyHeaders
+ }) {
+-  return /* @__PURE__ */ jsx(StorageContextProvider, { storage, children: /* @__PURE__ */ jsx(HistoryContextProvider, { maxHistoryLength, children: /* @__PURE__ */ jsx(
++  return /* @__PURE__ */ jsx(StorageContextProvider, { storage, children: /* @__PURE__ */ jsx(
+     EditorContextProvider,
+     {
+       defaultQuery,
+@@ -3776,6 +3761,7 @@ function GraphiQLProvider({
+               getDefaultFieldNames,
+               fetcher,
+               operationName,
++              onModifyHeaders,
+               children: /* @__PURE__ */ jsx(ExplorerContextProvider, { children: /* @__PURE__ */ jsx(
+                 PluginContextProvider,
+                 {
+@@ -3790,7 +3776,7 @@ function GraphiQLProvider({
+         }
+       )
+     }
+-  ) }) });
++  ) });
+ }
+ function useTheme(defaultTheme = null) {
+   const storageContext = useStorageContext();
+@@ -4200,6 +4186,7 @@ export {
+   TypeLink,
+   UnStyledButton,
+   VariableEditor,
++  isMacOs,
+   useAutoCompleteLeafs,
+   useCopyQuery,
+   useDragResize,
+diff --git a/dist/types/editor/context.d.ts b/dist/types/editor/context.d.ts
+index 199db8a294f8132d46470498870adbdf9fdc83af..d8901fe0d50db17db36a502dcf69d5f69efb84a1 100644
+--- a/dist/types/editor/context.d.ts
++++ b/dist/types/editor/context.d.ts
+@@ -1,6 +1,6 @@
+ import { DocumentNode, FragmentDefinitionNode, OperationDefinitionNode, ValidationRule } from 'graphql';
+ import { VariableToType } from 'graphql-language-service';
+-import { ReactNode } from 'react';
++import { Dispatch, ReactNode, SetStateAction } from 'react';
+ import { TabDefinition, TabsState, TabState } from './tabs';
+ import { CodeMirrorEditor } from './types';
+ export declare type CodeMirrorEditorWithOperationFacts = CodeMirrorEditor & {
+@@ -10,10 +10,11 @@ export declare type CodeMirrorEditorWithOperationFacts = CodeMirrorEditor & {
+     variableToType: VariableToType | null;
+ };
+ export declare type EditorContextType = TabsState & {
++    setTabState: Dispatch<SetStateAction<TabsState>>;
+     /**
+      * Add a new tab.
+      */
+-    addTab(): void;
++    addTab(tabState?: Pick<TabState, 'id' | 'query' | 'variables' | 'headers' | 'title'>): void;
+     /**
+      * Switch to a different tab.
+      * @param index The index of the tab that should be switched to.
+@@ -38,7 +39,7 @@ export declare type EditorContextType = TabsState & {
+      * @param partialTab A partial tab state object that will override the
+      * current values. The properties `id`, `hash` and `title` cannot be changed.
+      */
+-    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): void;
++    updateActiveTabValues(partialTab: Partial<Omit<TabState, 'hash'>>): void;
+     /**
+      * The CodeMirror editor instance for the headers editor.
+      */
+diff --git a/dist/types/editor/tabs.d.ts b/dist/types/editor/tabs.d.ts
+index 28704a9c1c6e22fa75986de8591759e13035c8c5..5204d2b25198f89da9bba70804656f02799c7df6 100644
+--- a/dist/types/editor/tabs.d.ts
++++ b/dist/types/editor/tabs.d.ts
+@@ -90,7 +90,7 @@ export declare function useSetEditorValues({ queryEditor, variableEditor, header
+     headers?: string | null | undefined;
+     response: string | null;
+ }) => void;
+-export declare function createTab({ query, variables, headers, }?: Partial<TabDefinition>): TabState;
++export declare function createTab({ id, title, query, variables, headers, }: Partial<TabDefinition & Pick<TabState, 'id' | 'title'>>): TabState;
+ export declare function setPropertiesInActiveTab(state: TabsState, partialTab: Partial<Omit<TabState, 'id' | 'hash' | 'title'>>): TabsState;
+ export declare function fuzzyExtractOperationName(str: string): string | null;
+ export declare function clearHeadersFromTabs(storage: StorageAPI | null): void;
+diff --git a/dist/types/execution.d.ts b/dist/types/execution.d.ts
+index 2d458001265d925ed0323a10aecbefdb7e6d0b4e..eb024cf197f13bfaa67423f5751c7cad7d0664bc 100644
+--- a/dist/types/execution.d.ts
++++ b/dist/types/execution.d.ts
+@@ -1,4 +1,4 @@
+-import { Fetcher } from '@graphiql/toolkit';
++import { Fetcher, MaybePromise } from '@graphiql/toolkit';
+ import { ReactNode } from 'react';
+ import { UseAutoCompleteLeafsArgs } from './editor/hooks';
+ export declare type ExecutionContextType = {
+@@ -45,8 +45,13 @@ export declare type ExecutionContextProviderProps = Pick<UseAutoCompleteLeafsArg
+      * This prop sets the operation name that is passed with a GraphQL request.
+      */
+     operationName?: string;
++    /**
++     * Modify headers before execution
++     * e.g. for interpolating headers values `"myKey": "{{valueToInterpolate}}"`
++     */
++    onModifyHeaders?: (headers?: Record<string, unknown>) => MaybePromise<Record<string, unknown>>;
+ };
+-export declare function ExecutionContextProvider({ fetcher, getDefaultFieldNames, children, operationName, }: ExecutionContextProviderProps): import("react/jsx-runtime").JSX.Element;
++export declare function ExecutionContextProvider({ fetcher, getDefaultFieldNames, children, operationName, onModifyHeaders, }: ExecutionContextProviderProps): import("react/jsx-runtime").JSX.Element;
+ export declare const useExecutionContext: {
+     (options: {
+         nonNull: true;
+diff --git a/dist/types/history/context.d.ts b/dist/types/history/context.d.ts
+index f2699b344d27806094c0e5d62d914e5618dcf4db..9e6e3c6cdfded41af49c4c15c8d0be100e896bb0 100644
+--- a/dist/types/history/context.d.ts
++++ b/dist/types/history/context.d.ts
+@@ -76,7 +76,7 @@ export declare type HistoryContextProviderProps = {
+  * any additional props they added for their needs (i.e., build their own functions that may save
+  * to a backend instead of localStorage and might need an id property added to the QueryStoreItem)
+  */
+-export declare function HistoryContextProvider(props: HistoryContextProviderProps): import("react/jsx-runtime").JSX.Element;
++export declare function HistoryContextProvider({ maxHistoryLength, children, }: HistoryContextProviderProps): import("react/jsx-runtime").JSX.Element;
+ export declare const useHistoryContext: {
+     (options: {
+         nonNull: true;
+diff --git a/dist/types/index.d.ts b/dist/types/index.d.ts
+index 26ef2a2a07dcdf29f868067d32a0f5ff7981d8e6..28d9620636bab2221239ab8b87505425a0468b5f 100644
+--- a/dist/types/index.d.ts
++++ b/dist/types/index.d.ts
+@@ -8,6 +8,7 @@ export { SchemaContext, SchemaContextProvider, useSchemaContext, } from './schem
+ export { StorageContext, StorageContextProvider, useStorageContext, } from './storage';
+ export { useTheme } from './theme';
+ export { useDragResize } from './utility/resize';
++export { isMacOs } from './utility/is-macos';
+ export * from './icons';
+ export * from './ui';
+ export * from './toolbar';
+diff --git a/dist/types/provider.d.ts b/dist/types/provider.d.ts
+index e95c73f0b8c7cdfaece528e5f411ffd29862d490..d0d1e80a13da5d22abbcb4d6e052e91323fcc86f 100644
+--- a/dist/types/provider.d.ts
++++ b/dist/types/provider.d.ts
+@@ -6,4 +6,4 @@ import { PluginContextProviderProps } from './plugin';
+ import { SchemaContextProviderProps } from './schema';
+ import { StorageContextProviderProps } from './storage';
+ export declare type GraphiQLProviderProps = EditorContextProviderProps & ExecutionContextProviderProps & ExplorerContextProviderProps & HistoryContextProviderProps & PluginContextProviderProps & SchemaContextProviderProps & StorageContextProviderProps;
+-export declare function GraphiQLProvider({ children, dangerouslyAssumeSchemaIsValid, defaultQuery, defaultHeaders, defaultTabs, externalFragments, fetcher, getDefaultFieldNames, headers, inputValueDeprecation, introspectionQueryName, maxHistoryLength, onEditOperationName, onSchemaChange, onTabChange, onTogglePluginVisibility, operationName, plugins, query, response, schema, schemaDescription, shouldPersistHeaders, storage, validationRules, variables, visiblePlugin, }: GraphiQLProviderProps): import("react/jsx-runtime").JSX.Element;
++export declare function GraphiQLProvider({ children, dangerouslyAssumeSchemaIsValid, defaultQuery, defaultHeaders, defaultTabs, externalFragments, fetcher, getDefaultFieldNames, headers, inputValueDeprecation, introspectionQueryName, maxHistoryLength, onEditOperationName, onSchemaChange, onTabChange, onTogglePluginVisibility, operationName, plugins, query, response, schema, schemaDescription, shouldPersistHeaders, storage, validationRules, variables, visiblePlugin, onModifyHeaders, }: GraphiQLProviderProps): import("react/jsx-runtime").JSX.Element;
+diff --git a/dist/types/storage.d.ts b/dist/types/storage.d.ts
+index c4c98ab5c3cd32837109d9d20d4808ad6793fd3f..0a1257b6e041d42068bffb5f332855372b89ea88 100644
+--- a/dist/types/storage.d.ts
++++ b/dist/types/storage.d.ts
+@@ -6,7 +6,7 @@ export declare type StorageContextProviderProps = {
+     children: ReactNode;
+     /**
+      * Provide a custom storage API.
+-     * @default `localStorage``
++     * @default `localStorage`
+      * @see {@link https://graphiql-test.netlify.app/typedoc/modules/graphiql_toolkit.html#storage-2|API docs}
+      * for details on the required interface.
+      */
+diff --git a/dist/types/utility/is-macos.d.ts b/dist/types/utility/is-macos.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..5f05699dde4723cbd446e914900dd9e7ff41ae70
+--- /dev/null
++++ b/dist/types/utility/is-macos.d.ts
+@@ -0,0 +1 @@
++export declare const isMacOs: boolean;

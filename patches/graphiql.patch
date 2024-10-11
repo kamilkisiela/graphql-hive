@@ -1,0 +1,59 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index d0d893ea0caffb6c1c70c5f95aed8ca49bc74701..ba3c02801e958c66fde9b813821e5a608f49b1cf 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -14,7 +14,7 @@ declare type AddSuffix<Obj extends Record<string, any>, Suffix extends string> =
+     [Key in keyof Obj as `${string & Key}${Suffix}`]: Obj[Key];
+ };
+ 
+-export declare function GraphiQL({ dangerouslyAssumeSchemaIsValid, confirmCloseTab, defaultQuery, defaultTabs, externalFragments, fetcher, getDefaultFieldNames, headers, inputValueDeprecation, introspectionQueryName, maxHistoryLength, onEditOperationName, onSchemaChange, onTabChange, onTogglePluginVisibility, operationName, plugins, query, response, schema, schemaDescription, shouldPersistHeaders, storage, validationRules, variables, visiblePlugin, defaultHeaders, ...props }: GraphiQLProps): JSX_2.Element;
++export declare function GraphiQL({ dangerouslyAssumeSchemaIsValid, confirmCloseTab, defaultQuery, defaultTabs, externalFragments, fetcher, getDefaultFieldNames, headers, inputValueDeprecation, introspectionQueryName, maxHistoryLength, onEditOperationName, onSchemaChange, onTabChange, onTogglePluginVisibility, operationName, plugins, query, response, schema, schemaDescription, shouldPersistHeaders, storage, validationRules, variables, visiblePlugin, defaultHeaders, onModifyHeaders, ...props }: GraphiQLProps): JSX_2.Element;
+ 
+ export declare namespace GraphiQL {
+     var Logo: typeof GraphiQLLogo;
+diff --git a/dist/index.mjs b/dist/index.mjs
+index cf1a9036b4b35b7918da09ead6977e1e77724b8a..896dadb9c22b36ceee99776b87684f9e3899023d 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -1,4 +1,4 @@
+-import { GraphiQLProvider, useEditorContext, useExecutionContext, useSchemaContext, useStorageContext, usePluginContext, useTheme, useDragResize, Tooltip, UnStyledButton, ReloadIcon, KeyboardShortcutIcon, SettingsIcon, Tabs, Tab, PlusIcon, QueryEditor, ExecuteButton, ChevronUpIcon, ChevronDownIcon, VariableEditor, HeaderEditor, Spinner, ResponseEditor, Dialog, ButtonGroup, Button, useCopyQuery, useMergeQuery, usePrettifyEditors, ToolbarButton, PrettifyIcon, MergeIcon, CopyIcon } from "@graphiql/react";
++import { GraphiQLProvider, useEditorContext, useExecutionContext, useSchemaContext, useStorageContext, usePluginContext, useTheme, useDragResize, Tooltip, UnStyledButton, ReloadIcon, KeyboardShortcutIcon, SettingsIcon, Tabs, Tab, PlusIcon, QueryEditor, ExecuteButton, ChevronUpIcon, ChevronDownIcon, VariableEditor, HeaderEditor, Spinner, ResponseEditor, Dialog, ButtonGroup, Button, useCopyQuery, useMergeQuery, usePrettifyEditors, ToolbarButton, PrettifyIcon, MergeIcon, CopyIcon, isMacOs } from "@graphiql/react";
+ import { GraphiQLProvider as GraphiQLProvider2 } from "@graphiql/react";
+ import React, { version, useMemo, useEffect, useState, Children, cloneElement, useCallback, Fragment } from "react";
+ const majorVersion = parseInt(version.slice(0, 2), 10);
+@@ -39,6 +39,7 @@ function GraphiQL({
+   variables,
+   visiblePlugin,
+   defaultHeaders,
++  onModifyHeaders,
+   ...props
+ }) {
+   var _a, _b;
+@@ -85,7 +86,8 @@ function GraphiQL({
+       shouldPersistHeaders,
+       storage,
+       validationRules,
+-      variables
++      variables,
++      onModifyHeaders
+     },
+     /* @__PURE__ */ React.createElement(
+       GraphiQLInterface,
+@@ -398,7 +400,7 @@ function GraphiQLInterface(props) {
+     {
+       type: "button",
+       className: "graphiql-tab-add",
+-      onClick: handleAddTab,
++      onClick: () => handleAddTab(),
+       "aria-label": "New tab"
+     },
+     /* @__PURE__ */ React.createElement(PlusIcon, { "aria-hidden": "true" })
+@@ -602,7 +604,7 @@ function GraphiQLInterface(props) {
+     )) : null
+   )));
+ }
+-const modifier = typeof navigator !== "undefined" && navigator.platform.toLowerCase().indexOf("mac") === 0 ? "Cmd" : "Ctrl";
++const modifier = isMacOs ? "⌘" : "Ctrl";
+ const SHORT_KEYS = Object.entries({
+   "Search in editor": [modifier, "F"],
+   "Search in documentation": [modifier, "K"],
