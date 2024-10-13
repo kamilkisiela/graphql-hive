@@ -501,7 +501,7 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateProjectId(input),
       ]);
 
-      const result = await injector.get(SchemaManager).disableExternalSchemaComposition({
+      const result = injector.get(SchemaManager).disableExternalSchemaComposition({
         project,
         organization,
       });
@@ -533,7 +533,7 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateProjectId(input),
       ]);
 
-      const result = await injector.get(SchemaManager).enableExternalSchemaComposition({
+      const result = injector.get(SchemaManager).enableExternalSchemaComposition({
         project,
         organization,
         endpoint: input.endpoint,
