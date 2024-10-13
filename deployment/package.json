@@ -1,8 +1,10 @@
 {
-  "name": "@hive/deployment",
+  "name": "hive",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "generate": "tsx generate.ts",
+    "publish": "echo 'Publish is done through the CD pipeline - see .github/workflows/release-stable.yaml'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

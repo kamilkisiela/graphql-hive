@@ -425,21 +425,23 @@ export function CDNAccessTokens(props: {
                   created <TimeAgo date={node.createdAt} />
                 </Td>
                 <Td align="right">
-                  <Button
-                    className="hover:text-red-500"
-                    variant="ghost"
-                    onClick={() => {
-                      void router.navigate({
-                        search: {
-                          page: 'cdn',
-                          cdn: 'delete',
-                          id: node.id,
-                        },
-                      });
-                    }}
-                  >
-                    <TrashIcon />
-                  </Button>
+                  {canManage ? (
+                    <Button
+                      className="hover:text-red-500"
+                      variant="ghost"
+                      onClick={() => {
+                        void router.navigate({
+                          search: {
+                            page: 'cdn',
+                            cdn: 'delete',
+                            id: node.id,
+                          },
+                        });
+                      }}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  ) : null}
                 </Td>
               </Tr>
             );

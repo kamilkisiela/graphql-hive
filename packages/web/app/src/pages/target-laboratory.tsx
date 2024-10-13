@@ -23,16 +23,18 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { ToggleGroup, ToggleGroupItem } from '@/components/v2/toggle-group';
 import { graphql } from '@/gql';
-import { TargetAccessScope } from '@/gql/graphql';
-import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useToggle } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/laboratory/use-collections';
 import { useCurrentOperation } from '@/lib/hooks/laboratory/use-current-operation';
-import { useOperationCollectionsPlugin } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
+import {
+  operationCollectionsPlugin,
+  TargetLaboratoryPageQuery,
+} from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useSyncOperationState } from '@/lib/hooks/laboratory/use-sync-operation-state';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
+import { explorerPlugin } from '@graphiql/plugin-explorer';
 import {
   UnStyledButton as GraphiQLButton,
   GraphiQLProviderProps,
@@ -44,6 +46,12 @@ import { EnterFullScreenIcon, ExitFullScreenIcon } from '@radix-ui/react-icons';
 import { Repeater } from '@repeaterjs/repeater';
 import { Link as RouterLink, useRouter } from '@tanstack/react-router';
 import 'graphiql/style.css';
+import '@graphiql/plugin-explorer/style.css';
+
+const explorer = explorerPlugin();
+
+// Declare outside components, otherwise while clicking on field in explorer operationCollectionsPlugin will be open
+const plugins = [explorer, operationCollectionsPlugin];
 
 function Share(): ReactElement | null {
   const label = 'Share query';
@@ -234,29 +242,6 @@ function Save(props: {
   );
 }
 
-const TargetLaboratoryPageQuery = graphql(`
-  query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organization(selector: { organization: $organizationId }) {
-      organization {
-        id
-        me {
-          id
-          ...CanAccessTarget_MemberFragment
-        }
-      }
-    }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
-      id
-      graphqlEndpointUrl
-      latestSchemaVersion {
-        id
-        sdl
-      }
-    }
-    ...Laboratory_IsCDNEnabledFragment
-  }
-`);
-
 function LaboratoryPageContent(props: {
   organizationId: string;
   projectId: string;
@@ -273,8 +258,6 @@ function LaboratoryPageContent(props: {
   const router = useRouter();
   const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
   const [isFullScreen, setIsFullScreen] = useState(false);
-
-  const currentOrganization = query.data?.organization?.organization;
   const { collections } = useCollections({
     organizationId: props.organizationId,
     projectId: props.projectId,
@@ -286,14 +269,6 @@ function LaboratoryPageContent(props: {
     );
     return new Set(operations);
   }, [collections]);
-
-  const operationCollectionsPlugin = useOperationCollectionsPlugin({
-    canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
-    canDelete: canAccessTarget(TargetAccessScope.Delete, currentOrganization?.me ?? null),
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
-  });
 
   const sdl = query.data?.target?.latestSchemaVersion?.sdl;
   const schema = useMemo(() => (sdl ? buildSchema(sdl) : null), [sdl]);
@@ -472,7 +447,7 @@ function LaboratoryPageContent(props: {
           fetcher={fetcher}
           showPersistHeadersSettings={false}
           shouldPersistHeaders={false}
-          plugins={[operationCollectionsPlugin]}
+          plugins={plugins}
           visiblePlugin={operationCollectionsPlugin}
           schema={schema}
           forcedTheme="dark"
@@ -529,7 +504,7 @@ export function TargetLaboratoryPage(props: {
 
 function useApiTabValueState(graphqlEndpointUrl: string | null) {
   const [state, setState] = useResetState<'mockApi' | 'linkedApi'>(() => {
-    const value = globalThis.window?.localStorage.getItem('hive:laboratory-tab-value');
+    const value = localStorage.getItem('hive:laboratory-tab-value');
     if (!value || !['mockApi', 'linkedApi'].includes(value)) {
       return graphqlEndpointUrl ? 'linkedApi' : 'mockApi';
     }
@@ -545,7 +520,7 @@ function useApiTabValueState(graphqlEndpointUrl: string | null) {
     state,
     useCallback(
       (state: 'mockApi' | 'linkedApi') => {
-        globalThis.window?.localStorage.setItem('hive:laboratory-tab-value', state);
+        localStorage.setItem('hive:laboratory-tab-value', state);
         setState(state);
       },
       [setState],

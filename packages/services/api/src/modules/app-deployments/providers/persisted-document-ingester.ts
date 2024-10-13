@@ -24,7 +24,10 @@ const AppDeploymentOperationHashModel = z
   .trim()
   .min(1, 'Hash must be at least 1 characters long')
   .max(128, 'Hash must be at most 128 characters long')
-  .regex(/^([A-Za-z]|[0-9]|_|-)+$/, "Can only contain letters, numbers, '_', and '-'");
+  .regex(
+    /^([A-Za-z]|[0-9]|_|-)+$/,
+    "Operation hash can only contain letters, numbers, '_', and '-'",
+  );
 
 const AppDeploymentOperationBodyModel = z.string().min(3, 'Body must be at least 3 character long');
 
@@ -157,8 +160,7 @@ export class PersistedDocumentIngester {
         return {
           type: 'error' as const,
           error: {
-            // TODO: we should add more details (what hash is affected etc.)
-            message: 'Failed to validate GraphQL operation against schema.',
+            message: 'The GraphQL operation is not valid against the latest schema version.',
             details: {
               index,
               message: errors[0].message,

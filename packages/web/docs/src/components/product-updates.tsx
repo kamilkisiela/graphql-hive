@@ -1,10 +1,7 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { ReactElement } from 'react';
 import type { GetStaticProps } from 'next';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import matter from 'gray-matter';
 
 type Changelog = {
   title: string;
@@ -13,7 +10,7 @@ type Changelog = {
   route: string;
 };
 
-function ProductUpdateTeaser(props: Changelog) {
+export function ProductUpdateTeaser(props: Changelog): ReactElement {
   return (
     <li className="mb-10 ml-4">
       <div className="absolute -left-1.5 mt-1.5 size-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700" />
@@ -33,49 +30,48 @@ function ProductUpdateTeaser(props: Changelog) {
   );
 }
 
-export const ProductUpdates = (props: { changelogs: Changelog[] }): ReactElement => {
-  return (
-    <>
-      <div className="pb-12">
-        <h1 className="!m-0 !text-left">Product Updates</h1>
-        <p>The most recent developments from GraphQL Hive.</p>
-      </div>
-      <ol className="relative border-l border-gray-200 dark:border-gray-700">
-        {props.changelogs.map(item => (
-          <ProductUpdateTeaser key={item.route} {...item} />
-        ))}
-      </ol>
-    </>
-  );
-};
+export async function getChangelogs(): Promise<Changelog[]> {
+  const { pageMap } = await import('../../.next/static/chunks/nextra-page-map-.mjs');
+
+  const productUpdatesFolder = pageMap.find(item => item.route === '/product-updates')!.children!;
+
+  return productUpdatesFolder
+    .slice(1) // cut `_meta.ts` which always comes first
+    .map(item => {
+      if (!item.children) {
+        if (!('title' in item.frontMatter!)) {
+          throw new Error(`Incorrect Front matter on page ${item.route}`);
+        }
+
+        // Regular mdx page
+        return {
+          title: item.frontMatter.title,
+          date: item.frontMatter.date.toISOString(),
+          description: item.frontMatter.description,
+          route: item.route!,
+        };
+      }
+      // Folder
+      const indexPage = item.children.find(item => item.name === 'index');
+      if (!indexPage) {
+        throw new Error('Changelog folder must have an "index.mdx" page');
+      }
+
+      if (!('date' in indexPage.frontMatter!)) {
+        throw new Error(`Incorrect Front matter on page ${item.route}`);
+      }
+
+      return {
+        title: indexPage.frontMatter.title,
+        date: indexPage.frontMatter.date.toISOString(),
+        description: indexPage.frontMatter.description,
+        route: indexPage.route!,
+      };
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
 
 export const getStaticProps: GetStaticProps<{ ssg: { changelogs: Changelog[] } }> = async () => {
-  const productUpdatesDirectory = path.join(process.cwd(), 'src', 'pages', 'product-updates');
-  const filenames = fs.readdirSync(productUpdatesDirectory);
-  const changelogs: Changelog[] = [];
-
-  for (const filename of filenames) {
-    if (filename.endsWith('.json') || filename.endsWith('index.mdx') || filename.endsWith('.ts')) {
-      continue;
-    }
-
-    const { data } = matter(
-      fs.readFileSync(path.join(productUpdatesDirectory, filename), 'utf8'),
-      {},
-    );
-
-    if (data.title && data.description && data.date) {
-      changelogs.push({
-        date: data.date.toISOString(),
-        title: data.title,
-        description: data.description,
-        route: `/product-updates/${filename.replace(/\.mdx$/, '')}`,
-      });
-    }
-  }
-
-  changelogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
   return {
     props: {
       __nextra_dynamic_opts: {
@@ -84,7 +80,7 @@ export const getStaticProps: GetStaticProps<{ ssg: { changelogs: Changelog[] } }
           description: 'The most recent developments from GraphQL Hive.',
         },
       },
-      ssg: { changelogs },
+      ssg: { changelogs: await getChangelogs() },
     },
   };
 };

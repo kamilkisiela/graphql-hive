@@ -869,7 +869,7 @@ test('add documents to app deployment fails if document does not pass validation
         index: 0,
         message: 'Cannot query field "hi" on type "Query".',
       },
-      message: 'Failed to validate GraphQL operation against schema.',
+      message: 'The GraphQL operation is not valid against the latest schema version.',
     },
     ok: null,
   });

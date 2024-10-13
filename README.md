@@ -15,6 +15,7 @@ from standalone APIs to composed schemas (Federation, Stitching).
   ([status page](https://status.graphql-hive.com))
 - [Read the announcement blog post](https://the-guild.dev/blog/announcing-graphql-hive-public)
 - [Read the docs](https://the-guild.dev/graphql/hive/docs)
+- [View the changelog for self-hosting](./deployments/CHANGELOG.md)
 
 ## Built for the community, for all GraphQL APIs
 
@@ -49,6 +50,8 @@ experience of its final users**.
 
 GraphQL Hive is completely open-source under the MIT license, meaning that you are free to host on
 your own infrastructure.
+
+- [Changelog](./deployments/CHANGELOG.md)
 
 GraphQL Hive helps you get a global overview of the usage of your GraphQL API with:
 

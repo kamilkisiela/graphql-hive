@@ -8,6 +8,7 @@ WORKDIR /usr/src/app/$SERVICE_DIR_NAME
 COPY --from=dist . /usr/src/app/$SERVICE_DIR_NAME/
 COPY --from=shared . /
 
+LABEL org.opencontainers.image.licenses=MIT
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
 LABEL org.opencontainers.image.description=$IMAGE_DESCRIPTION
