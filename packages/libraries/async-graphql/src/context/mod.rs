@@ -17,9 +17,11 @@ impl GraphQLHiveContext {
             client_version,
             timestamp: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-                * 1000,
+                .unwrap_or_else(|err| {
+                    println!("System time error: {}", err);
+                    std::time::Duration::from_secs(0)
+                })
+                .as_millis() as u64,
         }
     }
 }
