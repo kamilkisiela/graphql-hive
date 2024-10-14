@@ -100,8 +100,9 @@ export class AuditLogManager {
     if (!props.selector.organization) {
       throw new Error('Organization ID is required');
     }
-
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const sqlLimit = sql.raw(props.pagination?.limit?.toString()!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     const sqlOffset = sql.raw(props.pagination?.offset?.toString()!);
 
     let where: SqlValue[] = [];
@@ -112,15 +113,16 @@ export class AuditLogManager {
         where.push(sql`user_id = ${props.filter.userId}`);
       }
       if (props.filter?.from && props.filter?.to) {
-        console.log('new Date', new Date());
         const periods = parseDateRangeInput({
           from: new Date(props.filter.from),
           to: new Date(props.filter.to),
         });
-        where.push(sql`event_time >= ${periods.from.toISOString()}`);
-        where.push(sql`event_time <= ${periods.to.toISOString()}`);
+        where.push(
+          sql`event_time >= ${periods.from.toISOString()} AND event_time <= ${periods.to.toISOString()}`,
+        );
       }
     }
+
     const whereClause = where.length > 0 ? sql`WHERE ${sql.join(where, ' AND ')}` : sql``;
 
     const result = await this.clickHouse.query({
