@@ -1,5 +1,5 @@
 [package]
-name = "async-graphql-extension-graphql-hive"
+name = "graphql-hive-async-graphql-extension"
 version = "0.0.1"
 edition = "2021"
 license = "MIT"

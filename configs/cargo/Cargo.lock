@@ -416,22 +416,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "async-graphql-extension-graphql-hive"
-version = "0.0.1"
-dependencies = [
- "async-graphql",
- "async-trait",
- "axum-core 0.4.5",
- "derive_builder",
- "graphql-hive-core",
- "http 1.1.0",
- "rand 0.8.5",
- "serde_json",
- "tokio",
- "tracing",
-]
-
-[[package]]
 name = "async-graphql-parser"
 version = "7.0.11"
 source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
@@ -2044,6 +2028,22 @@ dependencies = [
  "fnv",
  "log",
  "regex",
+]
+
+[[package]]
+name = "graphql-hive-async-graphql-extension"
+version = "0.0.1"
+dependencies = [
+ "async-graphql",
+ "async-trait",
+ "axum-core 0.4.5",
+ "derive_builder",
+ "graphql-hive-core",
+ "http 1.1.0",
+ "rand 0.8.5",
+ "serde_json",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
