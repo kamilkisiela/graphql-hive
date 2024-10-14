@@ -57,7 +57,7 @@ jobs:
             --env HIVE_TOKEN="fake" \
             --mount "type=bind,source=/$(pwd)/router.yaml,target=/dist/config/router.yaml" \
             --mount "type=bind,source=/$(pwd)/supergraph.graphql,target=/dist/config/supergraph.graphql" \
-            ghcr.io/kamilkisiela/graphql-hive/apollo-router:${{ github.event.pull_request.head.sha }} \
+            ghcr.io/graphql-hive/apollo-router:${{ github.event.pull_request.head.sha }} \
             --log debug \
             --supergraph /dist/config/supergraph.graphql \
             --config /dist/config/router.yaml

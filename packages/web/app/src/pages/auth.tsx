@@ -54,7 +54,7 @@ export function AuthPage() {
                         <BookIcon className="size-4 flex-none" />
                         <span className="self-baseline text-white">Documentation</span>
                       </ExternalLink>
-                      <ExternalLink href="https://github.com/kamilkisiela/graphql-hive">
+                      <ExternalLink href="https://github.com/graphql-hive/platform">
                         <SiGithub className="size-4 flex-none" />
                         <span className="self-baseline text-white">Github</span>
                       </ExternalLink>

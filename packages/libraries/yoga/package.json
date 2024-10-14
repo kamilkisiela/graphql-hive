@@ -5,7 +5,7 @@
   "description": "GraphQL Hive + GraphQL Yoga",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive",
+    "url": "graphql-hive/platform",
     "directory": "packages/libraries/yoga"
   },
   "homepage": "https://the-guild.dev/graphql/hive",

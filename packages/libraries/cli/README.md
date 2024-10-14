@@ -75,7 +75,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/app/create.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/app/create.js)_
+[dist/commands/app/create.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/app/create.js)_
 
 ## `hive app:publish`
 
@@ -97,7 +97,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/app/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/app/publish.js)_
+[dist/commands/app/publish.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/app/publish.js)_
 
 ## `hive artifact:fetch`
 
@@ -120,7 +120,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/artifact/fetch.js)_
+[dist/commands/artifact/fetch.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/artifact/fetch.js)_
 
 ## `hive config:delete KEY`
 
@@ -138,7 +138,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/delete.js)_
+[dist/commands/config/delete.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -156,7 +156,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/get.js)_
+[dist/commands/config/get.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -171,7 +171,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/reset.js)_
+[dist/commands/config/reset.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -190,7 +190,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/config/set.js)_
+[dist/commands/config/set.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/config/set.js)_
 
 ## `hive dev`
 
@@ -221,7 +221,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/dev.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/dev.js)_
+[dist/commands/dev.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/dev.js)_
 
 ## `hive help [COMMAND]`
 
@@ -264,7 +264,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/introspect.js)_
+[dist/commands/introspect.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/introspect.js)_
 
 ## `hive operations:check FILE`
 
@@ -314,7 +314,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/operations/check.js)_
+[dist/commands/operations/check.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/operations/check.js)_
 
 ## `hive schema:check FILE`
 
@@ -348,7 +348,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/check.js)_
+[dist/commands/schema/check.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/schema/check.js)_
 
 ## `hive schema:delete SERVICE`
 
@@ -375,7 +375,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/delete.js)_
+[dist/commands/schema/delete.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/schema/delete.js)_
 
 ## `hive schema:fetch ACTIONID`
 
@@ -403,7 +403,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/fetch.js)_
+[dist/commands/schema/fetch.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/schema/fetch.js)_
 
 ## `hive schema:publish FILE`
 
@@ -441,7 +441,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/schema/publish.js)_
+[dist/commands/schema/publish.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -501,7 +501,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.37.0/dist/commands/whoami.js)_
+[dist/commands/whoami.js](https://github.com/graphql-hive/platform/blob/v0.37.0/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 

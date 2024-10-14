@@ -27,7 +27,7 @@ const EnvironmentModel = zod.object({
   GRAPHQL_PUBLIC_ORIGIN: zod
     .string({
       required_error:
-        'GRAPHQL_PUBLIC_ORIGIN is required (see: https://github.com/kamilkisiela/graphql-hive/pull/4288#issue-2195509699)',
+        'GRAPHQL_PUBLIC_ORIGIN is required (see: https://github.com/graphql-hive/platform/pull/4288#issue-2195509699)',
     })
     .url(),
   RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),

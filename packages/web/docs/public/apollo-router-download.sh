@@ -43,7 +43,7 @@ set_target() {
 
     *)
       echo "OS $OS is not supported."
-      echo "If you think that's a bug - please file an issue to https://github.com/kamilkisiela/graphql-hive/issues"
+      echo "If you think that's a bug - please file an issue to https://github.com/graphql-hive/platform/issues"
       exit 1
       ;;
   esac
