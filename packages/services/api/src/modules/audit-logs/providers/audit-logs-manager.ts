@@ -3,6 +3,7 @@ import { z } from 'zod';
 import * as Sentry from '@sentry/node';
 import { QueryAuditLogsArgs } from '../../../__generated__/types.next';
 import { User } from '../../../shared/entities';
+import { parseDateRangeInput } from '../../../shared/helpers';
 import { ClickHouse, sql } from '../../operations/providers/clickhouse-client';
 import { SqlValue } from '../../operations/providers/sql';
 import { Logger } from '../../shared/providers/logger';
@@ -40,7 +41,7 @@ export class AuditLogManager {
     logger: Logger,
     private clickHouse: ClickHouse,
   ) {
-    this.logger = logger.child({ source: 'AuditLogsManager' });
+    this.logger = logger.child({ source: 'AuditLogManager' });
   }
 
   createLogAuditEvent(event: AuditLogEvent, record: AuditLogRecordEvent): void {
@@ -90,53 +91,36 @@ export class AuditLogManager {
     props: QueryAuditLogsArgs,
   ): Promise<{ total: number; data: AuditLogModel[] }> {
     this.logger.info(
-      'Getting paginated audit logs (limit=%s, offset=%s, orgId=%s, userId=%s, action=%s)',
+      'Getting paginated audit logs (organization=%s, filter=%o, pagination=%o)',
       props.selector.organization,
-      props.filter?.endDate,
-      props.filter?.startDate,
-      props.filter?.userId,
+      props.filter,
+      props.pagination,
     );
 
-    // Handle the limit and offset for pagination
-    // let limit: SqlValue[] = [];
-    // let offset: SqlValue[] = [];
-    // if (props?.pagination?.limit) {
-    //   limit.push(sql`LIMIT ${String(props.pagination.limit)}`);
-    // } else {
-    //   limit.push(sql`LIMIT 25`);
-    // }
-    // if (props?.pagination?.offset) {
-    //   offset.push(sql`OFFSET ${String(props.pagination.offset)}`);
-    // } else {
-    //   offset.push(sql`OFFSET 0`);
-    // }
-    const limit = props.pagination?.limit ?? 25;
-    const sqlLimit = sql.raw(limit.toString());
-    const offset = props.pagination?.offset ?? 0;
-    const sqlOffset = sql.raw(offset.toString());
-
-    const where: SqlValue[] = [];
-    if (props.selector.organization) {
-      where.push(sql`organization_id = ${props.selector.organization}`);
-    } else {
-      // Handle case where organization_id is not provided
-      this.logger.warn('No organization_id provided in query');
+    if (!props.selector.organization) {
+      throw new Error('Organization ID is required');
     }
 
+    const sqlLimit = sql.raw(props.pagination?.limit?.toString()!);
+    const sqlOffset = sql.raw(props.pagination?.offset?.toString()!);
+
+    let where: SqlValue[] = [];
+    where.push(sql`organization_id = ${props.selector.organization}`);
+
     if (props.filter) {
-      // if (props.filter?.startDate) {
-      //   const dateIso = new Date(props.filter.startDate).toISOString();
-      //   where.push(sql`event_time >= ${dateIso}`);
-      // }
-      // if (props.filter?.endDate) {
-      //   const dateIso = new Date(props.filter.endDate).toISOString();
-      //   where.push(sql`event_time <= ${dateIso}`);
-      // }
       if (props.filter?.userId) {
         where.push(sql`user_id = ${props.filter.userId}`);
       }
+      if (props.filter?.from && props.filter?.to) {
+        console.log('new Date', new Date());
+        const periods = parseDateRangeInput({
+          from: new Date(props.filter.from),
+          to: new Date(props.filter.to),
+        });
+        where.push(sql`event_time >= ${periods.from.toISOString()}`);
+        where.push(sql`event_time <= ${periods.to.toISOString()}`);
+      }
     }
-
     const whereClause = where.length > 0 ? sql`WHERE ${sql.join(where, ' AND ')}` : sql``;
 
     const result = await this.clickHouse.query({
@@ -152,8 +136,19 @@ export class AuditLogManager {
       timeout: 5000,
     });
 
+    const totalResult = await this.clickHouse.query({
+      query: sql`
+        SELECT *
+        FROM audit_log
+        ${whereClause}
+        ORDER BY event_time DESC
+      `,
+      queryId: 'get-audit-logs-total',
+      timeout: 5000,
+    });
+
     return {
-      total: result.rows,
+      total: totalResult.rows,
       data: AUDIT_LOG_CLICKHOUSE_ARRAY.parse(result.data),
     };
   }

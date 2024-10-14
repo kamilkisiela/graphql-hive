@@ -20,23 +20,22 @@ export const typeDefs = gql`
     total: Int!
   }
 
-  #  todo: Handle the rest of the AuditLog types
   input AuditLogFilter {
-    startDate: DateTime
-    endDate: DateTime
+    from: DateTime
+    to: DateTime
     userId: ID
   }
 
-  input AuditLogPaginationInput {
-    limit: Int! = 25
-    offset: Int! = 0
+  input AuditLogPaginationFilter {
+    limit: Int = 25
+    offset: Int = 0
   }
 
   extend type Query {
     auditLogs(
       selector: OrganizationSelectorInput!
       filter: AuditLogFilter
-      pagination: AuditLogPaginationInput
+      pagination: AuditLogPaginationFilter
     ): AuditLogConnection!
   }
 

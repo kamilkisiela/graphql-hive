@@ -4,11 +4,10 @@ import { AuditLogManager } from '../../providers/audit-logs-manager';
 import type { QueryResolvers } from './../../../../__generated__/types.next';
 
 export const auditLogs: NonNullable<QueryResolvers['auditLogs']> = async (_parent, args, ctx) => {
-  const isAdmin = ctx.injector
-    .get(AuthManager)
-    .getCurrentUser()
-    ?.then(user => user.isAdmin);
-  if (!isAdmin) {
+  const isOwner = ctx.injector.get(AuthManager).ensureOrganizationOwnership({
+    organization: args.selector.organization,
+  });
+  if (!isOwner) {
     throw new GraphQLError('Unauthorized: You are not authorized to perform this action');
   }
 
@@ -18,8 +17,6 @@ export const auditLogs: NonNullable<QueryResolvers['auditLogs']> = async (_paren
     filter: filter,
     pagination: pagination,
   });
-
-  console.log('auditLogs', auditLogs);
 
   return {
     nodes: auditLogs.data,
