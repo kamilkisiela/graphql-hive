@@ -55,7 +55,7 @@ To run integration tests locally, from the pre-build Docker image, follow:
 5. Set the needed env vars, and use Docker Compose to run all local services:
 
    ```bash
-   export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
+   export DOCKER_REGISTRY="ghcr.io/graphql-hive/"
    export DOCKER_TAG=":IMAGE_TAG_HERE"
    
    docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
@@ -101,7 +101,7 @@ To run integration tests locally, from the pre-build Docker image, follow:
 4. Build source code: `pnpm build`
 5. Decide on the commit ID / Docker image tag you would like to use and set it as env var:
    ```bash
-   export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
+   export DOCKER_REGISTRY="ghcr.io/graphql-hive/"
    export DOCKER_TAG=":IMAGE_TAG_HERE"
    ```
 6. Run the e2e environment, by running:

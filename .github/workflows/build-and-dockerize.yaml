@@ -20,7 +20,7 @@ on:
         default: ghcr.io
         type: string
       imageName:
-        default: ${{ github.repository }}
+        default: ${{ github.repository_owner }}
         type: string
       imageTag:
         required: true
@@ -172,7 +172,7 @@ jobs:
           ${{ inputs.dockerize && github.event_name == 'pull_request' && inputs.publishPrComment }}
         with:
           message: |
-            🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):
+            🐋 This PR was built and pushed to the following [Docker images](https://github.com/graphql-hive?ecosystem=container&tab=packages&visibility=public) (tag: `${{ inputs.imageTag }}`):
 
             <details>
               <summary>Docker Bake metadata</summary>

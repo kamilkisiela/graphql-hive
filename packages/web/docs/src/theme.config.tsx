@@ -14,7 +14,7 @@ import { cn } from './lib';
 const HiveLogo = PRODUCTS.HIVE.logo;
 
 export default defineConfig({
-  docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
+  docsRepositoryBase: 'https://github.com/graphql-hive/platform/tree/main/packages/web/docs',
   color: {
     hue: {
       dark: 67.1,
@@ -77,7 +77,7 @@ export default defineConfig({
         <Giscus
           // ensure giscus is reloaded when client side route is changed
           key={route}
-          repo="kamilkisiela/graphql-hive"
+          repo="graphql-hive/platform"
           repoId="R_kgDOHWr5kA"
           category="Docs Discussions"
           categoryId="DIC_kwDOHWr5kM4CSDSS"

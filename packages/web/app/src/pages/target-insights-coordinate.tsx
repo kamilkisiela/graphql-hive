@@ -148,7 +148,7 @@ function SchemaCoordinateView(props: {
               <LegacyLink
                 as="a"
                 variant="primary"
-                href="https://github.com/kamilkisiela/graphql-hive/issues/3290"
+                href="https://github.com/graphql-hive/platform/issues/3290"
               >
                 Please reach out to us directly or via the GitHub issue
               </LegacyLink>

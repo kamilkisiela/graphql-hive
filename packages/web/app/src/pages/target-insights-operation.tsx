@@ -138,7 +138,7 @@ function OperationView({
           <AlertDescription>
             Hive is currently only collecting usage data for this operation. We are currently
             evaluating what kind of insights are useful for subscriptions.{' '}
-            <Link variant="primary" href="https://github.com/kamilkisiela/graphql-hive/issues/3290">
+            <Link variant="primary" href="https://github.com/graphql-hive/platform/issues/3290">
               Please reach out to us directly or via the GitHub issue
             </Link>
             .

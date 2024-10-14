@@ -6,7 +6,7 @@ import diagram from '../../../../public/docs/pages/self-hosting/diagram.png'
 
 If you are not able to use Hive Cloud service, you can self-host it. The self-hosted version is free
 and open-source. You can find the full
-[source code on GitHub](https://github.com/kamilkisiela/graphql-hive).
+[source code on GitHub](https://github.com/graphql-hive/platform).
 
 <Callout>
   **Self-hosting Hive** does currently not support all of the features as the Cloud version.
@@ -25,7 +25,7 @@ The easiest way of running GraphQL Hive is using [Docker](https://www.docker.com
 [docker-compose](https://docs.docker.com/compose/).
 
 All the services required for running GraphQL Hive are published to the GitHub container registry
-([GraphQL Hive Docker Images](https://github.com/kamilkisiela?tab=packages&repo_name=graphql-hive)).
+([GraphQL Hive Docker Images](https://github.com/graphql-hive?tab=packages)).
 
 Please make sure to install the Docker daemon as well as `docker-compose` on your machine before
 proceeding.
@@ -68,7 +68,7 @@ The following diagram shows the architecture of a self-hosted GraphQL Hive insta
 ### Services Overview
 
 > The dependencies between the different services are described in the
-> [`docker-compose.community.yml`](https://github.com/kamilkisiela/graphql-hive/blob/main/docker/docker-compose.community.yml)
+> [`docker-compose.community.yml`](https://github.com/graphql-hive/platform/blob/main/docker/docker-compose.community.yml)
 > file.
 
 #### Databases / Storage
@@ -128,7 +128,7 @@ in less than 15 minutes.
 ## Running GraphQL Hive
 
 First download the `docker-compose.community.yml` file from the
-[GitHub repository](https://github.com/kamilkisiela/graphql-hive/blob/main/docker/docker-compose.community.yml)
+[GitHub repository](https://github.com/graphql-hive/platform/blob/main/docker/docker-compose.community.yml)
 using `wget`. This's going to download the latest version available.
 
 <Callout type="info">
@@ -139,7 +139,7 @@ using `wget`. This's going to download the latest version available.
 > link below
 >
 > ```sh
-> bash wget https://raw.githubusercontent.com/kamilkisiela/graphql-hive/main/docker/docker-compose.community.yml
+> bash wget https://raw.githubusercontent.com/graphql-hive/platform/main/docker/docker-compose.community.yml
 > ```
 
 After downloading the `docker-compose.community.yml` file, this includes all the services required
@@ -150,8 +150,8 @@ to set some environment variables.
   **Docker Tag.** Docker images are built and published for each single commit within the GraphQL
   Hive repository and tagged with the corresponding commit sha. You can also find all available
   images on the [Hive Docker Registry
-  Overview](https://github.com/kamilkisiela?tab=packages&repo_name=graphql-hive). We recommend using
-  one of the latest versions. Right now we do not have a stable release strategy yet. However, every
+  Overview](https://github.com/graphql-hive?tab=packages&repo_name=platform). We recommend using one
+  of the latest versions. Right now we do not have a stable release strategy yet. However, every
   commit on the `main` branch can be considered as stable as it is the version we are running in
   production. After picking a version set the `DOCKER_TAG` environment variable to that value (e.g.
   `export DOCKER_TAG=":3b635063294a4636ee89579f57e531de04ef087f"`). We do not recommend using the
@@ -159,7 +159,7 @@ to set some environment variables.
 </Callout>
 
 ```bash
-export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
+export DOCKER_REGISTRY="ghcr.io/graphql-hive/"
 export DOCKER_TAG=":latest" # Pin this to an exact commit hash from our `main` branch, we publish a Docker image per each commit on main, and for PRs.
 export HIVE_ENCRYPTION_SECRET=$(openssl rand -hex 16)
 export HIVE_APP_BASE_URL="http://localhost:8080"
@@ -365,9 +365,8 @@ After doing your first testing with GraphQL Hive you should consider the followi
 - Set up a monitoring solution for your GraphQL Hive instance (leverage healthchecks, sentry error
   reporting, prometheus metrics, etc.).
 - Configure the `emails` service to use a real email provider (by default it uses `sendmail`).
-- Watch and follow the
-  [GraphQL Hive GitHub repository](https://github.com/kamilkisiela/graphql-hive) for new releases
-  and updates.
+- Watch and follow the [GraphQL Hive GitHub repository](https://github.com/graphql-hive/platform)
+  for new releases and updates.
 - Set up a weekly reminder for updating your GraphQL Hive instance to the latest version and
   applying maintenance.
 - Get yourself familiar with SuperTokens and follow their changelogs in order to keep your
@@ -379,12 +378,12 @@ After doing your first testing with GraphQL Hive you should consider the followi
 
 You can review the configuration options of all the services in the corresponding Readme files.
 
-- [`@hive/app`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/app/README.md)
-- [`@hive/server`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/server/README.md)
-- [`@hive/schema`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/schema/README.md)
-- [`@hive/webhooks`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/webhooks/README.md)
-- [`@hive/usage`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/usage/README.md)
-- [`@hive/usage-ingestor`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/usage-ingestor/README.md)
-- [`@hive/tokens`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/tokens/README.md)
-- [`@hive/storage`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/storage/README.md)
-- [`@hive/emails`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/emails/README.md)
+- [`@hive/app`](https://github.com/graphql-hive/platform/tree/main/packages/web/app/README.md)
+- [`@hive/server`](https://github.com/graphql-hive/platform/tree/main/packages/services/server/README.md)
+- [`@hive/schema`](https://github.com/graphql-hive/platform/tree/main/packages/services/schema/README.md)
+- [`@hive/webhooks`](https://github.com/graphql-hive/platform/tree/main/packages/services/webhooks/README.md)
+- [`@hive/usage`](https://github.com/graphql-hive/platform/tree/main/packages/services/usage/README.md)
+- [`@hive/usage-ingestor`](https://github.com/graphql-hive/platform/tree/main/packages/services/usage-ingestor/README.md)
+- [`@hive/tokens`](https://github.com/graphql-hive/platform/tree/main/packages/services/tokens/README.md)
+- [`@hive/storage`](https://github.com/graphql-hive/platform/tree/main/packages/services/storage/README.md)
+- [`@hive/emails`](https://github.com/graphql-hive/platform/tree/main/packages/services/emails/README.md)

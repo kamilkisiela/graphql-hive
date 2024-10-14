@@ -10,7 +10,7 @@ on:
         default: ghcr.io
         type: string
       imageName:
-        default: ${{ github.repository }}
+        default: ${{ github.repository_owner }}
         type: string
       imageTag:
         required: true

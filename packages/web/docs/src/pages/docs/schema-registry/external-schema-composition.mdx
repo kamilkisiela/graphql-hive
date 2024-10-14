@@ -57,7 +57,7 @@ address must contain a valid hostname (not an IP address), and the port must be 
   </Tabs.Tab>
   <Tabs.Tab>
 We provide a prebuilt
-[Docker image](https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fcomposition-federation-2)
+[Docker image](https://github.com/graphql-hive/platform/pkgs/container/composition-federation-2)
 for running External Composition Service for Apollo Federation v2.
 
 The pre-built image implements the best-practice to secure your endpoint, and uses the latest
@@ -71,7 +71,7 @@ To run the container, you can use the following command:
 
 ```bash
 docker run -p 3069:3069 -e SECRET="MY_SECRET_HERE" \
-  ghcr.io/kamilkisiela/graphql-hive/composition-federation-2
+  ghcr.io/graphql-hive/composition-federation-2
 ```
 
 You should make this service publicly available, and then configure it in Hive platform.
@@ -164,7 +164,7 @@ await server.listen({
 
 <Callout type="info">
   You can also find here [an example using NodeJS's HTTP
-  library](https://github.com/kamilkisiela/graphql-hive/blob/4af001a7102b255bd8ceb8e3f01722faceb8f2f3/packages/services/external-composition/federation-2).
+  library](https://github.com/graphql-hive/platform/blob/4af001a7102b255bd8ceb8e3f01722faceb8f2f3/packages/services/external-composition/federation-2).
 </Callout>
 
 To make sure your server is only receiving requests from Hive, you can use the secret provided in
