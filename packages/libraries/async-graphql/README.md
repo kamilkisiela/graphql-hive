@@ -2,9 +2,6 @@
 
 ---
 
-[GraphQL Hive](https://the-guild.dev/graphql/hive) is a schema registry for GraphQL. With Hive you
-manage and collaborate on all your GraphQL schemas and GraphQL workflows, regardless of the
-underlying strategy, engine or framework you’re using: this includes Schema Stitching, Apollo
-Federation, or just a traditional monolith approach.
+This is a client for integrating [GraphQL Hive](https://the-guild.dev/graphql/hive) with Rust servers using the `async-graphql` library. It allows you to report GraphQL schema changes and collect usage metrics, providing observability and performance tracking for your `async-graphql` API, without needing Apollo Router as a gateway.
 
-> Hive and all of its components are developed and managed as an MIT open-source project.
+> Hive is an open-source schema registry and observability tool for managing GraphQL workflows, developed under the MIT license.
