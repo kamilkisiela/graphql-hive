@@ -1,5 +1,18 @@
 # @graphql-hive/envelop
 
+## 0.33.9
+
+### Patch Changes
+
+- [#5667](https://github.com/kamilkisiela/graphql-hive/pull/5667)
+  [`be5d39c`](https://github.com/kamilkisiela/graphql-hive/commit/be5d39cbf08d0681d142e83a708d300abc504c44)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Report enum values when an enum is used
+  as an output type
+
+- Updated dependencies
+  [[`be5d39c`](https://github.com/kamilkisiela/graphql-hive/commit/be5d39cbf08d0681d142e83a708d300abc504c44)]:
+  - @graphql-hive/core@0.8.1
+
 ## 0.33.8
 
 ### Patch Changes
