@@ -1,4 +1,4 @@
-use crate::agent::{AgentError, ExecutionReport, UsageAgent};
+use graphql_hive_core::agent::{AgentError, ExecutionReport, UsageAgent};
 use apollo_router::layers::ServiceBuilderExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
@@ -120,7 +120,7 @@ impl UsagePlugin {
 
         let excluded_operation_names: HashSet<String> = config
             .exclude
-            .unwrap_or_else(|| vec![])
+            .unwrap_or_default()
             .clone()
             .into_iter()
             .collect();

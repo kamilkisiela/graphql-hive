@@ -140,3 +140,4 @@ schema.graphql
 resolvers.generated.ts
 
 docker/docker-compose.override.yml
+packages/libraries/async-graphql/target/

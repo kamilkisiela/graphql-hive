@@ -1,0 +1,12 @@
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-graphql = { git = "https://github.com/XiNiHa/async-graphql.git", rev = "16785021140660f8d62b85c17fec51428f4eb523" }
+async-graphql-axum = { git = "https://github.com/XiNiHa/async-graphql.git", rev = "16785021140660f8d62b85c17fec51428f4eb523" }
+axum = "0.7.7"
+hyper = "1.4.1"
+tokio = { version = "1.40.0", features = ["full"] }
+graphql-hive-async-graphql-extension = { path = "../", features = ["axum"] }
