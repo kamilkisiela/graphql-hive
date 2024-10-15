@@ -84,12 +84,12 @@ export type CheckFailureReasonCode =
 export type CheckPolicyResultRecord = CheckPolicyResponse[number] | { message: string };
 export type SchemaCheckWarning = {
   message: string;
-  source: string;
-  line: number;
-  column: number;
-  ruleId: string;
-  endLine: number | null;
-  endColumn: number | null;
+  source?: string;
+  line?: number | null;
+  column?: number | null;
+  ruleId: string | null;
+  endLine?: number | null;
+  endColumn?: number | null;
 };
 
 export type SchemaCheckSuccess = {

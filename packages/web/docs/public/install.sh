@@ -38,7 +38,7 @@
 
       unsupported_arch() {
         echoerr "GraphQL Hive CLI does not support \$@ at this time."
-        echo "If you think that's a bug - please file an issue to https://github.com/kamilkisiela/graphql-hive/issues"
+        echo "If you think that's a bug - please file an issue to https://github.com/graphql-hive/platform/issues"
         exit 1
       }
 

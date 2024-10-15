@@ -1,11 +1,11 @@
 {
   "name": "@graphql-hive/envelop",
-  "version": "0.33.8",
+  "version": "0.33.9",
   "type": "module",
   "description": "GraphQL Hive + GraphQL Envelop",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive",
+    "url": "graphql-hive/platform",
     "directory": "packages/libraries/envelop"
   },
   "homepage": "https://the-guild.dev/graphql/hive",

@@ -70,7 +70,7 @@ will be used for authenticating the supergraph polling from the CDN.
         --env HIVE_CDN_ENDPOINT="..." \ # The endpoint of your CDN access token
         --env HIVE_CDN_KEY="..." \ # The CDN access token
         --rm \
-        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
+        ghcr.io/graphql-hive/apollo-router:latest
       ```
 
       Passing command-line arguments:
@@ -80,7 +80,7 @@ will be used for authenticating the supergraph polling from the CDN.
         --env HIVE_CDN_ENDPOINT="..." \ # The endpoint of your CDN access token
         --env HIVE_CDN_KEY="..." \ # The CDN access token
         --rm \
-        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest --log debug
+        ghcr.io/graphql-hive/apollo-router:latest --log debug
       ```
 
   </Tabs.Tab>
@@ -92,7 +92,7 @@ will be used for authenticating the supergraph polling from the CDN.
     Once your project is ready, update `Cargo.toml` file with the following dependencies:
 
     ```toml filename="Cargo.toml"
-    graphql-hive-router = { git = "https://github.com/kamilkisiela/graphql-hive", branch = "main" }
+    graphql-hive-router = { git = "https://github.com/graphql-hive/platform", branch = "main" }
     ```
 
     Next, update `src/main.rs` file with the following content to add GraphQL Hive:
@@ -117,7 +117,7 @@ will be used for authenticating the supergraph polling from the CDN.
 
     Finally, [build the binary](https://www.apollographql.com/docs/router/customizations/custom-binary/#2-compile-the-router) and [run it](https://www.apollographql.com/docs/router/customizations/custom-binary/#3-run-the-compiled-binary) using `HIVE_CDN_ENDPOINT` and `HIVE_CDN_KEY` environment variables.
 
-    In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/kamilkisiela/graphql-hive/issues/new) in GraphQL Hive repository.
+    In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/graphql-hive/platform/issues/new) in GraphQL Hive repository.
 
   </Tabs.Tab>
 </Tabs>
@@ -170,7 +170,7 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
         --env HIVE_CDN_KEY="..." \
         --mount "type=bind,source=/home/usr/src/hive/router.yaml,target=/dist/config/router.yaml" \
         --rm \
-        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
+        ghcr.io/graphql-hive/apollo-router:latest
       ```
 
       To follow the same convention as Apollo Router's official Docker image, the config file is also located at `/dist/config/router.yaml`.
@@ -184,7 +184,7 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
     Once your project is ready, update `Cargo.toml` file with the following dependencies:
 
     ```toml filename="Cargo.toml"
-    graphql-hive-router = { git = "https://github.com/kamilkisiela/graphql-hive", branch = "main" }
+    graphql-hive-router = { git = "https://github.com/graphql-hive/platform", branch = "main" }
     ```
 
     Next, update `src/main.rs` file with the following content to add GraphQL Hive:
@@ -212,7 +212,7 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
     Finally, [build the binary](https://www.apollographql.com/docs/router/customizations/custom-binary/#2-compile-the-router) and [run it](https://www.apollographql.com/docs/router/customizations/custom-binary/#3-run-the-compiled-binary) using `HIVE_TOKEN`, `HIVE_CDN_ENDPOINT` and `HIVE_CDN_KEY` environment variables.
     Don't forget to create `router.yaml` file with configuration for `hive.usage` plugin.
 
-    In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/kamilkisiela/graphql-hive/issues/new) in GraphQL Hive repository.
+    In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/graphql-hive/platform/issues/new) in GraphQL Hive repository.
 
   </Tabs.Tab>
 </Tabs>

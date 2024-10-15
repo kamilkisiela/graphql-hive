@@ -34,7 +34,7 @@ export function CommunitySection({ className }: { className?: string }) {
         >
           <CallToAction
             variant="primary-inverted"
-            href="https://github.com/kamilkisiela/graphql-hive/discussions"
+            href="https://github.com/graphql-hive/platform/discussions"
             target="_blank"
             rel="noreferrer"
           >

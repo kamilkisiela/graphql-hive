@@ -1,11 +1,11 @@
 {
   "name": "@graphql-hive/yoga",
-  "version": "0.38.0",
+  "version": "0.38.1",
   "type": "module",
   "description": "GraphQL Hive + GraphQL Yoga",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive",
+    "url": "graphql-hive/platform",
     "directory": "packages/libraries/yoga"
   },
   "homepage": "https://the-guild.dev/graphql/hive",

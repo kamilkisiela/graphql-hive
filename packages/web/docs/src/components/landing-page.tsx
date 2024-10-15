@@ -83,8 +83,8 @@ export function IndexPage(): ReactElement {
             <CallToAction variant="primary-inverted" href="https://app.graphql-hive.com">
               Get started for free
             </CallToAction>
-            <CallToAction variant="secondary" href="/#pricing">
-              View Pricing
+            <CallToAction variant="secondary" href="/docs">
+              Documentation
             </CallToAction>
           </HeroLinks>
         </Hero>

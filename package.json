@@ -1,10 +1,9 @@
 {
-  "name": "graphql-hive",
-  "version": "0.0.0",
+  "name": "platform",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive"
+    "url": "graphql-hive/platform"
   },
   "author": {
     "email": "contact@the-guild.dev",

@@ -8,13 +8,14 @@ WORKDIR /usr/src/app
 
 RUN npm install --global @graphql-hive/cli@${CLI_VERSION}
 
+LABEL org.opencontainers.image.licenses=MIT
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
 LABEL org.opencontainers.image.description=$IMAGE_DESCRIPTION
 LABEL org.opencontainers.image.authors="The Guild"
 LABEL org.opencontainers.image.vendor="Kamil Kisiela"
-LABEL org.opencontainers.image.url="https://github.com/kamilkisiela/graphql-hive"
-LABEL org.opencontainers.image.source="https://github.com/kamilkisiela/graphql-hive"
+LABEL org.opencontainers.image.url="https://github.com/graphql-hive/platform"
+LABEL org.opencontainers.image.source="https://github.com/graphql-hive/platform"
 
 ENV ENVIRONMENT production
 ENV RELEASE $RELEASE

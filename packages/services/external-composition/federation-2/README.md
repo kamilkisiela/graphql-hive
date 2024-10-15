@@ -14,18 +14,18 @@ Start by deciding on your encryption secret. This is needed in order to ensure y
 secured and can be triggered only by Hive platform. Your secret can be any string you decide, and it
 will be used as private key to hash the requests to your composition service.
 
-We are going to use that secret later as `SECERT` env var, and also in Hive dashboard.
+We are going to use that secret later as `SECRET` env var, and also in Hive dashboard.
 
 ## Running as Docker container
 
-You can run this service as Docker container
-(`ghcr.io/kamilkisiela/graphql-hive/composition-federation-2`), from the published
-[Docker image we provide](https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fcomposition-federation-2).
+You can run this service as Docker container (`ghcr.io/graphql-hive/composition-federation-2`), from
+the published
+[Docker image we provide](https://github.com/orgs/graphql-hive/packages/container/package/graphql-hive%2Fcomposition-federation-2).
 
 To run the service, use the following command:
 
 ```
-docker run -p 3069 -e SECRET="MY_SECRET_HERE" ghcr.io/kamilkisiela/graphql-hive/composition-federation-2
+docker run -p 3069 -e SECRET="MY_SECRET_HERE" ghcr.io/graphql-hive/composition-federation-2
 ```
 
 The container runs on port `3069` by default (you can chnage it using `PORT` env var), and listens

@@ -1,5 +1,22 @@
 # @graphql-hive/cli
 
+## 0.44.1
+
+### Patch Changes
+
+- Updated dependencies
+  [[`be5d39c`](https://github.com/kamilkisiela/graphql-hive/commit/be5d39cbf08d0681d142e83a708d300abc504c44)]:
+  - @graphql-hive/core@0.8.1
+
+## 0.44.0
+
+### Minor Changes
+
+- [#5661](https://github.com/kamilkisiela/graphql-hive/pull/5661)
+  [`ed25aca`](https://github.com/kamilkisiela/graphql-hive/commit/ed25aca53a0c064adf50d13b0aa3407028d72049)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Improve error output for rejected app deployment
+  creation. The CLI now shows which operation is affected and the reason for the failed upload.
+
 ## 0.43.0
 
 ### Minor Changes
