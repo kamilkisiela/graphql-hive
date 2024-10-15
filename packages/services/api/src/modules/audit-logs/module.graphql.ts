@@ -1,6 +1,11 @@
 import { gql } from 'graphql-modules';
 
 export const typeDefs = gql`
+  """
+  AuditLog is a record of actions performed by users in
+  the organization. It is used to track changes and
+  actions performed by users.
+  """
   interface AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -11,8 +16,14 @@ export const typeDefs = gql`
     userId: ID!
     userEmail: String!
     organizationId: ID!
-    user: User # This one is nullable because it can be deleted!
-    organization: Organization # This one is nullable because it can be deleted!
+    """
+    User can be null if the user is deleted
+    """
+    user: User
+    """
+    Organization can be null if the organization is deleted
+    """
+    organization: Organization
   }
 
   type AuditLogConnection {
@@ -20,12 +31,20 @@ export const typeDefs = gql`
     total: Int!
   }
 
+  """
+  AuditLogFilter is used to filter audit logs by
+  date range and user id.
+  """
   input AuditLogFilter {
     from: DateTime
     to: DateTime
     userId: ID
   }
 
+  """
+  AuditLogPaginationFilter is used to paginate audit logs.
+  By default, it returns 25 records with an offset of 0.
+  """
   input AuditLogPaginationFilter {
     limit: Int = 25
     offset: Int = 0
@@ -39,6 +58,9 @@ export const typeDefs = gql`
     ): AuditLogConnection!
   }
 
+  """
+  Schema Policy Audit Logs
+  """
   type SchemaPolicySettingsUpdatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -76,7 +98,9 @@ export const typeDefs = gql`
     serviceName: String!
   }
 
-  # Project Audit Logs
+  """
+  Project Audit Logs
+  """
   type ProjectCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -101,7 +125,9 @@ export const typeDefs = gql`
     projectName: String!
   }
 
-  # User Role Audit Logs
+  """
+  User Role Audit Logs
+  """
   type RoleCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -137,7 +163,9 @@ export const typeDefs = gql`
     updatedFields: JSON!
   }
 
-  # Support Ticket Audit Logs
+  """
+  Support Ticket Audit Logs
+  """
   type SupportTicketCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -156,7 +184,9 @@ export const typeDefs = gql`
     updatedFields: JSON!
   }
 
-  # Laboratory Collection Audit Logs
+  """
+  Laboratory Collection Audit Logs
+  """
   type CollectionCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -182,7 +212,10 @@ export const typeDefs = gql`
     collectionId: String!
     collectionName: String!
   }
-  # Operation In Document Collection Audit Logs
+
+  """
+  Operation In Document Collection Audit Logs
+  """
   type OperationInDocumentCollectionCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -213,7 +246,9 @@ export const typeDefs = gql`
     operationId: String!
   }
 
-  # Organization Audit Logs
+  """
+  Organization Audit Logs
+  """
   type OrganizationSettingsUpdatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -234,7 +269,10 @@ export const typeDefs = gql`
     eventTime: DateTime!
     record: AuditLogIdRecord!
     newOwnerId: String!
-    newOwnerEmail: String # This one is nullable because the mutation can fail
+    """
+    newOwnerEmail can be null if the mutation fails
+    """
+    newOwnerEmail: String
   }
 
   type OrganizationCreatedAuditLog implements AuditLog {
@@ -260,7 +298,9 @@ export const typeDefs = gql`
     updatedFields: JSON!
   }
 
-  # Target
+  """
+  Target Audit Logs
+  """
   type TargetCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -288,7 +328,9 @@ export const typeDefs = gql`
     targetName: String!
   }
 
-  # User
+  """
+  User Audit Logs
+  """
   type UserInvitedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
@@ -320,7 +362,9 @@ export const typeDefs = gql`
     updatedFields: JSON!
   }
 
-  # Subscription
+  """
+  Subscription Audit Logs
+  """
   type SubscriptionCreatedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
