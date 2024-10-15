@@ -3,7 +3,6 @@ import { z } from 'zod';
 import * as Sentry from '@sentry/node';
 import { QueryAuditLogsArgs } from '../../../__generated__/types.next';
 import { User } from '../../../shared/entities';
-import { parseDateRangeInput } from '../../../shared/helpers';
 import { ClickHouse, sql } from '../../operations/providers/clickhouse-client';
 import { SqlValue } from '../../operations/providers/sql';
 import { Logger } from '../../shared/providers/logger';
@@ -113,12 +112,8 @@ export class AuditLogManager {
         where.push(sql`user_id = ${props.filter.userId}`);
       }
       if (props.filter?.from && props.filter?.to) {
-        const periods = parseDateRangeInput({
-          from: new Date(props.filter.from),
-          to: new Date(props.filter.to),
-        });
         where.push(
-          sql`event_time >= ${periods.from.toISOString()} AND event_time <= ${periods.to.toISOString()}`,
+          sql`event_time >= ${new Date(props.filter.from).toISOString()} AND event_time <= ${new Date(props.filter.to).toISOString()}`,
         );
       }
     }
