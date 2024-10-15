@@ -6,6 +6,7 @@ import { User } from '../../../shared/entities';
 import { ClickHouse, sql } from '../../operations/providers/clickhouse-client';
 import { SqlValue } from '../../operations/providers/sql';
 import { Logger } from '../../shared/providers/logger';
+import { formatToClickhouseDateTime } from '../helpers';
 import { AuditLogEvent, auditLogSchema } from './audit-logs-types';
 
 export const AUDIT_LOG_CLICKHOUSE_OBJECT = z.object({
@@ -112,9 +113,9 @@ export class AuditLogManager {
         where.push(sql`user_id = ${props.filter.userId}`);
       }
       if (props.filter?.from && props.filter?.to) {
-        where.push(
-          sql`event_time >= ${new Date(props.filter.from).toISOString()} AND event_time <= ${new Date(props.filter.to).toISOString()}`,
-        );
+        const from = formatToClickhouseDateTime(props.filter.from.toISOString());
+        const to = formatToClickhouseDateTime(props.filter.to.toISOString());
+        where.push(sql`event_time >= ${from} AND event_time <= ${to}`);
       }
     }
 
