@@ -111,8 +111,7 @@
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
       "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch",
       "@theguild/components": "patches/@theguild__components.patch",
-      "countup.js": "patches/countup.js.patch",
-      "nextra-theme-docs": "patches/nextra-theme-docs.patch"
+      "countup.js": "patches/countup.js.patch"
     }
   }
 }
