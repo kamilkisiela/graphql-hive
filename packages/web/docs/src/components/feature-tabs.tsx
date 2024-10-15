@@ -122,7 +122,7 @@ export function FeatureTabs({ className }: { className?: string }) {
                 key={tab}
                 value={tab}
                 className={
-                  'rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
+                  'hive-focus rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
                   ' border-transparent font-medium leading-6 text-green-800 sm:border' +
                   ' flex flex-1 justify-center gap-2.5 p-4' +
                   ' text-base sm:text-xs lg:text-base [&>svg]:shrink-0 [@media(min-width:673px)]:text-sm' +

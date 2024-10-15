@@ -5,7 +5,7 @@ import { CallToAction, Heading } from '@theguild/components';
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
     <Root delayDuration={0}>
-      <Trigger className="text-left">{children}</Trigger>
+      <Trigger className="hive-focus rounded text-left">{children}</Trigger>
       <Content
         sideOffset={5}
         className="bg-green-1000 z-20 rounded p-2 text-sm font-normal leading-4 text-white shadow"
@@ -85,7 +85,7 @@ export function Pricing(): ReactElement {
       <div className="mx-auto box-border w-full max-w-[1200px]">
         <header className="px-6">
           <Heading as="h2" size="md" className="text-green-1000 text-center">
-            <a id="pricing">Pricing</a>
+            Pricing
           </Heading>
           <p className="mx-auto mt-4 max-w-xl text-balance text-center text-green-800 lg:text-wrap">
             All features are available on all plans — including the free&nbsp;plan. Our pricing is
