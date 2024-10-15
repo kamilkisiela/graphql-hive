@@ -2026,8 +2026,8 @@ importers:
         specifier: 1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/components':
-        specifier: 7.0.0-alpha-20241011172058-33b9f16e93a282e39112338a62ae24a44f613a83
-        version: 7.0.0-alpha-20241011172058-33b9f16e93a282e39112338a62ae24a44f613a83(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
+        specifier: 7.0.0
+        version: 7.0.0(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -4446,6 +4446,9 @@ packages:
   '@floating-ui/utils@0.2.2':
     resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
 
+  '@formatjs/intl-localematcher@0.5.5':
+    resolution: {integrity: sha512-t5tOGMgZ/i5+ALl2/offNqAQq/lfUnKLEw0mXQI4N4bqpedhrSE+fyKLpwnd22sK0dif6AV+ufQcTsKShB9J1g==}
+
   '@giscus/react@3.0.0':
     resolution: {integrity: sha512-hgCjLpg3Wgh8VbTF5p8ZLcIHI74wvDk1VIFv12+eKhenNVUDjgwNg2B1aq/3puyHOad47u/ZSyqiMtohjy/OOA==}
     peerDependencies:
@@ -5480,8 +5483,8 @@ packages:
     resolution: {integrity: sha512-lH8bYk2kqfbKsht/Gejd8K+y069ZXPHBfrlcj1ptS6xlJbHhncHxpFyy57W+PTuCcN+MPGVjs+3CiufG8EUrCQ==}
     engines: {node: '>= 10'}
 
-  '@next/bundle-analyzer@14.2.13':
-    resolution: {integrity: sha512-CQOVKmfenD9HsG4AmyXG2ElMvtGKAT9TlS2JLgpL/EORi4WX+QMiQ8Ri6b+A7HRT+AiUGjsYnocIOET59i6Jfw==}
+  '@next/bundle-analyzer@14.2.15':
+    resolution: {integrity: sha512-W6iyrp/3G7WbIztDcNt+owYX1iv37m9f4RJs0fa/Ayw4EDdjNPX6qKQrC7gBrESHV3FuchED+8R+CNiw1i78eQ==}
 
   '@next/env@13.5.6':
     resolution: {integrity: sha512-Yac/bV5sBGkkEXmAX5FWPS9Mmo2rthrOPRQQNfycJPkjUAUclomCPH7QFVCDQ4Mp2k2K1SSM6m0zrxYrOwtFQw==}
@@ -8004,8 +8007,8 @@ packages:
   '@theguild/buddy@0.1.0':
     resolution: {integrity: sha512-eaABtwy4vzvU8H+ocjph0lrCguza8vS3DKhc5gfFtHOzBimLJa9N2qYjrTJkslkoB7XNSkU6UYlSDvUJBieh+g==}
 
-  '@theguild/components@7.0.0-alpha-20241011172058-33b9f16e93a282e39112338a62ae24a44f613a83':
-    resolution: {integrity: sha512-gJQbBewth43qYmTCQdNzlBrq3EdbjwDxIBrl3EeOi0uMfK+6pts1Pd1BOJB5omzibxXWgWfoB93T76g7Chcb5w==}
+  '@theguild/components@7.0.0':
+    resolution: {integrity: sha512-1yr2oieoKpOYXK7UMNP77weFNv6QzgxQZI8nk/GcXohYFO25SKoajE+hFRx+j3WKsgZp36a3pitGnOZbtqgx/w==}
     peerDependencies:
       next: ^13 || ^14
       react: ^18.2.0
@@ -13465,16 +13468,16 @@ packages:
       sass:
         optional: true
 
-  nextra-theme-docs@3.0.8:
-    resolution: {integrity: sha512-3kCc+01KPDolaUaxQD665a1bdy9ZN1HnC/42/7yL4GspAP7BSprKBvkU4rRz9xCFYIYbxDjq6NYV6FWuOnO94g==}
+  nextra-theme-docs@3.0.11:
+    resolution: {integrity: sha512-yRWVw5d9MDn0olgaZ1mEcMUOIkxtHce4lJLpkYo6YgPnrXvwO3wRLEry5zU4aWUUJGTfxkGOWcOgFqVFcOq7XA==}
     peerDependencies:
       next: '>=13'
-      nextra: 3.0.8
+      nextra: 3.0.11
       react: '>=18'
       react-dom: '>=18'
 
-  nextra@3.0.8:
-    resolution: {integrity: sha512-7YceCGQOPnEMtqIoDRuNg+BvUc4GpUTPJeZsuKEeJ9AwVgCFRPhCJZoDuGNkIEw3pKAqHUaWFm9JXFytHeBRUQ==}
+  nextra@3.0.11:
+    resolution: {integrity: sha512-P/YidS1aQHrMAHrEbX1skSrOv0T/SFwCaffVt5nSpV+mDgPTUmJXP992GZAarUIAYGKR07mYrfDiEegp6PNQvg==}
     engines: {node: '>=18'}
     peerDependencies:
       next: '>=13'
@@ -17549,10 +17552,10 @@ snapshots:
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sso-oidc': 3.596.0
-      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/client-sso-oidc': 3.596.0(@aws-sdk/client-sts@3.596.0)
+      '@aws-sdk/client-sts': 3.596.0
       '@aws-sdk/core': 3.592.0
-      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
+      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17657,13 +17660,13 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sso-oidc@3.596.0':
+  '@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0)':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/client-sts': 3.596.0
       '@aws-sdk/core': 3.592.0
-      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
+      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17700,6 +17703,7 @@ snapshots:
       '@smithy/util-utf8': 3.0.0
       tslib: 2.7.0
     transitivePeerDependencies:
+      - '@aws-sdk/client-sts'
       - aws-crt
 
   '@aws-sdk/client-sso-oidc@3.637.0(@aws-sdk/client-sts@3.637.0)':
@@ -17833,13 +17837,13 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0)':
+  '@aws-sdk/client-sts@3.596.0':
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sso-oidc': 3.596.0
+      '@aws-sdk/client-sso-oidc': 3.596.0(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/core': 3.592.0
-      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
+      '@aws-sdk/credential-provider-node': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/middleware-host-header': 3.577.0
       '@aws-sdk/middleware-logger': 3.577.0
       '@aws-sdk/middleware-recursion-detection': 3.577.0
@@ -17876,7 +17880,6 @@ snapshots:
       '@smithy/util-utf8': 3.0.0
       tslib: 2.7.0
     transitivePeerDependencies:
-      - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
   '@aws-sdk/client-sts@3.637.0':
@@ -17985,14 +17988,14 @@ snapshots:
       '@smithy/util-stream': 3.1.3
       tslib: 2.7.0
 
-  '@aws-sdk/credential-provider-ini@3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))':
+  '@aws-sdk/credential-provider-ini@3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)':
     dependencies:
-      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/client-sts': 3.596.0
       '@aws-sdk/credential-provider-env': 3.587.0
       '@aws-sdk/credential-provider-http': 3.596.0
       '@aws-sdk/credential-provider-process': 3.587.0
-      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0)
-      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
+      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))
+      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/types': 3.577.0
       '@smithy/credential-provider-imds': 3.2.0
       '@smithy/property-provider': 3.1.3
@@ -18021,14 +18024,14 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
-  '@aws-sdk/credential-provider-node@3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))':
+  '@aws-sdk/credential-provider-node@3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)':
     dependencies:
       '@aws-sdk/credential-provider-env': 3.587.0
       '@aws-sdk/credential-provider-http': 3.596.0
-      '@aws-sdk/credential-provider-ini': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
+      '@aws-sdk/credential-provider-ini': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/credential-provider-process': 3.587.0
-      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0)
-      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))
+      '@aws-sdk/credential-provider-sso': 3.592.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))
+      '@aws-sdk/credential-provider-web-identity': 3.587.0(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/types': 3.577.0
       '@smithy/credential-provider-imds': 3.2.0
       '@smithy/property-provider': 3.1.3
@@ -18075,10 +18078,10 @@ snapshots:
       '@smithy/types': 3.3.0
       tslib: 2.7.0
 
-  '@aws-sdk/credential-provider-sso@3.592.0(@aws-sdk/client-sso-oidc@3.596.0)':
+  '@aws-sdk/credential-provider-sso@3.592.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))':
     dependencies:
       '@aws-sdk/client-sso': 3.592.0
-      '@aws-sdk/token-providers': 3.587.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/token-providers': 3.587.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.3
       '@smithy/shared-ini-file-loader': 3.1.4
@@ -18101,9 +18104,9 @@ snapshots:
       - '@aws-sdk/client-sso-oidc'
       - aws-crt
 
-  '@aws-sdk/credential-provider-web-identity@3.587.0(@aws-sdk/client-sts@3.596.0(@aws-sdk/client-sso-oidc@3.596.0))':
+  '@aws-sdk/credential-provider-web-identity@3.587.0(@aws-sdk/client-sts@3.596.0)':
     dependencies:
-      '@aws-sdk/client-sts': 3.596.0(@aws-sdk/client-sso-oidc@3.596.0)
+      '@aws-sdk/client-sts': 3.596.0
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.3
       '@smithy/types': 3.3.0
@@ -18268,9 +18271,9 @@ snapshots:
       '@smithy/types': 3.3.0
       tslib: 2.7.0
 
-  '@aws-sdk/token-providers@3.587.0(@aws-sdk/client-sso-oidc@3.596.0)':
+  '@aws-sdk/token-providers@3.587.0(@aws-sdk/client-sso-oidc@3.596.0(@aws-sdk/client-sts@3.596.0))':
     dependencies:
-      '@aws-sdk/client-sso-oidc': 3.596.0
+      '@aws-sdk/client-sso-oidc': 3.596.0(@aws-sdk/client-sts@3.596.0)
       '@aws-sdk/types': 3.577.0
       '@smithy/property-provider': 3.1.3
       '@smithy/shared-ini-file-loader': 3.1.4
@@ -20420,6 +20423,10 @@ snapshots:
 
   '@floating-ui/utils@0.2.2': {}
 
+  '@formatjs/intl-localematcher@0.5.5':
+    dependencies:
+      tslib: 2.7.0
+
   '@giscus/react@3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       giscus: 1.5.0
@@ -22087,7 +22094,7 @@ snapshots:
       '@napi-rs/simple-git-win32-arm64-msvc': 0.1.17
       '@napi-rs/simple-git-win32-x64-msvc': 0.1.17
 
-  '@next/bundle-analyzer@14.2.13':
+  '@next/bundle-analyzer@14.2.15':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -25297,18 +25304,18 @@ snapshots:
 
   '@theguild/buddy@0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)': {}
 
-  '@theguild/components@7.0.0-alpha-20241011172058-33b9f16e93a282e39112338a62ae24a44f613a83(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
+  '@theguild/components@7.0.0(patch_hash=oskjo2y24bb7ptwj3nsbyin4w4)(@types/react-dom@18.3.0)(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))(typescript@5.5.4)(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))':
     dependencies:
       '@giscus/react': 3.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@next/bundle-analyzer': 14.2.13
+      '@next/bundle-analyzer': 14.2.15
       '@radix-ui/react-navigation-menu': 1.2.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@theguild/tailwind-config': 0.5.0(ts-node@10.9.2(@swc/core@1.7.18(@swc/helpers@0.5.11))(@types/node@20.16.1)(typescript@5.5.4))
       clsx: 2.1.1
       fuzzy: 0.1.3
       next: 14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-videos: 1.5.0(webpack@5.92.1(@swc/core@1.7.18(@swc/helpers@0.5.11))(esbuild@0.23.0))
-      nextra: 3.0.8(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
-      nextra-theme-docs: 3.0.8(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.8(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      nextra: 3.0.11(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+      nextra-theme-docs: 3.0.11(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.11(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-paginate: 8.2.0(react@18.3.1)
@@ -32335,7 +32342,7 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  nextra-theme-docs@3.0.8(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.8(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  nextra-theme-docs@3.0.11(patch_hash=rdj233awwzrixlopyy2d6hycxi)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@3.0.11(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@headlessui/react': 2.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx: 2.1.1
@@ -32343,14 +32350,15 @@ snapshots:
       flexsearch: 0.7.43
       next: 14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-themes: 0.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      nextra: 3.0.8(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
+      nextra: 3.0.11(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       scroll-into-view-if-needed: 3.1.0
       zod: 3.23.8
 
-  nextra@3.0.8(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4):
+  nextra@3.0.11(@types/react@18.3.3)(next@14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.4):
     dependencies:
+      '@formatjs/intl-localematcher': 0.5.5
       '@headlessui/react': 2.1.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mdx-js/mdx': 3.0.1
       '@mdx-js/react': 3.0.1(@types/react@18.3.3)(react@18.3.1)
@@ -32367,6 +32375,7 @@ snapshots:
       gray-matter: 4.0.3
       hast-util-to-estree: 3.1.0
       katex: 0.16.11
+      negotiator: 0.6.3
       next: 14.2.10(@babel/core@7.22.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       p-limit: 6.1.0
       react: 18.3.1
