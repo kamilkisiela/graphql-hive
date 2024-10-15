@@ -22,9 +22,9 @@ import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId, type TracingInstance } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
+import { AuthN, Session } from '../../api/src/modules/auth/lib/authz';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig, HivePersistedDocumentsConfig } from './environment';
-import { resolveUser, type SupertokensSession } from './supertokens';
 import { useArmor } from './use-armor';
 import { extractUserId, useSentryUser } from './use-sentry-user';
 
@@ -48,12 +48,13 @@ export interface GraphQLHandlerOptions {
   hivePersistedDocumentsConfig: HivePersistedDocumentsConfig;
   release: string;
   logger: FastifyBaseLogger;
+  authN: AuthN;
 }
 
 interface Context extends RegistryContext {
   req: FastifyRequest;
   reply: FastifyReply;
-  session: SupertokensSession | null;
+  session: Session;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -160,7 +161,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         mode: 'resolve-only',
         contextFieldName: 'session',
         async resolveUserFn(ctx: Context) {
-          return resolveUser(ctx);
+          return options.authN.authenticate(ctx);
         },
       }),
       useHive({
@@ -270,7 +271,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             reply,
             headers: req.headers,
             requestId,
-            session: null,
           });
         });
 

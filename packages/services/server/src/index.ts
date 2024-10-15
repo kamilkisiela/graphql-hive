@@ -12,6 +12,7 @@ import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import 'reflect-metadata';
 import { hostname } from 'os';
 import { createPubSub } from 'graphql-yoga';
+import { TargetAccessTokenStrategy } from 'packages/services/api/src/modules/auth/lib/target-access-token-strategy';
 import { z } from 'zod';
 import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
@@ -46,6 +47,8 @@ import {
   SeverityLevel,
 } from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
+import { AuthN } from '../../api/src/modules/auth/lib/authz';
+import { SuperTokensUserAuthNStrategy } from '../../api/src/modules/auth/lib/supertokens-strategy';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
 import { env } from './environment';
@@ -388,6 +391,21 @@ export async function main() {
       appDeploymentsEnabled: env.featureFlags.appDeploymentsEnabled,
     });
 
+    const authN = new AuthN({
+      strategies: [
+        new SuperTokensUserAuthNStrategy({
+          logger: server.log,
+          storage,
+        }),
+        new TargetAccessTokenStrategy({
+          logger: server.log,
+          tokensConfig: {
+            endpoint: env.hiveServices.tokens.endpoint,
+          },
+        }),
+      ],
+    });
+
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -405,6 +423,7 @@ export async function main() {
       hivePersistedDocumentsConfig: env.hivePersistedDocuments,
       tracing,
       logger: logger as any,
+      authN,
     });
 
     server.route({
