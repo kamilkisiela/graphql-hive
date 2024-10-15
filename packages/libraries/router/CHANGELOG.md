@@ -1,3 +1,7 @@
+# Unreleased
+
+- Report enum values when an enum is used as an output type
+
 # 19.07.2024
 
 - Writes `supergraph-schema.graphql` file to a temporary directory (the path depends on OS), and this is now the default of `HIVE_CDN_SCHEMA_FILE_PATH`.
