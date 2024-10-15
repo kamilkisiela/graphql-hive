@@ -63,45 +63,11 @@ checksum = "71938f30533e4d95a6d17aa530939da3842c2ab6f4f84b9dae68447e4129f74a"
 [[package]]
 name = "async-graphql"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ba6d24703c5adc5ba9116901b92ee4e4c0643c01a56c4fd303f3818638d7449"
-dependencies = [
- "async-graphql-derive 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-graphql-parser 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-graphql-value 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "async-stream",
- "async-trait",
- "base64",
- "bytes",
- "fast_chemail",
- "fnv",
- "futures-timer",
- "futures-util",
- "handlebars",
- "http",
- "indexmap",
- "mime",
- "multer",
- "num-traits",
- "once_cell",
- "pin-project-lite",
- "regex",
- "serde",
- "serde_json",
- "serde_urlencoded",
- "static_assertions_next",
- "tempfile",
- "thiserror",
-]
-
-[[package]]
-name = "async-graphql"
-version = "7.0.11"
 source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
- "async-graphql-derive 7.0.11 (git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523)",
- "async-graphql-parser 7.0.11 (git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523)",
- "async-graphql-value 7.0.11 (git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523)",
+ "async-graphql-derive",
+ "async-graphql-parser",
+ "async-graphql-value",
  "async-stream",
  "async-trait",
  "base64",
@@ -130,10 +96,9 @@ dependencies = [
 [[package]]
 name = "async-graphql-axum"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9aa80e171205c6d562057fd5a49167c8fbe61f7db2bed6540f6d4f2234d7ff2"
+source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
- "async-graphql 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-graphql",
  "async-trait",
  "axum",
  "bytes",
@@ -148,27 +113,10 @@ dependencies = [
 [[package]]
 name = "async-graphql-derive"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a94c2d176893486bd37cd1b6defadd999f7357bf5804e92f510c08bcf16c538f"
-dependencies = [
- "Inflector",
- "async-graphql-parser 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "darling",
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "strum",
- "syn",
- "thiserror",
-]
-
-[[package]]
-name = "async-graphql-derive"
-version = "7.0.11"
 source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
  "Inflector",
- "async-graphql-parser 7.0.11 (git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523)",
+ "async-graphql-parser",
  "darling",
  "proc-macro-crate",
  "proc-macro2",
@@ -181,34 +129,10 @@ dependencies = [
 [[package]]
 name = "async-graphql-parser"
 version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79272bdbf26af97866e149f05b2b546edb5c00e51b5f916289931ed233e208ad"
-dependencies = [
- "async-graphql-value 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "pest",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "async-graphql-parser"
-version = "7.0.11"
 source = "git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523#16785021140660f8d62b85c17fec51428f4eb523"
 dependencies = [
- "async-graphql-value 7.0.11 (git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523)",
+ "async-graphql-value",
  "pest",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "async-graphql-value"
-version = "7.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef5ec94176a12a8cbe985cd73f2e54dc9c702c88c766bdef12f1f3a67cedbee1"
-dependencies = [
- "bytes",
- "indexmap",
  "serde",
  "serde_json",
 ]
@@ -542,7 +466,7 @@ dependencies = [
 name = "example"
 version = "0.1.0"
 dependencies = [
- "async-graphql 7.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "async-graphql",
  "async-graphql-axum",
  "axum",
  "graphql-hive-async-graphql-extension",
@@ -684,7 +608,7 @@ checksum = "07e28edb80900c19c28f1072f2e8aeca7fa06b23cd4169cefe1af5aa3260783f"
 name = "graphql-hive-async-graphql-extension"
 version = "0.0.1"
 dependencies = [
- "async-graphql 7.0.11 (git+https://github.com/XiNiHa/async-graphql.git?rev=16785021140660f8d62b85c17fec51428f4eb523)",
+ "async-graphql",
  "async-trait",
  "axum-core",
  "derive_builder",

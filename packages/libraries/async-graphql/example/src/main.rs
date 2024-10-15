@@ -1,7 +1,7 @@
 use async_graphql::{Context, Object, Schema, SimpleObject};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{routing::get, routing::post, Extension, Router};
-use graphql_hive_async_graphql_extension::GraphQLHive;
+use graphql_hive_async_graphql_extension::{context::GraphQLHiveContext, GraphQLHive};
 use tokio::net::TcpListener;
 
 #[derive(SimpleObject)]
@@ -29,6 +29,7 @@ async fn main() {
         async_graphql::EmptyMutation,
         async_graphql::EmptySubscription,
     )
+    .extension(GraphQLHive::default())
     .finish();
 
     let app = Router::new()
@@ -42,8 +43,12 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-async fn graphql_handler(schema: Extension<MySchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+async fn graphql_handler(
+    schema: Extension<MySchema>,
+    ctx: GraphQLHiveContext,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner().data(ctx)).await.into()
 }
 
 async fn graphql_playground() -> axum::response::Html<String> {
