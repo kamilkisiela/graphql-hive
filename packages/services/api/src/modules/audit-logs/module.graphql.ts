@@ -36,8 +36,8 @@ export const typeDefs = gql`
   date range and user id.
   """
   input AuditLogFilter {
-    from: DateTime
-    to: DateTime
+    startDate: DateTime
+    endDate: DateTime
     userId: ID
   }
 

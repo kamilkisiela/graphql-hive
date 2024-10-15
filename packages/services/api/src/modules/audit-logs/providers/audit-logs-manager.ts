@@ -112,9 +112,9 @@ export class AuditLogManager {
       if (props.filter?.userId) {
         where.push(sql`user_id = ${props.filter.userId}`);
       }
-      if (props.filter?.from && props.filter?.to) {
-        const from = formatToClickhouseDateTime(props.filter.from.toISOString());
-        const to = formatToClickhouseDateTime(props.filter.to.toISOString());
+      if (props.filter?.startDate && props.filter?.endDate) {
+        const from = formatToClickhouseDateTime(props.filter.startDate.toISOString());
+        const to = formatToClickhouseDateTime(props.filter.endDate.toISOString());
         where.push(sql`event_time >= ${from} AND event_time <= ${to}`);
       }
     }
