@@ -1,4 +1,4 @@
-import type { FastifyBaseLogger, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyBaseLogger } from 'fastify';
 import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
 import { OverrideableBuilder } from 'supertokens-js-override/lib/build/index.js';
 import supertokens from 'supertokens-node';
@@ -9,9 +9,8 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import type { TypeInput } from 'supertokens-node/types';
 import zod from 'zod';
-import { HiveError, type Storage } from '@hive/api';
+import { type Storage } from '@hive/api';
 import type { EmailsApi } from '@hive/emails';
-import { captureException } from '@sentry/node';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { createInternalApiCaller } from './api';
 import { env } from './environment';
@@ -365,74 +364,6 @@ export function initSupertokens(requirements: {
   broadcastLog: BroadcastOIDCIntegrationLog;
 }) {
   supertokens.init(backendConfig(requirements));
-}
-
-export async function resolveUser(ctx: { req: FastifyRequest; reply: FastifyReply }) {
-  ctx.req.log.debug('Resolving user');
-  let session: SessionNode.SessionContainer | undefined;
-
-  try {
-    session = await SessionNode.getSession(ctx.req, ctx.reply, {
-      sessionRequired: false,
-      antiCsrfCheck: false,
-      checkDatabase: true,
-    });
-    ctx.req.log.debug('Session resolution ended successfully');
-  } catch (error) {
-    if (SessionNode.Error.isErrorFromSuperTokens(error)) {
-      // Check whether the email is already verified.
-      // If it is not then we need to redirect to the email verification page - which will trigger the email sending.
-      if (error.type === SessionNode.Error.INVALID_CLAIMS) {
-        throw new HiveError('Your account is not verified. Please verify your email address.', {
-          extensions: {
-            code: 'VERIFY_EMAIL',
-          },
-        });
-      } else if (
-        error.type === SessionNode.Error.TRY_REFRESH_TOKEN ||
-        error.type === SessionNode.Error.UNAUTHORISED
-      ) {
-        throw new HiveError('Invalid session', {
-          extensions: {
-            code: 'NEEDS_REFRESH',
-          },
-        });
-      }
-    }
-
-    ctx.req.log.error(error, 'Error while resolving user');
-    captureException(error);
-
-    throw error;
-  }
-
-  if (!session) {
-    ctx.req.log.debug('No session found');
-    return null;
-  }
-
-  const payload = session.getAccessTokenPayload();
-
-  if (!payload) {
-    ctx.req.log.error('No access token payload found');
-    return null;
-  }
-
-  const result = SuperTokenAccessTokenModel.safeParse(payload);
-
-  if (result.success === false) {
-    ctx.req.log.error('SuperTokens session payload is invalid');
-    ctx.req.log.debug('SuperTokens session payload: %s', JSON.stringify(payload));
-    ctx.req.log.debug(
-      'SuperTokens session parsing errors: %s',
-      JSON.stringify(result.error.flatten().fieldErrors),
-    );
-    throw new HiveError(`Invalid access token provided`);
-  }
-
-  ctx.req.log.debug('User resolved successfully');
-
-  return result.data;
 }
 
 type OidcIdLookupResponse =

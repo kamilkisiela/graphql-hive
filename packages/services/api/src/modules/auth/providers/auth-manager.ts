@@ -5,6 +5,8 @@ import type { Listify, MapToArray } from '../../../shared/helpers';
 import { share } from '../../../shared/helpers';
 import { Storage } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
+import { Session } from '../lib/authz';
+import { SuperTokensCookieBasedSession } from '../lib/supertokens-strategy';
 import {
   OrganizationAccess,
   OrganizationAccessScope,
@@ -33,13 +35,6 @@ export interface TargetAccessSelector {
   scope: TargetAccessScope;
 }
 
-type SuperTokenSessionPayload = {
-  version: '1';
-  superTokensUserId: string;
-  email: string;
-  externalUserId: string | null;
-};
-
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -49,7 +44,7 @@ type SuperTokenSessionPayload = {
   global: true,
 })
 export class AuthManager {
-  private session: SuperTokenSessionPayload | null;
+  private session: Session;
 
   constructor(
     @Inject(ApiToken) private apiToken: string,
@@ -187,7 +182,7 @@ export class AuthManager {
   });
 
   getCurrentUser: () => Promise<(User & { isAdmin: boolean }) | never> = share(async () => {
-    if (!this.session) {
+    if (!(this.session instanceof SuperTokensCookieBasedSession)) {
       throw new AccessError('Authorization token is missing', 'UNAUTHENTICATED');
     }
 
@@ -236,7 +231,7 @@ export class AuthManager {
   }
 
   isUser() {
-    return !!this.session;
+    return this.session instanceof SuperTokensCookieBasedSession;
   }
 
   getMemberOrganizationScopes(selector: OrganizationUserScopesSelector) {

@@ -46,6 +46,8 @@ import {
   SeverityLevel,
 } from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
+import { AuthN } from '../../api/src/modules/auth/lib/authz';
+import { SuperTokensUserAuthNStrategy } from '../../api/src/modules/auth/lib/supertokens-strategy';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
 import { env } from './environment';
@@ -388,6 +390,15 @@ export async function main() {
       appDeploymentsEnabled: env.featureFlags.appDeploymentsEnabled,
     });
 
+    const authN = new AuthN({
+      strategies: [
+        new SuperTokensUserAuthNStrategy({
+          logger: server.log,
+          storage,
+        }),
+      ],
+    });
+
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -405,6 +416,7 @@ export async function main() {
       hivePersistedDocumentsConfig: env.hivePersistedDocuments,
       tracing,
       logger: logger as any,
+      authN,
     });
 
     server.route({

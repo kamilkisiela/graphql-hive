@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/node';
 import { useRequestLogging } from './request-logs';
 import { useSentryErrorHandler } from './sentry';
 
-export type { FastifyBaseLogger, FastifyRequest } from 'fastify';
+export type { FastifyBaseLogger, FastifyRequest, FastifyReply } from 'fastify';
 
 export async function createServer(options: {
   sentryErrorHandler: boolean;

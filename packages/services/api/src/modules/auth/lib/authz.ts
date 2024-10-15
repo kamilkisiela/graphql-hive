@@ -1,5 +1,4 @@
-import { FastifyReply } from 'fastify';
-import { FastifyRequest } from '@hive/service-common';
+import { FastifyReply, FastifyRequest } from '@hive/service-common';
 import { HiveError } from '../../../shared/errors';
 import { isUUID } from '../../../shared/is-uuid';
 
@@ -146,7 +145,7 @@ class UnauthenticatedSession extends Session {
  * Strategy to authenticate a session from an incoming request.
  * E.g. SuperTokens, JWT, etc.
  */
-abstract class AuthNStrategy<TSession extends Session> {
+export abstract class AuthNStrategy<TSession extends Session> {
   /**
    * Parse a session from an incoming request.
    * Returns null if the strategy does not apply to the request.
