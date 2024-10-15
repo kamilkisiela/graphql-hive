@@ -389,4 +389,32 @@ export const typeDefs = gql`
     previousPlan: String!
     newPlan: String!
   }
+
+  """
+  App Deployment Audit Logs
+  """
+  type AppDeploymentCreatedAuditLog implements AuditLog {
+    id: ID!
+    eventTime: DateTime!
+    record: AuditLogIdRecord!
+    deploymentId: String!
+    deploymentName: String!
+    deploymentVersion: String!
+  }
+
+  type AppDeploymentUpdatedAuditLog implements AuditLog {
+    id: ID!
+    eventTime: DateTime!
+    record: AuditLogIdRecord!
+    deploymentId: String!
+    updatedFields: JSON!
+  }
+
+  type appDeploymentPublishedAuditLog implements AuditLog {
+    id: ID!
+    eventTime: DateTime!
+    record: AuditLogIdRecord!
+    deploymentId: String!
+    deploymentVersion: String!
+  }
 `;

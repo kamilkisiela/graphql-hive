@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import stringify from 'fast-json-stable-stringify';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
 import { ProjectManager } from '../../../project/providers/project-manager';
@@ -40,6 +41,25 @@ export const schemaDelete: NonNullable<MutationResolvers['schemaDelete']> = asyn
       checksum,
     },
     request.signal,
+  );
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  const projectId = await injector.get(ProjectManager).getProjectIdByToken();
+  await injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'SCHEMA_DELETED',
+      schemaDeletedAuditLogSchema: {
+        serviceName: input.serviceName.toLowerCase(),
+        projectId: projectId,
+        targetId: target.id,
+      },
+    },
+    {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      organizationId: organization,
+      user: currentUser,
+    },
   );
 
   return {

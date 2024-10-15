@@ -202,6 +202,23 @@ const projectDeletedAuditLogSchema = z.object({
   projectName: z.string(),
 });
 
+// App Deployment
+const appDeploymentCreatedAuditLogSchema = z.object({
+  deploymentId: z.string(),
+  deploymentName: z.string(),
+  deploymentVersion: z.string(),
+});
+
+const appDeploymentUpdatedAuditLogSchema = z.object({
+  deploymentId: z.string(),
+  updatedFields: z.string(),
+});
+
+const appDeploymentPublishedAuditLogSchema = z.object({
+  deploymentId: z.string(),
+  deploymentVersion: z.string(),
+});
+
 export const auditLogSchema = z.discriminatedUnion('eventType', [
   z.object({
     eventType: z.literal('USER_INVITED'),
@@ -342,6 +359,18 @@ export const auditLogSchema = z.discriminatedUnion('eventType', [
   z.object({
     eventType: z.literal('SUBSCRIPTION_CANCELED'),
     subscriptionCanceledAuditLogSchema,
+  }),
+  z.object({
+    eventType: z.literal('APP_DEPLOYMENT_CREATED'),
+    appDeploymentCreatedAuditLogSchema,
+  }),
+  z.object({
+    eventType: z.literal('APP_DEPLOYMENT_UPDATED'),
+    appDeploymentUpdatedAuditLogSchema,
+  }),
+  z.object({
+    eventType: z.literal('APP_DEPLOYMENT_PUBLISHED'),
+    appDeploymentPublishedAuditLogSchema,
   }),
 ]);
 
