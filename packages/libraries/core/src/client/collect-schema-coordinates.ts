@@ -256,7 +256,9 @@ export function collectSchemaCoordinates(args: {
         const inputTypeName = resolveTypeName(inputType);
 
         node.values.forEach(value => {
-          if (value.kind !== Kind.OBJECT) {
+          if (value.kind === Kind.ENUM) {
+            collectInputType(inputTypeName, value.value);
+          } else if (value.kind !== Kind.OBJECT) {
             // if a value is not an object we need to collect all fields
             collectInputType(inputTypeName);
           }
