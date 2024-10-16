@@ -1117,6 +1117,99 @@ describe('changes with usage data', () => {
       fields: 'auto-collect',
     },
   });
+
+  testChangesWithUsageData({
+    title: 'removing a used enum value is a breaking change',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        feed: Post
+      }
+
+      enum Media {
+        Image
+        Video
+      }
+
+      type Post {
+        id: ID!
+        title: String!
+        type: Media
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        feed: Post
+      }
+
+      enum Media {
+        Image
+      }
+
+      type Post {
+        id: ID!
+        title: String!
+        type: Media
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // Should be breaking,
+      // because it will cause existing queries
+      // that use this enum value to error
+      beforeReportedOperation: 'SchemaCheckError',
+      afterReportedOperation: 'SchemaCheckError',
+    },
+    reportOperation: {
+      operation: 'query feed { feed { id type } }',
+      operationName: 'feed',
+      fields: 'auto-collect',
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'adding a new value to a used enum value is NOT a breaking change',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        feed: Post
+      }
+
+      enum Media {
+        Image
+        Video
+      }
+
+      type Post {
+        id: ID!
+        title: String!
+        type: Media
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        feed: Post
+      }
+
+      enum Media {
+        Image
+        Video
+        Audio
+      }
+
+      type Post {
+        id: ID!
+        title: String!
+        type: Media
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      beforeReportedOperation: 'SchemaCheckSuccess',
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query feed { feed { id type } }',
+      operationName: 'feed',
+      fields: 'auto-collect',
+    },
+  });
 });
 
 test.concurrent('number of produced and collected operations should match', async ({ expect }) => {

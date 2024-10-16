@@ -63,6 +63,33 @@ describe('collectSchemaCoordinates', () => {
     });
     expect(Array.from(result)).toEqual(['Query.hello', 'Query.hello.message', 'String']);
   });
+
+  test('leaf field (enum)', () => {
+    const schema = buildSchema(/* GraphQL */ `
+      type Query {
+        hello: Option
+      }
+
+      enum Option {
+        World
+        You
+      }
+    `);
+    const result = collectSchemaCoordinates({
+      documentNode: parse(/* GraphQL */ `
+        query {
+          hello
+        }
+      `),
+      schema,
+      processVariables: false,
+      variables: null,
+      typeInfo: new TypeInfo(schema),
+    });
+
+    expect(Array.from(result)).toEqual(['Query.hello', 'Option.World', 'Option.You']);
+  });
+
   test('collected fields of interface selection set does not contain exact resolutions (User.id, Animal.id)', () => {
     const schema = buildSchema(/* GraphQL */ `
       type Query {

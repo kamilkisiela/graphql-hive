@@ -3,6 +3,7 @@ import {
   ASTNode,
   DocumentNode,
   getNamedType,
+  GraphQLEnumType,
   GraphQLInputType,
   GraphQLInterfaceType,
   GraphQLNamedType,
@@ -170,6 +171,15 @@ export function collectSchemaCoordinates(args: {
         }
 
         markAsUsed(makeId(parent.name, field.name));
+
+        // Collect the entire type if it's an enum.
+        // Deleting an enum value that is used,
+        // should be a breaking change
+        // as it changes the output of the field.
+        const fieldType = getNamedType(field.type);
+        if (fieldType instanceof GraphQLEnumType) {
+          markEntireTypeAsUsed(fieldType);
+        }
       },
       VariableDefinition(node) {
         const inputType = args.typeInfo.getInputType();
@@ -246,7 +256,9 @@ export function collectSchemaCoordinates(args: {
         const inputTypeName = resolveTypeName(inputType);
 
         node.values.forEach(value => {
-          if (value.kind !== Kind.OBJECT) {
+          if (value.kind === Kind.ENUM) {
+            collectInputType(inputTypeName, value.value);
+          } else if (value.kind !== Kind.OBJECT) {
             // if a value is not an object we need to collect all fields
             collectInputType(inputTypeName);
           }

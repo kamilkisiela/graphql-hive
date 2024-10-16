@@ -114,7 +114,7 @@ const meta: Record<string, DeepPartial<Item | MenuItem | PageItem>> = {
   github: {
     title: 'GitHub',
     type: 'page',
-    href: 'https://github.com/kamilkisiela/graphql-hive',
+    href: 'https://github.com/graphql-hive/platform',
     newWindow: true,
   },
   'the-guild': {

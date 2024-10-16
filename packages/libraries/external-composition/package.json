@@ -5,7 +5,7 @@
   "description": "Compose schemas outside GraphQL Hive",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive",
+    "url": "graphql-hive/platform",
     "directory": "packages/libraries/external-composition"
   },
   "homepage": "https://the-guild.dev/graphql/hive",

@@ -5,7 +5,8 @@ const schema = buildSchema(/* GraphQL */ `
   type Query {
     project(selector: ProjectSelectorInput!): Project
     projectsByType(type: ProjectType!): [Project!]!
-    projects(filter: FilterInput): [Project!]!
+    projectsByTypes(types: [ProjectType!]!): [Project!]!
+    projects(filter: FilterInput, and: [FilterInput!]): [Project!]!
   }
 
   type Mutation {
@@ -61,7 +62,6 @@ const schema = buildSchema(/* GraphQL */ `
     FEDERATION
     STITCHING
     SINGLE
-    CUSTOM
   }
 `);
 
@@ -106,6 +106,9 @@ test('collect fields', async () => {
       Project.cleanId,
       Project.name,
       Project.type,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
       ProjectSelectorInput.organization,
       ID,
       ProjectSelectorInput.project,
@@ -133,6 +136,9 @@ test('collect input object types', async () => {
       Project.cleanId,
       Project.name,
       Project.type,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
       ProjectSelectorInput.organization,
       ID,
       ProjectSelectorInput.project,
@@ -166,7 +172,6 @@ test('collect enums and scalars as inputs', async () => {
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       FilterInput.pagination,
       FilterInput.type,
       PaginationInput.limit,
@@ -287,7 +292,6 @@ test('collect arguments', async () => {
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       FilterInput.pagination,
       FilterInput.type,
       PaginationInput.limit,
@@ -331,7 +335,6 @@ test('skips argument directives', async () => {
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       Boolean,
       FilterInput.pagination,
       FilterInput.type,
@@ -366,7 +369,6 @@ test('collect used-only input fields', async () => {
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       FilterInput.pagination,
       FilterInput.type,
       PaginationInput.limit,
@@ -402,9 +404,148 @@ test('collect all input fields when `processVariables` has not been passed and i
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       FilterInput.pagination,
       FilterInput.type,
+    ]
+  `);
+});
+
+test('collect entire input object type used as variable', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info$ = await collect(
+    parse(/* GraphQL */ `
+      query getProjects($filter: FilterInput) {
+        projects(filter: $filter) {
+          name
+        }
+      }
+    `),
+    {},
+  );
+  const info = await info$.value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.name,
+      FilterInput.type,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      FilterInput.pagination,
+      PaginationInput.limit,
+      Int,
+      PaginationInput.offset,
+      FilterInput.order,
+      ProjectOrderByInput.field,
+      String,
+      ProjectOrderByInput.direction,
+      OrderDirection.ASC,
+      OrderDirection.DESC,
+    ]
+  `);
+});
+
+test('collect entire input object type used as variable (list)', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info$ = await collect(
+    parse(/* GraphQL */ `
+      query getProjects($filter: FilterInput) {
+        projects(and: $filter) {
+          name
+        }
+      }
+    `),
+    {},
+  );
+  const info = await info$.value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.and,
+      Project.name,
+      FilterInput.type,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      FilterInput.pagination,
+      PaginationInput.limit,
+      Int,
+      PaginationInput.offset,
+      FilterInput.order,
+      ProjectOrderByInput.field,
+      String,
+      ProjectOrderByInput.direction,
+      OrderDirection.ASC,
+      OrderDirection.DESC,
+    ]
+  `);
+});
+
+test('collect used input fields (list)', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info$ = await collect(
+    parse(/* GraphQL */ `
+      query getProjects($pagination: PaginationInput) {
+        projects(and: { pagination: $pagination, type: FEDERATION }) {
+          name
+        }
+      }
+    `),
+    {},
+  );
+  const info = await info$.value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.and,
+      Project.name,
+      PaginationInput.limit,
+      Int,
+      PaginationInput.offset,
+      FilterInput.pagination,
+      FilterInput.type,
+      ProjectType.FEDERATION,
+    ]
+  `);
+});
+
+test('enum values as list', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info$ = await collect(
+    parse(/* GraphQL */ `
+      query getProjects {
+        projectsByTypes(types: [FEDERATION, STITCHING]) {
+          name
+        }
+      }
+    `),
+    {},
+  );
+  const info = await info$.value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projectsByTypes,
+      Query.projectsByTypes.types,
+      Project.name,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
     ]
   `);
 });
@@ -511,7 +652,6 @@ test('(processVariables: true) collect used-only input fields', async () => {
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       FilterInput.pagination,
       FilterInput.type,
     ]
@@ -547,7 +687,6 @@ test('(processVariables: true) should collect input object without fields when c
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
-      ProjectType.CUSTOM,
       FilterInput.pagination,
       FilterInput.type,
     ]

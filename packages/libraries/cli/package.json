@@ -1,10 +1,10 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.44.0",
+  "version": "0.44.1",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive",
+    "url": "graphql-hive/platform",
     "directory": "packages/libraries/cli"
   },
   "homepage": "https://the-guild.dev/graphql/hive",

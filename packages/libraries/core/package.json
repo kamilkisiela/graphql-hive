@@ -1,10 +1,10 @@
 {
   "name": "@graphql-hive/core",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "kamilkisiela/graphql-hive",
+    "url": "graphql-hive/platform",
     "directory": "packages/libraries/core"
   },
   "homepage": "https://the-guild.dev/graphql/hive",
