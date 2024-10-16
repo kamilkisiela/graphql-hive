@@ -410,7 +410,7 @@ export const typeDefs = gql`
     updatedFields: JSON!
   }
 
-  type appDeploymentPublishedAuditLog implements AuditLog {
+  type AppDeploymentPublishedAuditLog implements AuditLog {
     id: ID!
     eventTime: DateTime!
     record: AuditLogIdRecord!

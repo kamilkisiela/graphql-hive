@@ -219,6 +219,12 @@ const appDeploymentPublishedAuditLogSchema = z.object({
   deploymentVersion: z.string(),
 });
 
+const serviceDeletedAuditLogSchema = z.object({
+  serviceName: z.string(),
+  targetId: z.string(),
+  projectId: z.string(),
+});
+
 export const auditLogSchema = z.discriminatedUnion('eventType', [
   z.object({
     eventType: z.literal('USER_INVITED'),
@@ -287,6 +293,10 @@ export const auditLogSchema = z.discriminatedUnion('eventType', [
   z.object({
     eventType: z.literal('SCHEMA_DELETED'),
     schemaDeletedAuditLogSchema,
+  }),
+  z.object({
+    eventType: z.literal('SERVICE_DELETED'),
+    serviceDeletedAuditLogSchema,
   }),
   z.object({
     eventType: z.literal('ROLE_CREATED'),

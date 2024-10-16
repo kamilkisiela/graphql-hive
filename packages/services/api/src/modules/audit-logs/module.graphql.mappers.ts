@@ -5,7 +5,7 @@ export type AuditLogMapper = AuditLogModel;
 export type SchemaPolicySettingsUpdatedAuditLogMapper = AuditLogModel;
 export type SchemaCheckedAuditLogMapper = AuditLogModel;
 export type SchemaPublishAuditLogMapper = AuditLogModel;
-export type SchemaDeletedAuditLogMapper = AuditLogModel;
+export type ServiceDeletedAuditLogMapper = AuditLogModel;
 // Organization
 export type OrganizationSettingsUpdatedAuditLogMapper = AuditLogModel;
 export type OrganizationTransferredAuditLogMapper = AuditLogModel;
@@ -46,3 +46,7 @@ export type TargetDeletedAuditLogMapper = AuditLogModel;
 export type SubscriptionCreatedAuditLogMapper = AuditLogModel;
 export type SubscriptionUpdatedAuditLogMapper = AuditLogModel;
 export type SubscriptionCanceledAuditLogMapper = AuditLogModel;
+// App Deployment
+export type AppDeploymentCreatedAuditLogMapper = AuditLogModel;
+export type AppDeploymentUpdatedAuditLogMapper = AuditLogModel;
+export type AppDeploymentPublishedAuditLogMapper = AuditLogModel;
