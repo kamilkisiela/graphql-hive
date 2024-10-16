@@ -5,6 +5,7 @@ import { alertsModule } from './modules/alerts';
 import { WEBHOOKS_CONFIG, WebhooksConfig } from './modules/alerts/providers/tokens';
 import { appDeploymentsModule } from './modules/app-deployments';
 import { APP_DEPLOYMENTS_ENABLED } from './modules/app-deployments/providers/app-deployments-enabled-token';
+import { auditLogsModule } from './modules/audit-logs';
 import { authModule } from './modules/auth';
 import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
@@ -82,6 +83,7 @@ const modules = [
   integrationsModule,
   alertsModule,
   feedbackModule,
+  auditLogsModule,
   cdnModule,
   adminModule,
   usageEstimationModule,

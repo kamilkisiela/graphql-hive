@@ -47,6 +47,7 @@ const config: CodegenConfig = {
             excludeTypes: [
               'TokenInfoPayload',
               'OrganizationByInviteCodePayload',
+              'AuditLog',
               'JoinOrganizationPayload',
               'Schema',
               'GraphQLNamedType',

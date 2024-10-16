@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { TRPCClientError } from '@trpc/client';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
 import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../../auth/providers/organization-access';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
@@ -36,6 +37,25 @@ export const upgradeToPro: NonNullable<MutationResolvers['upgradeToPro']> = asyn
           operations: Math.floor(args.input.monthlyLimits.operations / 1_000_000),
         },
       });
+
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      injector.get(AuditLogManager).createLogAuditEvent(
+        {
+          eventType: 'SUBSCRIPTION_CREATED',
+          subscriptionCreatedAuditLogSchema: {
+            operations: args.input.monthlyLimits.operations,
+            paymentMethodId: args.input.paymentMethodId,
+            newPlan: 'PRO',
+            previousPlan: 'HOBBY',
+          },
+        },
+        {
+          organizationId: organizationId,
+          userEmail: currentUser.email,
+          userId: currentUser.id,
+          user: currentUser,
+        },
+      );
     } catch (e) {
       if (e instanceof TRPCClientError) {
         throw new GraphQLError(`Falied to upgrade: ${e.message}`);

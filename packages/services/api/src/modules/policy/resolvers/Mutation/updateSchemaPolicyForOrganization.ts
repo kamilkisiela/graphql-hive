@@ -1,4 +1,6 @@
 import { TRPCClientError } from '@trpc/client';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { SchemaPolicyApiProvider } from '../../providers/schema-policy-api.provider';
@@ -16,6 +18,50 @@ export const updateSchemaPolicyForOrganization: NonNullable<
     const updatedPolicy = await injector
       .get(SchemaPolicyProvider)
       .setOrganizationPolicy({ organization }, config, allowOverrides);
+
+    if (allowOverrides === true) {
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      injector.get(AuditLogManager).createLogAuditEvent(
+        {
+          eventType: 'ORGANIZATION_SETTINGS_UPDATED',
+          organizationSettingsUpdatedAuditLogSchema: {
+            updatedFields: JSON.stringify({
+              schemaPolicy: {
+                updated: config,
+                allowOverrides: true,
+              },
+            }),
+          },
+        },
+        {
+          organizationId: organization,
+          userEmail: currentUser.email,
+          userId: currentUser.id,
+          user: currentUser,
+        },
+      );
+    } else if (allowOverrides === false) {
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      injector.get(AuditLogManager).createLogAuditEvent(
+        {
+          eventType: 'ORGANIZATION_SETTINGS_UPDATED',
+          organizationSettingsUpdatedAuditLogSchema: {
+            updatedFields: JSON.stringify({
+              schemaPolicy: {
+                updated: config,
+                allowOverrides: false,
+              },
+            }),
+          },
+        },
+        {
+          organizationId: organization,
+          userEmail: currentUser.email,
+          userId: currentUser.id,
+          user: currentUser,
+        },
+      );
+    }
 
     return {
       ok: {

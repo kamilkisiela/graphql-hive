@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../../target/providers/target-manager';
@@ -62,6 +64,23 @@ export const createProject: NonNullable<MutationResolvers['createProject']> = as
       organization: organizationId,
     }),
   ]);
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'PROJECT_CREATED',
+      projectCreatedAuditLogSchema: {
+        projectId: project.id,
+        projectName: project.name,
+      },
+    },
+    {
+      organizationId: organization.id,
+      userEmail: currentUser.email,
+      userId: currentUser.id,
+      user: currentUser,
+    },
+  );
 
   return {
     ok: {

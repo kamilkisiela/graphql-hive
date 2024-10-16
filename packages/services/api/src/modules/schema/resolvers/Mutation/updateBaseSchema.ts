@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { AuditLogManager } from '../../../audit-logs/providers/audit-logs-manager';
+import { AuthManager } from '../../../auth/providers/auth-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../../target/providers/target-manager';
 import { SchemaManager } from '../../providers/schema-manager';
@@ -36,6 +38,26 @@ export const updateBaseSchema: NonNullable<MutationResolvers['updateBaseSchema']
 
   const selector = { organization, project, target };
   await schemaManager.updateBaseSchema(selector, input.newBase ? input.newBase : null);
+
+  const currentUser = await injector.get(AuthManager).getCurrentUser();
+  await injector.get(AuditLogManager).createLogAuditEvent(
+    {
+      eventType: 'SCHEMA_POLICY_SETTINGS_UPDATED',
+      schemaPolicySettingsUpdatedAuditLogSchema: {
+        projectId: project,
+        updatedFields: JSON.stringify({
+          baseSchema: input.newBase ? 'updated' : 'removed',
+          newBase: input.newBase,
+        }),
+      },
+    },
+    {
+      userId: currentUser.id,
+      userEmail: currentUser.email,
+      organizationId: organization,
+      user: currentUser,
+    },
+  );
 
   return {
     ok: {
