@@ -172,6 +172,7 @@ export function FeatureTabs({ className }: { className?: string }) {
             <Tabs.Content value="Schema Management" tabIndex={-1}>
               <Feature
                 title="Schema Management"
+                documentationLink="/docs/schema-registry/schema-policy"
                 description="Evolve your GraphQL API with confidence."
                 highlights={highlights['Schema Management']}
                 setActiveHighlight={setActiveHighlight}
