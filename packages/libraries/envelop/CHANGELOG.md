@@ -1,5 +1,18 @@
 # @graphql-hive/envelop
 
+## 0.33.10
+
+### Patch Changes
+
+- [#5676](https://github.com/graphql-hive/platform/pull/5676)
+  [`c728803`](https://github.com/graphql-hive/platform/commit/c7288038f24c0214b4023994f306c6229c1ce72c)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Correct collection of enum values when
+  used in a list
+
+- Updated dependencies
+  [[`c728803`](https://github.com/graphql-hive/platform/commit/c7288038f24c0214b4023994f306c6229c1ce72c)]:
+  - @graphql-hive/core@0.8.2
+
 ## 0.33.9
 
 ### Patch Changes
