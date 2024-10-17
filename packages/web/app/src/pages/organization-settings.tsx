@@ -187,7 +187,7 @@ const UpdateOrganizationSlugMutation = graphql(`
           }
           organization {
             id
-            cleanId
+            slug
           }
         }
       }
@@ -201,7 +201,7 @@ const UpdateOrganizationSlugMutation = graphql(`
 const SettingsPageRenderer_OrganizationFragment = graphql(`
   fragment SettingsPageRenderer_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
       isOwner
@@ -244,7 +244,7 @@ const SettingsPageRenderer = (props: {
     mode: 'all',
     resolver: zodResolver(SlugFormSchema),
     defaultValues: {
-      slug: organization.cleanId,
+      slug: organization.slug,
     },
   });
 
@@ -270,8 +270,7 @@ const SettingsPageRenderer = (props: {
             to: '/$organizationId/view/settings',
             params: {
               organizationId:
-                result.data.updateOrganizationSlug.ok.updatedOrganizationPayload.organization
-                  .cleanId,
+                result.data.updateOrganizationSlug.ok.updatedOrganizationPayload.organization.slug,
             },
           });
         } else if (error) {

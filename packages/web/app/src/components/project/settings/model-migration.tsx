@@ -128,7 +128,7 @@ const ModelMigrationSettings_upgradeProjectRegistryModelMutation = graphql(`
 const ModelMigrationSettings_ProjectFragment = graphql(`
   fragment ModelMigrationSettings_ProjectFragment on Project {
     type
-    cleanId
+    slug
     registryModel
   }
 `);
@@ -150,7 +150,7 @@ export function ModelMigrationSettings(props: {
     try {
       const result = await upgradeMutation({
         input: {
-          project: project.cleanId,
+          project: project.slug,
           organization: props.organizationId,
           model: RegistryModel.Modern,
         },

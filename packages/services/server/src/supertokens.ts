@@ -448,12 +448,12 @@ type OidcIdLookupResponse =
     };
 
 export async function oidcIdLookup(
-  cleanId: string,
+  slug: string,
   storage: Storage,
   logger: FastifyBaseLogger,
 ): Promise<OidcIdLookupResponse> {
-  logger.debug('Looking up OIDC integration ID for organization %s', cleanId);
-  const oidcId = await storage.getOIDCIntegrationIdForOrganizationCleanId({ cleanId });
+  logger.debug('Looking up OIDC integration ID for organization %s', slug);
+  const oidcId = await storage.getOIDCIntegrationIdForOrganizationSlug({ slug });
 
   if (!oidcId) {
     return {

@@ -21,7 +21,7 @@ const OrganizationTransferPage_GetRequest = graphql(`
     organizationTransferRequest(selector: $selector) {
       organization {
         id
-        cleanId
+        slug
         owner {
           id
           user {
@@ -165,8 +165,7 @@ export function OrganizationTransferPage(props: { organizationId: string; code: 
                   <p className={classes.description}>
                     {query.data.organizationTransferRequest.organization.owner.user.displayName}{' '}
                     wants to transfer the "
-                    {query.data.organizationTransferRequest.organization.cleanId}" organization to
-                    you.
+                    {query.data.organizationTransferRequest.organization.slug}" organization to you.
                   </p>
 
                   <div className={classes.actions}>

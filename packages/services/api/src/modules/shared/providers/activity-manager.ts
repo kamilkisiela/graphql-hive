@@ -131,6 +131,11 @@ interface ProjectDeletedActivity extends BaseActivity {
   selector: OrganizationSelector;
   meta: {
     name: string;
+    /**
+     * We moved away from cleanId and replaced it with slug,
+     * but we need to keep it for backwards compatibility,
+     * as it's persisted in the database.
+     */
     cleanId: string;
   };
 }
@@ -171,6 +176,11 @@ interface TargetDeletedActivity extends BaseActivity {
   selector: ProjectSelector;
   meta: {
     name: string;
+    /**
+     * We moved away from cleanId and replaced it with slug,
+     * but we need to keep it for backwards compatibility,
+     * as it's persisted in the database.
+     */
     cleanId: string;
   };
 }

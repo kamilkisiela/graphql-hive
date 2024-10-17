@@ -110,7 +110,7 @@ function Schemas(props: { schemas?: readonly CompositeSchema[]; schema?: SingleS
 const SchemaView_OrganizationFragment = graphql(`
   fragment SchemaView_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       ...CanAccessTarget_MemberFragment
     }
@@ -120,7 +120,7 @@ const SchemaView_OrganizationFragment = graphql(`
 const SchemaView_ProjectFragment = graphql(`
   fragment SchemaView_ProjectFragment on Project {
     id
-    cleanId
+    slug
     type
     registryModel
   }
@@ -145,7 +145,7 @@ const SchemaView_SchemaFragment = graphql(`
 const SchemaView_TargetFragment = graphql(`
   fragment SchemaView_TargetFragment on Target {
     id
-    cleanId
+    slug
     latestSchemaVersion {
       id
       schemas {
@@ -188,9 +188,9 @@ function SchemaView(props: {
     scope: TargetAccessScope.RegistryWrite,
     member: organization.me,
     redirect: false,
-    organizationId: organization.cleanId,
-    projectId: project.cleanId,
-    targetId: target.cleanId,
+    organizationId: organization.slug,
+    projectId: project.slug,
+    targetId: target.slug,
   });
 
   const { latestSchemaVersion } = target;
@@ -272,9 +272,9 @@ function SchemaView(props: {
           {canMarkAsValid ? (
             <>
               <MarkAsValid
-                organizationId={organization.cleanId}
-                projectId={project.cleanId}
-                targetId={target.cleanId}
+                organizationId={organization.slug}
+                projectId={project.slug}
+                targetId={target.slug}
                 version={latestSchemaVersion}
               />{' '}
             </>

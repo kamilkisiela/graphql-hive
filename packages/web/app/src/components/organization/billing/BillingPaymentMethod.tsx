@@ -19,7 +19,7 @@ const GenerateStripeLinkMutation = graphql(`
 const BillingPaymentMethod_OrganizationFragment = graphql(`
   fragment BillingPaymentMethod_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     billingConfiguration {
       hasPaymentIssues
       paymentMethod {
@@ -63,7 +63,7 @@ export const ManagePaymentMethod = (props: {
             onClick={() => {
               void mutate({
                 selector: {
-                  organization: organization.cleanId,
+                  organization: organization.slug,
                 },
               }).then(result => {
                 if (result.data?.generateStripePortalLink) {

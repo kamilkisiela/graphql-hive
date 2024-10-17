@@ -40,13 +40,13 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
       const totalChanges = input.event.changes.length + input.event.messages.length;
       const projectLink = createMDLink({
         text: input.event.project.name,
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}`,
       });
       const targetLink = createMDLink({
         text: input.event.target.name,
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}/${input.event.target.slug}`,
       });
-      const changeUrl = `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`;
+      const changeUrl = `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}/${input.event.target.slug}/history/${input.event.schema.id}`;
       const viewLink = createMDLink({
         text: 'view details',
         url: changeUrl,
@@ -98,7 +98,7 @@ export class TeamsCommunicationAdapter implements CommunicationAdapter {
     try {
       const projectLink = createMDLink({
         text: input.event.project.name,
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}`,
       });
 
       const message = [

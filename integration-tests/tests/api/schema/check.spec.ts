@@ -285,9 +285,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: schemaCheckId,
       },
@@ -372,9 +372,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: schemaCheckId,
       },
@@ -433,9 +433,9 @@ test.concurrent('failed check due to graphql validation is persisted', async ({ 
     document: SchemaCheckQuery,
     variables: {
       selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
       },
       id: schemaCheckId,
     },
@@ -522,9 +522,9 @@ test.concurrent('failed check due to breaking change is persisted', async ({ exp
     document: SchemaCheckQuery,
     variables: {
       selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
       },
       id: schemaCheckId,
     },
@@ -619,9 +619,9 @@ test.concurrent('failed check due to policy error is persisted', async ({ expect
     document: SchemaCheckQuery,
     variables: {
       selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
       },
       id: schemaCheckId,
     },
@@ -730,9 +730,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: schemaCheckId,
       },
@@ -856,9 +856,9 @@ test.concurrent('metadata is persisted', async ({ expect }) => {
     document: SchemaCheckQuery,
     variables: {
       selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
       },
       id: schemaCheckId,
     },
@@ -944,9 +944,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
           schemaCheckId,
         },
       },
@@ -973,9 +973,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: schemaCheckId,
       },
@@ -1066,9 +1066,9 @@ test.concurrent('approve failed schema check with a comment', async ({ expect })
     document: ApproveFailedSchemaCheckMutation,
     variables: {
       input: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
         schemaCheckId,
         comment: 'This is a comment',
       },
@@ -1096,9 +1096,9 @@ test.concurrent('approve failed schema check with a comment', async ({ expect })
     document: SchemaCheckQuery,
     variables: {
       selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
       },
       id: schemaCheckId,
     },
@@ -1184,9 +1184,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
           schemaCheckId,
         },
       },
@@ -1236,9 +1236,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: newSchemaCheckId,
       },
@@ -1334,9 +1334,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
           schemaCheckId,
         },
       },
@@ -1386,9 +1386,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: newSchemaCheckId,
       },
@@ -1478,9 +1478,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
           schemaCheckId,
         },
       },
@@ -1531,9 +1531,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
         id: newSchemaCheckId,
       },

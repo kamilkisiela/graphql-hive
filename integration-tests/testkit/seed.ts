@@ -129,7 +129,7 @@ export function initSeed() {
                 variables: {
                   allowOverrides,
                   selector: {
-                    organization: organization.cleanId,
+                    organization: organization.slug,
                   },
                   policy,
                 },
@@ -139,7 +139,7 @@ export function initSeed() {
               return result.updateSchemaPolicyForOrganization;
             },
             async fetchOrganizationInfo() {
-              const result = await getOrganization(organization.cleanId, ownerToken).then(r =>
+              const result = await getOrganization(organization.slug, ownerToken).then(r =>
                 r.expectNoGraphQLErrors(),
               );
 
@@ -153,7 +153,7 @@ export function initSeed() {
               const inviteResult = await inviteToOrganization(
                 {
                   email,
-                  organization: organization.cleanId,
+                  organization: organization.slug,
                   role: roleId,
                 },
                 inviteToken,
@@ -166,28 +166,28 @@ export function initSeed() {
             },
             async members() {
               const membersResult = await getOrganizationMembers(
-                { organization: organization.cleanId },
+                { organization: organization.slug },
                 ownerToken,
               ).then(r => r.expectNoGraphQLErrors());
 
               const members = membersResult.organization?.organization.members.nodes;
 
               if (!members) {
-                throw new Error(`Could not get members for org ${organization.cleanId}`);
+                throw new Error(`Could not get members for org ${organization.slug}`);
               }
 
               return members;
             },
             async projects() {
               const projectsResult = await getOrganizationProjects(
-                { organization: organization.cleanId },
+                { organization: organization.slug },
                 ownerToken,
               ).then(r => r.expectNoGraphQLErrors());
 
               const projects = projectsResult.organization?.organization.projects.nodes;
 
               if (!projects) {
-                throw new Error(`Could not get projects for org ${organization.cleanId}`);
+                throw new Error(`Could not get projects for org ${organization.slug}`);
               }
 
               return projects;
@@ -201,7 +201,7 @@ export function initSeed() {
               const useLegacyRegistryModels = options?.useLegacyRegistryModels === true;
               const projectResult = await createProject(
                 {
-                  organization: organization.cleanId,
+                  organization: organization.slug,
                   type: projectType,
                   slug: generateUnique(),
                 },
@@ -215,8 +215,8 @@ export function initSeed() {
               if (useLegacyRegistryModels) {
                 await updateRegistryModel(
                   {
-                    organization: organization.cleanId,
-                    project: projectResult.createProject.ok!.createdProject.cleanId,
+                    organization: organization.slug,
+                    project: projectResult.createProject.ok!.createdProject.slug,
                     model: RegistryModel.Legacy,
                   },
                   ownerToken,
@@ -241,8 +241,8 @@ export function initSeed() {
                     document: UpdateSchemaPolicyForProject,
                     variables: {
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
                       },
                       policy,
                     },
@@ -254,9 +254,9 @@ export function initSeed() {
                 async removeTokens(tokenIds: string[]) {
                   return await deleteTokens(
                     {
-                      organization: organization.cleanId,
-                      project: project.cleanId,
-                      target: target.cleanId,
+                      organization: organization.slug,
+                      project: project.slug,
+                      target: target.slug,
                       tokens: tokenIds,
                     },
                     ownerToken,
@@ -281,9 +281,9 @@ export function initSeed() {
                         description,
                       },
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
-                        target: target.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
+                        target: target.slug,
                       },
                     },
                     authToken: token,
@@ -311,9 +311,9 @@ export function initSeed() {
                         description,
                       },
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
-                        target: target.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
+                        target: target.slug,
                       },
                     },
                     authToken: token,
@@ -333,9 +333,9 @@ export function initSeed() {
                     variables: {
                       id: collectionId,
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
-                        target: target.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
+                        target: target.slug,
                       },
                     },
                     authToken: token,
@@ -362,9 +362,9 @@ export function initSeed() {
                         variables: input.variables,
                       },
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
-                        target: target.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
+                        target: target.slug,
                       },
                     },
                     authToken: input.token || ownerToken,
@@ -378,9 +378,9 @@ export function initSeed() {
                     variables: {
                       id: input.operationId,
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
-                        target: target.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
+                        target: target.slug,
                       },
                     },
                     authToken: input.token || ownerToken,
@@ -409,9 +409,9 @@ export function initSeed() {
                         variables: input.variables,
                       },
                       selector: {
-                        organization: organization.cleanId,
-                        project: project.cleanId,
-                        target: target.cleanId,
+                        organization: organization.slug,
+                        project: project.slug,
+                        target: target.slug,
                       },
                     },
                     authToken: input.token || ownerToken,
@@ -424,7 +424,7 @@ export function initSeed() {
                   projectScopes = [],
                   organizationScopes = [],
                   target: forTarget = {
-                    cleanId: target.cleanId,
+                    slug: target.slug,
                     id: target.id,
                   },
                   actorToken = ownerToken,
@@ -433,7 +433,7 @@ export function initSeed() {
                   projectScopes?: ProjectAccessScope[];
                   organizationScopes?: OrganizationAccessScope[];
                   target?: {
-                    cleanId: string;
+                    slug: string;
                     id: string;
                   };
                   actorToken?: string;
@@ -443,9 +443,9 @@ export function initSeed() {
                   const tokenResult = await createToken(
                     {
                       name: generateUnique(),
-                      organization: organization.cleanId,
-                      project: project.cleanId,
-                      target: target.cleanId,
+                      organization: organization.slug,
+                      project: project.slug,
+                      target: target.slug,
                       organizationScopes: organizationScopes,
                       projectScopes: projectScopes,
                       targetScopes: targetScopes,
@@ -462,9 +462,9 @@ export function initSeed() {
                     async readOperationBody(hash: string) {
                       const operationBodyResult = await readOperationBody(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                           hash,
                         },
                         secret,
@@ -475,9 +475,9 @@ export function initSeed() {
                     async readOperationsStats(from: string, to: string) {
                       const statsResult = await readOperationsStats(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                           period: {
                             from,
                             to,
@@ -522,9 +522,9 @@ export function initSeed() {
                       const result = await setTargetValidation(
                         {
                           enabled,
-                          target: target.cleanId,
-                          project: project.cleanId,
-                          organization: organization.cleanId,
+                          target: target.slug,
+                          project: project.slug,
+                          organization: organization.slug,
                         },
                         {
                           token: secret,
@@ -542,9 +542,9 @@ export function initSeed() {
                     }) {
                       const result = await updateTargetValidationSettings(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                           excludedClients,
                           percentage,
                           period: 2,
@@ -560,9 +560,9 @@ export function initSeed() {
                     async fetchMetadataFromCDN() {
                       return fetchMetadataFromCDN(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                         },
                         secret,
                       );
@@ -570,9 +570,9 @@ export function initSeed() {
                     async updateSchemaVersionStatus(version: string, valid: boolean) {
                       return await updateSchemaVersionStatus(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                           valid,
                           version,
                         },
@@ -582,9 +582,9 @@ export function initSeed() {
                     async fetchSchemaFromCDN() {
                       return fetchSchemaFromCDN(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                         },
                         secret,
                       );
@@ -592,9 +592,9 @@ export function initSeed() {
                     async createCdnAccess() {
                       const result = await createCdnAccess(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                         },
                         secret,
                       ).then(r => r.expectNoGraphQLErrors());
@@ -654,9 +654,9 @@ export function initSeed() {
                       return (
                         await compareToPreviousVersion(
                           {
-                            organization: organization.cleanId,
-                            project: project.cleanId,
-                            target: target.cleanId,
+                            organization: organization.slug,
+                            project: project.slug,
+                            target: target.slug,
                             version,
                           },
                           secret,
@@ -667,9 +667,9 @@ export function initSeed() {
                       const result = await updateBaseSchema(
                         {
                           newBase,
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                         },
                         secret,
                       ).then(r => r.expectNoGraphQLErrors());
@@ -679,9 +679,9 @@ export function initSeed() {
                     async fetchVersions(count: number) {
                       const result = await fetchVersions(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                         },
                         count,
                         secret,
@@ -703,16 +703,16 @@ export function initSeed() {
                     async fetchSupergraph() {
                       const supergraphResponse = await fetchSupergraphFromCDN(
                         {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
+                          organization: organization.slug,
+                          project: project.slug,
+                          target: target.slug,
                         },
                         secret,
                       );
 
                       if (supergraphResponse.status !== 200) {
                         throw new Error(
-                          `Could not fetch supergraph for org ${organization.cleanId} project ${project.cleanId} target ${target.cleanId}`,
+                          `Could not fetch supergraph for org ${organization.slug} project ${project.slug} target ${target.slug}`,
                         );
                       }
 
@@ -728,7 +728,7 @@ export function initSeed() {
 
               const invitationResult = await inviteToOrganization(
                 {
-                  organization: organization.cleanId,
+                  organization: organization.slug,
                   email: memberEmail,
                 },
                 inviteToken,
@@ -738,7 +738,7 @@ export function initSeed() {
 
               if (!code) {
                 throw new Error(
-                  `Could not create invitation for ${memberEmail} to join org ${organization.cleanId}`,
+                  `Could not create invitation for ${memberEmail} to join org ${organization.slug}`,
                 );
               }
 
@@ -748,7 +748,7 @@ export function initSeed() {
 
               if (joinResult.joinOrganization.__typename !== 'OrganizationPayload') {
                 throw new Error(
-                  `Member ${memberEmail} could not join organization ${organization.cleanId}`,
+                  `Member ${memberEmail} could not join organization ${organization.slug}`,
                 );
               }
 
@@ -769,7 +769,7 @@ export function initSeed() {
                 ) {
                   const memberRoleAssignmentResult = await assignMemberRole(
                     {
-                      organization: organization.cleanId,
+                      organization: organization.slug,
                       user: input.userId,
                       role: input.roleId,
                     },
@@ -790,7 +790,7 @@ export function initSeed() {
                 ) {
                   const memberRoleDeletionResult = await deleteMemberRole(
                     {
-                      organization: organization.cleanId,
+                      organization: organization.slug,
                       role: roleId,
                     },
                     options.useMemberToken ? memberToken : ownerToken,
@@ -820,7 +820,7 @@ export function initSeed() {
                   });
                   const memberRoleCreationResult = await createMemberRole(
                     {
-                      organization: organization.cleanId,
+                      organization: organization.slug,
                       name,
                       description: 'some description',
                       organizationAccessScopes: scopes.organization,
@@ -852,7 +852,7 @@ export function initSeed() {
 
                   if (!createdRole) {
                     throw new Error(
-                      `Could not find created member role for org ${organization.cleanId}`,
+                      `Could not find created member role for org ${organization.slug}`,
                     );
                   }
 
@@ -875,7 +875,7 @@ export function initSeed() {
                 ) {
                   const memberRoleUpdateResult = await updateMemberRole(
                     {
-                      organization: organization.cleanId,
+                      organization: organization.slug,
                       role: role.id,
                       name: role.name,
                       description: role.description,
@@ -905,7 +905,7 @@ export function initSeed() {
 
                   if (!updatedRole) {
                     throw new Error(
-                      `Could not find the updated member role for org ${organization.cleanId}`,
+                      `Could not find the updated member role for org ${organization.slug}`,
                     );
                   }
 

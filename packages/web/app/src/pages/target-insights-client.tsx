@@ -339,7 +339,7 @@ const ClientInsightsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        cleanId
+        slug
         rateLimit {
           retentionInDays
         }

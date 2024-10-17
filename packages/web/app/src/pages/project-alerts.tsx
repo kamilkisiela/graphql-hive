@@ -166,7 +166,7 @@ function Alerts(props: {
 const ProjectAlertsPage_OrganizationFragment = graphql(`
   fragment ProjectAlertsPage_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       id
       ...CanAccessProject_MemberFragment

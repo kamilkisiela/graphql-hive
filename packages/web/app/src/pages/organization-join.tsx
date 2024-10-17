@@ -21,7 +21,7 @@ const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
         }
         organization {
           id
-          cleanId
+          slug
         }
       }
       ... on OrganizationInvitationError {
@@ -67,11 +67,11 @@ export function JoinOrganizationPage(props: { inviteCode: string }) {
         const org = result.data.joinOrganization.organization;
         toast({
           title: 'Joined organization',
-          description: `You are now a member of ${org.cleanId}`,
+          description: `You are now a member of ${org.slug}`,
         });
         void router.navigate({
           to: '/$organizationId',
-          params: { organizationId: org.cleanId },
+          params: { organizationId: org.slug },
         });
       }
     }

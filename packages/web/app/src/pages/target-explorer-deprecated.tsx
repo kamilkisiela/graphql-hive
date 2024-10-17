@@ -159,7 +159,7 @@ const DeprecatedSchemaExplorer_DeprecatedSchemaQuery = graphql(`
   ) {
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
-      cleanId
+      slug
       latestSchemaVersion {
         id
       }
@@ -301,7 +301,7 @@ const TargetExplorerDeprecatedSchemaPageQuery = graphql(`
         rateLimit {
           retentionInDays
         }
-        cleanId
+        slug
       }
     }
     hasCollectedOperations(

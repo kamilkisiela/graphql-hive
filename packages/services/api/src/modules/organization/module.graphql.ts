@@ -207,8 +207,9 @@ export default gql`
 
   type Organization {
     id: ID!
-    cleanId: ID!
-    name: String! @deprecated(reason: "Use the 'cleanId' field instead.")
+    slug: ID!
+    cleanId: ID! @deprecated(reason: "Use the 'slug' field instead.")
+    name: String! @deprecated(reason: "Use the 'slug' field instead.")
     owner: Member!
     me: Member!
     members: MemberConnection!

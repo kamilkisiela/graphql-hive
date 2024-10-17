@@ -762,7 +762,7 @@ const OrganizationMemberRoles_DeleteMemberRole = graphql(`
 const OrganizationMemberRoles_OrganizationFragment = graphql(`
   fragment OrganizationMemberRoles_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     memberRoles {
       id
       name
@@ -808,7 +808,7 @@ export function OrganizationMemberRoles(props: {
       >
         {roleToEdit ? (
           <OrganizationMemberRoleEditor
-            organizationCleanId={organization.cleanId}
+            organizationCleanId={organization.slug}
             me={organization.me}
             role={roleToEdit}
             close={() => setRoleToEdit(null)}
@@ -826,7 +826,7 @@ export function OrganizationMemberRoles(props: {
         {roleToShow ? (
           <OrganizationMemberRoleEditor
             mode="read-only"
-            organizationCleanId={organization.cleanId}
+            organizationCleanId={organization.slug}
             me={organization.me}
             role={roleToShow}
             close={() => setRoleToShow(null)}
@@ -860,7 +860,7 @@ export function OrganizationMemberRoles(props: {
                   try {
                     const result = await deleteRole({
                       input: {
-                        organization: organization.cleanId,
+                        organization: organization.slug,
                         role: roleToDelete.id,
                       },
                     });
@@ -901,7 +901,7 @@ export function OrganizationMemberRoles(props: {
         >
           <OrganizationMemberRoleCreateButton
             me={organization.me}
-            organizationCleanId={organization.cleanId}
+            organizationCleanId={organization.slug}
           />
         </SubPageLayoutHeader>
         <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">

@@ -16,9 +16,21 @@ interface NotificationIntegrations {
 
 export interface SchemaChangeNotificationInput {
   event: {
-    organization: Pick<Organization, 'id' | 'cleanId' | 'name'>;
-    project: Pick<Project, 'id' | 'cleanId' | 'name'>;
-    target: Pick<Target, 'id' | 'cleanId' | 'name'>;
+    organization: Pick<Organization, 'id' | 'slug' | 'name'> & {
+      // For backwards compatibility
+      // We moved away from cleanId and replaced it with slug
+      cleanId: string;
+    };
+    project: Pick<Project, 'id' | 'slug' | 'name'> & {
+      // For backwards compatibility
+      // We moved away from cleanId and replaced it with slug
+      cleanId: string;
+    };
+    target: Pick<Target, 'id' | 'slug' | 'name'> & {
+      // For backwards compatibility
+      // We moved away from cleanId and replaced it with slug
+      cleanId: string;
+    };
     schema: {
       id: string;
       commit: string;
@@ -37,8 +49,16 @@ export interface SchemaChangeNotificationInput {
 export interface ChannelConfirmationInput {
   event: {
     kind: 'created' | 'deleted';
-    organization: Pick<Organization, 'id' | 'cleanId' | 'name'>;
-    project: Pick<Project, 'id' | 'cleanId' | 'name'>;
+    organization: Pick<Organization, 'id' | 'slug' | 'name'> & {
+      // For backwards compatibility
+      // We moved away from cleanId and replaced it with slug
+      cleanId: string;
+    };
+    project: Pick<Project, 'id' | 'slug' | 'name'> & {
+      // For backwards compatibility
+      // We moved away from cleanId and replaced it with slug
+      cleanId: string;
+    };
   };
   channel: AlertChannel;
   integrations: NotificationIntegrations;

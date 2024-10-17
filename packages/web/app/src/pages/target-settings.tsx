@@ -59,7 +59,7 @@ const TargetSettings_TargetValidationSettingsFragment = graphql(`
     percentage
     targets {
       id
-      cleanId
+      slug
     }
     excludedClients
   }
@@ -418,7 +418,7 @@ const TargetSettingsPage_TargetSettingsQuery = graphql(`
     targets(selector: $targetsSelector) {
       nodes {
         id
-        cleanId
+        slug
       }
     }
     organization(selector: $organizationSelector) {
@@ -700,7 +700,7 @@ const ConditionalBreakingChanges = (props: {
                       }}
                       onBlur={() => setFieldTouched('targets', true)}
                     />{' '}
-                    {pt.cleanId}
+                    {pt.slug}
                   </div>
                 ))}
               </div>
@@ -791,7 +791,7 @@ function TargetSlug(props: { organizationId: string; projectId: string; targetId
             params: {
               organizationId: props.organizationId,
               projectId: props.projectId,
-              targetId: result.data.updateTargetSlug.ok.target.cleanId,
+              targetId: result.data.updateTargetSlug.ok.target.slug,
             },
             search: {
               page: 'general',
@@ -994,7 +994,7 @@ const TargetSettingsPage_UpdateTargetSlugMutation = graphql(`
         }
         target {
           id
-          cleanId
+          slug
         }
       }
       error {
@@ -1007,7 +1007,7 @@ const TargetSettingsPage_UpdateTargetSlugMutation = graphql(`
 const TargetSettingsPage_TargetFragment = graphql(`
   fragment TargetSettingsPage_TargetFragment on Target {
     id
-    cleanId
+    slug
     baseSchema
   }
 `);
@@ -1066,7 +1066,7 @@ const TargetSettingsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        cleanId
+        slug
         ...TargetSettingsPage_OrganizationFragment
         me {
           ...CDNAccessTokens_MeFragment
@@ -1075,12 +1075,12 @@ const TargetSettingsPageQuery = graphql(`
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
       id
-      cleanId
+      slug
       type
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
-      cleanId
+      slug
       graphqlEndpointUrl
       ...TargetSettingsPage_TargetFragment
     }
@@ -1218,16 +1218,16 @@ function TargetSettingsContent(props: {
                       organizationId={props.organizationId}
                     />
                     <GraphQLEndpointUrl
-                      targetId={currentTarget.cleanId}
-                      projectId={currentProject.cleanId}
-                      organizationId={currentOrganization.cleanId}
+                      targetId={currentTarget.slug}
+                      projectId={currentProject.slug}
+                      organizationId={currentOrganization.slug}
                       graphqlEndpointUrl={currentTarget.graphqlEndpointUrl ?? null}
                     />
                     {hasDeleteAccess && (
                       <TargetDelete
-                        targetId={currentTarget.cleanId}
-                        projectId={currentProject.cleanId}
-                        organizationId={currentOrganization.cleanId}
+                        targetId={currentTarget.slug}
+                        projectId={currentProject.slug}
+                        organizationId={currentOrganization.slug}
                       />
                     )}
                   </>

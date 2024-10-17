@@ -11,6 +11,7 @@ export const Target: Pick<
   | 'id'
   | 'name'
   | 'project'
+  | 'slug'
   | 'validationSettings'
   | '__isTypeOf'
 > = {
@@ -49,4 +50,5 @@ export const Target: Pick<
       })
       .then(flags => flags.forceLegacyCompositionInTargets.includes(target.id));
   },
+  cleanId: target => target.slug,
 };

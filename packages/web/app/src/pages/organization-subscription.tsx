@@ -33,7 +33,7 @@ const numberFormatter = Intl.NumberFormat('en-US');
 const SubscriptionPage_OrganizationFragment = graphql(`
   fragment SubscriptionPage_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
     }
@@ -66,7 +66,7 @@ const SubscriptionPageQuery = graphql(`
   query SubscriptionPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        cleanId
+        slug
         ...SubscriptionPage_OrganizationFragment
       }
     }
@@ -142,7 +142,7 @@ function SubscriptionPageContent(props: { organizationId: string }) {
             <Button asChild>
               <Link
                 to="/$organizationId/view/manage-subscription"
-                params={{ organizationId: currentOrganization.cleanId }}
+                params={{ organizationId: currentOrganization.slug }}
               >
                 Manage subscription
               </Link>

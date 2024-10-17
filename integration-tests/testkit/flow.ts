@@ -46,7 +46,7 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
             createdOrganizationPayload {
               organization {
                 id
-                cleanId
+                slug
                 owner {
                   id
                   organizationAccessScopes
@@ -87,7 +87,7 @@ export function getOrganization(organizationId: string, authToken: string) {
         organization(selector: { organization: $organizationId }) {
           organization {
             id
-            cleanId
+            slug
             getStarted {
               creatingProject
               publishingSchema
@@ -145,7 +145,7 @@ export function updateOrganizationSlug(input: UpdateOrganizationSlugInput, authT
               organization {
                 id
                 name
-                cleanId
+                slug
               }
             }
           }
@@ -171,7 +171,7 @@ export function joinOrganization(code: string, authToken: string) {
           ... on OrganizationPayload {
             organization {
               id
-              cleanId
+              slug
               me {
                 id
                 user {
@@ -238,7 +238,7 @@ export function getOrganizationProjects(selector: OrganizationSelectorInput, aut
             projects {
               nodes {
                 id
-                cleanId
+                slug
                 name
               }
             }
@@ -331,12 +331,12 @@ export function createProject(input: CreateProjectInput, authToken: string) {
           ok {
             createdProject {
               id
-              cleanId
+              slug
               name
             }
             createdTargets {
               id
-              cleanId
+              slug
               name
             }
           }
@@ -363,7 +363,7 @@ export function updateProjectSlug(input: UpdateProjectSlugInput, authToken: stri
             project {
               id
               name
-              cleanId
+              slug
             }
           }
           error {
@@ -386,7 +386,7 @@ export function updateRegistryModel(input: UpdateProjectRegistryModelInput, auth
         updateProjectRegistryModel(input: $input) {
           ok {
             id
-            cleanId
+            slug
           }
           error {
             message
@@ -409,7 +409,7 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
           ok {
             createdTarget {
               id
-              cleanId
+              slug
             }
           }
           error {
@@ -438,7 +438,7 @@ export function updateTargetSlug(input: UpdateTargetSlugInput, authToken: string
             }
             target {
               id
-              cleanId
+              slug
               name
             }
           }
@@ -536,7 +536,7 @@ export function createMemberRole(input: CreateMemberRoleInput, authToken: string
           ok {
             updatedOrganization {
               id
-              cleanId
+              slug
               memberRoles {
                 id
                 name
@@ -596,7 +596,7 @@ export function deleteMemberRole(input: DeleteMemberRoleInput, authToken: string
           ok {
             updatedOrganization {
               id
-              cleanId
+              slug
               memberRoles {
                 id
                 name

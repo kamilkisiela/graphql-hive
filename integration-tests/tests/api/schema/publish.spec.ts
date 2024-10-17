@@ -496,7 +496,7 @@ describe.each`
           : null;
 
       expect(linkToWebsite).toEqual(
-        `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
+        `${process.env.HIVE_APP_BASE_URL}/${organization.slug}/${project.slug}/${target.slug}`,
       );
     },
   );
@@ -546,7 +546,7 @@ describe.each`
           : null;
 
       expect(linkToWebsite).toMatch(
-        `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
+        `${process.env.HIVE_APP_BASE_URL}/${organization.slug}/${project.slug}/${target.slug}/history/`,
       );
       expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
     },
@@ -575,8 +575,8 @@ describe.each`
       .then(r => r.expectNoGraphQLErrors());
     const createTargetResult = await createTarget(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
+        organization: organization.slug,
+        project: project.slug,
         slug: 'target2',
       },
       ownerToken,
@@ -2798,9 +2798,9 @@ test('Target.schemaVersion: result is read from the database', async () => {
     const result = await execute({
       document: SchemaCompareToPreviousVersionQuery,
       variables: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
         version: latestVersion.id,
       },
       authToken: ownerToken,
@@ -2893,8 +2893,8 @@ test('Composition Error (Federation 2) can be served from the database', async (
         endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.cleanId,
-        organization: organization.cleanId,
+        project: project.slug,
+        organization: organization.slug,
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -2937,9 +2937,9 @@ test('Composition Error (Federation 2) can be served from the database', async (
     const result = await execute({
       document: SchemaCompareToPreviousVersionQuery,
       variables: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
         version: latestVersion.id,
       },
       authToken: ownerToken,
@@ -3022,8 +3022,8 @@ test('Composition Network Failure (Federation 2)', async () => {
         endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.cleanId,
-        organization: organization.cleanId,
+        project: project.slug,
+        organization: organization.slug,
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -3062,8 +3062,8 @@ test('Composition Network Failure (Federation 2)', async () => {
       {
         endpoint: `http://${serviceAddress}/no_compose`,
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.cleanId,
-        organization: organization.cleanId,
+        project: project.slug,
+        organization: organization.slug,
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -3094,9 +3094,9 @@ test('Composition Network Failure (Federation 2)', async () => {
     const result = await execute({
       document: SchemaCompareToPreviousVersionQuery,
       variables: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
         version: latestVersion.id,
       },
       authToken: ownerToken,

@@ -13,6 +13,7 @@ const webhookInput = z
           .object({
             id: z.string().nonempty(),
             cleanId: z.string().nonempty(),
+            slug: z.string().nonempty(),
             name: z.string().nonempty(),
           })
           .required(),
@@ -20,6 +21,7 @@ const webhookInput = z
           .object({
             id: z.string().nonempty(),
             cleanId: z.string().nonempty(),
+            slug: z.string().nonempty(),
             name: z.string().nonempty(),
           })
           .required(),
@@ -27,6 +29,7 @@ const webhookInput = z
           .object({
             id: z.string().nonempty(),
             cleanId: z.string().nonempty(),
+            slug: z.string().nonempty(),
             name: z.string().nonempty(),
           })
           .required(),

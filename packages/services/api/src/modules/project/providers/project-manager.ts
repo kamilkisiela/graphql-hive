@@ -104,7 +104,7 @@ export class ProjectManager {
       },
       meta: {
         name: deletedProject.name,
-        cleanId: deletedProject.cleanId,
+        cleanId: deletedProject.slug,
       },
     });
 

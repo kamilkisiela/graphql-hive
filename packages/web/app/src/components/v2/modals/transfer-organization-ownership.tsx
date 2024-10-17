@@ -32,7 +32,7 @@ const TransferOrganizationOwnership_Members = graphql(`
     organization(selector: $selector) {
       organization {
         id
-        cleanId
+        slug
         members {
           nodes {
             id
@@ -75,7 +75,7 @@ type Member = NonNullable<
 const TransferOrganizationOwnershipModal_OrganizationFragment = graphql(`
   fragment TransferOrganizationOwnershipModal_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
   }
 `);
 
@@ -98,7 +98,7 @@ export const TransferOrganizationOwnershipModal = ({
     query: TransferOrganizationOwnership_Members,
     variables: {
       selector: {
-        organization: organization.cleanId,
+        organization: organization.slug,
       },
     },
   });
@@ -127,13 +127,13 @@ export const TransferOrganizationOwnershipModal = ({
       newOwner: Yup.string().min(1).required('New owner is not defined'),
       confirmation: Yup.string()
         .min(1)
-        .equals([organization.cleanId])
+        .equals([organization.slug])
         .required('Type organization name to confirm'),
     }),
     onSubmit: async values => {
       const result = await mutate({
         input: {
-          organization: organization.cleanId,
+          organization: organization.slug,
           user: values.newOwner,
         },
       });
@@ -263,7 +263,7 @@ export const TransferOrganizationOwnershipModal = ({
 
       <div className="flex flex-col gap-2">
         <div>
-          Type <span className="font-bold">{organization.cleanId}</span> to confirm.
+          Type <span className="font-bold">{organization.slug}</span> to confirm.
         </div>
 
         <Input

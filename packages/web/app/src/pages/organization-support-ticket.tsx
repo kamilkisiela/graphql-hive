@@ -183,7 +183,7 @@ function SupportTicket(props: {
     scope: OrganizationAccessScope.Read,
     member: organization.me,
     redirect: true,
-    organizationId: organization.cleanId,
+    organizationId: organization.slug,
   });
 
   const commentEdges = ticket.comments?.edges;
@@ -209,7 +209,7 @@ function SupportTicket(props: {
                 <Link
                   to="/$organizationId/view/support"
                   params={{
-                    organizationId: organization.cleanId,
+                    organizationId: organization.slug,
                   }}
                 >
                   Tickets
@@ -228,7 +228,7 @@ function SupportTicket(props: {
 
               <div className="mt-6">
                 <ReplyTicketForm
-                  organizationId={organization.cleanId}
+                  organizationId={organization.slug}
                   ticketId={ticket.id}
                   onSubmit={props.refetch}
                 />
@@ -272,7 +272,7 @@ function SupportTicket(props: {
 const SupportTicket_OrganizationFragment = graphql(`
   fragment SupportTicket_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
       isOwner

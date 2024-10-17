@@ -1754,13 +1754,13 @@ export class SchemaPublisher {
         typeof this.schemaModuleConfig.schemaPublishLink === 'function'
           ? this.schemaModuleConfig.schemaPublishLink({
               organization: {
-                cleanId: organization.cleanId,
+                slug: organization.slug,
               },
               project: {
-                cleanId: project.cleanId,
+                slug: project.slug,
               },
               target: {
-                cleanId: target.cleanId,
+                slug: target.slug,
               },
               version: latestVersion ? { id: latestVersion.version } : undefined,
             })
@@ -1989,13 +1989,13 @@ export class SchemaPublisher {
       typeof this.schemaModuleConfig.schemaPublishLink === 'function'
         ? this.schemaModuleConfig.schemaPublishLink({
             organization: {
-              cleanId: organization.cleanId,
+              slug: organization.slug,
             },
             project: {
-              cleanId: project.cleanId,
+              slug: project.slug,
             },
             target: {
-              cleanId: target.cleanId,
+              slug: target.slug,
             },
             version: latestVersion
               ? {
@@ -2036,7 +2036,7 @@ export class SchemaPublisher {
   private async createGithubCheckRunStartForSchemaCheck(args: {
     project: {
       orgId: string;
-      cleanId: string;
+      slug: string;
       name: string;
       useProjectNameInGithubCheck: boolean;
     };
@@ -2081,7 +2081,7 @@ export class SchemaPublisher {
     organization: Organization;
     project: {
       orgId: string;
-      cleanId: string;
+      slug: string;
       name: string;
       useProjectNameInGithubCheck: boolean;
     };
