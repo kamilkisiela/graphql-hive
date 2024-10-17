@@ -1,8 +1,5 @@
-import NextImage from 'next/image'
 import { Callout, Cards, Steps, Tabs } from '@theguild/components'
-import orgImage from '../../../../public/docs/pages/first-steps/org.png'
-import projectImage from '../../../../public/docs/pages/first-steps/project.png'
-import signupImage from '../../../../public/docs/pages/first-steps/signup.png'
+import { Screenshot } from '../../../components/screenshot'
 
 # First Steps with Hive Cloud
 
@@ -13,11 +10,7 @@ import signupImage from '../../../../public/docs/pages/first-steps/signup.png'
 To get started with Hive, first sign up and create your Hive account if you haven't already.
 [You can use this page to login or sign up](https://app.graphql-hive.com/auth).
 
-<NextImage
-  alt="Login/Signup view"
-  src={signupImage}
-  className="mt-10 max-w-sm rounded-lg drop-shadow-md"
-/>
+<Screenshot>![Login/Signup view](/docs/pages/first-steps/signup.png)</Screenshot>
 
 <Callout type="info">
   At the moment, Hive Cloud supports GitHub and Google authentication, or you can use a plain
@@ -33,11 +26,7 @@ GraphQL APIs. Hive organizations are used to manage access, integrations, and bi
 
 To create a new organization, [you use this page](https://app.graphql-hive.com/org/new).
 
-<NextImage
-  alt="Create Organization Form"
-  src={orgImage}
-  className="mt-10 max-w-lg rounded-lg drop-shadow-md"
-/>
+<Screenshot>![Create Organization Form](/docs/pages/first-steps/org.png)</Screenshot>
 
 Once you've successfully created your organization, you'll be able to expand your organization by
 inviting other members to join and collaborate on projects.
@@ -143,13 +132,9 @@ Hive supports the following project types:
 To get started with your Hive **project**, click on **Create Project +** button from the
 organization's main page:
 
-<NextImage
-  alt="Create Project Form"
-  src={projectImage}
-  className="mt-10 max-w-lg rounded-lg drop-shadow-md"
-/>
+<Screenshot>![Create Project Form](/docs/pages/first-steps/project.png)</Screenshot>
 
-Continue with one of the following guidebased on the type of project you selected.
+Continue with one of the following guide based on the type of project you selected.
 
 <Cards>
   <Cards.Card arrow title="Apollo Federation" href="/docs/get-started/apollo-federation" />
