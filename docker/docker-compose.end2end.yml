@@ -3,7 +3,7 @@ name: 'hive-e2e'
 services:
   oidc-server-mock:
     container_name: oidc-server-mock
-    image: ghcr.io/soluto/oidc-server-mock:0.8.6
+    image: ghcr.io/soluto/oidc-server-mock:9.0.1
     ports:
       - '7043:80'
     environment:
