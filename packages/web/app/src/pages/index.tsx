@@ -42,8 +42,8 @@ export function IndexPage() {
     } else if (result?.organization.slug) {
       // Redirect to the organization
       void router.navigate({
-        to: '/$organizationId',
-        params: { organizationId: result.organization.slug },
+        to: '/$organizationSlug',
+        params: { organizationSlug: result.organization.slug },
       });
     } // else, still loading
   }, [router, result]);

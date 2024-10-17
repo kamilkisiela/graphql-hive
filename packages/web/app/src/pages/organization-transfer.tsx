@@ -77,9 +77,9 @@ export function OrganizationTransferPage(props: { organizationId: string; code: 
             notify('The organization is now yours!', 'success');
           }
           void router.navigate({
-            to: '/$organizationId',
+            to: '/$organizationSlug',
             params: {
-              organizationId: orgId,
+              organizationSlug: orgId,
             },
           });
         } else {

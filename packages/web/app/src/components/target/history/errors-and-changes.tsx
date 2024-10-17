@@ -270,11 +270,11 @@ function ChangeItem(props: {
                                       <p key={i}>
                                         <Link
                                           className="text-orange-500 hover:text-orange-500"
-                                          to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                                          to="/$organizationSlug/$projectSlug/$targetSlug/insights/$operationName/$operationHash"
                                           params={{
-                                            organizationId: props.organizationId,
-                                            projectId: props.projectId,
-                                            targetId: target.target.slug,
+                                            organizationSlug: props.organizationId,
+                                            projectSlug: props.projectId,
+                                            targetSlug: target.target.slug,
                                             operationName: `${hash.substring(0, 4)}_${name}`,
                                             operationHash: hash,
                                           }}
@@ -337,11 +337,11 @@ function ChangeItem(props: {
                           <Link
                             key={index}
                             className="text-orange-500 hover:text-orange-500"
-                            to="/$organizationId/$projectId/$targetId/insights/schema-coordinate/$coordinate"
+                            to="/$organizationSlug/$projectSlug/$targetSlug/insights/schema-coordinate/$coordinate"
                             params={{
-                              organizationId: props.organizationId,
-                              projectId: props.projectId,
-                              targetId: target.target.slug,
+                              organizationSlug: props.organizationId,
+                              projectSlug: props.projectId,
+                              targetSlug: target.target.slug,
                               coordinate: change.path!.join('.'),
                             }}
                             target="_blank"

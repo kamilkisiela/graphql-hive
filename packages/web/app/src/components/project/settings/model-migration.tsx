@@ -195,8 +195,8 @@ export function ModelMigrationSettings(props: {
             size="lg"
             onClick={() => {
               void router.navigate({
-                to: '/$organizationId/view/support',
-                params: { organizationId: props.organizationId },
+                to: '/$organizationSlug/view/support',
+                params: { organizationSlug: props.organizationId },
               });
             }}
           >
@@ -333,8 +333,8 @@ export function ModelMigrationSettings(props: {
                 variant="link"
                 onClick={() => {
                   void router.navigate({
-                    to: '/$organizationId/view/support',
-                    params: { organizationId: props.organizationId },
+                    to: '/$organizationSlug/view/support',
+                    params: { organizationSlug: props.organizationId },
                   });
                 }}
               >

@@ -129,14 +129,14 @@ export function OrganizationLayout({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             <OrganizationSelector
-              currentOrganizationCleanId={props.organizationId}
+              currentOrganizationSlug={props.organizationId}
               organizations={query.data?.organizations ?? null}
             />
           </div>
           <div>
             <UserMenu
               me={query.data?.me ?? null}
-              currentOrganizationCleanId={props.organizationId}
+              currentOrganizationSlug={props.organizationId}
               organizations={query.data?.organizations ?? null}
             />
           </div>
@@ -148,15 +148,18 @@ export function OrganizationLayout({
             <Tabs value={page} className="min-w-[600px]">
               <TabsList variant="menu">
                 <TabsTrigger variant="menu" value={Page.Overview} asChild>
-                  <Link to="/$organizationId" params={{ organizationId: currentOrganization.slug }}>
+                  <Link
+                    to="/$organizationSlug"
+                    params={{ organizationSlug: currentOrganization.slug }}
+                  >
                     Overview
                   </Link>
                 </TabsTrigger>
                 {canAccessOrganization(OrganizationAccessScope.Members, meInCurrentOrg) && (
                   <TabsTrigger variant="menu" value={Page.Members} asChild>
                     <Link
-                      to="/$organizationId/view/members"
-                      params={{ organizationId: currentOrganization.slug }}
+                      to="/$organizationSlug/view/members"
+                      params={{ organizationSlug: currentOrganization.slug }}
                       search={{ page: 'list' }}
                     >
                       Members
@@ -167,16 +170,16 @@ export function OrganizationLayout({
                   <>
                     <TabsTrigger variant="menu" value={Page.Policy} asChild>
                       <Link
-                        to="/$organizationId/view/policy"
-                        params={{ organizationId: currentOrganization.slug }}
+                        to="/$organizationSlug/view/policy"
+                        params={{ organizationSlug: currentOrganization.slug }}
                       >
                         Policy
                       </Link>
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Settings} asChild>
                       <Link
-                        to="/$organizationId/view/settings"
-                        params={{ organizationId: currentOrganization.slug }}
+                        to="/$organizationSlug/view/settings"
+                        params={{ organizationSlug: currentOrganization.slug }}
                       >
                         Settings
                       </Link>
@@ -187,8 +190,8 @@ export function OrganizationLayout({
                   env.zendeskSupport && (
                     <TabsTrigger variant="menu" value={Page.Support} asChild>
                       <Link
-                        to="/$organizationId/view/support"
-                        params={{ organizationId: currentOrganization.slug }}
+                        to="/$organizationSlug/view/support"
+                        params={{ organizationSlug: currentOrganization.slug }}
                       >
                         Support
                       </Link>
@@ -198,8 +201,8 @@ export function OrganizationLayout({
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                     <TabsTrigger variant="menu" value={Page.Subscription} asChild>
                       <Link
-                        to="/$organizationId/view/subscription"
-                        params={{ organizationId: currentOrganization.slug }}
+                        to="/$organizationSlug/view/subscription"
+                        params={{ organizationSlug: currentOrganization.slug }}
                       >
                         Subscription
                       </Link>
@@ -339,10 +342,10 @@ function CreateProjectModal(props: {
     if (data?.createProject.ok) {
       props.toggleModalOpen();
       void router.navigate({
-        to: '/$organizationId/$projectId',
+        to: '/$organizationSlug/$projectSlug',
         params: {
-          organizationId: props.organizationId,
-          projectId: data.createProject.ok.createdProject.slug,
+          organizationSlug: props.organizationId,
+          projectSlug: data.createProject.ok.createdProject.slug,
         },
       });
     } else if (data?.createProject.error?.inputErrors.slug) {

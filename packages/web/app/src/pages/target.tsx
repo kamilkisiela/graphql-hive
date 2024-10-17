@@ -287,16 +287,18 @@ function SchemaView(props: {
 }
 
 const TargetSchemaPageQuery = graphql(`
-  query TargetSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query TargetSchemaPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         ...SchemaView_OrganizationFragment
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organization: $organizationSlug, project: $projectSlug }) {
       ...SchemaView_ProjectFragment
     }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+    ) {
       ...SchemaView_TargetFragment
     }
   }
@@ -306,9 +308,9 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
   const [query] = useQuery({
     query: TargetSchemaPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
+      targetSlug: props.targetId,
     },
   });
 
@@ -335,11 +337,11 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
         <div className="flex flex-row items-center gap-x-4">
           <Button variant="outline" asChild>
             <Link
-              to="/$organizationId/$projectId/$targetId/explorer/unused"
+              to="/$organizationSlug/$projectSlug/$targetSlug/explorer/unused"
               params={{
-                organizationId: props.organizationId,
-                projectId: props.projectId,
-                targetId: props.targetId,
+                organizationSlug: props.organizationId,
+                projectSlug: props.projectId,
+                targetSlug: props.targetId,
               }}
             >
               Unused schema
@@ -348,11 +350,11 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
           <span className="italic">|</span>
           <Button variant="outline" asChild>
             <Link
-              to="/$organizationId/$projectId/$targetId/explorer/deprecated"
+              to="/$organizationSlug/$projectSlug/$targetSlug/explorer/deprecated"
               params={{
-                organizationId: props.organizationId,
-                projectId: props.projectId,
-                targetId: props.targetId,
+                organizationSlug: props.organizationId,
+                projectSlug: props.projectId,
+                targetSlug: props.targetId,
               }}
             >
               Deprecated schema

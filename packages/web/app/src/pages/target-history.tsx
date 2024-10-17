@@ -95,11 +95,11 @@ function ListPage(props: {
         >
           <Link
             key={version.id}
-            to="/$organizationId/$projectId/$targetId/history/$versionId"
+            to="/$organizationSlug/$projectSlug/$targetSlug/history/$versionId"
             params={{
-              organizationId: props.organizationId,
-              projectId: props.projectId,
-              targetId: props.targetId,
+              organizationSlug: props.organizationId,
+              projectSlug: props.projectId,
+              targetSlug: props.targetId,
               versionId: version.id,
             }}
           >
@@ -158,8 +158,10 @@ function ListPage(props: {
 }
 
 const TargetHistoryPageQuery = graphql(`
-  query TargetHistoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+  query TargetHistoryPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
+    target(
+      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+    ) {
       id
       latestSchemaVersion {
         id
@@ -177,9 +179,9 @@ function HistoryPageContent(props: {
   const [query] = useQuery({
     query: TargetHistoryPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
+      targetSlug: props.targetId,
     },
   });
   const [pageVariables, setPageVariables] = useState([{ first: 10, after: null as string | null }]);
@@ -193,11 +195,11 @@ function HistoryPageContent(props: {
   useEffect(() => {
     if (!versionId && currentTarget?.latestSchemaVersion?.id) {
       void router.navigate({
-        to: '/$organizationId/$projectId/$targetId/history/$versionId',
+        to: '/$organizationSlug/$projectSlug/$targetSlug/history/$versionId',
         params: {
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
+          organizationSlug: props.organizationId,
+          projectSlug: props.projectId,
+          targetSlug: props.targetId,
           versionId: currentTarget.latestSchemaVersion.id,
         },
       });

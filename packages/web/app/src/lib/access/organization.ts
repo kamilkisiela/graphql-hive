@@ -42,9 +42,9 @@ export function useOrganizationAccess({
     redirectTo: redirect
       ? router => {
           void router.navigate({
-            to: '/$organizationId',
+            to: '/$organizationSlug',
             params: {
-              organizationId,
+              organizationSlug: organizationId,
             },
           });
         }

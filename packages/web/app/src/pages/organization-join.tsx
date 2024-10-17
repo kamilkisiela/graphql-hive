@@ -70,8 +70,8 @@ export function JoinOrganizationPage(props: { inviteCode: string }) {
           description: `You are now a member of ${org.slug}`,
         });
         void router.navigate({
-          to: '/$organizationId',
-          params: { organizationId: org.slug },
+          to: '/$organizationSlug',
+          params: { organizationSlug: org.slug },
         });
       }
     }

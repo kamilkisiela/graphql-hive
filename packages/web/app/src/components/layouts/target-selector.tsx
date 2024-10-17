@@ -24,9 +24,9 @@ const TargetSelector_OrganizationConnectionFragment = graphql(`
 `);
 
 export function TargetSelector(props: {
-  currentOrganizationCleanId: string;
-  currentProjectCleanId: string;
-  currentTargetCleanId: string;
+  currentOrganizationSlug: string;
+  currentProjectSlug: string;
+  currentTargetSlug: string;
   organizations: FragmentType<typeof TargetSelector_OrganizationConnectionFragment> | null;
 }) {
   const router = useRouter();
@@ -37,22 +37,22 @@ export function TargetSelector(props: {
   )?.nodes;
 
   const currentOrganization = organizations?.find(
-    node => node.slug === props.currentOrganizationCleanId,
+    node => node.slug === props.currentOrganizationSlug,
   );
 
   const projects = currentOrganization?.projects.nodes;
-  const currentProject = projects?.find(node => node.slug === props.currentProjectCleanId);
+  const currentProject = projects?.find(node => node.slug === props.currentProjectSlug);
 
   const targets = currentProject?.targets.nodes;
-  const currentTarget = targets?.find(node => node.slug === props.currentTargetCleanId);
+  const currentTarget = targets?.find(node => node.slug === props.currentTargetSlug);
 
   return (
     <>
       {currentOrganization ? (
         <Link
-          to="/$organizationId"
+          to="/$organizationSlug"
           params={{
-            organizationId: currentOrganization.slug,
+            organizationSlug: currentOrganization.slug,
           }}
           className="max-w-[200px] shrink-0 truncate font-medium"
         >
@@ -64,10 +64,10 @@ export function TargetSelector(props: {
       <div className="italic text-gray-500">/</div>
       {currentOrganization && currentProject ? (
         <Link
-          to="/$organizationId/$projectId"
+          to="/$organizationSlug/$projectSlug"
           params={{
-            organizationId: props.currentOrganizationCleanId,
-            projectId: props.currentProjectCleanId,
+            organizationSlug: props.currentOrganizationSlug,
+            projectSlug: props.currentProjectSlug,
           }}
           className="max-w-[200px] shrink-0 truncate font-medium"
         >
@@ -80,14 +80,14 @@ export function TargetSelector(props: {
       {targets?.length && currentOrganization && currentProject && currentTarget ? (
         <>
           <Select
-            value={props.currentTargetCleanId}
+            value={props.currentTargetSlug}
             onValueChange={id => {
               void router.navigate({
-                to: '/$organizationId/$projectId/$targetId',
+                to: '/$organizationSlug/$projectSlug/$targetSlug',
                 params: {
-                  organizationId: props.currentOrganizationCleanId,
-                  projectId: props.currentProjectCleanId,
-                  targetId: id,
+                  organizationSlug: props.currentOrganizationSlug,
+                  projectSlug: props.currentProjectSlug,
+                  targetSlug: id,
                 },
               });
             }}

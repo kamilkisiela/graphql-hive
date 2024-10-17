@@ -99,11 +99,11 @@ export function TypeFilter(props: {
       options={types}
       onChange={option => {
         void router.navigate({
-          to: '/$organizationId/$projectId/$targetId/explorer/$typename',
+          to: '/$organizationSlug/$projectSlug/$targetSlug/explorer/$typename',
           params: {
-            organizationId: props.organizationId,
-            projectId: props.projectId,
-            targetId: props.targetId,
+            organizationSlug: props.organizationId,
+            projectSlug: props.projectId,
+            targetSlug: props.targetId,
             typename: option.value,
           },
         });
@@ -190,19 +190,19 @@ const variants: Array<{
   {
     value: 'all',
     label: 'All',
-    pathname: '/$organizationId/$projectId/$targetId/explorer',
+    pathname: '/$organizationSlug/$projectSlug/$targetSlug/explorer',
     tooltip: 'Shows all types, including unused and deprecated ones',
   },
   {
     value: 'unused',
     label: 'Unused',
-    pathname: '/$organizationId/$projectId/$targetId/explorer/unused',
+    pathname: '/$organizationSlug/$projectSlug/$targetSlug/explorer/unused',
     tooltip: 'Shows only types that are not used in any operation',
   },
   {
     value: 'deprecated',
     label: 'Deprecated',
-    pathname: '/$organizationId/$projectId/$targetId/explorer/deprecated',
+    pathname: '/$organizationSlug/$projectSlug/$targetSlug/explorer/deprecated',
     tooltip: 'Shows only types that are marked as deprecated',
   },
 ];
@@ -229,9 +229,9 @@ export function SchemaVariantFilter(props: {
                     <Link
                       to={variant.pathname}
                       params={{
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
+                        organizationSlug: props.organizationId,
+                        projectSlug: props.projectId,
+                        targetSlug: props.targetId,
                       }}
                     >
                       {variant.label}

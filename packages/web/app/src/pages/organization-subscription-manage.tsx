@@ -482,8 +482,8 @@ function ManageSubscriptionPageContent(props: { organizationId: string }) {
             <div>
               <Button asChild>
                 <Link
-                  to="/$organizationId/view/subscription"
-                  params={{ organizationId: currentOrganization.slug }}
+                  to="/$organizationSlug/view/subscription"
+                  params={{ organizationSlug: currentOrganization.slug }}
                 >
                   Subscription usage
                 </Link>

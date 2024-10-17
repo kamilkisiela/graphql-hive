@@ -67,11 +67,11 @@ function OperationRow({
             <Button variant="orangeLink" className="h-auto p-0" asChild>
               <Link
                 className="block max-w-[300px] truncate"
-                to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                to="/$organizationSlug/$projectSlug/$targetSlug/insights/$operationName/$operationHash"
                 params={{
-                  organizationId: organization,
-                  projectId: project,
-                  targetId: target,
+                  organizationSlug: organization,
+                  projectSlug: project,
+                  targetSlug: target,
                   operationName: operation.name,
                   operationHash: operation.hash,
                 }}

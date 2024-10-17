@@ -7,7 +7,7 @@ export function RenderIfStripeAvailable(props: { children: ReactNode; organizati
    * If Stripe is not enabled we redirect the user to the organization.
    */
   if (!getIsStripeEnabled()) {
-    return <Navigate to="/$organizationId" params={{ organizationId: props.organizationId }} />;
+    return <Navigate to="/$organizationSlug" params={{ organizationSlug: props.organizationId }} />;
   }
 
   return <>{props.children}</>;

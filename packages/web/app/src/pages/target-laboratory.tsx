@@ -131,11 +131,11 @@ function Save(props: {
           updateActiveTabValues({ id, title: name });
         }
         void router.navigate({
-          to: '/$organizationId/$projectId/$targetId/laboratory',
+          to: '/$organizationSlug/$projectSlug/$targetSlug/laboratory',
           params: {
-            organizationId: props.organizationId,
-            projectId: props.projectId,
-            targetId: props.targetId,
+            organizationSlug: props.organizationId,
+            projectSlug: props.projectId,
+            targetSlug: props.targetId,
           },
           search: { operation: id },
         });
@@ -250,9 +250,9 @@ function LaboratoryPageContent(props: {
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
+      targetSlug: props.targetId,
     },
   });
   const router = useRouter();
@@ -325,11 +325,11 @@ function LaboratoryPageContent(props: {
       const activeTab = tabs.find((_, index) => index === activeTabIndex)!;
       // Set search params while clicking on tab
       void router.navigate({
-        to: '/$organizationId/$projectId/$targetId/laboratory',
+        to: '/$organizationSlug/$projectSlug/$targetSlug/laboratory',
         params: {
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
+          organizationSlug: props.organizationId,
+          projectSlug: props.projectId,
+          targetSlug: props.targetId,
         },
         search: userOperations.has(activeTab.id) ? { operation: activeTab.id } : {},
       });
@@ -359,11 +359,11 @@ function LaboratoryPageContent(props: {
           <div>
             {query.data && !query.data.target?.graphqlEndpointUrl ? (
               <RouterLink
-                to="/$organizationId/$projectId/$targetId/settings"
+                to="/$organizationSlug/$projectSlug/$targetSlug/settings"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationId,
+                  projectSlug: props.projectId,
+                  targetSlug: props.targetId,
                 }}
                 search={{ page: 'general' }}
               >

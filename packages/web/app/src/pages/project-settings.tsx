@@ -209,10 +209,7 @@ const SlugFormSchema = z.object({
 
 type SlugFormValues = z.infer<typeof SlugFormSchema>;
 
-function ProjectSettingsPage_SlugForm(props: {
-  organizationCleanId: string;
-  projectCleanId: string;
-}) {
+function ProjectSettingsPage_SlugForm(props: { organizationSlug: string; projectSlug: string }) {
   const { toast } = useToast();
   const router = useRouter();
   const [_slugMutation, slugMutate] = useMutation(ProjectSettingsPage_UpdateProjectSlugMutation);
@@ -221,7 +218,7 @@ function ProjectSettingsPage_SlugForm(props: {
     mode: 'all',
     resolver: zodResolver(SlugFormSchema),
     defaultValues: {
-      slug: props.projectCleanId,
+      slug: props.projectSlug,
     },
   });
 
@@ -230,8 +227,8 @@ function ProjectSettingsPage_SlugForm(props: {
       try {
         const result = await slugMutate({
           input: {
-            organization: props.organizationCleanId,
-            project: props.projectCleanId,
+            organization: props.organizationSlug,
+            project: props.projectSlug,
             slug: data.slug,
           },
         });
@@ -245,10 +242,10 @@ function ProjectSettingsPage_SlugForm(props: {
             description: 'Project slug updated',
           });
           void router.navigate({
-            to: '/$organizationId/$projectId/view/settings',
+            to: '/$organizationSlug/$projectSlug/view/settings',
             params: {
-              organizationId: props.organizationCleanId,
-              projectId: result.data.updateProjectSlug.ok.project.slug,
+              organizationSlug: props.organizationSlug,
+              projectSlug: result.data.updateProjectSlug.ok.project.slug,
             },
           });
         } else if (error) {
@@ -293,7 +290,7 @@ function ProjectSettingsPage_SlugForm(props: {
                   <FormControl>
                     <div className="flex items-center">
                       <div className="border-input text-muted-foreground h-10 rounded-md rounded-r-none border-y border-l bg-gray-900 px-3 py-2 text-sm">
-                        {env.appBaseUrl.replace(/https?:\/\//i, '')}/{props.organizationCleanId}/
+                        {env.appBaseUrl.replace(/https?:\/\//i, '')}/{props.organizationSlug}/
                       </div>
                       <Input placeholder="slug" className="w-48 rounded-l-none" {...field} />
                     </div>
@@ -339,13 +336,13 @@ const ProjectSettingsPage_ProjectFragment = graphql(`
 `);
 
 const ProjectSettingsPageQuery = graphql(`
-  query ProjectSettingsPageQuery($organizationId: ID!, $projectId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query ProjectSettingsPageQuery($organizationSlug: ID!, $projectSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         ...ProjectSettingsPage_OrganizationFragment
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organization: $organizationSlug, project: $projectSlug }) {
       ...ProjectSettingsPage_ProjectFragment
     }
     isGitHubIntegrationFeatureEnabled
@@ -357,8 +354,8 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
   const [query] = useQuery({
     query: ProjectSettingsPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
     },
     requestPolicy: 'cache-and-network',
   });
@@ -398,8 +395,8 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
               <>
                 <ModelMigrationSettings project={project} organizationId={organization.slug} />
                 <ProjectSettingsPage_SlugForm
-                  organizationCleanId={props.organizationId}
-                  projectCleanId={props.projectId}
+                  organizationSlug={props.organizationId}
+                  projectSlug={props.projectId}
                 />
                 {query.data?.isGitHubIntegrationFeatureEnabled &&
                 !project.isProjectNameInGitHubCheckEnabled ? (
@@ -514,9 +511,9 @@ export function DeleteProjectModal(props: {
       });
       props.toggleModalOpen();
       void router.navigate({
-        to: '/$organizationId',
+        to: '/$organizationSlug',
         params: {
-          organizationId,
+          organizationSlug: organizationId,
         },
       });
     }

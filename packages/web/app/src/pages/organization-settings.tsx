@@ -267,9 +267,9 @@ const SettingsPageRenderer = (props: {
             description: 'Organization slug updated',
           });
           void router.navigate({
-            to: '/$organizationId/view/settings',
+            to: '/$organizationSlug/view/settings',
             params: {
-              organizationId:
+              organizationSlug:
                 result.data.updateOrganizationSlug.ok.updatedOrganizationPayload.organization.slug,
             },
           });

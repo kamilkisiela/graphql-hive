@@ -46,11 +46,11 @@ export function useTargetAccess({
     redirectTo: redirect
       ? router => {
           void router.navigate({
-            to: '/$organizationId/$projectId/$targetId',
+            to: '/$organizationSlug/$projectSlug/$targetSlug',
             params: {
-              organizationId,
-              projectId,
-              targetId,
+              organizationSlug: organizationId,
+              projectSlug: projectId,
+              targetSlug: targetId,
             },
           });
         }

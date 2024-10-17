@@ -38,8 +38,8 @@ const IncrementalNativeCompositionSwitch_Mutation = graphql(`
 `);
 
 const IncrementalNativeCompositionSwitch = (props: {
-  organizationCleanId: string;
-  projectCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
   target: FragmentType<typeof IncrementalNativeCompositionSwitch_TargetFragment>;
 }) => {
   const target = useFragment(IncrementalNativeCompositionSwitch_TargetFragment, props.target);
@@ -67,8 +67,8 @@ const IncrementalNativeCompositionSwitch = (props: {
                 onCheckedChange={nativeComposition => {
                   void mutate({
                     input: {
-                      organization: props.organizationCleanId,
-                      project: props.projectCleanId,
+                      organization: props.organizationSlug,
+                      project: props.projectSlug,
                       target: target.slug,
                       nativeComposition,
                     },
@@ -255,8 +255,8 @@ export function NativeCompositionSettings(props: {
               <div className="flex flex-row gap-4">
                 {project.targets.nodes.map(target => (
                   <IncrementalNativeCompositionSwitch
-                    organizationCleanId={organization.slug}
-                    projectCleanId={project.slug}
+                    organizationSlug={organization.slug}
+                    projectSlug={project.slug}
                     key={target.id}
                     target={target}
                   />

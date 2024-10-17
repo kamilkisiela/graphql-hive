@@ -560,11 +560,11 @@ function ClientsStats(props: {
         }
 
         void router.navigate({
-          to: '/$organizationId/$projectId/$targetId/insights/client/$name',
+          to: '/$organizationSlug/$projectSlug/$targetSlug/insights/client/$name',
           params: {
-            organizationId: props.organizationId,
-            projectId: props.projectId,
-            targetId: props.targetId,
+            organizationSlug: props.organizationId,
+            projectSlug: props.projectId,
+            targetSlug: props.targetId,
             name: ev.value,
           },
           search(searchParams) {

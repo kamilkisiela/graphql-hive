@@ -207,9 +207,9 @@ function SupportTicket(props: {
                 asChild
               >
                 <Link
-                  to="/$organizationId/view/support"
+                  to="/$organizationSlug/view/support"
                   params={{
-                    organizationId: organization.slug,
+                    organizationSlug: organization.slug,
                   }}
                 >
                   Tickets

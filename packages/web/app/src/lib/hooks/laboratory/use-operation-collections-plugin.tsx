@@ -77,8 +77,8 @@ const CreateOperationMutation = graphql(`
 `);
 
 export const TargetLaboratoryPageQuery = graphql(`
-  query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query TargetLaboratoryPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         id
         me {
@@ -87,7 +87,9 @@ export const TargetLaboratoryPageQuery = graphql(`
         }
       }
     }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+    ) {
       id
       graphqlEndpointUrl
       latestSchemaVersion {
@@ -120,7 +122,11 @@ export function Content() {
   };
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
-    variables: { organizationId, projectId, targetId },
+    variables: {
+      organizationSlug: organizationId,
+      projectSlug: projectId,
+      targetSlug: targetId,
+    },
   });
   const currentOrganization = query.data?.organization?.organization;
   const canEdit = canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null);
@@ -267,8 +273,12 @@ export function Content() {
     }
     if (result.data?.createOperationInDocumentCollection.ok) {
       void router.navigate({
-        to: '/$organizationId/$projectId/$targetId/laboratory',
-        params: { organizationId, projectId, targetId },
+        to: '/$organizationSlug/$projectSlug/$targetSlug/laboratory',
+        params: {
+          organizationSlug: organizationId,
+          projectSlug: projectId,
+          targetSlug: targetId,
+        },
         search: {
           operation: result.data.createOperationInDocumentCollection.ok.operation.id,
         },
@@ -335,8 +345,12 @@ export function Content() {
           collection.operations.edges.map(({ node }) => (
             <div key={node.id} className="flex items-center">
               <Link
-                to="/$organizationId/$projectId/$targetId/laboratory"
-                params={{ organizationId, projectId, targetId }}
+                to="/$organizationSlug/$projectSlug/$targetSlug/laboratory"
+                params={{
+                  organizationSlug: organizationId,
+                  projectSlug: projectId,
+                  targetSlug: targetId,
+                }}
                 search={{ operation: node.id }}
                 className={cn(
                   'flex w-full items-center gap-x-3 rounded p-2 font-normal text-white/50 hover:bg-gray-100/10 hover:text-white hover:no-underline',

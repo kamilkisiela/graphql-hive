@@ -85,7 +85,7 @@ const UserMenu_MemberFragment = graphql(`
 export function UserMenu(props: {
   me: FragmentType<typeof UserMenu_MeFragment> | null;
   organizations: FragmentType<typeof UserMenu_OrganizationConnectionFragment> | null;
-  currentOrganizationCleanId: string;
+  currentOrganizationSlug: string;
 }) {
   const docsUrl = getDocsUrl();
   const me = useFragment(UserMenu_MeFragment, props.me);
@@ -96,7 +96,7 @@ export function UserMenu(props: {
   const [isUserSettingsModalOpen, toggleUserSettingsModalOpen] = useToggle();
   const [isLeaveOrganizationModalOpen, toggleLeaveOrganizationModalOpen] = useToggle();
   const currentOrganization = organizations?.find(
-    org => org.slug === props.currentOrganizationCleanId,
+    org => org.slug === props.currentOrganizationSlug,
   );
   const meInOrg = useFragment(UserMenu_MemberFragment, currentOrganization?.me);
 
@@ -168,9 +168,9 @@ export function UserMenu(props: {
                       active={currentOrganization?.slug === org.slug}
                     >
                       <Link
-                        to="/$organizationId"
+                        to="/$organizationSlug"
                         params={{
-                          organizationId: org.slug,
+                          organizationSlug: org.slug,
                         }}
                       >
                         {org.slug}
@@ -215,9 +215,9 @@ export function UserMenu(props: {
               {currentOrganization && env.zendeskSupport ? (
                 <DropdownMenuItem asChild>
                   <Link
-                    to="/$organizationId/view/support"
+                    to="/$organizationSlug/view/support"
                     params={{
-                      organizationId: currentOrganization.slug,
+                      organizationSlug: currentOrganization.slug,
                     }}
                   >
                     <LifeBuoyIcon className="mr-2 size-4" />
@@ -320,7 +320,7 @@ export function LeaveOrganizationModal(props: {
     <LeaveOrganizationModalContent
       isOpen={props.isOpen}
       toggleModalOpen={props.toggleModalOpen}
-      organizationCleanId={organizationId}
+      organizationSlug={organizationId}
       onSubmit={onSubmit}
     />
   );
@@ -329,19 +329,19 @@ export function LeaveOrganizationModal(props: {
 export function LeaveOrganizationModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationCleanId: string;
+  organizationSlug: string;
   onSubmit: () => void;
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
       <DialogContent className="w-4/5 max-w-[520px] md:w-3/5">
         <DialogHeader>
-          <DialogTitle>Leave {props.organizationCleanId}?</DialogTitle>
+          <DialogTitle>Leave {props.organizationSlug}?</DialogTitle>
           <DialogDescription>
             Are you sure you want to leave this organization?
             <br />
             You will lose access to{' '}
-            <span className="font-semibold text-white">{props.organizationCleanId}</span>.
+            <span className="font-semibold text-white">{props.organizationSlug}</span>.
           </DialogDescription>
           <DialogDescription className="font-bold">This action is irreversible!</DialogDescription>
         </DialogHeader>

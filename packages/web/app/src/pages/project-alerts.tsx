@@ -175,13 +175,13 @@ const ProjectAlertsPage_OrganizationFragment = graphql(`
 `);
 
 const ProjectAlertsPageQuery = graphql(`
-  query ProjectAlertsPageQuery($organizationId: ID!, $projectId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query ProjectAlertsPageQuery($organizationSlug: ID!, $projectSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         ...ProjectAlertsPage_OrganizationFragment
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organization: $organizationSlug, project: $projectSlug }) {
       id
       targets {
         nodes {
@@ -203,8 +203,8 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
   const [query] = useQuery({
     query: ProjectAlertsPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
     },
     requestPolicy: 'cache-and-network',
   });
