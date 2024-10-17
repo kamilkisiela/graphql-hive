@@ -27,7 +27,6 @@ import { Link, useRouter } from '@tanstack/react-router';
 const TargetCard_TargetFragment = graphql(`
   fragment TargetCard_TargetFragment on Target {
     id
-    name
     cleanId
   }
 `);
@@ -153,7 +152,7 @@ const TargetCard = (props: {
               <div className="flex flex-row items-center justify-between gap-y-3 px-4 pt-4">
                 <div>
                   {target ? (
-                    <h4 className="line-clamp-2 text-lg font-bold">{target.name}</h4>
+                    <h4 className="line-clamp-2 text-lg font-bold">{target.cleanId}</h4>
                   ) : (
                     <div className="h-4 w-48 animate-pulse rounded-full bg-gray-800 py-2" />
                   )}
@@ -265,7 +264,7 @@ const ProjectsPageContent = (
     const searchPhrase = props.search;
     const newTargets = searchPhrase
       ? targetConnection.nodes.filter(target =>
-          target.name.toLowerCase().includes(searchPhrase.toLowerCase()),
+          target.cleanId.toLowerCase().includes(searchPhrase.toLowerCase()),
         )
       : targetConnection.nodes.slice();
 
@@ -282,11 +281,11 @@ const ProjectsPageContent = (
       }
 
       if (sortKey === 'name') {
-        return a.name.localeCompare(b.name) * sortOrder * -1;
+        return a.cleanId.localeCompare(b.cleanId) * sortOrder * -1;
       }
 
       // falls back to sort by name in ascending order
-      return a.name.localeCompare(b.name);
+      return a.cleanId.localeCompare(b.cleanId);
     });
   }, [targetConnection, props.search, sortKey, sortOrder]);
 
@@ -467,7 +466,7 @@ const ProjectOverviewPageQuery = graphql(`
       total
       nodes {
         id
-        name
+        cleanId
         ...TargetCard_TargetFragment
         totalRequests(period: $period)
         requestsOverTime(resolution: $chartResolution, period: $period) {

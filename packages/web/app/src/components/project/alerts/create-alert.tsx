@@ -30,7 +30,6 @@ export const CreateAlertModal_TargetFragment = graphql(`
   fragment CreateAlertModal_TargetFragment on Target {
     id
     cleanId
-    name
   }
 `);
 
@@ -145,7 +144,7 @@ export const CreateAlertModal = (props: {
             placeholder="Select target"
             options={targets.map(target => ({
               value: target.cleanId,
-              name: target.name,
+              name: target.cleanId,
             }))}
             value={values.target}
             onChange={handleChange}

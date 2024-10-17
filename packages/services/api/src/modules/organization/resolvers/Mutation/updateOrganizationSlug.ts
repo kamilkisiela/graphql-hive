@@ -6,7 +6,7 @@ import type { MutationResolvers } from './../../../../__generated__/types.next';
 export const updateOrganizationSlug: NonNullable<
   MutationResolvers['updateOrganizationSlug']
 > = async (_, { input }, { injector }) => {
-  const parsedInput = OrganizationSlugModel.safeParse(input.slug.trim());
+  const parsedInput = OrganizationSlugModel.safeParse(input.slug);
 
   if (!parsedInput.success) {
     return {
@@ -20,7 +20,7 @@ export const updateOrganizationSlug: NonNullable<
 
   const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
   const result = await injector.get(OrganizationManager).updateSlug({
-    slug: input.slug,
+    slug: parsedInput.data,
     organization: organizationId,
   });
 

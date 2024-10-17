@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
-import { paramCase } from 'param-case';
 import { Organization, OrganizationMemberRole } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { cache, diffArrays, share } from '../../../shared/helpers';
@@ -20,7 +19,7 @@ import { TokenStorage } from '../../token/providers/token-storage';
 import {
   organizationAdminScopes,
   organizationViewerScopes,
-  reservedOrganizationNames,
+  reservedOrganizationSlugs,
 } from './organization-config';
 
 function ensureReadAccess(
@@ -277,14 +276,14 @@ export class OrganizationManager {
   }
 
   async createOrganization(input: {
-    name: string;
+    slug: string;
     user: {
       id: string;
       superTokensUserId: string | null;
       oidcIntegrationId: string | null;
     };
-  }): Promise<Organization> {
-    const { name, user } = input;
+  }) {
+    const { slug, user } = input;
     this.logger.info('Creating an organization (input=%o)', input);
 
     if (user.oidcIntegrationId) {
@@ -295,24 +294,25 @@ export class OrganizationManager {
       throw new HiveError('Cannot create organization with OIDC user.');
     }
 
-    const organization = await this.storage.createOrganization({
-      name,
-      cleanId: paramCase(name),
+    const result = await this.storage.createOrganization({
+      cleanId: slug,
       user: user.id,
       adminScopes: organizationAdminScopes,
       viewerScopes: organizationViewerScopes,
-      reservedNames: reservedOrganizationNames,
+      reservedSlugs: reservedOrganizationSlugs,
     });
 
-    await this.activityManager.create({
-      type: 'ORGANIZATION_CREATED',
-      selector: {
-        organization: organization.id,
-      },
-      user,
-    });
+    if (result.ok) {
+      await this.activityManager.create({
+        type: 'ORGANIZATION_CREATED',
+        selector: {
+          organization: result.organization.id,
+        },
+        user,
+      });
+    }
 
-    return organization;
+    return result;
   }
 
   async deleteOrganization(selector: OrganizationSelector): Promise<Organization> {
@@ -402,47 +402,6 @@ export class OrganizationManager {
     return result;
   }
 
-  async updateName(
-    input: {
-      name: string;
-    } & OrganizationSelector,
-  ): Promise<Organization> {
-    const { name } = input;
-    this.logger.info('Updating an organization name (input=%o)', input);
-    await this.authManager.ensureOrganizationAccess({
-      ...input,
-      scope: OrganizationAccessScope.SETTINGS,
-    });
-    const [user, organization] = await Promise.all([
-      this.authManager.getCurrentUser(),
-      this.getOrganization({
-        organization: input.organization,
-      }),
-    ]);
-
-    if (organization.name === name) {
-      return organization;
-    }
-
-    const result = await this.storage.updateOrganizationName({
-      name,
-      organization: organization.id,
-      user: user.id,
-    });
-
-    await this.activityManager.create({
-      type: 'ORGANIZATION_NAME_UPDATED',
-      selector: {
-        organization: organization.id,
-      },
-      meta: {
-        value: result.name,
-      },
-    });
-
-    return result;
-  }
-
   async updateSlug(
     input: {
       slug: string;
@@ -472,7 +431,7 @@ export class OrganizationManager {
       cleanId: slug,
       organization: organization.id,
       user: user.id,
-      reservedNames: reservedOrganizationNames,
+      reservedSlugs: reservedOrganizationSlugs,
     });
 
     if (result.ok) {

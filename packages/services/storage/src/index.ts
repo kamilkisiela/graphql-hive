@@ -98,10 +98,6 @@ const organizationGetStartedMapping: Record<
   enablingUsageBasedBreakingChanges: 'get_started_usage_breaking',
 };
 
-function addRandomHashToId(id: string) {
-  return `${id}-${Math.random().toString(16).substring(2, 6)}`;
-}
-
 function ensureDefined<T>(value: T | null | undefined, propertyName: string): T {
   if (value == null) {
     throw new Error(`${propertyName} is null or undefined`);
@@ -142,37 +138,6 @@ async function tracedTransaction<T>(
       span.end();
     }
   });
-}
-
-async function ensureFreeOrganizationCleanId(
-  newCleanId: string,
-  currentCleanId: string | null,
-  connection: Connection,
-  reservedNames: string[],
-): Promise<string> {
-  if (reservedNames.includes(newCleanId)) {
-    return ensureFreeOrganizationCleanId(
-      addRandomHashToId(newCleanId),
-      currentCleanId,
-      connection,
-      reservedNames,
-    );
-  }
-
-  const orgCleanIdExists = await connection.exists(
-    sql`/* orgCleanIdExistsGlobally */ SELECT 1 FROM organizations WHERE clean_id = ${newCleanId} LIMIT 1`,
-  );
-
-  if (orgCleanIdExists) {
-    return ensureFreeOrganizationCleanId(
-      addRandomHashToId(newCleanId),
-      currentCleanId,
-      connection,
-      reservedNames,
-    );
-  }
-
-  return newCleanId;
 }
 
 function resolveAuthProviderOfUser(
@@ -579,81 +544,6 @@ export async function createStorage(
 
       return org ? transformOrganization(org) : null;
     },
-    async createOrganization(
-      {
-        name,
-        user,
-        cleanId,
-        adminScopes,
-        viewerScopes,
-        reservedNames,
-      }: Parameters<Storage['createOrganization']>[0] & {
-        reservedNames: string[];
-      },
-      connection: Connection,
-    ) {
-      const availableCleanId = await ensureFreeOrganizationCleanId(
-        cleanId,
-        null,
-        connection,
-        reservedNames,
-      );
-      const org = await connection.one<Slonik<organizations>>(
-        sql`/* createOrganization */
-          INSERT INTO organizations
-            ("name", "clean_id", "user_id")
-          VALUES
-            (${name}, ${availableCleanId}, ${user})
-          RETURNING *
-        `,
-      );
-
-      // Create default roles for the organization
-      const roles = await connection.query<
-        Pick<organization_member_roles, 'id' | 'name'>
-      >(sql`/* createOrganizationRoles */
-        INSERT INTO organization_member_roles
-        (
-          organization_id,
-          name,
-          description,
-          scopes,
-          locked
-        )
-        VALUES (
-          ${org.id},
-          'Admin',
-          'Full access to all organization resources',
-          ${sql.array(adminScopes, 'text')},
-          true
-        ), (
-          ${org.id},
-          'Viewer',
-          'Read-only access to all organization resources',
-          ${sql.array(viewerScopes, 'text')},
-          true
-        )
-        RETURNING id, name
-      `);
-
-      const adminRole = roles.rows.find(role => role.name === 'Admin');
-
-      if (!adminRole) {
-        throw new Error('Admin role not found');
-      }
-
-      // Assign the admin role to the user
-      await connection.query<Slonik<organization_member>>(
-        sql`/* assignAdminRole */
-          INSERT INTO organization_member
-            ("organization_id", "user_id", "role_id")
-          VALUES
-            (${org.id}, ${user}, ${adminRole.id})
-        `,
-      );
-
-      return transformOrganization(org);
-    },
     async addOrganizationMemberViaOIDCIntegrationId(
       args: {
         oidcIntegrationId: string;
@@ -850,9 +740,84 @@ export async function createStorage(
       });
     },
     createOrganization(input) {
-      return tracedTransaction('createOrganization', pool, t =>
-        shared.createOrganization(input, t),
-      );
+      return tracedTransaction('createOrganization', pool, async t => {
+        if (input.reservedSlugs.includes(input.cleanId)) {
+          return {
+            ok: false,
+            message: 'Organization slug is reserved',
+          };
+        }
+
+        const orgCleanIdExists = await t.exists(
+          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${input.cleanId} LIMIT 1`,
+        );
+
+        if (orgCleanIdExists) {
+          return {
+            ok: false,
+            message: 'Organization slug is already taken',
+          };
+        }
+
+        const org = await t.one<organizations>(
+          sql`/* createOrganization */
+          INSERT INTO organizations
+            ("name", "clean_id", "user_id")
+          VALUES
+            (${input.cleanId}, ${input.cleanId}, ${input.user})
+          RETURNING *
+        `,
+        );
+
+        // Create default roles for the organization
+        const roles = await t.query<
+          Pick<organization_member_roles, 'id' | 'name'>
+        >(sql`/* createOrganizationRoles */
+          INSERT INTO organization_member_roles
+          (
+            organization_id,
+            name,
+            description,
+            scopes,
+            locked
+          )
+          VALUES (
+            ${org.id},
+            'Admin',
+            'Full access to all organization resources',
+            ${sql.array(input.adminScopes, 'text')},
+            true
+          ), (
+            ${org.id},
+            'Viewer',
+            'Read-only access to all organization resources',
+            ${sql.array(input.viewerScopes, 'text')},
+            true
+          )
+          RETURNING id, name
+        `);
+
+        const adminRole = roles.rows.find(role => role.name === 'Admin');
+
+        if (!adminRole) {
+          throw new Error('Admin role not found');
+        }
+
+        // Assign the admin role to the user
+        await t.query<organization_member>(
+          sql`/* assignAdminRole */
+            INSERT INTO organization_member
+              ("organization_id", "user_id", "role_id")
+            VALUES
+              (${org.id}, ${input.user}, ${adminRole.id})
+          `,
+        );
+
+        return {
+          ok: true,
+          organization: transformOrganization(org),
+        };
+      });
     },
     async deleteOrganization({ organization }) {
       const result = await tracedTransaction('DeleteOrganization', pool, async t => {
@@ -877,19 +842,35 @@ export async function createStorage(
         tokens: result.tokens,
       };
     },
-    async createProject({ name, organization, cleanId, type }) {
+    async createProject({ organization, slug, type }) {
       // Native Composition is enabled by default for fresh Federation-type projects
-      return transformProject(
-        await pool.one<projects>(
+      return pool.transaction(async t => {
+        const projectSlugExists = await t.exists(
+          sql`/* projectSlugExists */ SELECT 1 FROM projects WHERE clean_id = ${slug} AND org_id = ${organization} LIMIT 1`,
+        );
+
+        if (projectSlugExists) {
+          return {
+            ok: false,
+            message: 'Project slug is already taken',
+          };
+        }
+
+        const project = await t.one<projects>(
           sql`/* createProject */
             INSERT INTO projects
               ("name", "clean_id", "type", "org_id", "native_federation")
             VALUES
-              (${name}, ${cleanId}, ${type}, ${organization}, ${type === ProjectType.FEDERATION})
+              (${slug}, ${slug}, ${type}, ${organization}, ${type === ProjectType.FEDERATION})
             RETURNING *
           `,
-        ),
-      );
+        );
+
+        return {
+          ok: true,
+          project: transformProject(project),
+        };
+      });
     },
     async getOrganizationId({ organization }) {
       // Based on clean_id, resolve id
@@ -1278,19 +1259,9 @@ export async function createStorage(
         ),
       );
     },
-    async updateOrganizationName({ name, organization }) {
-      return transformOrganization(
-        await pool.one<Slonik<organizations>>(sql`/* updateOrganizationName */
-          UPDATE organizations
-          SET name = ${name}
-          WHERE id = ${organization}
-          RETURNING *
-        `),
-      );
-    },
-    async updateOrganizationCleanId({ cleanId, organization, reservedNames }) {
+    async updateOrganizationCleanId({ cleanId, organization, reservedSlugs }) {
       return pool.transaction(async t => {
-        if (reservedNames.includes(cleanId)) {
+        if (reservedSlugs.includes(cleanId)) {
           return {
             ok: false,
             message: 'Provided organization slug is not allowed',
@@ -1311,9 +1282,9 @@ export async function createStorage(
         return {
           ok: true,
           organization: transformOrganization(
-            await pool.one<Slonik<organizations>>(sql`/* updateOrganizationSlug */
+            await t.one<Slonik<organizations>>(sql`/* updateOrganizationSlug */
               UPDATE organizations
-              SET clean_id = ${cleanId}
+              SET clean_id = ${cleanId}, name = ${cleanId}
               WHERE id = ${organization}
               RETURNING *
             `),
@@ -1701,15 +1672,31 @@ export async function createStorage(
 
       return result.rows.map(transformProject);
     },
-    async updateProjectName({ name, cleanId, organization, project }) {
-      return transformProject(
-        await pool.one<Slonik<projects>>(sql`/* updateProjectName */
-          UPDATE projects
-          SET name = ${name}, clean_id = ${cleanId}
-          WHERE id = ${project} AND org_id = ${organization}
-          RETURNING *
-        `),
-      );
+    async updateProjectSlug({ slug, organization, project }) {
+      return pool.transaction(async t => {
+        const projectSlugExists = await t.exists(
+          sql`/* projectSlugExists */ SELECT 1 FROM projects WHERE clean_id = ${slug} AND id != ${project} AND org_id = ${organization} LIMIT 1`,
+        );
+
+        if (projectSlugExists) {
+          return {
+            ok: false,
+            message: 'Project slug is already taken',
+          };
+        }
+
+        return {
+          ok: true,
+          project: transformProject(
+            await t.one<Slonik<projects>>(sql`/* updateProjectSlug */
+              UPDATE projects
+              SET clean_id = ${slug}, name = ${slug}
+              WHERE id = ${project} AND org_id = ${organization}
+              RETURNING *
+            `),
+          ),
+        };
+      });
     },
     async updateNativeSchemaComposition({ project, enabled }) {
       return transformProject(
@@ -1794,39 +1781,65 @@ export async function createStorage(
         tokens: result.tokens,
       };
     },
-    async createTarget({ organization, project, name, cleanId }) {
-      const result = await pool.maybeOne<unknown>(sql`/* createTarget */
-        INSERT INTO targets
-          (name, clean_id, project_id)
-        VALUES
-          (${name}, ${cleanId}, ${project})
-        RETURNING
-          ${targetSQLFields}
-      `);
+    async createTarget({ organization, project, slug }) {
+      return pool.transaction(async t => {
+        const targetSlugExists = await t.exists(
+          sql`/* targetSlugExists */ SELECT 1 FROM targets WHERE clean_id = ${slug} AND project_id = ${project} LIMIT 1`,
+        );
 
-      return {
-        ...TargetModel.parse(result),
-        orgId: organization,
-      };
+        if (targetSlugExists) {
+          return {
+            ok: false,
+            message: 'Target slug is already taken',
+          };
+        }
+
+        const result = await t.maybeOne<unknown>(sql`/* createTarget */
+          INSERT INTO targets
+            (name, clean_id, project_id)
+          VALUES
+            (${slug}, ${slug}, ${project})
+          RETURNING
+            ${targetSQLFields}
+        `);
+
+        return {
+          ok: true,
+          target: {
+            ...TargetModel.parse(result),
+            orgId: organization,
+          },
+        };
+      });
     },
-    async updateTargetName({ organization, project, target, name, cleanId }) {
-      const result = await pool.one<Record<string, unknown>>(sql`/* updateTargetName */
-        UPDATE
-          targets
-        SET
-          "name" = ${name},
-          "clean_id" = ${cleanId}
-        WHERE
-          "id" = ${target}
-          AND "project_id" = ${project}
-        RETURNING
-          ${targetSQLFields}
-      `);
+    async updateTargetSlug({ slug, organization, project, target }) {
+      return pool.transaction(async t => {
+        const targetSlugExists = await t.exists(
+          sql`/* targetSlugExists */ SELECT 1 FROM targets WHERE clean_id = ${slug} AND id != ${target} AND project_id = ${project} LIMIT 1`,
+        );
 
-      return {
-        ...TargetModel.parse(result),
-        orgId: organization,
-      };
+        if (targetSlugExists) {
+          return {
+            ok: false,
+            message: 'Target slug is already taken',
+          };
+        }
+
+        const result = await t.one<targets>(sql`/* updateTargetSlug */
+          UPDATE targets
+          SET clean_id = ${slug}, name = ${slug}
+          WHERE id = ${target} AND project_id = ${project}
+          RETURNING ${targetSQLFields}
+        `);
+
+        return {
+          ok: true,
+          target: {
+            ...TargetModel.parse(result),
+            orgId: organization,
+          },
+        };
+      });
     },
     async deleteTarget({ organization, target }) {
       const result = await tracedTransaction('deleteTarget', pool, async t => {
@@ -4739,7 +4752,7 @@ export async function createStorage(
         }
 
         if (modify) {
-          await pool.query(sql`/* updateTargetSchemaComposition_update */
+          await t.query(sql`/* updateTargetSchemaComposition_update */
             UPDATE organizations
             SET feature_flags = ${sql.jsonb(ff)}
             WHERE id = ${args.organizationId};

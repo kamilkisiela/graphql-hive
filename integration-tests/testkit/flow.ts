@@ -25,11 +25,10 @@ import type {
   TargetSelectorInput,
   UpdateBaseSchemaInput,
   UpdateMemberRoleInput,
-  UpdateOrganizationNameInput,
   UpdateOrganizationSlugInput,
-  UpdateProjectNameInput,
   UpdateProjectRegistryModelInput,
-  UpdateTargetNameInput,
+  UpdateProjectSlugInput,
+  UpdateTargetSlugInput,
   UpdateTargetValidationSettingsInput,
 } from './gql/graphql';
 import { execute } from './graphql';
@@ -47,7 +46,6 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
             createdOrganizationPayload {
               organization {
                 id
-                name
                 cleanId
                 owner {
                   id
@@ -69,7 +67,7 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
           error {
             message
             inputErrors {
-              name
+              slug
             }
           }
         }
@@ -90,7 +88,6 @@ export function getOrganization(organizationId: string, authToken: string) {
           organization {
             id
             cleanId
-            name
             getStarted {
               creatingProject
               publishingSchema
@@ -135,37 +132,7 @@ export function inviteToOrganization(input: InviteToOrganizationByEmailInput, au
   });
 }
 
-export function renameOrganization(input: UpdateOrganizationNameInput, authToken: string) {
-  return execute({
-    document: graphql(`
-      mutation updateOrganizationName($input: UpdateOrganizationNameInput!) {
-        updateOrganizationName(input: $input) {
-          ok {
-            updatedOrganizationPayload {
-              selector {
-                organization
-              }
-              organization {
-                id
-                name
-                cleanId
-              }
-            }
-          }
-          error {
-            message
-          }
-        }
-      }
-    `),
-    variables: {
-      input,
-    },
-    authToken,
-  });
-}
-
-export function changeOrganizationSlug(input: UpdateOrganizationSlugInput, authToken: string) {
+export function updateOrganizationSlug(input: UpdateOrganizationSlugInput, authToken: string) {
   return execute({
     document: graphql(`
       mutation updateOrganizationSlug($input: UpdateOrganizationSlugInput!) {
@@ -204,7 +171,6 @@ export function joinOrganization(code: string, authToken: string) {
           ... on OrganizationPayload {
             organization {
               id
-              name
               cleanId
               me {
                 id
@@ -250,6 +216,30 @@ export function getOrganizationMembers(selector: OrganizationSelectorInput, auth
                 organizationAccessScopes
                 projectAccessScopes
                 targetAccessScopes
+              }
+            }
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      selector,
+    },
+  });
+}
+
+export function getOrganizationProjects(selector: OrganizationSelectorInput, authToken: string) {
+  return execute({
+    document: graphql(`
+      query getOrganizationProjects($selector: OrganizationSelectorInput!) {
+        organization(selector: $selector) {
+          organization {
+            projects {
+              nodes {
+                id
+                cleanId
+                name
               }
             }
           }
@@ -342,6 +332,7 @@ export function createProject(input: CreateProjectInput, authToken: string) {
             createdProject {
               id
               cleanId
+              name
             }
             createdTargets {
               id
@@ -359,20 +350,20 @@ export function createProject(input: CreateProjectInput, authToken: string) {
   });
 }
 
-export function renameProject(input: UpdateProjectNameInput, authToken: string) {
+export function updateProjectSlug(input: UpdateProjectSlugInput, authToken: string) {
   return execute({
     document: graphql(`
-      mutation updateProjectName($input: UpdateProjectNameInput!) {
-        updateProjectName(input: $input) {
+      mutation updateProjectSlug($input: UpdateProjectSlugInput!) {
+        updateProjectSlug(input: $input) {
           ok {
             selector {
               organization
               project
             }
-            updatedProject {
+            project {
               id
-              cleanId
               name
+              cleanId
             }
           }
           error {
@@ -396,7 +387,6 @@ export function updateRegistryModel(input: UpdateProjectRegistryModelInput, auth
           ok {
             id
             cleanId
-            name
           }
           error {
             message
@@ -435,18 +425,18 @@ export function createTarget(input: CreateTargetInput, authToken: string) {
   });
 }
 
-export function renameTarget(input: UpdateTargetNameInput, authToken: string) {
+export function updateTargetSlug(input: UpdateTargetSlugInput, authToken: string) {
   return execute({
     document: graphql(`
-      mutation updateTargetName($input: UpdateTargetNameInput!) {
-        updateTargetName(input: $input) {
+      mutation updateTargetSlug($input: UpdateTargetSlugInput!) {
+        updateTargetSlug(input: $input) {
           ok {
             selector {
               organization
               project
               target
             }
-            updatedTarget {
+            target {
               id
               cleanId
               name

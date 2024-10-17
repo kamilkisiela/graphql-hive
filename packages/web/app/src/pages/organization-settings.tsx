@@ -177,28 +177,6 @@ function Integrations(props: { organizationId: string }) {
   );
 }
 
-const UpdateOrganizationNameMutation = graphql(`
-  mutation Settings_UpdateOrganizationName($input: UpdateOrganizationNameInput!) {
-    updateOrganizationName(input: $input) {
-      ok {
-        updatedOrganizationPayload {
-          selector {
-            organization
-          }
-          organization {
-            id
-            cleanId
-            name
-          }
-        }
-      }
-      error {
-        message
-      }
-    }
-  }
-`);
-
 const UpdateOrganizationSlugMutation = graphql(`
   mutation Settings_UpdateOrganizationSlug($input: UpdateOrganizationSlugInput!) {
     updateOrganizationSlug(input: $input) {
@@ -224,7 +202,6 @@ const SettingsPageRenderer_OrganizationFragment = graphql(`
   fragment SettingsPageRenderer_OrganizationFragment on Organization {
     id
     cleanId
-    name
     me {
       ...CanAccessOrganization_MemberFragment
       isOwner
@@ -245,17 +222,6 @@ const SlugFormSchema = z.object({
 
 type SlugFormValues = z.infer<typeof SlugFormSchema>;
 
-const NameFormSchema = z.object({
-  name: z
-    .string({
-      required_error: 'Name is required',
-    })
-    .min(1, 'Name is required')
-    .max(50, 'Name must be less than 50 characters'),
-});
-
-type NameFormValues = z.infer<typeof NameFormSchema>;
-
 const SettingsPageRenderer = (props: {
   organization: FragmentType<typeof SettingsPageRenderer_OrganizationFragment>;
   organizationId: string;
@@ -272,49 +238,7 @@ const SettingsPageRenderer = (props: {
   const [isTransferModalOpen, toggleTransferModalOpen] = useToggle();
   const { toast } = useToast();
 
-  const [_nameMutation, nameMutate] = useMutation(UpdateOrganizationNameMutation);
   const [_slugMutation, slugMutate] = useMutation(UpdateOrganizationSlugMutation);
-
-  const nameForm = useForm({
-    mode: 'all',
-    resolver: zodResolver(NameFormSchema),
-    defaultValues: {
-      name: organization.name,
-    },
-  });
-
-  const onNameFormSubmit = useCallback(
-    async (data: NameFormValues) => {
-      try {
-        const result = await nameMutate({
-          input: {
-            organization: props.organizationId,
-            name: data.name,
-          },
-        });
-
-        const error = result.error || result.data?.updateOrganizationName.error;
-
-        if (result.data?.updateOrganizationName?.ok) {
-          toast({
-            variant: 'default',
-            title: 'Success',
-            description: 'Organization name updated',
-          });
-        } else if (error) {
-          nameForm.setError('name', error);
-        }
-      } catch (error) {
-        console.error('error', error);
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to update organization name',
-        });
-      }
-    },
-    [nameMutate, props.organizationId],
-  );
 
   const slugForm = useForm({
     mode: 'all',
@@ -374,52 +298,6 @@ const SettingsPageRenderer = (props: {
 
       {hasAccess ? (
         <div className="flex flex-col gap-y-4">
-          <Form {...nameForm}>
-            <form onSubmit={nameForm.handleSubmit(onNameFormSubmit)}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Organization Name</CardTitle>
-                  <CardDescription>
-                    Changing the name of your organization will{' '}
-                    <span className="font-bold">not</span> change the slug of your organization URL,
-                    and will <span className="font-bold">not</span> invalidate any existing links to
-                    your organization.
-                    <br />
-                    <DocsLink
-                      className="text-muted-foreground text-sm"
-                      href="/management/organizations#rename-an-organization"
-                    >
-                      You can read more about it in the documentation
-                    </DocsLink>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="grid gap-4">
-                  <FormField
-                    control={nameForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Name" className="w-80" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button
-                    disabled={nameForm.formState.isSubmitting}
-                    className="px-10"
-                    type="submit"
-                  >
-                    Save
-                  </Button>
-                </CardFooter>
-              </Card>
-            </form>
-          </Form>
-
           <Form {...slugForm}>
             <form onSubmit={slugForm.handleSubmit(onSlugFormSubmit)}>
               <Card>

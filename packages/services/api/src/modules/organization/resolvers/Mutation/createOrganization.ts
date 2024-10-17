@@ -1,6 +1,6 @@
 import { AuthManager } from '../../../auth/providers/auth-manager';
 import { OrganizationManager } from '../../providers/organization-manager';
-import { OrganizationNameModel } from '../../validation';
+import { OrganizationSlugModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
 
 export const createOrganization: NonNullable<MutationResolvers['createOrganization']> = async (
@@ -8,32 +8,42 @@ export const createOrganization: NonNullable<MutationResolvers['createOrganizati
   { input },
   { injector },
 ) => {
-  const organizationNameResult = OrganizationNameModel.safeParse(input.name.trim());
-  if (!organizationNameResult.success) {
+  const slugParseResult = OrganizationSlugModel.safeParse(input.slug);
+  if (!slugParseResult.success) {
     return {
       error: {
         message: 'Please check your input.',
         inputErrors: {
-          name: organizationNameResult.error.issues[0].message ?? null,
+          slug: slugParseResult.error.issues[0].message ?? null,
         },
       },
     };
   }
 
   const user = await injector.get(AuthManager).getCurrentUser();
-  const organization = await injector.get(OrganizationManager).createOrganization({
-    name: input.name,
+  const result = await injector.get(OrganizationManager).createOrganization({
+    slug: input.slug,
     user,
   });
 
-  return {
-    ok: {
-      createdOrganizationPayload: {
-        selector: {
-          organization: organization.cleanId,
+  if (result.ok) {
+    return {
+      ok: {
+        createdOrganizationPayload: {
+          selector: {
+            organization: result.organization.cleanId,
+          },
+          organization: result.organization,
         },
-        organization,
       },
+    };
+  }
+
+  return {
+    ok: null,
+    error: {
+      message: result.message,
+      inputErrors: {},
     },
   };
 };

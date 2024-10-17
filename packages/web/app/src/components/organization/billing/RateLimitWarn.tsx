@@ -7,7 +7,6 @@ const RateLimitWarn_OrganizationFragment = graphql(`
   fragment RateLimitWarn_OrganizationFragment on Organization {
     id
     cleanId
-    name
     plan
     rateLimit {
       limitedForOperations

@@ -23,7 +23,6 @@ export default gql`
     deleteOrganizationInvitation(
       input: DeleteOrganizationInvitationInput!
     ): DeleteOrganizationInvitationResult!
-    updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
     updateOrganizationSlug(input: UpdateOrganizationSlugInput!): UpdateOrganizationSlugResult!
     updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
     requestOrganizationTransfer(
@@ -40,19 +39,6 @@ export default gql`
     Remove this mutation after migration is complete.
     """
     migrateUnassignedMembers(input: MigrateUnassignedMembersInput!): MigrateUnassignedMembersResult!
-  }
-
-  type UpdateOrganizationNameResult {
-    ok: UpdateOrganizationNameOk
-    error: UpdateOrganizationNameError
-  }
-
-  type UpdateOrganizationNameOk {
-    updatedOrganizationPayload: OrganizationPayload!
-  }
-
-  type UpdateOrganizationNameError implements Error {
-    message: String!
   }
 
   type UpdateOrganizationSlugResult {
@@ -73,7 +59,7 @@ export default gql`
   }
 
   type CreateOrganizationInputErrors {
-    name: String
+    slug: String
   }
 
   type CreateOrganizationError implements Error {
@@ -176,12 +162,7 @@ export default gql`
   }
 
   input CreateOrganizationInput {
-    name: String!
-  }
-
-  input UpdateOrganizationNameInput {
-    organization: ID!
-    name: String!
+    slug: String!
   }
 
   input UpdateOrganizationSlugInput {
@@ -227,7 +208,7 @@ export default gql`
   type Organization {
     id: ID!
     cleanId: ID!
-    name: String!
+    name: String! @deprecated(reason: "Use the 'cleanId' field instead.")
     owner: Member!
     me: Member!
     members: MemberConnection!

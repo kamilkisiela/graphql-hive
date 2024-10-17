@@ -62,13 +62,13 @@ export const CreateOrganizationMutation = graphql(`
           organization {
             cleanId
             id
-            cleanId
           }
         }
       }
       error {
+        message
         inputErrors {
-          name
+          slug
         }
       }
     }
@@ -76,20 +76,13 @@ export const CreateOrganizationMutation = graphql(`
 `);
 
 const formSchema = z.object({
-  name: z
+  slug: z
     .string({
-      required_error: 'Organization name is required',
+      required_error: 'Organization slug is required',
     })
-    .min(2, {
-      message: 'Name must be at least 2 characters long',
-    })
-    .max(50, {
-      message: 'Name must be at most 50 characters long',
-    })
-    .regex(
-      /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
-      'Name restricted to alphanumerical characters, spaces and . , _ - / &',
-    ),
+    .min(1, 'Organization slug is required')
+    .max(50, 'Slug must be less than 50 characters')
+    .regex(/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers and dashes'),
 });
 
 export const CreateOrganizationForm = (): JSX.Element => {
@@ -100,7 +93,7 @@ export const CreateOrganizationForm = (): JSX.Element => {
     mode: 'onChange',
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      slug: '',
     },
     disabled: mutation.fetching,
   });
@@ -108,14 +101,18 @@ export const CreateOrganizationForm = (): JSX.Element => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const mutation = await mutate({
       input: {
-        name: values.name,
+        slug: values.slug,
       },
     });
+
+    const errorMessage =
+      mutation.data?.createOrganization.error?.inputErrors?.slug ||
+      mutation.data?.createOrganization.error?.message;
 
     if (mutation.data?.createOrganization.ok) {
       toast({
         title: 'Organization created',
-        description: `You are now an admin of "${values.name}" organization.`,
+        description: `You are now an admin of "${values.slug}" organization.`,
       });
       void router.navigate({
         to: '/$organizationId',
@@ -124,10 +121,10 @@ export const CreateOrganizationForm = (): JSX.Element => {
             mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
         },
       });
-    } else if (mutation.data?.createOrganization.error?.inputErrors?.name) {
-      form.setError('name', {
+    } else if (errorMessage) {
+      form.setError('slug', {
         type: 'manual',
-        message: mutation.data.createOrganization.error.inputErrors.name,
+        message: errorMessage,
       });
     } else if (mutation.error) {
       toast({
@@ -163,11 +160,11 @@ export const CreateOrganizationFormContent = ({
             <CardContent>
               <FormField
                 control={form.control}
-                name="name"
+                name="slug"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input placeholder="Organization name" {...field} />
+                      <Input placeholder="my-organization" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

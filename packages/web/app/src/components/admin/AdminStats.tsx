@@ -165,7 +165,6 @@ const AdminStatsQuery = graphql(`
           organization {
             id
             cleanId
-            name
             owner {
               id
               user {
@@ -407,9 +406,10 @@ export function AdminStats({
         .map(node => ({
           name: (
             <div>
-              <div style={{ paddingBottom: 5, fontWeight: 'bold' }}>{node.organization.name}</div>
+              <div style={{ paddingBottom: 5, fontWeight: 'bold' }}>
+                {node.organization.cleanId}
+              </div>
               <pre title="id">{node.organization.id}</pre>
-              <pre title="clean id">{node.organization.cleanId}</pre>
               <pre title="owner">{node.organization.owner.user.email}</pre>
             </div>
           ),

@@ -1,26 +1,24 @@
 import { z } from 'zod';
 import { IdTranslator } from '../../../shared/providers/id-translator';
 import { TargetManager } from '../../providers/target-manager';
-import { TargetNameModel } from '../../validation';
+import { TargetSlugModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
 
-export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']> = async (
-  _,
+const UpdateTargetSlugModel = z.object({
+  slug: TargetSlugModel,
+});
+
+export const updateTargetSlug: NonNullable<MutationResolvers['updateTargetSlug']> = async (
+  _parent,
   { input },
   { injector },
 ) => {
-  const UpdateTargetModel = z.object({
-    name: TargetNameModel,
-  });
-
-  const result = UpdateTargetModel.safeParse(input);
-  if (!result.success) {
+  const inputParseResult = UpdateTargetSlugModel.safeParse(input);
+  if (!inputParseResult.success) {
     return {
       error: {
-        message: 'Check your input.',
-        inputErrors: {
-          name: result.error.formErrors.fieldErrors.name?.[0],
-        },
+        message:
+          inputParseResult.error.formErrors.fieldErrors.slug?.[0] ?? 'Please check your input.',
       },
     };
   }
@@ -41,21 +39,30 @@ export const updateTargetName: NonNullable<MutationResolvers['updateTargetName']
     }),
   ]);
 
-  const target = await injector.get(TargetManager).updateName({
-    name: input.name,
+  const result = await injector.get(TargetManager).updateSlug({
+    slug: input.slug,
     organization: organizationId,
     project: projectId,
     target: targetId,
   });
 
-  return {
-    ok: {
-      selector: {
-        organization: input.organization,
-        project: input.project,
-        target: target.cleanId,
+  if (result.ok) {
+    return {
+      ok: {
+        selector: {
+          organization: input.organization,
+          project: input.project,
+          target: result.target.cleanId,
+        },
+        target: result.target,
       },
-      updatedTarget: target,
+    };
+  }
+
+  return {
+    ok: null,
+    error: {
+      message: result.message,
     },
   };
 };

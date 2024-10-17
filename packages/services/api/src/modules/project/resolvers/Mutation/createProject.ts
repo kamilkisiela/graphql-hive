@@ -1,9 +1,12 @@
 import { z } from 'zod';
+import { Target } from '../../../../shared/entities';
+import { assertOk } from '../../../../shared/helpers';
 import { OrganizationManager } from '../../../organization/providers/organization-manager';
 import { IdTranslator } from '../../../shared/providers/id-translator';
+import { Logger } from '../../../shared/providers/logger';
 import { TargetManager } from '../../../target/providers/target-manager';
 import { ProjectManager } from '../../providers/project-manager';
-import { MaybeModel, ProjectNameModel, URLModel } from '../../validation';
+import { ProjectSlugModel } from '../../validation';
 import type { MutationResolvers } from './../../../../__generated__/types.next';
 
 export const createProject: NonNullable<MutationResolvers['createProject']> = async (
@@ -12,20 +15,16 @@ export const createProject: NonNullable<MutationResolvers['createProject']> = as
   { injector },
 ) => {
   const CreateProjectModel = z.object({
-    name: ProjectNameModel,
-    buildUrl: MaybeModel(URLModel),
-    validationUrl: MaybeModel(URLModel),
+    slug: ProjectSlugModel,
   });
-  const result = CreateProjectModel.safeParse(input);
+  const inputParseResult = CreateProjectModel.safeParse(input);
 
-  if (!result.success) {
+  if (!inputParseResult.success) {
     return {
       error: {
         message: 'Please check your input.',
         inputErrors: {
-          name: result.error.formErrors.fieldErrors.name?.[0],
-          buildUrl: result.error.formErrors.fieldErrors.buildUrl?.[0],
-          validationUrl: result.error.formErrors.fieldErrors.validationUrl?.[0],
+          slug: inputParseResult.error.formErrors.fieldErrors.slug?.[0],
         },
       },
     };
@@ -35,37 +34,61 @@ export const createProject: NonNullable<MutationResolvers['createProject']> = as
   const organizationId = await translator.translateOrganizationId({
     organization: input.organization,
   });
-  const project = await injector.get(ProjectManager).createProject({
-    ...input,
+
+  const result = await injector.get(ProjectManager).createProject({
+    slug: input.slug,
+    type: input.type,
     organization: organizationId,
   });
+
+  if (result.ok === false) {
+    return {
+      error: {
+        message: result.message,
+        inputErrors: {},
+      },
+    };
+  }
+
+  assertOk(result, 'Expected result to be ok');
+
   const organization = await injector.get(OrganizationManager).getOrganization({
     organization: organizationId,
   });
 
   const targetManager = injector.get(TargetManager);
 
-  const targets = await Promise.all([
+  const targetResults = await Promise.all([
     targetManager.createTarget({
-      name: 'production',
-      project: project.id,
+      slug: 'production',
+      project: result.project.id,
       organization: organizationId,
     }),
     targetManager.createTarget({
-      name: 'staging',
-      project: project.id,
+      slug: 'staging',
+      project: result.project.id,
       organization: organizationId,
     }),
     targetManager.createTarget({
-      name: 'development',
-      project: project.id,
+      slug: 'development',
+      project: result.project.id,
       organization: organizationId,
     }),
   ]);
 
+  const logger = injector.get(Logger);
+  const targets: Target[] = [];
+  for (const result of targetResults) {
+    if (result.ok) {
+      targets.push(result.target);
+    } else {
+      logger.error('Failed to create a target: ' + result.message);
+    }
+  }
+
   return {
     ok: {
-      createdProject: project,
+      createdProject: result.project,
       createdTargets: targets,
       updatedOrganization: organization,
     },

@@ -132,7 +132,6 @@ const TargetExplorerTypenamePageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        name
         cleanId
         rateLimit {
           retentionInDays

@@ -1,3 +1,7 @@
+function randomSlug() {
+  return Math.random().toString(36).substring(2);
+}
+
 const getUser = () =>
   ({
     email: `${crypto.randomUUID()}@local.host`,
@@ -33,7 +37,8 @@ describe('basic user flow', () => {
   it('should log in and log out', () => {
     cy.login(user);
 
-    cy.get('input[name="name"]').type('Bubatzbieber');
+    const slug = randomSlug();
+    cy.get('input[name="slug"]').type(slug);
     cy.get('button[type="submit"]').click();
 
     // Logout
@@ -44,12 +49,13 @@ describe('basic user flow', () => {
 });
 
 it('create organization', () => {
+  const slug = randomSlug();
   const user = getUser();
   cy.visit('/');
   cy.signup(user);
-  cy.get('input[name="name"]').type('Bubatzbieber');
+  cy.get('input[name="slug"]').type(slug);
   cy.get('button[type="submit"]').click();
-  cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
+  cy.get('[data-cy="organization-picker-current"]').contains(slug);
 });
 
 describe('oidc', () => {
@@ -58,7 +64,8 @@ describe('oidc', () => {
     cy.visit('/');
     cy.signup(organizationAdminUser);
 
-    cy.createOIDCIntegration('Bubatzbieber').then(({ loginUrl }) => {
+    const slug = randomSlug();
+    cy.createOIDCIntegration(slug).then(({ loginUrl }) => {
       cy.visit('/logout');
 
       cy.clearAllCookies();
@@ -70,7 +77,7 @@ describe('oidc', () => {
       cy.get('input[id="Input_Password"]').type('password');
       cy.get('button[value="login"]').click();
 
-      cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
+      cy.get('[data-cy="organization-picker-current"]').contains(slug);
     });
   });
 
@@ -79,7 +86,8 @@ describe('oidc', () => {
     cy.visit('/');
     cy.signup(organizationAdminUser);
 
-    cy.createOIDCIntegration('Bubatzbieber').then(({ organizationSlug }) => {
+    const slug = randomSlug();
+    cy.createOIDCIntegration(slug).then(({ organizationSlug }) => {
       cy.visit('/logout');
 
       cy.clearAllCookies();
@@ -95,7 +103,7 @@ describe('oidc', () => {
       cy.get('input[id="Input_Password"]').type('password');
       cy.get('button[value="login"]').click();
 
-      cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
+      cy.get('[data-cy="organization-picker-current"]').contains(slug);
     });
   });
 
@@ -104,7 +112,8 @@ describe('oidc', () => {
     cy.visit('/');
     cy.signup(organizationAdminUser);
 
-    cy.createOIDCIntegration('Bubatzbieber').then(({ organizationSlug }) => {
+    const slug = randomSlug();
+    cy.createOIDCIntegration(slug).then(({ organizationSlug }) => {
       cy.visit('/logout');
 
       cy.clearAllCookies();
@@ -120,7 +129,7 @@ describe('oidc', () => {
       cy.get('input[id="Input_Password"]').type('password');
       cy.get('button[value="login"]').click();
 
-      cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
+      cy.get('[data-cy="organization-picker-current"]').contains(slug);
     });
   });
 

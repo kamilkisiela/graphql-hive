@@ -55,7 +55,6 @@ const TargetLayoutQuery = graphql(`
       nodes {
         id
         cleanId
-        name
         isAppDeploymentsEnabled
         me {
           id
@@ -65,13 +64,11 @@ const TargetLayoutQuery = graphql(`
           nodes {
             id
             cleanId
-            name
             registryModel
             targets {
               nodes {
                 id
                 cleanId
-                name
               }
             }
           }

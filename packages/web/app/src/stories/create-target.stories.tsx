@@ -15,20 +15,16 @@ export default meta;
 type Story = StoryObj<typeof CreateTargetModalContent>;
 
 const formSchema = z.object({
-  targetName: z
+  targetSlug: z
     .string({
-      required_error: 'Target name is required',
+      required_error: 'Target slug is required',
     })
     .min(2, {
-      message: 'Target name must be at least 2 characters long',
+      message: 'Target slug must be at least 2 characters long',
     })
     .max(50, {
-      message: 'Target name must be at most 50 characters long',
-    })
-    .regex(
-      /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
-      'Target name restricted to alphanumerical characters, spaces and . , _ - / &',
-    ),
+      message: 'Target slug must be at most 50 characters long',
+    }),
 });
 
 export const Default: Story = {
@@ -37,7 +33,7 @@ export const Default: Story = {
       mode: 'onChange',
       resolver: zodResolver(formSchema),
       defaultValues: {
-        targetName: '',
+        targetSlug: '',
       },
     });
     const [openModal, setOpenModal] = useState(false);

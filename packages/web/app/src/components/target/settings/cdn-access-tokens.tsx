@@ -87,7 +87,7 @@ function CreateCDNAccessTokenModal(props: {
       </div>
 
       <div className="flex flex-col gap-4">
-        <label className="text-sm font-semibold" htmlFor="buildUrl">
+        <label className="text-sm font-semibold" htmlFor="alias">
           CDN Access Token Alias
         </label>
         <Input

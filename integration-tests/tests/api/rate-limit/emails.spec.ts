@@ -8,9 +8,9 @@ import * as emails from '../../../testkit/emails';
 import { updateOrgRateLimit, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
-function filterEmailsByOrg(orgName: string, emails: emails.Email[]) {
+function filterEmailsByOrg(orgSlug: string, emails: emails.Email[]) {
   return emails
-    .filter(email => email.subject.includes(orgName))
+    .filter(email => email.subject.includes(orgSlug))
     .map(email => ({
       subject: email.subject,
       email: email.to,
@@ -62,10 +62,10 @@ test('rate limit approaching and reached for organization', async () => {
   let sent = await emails.history();
   expect(sent).toContainEqual({
     to: ownerEmail,
-    subject: `${organization.name} is approaching its rate limit`,
+    subject: `${organization.cleanId} is approaching its rate limit`,
     body: expect.any(String),
   });
-  expect(filterEmailsByOrg(organization.name, sent)).toHaveLength(1);
+  expect(filterEmailsByOrg(organization.cleanId, sent)).toHaveLength(1);
 
   // Collect operations and check for rate-limit reached
   const collectMoreResult = await collectOperations([op, op]);
@@ -77,10 +77,10 @@ test('rate limit approaching and reached for organization', async () => {
 
   expect(sent).toContainEqual({
     to: ownerEmail,
-    subject: `GraphQL-Hive operations quota for ${organization.name} exceeded`,
+    subject: `GraphQL-Hive operations quota for ${organization.cleanId} exceeded`,
     body: expect.any(String),
   });
-  expect(filterEmailsByOrg(organization.name, sent)).toHaveLength(2);
+  expect(filterEmailsByOrg(organization.cleanId, sent)).toHaveLength(2);
 
   // Make sure we don't send the same email again
   const collectEvenMoreResult = await collectOperations([op, op]);
@@ -90,5 +90,5 @@ test('rate limit approaching and reached for organization', async () => {
 
   // Nothing new
   sent = await emails.history();
-  expect(filterEmailsByOrg(organization.name, sent)).toHaveLength(2);
+  expect(filterEmailsByOrg(organization.cleanId, sent)).toHaveLength(2);
 });
