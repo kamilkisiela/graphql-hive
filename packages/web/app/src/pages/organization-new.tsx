@@ -66,6 +66,7 @@ export const CreateOrganizationMutation = graphql(`
         }
       }
       error {
+        message
         inputErrors {
           slug
         }
@@ -104,6 +105,10 @@ export const CreateOrganizationForm = (): JSX.Element => {
       },
     });
 
+    const errorMessage =
+      mutation.data?.createOrganization.error?.inputErrors?.slug ||
+      mutation.data?.createOrganization.error?.message;
+
     if (mutation.data?.createOrganization.ok) {
       toast({
         title: 'Organization created',
@@ -116,10 +121,10 @@ export const CreateOrganizationForm = (): JSX.Element => {
             mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
         },
       });
-    } else if (mutation.data?.createOrganization.error?.inputErrors?.slug) {
+    } else if (errorMessage) {
       form.setError('slug', {
         type: 'manual',
-        message: mutation.data.createOrganization.error.inputErrors.slug,
+        message: errorMessage,
       });
     } else if (mutation.error) {
       toast({
@@ -159,7 +164,7 @@ export const CreateOrganizationFormContent = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input placeholder="Organization slug" {...field} />
+                      <Input placeholder="my-organization" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

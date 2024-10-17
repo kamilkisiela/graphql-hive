@@ -157,3 +157,45 @@ test.concurrent(
     expect(renameResult.updateProjectSlug.error?.message).toBeDefined();
   },
 );
+
+test.concurrent(
+  `changing a project's slug to "new" should result in an error`,
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { project } = await createProject(ProjectType.Single);
+
+    const renameResult = await updateProjectSlug(
+      {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        slug: 'new',
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(renameResult.updateProjectSlug.ok).toBeNull();
+    expect(renameResult.updateProjectSlug.error?.message).toBeDefined();
+  },
+);
+
+test.concurrent(
+  `changing a project's slug to "new" should result in an error`,
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { project } = await createProject(ProjectType.Single);
+
+    const renameResult = await updateProjectSlug(
+      {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        slug: 'new',
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(renameResult.updateProjectSlug.ok).toBeNull();
+    expect(renameResult.updateProjectSlug.error?.message).toBeDefined();
+  },
+);

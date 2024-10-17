@@ -9,7 +9,7 @@ import { Logger } from '../../shared/providers/logger';
 import { OrganizationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
 
-const reservedSlugs = ['view'];
+const reservedSlugs = ['view', 'new'];
 
 /**
  * Responsible for auth checks.

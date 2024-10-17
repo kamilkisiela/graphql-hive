@@ -1214,9 +1214,9 @@ function TargetSettingsContent(props: {
                 {props.page === 'general' && hasSettingsAccess ? (
                   <>
                     <TargetSlug
-                      targetId={currentTarget.cleanId}
-                      projectId={currentProject.cleanId}
-                      organizationId={currentOrganization.cleanId}
+                      targetId={props.targetId}
+                      projectId={props.projectId}
+                      organizationId={props.organizationId}
                     />
                     <GraphQLEndpointUrl
                       targetId={currentTarget.cleanId}

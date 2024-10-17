@@ -397,7 +397,7 @@ export function CreateProjectModalContent(props: {
                     <FormItem className="mt-0">
                       <FormLabel>Slug of your project</FormLabel>
                       <FormControl>
-                        <Input placeholder="My GraphQL API" autoComplete="off" {...field} />
+                        <Input placeholder="my-project" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

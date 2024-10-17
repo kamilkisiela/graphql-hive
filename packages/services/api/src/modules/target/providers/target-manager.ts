@@ -12,7 +12,7 @@ import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers
 import { TokenStorage } from '../../token/providers/token-storage';
 import { HiveError } from './../../../shared/errors';
 
-const reservedSlugs = ['view'];
+const reservedSlugs = ['view', 'new'];
 
 /**
  * Responsible for auth checks.

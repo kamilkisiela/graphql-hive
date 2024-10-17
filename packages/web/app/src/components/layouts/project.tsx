@@ -337,7 +337,7 @@ export function CreateTargetModalContent(props: {
                   return (
                     <FormItem>
                       <FormControl>
-                        <Input placeholder="Target slug" autoComplete="off" {...field} />
+                        <Input placeholder="my-target" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

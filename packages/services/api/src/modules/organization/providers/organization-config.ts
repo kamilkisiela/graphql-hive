@@ -48,6 +48,8 @@ export const reservedOrganizationSlugs = [
   'call',
   'join',
   'view',
+  'new',
+  'org',
 ];
 
 export const organizationAdminScopes = [
