@@ -51,7 +51,7 @@ const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphq
         name
         target {
           id
-          cleanId
+          slug
         }
       }
     }
@@ -274,7 +274,7 @@ function ChangeItem(props: {
                                           params={{
                                             organizationId: props.organizationId,
                                             projectId: props.projectId,
-                                            targetId: target.target.cleanId,
+                                            targetId: target.target.slug,
                                             operationName: `${hash.substring(0, 4)}_${name}`,
                                             operationHash: hash,
                                           }}
@@ -341,7 +341,7 @@ function ChangeItem(props: {
                             params={{
                               organizationId: props.organizationId,
                               projectId: props.projectId,
-                              targetId: target.target.cleanId,
+                              targetId: target.target.slug,
                               coordinate: change.path!.join('.'),
                             }}
                             target="_blank"

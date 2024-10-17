@@ -25,7 +25,7 @@ import { Link } from '@tanstack/react-router';
 
 const ManageSubscriptionInner_OrganizationFragment = graphql(`
   fragment ManageSubscriptionInner_OrganizationFragment on Organization {
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
     }
@@ -127,7 +127,7 @@ function Inner(props: {
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
     redirect: true,
-    organizationId: organization.cleanId,
+    organizationId: organization.slug,
   });
 
   const [query] = useQuery({ query: BillingsPlanQuery });
@@ -228,7 +228,7 @@ function Inner(props: {
     }
 
     await upgradeToProMutation({
-      organization: organization.cleanId,
+      organization: organization.slug,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
       },
@@ -251,9 +251,9 @@ function Inner(props: {
     }
 
     await downgradeToHobbyMutation({
-      organization: organization.cleanId,
+      organization: organization.slug,
     });
-  }, [organization.cleanId, downgradeToHobbyMutation, isFetching]);
+  }, [organization.slug, downgradeToHobbyMutation, isFetching]);
 
   const updateLimits = useCallback(async () => {
     if (isFetching) {
@@ -261,12 +261,12 @@ function Inner(props: {
     }
 
     await updateOrgRateLimitMutation({
-      organization: organization.cleanId,
+      organization: organization.slug,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
       },
     });
-  }, [organization.cleanId, operationsRateLimit, updateOrgRateLimitMutation, isFetching]);
+  }, [organization.slug, operationsRateLimit, updateOrgRateLimitMutation, isFetching]);
 
   if (!canAccess) {
     return null;
@@ -415,7 +415,7 @@ function Inner(props: {
                 </>
               )}
 
-            {error && <QueryError organizationId={organization.cleanId} showError error={error} />}
+            {error && <QueryError organizationId={organization.slug} showError error={error} />}
             <div>{renderActions()}</div>
           </div>
         </div>
@@ -428,7 +428,7 @@ const ManageSubscriptionPageQuery = graphql(`
   query ManageSubscriptionPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        cleanId
+        slug
         ...ManageSubscriptionInner_OrganizationFragment
       }
     }
@@ -483,7 +483,7 @@ function ManageSubscriptionPageContent(props: { organizationId: string }) {
               <Button asChild>
                 <Link
                   to="/$organizationId/view/subscription"
-                  params={{ organizationId: currentOrganization.cleanId }}
+                  params={{ organizationId: currentOrganization.slug }}
                 >
                   Subscription usage
                 </Link>

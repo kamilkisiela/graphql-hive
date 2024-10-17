@@ -157,8 +157,9 @@ export default gql`
 
   type Target {
     id: ID!
-    cleanId: ID!
-    name: String! @deprecated(reason: "Use the 'cleanId' field instead.")
+    slug: ID!
+    cleanId: ID! @deprecated(reason: "Use the 'slug' field instead.")
+    name: String! @deprecated(reason: "Use the 'slug' field instead.")
     project: Project!
     """
     The endpoint url of the target's explorer instance.

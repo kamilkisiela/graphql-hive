@@ -12,17 +12,38 @@ export interface WebhookInput {
   event: {
     organization: {
       id: string;
+      /**
+       * @deprecated
+       * We moved away from cleanId and replaced it with slug,
+       * but we need to keep it for backwards compatibility.
+       */
       cleanId: string;
+      slug: string;
       name: string;
     };
     project: {
       id: string;
+      /**
+       * @deprecated
+       * We moved away from cleanId and replaced it with slug,
+       * but we need to keep it for backwards compatibility.
+       *
+       * @deprecated
+       */
       cleanId: string;
+      slug: string;
       name: string;
     };
     target: {
       id: string;
+      /**
+       * @deprecated
+       * We moved away from cleanId and replaced it with slug,
+       * but we need to keep it for backwards compatibility.
+       *
+       */
       cleanId: string;
+      slug: string;
       name: string;
     };
     schema: {

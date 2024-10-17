@@ -24,7 +24,7 @@ test('rate limit approaching and reached for organization', async () => {
 
   await updateOrgRateLimit(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
     },
     {
       operations: 11,
@@ -62,10 +62,10 @@ test('rate limit approaching and reached for organization', async () => {
   let sent = await emails.history();
   expect(sent).toContainEqual({
     to: ownerEmail,
-    subject: `${organization.cleanId} is approaching its rate limit`,
+    subject: `${organization.slug} is approaching its rate limit`,
     body: expect.any(String),
   });
-  expect(filterEmailsByOrg(organization.cleanId, sent)).toHaveLength(1);
+  expect(filterEmailsByOrg(organization.slug, sent)).toHaveLength(1);
 
   // Collect operations and check for rate-limit reached
   const collectMoreResult = await collectOperations([op, op]);
@@ -77,10 +77,10 @@ test('rate limit approaching and reached for organization', async () => {
 
   expect(sent).toContainEqual({
     to: ownerEmail,
-    subject: `GraphQL-Hive operations quota for ${organization.cleanId} exceeded`,
+    subject: `GraphQL-Hive operations quota for ${organization.slug} exceeded`,
     body: expect.any(String),
   });
-  expect(filterEmailsByOrg(organization.cleanId, sent)).toHaveLength(2);
+  expect(filterEmailsByOrg(organization.slug, sent)).toHaveLength(2);
 
   // Make sure we don't send the same email again
   const collectEvenMoreResult = await collectOperations([op, op]);
@@ -90,5 +90,5 @@ test('rate limit approaching and reached for organization', async () => {
 
   // Nothing new
   sent = await emails.history();
-  expect(filterEmailsByOrg(organization.cleanId, sent)).toHaveLength(2);
+  expect(filterEmailsByOrg(organization.slug, sent)).toHaveLength(2);
 });

@@ -10,8 +10,8 @@ test.concurrent(
 
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.cleanId,
-        slug: organization.cleanId,
+        organization: organization.slug,
+        slug: organization.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -19,9 +19,9 @@ test.concurrent(
     const result =
       changeOrganizationSlugResult.updateOrganizationSlug.ok?.updatedOrganizationPayload;
     expect(changeOrganizationSlugResult.updateOrganizationSlug.error).toBeNull();
-    expect(result?.organization.name).toBe(organization.cleanId);
-    expect(result?.organization.cleanId).toEqual(organization.cleanId);
-    expect(result?.selector.organization).toEqual(organization.cleanId);
+    expect(result?.organization.name).toBe(organization.slug);
+    expect(result?.organization.slug).toEqual(organization.slug);
+    expect(result?.selector.organization).toEqual(organization.slug);
   },
 );
 
@@ -31,11 +31,11 @@ test.concurrent(
     const { ownerToken, createOrg } = await initSeed().createOwner();
     const { organization } = await createOrg();
 
-    const newCleanId = randomUUID();
+    const newSlug = randomUUID();
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.cleanId,
-        slug: newCleanId,
+        organization: organization.slug,
+        slug: newSlug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -43,9 +43,9 @@ test.concurrent(
     const result =
       changeOrganizationSlugResult.updateOrganizationSlug.ok?.updatedOrganizationPayload;
     expect(changeOrganizationSlugResult.updateOrganizationSlug.error).toBeNull();
-    expect(result?.organization.name).toBe(newCleanId);
-    expect(result?.organization.cleanId).toEqual(newCleanId);
-    expect(result?.selector.organization).toEqual(newCleanId);
+    expect(result?.organization.name).toBe(newSlug);
+    expect(result?.organization.slug).toEqual(newSlug);
+    expect(result?.selector.organization).toEqual(newSlug);
   },
 );
 
@@ -55,11 +55,11 @@ test.concurrent(
     const { ownerToken, createOrg } = await initSeed().createOwner();
     const { organization } = await createOrg();
 
-    const newCleanId = randomUUID();
+    const newSlug = randomUUID();
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.cleanId,
-        slug: newCleanId,
+        organization: organization.slug,
+        slug: newSlug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -69,9 +69,9 @@ test.concurrent(
     expect(changeOrganizationSlugResult.updateOrganizationSlug.error).toBeNull();
     // We keep the organization name the same as the clean id (slug)
     // We do it for legacy reasons, as some queries still use the name.
-    expect(result?.organization.name).toBe(newCleanId);
-    expect(result?.organization.cleanId).toEqual(newCleanId);
-    expect(result?.selector.organization).toEqual(newCleanId);
+    expect(result?.organization.name).toBe(newSlug);
+    expect(result?.organization.slug).toEqual(newSlug);
+    expect(result?.selector.organization).toEqual(newSlug);
   },
 );
 
@@ -81,11 +81,11 @@ test.concurrent(
     const { ownerToken, createOrg } = await initSeed().createOwner();
     const { organization } = await createOrg();
 
-    const newCleanId = 'graphql';
+    const newSlug = 'graphql';
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.cleanId,
-        slug: newCleanId,
+        organization: organization.slug,
+        slug: newSlug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -104,8 +104,8 @@ test.concurrent(
 
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.cleanId,
-        slug: anotherOrganization.cleanId,
+        organization: organization.slug,
+        slug: anotherOrganization.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());

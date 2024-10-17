@@ -12,19 +12,19 @@ test.concurrent(
     expect(targets).toHaveLength(3);
     expect(targets).toContainEqual(
       expect.objectContaining({
-        cleanId: 'development',
+        slug: 'development',
         name: 'development',
       }),
     );
     expect(targets).toContainEqual(
       expect.objectContaining({
-        cleanId: 'staging',
+        slug: 'staging',
         name: 'staging',
       }),
     );
     expect(targets).toContainEqual(
       expect.objectContaining({
-        cleanId: 'production',
+        slug: 'production',
         name: 'production',
       }),
     );
@@ -38,8 +38,8 @@ test.concurrent(`changing a project's slug should result changing its name`, asy
 
   const renameResult = await updateProjectSlug(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
+      organization: organization.slug,
+      project: project.slug,
       slug: 'bar',
     },
     ownerToken,
@@ -47,7 +47,7 @@ test.concurrent(`changing a project's slug should result changing its name`, asy
 
   expect(renameResult.updateProjectSlug.error).toBeNull();
   expect(renameResult.updateProjectSlug.ok?.project.name).toBe('bar');
-  expect(renameResult.updateProjectSlug.ok?.project.cleanId).toBe('bar');
+  expect(renameResult.updateProjectSlug.ok?.project.slug).toBe('bar');
   expect(renameResult.updateProjectSlug.ok?.selector.project).toBe('bar');
 });
 
@@ -60,17 +60,17 @@ test.concurrent(
 
     const renameResult = await updateProjectSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        slug: project.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        slug: project.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
 
     expect(renameResult.updateProjectSlug.error).toBeNull();
-    expect(renameResult.updateProjectSlug.ok?.project.name).toBe(project.cleanId);
-    expect(renameResult.updateProjectSlug.ok?.project.cleanId).toBe(project.cleanId);
-    expect(renameResult.updateProjectSlug.ok?.selector.project).toBe(project.cleanId);
+    expect(renameResult.updateProjectSlug.ok?.project.name).toBe(project.slug);
+    expect(renameResult.updateProjectSlug.ok?.project.slug).toBe(project.slug);
+    expect(renameResult.updateProjectSlug.ok?.selector.project).toBe(project.slug);
   },
 );
 
@@ -84,9 +84,9 @@ test.concurrent(
 
     const renameResult = await updateProjectSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        slug: project2.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        slug: project2.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -99,13 +99,13 @@ test.concurrent(
       expect.arrayContaining([
         expect.objectContaining({
           id: project.id,
-          cleanId: project.cleanId,
-          name: project.cleanId,
+          slug: project.slug,
+          name: project.slug,
         }),
         expect.objectContaining({
           id: project2.id,
-          cleanId: project2.cleanId,
-          name: project2.cleanId,
+          slug: project2.slug,
+          name: project2.slug,
         }),
       ]),
     );
@@ -123,17 +123,17 @@ test.concurrent(
 
     const renameResult = await updateProjectSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        slug: project2.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        slug: project2.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
 
     expect(renameResult.updateProjectSlug.error).toBeNull();
-    expect(renameResult.updateProjectSlug.ok?.project.name).toBe(project2.cleanId);
-    expect(renameResult.updateProjectSlug.ok?.project.cleanId).toBe(project2.cleanId);
-    expect(renameResult.updateProjectSlug.ok?.selector.project).toBe(project2.cleanId);
+    expect(renameResult.updateProjectSlug.ok?.project.name).toBe(project2.slug);
+    expect(renameResult.updateProjectSlug.ok?.project.slug).toBe(project2.slug);
+    expect(renameResult.updateProjectSlug.ok?.selector.project).toBe(project2.slug);
   },
 );
 
@@ -146,8 +146,8 @@ test.concurrent(
 
     const renameResult = await updateProjectSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
+        organization: organization.slug,
+        project: project.slug,
         slug: 'view',
       },
       ownerToken,
@@ -167,8 +167,8 @@ test.concurrent(
 
     const renameResult = await updateProjectSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
+        organization: organization.slug,
+        project: project.slug,
         slug: 'new',
       },
       ownerToken,
@@ -188,8 +188,8 @@ test.concurrent(
 
     const renameResult = await updateProjectSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
+        organization: organization.slug,
+        project: project.slug,
         slug: 'new',
       },
       ownerToken,

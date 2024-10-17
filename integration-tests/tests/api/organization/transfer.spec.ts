@@ -18,7 +18,7 @@ test.concurrent(
 
     const transferRequestResult = await getOrganizationTransferRequest(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         code: 'non-existing-code',
       },
       ownerToken,
@@ -37,7 +37,7 @@ test.concurrent(
 
     const transferRequestResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -57,7 +57,7 @@ test.concurrent(
 
     const errors = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: orgMembers.find(u => u.user.email === ownerEmail)!.user.id,
       },
       memberToken,
@@ -77,7 +77,7 @@ test.concurrent(
 
     const transferRequestResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       memberToken,
@@ -96,7 +96,7 @@ test.concurrent(
 
     const requestTransferResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -112,7 +112,7 @@ test.concurrent(
 
     const errors = await getOrganizationTransferRequest(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         code,
       },
       nonMemberToken,
@@ -133,7 +133,7 @@ test.concurrent(
 
     const requestTransferResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -147,7 +147,7 @@ test.concurrent(
 
     const requestResult = await getOrganizationTransferRequest(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         code,
       },
       lonelyMemberToken,
@@ -163,7 +163,7 @@ test.concurrent('recipient should be able to access the transfer request', async
   const { member, memberToken } = await inviteAndJoinMember();
   const requestTransferResult = await requestOrganizationTransfer(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
       user: member.user.id,
     },
     ownerToken,
@@ -177,7 +177,7 @@ test.concurrent('recipient should be able to access the transfer request', async
 
   const requestResult = await getOrganizationTransferRequest(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
       code,
     },
     memberToken,
@@ -193,7 +193,7 @@ test.concurrent('recipient should be able to answer the ownership transfer', asy
 
   const requestTransferResult = await requestOrganizationTransfer(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
       user: member.user.id,
     },
     ownerToken,
@@ -207,7 +207,7 @@ test.concurrent('recipient should be able to answer the ownership transfer', asy
 
   const answerResult = await answerOrganizationTransferRequest(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
       code,
       accept: true,
     },
@@ -227,7 +227,7 @@ test.concurrent(
 
     const requestTransferResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -241,7 +241,7 @@ test.concurrent(
 
     const answerResult = await answerOrganizationTransferRequest(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         code,
         accept: true,
       },
@@ -259,7 +259,7 @@ test.concurrent('owner should not be able to answer the ownership transfer', asy
 
   const requestTransferResult = await requestOrganizationTransfer(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
       user: member.user.id,
     },
     ownerToken,
@@ -273,7 +273,7 @@ test.concurrent('owner should not be able to answer the ownership transfer', asy
 
   const answerResult = await answerOrganizationTransferRequest(
     {
-      organization: organization.cleanId,
+      organization: organization.slug,
       code,
       accept: true,
     },
@@ -292,7 +292,7 @@ test.concurrent(
 
     const requestTransferResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -307,7 +307,7 @@ test.concurrent(
     const { ownerToken: nonMemberToken } = await initSeed().createOwner();
     const answerResult = await answerOrganizationTransferRequest(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         code,
         accept: true,
       },
@@ -327,7 +327,7 @@ test.concurrent(
 
     const requestTransferResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -376,7 +376,7 @@ test.concurrent(
 
     const requestTransferResult = await requestOrganizationTransfer(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         user: member.user.id,
       },
       ownerToken,
@@ -390,7 +390,7 @@ test.concurrent(
 
     const answerResult = await answerOrganizationTransferRequest(
       {
-        organization: organization.cleanId,
+        organization: organization.slug,
         code,
         accept: true,
       },

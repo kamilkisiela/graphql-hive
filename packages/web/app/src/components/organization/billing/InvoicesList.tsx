@@ -7,7 +7,7 @@ import { CurrencyFormatter, DateFormatter } from './helpers';
 const OrganizationInvoicesList_OrganizationFragment = graphql(`
   fragment OrganizationInvoicesList_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     billingConfiguration {
       hasPaymentIssues
       invoices {

@@ -70,7 +70,7 @@ export function connectGithub(server: FastifyInstance) {
     } else {
       const result = await graphql<{
         organizationByGitHubInstallationId?: {
-          cleanId: string;
+          slug: string;
         };
       }>({
         url: env.graphqlPublicEndpoint,
@@ -85,7 +85,7 @@ export function connectGithub(server: FastifyInstance) {
           query getOrganizationByGitHubInstallationId($installation: ID!) {
             organizationByGitHubInstallationId(input: $input) {
               id
-              cleanId
+              slug
             }
           }
         `,
@@ -94,7 +94,7 @@ export function connectGithub(server: FastifyInstance) {
         },
       });
 
-      orgId = result.data?.organizationByGitHubInstallationId?.cleanId;
+      orgId = result.data?.organizationByGitHubInstallationId?.slug;
     }
 
     if (orgId) {

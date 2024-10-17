@@ -50,8 +50,8 @@ test.concurrent('call an external service to compose and validate services', asy
       endpoint: `http://${dockerAddress}/compose`,
       // eslint-disable-next-line no-process-env
       secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-      project: project.cleanId,
-      organization: organization.cleanId,
+      project: project.slug,
+      organization: organization.slug,
     },
     writeToken.secret,
   ).then(r => r.expectNoGraphQLErrors());
@@ -138,8 +138,8 @@ test.concurrent(
         endpoint: `http://${dockerAddress}/fail_on_signature`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.cleanId,
-        organization: organization.cleanId,
+        project: project.slug,
+        organization: organization.slug,
       },
       writeToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -238,8 +238,8 @@ test.concurrent(
         endpoint: `http://${dockerAddress}/non-existing-endpoint`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.cleanId,
-        organization: organization.cleanId,
+        project: project.slug,
+        organization: organization.slug,
       },
       writeToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -333,8 +333,8 @@ test.concurrent('a timeout error should be visible to the user', async ({ expect
       endpoint: `http://${dockerAddress}/timeout`,
       // eslint-disable-next-line no-process-env
       secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-      project: project.cleanId,
-      organization: organization.cleanId,
+      project: project.slug,
+      organization: organization.slug,
     },
     writeToken.secret,
   ).then(r => r.expectNoGraphQLErrors());

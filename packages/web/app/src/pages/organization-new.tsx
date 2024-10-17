@@ -60,8 +60,8 @@ export const CreateOrganizationMutation = graphql(`
             organization
           }
           organization {
-            cleanId
             id
+            slug
           }
         }
       }
@@ -118,7 +118,7 @@ export const CreateOrganizationForm = (): JSX.Element => {
         to: '/$organizationId',
         params: {
           organizationId:
-            mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId,
+            mutation.data.createOrganization.ok.createdOrganizationPayload.organization.slug,
         },
       });
     } else if (errorMessage) {

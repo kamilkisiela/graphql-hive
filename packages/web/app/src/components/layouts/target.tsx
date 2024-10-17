@@ -54,7 +54,7 @@ const TargetLayoutQuery = graphql(`
     organizations {
       nodes {
         id
-        cleanId
+        slug
         isAppDeploymentsEnabled
         me {
           id
@@ -63,12 +63,12 @@ const TargetLayoutQuery = graphql(`
         projects {
           nodes {
             id
-            cleanId
+            slug
             registryModel
             targets {
               nodes {
                 id
-                cleanId
+                slug
               }
             }
           }
@@ -106,12 +106,12 @@ export const TargetLayout = ({
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organizations.nodes.find(
-    node => node.cleanId === props.organizationId,
+    node => node.slug === props.organizationId,
   );
   const currentProject = currentOrganization?.projects.nodes.find(
-    node => node.cleanId === props.projectId,
+    node => node.slug === props.projectId,
   );
-  const currentTarget = currentProject?.targets.nodes.find(node => node.cleanId === props.targetId);
+  const currentTarget = currentProject?.targets.nodes.find(node => node.slug === props.targetId);
   const isCDNEnabled = query.data?.isCDNEnabled === true;
 
   useTargetAccess({
@@ -123,7 +123,7 @@ export const TargetLayout = ({
     organizationId: orgId,
   });
 
-  useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
+  useLastVisitedOrganizationWriter(currentOrganization?.slug);
 
   const hasRegistryReadAccess = canAccessTarget(
     TargetAccessScope.RegistryRead,
@@ -220,9 +220,9 @@ export const TargetLayout = ({
                       <Link
                         to="/$organizationId/$projectId/$targetId/history"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
-                          targetId: currentTarget.cleanId,
+                          organizationId: currentOrganization.slug,
+                          projectId: currentProject.slug,
+                          targetId: currentTarget.slug,
                         }}
                       >
                         History

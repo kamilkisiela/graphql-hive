@@ -141,7 +141,7 @@ describe.each`
         'fixtures/init-schema.graphql',
       ]),
     ).resolves.toMatch(
-      `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
+      `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.slug}/${project.slug}/${target.slug}`,
     );
 
     await expect(
@@ -153,7 +153,7 @@ describe.each`
         'fixtures/nonbreaking-schema.graphql',
       ]),
     ).resolves.toMatch(
-      `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
+      `Available at ${process.env.HIVE_APP_BASE_URL}/${organization.slug}/${project.slug}/${target.slug}/history/`,
     );
   });
 

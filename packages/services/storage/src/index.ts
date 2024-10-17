@@ -259,7 +259,7 @@ export async function createStorage(
   function transformOrganization(organization: organizations): Organization {
     return {
       id: organization.id,
-      cleanId: organization.clean_id,
+      slug: organization.clean_id,
       name: organization.name,
       monthlyRateLimit: {
         retentionInDays: parseInt(organization.limit_retention_days),
@@ -298,7 +298,7 @@ export async function createStorage(
   function transformProject(project: projects): Project {
     return {
       id: project.id,
-      cleanId: project.clean_id,
+      slug: project.clean_id,
       orgId: project.org_id,
       name: project.name,
       type: project.type as ProjectType,
@@ -741,18 +741,18 @@ export async function createStorage(
     },
     createOrganization(input) {
       return tracedTransaction('createOrganization', pool, async t => {
-        if (input.reservedSlugs.includes(input.cleanId)) {
+        if (input.reservedSlugs.includes(input.slug)) {
           return {
             ok: false,
             message: 'Organization slug is reserved',
           };
         }
 
-        const orgCleanIdExists = await t.exists(
-          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${input.cleanId} LIMIT 1`,
+        const orgSlugExists = await t.exists(
+          sql`/* orgSlugExists */ SELECT 1 FROM organizations WHERE clean_id = ${input.slug} LIMIT 1`,
         );
 
-        if (orgCleanIdExists) {
+        if (orgSlugExists) {
           return {
             ok: false,
             message: 'Organization slug is already taken',
@@ -764,7 +764,7 @@ export async function createStorage(
           INSERT INTO organizations
             ("name", "clean_id", "user_id")
           VALUES
-            (${input.cleanId}, ${input.cleanId}, ${input.user})
+            (${input.slug}, ${input.slug}, ${input.user})
           RETURNING *
         `,
         );
@@ -1259,20 +1259,20 @@ export async function createStorage(
         ),
       );
     },
-    async updateOrganizationCleanId({ cleanId, organization, reservedSlugs }) {
+    async updateOrganizationSlug({ slug, organization, reservedSlugs }) {
       return pool.transaction(async t => {
-        if (reservedSlugs.includes(cleanId)) {
+        if (reservedSlugs.includes(slug)) {
           return {
             ok: false,
             message: 'Provided organization slug is not allowed',
           };
         }
 
-        const orgCleanIdExists = await t.exists(
-          sql`/* orgCleanIdExists */ SELECT 1 FROM organizations WHERE clean_id = ${cleanId} AND id != ${organization} LIMIT 1`,
+        const orgSlugExists = await t.exists(
+          sql`/* orgSlugExists */ SELECT 1 FROM organizations WHERE clean_id = ${slug} AND id != ${organization} LIMIT 1`,
         );
 
-        if (orgCleanIdExists) {
+        if (orgSlugExists) {
           return {
             ok: false,
             message: 'Organization slug is already taken',
@@ -1284,7 +1284,7 @@ export async function createStorage(
           organization: transformOrganization(
             await t.one<Slonik<organizations>>(sql`/* updateOrganizationSlug */
               UPDATE organizations
-              SET clean_id = ${cleanId}, name = ${cleanId}
+              SET clean_id = ${slug}, name = ${slug}
               WHERE id = ${organization}
               RETURNING *
             `),
@@ -1567,7 +1567,7 @@ export async function createStorage(
 
       // Based on clean_id, resolve id
       const result = await pool.one<Pick<targets, 'id'>>(
-        sql`/* getTargetId (clean) */
+        sql`/* getTargetId (slug) */
           SELECT t.id FROM targets as t
           LEFT JOIN projects AS p ON (p.id = t.project_id)
           LEFT JOIN organizations AS o ON (o.id = p.org_id)
@@ -1621,9 +1621,9 @@ export async function createStorage(
 
       return null;
     },
-    async getOrganizationByCleanId({ cleanId }) {
+    async getOrganizationBySlug({ slug }) {
       const result = await pool.maybeOne<Slonik<organizations>>(
-        sql`/* getOrganizationByCleanId */ SELECT * FROM organizations WHERE clean_id = ${cleanId} LIMIT 1`,
+        sql`/* getOrganizationBySlug */ SELECT * FROM organizations WHERE clean_id = ${slug} LIMIT 1`,
       );
 
       if (!result) {
@@ -1654,9 +1654,9 @@ export async function createStorage(
         ),
       );
     },
-    async getProjectByCleanId({ cleanId, organization }) {
+    async getProjectBySlug({ slug, organization }) {
       const result = await pool.maybeOne<Slonik<projects>>(
-        sql`/* getProjectByCleanId */ SELECT * FROM projects WHERE clean_id = ${cleanId} AND org_id = ${organization} AND type != 'CUSTOM' LIMIT 1`,
+        sql`/* getProjectBySlug */ SELECT * FROM projects WHERE clean_id = ${slug} AND org_id = ${organization} AND type != 'CUSTOM' LIMIT 1`,
       );
 
       if (!result) {
@@ -1932,14 +1932,14 @@ export async function createStorage(
         });
       },
     ),
-    async getTargetByCleanId({ organization, project, cleanId }) {
-      const result = await pool.maybeOne<unknown>(sql`/* getTargetByCleanId */
+    async getTargetBySlug({ organization, project, slug }) {
+      const result = await pool.maybeOne<unknown>(sql`/* getTargetBySlug */
         SELECT
           ${targetSQLFields}
         FROM
           targets
         WHERE
-          clean_id = ${cleanId}
+          clean_id = ${slug}
           AND project_id = ${project}
         LIMIT 1
       `);
@@ -3307,9 +3307,8 @@ export async function createStorage(
       return decodeOktaIntegrationRecord(result);
     },
 
-    async getOIDCIntegrationIdForOrganizationCleanId({ cleanId }) {
-      const id =
-        await pool.maybeOneFirst<string>(sql`/* getOIDCIntegrationIdForOrganizationCleanId */
+    async getOIDCIntegrationIdForOrganizationSlug({ slug }) {
+      const id = await pool.maybeOneFirst<string>(sql`/* getOIDCIntegrationIdForOrganizationSlug */
         SELECT
           "id"
         FROM
@@ -3318,7 +3317,7 @@ export async function createStorage(
           "linked_organization_id" = (
             SELECT "id"
             FROM "organizations"
-            WHERE "clean_id" = ${cleanId}
+            WHERE "clean_id" = ${slug}
             LIMIT 1
           )
         LIMIT 1
@@ -5333,7 +5332,7 @@ const schemaVersionSQLFields = (t = sql``) => sql`
 
 const targetSQLFields = sql`
   "id",
-  "clean_id" as "cleanId",
+  "clean_id" as "slug",
   "name",
   "project_id" as "projectId",
   "graphql_endpoint_url" as "graphqlEndpointUrl"
@@ -5341,7 +5340,7 @@ const targetSQLFields = sql`
 
 const TargetModel = zod.object({
   id: zod.string(),
-  cleanId: zod.string(),
+  slug: zod.string(),
   name: zod.string(),
   projectId: zod.string(),
   graphqlEndpointUrl: zod.string().nullable(),

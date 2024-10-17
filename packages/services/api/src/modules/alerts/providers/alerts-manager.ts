@@ -153,7 +153,18 @@ export class AlertsManager {
     return this.storage.getAlerts(selector);
   }
 
-  async triggerSchemaChangeNotifications(event: SchemaChangeNotificationInput['event']) {
+  async triggerSchemaChangeNotifications(
+    // Omitting cleanId fields from the event object.
+    // The cleanId is in the type for backwards compatibility,
+    // but we replaced it with slug.
+    // Ugly, but otherwise we would have to write a new type,
+    // specific for this parameter.
+    event: Omit<SchemaChangeNotificationInput['event'], 'organization' | 'project' | 'target'> & {
+      organization: Omit<SchemaChangeNotificationInput['event']['organization'], 'cleanId'>;
+      project: Omit<SchemaChangeNotificationInput['event']['project'], 'cleanId'>;
+      target: Omit<SchemaChangeNotificationInput['event']['target'], 'cleanId'>;
+    },
+  ) {
     const organization = event.organization.id;
     const project = event.project.id;
     const target = event.target.id;
@@ -206,17 +217,20 @@ export class AlertsManager {
     const safeEvent: SchemaChangeNotificationInput['event'] = {
       organization: {
         id: event.organization.id,
-        cleanId: event.organization.cleanId,
+        cleanId: event.organization.slug,
+        slug: event.organization.slug,
         name: event.organization.name,
       },
       project: {
         id: event.project.id,
-        cleanId: event.project.cleanId,
+        cleanId: event.project.slug,
+        slug: event.project.slug,
         name: event.project.name,
       },
       target: {
         id: event.target.id,
-        cleanId: event.target.cleanId,
+        cleanId: event.target.slug,
+        slug: event.target.slug,
         name: event.target.name,
       },
       schema: {
@@ -281,12 +295,14 @@ export class AlertsManager {
         kind: input.kind,
         organization: {
           id: organization.id,
-          cleanId: organization.cleanId,
+          cleanId: organization.slug,
+          slug: organization.slug,
           name: organization.name,
         },
         project: {
           id: project.id,
-          cleanId: project.cleanId,
+          cleanId: project.slug,
+          slug: project.slug,
           name: project.name,
         },
       },

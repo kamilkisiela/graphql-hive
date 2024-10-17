@@ -60,7 +60,7 @@ const GithubIntegration_EnableProjectNameInGitHubCheckMutation = graphql(`
   mutation GithubIntegration_EnableProjectNameInGitHubCheckMutation($input: ProjectSelectorInput!) {
     enableProjectNameInGithubCheck(input: $input) {
       id
-      cleanId
+      slug
       isProjectNameInGitHubCheckEnabled
     }
   }
@@ -187,7 +187,7 @@ const ProjectSettingsPage_UpdateProjectSlugMutation = graphql(`
         }
         project {
           id
-          cleanId
+          slug
         }
       }
       error {
@@ -248,7 +248,7 @@ function ProjectSettingsPage_SlugForm(props: {
             to: '/$organizationId/$projectId/view/settings',
             params: {
               organizationId: props.organizationCleanId,
-              projectId: result.data.updateProjectSlug.ok.project.cleanId,
+              projectId: result.data.updateProjectSlug.ok.project.slug,
             },
           });
         } else if (error) {
@@ -317,7 +317,7 @@ function ProjectSettingsPage_SlugForm(props: {
 const ProjectSettingsPage_OrganizationFragment = graphql(`
   fragment ProjectSettingsPage_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       id
       ...CanAccessProject_MemberFragment
@@ -329,7 +329,7 @@ const ProjectSettingsPage_OrganizationFragment = graphql(`
 
 const ProjectSettingsPage_ProjectFragment = graphql(`
   fragment ProjectSettingsPage_ProjectFragment on Project {
-    cleanId
+    slug
     type
     isProjectNameInGitHubCheckEnabled
     ...ModelMigrationSettings_ProjectFragment
@@ -396,7 +396,7 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
           <div className="flex flex-col gap-y-4">
             {project && organization ? (
               <>
-                <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
+                <ModelMigrationSettings project={project} organizationId={organization.slug} />
                 <ProjectSettingsPage_SlugForm
                   organizationCleanId={props.organizationId}
                   projectCleanId={props.projectId}
@@ -405,9 +405,9 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
                 !project.isProjectNameInGitHubCheckEnabled ? (
                   <GitHubIntegration
                     organizationId={props.organizationId}
-                    organizationSlug={organization.cleanId}
+                    organizationSlug={organization.slug}
                     projectId={props.projectId}
-                    projectSlug={project.cleanId}
+                    projectSlug={project.slug}
                   />
                 ) : null}
 

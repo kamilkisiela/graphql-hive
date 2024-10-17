@@ -295,7 +295,7 @@ export class OrganizationManager {
     }
 
     const result = await this.storage.createOrganization({
-      cleanId: slug,
+      slug,
       user: user.id,
       adminScopes: organizationAdminScopes,
       viewerScopes: organizationViewerScopes,
@@ -420,15 +420,15 @@ export class OrganizationManager {
       }),
     ]);
 
-    if (organization.cleanId === slug) {
+    if (organization.slug === slug) {
       return {
         ok: true,
         organization,
       } as const;
     }
 
-    const result = await this.storage.updateOrganizationCleanId({
-      cleanId: slug,
+    const result = await this.storage.updateOrganizationSlug({
+      slug,
       organization: organization.id,
       user: user.id,
       reservedSlugs: reservedOrganizationSlugs,
@@ -441,7 +441,7 @@ export class OrganizationManager {
           organization: organization.id,
         },
         meta: {
-          value: result.organization.cleanId,
+          value: result.organization.slug,
         },
       });
     }
@@ -680,7 +680,7 @@ export class OrganizationManager {
                 <mj-text>
                   ${member.user.displayName} wants to transfer the ownership of the <strong>${organization.name}</strong> organization.
                 </mj-text>
-                <mj-button href="${mjml.raw(this.appBaseUrl)}/action/transfer/${organization.cleanId}/${code}">
+                <mj-button href="${mjml.raw(this.appBaseUrl)}/action/transfer/${organization.slug}/${code}">
                   Accept the transfer
                 </mj-button>
                 <mj-text align="center">

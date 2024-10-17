@@ -369,7 +369,7 @@ export async function main() {
       schemaConfig: env.hiveServices.webApp
         ? {
             schemaPublishLink(input) {
-              let url = `${env.hiveServices.webApp.url}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}`;
+              let url = `${env.hiveServices.webApp.url}/${input.organization.slug}/${input.project.slug}/${input.target.slug}`;
 
               if (input.version) {
                 url += `/history/${input.version.id}`;
@@ -378,7 +378,7 @@ export async function main() {
               return url;
             },
             schemaCheckLink(input) {
-              return `${env.hiveServices.webApp.url}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}/checks/${input.schemaCheckId}`;
+              return `${env.hiveServices.webApp.url}/${input.organization.slug}/${input.project.slug}/${input.target.slug}/checks/${input.schemaCheckId}`;
             },
           }
         : {},

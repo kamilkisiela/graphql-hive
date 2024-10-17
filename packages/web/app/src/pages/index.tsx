@@ -15,7 +15,7 @@ const DefaultOrganizationQuery = graphql(`
     myDefaultOrganization(previouslyVisitedOrganizationId: $previouslyVisitedOrganizationId) {
       organization {
         id
-        cleanId
+        slug
       }
     }
   }
@@ -32,24 +32,24 @@ export function IndexPage() {
   const router = useRouter();
   const result = query.data?.myDefaultOrganization;
 
-  useLastVisitedOrganizationWriter(result?.organization?.cleanId);
+  useLastVisitedOrganizationWriter(result?.organization?.slug);
   useEffect(() => {
     if (result === null) {
       // No organization, redirect to create one
       void router.navigate({
         to: '/org/new',
       });
-    } else if (result?.organization.cleanId) {
+    } else if (result?.organization.slug) {
       // Redirect to the organization
       void router.navigate({
         to: '/$organizationId',
-        params: { organizationId: result.organization.cleanId },
+        params: { organizationId: result.organization.slug },
       });
     } // else, still loading
   }, [router, result]);
 
   if (query.error) {
-    return <QueryError organizationId={result?.organization.cleanId ?? null} error={query.error} />;
+    return <QueryError organizationId={result?.organization.slug ?? null} error={query.error} />;
   }
 
   return (

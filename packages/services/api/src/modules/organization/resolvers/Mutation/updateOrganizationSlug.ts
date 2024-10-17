@@ -29,7 +29,7 @@ export const updateOrganizationSlug: NonNullable<
       ok: {
         updatedOrganizationPayload: {
           selector: {
-            organization: result.organization.cleanId,
+            organization: result.organization.slug,
           },
           organization: result.organization,
         },

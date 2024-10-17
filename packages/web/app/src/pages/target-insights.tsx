@@ -105,7 +105,7 @@ const TargetOperationsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        cleanId
+        slug
         rateLimit {
           retentionInDays
         }

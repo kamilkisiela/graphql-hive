@@ -9,6 +9,7 @@ export const Project: Pick<
   | 'experimental_nativeCompositionPerTarget'
   | 'id'
   | 'name'
+  | 'slug'
   | 'type'
   | 'validationUrl'
   | '__isTypeOf'
@@ -28,4 +29,5 @@ export const Project: Pick<
 
     return organization.featureFlags.forceLegacyCompositionInTargets.length > 0;
   },
+  cleanId: project => project.slug,
 };

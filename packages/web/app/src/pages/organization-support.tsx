@@ -293,7 +293,7 @@ function SupportTicketRow(props: {
 const Support_OrganizationFragment = graphql(`
   fragment Support_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
       isOwner
@@ -333,7 +333,7 @@ function Support(props: {
     scope: OrganizationAccessScope.Read,
     member: organization.me,
     redirect: true,
-    organizationId: organization.cleanId,
+    organizationId: organization.slug,
   });
 
   const tickets = supportTicketsConnection?.edges.map(e => e.node);
@@ -354,7 +354,7 @@ function Support(props: {
             <NewTicketForm
               isOpen={isOpen}
               onClose={toggle}
-              organizationId={organization.cleanId}
+              organizationId={organization.slug}
               onSubmit={onSubmit}
             />
           </div>
@@ -374,7 +374,7 @@ function Support(props: {
               {(tickets ?? []).map(ticket => (
                 <SupportTicketRow
                   key={ticket.id}
-                  organizationId={organization.cleanId}
+                  organizationId={organization.slug}
                   ticket={ticket}
                 />
               ))}

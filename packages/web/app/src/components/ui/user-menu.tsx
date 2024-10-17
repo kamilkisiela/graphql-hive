@@ -53,7 +53,7 @@ const UserMenu_OrganizationConnectionFragment = graphql(`
   fragment UserMenu_OrganizationConnectionFragment on OrganizationConnection {
     nodes {
       id
-      cleanId
+      slug
       me {
         ...UserMenu_MemberFragment
       }
@@ -96,7 +96,7 @@ export function UserMenu(props: {
   const [isUserSettingsModalOpen, toggleUserSettingsModalOpen] = useToggle();
   const [isLeaveOrganizationModalOpen, toggleLeaveOrganizationModalOpen] = useToggle();
   const currentOrganization = organizations?.find(
-    org => org.cleanId === props.currentOrganizationCleanId,
+    org => org.slug === props.currentOrganizationCleanId,
   );
   const meInOrg = useFragment(UserMenu_MemberFragment, currentOrganization?.me);
 
@@ -112,7 +112,7 @@ export function UserMenu(props: {
         <LeaveOrganizationModal
           toggleModalOpen={toggleLeaveOrganizationModalOpen}
           isOpen={isLeaveOrganizationModalOpen}
-          organizationId={currentOrganization.cleanId}
+          organizationId={currentOrganization.slug}
         />
       ) : null}
       <div className="flex flex-row items-center gap-8">
@@ -164,16 +164,16 @@ export function UserMenu(props: {
                   {organizations.map(org => (
                     <DropdownMenuItem
                       asChild
-                      key={org.cleanId}
-                      active={currentOrganization?.cleanId === org.cleanId}
+                      key={org.slug}
+                      active={currentOrganization?.slug === org.slug}
                     >
                       <Link
                         to="/$organizationId"
                         params={{
-                          organizationId: org.cleanId,
+                          organizationId: org.slug,
                         }}
                       >
-                        {org.cleanId}
+                        {org.slug}
                       </Link>
                     </DropdownMenuItem>
                   ))}
@@ -217,7 +217,7 @@ export function UserMenu(props: {
                   <Link
                     to="/$organizationId/view/support"
                     params={{
-                      organizationId: currentOrganization.cleanId,
+                      organizationId: currentOrganization.slug,
                     }}
                   >
                     <LifeBuoyIcon className="mr-2 size-4" />

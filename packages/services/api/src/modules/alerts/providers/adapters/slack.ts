@@ -45,15 +45,15 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
       const totalChanges = input.event.changes.length + input.event.messages.length;
       const projectLink = this.createLink({
         text: input.event.project.name,
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}`,
       });
       const targetLink = this.createLink({
         text: input.event.target.name,
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}/${input.event.target.slug}`,
       });
       const viewLink = this.createLink({
         text: 'view details',
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}/${input.event.target.cleanId}/history/${input.event.schema.id}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}/${input.event.target.slug}/history/${input.event.schema.id}`,
       });
 
       if (input.event.initial) {
@@ -108,7 +108,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     try {
       const projectLink = this.createLink({
         text: input.event.project.name,
-        url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
+        url: `${this.appBaseUrl}/${input.event.organization.slug}/${input.event.project.slug}`,
       });
 
       const client = new WebClient(token);

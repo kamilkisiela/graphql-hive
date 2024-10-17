@@ -91,7 +91,7 @@ export interface Storage {
 
   getOrganizationId(_: OrganizationSelector): Promise<string | null>;
   getOrganizationByInviteCode(_: { inviteCode: string }): Promise<Organization | null>;
-  getOrganizationByCleanId(_: { cleanId: string }): Promise<Organization | null>;
+  getOrganizationBySlug(_: { slug: string }): Promise<Organization | null>;
   getOrganizationByGitHubInstallationId(_: {
     installationId: string;
   }): Promise<Organization | null>;
@@ -99,7 +99,7 @@ export interface Storage {
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
-    _: Pick<Organization, 'cleanId'> & {
+    _: Pick<Organization, 'slug'> & {
       user: string;
       adminScopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       viewerScopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
@@ -123,9 +123,9 @@ export interface Storage {
     | never
   >;
 
-  updateOrganizationCleanId(
+  updateOrganizationSlug(
     _: OrganizationSelector &
-      Pick<Organization, 'cleanId'> & { user: string; reservedSlugs: string[] },
+      Pick<Organization, 'slug'> & { user: string; reservedSlugs: string[] },
   ): Promise<
     | {
         ok: true;
@@ -268,7 +268,7 @@ export interface Storage {
 
   getProjectId(_: ProjectSelector): Promise<string | never>;
 
-  getProjectByCleanId(_: { cleanId: string } & OrganizationSelector): Promise<Project | null>;
+  getProjectBySlug(_: { slug: string } & OrganizationSelector): Promise<Project | null>;
 
   getProjects(_: OrganizationSelector): Promise<Project[] | never>;
 
@@ -326,9 +326,9 @@ export interface Storage {
 
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
 
-  getTargetByCleanId(
+  getTargetBySlug(
     _: {
-      cleanId: string;
+      slug: string;
     } & ProjectSelector,
   ): Promise<Target | null>;
 
@@ -647,7 +647,7 @@ export interface Storage {
   ): Promise<void>;
 
   getOIDCIntegrationForOrganization(_: { organizationId: string }): Promise<OIDCIntegration | null>;
-  getOIDCIntegrationIdForOrganizationCleanId(_: { cleanId: string }): Promise<string | null>;
+  getOIDCIntegrationIdForOrganizationSlug(_: { slug: string }): Promise<string | null>;
 
   getOIDCIntegrationById(_: { oidcIntegrationId: string }): Promise<OIDCIntegration | null>;
 

@@ -249,8 +249,8 @@ test.concurrent(
           endpoint: `http://${await getServiceHost('composition_federation_2', 3069, false)}/compose`,
           // eslint-disable-next-line no-process-env
           secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-          project: project.cleanId,
-          organization: organization.cleanId,
+          project: project.slug,
+          organization: organization.slug,
         },
         readToken.secret,
       ).then(r => r.expectNoGraphQLErrors());

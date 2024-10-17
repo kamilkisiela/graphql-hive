@@ -335,8 +335,8 @@ test.concurrent('check usage from two selected targets', async ({ expect }) => {
   const productionTargetResult = await createTarget(
     {
       slug: 'target2',
-      organization: organization.cleanId,
-      project: project.cleanId,
+      organization: organization.slug,
+      project: project.slug,
     },
     ownerToken,
   ).then(r => r.expectNoGraphQLErrors());
@@ -431,9 +431,9 @@ test.concurrent('check usage from two selected targets', async ({ expect }) => {
   // Now switch to using checking both staging and production
   const updateValidationResult = await updateTargetValidationSettings(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: staging.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: staging.slug,
       percentage: 50, // Out of 3 requests, 1 is for Query.me, 2 are done for Query.me so it's 1/3 = 33.3%
       period: 2,
       targets: [productionTarget.id, staging.id],
@@ -581,9 +581,9 @@ test.concurrent('check usage not from excluded client names', async ({ expect })
   // Exclude app from the check (tests partial, incomplete exclusion)
   let updateValidationResult = await updateTargetValidationSettings(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: target.slug,
       percentage: 0,
       period: 2,
       targets: [target.id],
@@ -617,9 +617,9 @@ test.concurrent('check usage not from excluded client names', async ({ expect })
   // Exclude BOTH 'app' and 'cli' (tests multi client covering exclusion)
   updateValidationResult = await updateTargetValidationSettings(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: target.slug,
       percentage: 0,
       period: 2,
       targets: [target.id],
@@ -2618,9 +2618,9 @@ test.concurrent(
       variables: {
         id: firstSchemaCheckId,
         selector: {
-          organization: organization.cleanId,
-          project: project.cleanId,
-          target: target.cleanId,
+          organization: organization.slug,
+          project: project.slug,
+          target: target.slug,
         },
       },
       authToken: token.secret,
@@ -2884,9 +2884,9 @@ test.concurrent('ensure percentage precision up to 2 decimal places', async ({ e
   // should accept a breaking change when percentage is 2%
   let updateValidationResult = await updateTargetValidationSettings(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: target.slug,
       percentage: 2,
       period: 2,
       targets: [target.id],
@@ -2912,9 +2912,9 @@ test.concurrent('ensure percentage precision up to 2 decimal places', async ({ e
   // should reject a breaking change when percentage is 1.99%
   updateValidationResult = await updateTargetValidationSettings(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: target.slug,
       percentage: 1.99,
       period: 2,
       targets: [target.id],

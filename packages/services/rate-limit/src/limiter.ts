@@ -35,7 +35,7 @@ export type CachedRateLimitInfo = {
   orgName: string;
   orgEmail: string;
   orgPlan: string;
-  orgCleanId: string;
+  orgSlug: string;
   operations: RateLimitCheckResponse;
   retentionInDays: number;
 };
@@ -128,7 +128,7 @@ export function createRateLimiter(config: {
           orgName: record.org_name,
           orgEmail: record.owner_email,
           orgPlan: record.org_plan_name,
-          orgCleanId: record.org_clean_id,
+          orgSlug: record.org_clean_id,
           operations: {
             current: 0,
             quota: record.limit_operations_monthly,
@@ -165,7 +165,7 @@ export function createRateLimiter(config: {
         emails.limitExceeded({
           organization: {
             id: orgId,
-            cleanId: orgRecord.orgCleanId,
+            slug: orgRecord.orgSlug,
             name: orgName,
             email: orgRecord.orgEmail,
           },
@@ -182,7 +182,7 @@ export function createRateLimiter(config: {
         emails.limitWarning({
           organization: {
             id: orgId,
-            cleanId: orgRecord.orgCleanId,
+            slug: orgRecord.orgSlug,
             name: orgName,
             email: orgRecord.orgEmail,
           },

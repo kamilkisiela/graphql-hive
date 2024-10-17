@@ -3,13 +3,13 @@ import { InjectionToken, Provider, Scope } from 'graphql-modules';
 export interface SchemaModuleConfig {
   schemaPublishLink?(input: {
     organization: {
-      cleanId: string;
+      slug: string;
     };
     project: {
-      cleanId: string;
+      slug: string;
     };
     target: {
-      cleanId: string;
+      slug: string;
     };
     version?: {
       id: string;
@@ -17,13 +17,13 @@ export interface SchemaModuleConfig {
   }): string;
   schemaCheckLink?(input: {
     organization: {
-      cleanId: string;
+      slug: string;
     };
     project: {
-      cleanId: string;
+      slug: string;
     };
     target: {
-      cleanId: string;
+      slug: string;
     };
     schemaCheckId: string;
   }): string;

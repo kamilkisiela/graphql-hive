@@ -9,9 +9,9 @@ test.concurrent(`changing a target's slug should result changing its name`, asyn
 
   const renameResult = await updateTargetSlug(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: target.slug,
       slug: 'bar',
     },
     ownerToken,
@@ -19,7 +19,7 @@ test.concurrent(`changing a target's slug should result changing its name`, asyn
 
   expect(renameResult.updateTargetSlug.error).toBeNull();
   expect(renameResult.updateTargetSlug.ok?.target.name).toBe('bar');
-  expect(renameResult.updateTargetSlug.ok?.target.cleanId).toBe('bar');
+  expect(renameResult.updateTargetSlug.ok?.target.slug).toBe('bar');
   expect(renameResult.updateTargetSlug.ok?.selector.target).toBe('bar');
 });
 
@@ -32,18 +32,18 @@ test.concurrent(
 
     const renameResult = await updateTargetSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-        slug: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
+        slug: target.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
 
     expect(renameResult.updateTargetSlug.error).toBeNull();
-    expect(renameResult.updateTargetSlug.ok?.target.name).toBe(target.cleanId);
-    expect(renameResult.updateTargetSlug.ok?.target.cleanId).toBe(target.cleanId);
-    expect(renameResult.updateTargetSlug.ok?.selector.target).toBe(target.cleanId);
+    expect(renameResult.updateTargetSlug.ok?.target.name).toBe(target.slug);
+    expect(renameResult.updateTargetSlug.ok?.target.slug).toBe(target.slug);
+    expect(renameResult.updateTargetSlug.ok?.selector.target).toBe(target.slug);
   },
 );
 
@@ -62,10 +62,10 @@ test.concurrent(
 
     const renameResult = await updateTargetSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: firstTarget.cleanId,
-        slug: secondTarget.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: firstTarget.slug,
+        slug: secondTarget.slug,
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());
@@ -83,16 +83,16 @@ test.concurrent(
     const { project, target } = await createProject(ProjectType.Single);
     const { targets, project: project2 } = await createProject(ProjectType.Single);
 
-    const target2 = targets.find(t => t.cleanId !== target.cleanId)!;
+    const target2 = targets.find(t => t.slug !== target.slug)!;
     expect(target2).toBeDefined();
 
     const sharedSlug = 'foo';
 
     await updateTargetSlug(
       {
-        organization: organization.cleanId,
-        project: project2.cleanId,
-        target: target2.cleanId,
+        organization: organization.slug,
+        project: project2.slug,
+        target: target2.slug,
         slug: sharedSlug,
       },
       ownerToken,
@@ -100,9 +100,9 @@ test.concurrent(
 
     const renameResult = await updateTargetSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
         slug: sharedSlug,
       },
       ownerToken,
@@ -110,7 +110,7 @@ test.concurrent(
 
     expect(renameResult.updateTargetSlug.error).toBeNull();
     expect(renameResult.updateTargetSlug.ok?.target.name).toBe(sharedSlug);
-    expect(renameResult.updateTargetSlug.ok?.target.cleanId).toBe(sharedSlug);
+    expect(renameResult.updateTargetSlug.ok?.target.slug).toBe(sharedSlug);
     expect(renameResult.updateTargetSlug.ok?.selector.target).toBe(sharedSlug);
   },
 );
@@ -124,9 +124,9 @@ test.concurrent(
 
     const renameResult = await updateTargetSlug(
       {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
+        organization: organization.slug,
+        project: project.slug,
+        target: target.slug,
         slug: 'view',
       },
       ownerToken,

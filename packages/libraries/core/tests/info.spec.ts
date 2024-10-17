@@ -45,16 +45,16 @@ test('should use selfHosting.graphqlEndpoint if provided', async () => {
           },
           organization: {
             name: 'Org',
-            cleanId: 'org-id',
+            slug: 'org-id',
           },
           project: {
             name: 'Project',
             type: 'SINGLE',
-            cleanId: 'project-id',
+            slug: 'project-id',
           },
           target: {
             name: 'Target',
-            cleanId: 'target-id',
+            slug: 'target-id',
           },
           canReportSchema: true,
           canCollectUsage: true,

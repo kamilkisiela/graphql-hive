@@ -878,9 +878,9 @@ async function prepare(targetPick: TargetOption) {
   // force legacy composition
   await updateTargetSchemaComposition(
     {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: targetWithLegacyComposition.cleanId,
+      organization: organization.slug,
+      project: project.slug,
+      target: targetWithLegacyComposition.slug,
       nativeComposition: false,
     },
     targetWithLegacyComposition.tokens.secrets.settings,
@@ -941,7 +941,7 @@ async function prepareProject(projectType: ProjectType) {
 
     return {
       id: target.id,
-      cleanId: target.cleanId,
+      slug: target.slug,
       fetchVersions: readonlyToken.fetchVersions,
       tokens: {
         secrets: {

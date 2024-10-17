@@ -50,7 +50,7 @@ import { roleFormSchema } from './roles';
 const MemberRoleMigrationStickyNote_OrganizationFragment = graphql(`
   fragment MemberRoleMigrationStickyNote_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       isAdmin
     }
@@ -109,7 +109,7 @@ export function MemberRoleMigrationStickyNote(props: {
           className="underline underline-offset-4"
           to="/$organizationId/view/members"
           params={{
-            organizationId: organization.cleanId,
+            organizationId: organization.slug,
           }}
           search={{
             page: 'migration',
@@ -821,7 +821,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
 const OrganizationMemberRolesMigration_OrganizationFragment = graphql(`
   fragment OrganizationMemberRolesMigration_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       id
       isAdmin
@@ -888,7 +888,7 @@ export function OrganizationMemberRolesMigration(props: {
                 key={memberGroup.id}
                 memberGroup={memberGroup}
                 roles={organization.memberRoles}
-                organizationCleanId={organization.cleanId}
+                organizationCleanId={organization.slug}
               />
             ))}
           </tbody>

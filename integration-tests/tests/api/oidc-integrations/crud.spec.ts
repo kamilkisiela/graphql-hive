@@ -112,7 +112,7 @@ describe('create', () => {
       const refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
         variables: {
-          organizationId: organization.cleanId,
+          organizationId: organization.slug,
         },
         authToken: ownerToken,
       }).then(r => r.expectNoGraphQLErrors());
@@ -455,7 +455,7 @@ describe('delete', () => {
       let refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
         variables: {
-          organizationId: organization.cleanId,
+          organizationId: organization.slug,
         },
         authToken: ownerToken,
       }).then(r => r.expectNoGraphQLErrors());
@@ -494,7 +494,7 @@ describe('delete', () => {
       refetchedOrg = await execute({
         document: OrganizationWithOIDCIntegration,
         variables: {
-          organizationId: organization.cleanId,
+          organizationId: organization.slug,
         },
         authToken: ownerToken,
       }).then(r => r.expectNoGraphQLErrors());
@@ -800,7 +800,7 @@ describe('restrictions', () => {
     const refetchedOrg = await execute({
       document: OrganizationWithOIDCIntegration,
       variables: {
-        organizationId: organization.cleanId,
+        organizationId: organization.slug,
       },
       authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
@@ -842,7 +842,7 @@ describe('restrictions', () => {
     const orgAfterOidc = await execute({
       document: OrganizationWithOIDCIntegration,
       variables: {
-        organizationId: organization.cleanId,
+        organizationId: organization.slug,
       },
       authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
@@ -869,7 +869,7 @@ describe('restrictions', () => {
     const orgAfterDisablingOidcRestrictions = await execute({
       document: OrganizationWithOIDCIntegration,
       variables: {
-        organizationId: organization.cleanId,
+        organizationId: organization.slug,
       },
       authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
@@ -924,7 +924,7 @@ describe('restrictions', () => {
       const readAccessCheck = await execute({
         document: OrganizationReadTest,
         variables: {
-          organizationId: organization.cleanId,
+          organizationId: organization.slug,
         },
         authToken: ownerToken,
       }).then(r => r.expectNoGraphQLErrors());

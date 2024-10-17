@@ -59,7 +59,7 @@ export enum Page {
 const OrganizationLayout_OrganizationFragment = graphql(`
   fragment OrganizationLayout_OrganizationFragment on Organization {
     id
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
     }
@@ -105,7 +105,7 @@ export function OrganizationLayout({
     OrganizationLayout_OrganizationFragment,
     query.data?.organizations.nodes,
   );
-  const currentOrganization = organizations?.find(org => org.cleanId === props.organizationId);
+  const currentOrganization = organizations?.find(org => org.slug === props.organizationId);
 
   useOrganizationAccess({
     member: currentOrganization?.me ?? null,
@@ -114,7 +114,7 @@ export function OrganizationLayout({
     organizationId: props.organizationId,
   });
 
-  useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
+  useLastVisitedOrganizationWriter(currentOrganization?.slug);
 
   const meInCurrentOrg = currentOrganization?.me;
 
@@ -148,10 +148,7 @@ export function OrganizationLayout({
             <Tabs value={page} className="min-w-[600px]">
               <TabsList variant="menu">
                 <TabsTrigger variant="menu" value={Page.Overview} asChild>
-                  <Link
-                    to="/$organizationId"
-                    params={{ organizationId: currentOrganization.cleanId }}
-                  >
+                  <Link to="/$organizationId" params={{ organizationId: currentOrganization.slug }}>
                     Overview
                   </Link>
                 </TabsTrigger>
@@ -159,7 +156,7 @@ export function OrganizationLayout({
                   <TabsTrigger variant="menu" value={Page.Members} asChild>
                     <Link
                       to="/$organizationId/view/members"
-                      params={{ organizationId: currentOrganization.cleanId }}
+                      params={{ organizationId: currentOrganization.slug }}
                       search={{ page: 'list' }}
                     >
                       Members
@@ -171,7 +168,7 @@ export function OrganizationLayout({
                     <TabsTrigger variant="menu" value={Page.Policy} asChild>
                       <Link
                         to="/$organizationId/view/policy"
-                        params={{ organizationId: currentOrganization.cleanId }}
+                        params={{ organizationId: currentOrganization.slug }}
                       >
                         Policy
                       </Link>
@@ -179,7 +176,7 @@ export function OrganizationLayout({
                     <TabsTrigger variant="menu" value={Page.Settings} asChild>
                       <Link
                         to="/$organizationId/view/settings"
-                        params={{ organizationId: currentOrganization.cleanId }}
+                        params={{ organizationId: currentOrganization.slug }}
                       >
                         Settings
                       </Link>
@@ -191,7 +188,7 @@ export function OrganizationLayout({
                     <TabsTrigger variant="menu" value={Page.Support} asChild>
                       <Link
                         to="/$organizationId/view/support"
-                        params={{ organizationId: currentOrganization.cleanId }}
+                        params={{ organizationId: currentOrganization.slug }}
                       >
                         Support
                       </Link>
@@ -202,7 +199,7 @@ export function OrganizationLayout({
                     <TabsTrigger variant="menu" value={Page.Subscription} asChild>
                       <Link
                         to="/$organizationId/view/subscription"
-                        params={{ organizationId: currentOrganization.cleanId }}
+                        params={{ organizationId: currentOrganization.slug }}
                       >
                         Subscription
                       </Link>
@@ -253,11 +250,11 @@ export const CreateProjectMutation = graphql(`
       ok {
         createdProject {
           id
-          cleanId
+          slug
         }
         createdTargets {
           id
-          cleanId
+          slug
         }
         updatedOrganization {
           id
@@ -345,7 +342,7 @@ function CreateProjectModal(props: {
         to: '/$organizationId/$projectId',
         params: {
           organizationId: props.organizationId,
-          projectId: data.createProject.ok.createdProject.cleanId,
+          projectId: data.createProject.ok.createdProject.slug,
         },
       });
     } else if (data?.createProject.error?.inputErrors.slug) {
