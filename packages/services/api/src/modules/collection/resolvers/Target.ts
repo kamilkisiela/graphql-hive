@@ -3,7 +3,7 @@ import type { TargetResolvers } from './../../../__generated__/types.next';
 
 export const Target: Pick<
   TargetResolvers,
-  'documentCollection' | 'documentCollectionOperation' | 'documentCollections'
+  'documentCollection' | 'documentCollectionOperation' | 'documentCollections' | '__isTypeOf'
 > = {
   documentCollections: (target, args, { injector }) =>
     injector.get(CollectionProvider).getCollections(target.id, args.first, args.after),
