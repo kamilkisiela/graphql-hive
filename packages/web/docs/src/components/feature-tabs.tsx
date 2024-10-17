@@ -1,11 +1,10 @@
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import * as Tabs from '@radix-ui/react-tabs';
 import { CallToAction, Heading } from '@theguild/components';
 import { cn } from '../lib';
 import { ArrowIcon } from './arrow-icon';
-import { Stud } from './stud';
 import observabilityClientsImage from '../../public/features/observability/clients.webp';
 import observabilityOperationsImage from '../../public/features/observability/operations.webp';
 import observabilityOverallImage from '../../public/features/observability/overall.webp';
@@ -123,10 +122,10 @@ export function FeatureTabs({ className }: { className?: string }) {
                 key={tab}
                 value={tab}
                 className={
-                  'rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
+                  'hive-focus rdx-state-active:text-green-1000 rdx-state-active:border-beige-600 rdx-state-active:bg-white' +
                   ' border-transparent font-medium leading-6 text-green-800 sm:border' +
-                  ' flex flex-1 justify-center gap-2.5 p-4' +
-                  ' text-base sm:text-xs lg:text-base [&>svg]:shrink-0 [@media(min-width:673px)]:text-sm' +
+                  ' flex flex-1 items-center justify-center gap-2.5 p-4 sm:max-lg:p-3' +
+                  ' text-base sm:text-xs md:text-sm lg:text-base [&>svg]:shrink-0' +
                   ' max-sm:rdx-state-inactive:hidden group-focus-within:rdx-state-inactive:flex [&[data-state="inactive"]>:last-child]:invisible' +
                   ' rounded-lg sm:rounded-[15px]' +
                   ' max-sm:bg-beige-200 max-sm:rdx-state-inactive:rounded-none z-10' +
@@ -155,7 +154,6 @@ export function FeatureTabs({ className }: { className?: string }) {
             <Tabs.Content value="Schema Registry" tabIndex={-1}>
               <Feature
                 title="Schema Registry"
-                icon={<SchemaRegistryIcon />}
                 documentationLink="/docs/schema-registry"
                 description="Publish schemas, compose federated services, and detect backward-incompatible changes with ease."
                 highlights={highlights['Schema Registry']}
@@ -165,7 +163,6 @@ export function FeatureTabs({ className }: { className?: string }) {
             <Tabs.Content value="GraphQL Observability" tabIndex={-1}>
               <Feature
                 title="GraphQL Observability"
-                icon={<GraphQLObservabilityIcon />}
                 documentationLink="/docs/schema-registry/usage-reporting"
                 description="Enhanced GraphQL Observability tools provide insights into API usage and user experience metrics."
                 highlights={highlights['GraphQL Observability']}
@@ -175,7 +172,7 @@ export function FeatureTabs({ className }: { className?: string }) {
             <Tabs.Content value="Schema Management" tabIndex={-1}>
               <Feature
                 title="Schema Management"
-                icon={<SchemaManagementIcon />}
+                documentationLink="/docs/schema-registry/schema-policy"
                 description="Evolve your GraphQL API with confidence."
                 highlights={highlights['Schema Management']}
                 setActiveHighlight={setActiveHighlight}
@@ -233,19 +230,17 @@ function SchemaManagementIcon() {
 }
 
 function Feature(props: {
-  icon: ReactNode;
   title: string;
   description: string;
   highlights: Highlight[];
   documentationLink?: string;
   setActiveHighlight: (highlight: string) => void;
 }) {
-  const { icon, title, description, documentationLink, highlights } = props;
+  const { title, description, documentationLink, highlights } = props;
 
   return (
     <div className="flex flex-col gap-6 px-4 pb-4 md:gap-12 md:pb-12 md:pl-12 md:pr-16">
       <header className="flex flex-wrap items-center gap-4 md:flex-col md:items-start md:gap-6">
-        <Stud>{icon}</Stud>
         <Heading as="h2" size="md" className="text-green-1000 max-sm:text-2xl max-sm:leading-8">
           {title}
         </Heading>

@@ -113,7 +113,7 @@ export function CompanyTestimonialsSection({ className }: { className?: string }
                   key={testimonial.company}
                   value={testimonial.company}
                   className={
-                    'flex-grow-0 [&[data-state="active"]>:first-child]:bg-blue-400' +
+                    'hive-focus flex-grow-0 [&[data-state="active"]>:first-child]:bg-blue-400' +
                     ' lg:rdx-state-active:bg-white lg:flex-grow lg:bg-transparent' +
                     ' justify-center p-0.5 lg:p-4' +
                     ' rdx-state-active:text-green-1000 lg:rdx-state-active:border-beige-600' +
