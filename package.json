@@ -74,7 +74,7 @@
     "@theguild/prettier-config": "2.0.7",
     "@types/node": "20.16.1",
     "bob-the-bundler": "7.0.1",
-    "cypress": "13.13.3",
+    "cypress": "13.14.2",
     "dotenv": "16.4.5",
     "eslint": "8.57.0",
     "eslint-plugin-cypress": "3.5.0",
@@ -109,7 +109,8 @@
       "slonik@30.4.4": "patches/slonik@30.4.4.patch",
       "@oclif/core@3.26.6": "patches/@oclif__core@3.26.6.patch",
       "oclif@4.13.6": "patches/oclif@4.13.6.patch",
-      "@graphiql/react@1.0.0-alpha.3": "patches/@graphiql__react@1.0.0-alpha.3.patch",
+      "graphiql": "patches/graphiql.patch",
+      "@graphiql/react": "patches/@graphiql__react.patch",
       "@theguild/components": "patches/@theguild__components.patch",
       "countup.js": "patches/countup.js.patch",
       "nextra-theme-docs": "patches/nextra-theme-docs.patch"
