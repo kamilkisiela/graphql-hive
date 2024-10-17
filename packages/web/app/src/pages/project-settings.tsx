@@ -276,10 +276,9 @@ function ProjectSettingsPage_SlugForm(props: {
               This is your project's URL namespace on Hive. Changing it{' '}
               <span className="font-bold">will</span> invalidate any existing links to your project.
               <br />
-              {/* TODO: document it */}
               <DocsLink
                 className="text-muted-foreground text-sm"
-                href="/management/projects#change-slug-of-project"
+                href="/management/projects#change-slug-of-a-project"
               >
                 You can read more about it in the documentation
               </DocsLink>

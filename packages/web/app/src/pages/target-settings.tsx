@@ -824,10 +824,9 @@ function TargetSlug(props: { organizationId: string; projectId: string; targetId
                 <span className="font-bold">will</span> invalidate any existing links to your
                 target.
                 <br />
-                {/* TODO: document it */}
                 <DocsLink
                   className="text-muted-foreground text-sm"
-                  href="/management/targets#change-slug-of-target"
+                  href="/management/targets#change-slug-of-a-target"
                 >
                   You can read more about it in the documentation
                 </DocsLink>
