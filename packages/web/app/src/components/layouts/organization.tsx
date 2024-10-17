@@ -253,12 +253,10 @@ export const CreateProjectMutation = graphql(`
       ok {
         createdProject {
           id
-          name
           cleanId
         }
         createdTargets {
           id
-          name
           cleanId
         }
         updatedOrganization {
@@ -268,9 +266,7 @@ export const CreateProjectMutation = graphql(`
       error {
         message
         inputErrors {
-          name
-          buildUrl
-          validationUrl
+          slug
         }
       }
     }
@@ -278,15 +274,15 @@ export const CreateProjectMutation = graphql(`
 `);
 
 const createProjectFormSchema = z.object({
-  projectName: z
+  projectSlug: z
     .string({
-      required_error: 'Project name is required',
+      required_error: 'Project slug is required',
     })
     .min(2, {
-      message: 'Project name must be at least 2 characters long',
+      message: 'Project slug must be at least 2 characters long',
     })
-    .max(40, {
-      message: 'Project name must be at most 40 characters long',
+    .max(50, {
+      message: 'Project slug must be at most 50 characters long',
     }),
   projectType: z.nativeEnum(ProjectType, {
     required_error: 'Project type is required',
@@ -330,7 +326,7 @@ function CreateProjectModal(props: {
     mode: 'onChange',
     resolver: zodResolver(createProjectFormSchema),
     defaultValues: {
-      projectName: '',
+      projectSlug: '',
       projectType: ProjectType.Single,
     },
   });
@@ -339,7 +335,7 @@ function CreateProjectModal(props: {
     const { data, error } = await mutate({
       input: {
         organization: props.organizationId,
-        name: values.projectName,
+        slug: values.projectSlug,
         type: values.projectType,
       },
     });
@@ -352,9 +348,9 @@ function CreateProjectModal(props: {
           projectId: data.createProject.ok.createdProject.cleanId,
         },
       });
-    } else if (data?.createProject.error?.inputErrors.name) {
-      form.setError('projectName', {
-        message: data?.createProject.error?.inputErrors.name,
+    } else if (data?.createProject.error?.inputErrors.slug) {
+      form.setError('projectSlug', {
+        message: data?.createProject.error?.inputErrors.slug,
       });
     } else {
       toast({
@@ -395,13 +391,13 @@ export function CreateProjectModalContent(props: {
             <div>
               <FormField
                 control={props.form.control}
-                name="projectName"
+                name="projectSlug"
                 render={({ field }) => {
                   return (
                     <FormItem className="mt-0">
-                      <FormLabel>Name of your project</FormLabel>
+                      <FormLabel>Slug of your project</FormLabel>
                       <FormControl>
-                        <Input placeholder="My GraphQL API" autoComplete="off" {...field} />
+                        <Input placeholder="my-project" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -110,7 +110,6 @@ export function createAgent<TEvent>(
       const promise = captureAsync(event);
       inProgressCaptures.push(promise);
       void promise.finally(() => {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         inProgressCaptures = inProgressCaptures.filter(p => p !== promise);
       });
     } else {

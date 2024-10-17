@@ -23,7 +23,6 @@ const IncrementalNativeCompositionSwitch_TargetFragment = graphql(`
   fragment IncrementalNativeCompositionSwitch_TargetFragment on Target {
     id
     cleanId
-    name
     experimental_forcedLegacySchemaComposition
   }
 `);
@@ -54,7 +53,7 @@ const IncrementalNativeCompositionSwitch = (props: {
       )}
     >
       <div>
-        <div className="text-sm font-semibold">{target.name}</div>
+        <div className="text-sm font-semibold">{target.cleanId}</div>
         <div className="min-w-32 text-xs">
           {target.experimental_forcedLegacySchemaComposition ? 'Legacy' : 'Native'} composition
         </div>

@@ -577,7 +577,7 @@ describe.each`
       {
         organization: organization.cleanId,
         project: project.cleanId,
-        name: 'target2',
+        slug: 'target2',
       },
       ownerToken,
     ).then(r => r.expectNoGraphQLErrors());

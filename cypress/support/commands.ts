@@ -15,17 +15,17 @@ namespace Cypress {
     }): Chainable;
     login(data: { email: string; password: string }): Chainable;
     dataCy(name: string): Chainable<JQuery<HTMLElement>>;
-    createOIDCIntegration(organizationName: string): Chainable<{
+    createOIDCIntegration(organizationSlug: string): Chainable<{
       loginUrl: string;
       organizationSlug: string;
     }>;
   }
 }
 
-Cypress.Commands.add('createOIDCIntegration', (organizationName: string) => {
-  cy.get('input[name="name"]').type(organizationName);
+Cypress.Commands.add('createOIDCIntegration', (organizationSlug: string) => {
+  cy.get('input[name="slug"]').type(organizationSlug);
   cy.get('button[type="submit"]').click();
-  cy.get('[data-cy="organization-picker-current"]').contains(organizationName);
+  cy.get('[data-cy="organization-picker-current"]').contains(organizationSlug);
   cy.get('a[href$="/view/settings"]').click();
   cy.get('a[href$="/view/settings#create-oidc-integration"]').click();
   cy.get('input[id="tokenEndpoint"]').type('http://oidc-server-mock:80/connect/token');

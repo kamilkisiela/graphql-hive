@@ -44,7 +44,6 @@ const ProjectLayoutQuery = graphql(`
       nodes {
         id
         cleanId
-        name
         me {
           id
           ...CanAccessProject_MemberFragment
@@ -53,7 +52,6 @@ const ProjectLayoutQuery = graphql(`
           nodes {
             id
             cleanId
-            name
             registryModel
           }
         }
@@ -223,29 +221,28 @@ export const CreateTarget_CreateTargetMutation = graphql(`
         createdTarget {
           id
           cleanId
-          name
         }
       }
       error {
         message
         inputErrors {
-          name
+          slug
         }
       }
     }
   }
 `);
 
-const createProjectFormSchema = z.object({
-  targetName: z
+const createTargetFormSchema = z.object({
+  targetSlug: z
     .string({
-      required_error: 'Target name is required',
+      required_error: 'Target slug is required',
     })
     .min(2, {
-      message: 'Target name must be at least 2 characters long',
+      message: 'Target slug must be at least 2 characters long',
     })
     .max(50, {
-      message: 'Target name must be at most 50 characters long',
+      message: 'Target slug must be at most 50 characters long',
     }),
 });
 
@@ -260,20 +257,20 @@ function CreateTargetModal(props: {
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof createProjectFormSchema>>({
+  const form = useForm<z.infer<typeof createTargetFormSchema>>({
     mode: 'onChange',
-    resolver: zodResolver(createProjectFormSchema),
+    resolver: zodResolver(createTargetFormSchema),
     defaultValues: {
-      targetName: '',
+      targetSlug: '',
     },
   });
 
-  async function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
+  async function onSubmit(values: z.infer<typeof createTargetFormSchema>) {
     const { data, error } = await mutate({
       input: {
         project: props.projectId,
         organization: props.organizationId,
-        name: values.targetName,
+        slug: values.targetSlug,
       },
     });
 
@@ -290,11 +287,11 @@ function CreateTargetModal(props: {
       toast({
         variant: 'default',
         title: 'Target created',
-        description: `Your target "${data.createTarget.ok.createdTarget.name}" has been created`,
+        description: `Your target "${data.createTarget.ok.createdTarget.cleanId}" has been created`,
       });
-    } else if (data?.createTarget.error?.inputErrors.name) {
-      form.setError('targetName', {
-        message: data?.createTarget.error?.inputErrors.name,
+    } else if (data?.createTarget.error?.inputErrors.slug) {
+      form.setError('targetSlug', {
+        message: data?.createTarget.error?.inputErrors.slug,
       });
     } else {
       toast({
@@ -318,8 +315,8 @@ function CreateTargetModal(props: {
 export function CreateTargetModalContent(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  onSubmit: (values: z.infer<typeof createProjectFormSchema>) => void | Promise<void>;
-  form: UseFormReturn<z.infer<typeof createProjectFormSchema>>;
+  onSubmit: (values: z.infer<typeof createTargetFormSchema>) => void | Promise<void>;
+  form: UseFormReturn<z.infer<typeof createTargetFormSchema>>;
 }) {
   return (
     <Dialog open={props.isOpen} onOpenChange={props.toggleModalOpen}>
@@ -335,12 +332,12 @@ export function CreateTargetModalContent(props: {
             <div className="space-y-8">
               <FormField
                 control={props.form.control}
-                name="targetName"
+                name="targetSlug"
                 render={({ field }) => {
                   return (
                     <FormItem>
                       <FormControl>
-                        <Input placeholder="Target name" autoComplete="off" {...field} />
+                        <Input placeholder="my-target" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

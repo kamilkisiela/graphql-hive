@@ -1,8 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { paramCase } from 'param-case';
 import * as zod from 'zod';
 import type { Target, TargetSettings } from '../../../shared/entities';
-import { share, uuid } from '../../../shared/helpers';
+import { share } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
@@ -12,6 +11,8 @@ import { Logger } from '../../shared/providers/logger';
 import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
 import { HiveError } from './../../../shared/errors';
+
+const reservedSlugs = ['view', 'new'];
 
 /**
  * Responsible for auth checks.
@@ -36,15 +37,24 @@ export class TargetManager {
   }
 
   async createTarget({
-    name,
+    slug,
     project,
     organization,
   }: {
-    name: string;
-  } & ProjectSelector): Promise<Target> {
+    slug: string;
+  } & ProjectSelector): Promise<
+    | {
+        ok: true;
+        target: Target;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  > {
     this.logger.info(
-      'Creating a target (name=%s, project=%s, organization=%s)',
-      name,
+      'Creating a target (slug=%s, project=%s, organization=%s)',
+      slug,
       project,
       organization,
     );
@@ -54,34 +64,32 @@ export class TargetManager {
       scope: ProjectAccessScope.READ,
     });
 
-    let cleanId = paramCase(name);
-
-    if (
-      // packages/web/app uses the "view" prefix, let's avoid the collision
-      name.toLowerCase() === 'view' ||
-      (await this.storage.getTargetByCleanId({ cleanId, project, organization }))
-    ) {
-      cleanId = paramCase(`${name}-${uuid(4)}`);
+    if (reservedSlugs.includes(slug)) {
+      return {
+        ok: false,
+        message: 'Slug is reserved',
+      };
     }
 
     // create target
-    const target = await this.storage.createTarget({
-      name,
-      cleanId,
+    const result = await this.storage.createTarget({
+      slug,
       project,
       organization,
     });
 
-    await this.activityManager.create({
-      type: 'TARGET_CREATED',
-      selector: {
-        organization,
-        project,
-        target: target.id,
-      },
-    });
+    if (result.ok) {
+      await this.activityManager.create({
+        type: 'TARGET_CREATED',
+        selector: {
+          organization,
+          project,
+          target: result.target.id,
+        },
+      });
+    }
 
-    return target;
+    return result;
   }
 
   async deleteTarget({ organization, project, target }: TargetSelector): Promise<Target> {
@@ -210,45 +218,56 @@ export class TargetManager {
     return this.storage.updateTargetValidationSettings(input);
   }
 
-  async updateName(
+  async updateSlug(
     input: {
-      name: string;
+      slug: string;
     } & TargetSelector,
-  ): Promise<Target> {
-    const { name, organization, project, target } = input;
-    this.logger.info('Updating a target name (input=%o)', input);
+  ): Promise<
+    | {
+        ok: true;
+        target: Target;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  > {
+    const { slug, organization, project, target } = input;
+    this.logger.info('Updating a target slug (input=%o)', input);
     await this.authManager.ensureTargetAccess({
       ...input,
       scope: TargetAccessScope.SETTINGS,
     });
     const user = await this.authManager.getCurrentUser();
 
-    let cleanId = paramCase(name);
-
-    if (await this.storage.getTargetByCleanId({ cleanId, organization, project })) {
-      cleanId = paramCase(`${name}-${uuid(4)}`);
+    if (reservedSlugs.includes(slug)) {
+      return {
+        ok: false,
+        message: 'Slug is reserved',
+      };
     }
 
-    const result = await this.storage.updateTargetName({
-      name,
-      cleanId,
+    const result = await this.storage.updateTargetSlug({
+      slug,
       organization,
       project,
       target,
       user: user.id,
     });
 
-    await this.activityManager.create({
-      type: 'TARGET_NAME_UPDATED',
-      selector: {
-        organization,
-        project,
-        target,
-      },
-      meta: {
-        value: name,
-      },
-    });
+    if (result.ok) {
+      await this.activityManager.create({
+        type: 'TARGET_ID_UPDATED',
+        selector: {
+          organization,
+          project,
+          target,
+        },
+        meta: {
+          value: slug,
+        },
+      });
+    }
 
     return result;
   }

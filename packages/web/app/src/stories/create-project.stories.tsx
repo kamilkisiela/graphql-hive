@@ -16,20 +16,16 @@ export default meta;
 type Story = StoryObj<typeof CreateProjectModalContent>;
 
 const formSchema = z.object({
-  projectName: z
+  projectSlug: z
     .string({
-      required_error: 'Project name is required',
+      required_error: 'Project slug is required',
     })
     .min(2, {
-      message: 'Project name must be at least 2 characters long',
+      message: 'Project slug must be at least 2 characters long',
     })
     .max(50, {
-      message: 'Project name must be at most 50 characters long',
-    })
-    .regex(
-      /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
-      'Project name restricted to alphanumerical characters, spaces and . , _ - / &',
-    ),
+      message: 'Project slug must be at most 50 characters long',
+    }),
   projectType: z.nativeEnum(ProjectType, {
     required_error: 'Project type is required',
   }),
@@ -41,7 +37,7 @@ export const Default: Story = {
       mode: 'onChange',
       resolver: zodResolver(formSchema),
       defaultValues: {
-        projectName: '',
+        projectSlug: '',
         projectType: ProjectType.Single,
       },
     });

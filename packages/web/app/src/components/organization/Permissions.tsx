@@ -30,7 +30,6 @@ const OrganizationPermissions_UpdateMemberAccessMutation = graphql(`
       organization {
         id
         cleanId
-        name
       }
     }
   }
