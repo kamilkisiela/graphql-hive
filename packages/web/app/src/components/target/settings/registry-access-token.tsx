@@ -49,8 +49,8 @@ export const CreateAccessToken_CreateTokenMutation = graphql(`
 `);
 
 const CreateAccessTokenModalQuery = graphql(`
-  query CreateAccessTokenModalQuery($organizationId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query CreateAccessTokenModalQuery($organizationSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         ...CreateAccessTokenModalContent_OrganizationFragment
       }
@@ -69,7 +69,7 @@ export function CreateAccessTokenModal(props: {
   const [organizationQuery] = useQuery({
     query: CreateAccessTokenModalQuery,
     variables: {
-      organizationId: props.organizationId,
+      organizationSlug: props.organizationId,
     },
   });
 

@@ -115,9 +115,9 @@ export const CreateOrganizationForm = (): JSX.Element => {
         description: `You are now an admin of "${values.slug}" organization.`,
       });
       void router.navigate({
-        to: '/$organizationId',
+        to: '/$organizationSlug',
         params: {
-          organizationId:
+          organizationSlug:
             mutation.data.createOrganization.ok.createdOrganizationPayload.organization.slug,
         },
       });

@@ -18,13 +18,15 @@ import { Outlet, Link as RouterLink, useParams, useRouter } from '@tanstack/reac
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: ID!
+    $projectSlug: ID!
+    $targetSlug: ID!
     $after: String
     $filters: SchemaChecksFilter
   ) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+    ) {
       id
       schemaChecks(first: 20, after: $after, filters: $filters) {
         edges {
@@ -74,9 +76,9 @@ const Navigation = (props: {
   const [query] = useQuery({
     query: SchemaChecks_NavigationQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
+      targetSlug: props.targetId,
       after: props.after,
       filters: {
         changed: props.filters?.showOnlyChanged ?? false,
@@ -99,11 +101,11 @@ const Navigation = (props: {
             >
               <RouterLink
                 key={edge.node.id}
-                to="/$organizationId/$projectId/$targetId/checks/$schemaCheckId"
+                to="/$organizationSlug/$projectSlug/$targetSlug/checks/$schemaCheckId"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationId,
+                  projectSlug: props.projectId,
+                  targetSlug: props.targetId,
                   schemaCheckId: edge.node.id,
                 }}
                 search={{
@@ -169,12 +171,12 @@ const Navigation = (props: {
 
 const ChecksPageQuery = graphql(`
   query ChecksPageQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: ID!
+    $projectSlug: ID!
+    $targetSlug: ID!
     $filters: SchemaChecksFilter
   ) {
-    organization(selector: { organization: $organizationId }) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         id
         rateLimit {
@@ -182,7 +184,9 @@ const ChecksPageQuery = graphql(`
         }
       }
     }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+    ) {
       id
       schemaChecks(first: 1) {
         edges {
@@ -226,9 +230,9 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
   const [query] = useQuery({
     query: ChecksPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
+      targetSlug: props.targetId,
       filters: {
         changed: filters.showOnlyChanged ?? false,
         failed: filters.showOnlyFailed ?? false,

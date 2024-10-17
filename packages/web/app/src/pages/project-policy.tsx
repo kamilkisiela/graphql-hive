@@ -12,8 +12,8 @@ import { ProjectAccessScope, RegistryModel } from '@/gql/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 
 const ProjectPolicyPageQuery = graphql(`
-  query ProjectPolicyPageQuery($organizationId: ID!, $projectId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query ProjectPolicyPageQuery($organizationSlug: ID!, $projectSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         id
         me {
@@ -22,7 +22,7 @@ const ProjectPolicyPageQuery = graphql(`
         }
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organization: $organizationSlug, project: $projectSlug }) {
       id
       registryModel
       schemaPolicy {
@@ -72,8 +72,8 @@ function ProjectPolicyContent(props: { organizationId: string; projectId: string
   const [query] = useQuery({
     query: ProjectPolicyPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
     },
     requestPolicy: 'cache-and-network',
   });

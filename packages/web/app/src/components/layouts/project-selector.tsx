@@ -18,8 +18,8 @@ const ProjectSelector_OrganizationConnectionFragment = graphql(`
 `);
 
 export function ProjectSelector(props: {
-  currentOrganizationCleanId: string;
-  currentProjectCleanId: string;
+  currentOrganizationSlug: string;
+  currentProjectSlug: string;
   organizations: FragmentType<typeof ProjectSelector_OrganizationConnectionFragment> | null;
 }) {
   const router = useRouter();
@@ -30,18 +30,18 @@ export function ProjectSelector(props: {
   )?.nodes;
 
   const currentOrganization = organizations?.find(
-    node => node.slug === props.currentOrganizationCleanId,
+    node => node.slug === props.currentOrganizationSlug,
   );
 
   const projects = currentOrganization?.projects.nodes;
-  const currentProject = projects?.find(node => node.slug === props.currentProjectCleanId);
+  const currentProject = projects?.find(node => node.slug === props.currentProjectSlug);
 
   return (
     <>
       {currentOrganization ? (
         <Link
-          to="/$organizationId"
-          params={{ organizationId: props.currentOrganizationCleanId }}
+          to="/$organizationSlug"
+          params={{ organizationSlug: props.currentOrganizationSlug }}
           className="max-w-[200px] shrink-0 truncate font-medium"
         >
           {currentOrganization.slug}
@@ -53,13 +53,13 @@ export function ProjectSelector(props: {
         <>
           <div className="italic text-gray-500">/</div>
           <Select
-            value={props.currentProjectCleanId}
+            value={props.currentProjectSlug}
             onValueChange={id => {
               void router.navigate({
-                to: '/$organizationId/$projectId',
+                to: '/$organizationSlug/$projectSlug',
                 params: {
-                  organizationId: props.currentOrganizationCleanId,
-                  projectId: id,
+                  organizationSlug: props.currentOrganizationSlug,
+                  projectSlug: id,
                 },
               });
             }}

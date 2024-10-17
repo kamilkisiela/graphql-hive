@@ -270,8 +270,8 @@ function SupportTicketRow(props: {
           asChild
         >
           <Link
-            to="/$organizationId/view/support/ticket/$ticketId"
-            params={{ organizationId: props.organizationId, ticketId: ticket.id }}
+            to="/$organizationSlug/view/support/ticket/$ticketId"
+            params={{ organizationSlug: props.organizationId, ticketId: ticket.id }}
           >
             {ticket.subject}
           </Link>

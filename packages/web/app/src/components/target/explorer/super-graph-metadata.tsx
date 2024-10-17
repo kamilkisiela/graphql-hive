@@ -24,11 +24,11 @@ function SubgraphChip(props: {
 }): React.ReactElement {
   const inner = (
     <Link
-      to="/$organizationId/$projectId/$targetId"
+      to="/$organizationSlug/$projectSlug/$targetSlug"
       params={{
-        organizationId: props.organizationId,
-        projectId: props.projectId,
-        targetId: props.targetId,
+        organizationSlug: props.organizationId,
+        projectSlug: props.projectId,
+        targetSlug: props.targetId,
       }}
       // TODO(router)
       hash={`service-${props.text}`}

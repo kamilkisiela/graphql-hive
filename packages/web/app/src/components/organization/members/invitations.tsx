@@ -298,7 +298,7 @@ const Members_Invitation = graphql(`
 
 function Invitation(props: {
   invitation: FragmentType<typeof Members_Invitation>;
-  organizationCleanId: string;
+  organizationSlug: string;
   refetchInvitations(): void;
 }) {
   const invitation = useFragment(Members_Invitation, props.invitation);
@@ -336,7 +336,7 @@ function Invitation(props: {
                   try {
                     const result = await deleteInvitation({
                       input: {
-                        organization: props.organizationCleanId,
+                        organization: props.organizationSlug,
                         email: invitation.email,
                       },
                     });
@@ -453,7 +453,7 @@ export function OrganizationInvitations(props: {
               <Invitation
                 key={node.id}
                 invitation={node}
-                organizationCleanId={organization.slug}
+                organizationSlug={organization.slug}
                 refetchInvitations={props.refetchInvitations}
               />
             ))}

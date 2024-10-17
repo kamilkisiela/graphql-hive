@@ -787,11 +787,11 @@ function TargetSlug(props: { organizationId: string; projectId: string; targetId
             description: 'Target slug updated',
           });
           void router.navigate({
-            to: '/$organizationId/$projectId/$targetId/settings',
+            to: '/$organizationSlug/$projectSlug/$targetSlug/settings',
             params: {
-              organizationId: props.organizationId,
-              projectId: props.projectId,
-              targetId: result.data.updateTargetSlug.ok.target.slug,
+              organizationSlug: props.organizationId,
+              projectSlug: props.projectId,
+              targetSlug: result.data.updateTargetSlug.ok.target.slug,
             },
             search: {
               page: 'general',
@@ -935,11 +935,11 @@ function GraphQLEndpointUrl(props: {
             <CardDescription>
               The endpoint url will be used for querying the target from the{' '}
               <Link
-                to="/$organizationId/$projectId/$targetId/laboratory"
+                to="/$organizationSlug/$projectSlug/$targetSlug/laboratory"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationId,
+                  projectSlug: props.projectId,
+                  targetSlug: props.targetId,
                 }}
               >
                 Hive Laboratory
@@ -1062,8 +1062,8 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
 }
 
 const TargetSettingsPageQuery = graphql(`
-  query TargetSettingsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query TargetSettingsPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         id
         slug
@@ -1073,12 +1073,14 @@ const TargetSettingsPageQuery = graphql(`
         }
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organization: $organizationSlug, project: $projectSlug }) {
       id
       slug
       type
     }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+    ) {
       id
       slug
       graphqlEndpointUrl
@@ -1126,9 +1128,9 @@ function TargetSettingsContent(props: {
   const [query] = useQuery({
     query: TargetSettingsPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationId,
+      projectSlug: props.projectId,
+      targetSlug: props.targetId,
     },
   });
 
@@ -1347,10 +1349,10 @@ export function DeleteTargetModal(props: {
       });
       props.toggleModalOpen();
       void router.navigate({
-        to: '/$organizationId/$projectId',
+        to: '/$organizationSlug/$projectSlug',
         params: {
-          organizationId,
-          projectId,
+          organizationSlug: organizationId,
+          projectSlug: projectId,
         },
       });
     }

@@ -154,15 +154,15 @@ export const TargetLayout = ({
             <HiveLink className="size-8" />
             <TargetSelector
               organizations={query.data?.organizations ?? null}
-              currentOrganizationCleanId={props.organizationId}
-              currentProjectCleanId={props.projectId}
-              currentTargetCleanId={props.targetId}
+              currentOrganizationSlug={props.organizationId}
+              currentProjectSlug={props.projectId}
+              currentTargetSlug={props.targetId}
             />
           </div>
           <div>
             <UserMenu
               me={me ?? null}
-              currentOrganizationCleanId={props.organizationId}
+              currentOrganizationSlug={props.organizationId}
               organizations={query.data?.organizations ?? null}
             />
           </div>
@@ -182,11 +182,11 @@ export const TargetLayout = ({
                   <>
                     <TabsTrigger variant="menu" value={Page.Schema} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId"
+                        to="/$organizationSlug/$projectSlug/$targetSlug"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationId,
+                          projectSlug: props.projectId,
+                          targetSlug: props.targetId,
                         }}
                       >
                         Schema
@@ -194,11 +194,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Checks} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/checks"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/checks"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationId,
+                          projectSlug: props.projectId,
+                          targetSlug: props.targetId,
                         }}
                       >
                         Checks
@@ -206,11 +206,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Explorer} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/explorer"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/explorer"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationId,
+                          projectSlug: props.projectId,
+                          targetSlug: props.targetId,
                         }}
                       >
                         Explorer
@@ -218,11 +218,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.History} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/history"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/history"
                         params={{
-                          organizationId: currentOrganization.slug,
-                          projectId: currentProject.slug,
-                          targetId: currentTarget.slug,
+                          organizationSlug: currentOrganization.slug,
+                          projectSlug: currentProject.slug,
+                          targetSlug: currentTarget.slug,
                         }}
                       >
                         History
@@ -230,11 +230,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Insights} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/insights"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/insights"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationId,
+                          projectSlug: props.projectId,
+                          targetSlug: props.targetId,
                         }}
                       >
                         Insights
@@ -243,11 +243,11 @@ export const TargetLayout = ({
                     {currentOrganization.isAppDeploymentsEnabled && (
                       <TabsTrigger variant="menu" value={Page.Apps} asChild>
                         <Link
-                          to="/$organizationId/$projectId/$targetId/apps"
+                          to="/$organizationSlug/$projectSlug/$targetSlug/apps"
                           params={{
-                            organizationId: props.organizationId,
-                            projectId: props.projectId,
-                            targetId: props.targetId,
+                            organizationSlug: props.organizationId,
+                            projectSlug: props.projectId,
+                            targetSlug: props.targetId,
                           }}
                         >
                           Apps
@@ -256,11 +256,11 @@ export const TargetLayout = ({
                     )}
                     <TabsTrigger variant="menu" value={Page.Laboratory} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/laboratory"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/laboratory"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationId,
+                          projectSlug: props.projectId,
+                          targetSlug: props.targetId,
                         }}
                       >
                         Laboratory
@@ -271,11 +271,11 @@ export const TargetLayout = ({
                 {canAccessSettingsPage && (
                   <TabsTrigger variant="menu" value={Page.Settings} asChild>
                     <Link
-                      to="/$organizationId/$projectId/$targetId/settings"
+                      to="/$organizationSlug/$projectSlug/$targetSlug/settings"
                       params={{
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
+                        organizationSlug: props.organizationId,
+                        projectSlug: props.projectId,
+                        targetSlug: props.targetId,
                       }}
                       search={{ page: 'general' }}
                     >
@@ -487,11 +487,11 @@ export function ConnectSchemaModal(props: {
                 }}
                 variant="primary"
                 className="font-bold underline"
-                to="/$organizationId/$projectId/$targetId/settings"
+                to="/$organizationSlug/$projectSlug/$targetSlug/settings"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationId,
+                  projectSlug: props.projectId,
+                  targetSlug: props.targetId,
                 }}
                 target="_blank"
                 rel="noreferrer"

@@ -44,10 +44,10 @@ export function useProjectAccess({
     redirectTo: redirect
       ? router => {
           void router.navigate({
-            to: '/$organizationId/$projectId',
+            to: '/$organizationSlug/$projectSlug',
             params: {
-              organizationId,
-              projectId,
+              organizationSlug: organizationId,
+              projectSlug: projectId,
             },
           });
         }

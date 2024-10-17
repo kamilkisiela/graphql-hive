@@ -105,15 +105,15 @@ export function ProjectLayout({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             <ProjectSelector
-              currentOrganizationCleanId={props.organizationId}
-              currentProjectCleanId={props.projectId}
+              currentOrganizationSlug={props.organizationId}
+              currentProjectSlug={props.projectId}
               organizations={query.data?.organizations ?? null}
             />
           </div>
           <div>
             <UserMenu
               me={me ?? null}
-              currentOrganizationCleanId={props.organizationId}
+              currentOrganizationSlug={props.organizationId}
               organizations={query.data?.organizations ?? null}
             />
           </div>
@@ -131,10 +131,10 @@ export function ProjectLayout({
               <TabsList variant="menu">
                 <TabsTrigger variant="menu" value={Page.Targets} asChild>
                   <Link
-                    to="/$organizationId/$projectId"
+                    to="/$organizationSlug/$projectSlug"
                     params={{
-                      organizationId: currentOrganization.slug,
-                      projectId: currentProject.slug,
+                      organizationSlug: currentOrganization.slug,
+                      projectSlug: currentProject.slug,
                     }}
                   >
                     Targets
@@ -143,10 +143,10 @@ export function ProjectLayout({
                 {canAccessProject(ProjectAccessScope.Alerts, currentOrganization.me) && (
                   <TabsTrigger variant="menu" value={Page.Alerts} asChild>
                     <Link
-                      to="/$organizationId/$projectId/view/alerts"
+                      to="/$organizationSlug/$projectSlug/view/alerts"
                       params={{
-                        organizationId: currentOrganization.slug,
-                        projectId: currentProject.slug,
+                        organizationSlug: currentOrganization.slug,
+                        projectSlug: currentProject.slug,
                       }}
                     >
                       Alerts
@@ -157,10 +157,10 @@ export function ProjectLayout({
                   <>
                     <TabsTrigger variant="menu" value={Page.Policy} asChild>
                       <Link
-                        to="/$organizationId/$projectId/view/policy"
+                        to="/$organizationSlug/$projectSlug/view/policy"
                         params={{
-                          organizationId: currentOrganization.slug,
-                          projectId: currentProject.slug,
+                          organizationSlug: currentOrganization.slug,
+                          projectSlug: currentProject.slug,
                         }}
                       >
                         Policy
@@ -168,10 +168,10 @@ export function ProjectLayout({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Settings} asChild>
                       <Link
-                        to="/$organizationId/$projectId/view/settings"
+                        to="/$organizationSlug/$projectSlug/view/settings"
                         params={{
-                          organizationId: currentOrganization.slug,
-                          projectId: currentProject.slug,
+                          organizationSlug: currentOrganization.slug,
+                          projectSlug: currentProject.slug,
                         }}
                       >
                         Settings
@@ -277,11 +277,11 @@ function CreateTargetModal(props: {
     if (data?.createTarget.ok) {
       props.toggleModalOpen();
       void router.navigate({
-        to: '/$organizationId/$projectId/$targetId',
+        to: '/$organizationSlug/$projectSlug/$targetSlug',
         params: {
-          organizationId,
-          projectId,
-          targetId: data.createTarget.ok.createdTarget.slug,
+          organizationSlug: organizationId,
+          projectSlug: projectId,
+          targetSlug: data.createTarget.ok.createdTarget.slug,
         },
       });
       toast({

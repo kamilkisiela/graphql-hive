@@ -82,10 +82,10 @@ const ProjectCard = (props: {
   return (
     <Card className="h-full self-start bg-gray-900/50 p-5 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50">
       <Link
-        to="/$organizationId/$projectId"
+        to="/$organizationSlug/$projectSlug"
         params={{
-          organizationId: props.cleanOrganizationId ?? 'unknown-yet',
-          projectId: project?.slug ?? 'unknown-yet',
+          organizationSlug: props.cleanOrganizationId ?? 'unknown-yet',
+          projectSlug: project?.slug ?? 'unknown-yet',
         }}
       >
         <TooltipProvider>
@@ -225,17 +225,17 @@ const ProjectCard = (props: {
 
 const OrganizationProjectsPageQuery = graphql(`
   query OrganizationProjectsPageQuery(
-    $organizationId: ID!
+    $organizationSlug: ID!
     $chartResolution: Int!
     $period: DateRangeInput!
   ) {
-    organization(selector: { organization: $organizationId }) {
+    organization(selector: { organization: $organizationSlug }) {
       organization {
         id
         slug
       }
     }
-    projects(selector: { organization: $organizationId }) {
+    projects(selector: { organization: $organizationSlug }) {
       total
       nodes {
         id
@@ -288,7 +288,7 @@ function OrganizationPageContent(
   const [query] = useQuery({
     query: OrganizationProjectsPageQuery,
     variables: {
-      organizationId: props.organizationId,
+      organizationSlug: props.organizationId,
       chartResolution: days, // 14 days = 14 data points
       period: period.current,
     },

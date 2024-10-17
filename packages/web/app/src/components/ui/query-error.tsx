@@ -55,7 +55,10 @@ export function QueryError({
                   If you wish to track it later or share more details with us,{' '}
                   {organizationId ? (
                     <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
-                      <Link to="/$organizationId/view/support" params={{ organizationId }}>
+                      <Link
+                        to="/$organizationSlug/view/support"
+                        params={{ organizationSlug: organizationId }}
+                      >
                         you can use the support
                       </Link>
                     </Button>

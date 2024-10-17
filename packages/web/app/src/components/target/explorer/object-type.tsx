@@ -23,9 +23,9 @@ export function GraphQLObjectTypeComponent(props: {
   type: FragmentType<typeof GraphQLObjectTypeComponent_TypeFragment>;
   totalRequests?: number;
   collapsed?: boolean;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   warnAboutUnusedArguments: boolean;
   warnAboutDeprecatedArguments: boolean;
   styleDeprecated: boolean;
@@ -43,9 +43,9 @@ export function GraphQLObjectTypeComponent(props: {
       description={ttype.description}
       implements={ttype.interfaces}
       supergraphMetadata={ttype.supergraphMetadata}
-      targetCleanId={props.targetCleanId}
-      projectCleanId={props.projectCleanId}
-      organizationCleanId={props.organizationCleanId}
+      targetSlug={props.targetSlug}
+      projectSlug={props.projectSlug}
+      organizationSlug={props.organizationSlug}
     >
       <GraphQLFields
         typeName={ttype.name}
@@ -53,9 +53,9 @@ export function GraphQLObjectTypeComponent(props: {
         filterValue={search}
         totalRequests={props.totalRequests}
         collapsed={props.collapsed}
-        targetCleanId={props.targetCleanId}
-        projectCleanId={props.projectCleanId}
-        organizationCleanId={props.organizationCleanId}
+        targetSlug={props.targetSlug}
+        projectSlug={props.projectSlug}
+        organizationSlug={props.organizationSlug}
         warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
         warnAboutUnusedArguments={props.warnAboutUnusedArguments}
         styleDeprecated={props.styleDeprecated}
