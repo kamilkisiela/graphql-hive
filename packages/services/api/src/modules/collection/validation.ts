@@ -5,7 +5,7 @@ import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/scopes';
 import { IdTranslator } from '../shared/providers/id-translator';
 
-const MAX_INPUT_LENGTH = 5000;
+const MAX_INPUT_LENGTH = 10_000;
 
 // The following validates the length and the validity of the JSON object incoming as string.
 const inputObjectSchema = zod
