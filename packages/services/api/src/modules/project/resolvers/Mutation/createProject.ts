@@ -32,7 +32,7 @@ export const createProject: NonNullable<MutationResolvers['createProject']> = as
 
   const translator = injector.get(IdTranslator);
   const organizationId = await translator.translateOrganizationId({
-    organization: input.organization,
+    organizationSlug: input.organizationSlug,
   });
 
   const result = await injector.get(ProjectManager).createProject({

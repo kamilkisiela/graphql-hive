@@ -39,9 +39,9 @@ export const TypeRenderFragment = graphql(`
 export function TypeRenderer(props: {
   type: FragmentType<typeof TypeRenderFragment>;
   totalRequests?: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   warnAboutUnusedArguments: boolean;
   warnAboutDeprecatedArguments: boolean;
   styleDeprecated: boolean;
@@ -53,9 +53,9 @@ export function TypeRenderer(props: {
         <GraphQLObjectTypeComponent
           type={ttype}
           totalRequests={props.totalRequests}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
           warnAboutUnusedArguments={props.warnAboutUnusedArguments}
           warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
           styleDeprecated={props.styleDeprecated}
@@ -66,9 +66,9 @@ export function TypeRenderer(props: {
         <GraphQLInterfaceTypeComponent
           type={ttype}
           totalRequests={props.totalRequests}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
           warnAboutUnusedArguments={props.warnAboutUnusedArguments}
           warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
           styleDeprecated={props.styleDeprecated}
@@ -79,9 +79,9 @@ export function TypeRenderer(props: {
         <GraphQLUnionTypeComponent
           type={ttype}
           totalRequests={props.totalRequests}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
         />
       );
     case 'GraphQLEnumType':
@@ -89,9 +89,9 @@ export function TypeRenderer(props: {
         <GraphQLEnumTypeComponent
           type={ttype}
           totalRequests={props.totalRequests}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
           styleDeprecated={props.styleDeprecated}
         />
       );
@@ -100,9 +100,9 @@ export function TypeRenderer(props: {
         <GraphQLInputObjectTypeComponent
           type={ttype}
           totalRequests={props.totalRequests}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
           styleDeprecated={props.styleDeprecated}
         />
       );
@@ -111,9 +111,9 @@ export function TypeRenderer(props: {
         <GraphQLScalarTypeComponent
           type={ttype}
           totalRequests={props.totalRequests}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
         />
       );
     default:
@@ -123,13 +123,13 @@ export function TypeRenderer(props: {
 
 const TargetExplorerTypenamePageQuery = graphql(`
   query TargetExplorerTypenamePageQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $period: DateRangeInput!
     $typename: String!
   ) {
-    organization(selector: { organization: $organizationId }) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         slug
@@ -138,7 +138,13 @@ const TargetExplorerTypenamePageQuery = graphql(`
         }
       }
     }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       slug
       latestSchemaVersion {
@@ -154,9 +160,9 @@ const TargetExplorerTypenamePageQuery = graphql(`
     }
     operationsStats(
       selector: {
-        organization: $organizationId
-        project: $projectId
-        target: $targetId
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
         period: $period
       }
     ) {
@@ -166,9 +172,9 @@ const TargetExplorerTypenamePageQuery = graphql(`
 `);
 
 function TypeExplorerPageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   typename: string;
 }) {
   const { resolvedPeriod, dataRetentionInDays, setDataRetentionInDays } =
@@ -176,9 +182,9 @@ function TypeExplorerPageContent(props: {
   const [query] = useQuery({
     query: TargetExplorerTypenamePageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       period: resolvedPeriod,
       typename: props.typename,
     },
@@ -194,7 +200,7 @@ function TypeExplorerPageContent(props: {
   }, [setDataRetentionInDays, retentionInDays]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentTarget = query.data?.target;
@@ -203,9 +209,9 @@ function TypeExplorerPageContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Explorer}
     >
       <div className="flex flex-row items-center justify-between py-6">
@@ -217,9 +223,9 @@ function TypeExplorerPageContent(props: {
           {latestSchemaVersion && type ? (
             <>
               <TypeFilter
-                organizationId={props.organizationId}
-                projectId={props.projectId}
-                targetId={props.targetId}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
                 period={resolvedPeriod}
                 typename={props.typename}
               />
@@ -227,9 +233,9 @@ function TypeExplorerPageContent(props: {
               <DateRangeFilter />
               <ArgumentVisibilityFilter />
               <SchemaVariantFilter
-                organizationId={props.organizationId}
-                projectId={props.projectId}
-                targetId={props.targetId}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
                 variant="all"
               />
             </>
@@ -240,9 +246,9 @@ function TypeExplorerPageContent(props: {
         <TypeRenderer
           totalRequests={query.data?.operationsStats.totalRequests ?? 0}
           type={type}
-          organizationCleanId={props.organizationId}
-          projectCleanId={props.projectId}
-          targetCleanId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
           warnAboutDeprecatedArguments={false}
           warnAboutUnusedArguments={false}
           styleDeprecated
@@ -257,9 +263,9 @@ function TypeExplorerPageContent(props: {
 }
 
 export function TargetExplorerTypePage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   typename: string;
 }) {
   return (

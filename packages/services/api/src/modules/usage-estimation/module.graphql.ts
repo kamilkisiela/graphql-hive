@@ -8,7 +8,7 @@ export default gql`
   input UsageEstimationInput {
     year: Int!
     month: Int!
-    organization: String!
+    organizationSlug: String!
   }
 
   type UsageEstimation {

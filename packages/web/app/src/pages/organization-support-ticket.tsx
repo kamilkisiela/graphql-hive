@@ -43,7 +43,7 @@ const ReplyTicketForm_SupportTicketReplyMutation = graphql(`
 `);
 
 function ReplyTicketForm(props: {
-  organizationId: string;
+  organizationSlug: string;
   ticketId: string;
   onSubmit: () => void;
 }) {
@@ -60,7 +60,7 @@ function ReplyTicketForm(props: {
     try {
       const result = await mutate({
         input: {
-          organization: props.organizationId,
+          organizationSlug: props.organizationSlug,
           ticketId: props.ticketId,
           body: data.body,
         },
@@ -183,7 +183,7 @@ function SupportTicket(props: {
     scope: OrganizationAccessScope.Read,
     member: organization.me,
     redirect: true,
-    organizationId: organization.slug,
+    organizationSlug: organization.slug,
   });
 
   const commentEdges = ticket.comments?.edges;
@@ -207,9 +207,9 @@ function SupportTicket(props: {
                 asChild
               >
                 <Link
-                  to="/$organizationId/view/support"
+                  to="/$organizationSlug/view/support"
                   params={{
-                    organizationId: organization.slug,
+                    organizationSlug: organization.slug,
                   }}
                 >
                   Tickets
@@ -228,7 +228,7 @@ function SupportTicket(props: {
 
               <div className="mt-6">
                 <ReplyTicketForm
-                  organizationId={organization.slug}
+                  organizationSlug={organization.slug}
                   ticketId={ticket.id}
                   onSubmit={props.refetch}
                 />
@@ -293,13 +293,13 @@ const SupportTicketPageQuery = graphql(`
   }
 `);
 
-function SupportTicketPageContent(props: { ticketId: string; organizationId: string }) {
+function SupportTicketPageContent(props: { ticketId: string; organizationSlug: string }) {
   const ticketId = props.ticketId as string;
   const [query, refetchQuery] = useQuery({
     query: SupportTicketPageQuery,
     variables: {
       selector: {
-        organization: props.organizationId,
+        organizationSlug: props.organizationSlug,
       },
       ticketId,
     },
@@ -311,7 +311,7 @@ function SupportTicketPageContent(props: { ticketId: string; organizationId: str
   }, [refetchQuery]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -320,7 +320,7 @@ function SupportTicketPageContent(props: { ticketId: string; organizationId: str
   return (
     <OrganizationLayout
       page={Page.Support}
-      organizationId={props.organizationId}
+      organizationSlug={props.organizationSlug}
       className="flex flex-col gap-y-10"
     >
       {currentOrganization ? (
@@ -339,11 +339,17 @@ function SupportTicketPageContent(props: { ticketId: string; organizationId: str
   );
 }
 
-export function OrganizationSupportTicketPage(props: { organizationId: string; ticketId: string }) {
+export function OrganizationSupportTicketPage(props: {
+  organizationSlug: string;
+  ticketId: string;
+}) {
   return (
     <>
       <Meta title={`Support Ticket #${props.ticketId}`} />
-      <SupportTicketPageContent organizationId={props.organizationId} ticketId={props.ticketId} />
+      <SupportTicketPageContent
+        organizationSlug={props.organizationSlug}
+        ticketId={props.ticketId}
+      />
     </>
   );
 }

@@ -5,14 +5,17 @@ import { env } from '@/env/backend';
 import { addMocksToSchema } from '@graphql-tools/mock';
 
 const LabParams = z.object({
-  organizationId: z.string({
-    required_error: 'Missing organizationId (format /api/lab/:organizationId/:projectId/:targetId)',
+  organizationSlug: z.string({
+    required_error:
+      'Missing organizationSlug (format /api/lab/:organizationSlug/:projectSlug/:targetSlug)',
   }),
-  projectId: z.string({
-    required_error: 'Missing projectId (format /api/lab/:organizationId/:projectId/:targetId)',
+  projectSlug: z.string({
+    required_error:
+      'Missing projectSlug (format /api/lab/:organizationSlug/:projectSlug/:targetSlug)',
   }),
-  targetId: z.string({
-    required_error: 'Missing targetId (format /api/lab/:organizationId/:projectId/:targetId)',
+  targetSlug: z.string({
+    required_error:
+      'Missing targetSlug (format /api/lab/:organizationSlug/:projectSlug/:targetSlug)',
   }),
 });
 
@@ -25,7 +28,7 @@ const LabBody = z.object({
 });
 
 export function connectLab(server: FastifyInstance) {
-  server.all('/api/lab/:organizationId/:projectId/:targetId', async (req, res) => {
+  server.all('/api/lab/:organizationSlug/:projectSlug/:targetSlug', async (req, res) => {
     const url = env.graphqlPublicEndpoint;
 
     const labParamsResult = LabParams.safeParse(req.params);
@@ -35,7 +38,7 @@ export function connectLab(server: FastifyInstance) {
       return;
     }
 
-    const { organizationId, projectId, targetId } = labParamsResult.data;
+    const { organizationSlug, projectSlug, targetSlug } = labParamsResult.data;
 
     const headers: Record<string, string> = {};
 
@@ -57,9 +60,9 @@ export function connectLab(server: FastifyInstance) {
       `,
       variables: {
         selector: {
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
+          organizationSlug,
+          projectSlug,
+          targetSlug,
         },
       },
     };

@@ -19,12 +19,18 @@ import { useArgumentListToggle, usePeriodSelector } from './provider';
 
 const TypeFilter_AllTypes = graphql(`
   query TypeFilter_AllTypes(
-    $organization: ID!
-    $project: ID!
-    $target: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $period: DateRangeInput!
   ) {
-    target(selector: { organization: $organization, project: $project, target: $target }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       __typename
       id
       latestValidSchemaVersion {
@@ -61,9 +67,9 @@ const TypeFilter_AllTypes = graphql(`
 
 export function TypeFilter(props: {
   typename?: string;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   period: {
     to: string;
     from: string;
@@ -73,9 +79,9 @@ export function TypeFilter(props: {
   const [query] = useQuery({
     query: TypeFilter_AllTypes,
     variables: {
-      organization: props.organizationId,
-      project: props.projectId,
-      target: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       period: props.period,
     },
     requestPolicy: 'cache-first',
@@ -99,11 +105,11 @@ export function TypeFilter(props: {
       options={types}
       onChange={option => {
         void router.navigate({
-          to: '/$organizationId/$projectId/$targetId/explorer/$typename',
+          to: '/$organizationSlug/$projectSlug/$targetSlug/explorer/$typename',
           params: {
-            organizationId: props.organizationId,
-            projectId: props.projectId,
-            targetId: props.targetId,
+            organizationSlug: props.organizationSlug,
+            projectSlug: props.projectSlug,
+            targetSlug: props.targetSlug,
             typename: option.value,
           },
         });
@@ -190,27 +196,27 @@ const variants: Array<{
   {
     value: 'all',
     label: 'All',
-    pathname: '/$organizationId/$projectId/$targetId/explorer',
+    pathname: '/$organizationSlug/$projectSlug/$targetSlug/explorer',
     tooltip: 'Shows all types, including unused and deprecated ones',
   },
   {
     value: 'unused',
     label: 'Unused',
-    pathname: '/$organizationId/$projectId/$targetId/explorer/unused',
+    pathname: '/$organizationSlug/$projectSlug/$targetSlug/explorer/unused',
     tooltip: 'Shows only types that are not used in any operation',
   },
   {
     value: 'deprecated',
     label: 'Deprecated',
-    pathname: '/$organizationId/$projectId/$targetId/explorer/deprecated',
+    pathname: '/$organizationSlug/$projectSlug/$targetSlug/explorer/deprecated',
     tooltip: 'Shows only types that are marked as deprecated',
   },
 ];
 
 export function SchemaVariantFilter(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   variant: 'all' | 'unused' | 'deprecated';
 }) {
   return (
@@ -229,9 +235,9 @@ export function SchemaVariantFilter(props: {
                     <Link
                       to={variant.pathname}
                       params={{
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
+                        organizationSlug: props.organizationSlug,
+                        projectSlug: props.projectSlug,
+                        targetSlug: props.targetSlug,
                       }}
                     >
                       {variant.label}

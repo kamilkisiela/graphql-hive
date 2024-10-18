@@ -29,12 +29,12 @@ export default gql`
   }
 
   input AddSlackIntegrationInput {
-    organization: ID!
+    organizationSlug: String!
     token: String!
   }
 
   input AddGitHubIntegrationInput {
-    organization: ID!
+    organizationSlug: String!
     installationId: ID!
   }
 

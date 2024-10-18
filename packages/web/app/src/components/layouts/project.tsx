@@ -69,8 +69,8 @@ export function ProjectLayout({
   ...props
 }: {
   page: Page;
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
   className?: string;
   children: ReactNode;
 }) {
@@ -82,18 +82,18 @@ export function ProjectLayout({
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organizations.nodes.find(
-    node => node.slug === props.organizationId,
+    node => node.slug === props.organizationSlug,
   );
   const currentProject = currentOrganization?.projects.nodes.find(
-    node => node.slug === props.projectId,
+    node => node.slug === props.projectSlug,
   );
 
   useProjectAccess({
     scope: ProjectAccessScope.Read,
     member: currentOrganization?.me ?? null,
     redirect: true,
-    organizationId: props.organizationId,
-    projectId: props.projectId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
   });
 
   useLastVisitedOrganizationWriter(currentOrganization?.slug);
@@ -105,15 +105,15 @@ export function ProjectLayout({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             <ProjectSelector
-              currentOrganizationCleanId={props.organizationId}
-              currentProjectCleanId={props.projectId}
+              currentOrganizationSlug={props.organizationSlug}
+              currentProjectSlug={props.projectSlug}
               organizations={query.data?.organizations ?? null}
             />
           </div>
           <div>
             <UserMenu
               me={me ?? null}
-              currentOrganizationCleanId={props.organizationId}
+              currentOrganizationSlug={props.organizationSlug}
               organizations={query.data?.organizations ?? null}
             />
           </div>
@@ -121,7 +121,10 @@ export function ProjectLayout({
       </header>
 
       {page === Page.Settings || currentProject?.registryModel !== 'LEGACY' ? null : (
-        <ProjectMigrationToast orgId={props.organizationId} projectId={currentProject.slug} />
+        <ProjectMigrationToast
+          organizationSlug={props.organizationSlug}
+          projectSlug={currentProject.slug}
+        />
       )}
 
       <div className="relative h-[--tabs-navbar-height] border-b border-gray-800">
@@ -131,10 +134,10 @@ export function ProjectLayout({
               <TabsList variant="menu">
                 <TabsTrigger variant="menu" value={Page.Targets} asChild>
                   <Link
-                    to="/$organizationId/$projectId"
+                    to="/$organizationSlug/$projectSlug"
                     params={{
-                      organizationId: currentOrganization.slug,
-                      projectId: currentProject.slug,
+                      organizationSlug: currentOrganization.slug,
+                      projectSlug: currentProject.slug,
                     }}
                   >
                     Targets
@@ -143,10 +146,10 @@ export function ProjectLayout({
                 {canAccessProject(ProjectAccessScope.Alerts, currentOrganization.me) && (
                   <TabsTrigger variant="menu" value={Page.Alerts} asChild>
                     <Link
-                      to="/$organizationId/$projectId/view/alerts"
+                      to="/$organizationSlug/$projectSlug/view/alerts"
                       params={{
-                        organizationId: currentOrganization.slug,
-                        projectId: currentProject.slug,
+                        organizationSlug: currentOrganization.slug,
+                        projectSlug: currentProject.slug,
                       }}
                     >
                       Alerts
@@ -157,10 +160,10 @@ export function ProjectLayout({
                   <>
                     <TabsTrigger variant="menu" value={Page.Policy} asChild>
                       <Link
-                        to="/$organizationId/$projectId/view/policy"
+                        to="/$organizationSlug/$projectSlug/view/policy"
                         params={{
-                          organizationId: currentOrganization.slug,
-                          projectId: currentProject.slug,
+                          organizationSlug: currentOrganization.slug,
+                          projectSlug: currentProject.slug,
                         }}
                       >
                         Policy
@@ -168,10 +171,10 @@ export function ProjectLayout({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Settings} asChild>
                       <Link
-                        to="/$organizationId/$projectId/view/settings"
+                        to="/$organizationSlug/$projectSlug/view/settings"
                         params={{
-                          organizationId: currentOrganization.slug,
-                          projectId: currentProject.slug,
+                          organizationSlug: currentOrganization.slug,
+                          projectSlug: currentProject.slug,
                         }}
                       >
                         Settings
@@ -195,8 +198,8 @@ export function ProjectLayout({
             </Button>
           ) : null}
           <CreateTargetModal
-            organizationId={props.organizationId}
-            projectId={props.projectId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
             isOpen={isModalOpen}
             toggleModalOpen={toggleModalOpen}
           />
@@ -214,9 +217,9 @@ export const CreateTarget_CreateTargetMutation = graphql(`
     createTarget(input: $input) {
       ok {
         selector {
-          organization
-          project
-          target
+          organizationSlug
+          projectSlug
+          targetSlug
         }
         createdTarget {
           id
@@ -249,10 +252,10 @@ const createTargetFormSchema = z.object({
 function CreateTargetModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
 }) {
-  const { organizationId, projectId } = props;
+  const { organizationSlug, projectSlug } = props;
   const [_, mutate] = useMutation(CreateTarget_CreateTargetMutation);
   const router = useRouter();
   const { toast } = useToast();
@@ -268,8 +271,8 @@ function CreateTargetModal(props: {
   async function onSubmit(values: z.infer<typeof createTargetFormSchema>) {
     const { data, error } = await mutate({
       input: {
-        project: props.projectId,
-        organization: props.organizationId,
+        projectSlug: props.projectSlug,
+        organizationSlug: props.organizationSlug,
         slug: values.targetSlug,
       },
     });
@@ -277,11 +280,11 @@ function CreateTargetModal(props: {
     if (data?.createTarget.ok) {
       props.toggleModalOpen();
       void router.navigate({
-        to: '/$organizationId/$projectId/$targetId',
+        to: '/$organizationSlug/$projectSlug/$targetSlug',
         params: {
-          organizationId,
-          projectId,
-          targetId: data.createTarget.ok.createdTarget.slug,
+          organizationSlug,
+          projectSlug,
+          targetSlug: data.createTarget.ok.createdTarget.slug,
         },
       });
       toast({

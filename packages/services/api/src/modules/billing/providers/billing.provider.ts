@@ -1,7 +1,6 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { StripeBillingApi, StripeBillingApiInput } from '@hive/stripe-billing';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { OrganizationSelector } from '../../../__generated__/types';
 import { OrganizationBilling } from '../../../shared/entities';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
@@ -61,13 +60,13 @@ export class BillingProvider {
     return await this.billingService.availablePrices.query();
   }
 
-  async getOrganizationBillingParticipant(
-    selector: OrganizationSelector,
-  ): Promise<OrganizationBilling | null> {
+  async getOrganizationBillingParticipant(selector: {
+    organizationId: string;
+  }): Promise<OrganizationBilling | null> {
     this.logger.debug('Fetching organization billing (selector=%o)', selector);
 
     return this.storage.getOrganizationBilling({
-      organization: selector.organization,
+      organization: selector.organizationId,
     });
   }
 

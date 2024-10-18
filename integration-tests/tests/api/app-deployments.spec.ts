@@ -1524,9 +1524,9 @@ test('get app deployment documents via GraphQL API', async () => {
     document: GetPaginatedPersistedDocuments,
     variables: {
       targetSelector: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
       },
       appDeploymentName: 'app-name',
       appDeploymentVersion: 'app-version',
@@ -1641,9 +1641,9 @@ test('paginate app deployment documents via GraphQL API', async () => {
     document: GetPaginatedPersistedDocuments,
     variables: {
       targetSelector: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
       },
       appDeploymentName: 'app-name',
       appDeploymentVersion: 'app-version',
@@ -1674,9 +1674,9 @@ test('paginate app deployment documents via GraphQL API', async () => {
     document: GetPaginatedPersistedDocuments,
     variables: {
       targetSelector: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
       },
       appDeploymentName: 'app-name',
       appDeploymentVersion: 'app-version',
@@ -1708,9 +1708,9 @@ test('paginate app deployment documents via GraphQL API', async () => {
     document: GetPaginatedPersistedDocuments,
     variables: {
       targetSelector: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
       },
       appDeploymentName: 'app-name',
       appDeploymentVersion: 'app-version',
@@ -1814,9 +1814,9 @@ test('app deployment usage reporting', async () => {
     document: GetAppDeployment,
     variables: {
       targetSelector: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
       },
       appDeploymentName: 'app-name',
       appDeploymentVersion: 'app-version',
@@ -1867,9 +1867,9 @@ test('app deployment usage reporting', async () => {
     document: GetAppDeployment,
     variables: {
       targetSelector: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
       },
       appDeploymentName: 'app-name',
       appDeploymentVersion: 'app-version',

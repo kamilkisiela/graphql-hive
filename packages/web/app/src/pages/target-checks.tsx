@@ -18,13 +18,19 @@ import { Outlet, Link as RouterLink, useParams, useRouter } from '@tanstack/reac
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $after: String
     $filters: SchemaChecksFilter
   ) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       schemaChecks(first: 20, after: $after, filters: $filters) {
         edges {
@@ -66,17 +72,17 @@ const Navigation = (props: {
   isLastPage: boolean;
   onLoadMore: (cursor: string) => void;
   filters?: SchemaCheckFilters;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   schemaCheckId?: string;
 }) => {
   const [query] = useQuery({
     query: SchemaChecks_NavigationQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       after: props.after,
       filters: {
         changed: props.filters?.showOnlyChanged ?? false,
@@ -99,11 +105,11 @@ const Navigation = (props: {
             >
               <RouterLink
                 key={edge.node.id}
-                to="/$organizationId/$projectId/$targetId/checks/$schemaCheckId"
+                to="/$organizationSlug/$projectSlug/$targetSlug/checks/$schemaCheckId"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationSlug,
+                  projectSlug: props.projectSlug,
+                  targetSlug: props.targetSlug,
                   schemaCheckId: edge.node.id,
                 }}
                 search={{
@@ -169,12 +175,12 @@ const Navigation = (props: {
 
 const ChecksPageQuery = graphql(`
   query ChecksPageQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $filters: SchemaChecksFilter
   ) {
-    organization(selector: { organization: $organizationId }) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         rateLimit {
@@ -182,7 +188,13 @@ const ChecksPageQuery = graphql(`
         }
       }
     }
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       schemaChecks(first: 1) {
         edges {
@@ -202,7 +214,11 @@ const ChecksPageQuery = graphql(`
   }
 `);
 
-function ChecksPageContent(props: { organizationId: string; projectId: string; targetId: string }) {
+function ChecksPageContent(props: {
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
+}) {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
@@ -226,9 +242,9 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
   const [query] = useQuery({
     query: ChecksPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       filters: {
         changed: filters.showOnlyChanged ?? false,
         failed: filters.showOnlyFailed ?? false,
@@ -237,7 +253,7 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
@@ -278,9 +294,9 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
   return (
     <>
       <TargetLayout
-        organizationId={props.organizationId}
-        projectId={props.projectId}
-        targetId={props.targetId}
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+        targetSlug={props.targetSlug}
         page={Page.Checks}
         className={cn('flex', hasSchemaChecks || hasActiveSchemaCheck ? 'flex-row gap-x-6' : '')}
       >
@@ -323,9 +339,9 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
                 <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
                   {paginationVariables.map((cursor, index) => (
                     <Navigation
-                      organizationId={props.organizationId}
-                      projectId={props.projectId}
-                      targetId={props.targetId}
+                      organizationSlug={props.organizationSlug}
+                      projectSlug={props.projectSlug}
+                      targetSlug={props.targetSlug}
                       schemaCheckId={schemaCheckId}
                       after={cursor}
                       isLastPage={index + 1 === paginationVariables.length}
@@ -372,9 +388,9 @@ function ChecksPageContent(props: { organizationId: string; projectId: string; t
 }
 
 export function TargetChecksPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   return (
     <>

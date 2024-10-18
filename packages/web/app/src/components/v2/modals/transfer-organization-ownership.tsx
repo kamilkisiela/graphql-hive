@@ -98,7 +98,7 @@ export const TransferOrganizationOwnershipModal = ({
     query: TransferOrganizationOwnership_Members,
     variables: {
       selector: {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
       },
     },
   });
@@ -133,8 +133,8 @@ export const TransferOrganizationOwnershipModal = ({
     onSubmit: async values => {
       const result = await mutate({
         input: {
-          organization: organization.slug,
-          user: values.newOwner,
+          organizationSlug: organization.slug,
+          userId: values.newOwner,
         },
       });
 

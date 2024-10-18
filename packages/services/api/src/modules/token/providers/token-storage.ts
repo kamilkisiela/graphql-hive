@@ -70,16 +70,14 @@ export class TokenStorage {
     return response;
   }
 
-  async deleteTokens(
-    input: {
-      tokens: readonly string[];
-    } & TargetSelector,
-  ): Promise<readonly string[]> {
+  async deleteTokens(input: { tokenIds: readonly string[] }): Promise<readonly string[]> {
     this.logger.debug('Deleting tokens (input=%o)', input);
 
-    await Promise.all(input.tokens.map(token => this.tokensService.deleteToken.mutate({ token })));
+    await Promise.all(
+      input.tokenIds.map(token => this.tokensService.deleteToken.mutate({ token })),
+    );
 
-    return input.tokens;
+    return input.tokenIds;
   }
 
   async invalidateTokens(tokens: string[]) {

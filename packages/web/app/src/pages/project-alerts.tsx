@@ -32,8 +32,8 @@ import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useToggle } from '@/lib/hooks';
 
 function Channels(props: {
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
   channels: FragmentType<typeof ChannelsTable_AlertChannelFragment>[];
 }) {
   const [selected, setSelected] = useState<string[]>([]);
@@ -74,8 +74,8 @@ function Channels(props: {
           </Button>
           {channels.length > 0 && (
             <DeleteChannelsButton
-              organizationId={props.organizationId}
-              projectId={props.projectId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
               selected={selected}
               onSuccess={() => {
                 setSelected([]);
@@ -86,8 +86,8 @@ function Channels(props: {
       </CardFooter>
       {isModalOpen && (
         <CreateChannelModal
-          organizationId={props.organizationId}
-          projectId={props.projectId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
           isOpen={isModalOpen}
           toggleModalOpen={toggleModalOpen}
         />
@@ -100,8 +100,8 @@ function Alerts(props: {
   alerts: FragmentType<typeof AlertsTable_AlertFragment>[];
   channels: FragmentType<typeof CreateAlertModal_AlertChannelFragment>[];
   targets: FragmentType<typeof CreateAlertModal_TargetFragment>[];
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [isModalOpen, toggleModalOpen] = useToggle();
@@ -139,8 +139,8 @@ function Alerts(props: {
               Create alert
             </Button>
             <DeleteAlertsButton
-              organizationId={props.organizationId}
-              projectId={props.projectId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
               selected={selected}
               onSuccess={() => {
                 setSelected([]);
@@ -151,8 +151,8 @@ function Alerts(props: {
       </Card>
       {isModalOpen && (
         <CreateAlertModal
-          projectId={props.projectId}
-          organizationId={props.organizationId}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
           targets={props.targets}
           channels={props.channels}
           isOpen={isModalOpen}
@@ -175,13 +175,13 @@ const ProjectAlertsPage_OrganizationFragment = graphql(`
 `);
 
 const ProjectAlertsPageQuery = graphql(`
-  query ProjectAlertsPageQuery($organizationId: ID!, $projectId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query ProjectAlertsPageQuery($organizationSlug: String!, $projectSlug: String!) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         ...ProjectAlertsPage_OrganizationFragment
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organizationSlug: $organizationSlug, projectSlug: $projectSlug }) {
       id
       targets {
         nodes {
@@ -199,12 +199,12 @@ const ProjectAlertsPageQuery = graphql(`
   }
 `);
 
-function AlertsPageContent(props: { organizationId: string; projectId: string }) {
+function AlertsPageContent(props: { organizationSlug: string; projectSlug: string }) {
   const [query] = useQuery({
     query: ProjectAlertsPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
     },
     requestPolicy: 'cache-and-network',
   });
@@ -220,12 +220,12 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
     scope: ProjectAccessScope.Alerts,
     member: organizationForAlerts?.me ?? null,
     redirect: true,
-    organizationId: props.organizationId,
-    projectId: props.projectId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const alerts = currentProject?.alerts || [];
@@ -234,8 +234,8 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
 
   return (
     <ProjectLayout
-      projectId={props.projectId}
-      organizationId={props.organizationId}
+      projectSlug={props.projectSlug}
+      organizationSlug={props.organizationSlug}
       page={Page.Alerts}
       className="flex flex-col gap-y-10"
     >
@@ -247,13 +247,13 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
         {currentProject && currentOrganization && hasAccess ? (
           <div className="flex flex-col gap-y-4">
             <Channels
-              organizationId={props.organizationId}
-              projectId={props.projectId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
               channels={channels}
             />
             <Alerts
-              organizationId={props.organizationId}
-              projectId={props.projectId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
               alerts={alerts}
               channels={channels}
               targets={targets}
@@ -265,11 +265,14 @@ function AlertsPageContent(props: { organizationId: string; projectId: string })
   );
 }
 
-export function ProjectAlertsPage(props: { organizationId: string; projectId: string }) {
+export function ProjectAlertsPage(props: { organizationSlug: string; projectSlug: string }) {
   return (
     <>
       <Meta title="Alerts" />
-      <AlertsPageContent organizationId={props.organizationId} projectId={props.projectId} />
+      <AlertsPageContent
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+      />
     </>
   );
 }

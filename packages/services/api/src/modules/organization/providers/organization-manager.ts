@@ -1430,8 +1430,8 @@ export class OrganizationManager {
   }: {
     organizationId: string;
     assignRole?: {
-      role: string;
-      users: readonly string[];
+      roleId: string;
+      userIds: readonly string[];
     } | null;
     createRole?: {
       name: string;
@@ -1439,7 +1439,7 @@ export class OrganizationManager {
       organizationScopes: readonly OrganizationAccessScope[];
       projectScopes: readonly ProjectAccessScope[];
       targetScopes: readonly TargetAccessScope[];
-      users: readonly string[];
+      userIds: readonly string[];
     } | null;
   }) {
     const currentUser = await this.authManager.getCurrentUser();
@@ -1459,8 +1459,8 @@ export class OrganizationManager {
     if (assignRole) {
       return this.assignRoleToMembersMigration({
         organizationId,
-        roleId: assignRole.role,
-        users: assignRole.users,
+        roleId: assignRole.roleId,
+        userIds: assignRole.userIds,
       });
     }
 
@@ -1481,7 +1481,7 @@ export class OrganizationManager {
     organizationScopes: readonly OrganizationAccessScope[];
     projectScopes: readonly ProjectAccessScope[];
     targetScopes: readonly TargetAccessScope[];
-    users: readonly string[];
+    userIds: readonly string[];
   }) {
     const result = await this.createMemberRole({
       organizationId: input.organizationId,
@@ -1496,7 +1496,7 @@ export class OrganizationManager {
       return this.assignRoleToMembersMigration({
         roleId: result.ok.createdRole.id,
         organizationId: input.organizationId,
-        users: input.users,
+        userIds: input.userIds,
       });
     }
 
@@ -1506,12 +1506,12 @@ export class OrganizationManager {
   private async assignRoleToMembersMigration(input: {
     organizationId: string;
     roleId: string;
-    users: readonly string[];
+    userIds: readonly string[];
   }) {
     await this.storage.assignOrganizationMemberRoleToMany({
       organizationId: input.organizationId,
       roleId: input.roleId,
-      userIds: input.users,
+      userIds: input.userIds,
     });
 
     return {

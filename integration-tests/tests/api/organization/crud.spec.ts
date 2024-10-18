@@ -10,7 +10,7 @@ test.concurrent(
 
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
         slug: organization.slug,
       },
       ownerToken,
@@ -21,7 +21,7 @@ test.concurrent(
     expect(changeOrganizationSlugResult.updateOrganizationSlug.error).toBeNull();
     expect(result?.organization.name).toBe(organization.slug);
     expect(result?.organization.slug).toEqual(organization.slug);
-    expect(result?.selector.organization).toEqual(organization.slug);
+    expect(result?.selector.organizationSlug).toEqual(organization.slug);
   },
 );
 
@@ -34,7 +34,7 @@ test.concurrent(
     const newSlug = randomUUID();
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
         slug: newSlug,
       },
       ownerToken,
@@ -45,7 +45,7 @@ test.concurrent(
     expect(changeOrganizationSlugResult.updateOrganizationSlug.error).toBeNull();
     expect(result?.organization.name).toBe(newSlug);
     expect(result?.organization.slug).toEqual(newSlug);
-    expect(result?.selector.organization).toEqual(newSlug);
+    expect(result?.selector.organizationSlug).toEqual(newSlug);
   },
 );
 
@@ -58,7 +58,7 @@ test.concurrent(
     const newSlug = randomUUID();
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
         slug: newSlug,
       },
       ownerToken,
@@ -71,7 +71,7 @@ test.concurrent(
     // We do it for legacy reasons, as some queries still use the name.
     expect(result?.organization.name).toBe(newSlug);
     expect(result?.organization.slug).toEqual(newSlug);
-    expect(result?.selector.organization).toEqual(newSlug);
+    expect(result?.selector.organizationSlug).toEqual(newSlug);
   },
 );
 
@@ -84,7 +84,7 @@ test.concurrent(
     const newSlug = 'graphql';
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
         slug: newSlug,
       },
       ownerToken,
@@ -104,7 +104,7 @@ test.concurrent(
 
     const changeOrganizationSlugResult = await updateOrganizationSlug(
       {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
         slug: anotherOrganization.slug,
       },
       ownerToken,

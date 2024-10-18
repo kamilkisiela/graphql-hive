@@ -6,7 +6,7 @@ import type { QueryResolvers } from './../../../../__generated__/types.next';
 
 export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganization']> = async (
   _,
-  { previouslyVisitedOrganizationId },
+  { previouslyVisitedOrganizationId: previouslyVisitedOrganizationSlug },
   { injector },
 ) => {
   const user = await injector.get(AuthManager).getCurrentUser();
@@ -24,7 +24,7 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
 
       return {
         selector: {
-          organization: org.slug,
+          organizationSlug: org.slug,
         },
         organization: org,
       };
@@ -35,9 +35,9 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
 
   // This is the organization that got stored as an cookie
   // We make sure it actually exists before directing to it.
-  if (previouslyVisitedOrganizationId) {
+  if (previouslyVisitedOrganizationSlug) {
     const orgId = await injector.get(IdTranslator).translateOrganizationIdSafe({
-      organization: previouslyVisitedOrganizationId,
+      organizationSlug: previouslyVisitedOrganizationSlug,
     });
 
     if (orgId) {
@@ -48,7 +48,7 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
       if (org) {
         return {
           selector: {
-            organization: org.slug,
+            organizationSlug: org.slug,
           },
           organization: org,
         };
@@ -64,7 +64,7 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
 
       return {
         selector: {
-          organization: firstOrg.slug,
+          organizationSlug: firstOrg.slug,
         },
         organization: firstOrg,
       };

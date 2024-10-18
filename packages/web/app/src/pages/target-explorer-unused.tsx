@@ -47,9 +47,9 @@ const UnusedSchemaView_UnusedSchemaExplorerFragment = graphql(`
 const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
   explorer: FragmentType<typeof UnusedSchemaView_UnusedSchemaExplorerFragment>;
   totalRequests: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const [selectedLetter, setSelectedLetter] = useState<string>();
   const { types } = useFragment(UnusedSchemaView_UnusedSchemaExplorerFragment, props.explorer);
@@ -132,9 +132,9 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
             <TypeRenderer
               key={i}
               type={type}
-              organizationCleanId={props.organizationCleanId}
-              projectCleanId={props.projectCleanId}
-              targetCleanId={props.targetCleanId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
+              targetSlug={props.targetSlug}
               warnAboutDeprecatedArguments={false}
               warnAboutUnusedArguments
               styleDeprecated
@@ -148,12 +148,18 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
 
 const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
   query UnusedSchemaExplorer_UnusedSchemaQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $period: DateRangeInput!
   ) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       slug
       latestSchemaVersion {
@@ -170,9 +176,9 @@ const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
     }
     operationsStats(
       selector: {
-        organization: $organizationId
-        project: $projectId
-        target: $targetId
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
         period: $period
       }
     ) {
@@ -183,9 +189,9 @@ const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
 
 function UnusedSchemaExplorer(props: {
   dataRetentionInDays: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const dateRangeController = useDateRangeController({
     dataRetentionInDays: props.dataRetentionInDays,
@@ -195,9 +201,9 @@ function UnusedSchemaExplorer(props: {
   const [query, refresh] = useQuery({
     query: UnusedSchemaExplorer_UnusedSchemaQuery,
     variables: {
-      organizationId: props.organizationCleanId,
-      projectId: props.projectCleanId,
-      targetId: props.targetCleanId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       period: dateRangeController.resolvedRange,
     },
   });
@@ -209,7 +215,7 @@ function UnusedSchemaExplorer(props: {
   }, [dateRangeController.resolvedRange]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationCleanId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const latestSchemaVersion = query.data?.target?.latestSchemaVersion;
@@ -233,9 +239,9 @@ function UnusedSchemaExplorer(props: {
             onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
           />
           <SchemaVariantFilter
-            organizationId={props.organizationCleanId}
-            projectId={props.projectCleanId}
-            targetId={props.targetCleanId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
             variant="unused"
           />
         </div>
@@ -257,11 +263,11 @@ function UnusedSchemaExplorer(props: {
                     <br />
                     <br />
                     <Link
-                      to="/$organizationId/$projectId/$targetId/history/$versionId"
+                      to="/$organizationSlug/$projectSlug/$targetSlug/history/$versionId"
                       params={{
-                        organizationId: props.organizationCleanId,
-                        projectId: props.projectCleanId,
-                        targetId: props.targetCleanId,
+                        organizationSlug: props.organizationSlug,
+                        projectSlug: props.projectSlug,
+                        targetSlug: props.targetSlug,
                         versionId: latestSchemaVersion.id,
                       }}
                     >
@@ -273,9 +279,9 @@ function UnusedSchemaExplorer(props: {
               <UnusedSchemaView
                 totalRequests={query.data?.operationsStats.totalRequests ?? 0}
                 explorer={latestValidSchemaVersion.unusedSchema}
-                organizationCleanId={props.organizationCleanId}
-                projectCleanId={props.projectCleanId}
-                targetCleanId={props.targetCleanId}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
               />
             </>
           ) : (
@@ -288,8 +294,12 @@ function UnusedSchemaExplorer(props: {
 }
 
 const TargetExplorerUnusedSchemaPageQuery = graphql(`
-  query TargetExplorerUnusedSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query TargetExplorerUnusedSchemaPageQuery(
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
+  ) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         rateLimit {
@@ -299,27 +309,31 @@ const TargetExplorerUnusedSchemaPageQuery = graphql(`
       }
     }
     hasCollectedOperations(
-      selector: { organization: $organizationId, project: $projectId, target: $targetId }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     )
   }
 `);
 
 function ExplorerUnusedSchemaPageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const [query] = useQuery({
     query: TargetExplorerUnusedSchemaPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -327,18 +341,18 @@ function ExplorerUnusedSchemaPageContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Explorer}
     >
       {currentOrganization ? (
         hasCollectedOperations ? (
           <UnusedSchemaExplorer
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
-            organizationCleanId={props.organizationId}
-            projectCleanId={props.projectId}
-            targetCleanId={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
           />
         ) : (
           <div className="py-8">
@@ -355,9 +369,9 @@ function ExplorerUnusedSchemaPageContent(props: {
 }
 
 export function TargetExplorerUnusedPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   return (
     <>

@@ -28,9 +28,9 @@ export const CreateAccessToken_CreateTokenMutation = graphql(`
     createToken(input: $input) {
       ok {
         selector {
-          organization
-          project
-          target
+          organizationSlug
+          projectSlug
+          targetSlug
         }
         createdToken {
           id
@@ -49,8 +49,8 @@ export const CreateAccessToken_CreateTokenMutation = graphql(`
 `);
 
 const CreateAccessTokenModalQuery = graphql(`
-  query CreateAccessTokenModalQuery($organizationId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query CreateAccessTokenModalQuery($organizationSlug: String!) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         ...CreateAccessTokenModalContent_OrganizationFragment
       }
@@ -61,15 +61,15 @@ const CreateAccessTokenModalQuery = graphql(`
 export function CreateAccessTokenModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const { isOpen, toggleModalOpen } = props;
   const [organizationQuery] = useQuery({
     query: CreateAccessTokenModalQuery,
     variables: {
-      organizationId: props.organizationId,
+      organizationSlug: props.organizationSlug,
     },
   });
 
@@ -80,9 +80,9 @@ export function CreateAccessTokenModal(props: {
       {organization ? (
         <ModalContent
           organization={organization}
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
           toggleModalOpen={toggleModalOpen}
         />
       ) : (
@@ -143,9 +143,9 @@ const createRegistryTokenFormSchema = z.object({
 
 export function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   toggleModalOpen: () => void;
 }) {
   const { toast } = useToast();
@@ -175,9 +175,9 @@ export function ModalContent(props: {
   async function onSubmit(values: z.infer<typeof createRegistryTokenFormSchema>) {
     const { error } = await mutate({
       input: {
-        organization: props.organizationId,
-        project: props.projectId,
-        target: props.targetId,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
         name: values.tokenDescription,
         organizationScopes: [],
         projectScopes: [],

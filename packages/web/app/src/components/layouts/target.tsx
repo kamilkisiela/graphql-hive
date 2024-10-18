@@ -89,9 +89,9 @@ export const TargetLayout = ({
   ...props
 }: {
   page: Page;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   className?: string;
   children: ReactNode;
   connect?: ReactNode;
@@ -102,25 +102,23 @@ export const TargetLayout = ({
     requestPolicy: 'cache-first',
   });
 
-  const { organizationId: orgId, projectId } = props;
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organizations.nodes.find(
-    node => node.slug === props.organizationId,
+    node => node.slug === props.organizationSlug,
   );
   const currentProject = currentOrganization?.projects.nodes.find(
-    node => node.slug === props.projectId,
+    node => node.slug === props.projectSlug,
   );
-  const currentTarget = currentProject?.targets.nodes.find(node => node.slug === props.targetId);
+  const currentTarget = currentProject?.targets.nodes.find(node => node.slug === props.targetSlug);
   const isCDNEnabled = query.data?.isCDNEnabled === true;
 
   useTargetAccess({
     scope: TargetAccessScope.Read,
     member: currentOrganization?.me ?? null,
     redirect: true,
-    targetId: props.targetId,
-    projectId,
-    organizationId: orgId,
+    targetSlug: props.targetSlug,
+    projectSlug: props.projectSlug,
+    organizationSlug: props.organizationSlug,
   });
 
   useLastVisitedOrganizationWriter(currentOrganization?.slug);
@@ -154,15 +152,15 @@ export const TargetLayout = ({
             <HiveLink className="size-8" />
             <TargetSelector
               organizations={query.data?.organizations ?? null}
-              currentOrganizationCleanId={props.organizationId}
-              currentProjectCleanId={props.projectId}
-              currentTargetCleanId={props.targetId}
+              currentOrganizationSlug={props.organizationSlug}
+              currentProjectSlug={props.projectSlug}
+              currentTargetSlug={props.targetSlug}
             />
           </div>
           <div>
             <UserMenu
               me={me ?? null}
-              currentOrganizationCleanId={props.organizationId}
+              currentOrganizationSlug={props.organizationSlug}
               organizations={query.data?.organizations ?? null}
             />
           </div>
@@ -170,7 +168,10 @@ export const TargetLayout = ({
       </header>
 
       {currentProject?.registryModel === 'LEGACY' ? (
-        <ProjectMigrationToast orgId={orgId} projectId={projectId} />
+        <ProjectMigrationToast
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+        />
       ) : null}
 
       <div className="relative h-[--tabs-navbar-height] border-b border-gray-800">
@@ -182,11 +183,11 @@ export const TargetLayout = ({
                   <>
                     <TabsTrigger variant="menu" value={Page.Schema} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId"
+                        to="/$organizationSlug/$projectSlug/$targetSlug"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationSlug,
+                          projectSlug: props.projectSlug,
+                          targetSlug: props.targetSlug,
                         }}
                       >
                         Schema
@@ -194,11 +195,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Checks} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/checks"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/checks"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationSlug,
+                          projectSlug: props.projectSlug,
+                          targetSlug: props.targetSlug,
                         }}
                       >
                         Checks
@@ -206,11 +207,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Explorer} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/explorer"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/explorer"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationSlug,
+                          projectSlug: props.projectSlug,
+                          targetSlug: props.targetSlug,
                         }}
                       >
                         Explorer
@@ -218,11 +219,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.History} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/history"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/history"
                         params={{
-                          organizationId: currentOrganization.slug,
-                          projectId: currentProject.slug,
-                          targetId: currentTarget.slug,
+                          organizationSlug: currentOrganization.slug,
+                          projectSlug: currentProject.slug,
+                          targetSlug: currentTarget.slug,
                         }}
                       >
                         History
@@ -230,11 +231,11 @@ export const TargetLayout = ({
                     </TabsTrigger>
                     <TabsTrigger variant="menu" value={Page.Insights} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/insights"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/insights"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationSlug,
+                          projectSlug: props.projectSlug,
+                          targetSlug: props.targetSlug,
                         }}
                       >
                         Insights
@@ -243,11 +244,11 @@ export const TargetLayout = ({
                     {currentOrganization.isAppDeploymentsEnabled && (
                       <TabsTrigger variant="menu" value={Page.Apps} asChild>
                         <Link
-                          to="/$organizationId/$projectId/$targetId/apps"
+                          to="/$organizationSlug/$projectSlug/$targetSlug/apps"
                           params={{
-                            organizationId: props.organizationId,
-                            projectId: props.projectId,
-                            targetId: props.targetId,
+                            organizationSlug: props.organizationSlug,
+                            projectSlug: props.projectSlug,
+                            targetSlug: props.targetSlug,
                           }}
                         >
                           Apps
@@ -256,11 +257,11 @@ export const TargetLayout = ({
                     )}
                     <TabsTrigger variant="menu" value={Page.Laboratory} asChild>
                       <Link
-                        to="/$organizationId/$projectId/$targetId/laboratory"
+                        to="/$organizationSlug/$projectSlug/$targetSlug/laboratory"
                         params={{
-                          organizationId: props.organizationId,
-                          projectId: props.projectId,
-                          targetId: props.targetId,
+                          organizationSlug: props.organizationSlug,
+                          projectSlug: props.projectSlug,
+                          targetSlug: props.targetSlug,
                         }}
                       >
                         Laboratory
@@ -271,11 +272,11 @@ export const TargetLayout = ({
                 {canAccessSettingsPage && (
                   <TabsTrigger variant="menu" value={Page.Settings} asChild>
                     <Link
-                      to="/$organizationId/$projectId/$targetId/settings"
+                      to="/$organizationSlug/$projectSlug/$targetSlug/settings"
                       params={{
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
+                        organizationSlug: props.organizationSlug,
+                        projectSlug: props.projectSlug,
+                        targetSlug: props.targetSlug,
                       }}
                       search={{ page: 'general' }}
                     >
@@ -302,9 +303,9 @@ export const TargetLayout = ({
                   Connect to CDN
                 </Button>
                 <ConnectSchemaModal
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   isOpen={isModalOpen}
                   toggleModalOpen={toggleModalOpen}
                 />
@@ -364,17 +365,17 @@ function composeEndpoint(baseUrl: string, artifactType: CdnArtifactType): string
 export function ConnectSchemaModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const [query] = useQuery({
     query: ConnectSchemaModalQuery,
     variables: {
       targetSelector: {
-        organization: props.organizationId,
-        project: props.projectId,
-        target: props.targetId,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
       },
     },
     requestPolicy: 'cache-and-network',
@@ -487,11 +488,11 @@ export function ConnectSchemaModal(props: {
                 }}
                 variant="primary"
                 className="font-bold underline"
-                to="/$organizationId/$projectId/$targetId/settings"
+                to="/$organizationSlug/$projectSlug/$targetSlug/settings"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationSlug,
+                  projectSlug: props.projectSlug,
+                  targetSlug: props.targetSlug,
                 }}
                 target="_blank"
                 rel="noreferrer"

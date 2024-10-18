@@ -2940,28 +2940,26 @@ export async function createStorage(
 
       return result?.github_app_installation_id;
     },
-    async addAlertChannel({ project, name, type, slack, webhook }) {
+    async addAlertChannel({ projectId, name, type, slackChannel, webhookEndpoint }) {
       return transformAlertChannel(
         await pool.one<Slonik<alert_channels>>(
           sql`/* addAlertChannel */
             INSERT INTO alert_channels
               ("name", "type", "project_id", "slack_channel", "webhook_endpoint")
             VALUES
-              (${name}, ${type}, ${project}, ${slack?.channel ?? null}, ${
-                webhook?.endpoint ?? null
-              })
+              (${name}, ${type}, ${projectId}, ${slackChannel ?? null}, ${webhookEndpoint ?? null})
             RETURNING *
           `,
         ),
       );
     },
-    async deleteAlertChannels({ project, channels }) {
-      const result = await pool.query<Slonik<alert_channels>>(
+    async deleteAlertChannels({ projectId, channelIds }) {
+      const result = await pool.query<alert_channels>(
         sql`/* deleteAlertChannels */
           DELETE FROM alert_channels
           WHERE
-            project_id = ${project} AND
-            id IN (${sql.join(channels, sql`, `)})
+            project_id = ${projectId} AND
+            id IN (${sql.join(channelIds, sql`, `)})
           RETURNING *
         `,
       );
@@ -2976,18 +2974,18 @@ export async function createStorage(
       return result.rows.map(transformAlertChannel);
     },
 
-    async addAlert({ organization, project, target, channel, type }) {
+    async addAlert({ organizationId, projectId, targetId, channelId, type }) {
       return transformAlert(
         await pool.one<Slonik<alerts>>(
           sql`/* addAlert */
             INSERT INTO alerts
               ("type", "alert_channel_id", "target_id", "project_id")
             VALUES
-              (${type}, ${channel}, ${target}, ${project})
+              (${type}, ${channelId}, ${targetId}, ${projectId})
             RETURNING *
           `,
         ),
-        organization,
+        organizationId,
       );
     },
     async deleteAlerts({ organization, project, alerts }) {
@@ -4419,9 +4417,9 @@ export async function createStorage(
     async getTargetBreadcrumbForTargetId(args) {
       const result = await pool.maybeOne<unknown>(sql`/* getTargetBreadcrumbForTargetId */
         SELECT
-          o."clean_id" AS "organization",
-          p."clean_id" AS "project",
-          t."clean_id" AS "target"
+          o."clean_id" AS "organization_slug",
+          p."clean_id" AS "project_slug",
+          t."clean_id" AS "target_slug"
         FROM
           "targets" t
           INNER JOIN "projects" p ON t."project_id" = p."id"

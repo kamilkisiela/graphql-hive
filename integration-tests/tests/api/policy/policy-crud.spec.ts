@@ -25,9 +25,9 @@ describe('Policy CRUD', () => {
           document: TargetCalculatedPolicy,
           variables: {
             selector: {
-              organization: organization.slug,
-              project: project.slug,
-              target: target.slug,
+              organizationSlug: organization.slug,
+              projectSlug: project.slug,
+              targetSlug: target.slug,
             },
           },
           authToken: ownerToken,
@@ -49,9 +49,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
         },
         authToken: ownerToken,
@@ -76,9 +76,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
         },
         authToken: ownerToken,
@@ -104,9 +104,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
         },
         authToken: ownerToken,
@@ -151,9 +151,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
         },
         authToken: ownerToken,
@@ -202,9 +202,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
         },
         authToken: ownerToken,

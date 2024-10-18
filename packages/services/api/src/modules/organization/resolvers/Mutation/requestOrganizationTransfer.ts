@@ -5,9 +5,9 @@ import type { MutationResolvers } from './../../../../__generated__/types.next';
 export const requestOrganizationTransfer: NonNullable<
   MutationResolvers['requestOrganizationTransfer']
 > = async (_, { input }, { injector }) => {
-  const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+  const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
   return injector.get(OrganizationManager).requestOwnershipTransfer({
-    organization,
-    user: input.user,
+    organization: organizationId,
+    user: input.userId,
   });
 };

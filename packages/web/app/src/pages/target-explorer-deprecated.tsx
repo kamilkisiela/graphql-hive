@@ -47,9 +47,9 @@ const DeprecatedSchemaView_DeprecatedSchemaExplorerFragment = graphql(`
 const DeprecatedSchemaView = memo(function _DeprecatedSchemaView(props: {
   explorer: FragmentType<typeof DeprecatedSchemaView_DeprecatedSchemaExplorerFragment>;
   totalRequests: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const [selectedLetter, setSelectedLetter] = useState<string>();
   const { types } = useFragment(
@@ -136,9 +136,9 @@ const DeprecatedSchemaView = memo(function _DeprecatedSchemaView(props: {
               key={i}
               type={type}
               totalRequests={props.totalRequests}
-              organizationCleanId={props.organizationCleanId}
-              projectCleanId={props.projectCleanId}
-              targetCleanId={props.targetCleanId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
+              targetSlug={props.targetSlug}
               warnAboutDeprecatedArguments
               warnAboutUnusedArguments={false}
               styleDeprecated={false}
@@ -152,12 +152,18 @@ const DeprecatedSchemaView = memo(function _DeprecatedSchemaView(props: {
 
 const DeprecatedSchemaExplorer_DeprecatedSchemaQuery = graphql(`
   query DeprecatedSchemaExplorer_DeprecatedSchemaQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $period: DateRangeInput!
   ) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       slug
       latestSchemaVersion {
@@ -174,9 +180,9 @@ const DeprecatedSchemaExplorer_DeprecatedSchemaQuery = graphql(`
     }
     operationsStats(
       selector: {
-        organization: $organizationId
-        project: $projectId
-        target: $targetId
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
         period: $period
       }
     ) {
@@ -187,9 +193,9 @@ const DeprecatedSchemaExplorer_DeprecatedSchemaQuery = graphql(`
 
 function DeprecatedSchemaExplorer(props: {
   dataRetentionInDays: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const dateRangeController = useDateRangeController({
     dataRetentionInDays: props.dataRetentionInDays,
@@ -199,9 +205,9 @@ function DeprecatedSchemaExplorer(props: {
   const [query, refresh] = useQuery({
     query: DeprecatedSchemaExplorer_DeprecatedSchemaQuery,
     variables: {
-      organizationId: props.organizationCleanId,
-      projectId: props.projectCleanId,
-      targetId: props.targetCleanId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       period: dateRangeController.resolvedRange,
     },
   });
@@ -213,7 +219,7 @@ function DeprecatedSchemaExplorer(props: {
   }, [dateRangeController.resolvedRange]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationCleanId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const latestSchemaVersion = query.data?.target?.latestSchemaVersion;
@@ -235,9 +241,9 @@ function DeprecatedSchemaExplorer(props: {
             onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
           />
           <SchemaVariantFilter
-            organizationId={props.organizationCleanId}
-            projectId={props.projectCleanId}
-            targetId={props.targetCleanId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
             variant="deprecated"
           />
         </div>
@@ -259,11 +265,11 @@ function DeprecatedSchemaExplorer(props: {
                     <br />
                     <br />
                     <Link
-                      to="/$organizationId/$projectId/$targetId/history/$versionId"
+                      to="/$organizationSlug/$projectSlug/$targetSlug/history/$versionId"
                       params={{
-                        organizationId: props.organizationCleanId,
-                        projectId: props.projectCleanId,
-                        targetId: props.targetCleanId,
+                        organizationSlug: props.organizationSlug,
+                        projectSlug: props.projectSlug,
+                        targetSlug: props.targetSlug,
                         versionId: latestSchemaVersion.id,
                       }}
                     >
@@ -275,9 +281,9 @@ function DeprecatedSchemaExplorer(props: {
               <DeprecatedSchemaView
                 totalRequests={query.data?.operationsStats.totalRequests ?? 0}
                 explorer={latestValidSchemaVersion.deprecatedSchema}
-                organizationCleanId={props.organizationCleanId}
-                projectCleanId={props.projectCleanId}
-                targetCleanId={props.targetCleanId}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
               />
             </>
           ) : (
@@ -291,11 +297,11 @@ function DeprecatedSchemaExplorer(props: {
 
 const TargetExplorerDeprecatedSchemaPageQuery = graphql(`
   query TargetExplorerDeprecatedSchemaPageQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
   ) {
-    organization(selector: { organization: $organizationId }) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         rateLimit {
@@ -305,27 +311,31 @@ const TargetExplorerDeprecatedSchemaPageQuery = graphql(`
       }
     }
     hasCollectedOperations(
-      selector: { organization: $organizationId, project: $projectId, target: $targetId }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     )
   }
 `);
 
 function ExplorerDeprecatedSchemaPageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const [query] = useQuery({
     query: TargetExplorerDeprecatedSchemaPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -333,18 +343,18 @@ function ExplorerDeprecatedSchemaPageContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Explorer}
     >
       {currentOrganization ? (
         hasCollectedOperations ? (
           <DeprecatedSchemaExplorer
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
-            organizationCleanId={props.organizationId}
-            projectCleanId={props.projectId}
-            targetCleanId={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
           />
         ) : (
           <div className="py-8">
@@ -361,9 +371,9 @@ function ExplorerDeprecatedSchemaPageContent(props: {
 }
 
 export function TargetExplorerDeprecatedPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   return (
     <>

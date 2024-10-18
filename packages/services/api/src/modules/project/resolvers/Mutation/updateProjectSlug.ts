@@ -40,8 +40,8 @@ export const updateProjectSlug: NonNullable<MutationResolvers['updateProjectSlug
     return {
       ok: {
         selector: {
-          organization: input.organization,
-          project: result.project.slug,
+          organizationSlug: input.organizationSlug,
+          projectSlug: result.project.slug,
         },
         project: result.project,
       },

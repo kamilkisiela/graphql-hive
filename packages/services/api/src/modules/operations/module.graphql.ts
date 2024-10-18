@@ -13,33 +13,35 @@ export default gql`
   }
 
   input OperationsStatsSelectorInput {
-    organization: ID!
-    project: ID!
-    target: ID!
+    organizationSlug: String!
+    projectSlug: String!
+    targetSlug: String!
     period: DateRangeInput!
+    # TODO: are these IDs or hashes?
     operations: [ID!]
     clientNames: [String!]
   }
 
   input ClientStatsInput {
-    organization: ID!
-    project: ID!
-    target: ID!
+    organizationSlug: String!
+    projectSlug: String!
+    targetSlug: String!
     period: DateRangeInput!
     client: String!
   }
 
   input SchemaCoordinateStatsInput {
-    organization: ID!
-    project: ID!
-    target: ID!
+    organizationSlug: String!
+    projectSlug: String!
+    targetSlug: String!
     period: DateRangeInput!
     schemaCoordinate: String!
   }
 
   input ClientStatsByTargetsInput {
-    organization: ID!
-    project: ID!
+    organizationSlug: String!
+    projectSlug: String!
+    # TODO: are these IDs or slugs?
     targetIds: [ID!]!
     period: DateRangeInput!
   }
@@ -55,9 +57,9 @@ export default gql`
   }
 
   input FieldStatsInput {
-    target: String!
-    project: String!
-    organization: String!
+    targetSlug: String!
+    projectSlug: String!
+    organizationSlug: String!
     type: String!
     field: String!
     argument: String
@@ -66,9 +68,9 @@ export default gql`
   }
 
   input FieldListStatsInput {
-    target: String!
-    project: String!
-    organization: String!
+    targetSlug: String!
+    projectSlug: String!
+    organizationSlug: String!
     period: DateRangeInput!
     fields: [FieldTypePairInput!]!
     operationHash: String

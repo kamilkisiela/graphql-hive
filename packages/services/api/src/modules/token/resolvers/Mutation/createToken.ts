@@ -43,9 +43,9 @@ export const createToken: NonNullable<MutationResolvers['createToken']> = async 
   return {
     ok: {
       selector: {
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
+        organizationSlug: input.organizationSlug,
+        projectSlug: input.projectSlug,
+        targetSlug: input.targetSlug,
       },
       createdToken: token,
       secret: token.secret,

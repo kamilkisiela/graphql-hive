@@ -23,18 +23,18 @@ const OperationQuery = graphql(`
 `);
 
 export function useCurrentOperation(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const operationIdFromSearch = useOperationFromQueryString();
   const [{ data }] = useQuery({
     query: OperationQuery,
     variables: {
       selector: {
-        target: props.targetId,
-        project: props.projectId,
-        organization: props.organizationId,
+        targetSlug: props.targetSlug,
+        projectSlug: props.projectSlug,
+        organizationSlug: props.organizationSlug,
       },
       id: operationIdFromSearch!,
     },

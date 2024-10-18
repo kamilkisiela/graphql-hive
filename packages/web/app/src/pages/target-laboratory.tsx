@@ -98,29 +98,29 @@ const UpdateOperationMutation = graphql(`
 `);
 
 function Save(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const router = useRouter();
   const [operationModalOpen, toggleOperationModal] = useToggle();
   const { collections } = useCollections({
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
+    targetSlug: props.targetSlug,
   });
   const notify = useNotifications();
   const currentOperation = useCurrentOperation({
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
+    targetSlug: props.targetSlug,
   });
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
   const { queryEditor, variableEditor, headerEditor, updateActiveTabValues } = useEditorContext()!;
   const { clearOperation } = useSyncOperationState({
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
+    targetSlug: props.targetSlug,
   });
   const operationFromQueryString = useOperationFromQueryString();
 
@@ -131,11 +131,11 @@ function Save(props: {
           updateActiveTabValues({ id, title: name });
         }
         void router.navigate({
-          to: '/$organizationId/$projectId/$targetId/laboratory',
+          to: '/$organizationSlug/$projectSlug/$targetSlug/laboratory',
           params: {
-            organizationId: props.organizationId,
-            projectId: props.projectId,
-            targetId: props.targetId,
+            organizationSlug: props.organizationSlug,
+            projectSlug: props.projectSlug,
+            targetSlug: props.targetSlug,
           },
           search: { operation: id },
         });
@@ -194,9 +194,9 @@ function Save(props: {
             }
             const { error, data } = await mutateUpdate({
               selector: {
-                target: props.targetId,
-                organization: props.organizationId,
-                project: props.projectId,
+                targetSlug: props.targetSlug,
+                organizationSlug: props.organizationSlug,
+                projectSlug: props.projectSlug,
               },
               input: {
                 name: currentOperation.name,
@@ -231,9 +231,9 @@ function Save(props: {
         </DropdownMenuItem>
       </DropdownMenuContent>
       <CreateOperationModal
-        organizationId={props.organizationId}
-        projectId={props.projectId}
-        targetId={props.targetId}
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+        targetSlug={props.targetSlug}
         isOpen={operationModalOpen}
         close={toggleOperationModal}
         onSaveSuccess={onSaveSuccess}
@@ -243,25 +243,25 @@ function Save(props: {
 }
 
 function LaboratoryPageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
   const router = useRouter();
   const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const { collections } = useCollections({
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
+    targetSlug: props.targetSlug,
   });
   const userOperations = useMemo(() => {
     const operations = collections.flatMap(collection =>
@@ -277,7 +277,7 @@ function LaboratoryPageContent(props: {
     query.data?.target?.graphqlEndpointUrl ?? null,
   );
 
-  const mockEndpoint = `${location.origin}/api/lab/${props.organizationId}/${props.projectId}/${props.targetId}`;
+  const mockEndpoint = `${location.origin}/api/lab/${props.organizationSlug}/${props.projectSlug}/${props.targetSlug}`;
 
   const fetcher = useMemo<Fetcher>(() => {
     return async (params, opts) => {
@@ -315,7 +315,7 @@ function LaboratoryPageContent(props: {
   }, [query.data?.target?.graphqlEndpointUrl, actualSelectedApiEndpoint]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const FullScreenIcon = isFullScreen ? ExitFullScreenIcon : EnterFullScreenIcon;
@@ -325,11 +325,11 @@ function LaboratoryPageContent(props: {
       const activeTab = tabs.find((_, index) => index === activeTabIndex)!;
       // Set search params while clicking on tab
       void router.navigate({
-        to: '/$organizationId/$projectId/$targetId/laboratory',
+        to: '/$organizationSlug/$projectSlug/$targetSlug/laboratory',
         params: {
-          organizationId: props.organizationId,
-          projectId: props.projectId,
-          targetId: props.targetId,
+          organizationSlug: props.organizationSlug,
+          projectSlug: props.projectSlug,
+          targetSlug: props.targetSlug,
         },
         search: userOperations.has(activeTab.id) ? { operation: activeTab.id } : {},
       });
@@ -339,9 +339,9 @@ function LaboratoryPageContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Laboratory}
       className="flex h-[--content-height] flex-col pb-0"
     >
@@ -359,11 +359,11 @@ function LaboratoryPageContent(props: {
           <div>
             {query.data && !query.data.target?.graphqlEndpointUrl ? (
               <RouterLink
-                to="/$organizationId/$projectId/$targetId/settings"
+                to="/$organizationSlug/$projectSlug/$targetSlug/settings"
                 params={{
-                  organizationId: props.organizationId,
-                  projectId: props.projectId,
-                  targetId: props.targetId,
+                  organizationSlug: props.organizationSlug,
+                  projectSlug: props.projectSlug,
+                  targetSlug: props.targetSlug,
                 }}
                 search={{ page: 'general' }}
               >
@@ -468,9 +468,9 @@ function LaboratoryPageContent(props: {
             {({ prettify }) => (
               <>
                 <Save
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                 />
                 <Share />
                 {prettify}
@@ -490,9 +490,9 @@ function LaboratoryPageContent(props: {
 }
 
 export function TargetLaboratoryPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   return (
     <>

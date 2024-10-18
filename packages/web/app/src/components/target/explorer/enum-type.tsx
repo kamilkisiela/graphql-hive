@@ -36,9 +36,9 @@ const GraphQLEnumTypeComponent_TypeFragment = graphql(`
 export function GraphQLEnumTypeComponent(props: {
   type: FragmentType<typeof GraphQLEnumTypeComponent_TypeFragment>;
   totalRequests?: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   styleDeprecated: boolean;
 }) {
   const ttype = useFragment(GraphQLEnumTypeComponent_TypeFragment, props.type);
@@ -48,9 +48,9 @@ export function GraphQLEnumTypeComponent(props: {
       kind="enum"
       description={ttype.description}
       supergraphMetadata={ttype.supergraphMetadata}
-      targetCleanId={props.targetCleanId}
-      projectCleanId={props.projectCleanId}
-      organizationCleanId={props.organizationCleanId}
+      targetSlug={props.targetSlug}
+      projectSlug={props.projectSlug}
+      organizationSlug={props.organizationSlug}
     >
       <div className="flex flex-col">
         {ttype.values.map((value, i) => (
@@ -61,9 +61,9 @@ export function GraphQLEnumTypeComponent(props: {
                 deprecationReason={value.deprecationReason}
               >
                 <LinkToCoordinatePage
-                  organizationId={props.organizationCleanId}
-                  projectId={props.projectCleanId}
-                  targetId={props.targetCleanId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   coordinate={`${ttype.name}.${value.name}`}
                 >
                   {value.name}
@@ -72,9 +72,9 @@ export function GraphQLEnumTypeComponent(props: {
             </div>
             {value.supergraphMetadata ? (
               <SupergraphMetadataList
-                targetId={props.targetCleanId}
-                projectId={props.projectCleanId}
-                organizationId={props.organizationCleanId}
+                targetSlug={props.targetSlug}
+                projectSlug={props.projectSlug}
+                organizationSlug={props.organizationSlug}
                 supergraphMetadata={value.supergraphMetadata}
               />
             ) : null}
@@ -82,9 +82,9 @@ export function GraphQLEnumTypeComponent(props: {
               <SchemaExplorerUsageStats
                 totalRequests={props.totalRequests}
                 usage={value.usage}
-                targetCleanId={props.targetCleanId}
-                projectCleanId={props.projectCleanId}
-                organizationCleanId={props.organizationCleanId}
+                targetSlug={props.targetSlug}
+                projectSlug={props.projectSlug}
+                organizationSlug={props.organizationSlug}
               />
             ) : null}
           </GraphQLTypeCardListItem>

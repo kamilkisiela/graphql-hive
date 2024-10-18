@@ -161,9 +161,9 @@ function OrganizationMemberRoleSwitcher(props: {
           try {
             const result = await assignRole({
               input: {
-                organization: organization.slug,
-                role: role.id,
-                user: member.user.id,
+                organizationSlug: organization.slug,
+                roleId: role.id,
+                userId: member.user.id,
               },
             });
 
@@ -384,8 +384,8 @@ function OrganizationMemberRow(props: {
                   try {
                     const result = await deleteMember({
                       input: {
-                        organization: organization.slug,
-                        user: member.user.id,
+                        organizationSlug: organization.slug,
+                        userId: member.user.id,
                       },
                     });
 

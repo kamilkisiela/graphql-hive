@@ -436,7 +436,7 @@ export function AdminStats({
   );
 
   return (
-    <DataWrapper query={query} organizationId={null}>
+    <DataWrapper query={query} organizationSlug={null}>
       {({ data }) => (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between rounded-md border border-gray-800 bg-gray-900/50 p-5">

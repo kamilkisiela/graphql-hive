@@ -52,9 +52,9 @@ const ApproveFailedSchemaCheckMutation = graphql(`
 `);
 
 function ApproveFailedSchemaCheckModal(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   schemaCheckId: string;
   contextId: string | null | undefined;
   onClose(): void;
@@ -137,9 +137,9 @@ function ApproveFailedSchemaCheckModal(props: {
               onClick={() =>
                 approve({
                   input: {
-                    organization: props.organizationId,
-                    project: props.projectId,
-                    target: props.targetId,
+                    organizationSlug: props.organizationSlug,
+                    projectSlug: props.projectSlug,
+                    targetSlug: props.targetSlug,
                     schemaCheckId: props.schemaCheckId,
                     comment: approvalComment,
                   },
@@ -411,9 +411,9 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
 function DefaultSchemaView(props: {
   schemaCheck: FragmentType<typeof DefaultSchemaView_SchemaCheckFragment>;
   projectType: ProjectType;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
   const [selectedView, setSelectedView] = useState<string>('details');
@@ -495,9 +495,9 @@ function DefaultSchemaView(props: {
             {schemaCheck.breakingSchemaChanges?.nodes.length ? (
               <div className="mb-5">
                 <ChangesBlock
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   schemaCheckId={schemaCheck.id}
                   title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
@@ -509,9 +509,9 @@ function DefaultSchemaView(props: {
             {schemaCheck.safeSchemaChanges ? (
               <div className="mb-5">
                 <ChangesBlock
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   schemaCheckId={schemaCheck.id}
                   title="Safe Changes"
                   criticality={CriticalityLevel.Safe}
@@ -620,9 +620,9 @@ function ContractCheckView(props: {
   contractCheck: FragmentType<typeof ContractCheckView_ContractCheckFragment>;
   schemaCheck: FragmentType<typeof ContractCheckView_SchemaCheckFragment>;
   projectType: ProjectType;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
   const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
@@ -690,9 +690,9 @@ function ContractCheckView(props: {
             {contractCheck.breakingSchemaChanges?.nodes.length && (
               <div className="mb-2">
                 <ChangesBlock
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   schemaCheckId={schemaCheck.id}
                   title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
@@ -704,9 +704,9 @@ function ContractCheckView(props: {
             {contractCheck.safeSchemaChanges && (
               <div className="mb-2">
                 <ChangesBlock
-                  organizationId={props.organizationId}
-                  projectId={props.projectId}
-                  targetId={props.targetId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   schemaCheckId={schemaCheck.id}
                   title="Safe Changes"
                   criticality={CriticalityLevel.Safe}
@@ -839,9 +839,9 @@ const SchemaChecksView_SchemaCheckFragment = graphql(`
 function SchemaChecksView(props: {
   schemaCheck: FragmentType<typeof SchemaChecksView_SchemaCheckFragment>;
   projectType: ProjectType;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const schemaCheck = useFragment(SchemaChecksView_SchemaCheckFragment, props.schemaCheck);
 
@@ -943,18 +943,18 @@ function SchemaChecksView(props: {
       </Tabs>
       {selectedContractCheckNode ? (
         <ContractCheckView
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
           contractCheck={selectedContractCheckNode}
           schemaCheck={schemaCheck}
           projectType={props.projectType}
         />
       ) : (
         <DefaultSchemaView
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
           schemaCheck={schemaCheck}
           projectType={props.projectType}
         />
@@ -1002,18 +1002,24 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
 
 const ActiveSchemaCheckQuery = graphql(`
   query ActiveSchemaCheck_ActiveSchemaCheckQuery(
-    $organizationId: ID!
-    $projectId: ID!
-    $targetId: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $schemaCheckId: ID!
   ) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       schemaCheck(id: $schemaCheckId) {
         ...ActiveSchemaCheck_SchemaCheckFragment
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organizationSlug: $organizationSlug, projectSlug: $projectSlug }) {
       id
       type
     }
@@ -1022,17 +1028,17 @@ const ActiveSchemaCheckQuery = graphql(`
 
 const ActiveSchemaCheck = (props: {
   schemaCheckId: string | null;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): React.ReactElement | null => {
   const { schemaCheckId } = props;
   const [query] = useQuery({
     query: ActiveSchemaCheckQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
-      targetId: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       schemaCheckId: schemaCheckId ?? '',
     },
     pause: !schemaCheckId,
@@ -1121,9 +1127,9 @@ const ActiveSchemaCheck = (props: {
                     <PopoverArrow />
                     <ApproveFailedSchemaCheckModal
                       onClose={() => setApprovalOpen(false)}
-                      organizationId={props.organizationId}
-                      projectId={props.projectId}
-                      targetId={props.targetId}
+                      organizationSlug={props.organizationSlug}
+                      projectSlug={props.projectSlug}
+                      targetSlug={props.targetSlug}
                       schemaCheckId={schemaCheck.id}
                       contextId={schemaCheck.contextId}
                     />
@@ -1173,9 +1179,9 @@ const ActiveSchemaCheck = (props: {
         ) : null}
       </div>
       <SchemaChecksView
-        organizationId={props.organizationId}
-        projectId={props.projectId}
-        targetId={props.targetId}
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+        targetSlug={props.targetSlug}
         schemaCheck={schemaCheck}
         projectType={query.data.project.type}
       />
@@ -1184,18 +1190,18 @@ const ActiveSchemaCheck = (props: {
 };
 
 export function TargetChecksSinglePage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   schemaCheckId: string;
 }) {
   return (
     <>
       <Meta title={`Schema check ${props.schemaCheckId}`} />
       <ActiveSchemaCheck
-        organizationId={props.organizationId}
-        projectId={props.projectId}
-        targetId={props.targetId}
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+        targetSlug={props.targetSlug}
         schemaCheckId={props.schemaCheckId}
       />
     </>

@@ -25,7 +25,7 @@ const OrganizationPermissions_UpdateMemberAccessMutation = graphql(`
   ) {
     updateOrganizationMemberAccess(input: $input) {
       selector {
-        organization
+        organizationSlug
       }
       organization {
         id
@@ -312,8 +312,8 @@ export function usePermissionsManager({
       setState('LOADING');
       const result = await mutate({
         input: {
-          organization: organization.slug,
-          user: member.user.id,
+          organizationSlug: organization.slug,
+          userId: member.user.id,
           targetScopes,
           projectScopes,
           organizationScopes,

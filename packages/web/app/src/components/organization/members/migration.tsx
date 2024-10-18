@@ -82,7 +82,7 @@ export function MemberRoleMigrationStickyNote(props: {
   const isMembersView =
     // @ts-expect-error - it's missing the `search` property, but it's fine, it works correctly
     router.matchRoute({
-      to: '/$organizationId/view/members',
+      to: '/$organizationSlug/view/members',
     }) !== false;
 
   if (
@@ -107,9 +107,9 @@ export function MemberRoleMigrationStickyNote(props: {
         {daysLeft.current} {daysLeft.current > 1 ? 'days' : 'day'} left to{' '}
         <Link
           className="underline underline-offset-4"
-          to="/$organizationId/view/members"
+          to="/$organizationSlug/view/members"
           params={{
-            organizationId: organization.slug,
+            organizationSlug: organization.slug,
           }}
           search={{
             page: 'migration',
@@ -396,7 +396,7 @@ const OrganizationMemberRolesMigrationGroup_Migrate = graphql(`
 `);
 
 function OrganizationMemberRolesMigrationGroup(props: {
-  organizationCleanId: string;
+  organizationSlug: string;
   memberGroup: FragmentType<typeof OrganizationMemberRolesMigrationGroup_MemberRoleMigrationGroup>;
   roles: readonly {
     id: string;
@@ -459,14 +459,14 @@ function OrganizationMemberRolesMigrationGroup(props: {
           'roleId' in data
             ? {
                 assignRole: {
-                  organization: props.organizationCleanId,
-                  role: data.roleId,
-                  users: data.users,
+                  organizationSlug: props.organizationSlug,
+                  roleId: data.roleId,
+                  userIds: data.users,
                 },
               }
             : {
                 createRole: {
-                  organization: props.organizationCleanId,
+                  organizationSlug: props.organizationSlug,
                   name: data.name,
                   description: data.description,
                   organizationScopes: data.organizationScopes.filter(
@@ -479,7 +479,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
                   targetScopes: data.targetScopes.filter((s): s is TargetAccessScope =>
                     Object.values(TargetAccessScope).includes(s as TargetAccessScope),
                   ),
-                  users: data.users,
+                  userIds: data.users,
                 },
               },
       });
@@ -888,7 +888,7 @@ export function OrganizationMemberRolesMigration(props: {
                 key={memberGroup.id}
                 memberGroup={memberGroup}
                 roles={organization.memberRoles}
-                organizationCleanId={organization.slug}
+                organizationSlug={organization.slug}
               />
             ))}
           </tbody>

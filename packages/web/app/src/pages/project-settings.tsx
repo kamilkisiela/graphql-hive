@@ -67,9 +67,7 @@ const GithubIntegration_EnableProjectNameInGitHubCheckMutation = graphql(`
 `);
 
 function GitHubIntegration(props: {
-  organizationId: string;
   organizationSlug: string;
-  projectId: string;
   projectSlug: string;
 }): ReactElement | null {
   const docksLink = getDocsUrl('integrations/ci-cd#github-workflow-for-ci');
@@ -78,7 +76,7 @@ function GitHubIntegration(props: {
     query: GithubIntegration_GithubIntegrationDetailsQuery,
     variables: {
       selector: {
-        organization: props.organizationId,
+        organizationSlug: props.organizationSlug,
       },
     },
   });
@@ -151,8 +149,8 @@ function GitHubIntegration(props: {
               onClick={() => {
                 void ghCheckMutate({
                   input: {
-                    organization: props.organizationId,
-                    project: props.projectId,
+                    organizationSlug: props.organizationSlug,
+                    projectSlug: props.projectSlug,
                   },
                 }).then(
                   result => {
@@ -182,8 +180,8 @@ const ProjectSettingsPage_UpdateProjectSlugMutation = graphql(`
     updateProjectSlug(input: $input) {
       ok {
         selector {
-          organization
-          project
+          organizationSlug
+          projectSlug
         }
         project {
           id
@@ -209,10 +207,7 @@ const SlugFormSchema = z.object({
 
 type SlugFormValues = z.infer<typeof SlugFormSchema>;
 
-function ProjectSettingsPage_SlugForm(props: {
-  organizationCleanId: string;
-  projectCleanId: string;
-}) {
+function ProjectSettingsPage_SlugForm(props: { organizationSlug: string; projectSlug: string }) {
   const { toast } = useToast();
   const router = useRouter();
   const [_slugMutation, slugMutate] = useMutation(ProjectSettingsPage_UpdateProjectSlugMutation);
@@ -221,7 +216,7 @@ function ProjectSettingsPage_SlugForm(props: {
     mode: 'all',
     resolver: zodResolver(SlugFormSchema),
     defaultValues: {
-      slug: props.projectCleanId,
+      slug: props.projectSlug,
     },
   });
 
@@ -230,8 +225,8 @@ function ProjectSettingsPage_SlugForm(props: {
       try {
         const result = await slugMutate({
           input: {
-            organization: props.organizationCleanId,
-            project: props.projectCleanId,
+            organizationSlug: props.organizationSlug,
+            projectSlug: props.projectSlug,
             slug: data.slug,
           },
         });
@@ -245,10 +240,10 @@ function ProjectSettingsPage_SlugForm(props: {
             description: 'Project slug updated',
           });
           void router.navigate({
-            to: '/$organizationId/$projectId/view/settings',
+            to: '/$organizationSlug/$projectSlug/view/settings',
             params: {
-              organizationId: props.organizationCleanId,
-              projectId: result.data.updateProjectSlug.ok.project.slug,
+              organizationSlug: props.organizationSlug,
+              projectSlug: result.data.updateProjectSlug.ok.project.slug,
             },
           });
         } else if (error) {
@@ -293,7 +288,7 @@ function ProjectSettingsPage_SlugForm(props: {
                   <FormControl>
                     <div className="flex items-center">
                       <div className="border-input text-muted-foreground h-10 rounded-md rounded-r-none border-y border-l bg-gray-900 px-3 py-2 text-sm">
-                        {env.appBaseUrl.replace(/https?:\/\//i, '')}/{props.organizationCleanId}/
+                        {env.appBaseUrl.replace(/https?:\/\//i, '')}/{props.organizationSlug}/
                       </div>
                       <Input placeholder="slug" className="w-48 rounded-l-none" {...field} />
                     </div>
@@ -339,26 +334,26 @@ const ProjectSettingsPage_ProjectFragment = graphql(`
 `);
 
 const ProjectSettingsPageQuery = graphql(`
-  query ProjectSettingsPageQuery($organizationId: ID!, $projectId: ID!) {
-    organization(selector: { organization: $organizationId }) {
+  query ProjectSettingsPageQuery($organizationSlug: String!, $projectSlug: String!) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         ...ProjectSettingsPage_OrganizationFragment
       }
     }
-    project(selector: { organization: $organizationId, project: $projectId }) {
+    project(selector: { organizationSlug: $organizationSlug, projectSlug: $projectSlug }) {
       ...ProjectSettingsPage_ProjectFragment
     }
     isGitHubIntegrationFeatureEnabled
   }
 `);
 
-function ProjectSettingsContent(props: { organizationId: string; projectId: string }) {
+function ProjectSettingsContent(props: { organizationSlug: string; projectSlug: string }) {
   const [isModalOpen, toggleModalOpen] = useToggle();
   const [query] = useQuery({
     query: ProjectSettingsPageQuery,
     variables: {
-      organizationId: props.organizationId,
-      projectId: props.projectId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
     },
     requestPolicy: 'cache-and-network',
   });
@@ -372,18 +367,18 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
     scope: ProjectAccessScope.Settings,
     member: organization?.me ?? null,
     redirect: true,
-    organizationId: props.organizationId,
-    projectId: props.projectId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   return (
     <ProjectLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
       page={Page.Settings}
       className="flex flex-col gap-y-10"
     >
@@ -396,17 +391,15 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
           <div className="flex flex-col gap-y-4">
             {project && organization ? (
               <>
-                <ModelMigrationSettings project={project} organizationId={organization.slug} />
+                <ModelMigrationSettings project={project} organizationSlug={organization.slug} />
                 <ProjectSettingsPage_SlugForm
-                  organizationCleanId={props.organizationId}
-                  projectCleanId={props.projectId}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
                 />
                 {query.data?.isGitHubIntegrationFeatureEnabled &&
                 !project.isProjectNameInGitHubCheckEnabled ? (
                   <GitHubIntegration
-                    organizationId={props.organizationId}
                     organizationSlug={organization.slug}
-                    projectId={props.projectId}
                     projectSlug={project.slug}
                   />
                 ) : null}
@@ -444,8 +437,8 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
                   </Card>
                 )}
                 <DeleteProjectModal
-                  projectId={props.projectId}
-                  organizationId={props.organizationId}
+                  projectSlug={props.projectSlug}
+                  organizationSlug={props.organizationSlug}
                   isOpen={isModalOpen}
                   toggleModalOpen={toggleModalOpen}
                 />
@@ -458,11 +451,14 @@ function ProjectSettingsContent(props: { organizationId: string; projectId: stri
   );
 }
 
-export function ProjectSettingsPage(props: { organizationId: string; projectId: string }) {
+export function ProjectSettingsPage(props: { organizationSlug: string; projectSlug: string }) {
   return (
     <>
       <Meta title="Project settings" />
-      <ProjectSettingsContent organizationId={props.organizationId} projectId={props.projectId} />
+      <ProjectSettingsContent
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+      />
     </>
   );
 }
@@ -471,8 +467,8 @@ export const DeleteProjectMutation = graphql(`
   mutation deleteProject($selector: ProjectSelectorInput!) {
     deleteProject(selector: $selector) {
       selector {
-        organization
-        project
+        organizationSlug
+        projectSlug
       }
       deletedProject {
         __typename
@@ -485,10 +481,10 @@ export const DeleteProjectMutation = graphql(`
 export function DeleteProjectModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
 }) {
-  const { organizationId, projectId } = props;
+  const { organizationSlug, projectSlug } = props;
   const [, mutate] = useMutation(DeleteProjectMutation);
   const { toast } = useToast();
   const router = useRouter();
@@ -496,8 +492,8 @@ export function DeleteProjectModal(props: {
   const handleDelete = async () => {
     const { error } = await mutate({
       selector: {
-        organization: organizationId,
-        project: projectId,
+        organizationSlug,
+        projectSlug,
       },
     });
 
@@ -514,9 +510,9 @@ export function DeleteProjectModal(props: {
       });
       props.toggleModalOpen();
       void router.navigate({
-        to: '/$organizationId',
+        to: '/$organizationSlug',
         params: {
-          organizationId,
+          organizationSlug,
         },
       });
     }

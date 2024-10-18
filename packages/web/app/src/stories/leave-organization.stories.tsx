@@ -23,7 +23,7 @@ export const Default: Story = {
           <LeaveOrganizationModalContent
             isOpen={openModal}
             onSubmit={() => console.log('submit')}
-            organizationCleanId="test-organization"
+            organizationSlug="test-organization"
             toggleModalOpen={toggleModalOpen}
           />
         )}

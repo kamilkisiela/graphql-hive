@@ -28,9 +28,9 @@ const GraphQLUnionTypeComponent_TypeFragment = graphql(`
 export function GraphQLUnionTypeComponent(props: {
   type: FragmentType<typeof GraphQLUnionTypeComponent_TypeFragment>;
   totalRequests?: number;
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const ttype = useFragment(GraphQLUnionTypeComponent_TypeFragment, props.type);
   return (
@@ -39,9 +39,9 @@ export function GraphQLUnionTypeComponent(props: {
       kind="union"
       description={ttype.description}
       supergraphMetadata={ttype.supergraphMetadata}
-      targetCleanId={props.targetCleanId}
-      projectCleanId={props.projectCleanId}
-      organizationCleanId={props.organizationCleanId}
+      targetSlug={props.targetSlug}
+      projectSlug={props.projectSlug}
+      organizationSlug={props.organizationSlug}
     >
       <div className="flex flex-col">
         {ttype.members.map((member, i) => (
@@ -51,16 +51,16 @@ export function GraphQLUnionTypeComponent(props: {
               <SchemaExplorerUsageStats
                 totalRequests={props.totalRequests}
                 usage={member.usage}
-                targetCleanId={props.targetCleanId}
-                projectCleanId={props.projectCleanId}
-                organizationCleanId={props.organizationCleanId}
+                targetSlug={props.targetSlug}
+                projectSlug={props.projectSlug}
+                organizationSlug={props.organizationSlug}
               />
             ) : null}
             {member.supergraphMetadata ? (
               <SupergraphMetadataList
-                targetId={props.targetCleanId}
-                projectId={props.projectCleanId}
-                organizationId={props.organizationCleanId}
+                targetSlug={props.targetSlug}
+                projectSlug={props.projectSlug}
+                organizationSlug={props.organizationSlug}
                 supergraphMetadata={member.supergraphMetadata}
               />
             ) : null}

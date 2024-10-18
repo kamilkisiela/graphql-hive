@@ -5,7 +5,7 @@ import { QueryError } from '@/components/ui/query-error';
 export class DataWrapper<TData, TVariables extends AnyVariables> extends Component<{
   query: UseQueryState<TData, TVariables>;
   showStale?: boolean;
-  organizationId: string | null;
+  organizationSlug: string | null;
   children(props: { data: TData }): ReactNode;
   spinnerComponent?: ReactNode;
 }> {
@@ -17,7 +17,7 @@ export class DataWrapper<TData, TVariables extends AnyVariables> extends Compone
     }
 
     if (error) {
-      return <QueryError organizationId={this.props.organizationId} error={error} />;
+      return <QueryError organizationSlug={this.props.organizationSlug} error={error} />;
     }
 
     if (!data) {

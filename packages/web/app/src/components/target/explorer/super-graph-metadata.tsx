@@ -18,17 +18,17 @@ function stringToHslColor(str: string, s = 30, l = 80) {
 function SubgraphChip(props: {
   text: string;
   tooltip: boolean;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): React.ReactElement {
   const inner = (
     <Link
-      to="/$organizationId/$projectId/$targetId"
+      to="/$organizationSlug/$projectSlug/$targetSlug"
       params={{
-        organizationId: props.organizationId,
-        projectId: props.projectId,
-        targetId: props.targetId,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
       }}
       // TODO(router)
       hash={`service-${props.text}`}
@@ -67,9 +67,9 @@ const tooltipColor = 'rgb(36, 39, 46)';
 const previewThreshold = 3;
 
 export function SupergraphMetadataList(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   supergraphMetadata: FragmentType<typeof SupergraphMetadataList_SupergraphMetadataFragment>;
 }) {
   const supergraphMetadata = useFragment(
@@ -86,9 +86,9 @@ export function SupergraphMetadataList(props: {
       return [
         supergraphMetadata.ownedByServiceNames.map((serviceName, index) => (
           <SubgraphChip
-            organizationId={props.organizationId}
-            projectId={props.projectId}
-            targetId={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
             key={`${serviceName}-${index}`}
             text={serviceName}
             tooltip
@@ -103,9 +103,9 @@ export function SupergraphMetadataList(props: {
         .slice(0, previewThreshold)
         .map((serviceName, index) => (
           <SubgraphChip
-            organizationId={props.organizationId}
-            projectId={props.projectId}
-            targetId={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
             key={`${serviceName}-${index}`}
             text={serviceName}
             tooltip
@@ -113,9 +113,9 @@ export function SupergraphMetadataList(props: {
         )),
       supergraphMetadata.ownedByServiceNames.map((serviceName, index) => (
         <SubgraphChip
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
           key={`${serviceName}-${index}`}
           text={serviceName}
           tooltip={false}

@@ -10,16 +10,16 @@ export const deleteTarget: NonNullable<MutationResolvers['deleteTarget']> = asyn
   const translator = injector.get(IdTranslator);
   const [organizationId, projectId, targetId] = await Promise.all([
     translator.translateOrganizationId({
-      organization: selector.organization,
+      organizationSlug: selector.organizationSlug,
     }),
     translator.translateProjectId({
-      organization: selector.organization,
-      project: selector.project,
+      organizationSlug: selector.organizationSlug,
+      projectSlug: selector.projectSlug,
     }),
     translator.translateTargetId({
-      organization: selector.organization,
-      project: selector.project,
-      target: selector.target,
+      organizationSlug: selector.organizationSlug,
+      projectSlug: selector.projectSlug,
+      targetSlug: selector.targetSlug,
     }),
   ]);
   const target = await injector.get(TargetManager).deleteTarget({
@@ -29,9 +29,9 @@ export const deleteTarget: NonNullable<MutationResolvers['deleteTarget']> = asyn
   });
   return {
     selector: {
-      organization: organizationId,
-      project: projectId,
-      target: targetId,
+      organizationSlug: selector.organizationSlug,
+      projectSlug: selector.projectSlug,
+      targetSlug: selector.targetSlug,
     },
     deletedTarget: target,
   };

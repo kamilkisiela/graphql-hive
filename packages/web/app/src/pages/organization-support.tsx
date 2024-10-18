@@ -75,7 +75,7 @@ const NewTicketForm_SupportTicketCreateMutation = graphql(`
 `);
 
 function NewTicketForm(props: {
-  organizationId: string;
+  organizationSlug: string;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: () => void;
@@ -104,7 +104,7 @@ function NewTicketForm(props: {
     try {
       const result = await mutate({
         input: {
-          organization: props.organizationId,
+          organizationSlug: props.organizationSlug,
           subject: data.subject,
           priority: data.priority,
           description: data.description,
@@ -254,7 +254,7 @@ const SupportTicketRow_SupportTicket = graphql(`
 `);
 
 function SupportTicketRow(props: {
-  organizationId: string;
+  organizationSlug: string;
   ticket: FragmentType<typeof SupportTicketRow_SupportTicket>;
 }) {
   const ticket = useFragment(SupportTicketRow_SupportTicket, props.ticket);
@@ -270,8 +270,8 @@ function SupportTicketRow(props: {
           asChild
         >
           <Link
-            to="/$organizationId/view/support/ticket/$ticketId"
-            params={{ organizationId: props.organizationId, ticketId: ticket.id }}
+            to="/$organizationSlug/view/support/ticket/$ticketId"
+            params={{ organizationSlug: props.organizationSlug, ticketId: ticket.id }}
           >
             {ticket.subject}
           </Link>
@@ -333,7 +333,7 @@ function Support(props: {
     scope: OrganizationAccessScope.Read,
     member: organization.me,
     redirect: true,
-    organizationId: organization.slug,
+    organizationSlug: organization.slug,
   });
 
   const tickets = supportTicketsConnection?.edges.map(e => e.node);
@@ -354,7 +354,7 @@ function Support(props: {
             <NewTicketForm
               isOpen={isOpen}
               onClose={toggle}
-              organizationId={organization.slug}
+              organizationSlug={organization.slug}
               onSubmit={onSubmit}
             />
           </div>
@@ -374,7 +374,7 @@ function Support(props: {
               {(tickets ?? []).map(ticket => (
                 <SupportTicketRow
                   key={ticket.id}
-                  organizationId={organization.slug}
+                  organizationSlug={organization.slug}
                   ticket={ticket}
                 />
               ))}
@@ -396,12 +396,12 @@ const SupportPageQuery = graphql(`
   }
 `);
 
-function SupportPageContent(props: { organizationId: string }) {
+function SupportPageContent(props: { organizationSlug: string }) {
   const [query, refetchQuery] = useQuery({
     query: SupportPageQuery,
     variables: {
       selector: {
-        organization: props.organizationId,
+        organizationSlug: props.organizationSlug,
       },
     },
     requestPolicy: 'cache-first',
@@ -412,7 +412,7 @@ function SupportPageContent(props: { organizationId: string }) {
   }, [refetchQuery]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -420,7 +420,7 @@ function SupportPageContent(props: { organizationId: string }) {
   return (
     <OrganizationLayout
       page={Page.Support}
-      organizationId={props.organizationId}
+      organizationSlug={props.organizationSlug}
       className="flex flex-col gap-y-10"
     >
       {currentOrganization ? (
@@ -430,11 +430,11 @@ function SupportPageContent(props: { organizationId: string }) {
   );
 }
 
-export function OrganizationSupportPage(props: { organizationId: string }) {
+export function OrganizationSupportPage(props: { organizationSlug: string }) {
   return (
     <>
       <Meta title="Support" />
-      <SupportPageContent organizationId={props.organizationId} />
+      <SupportPageContent organizationSlug={props.organizationSlug} />
     </>
   );
 }

@@ -1,5 +1,4 @@
 import { Injectable, Scope } from 'graphql-modules';
-import type { AlertsModule } from '../__generated__/types';
 import type { Alert, AlertChannel } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
@@ -38,54 +37,74 @@ export class AlertsManager {
     this.logger = logger.child({ source: 'AlertsManager' });
   }
 
-  async addChannel(input: AlertsModule.AddAlertChannelInput): Promise<AlertChannel> {
+  async addChannel(input: {
+    name: string;
+    organizationId: string;
+    projectId: string;
+    type: AlertChannel['type'];
+    slackChannel?: string | null;
+    webhookEndpoint?: string | null;
+  }): Promise<AlertChannel> {
     this.logger.debug(
       'Adding Alert Channel (organization=%s, project=%s, type=%s)',
-      input.organization,
-      input.project,
+      input.organizationId,
+      input.projectId,
       input.type,
     );
     await this.authManager.ensureProjectAccess({
-      ...input,
       scope: ProjectAccessScope.ALERTS,
+      organization: input.organizationId,
+      project: input.projectId,
     });
 
-    const channel = await this.storage.addAlertChannel(input);
+    const channel = await this.storage.addAlertChannel({
+      slackChannel: input.slackChannel,
+      webhookEndpoint: input.webhookEndpoint,
+      name: input.name,
+      type: input.type,
+      organizationId: input.organizationId,
+      projectId: input.projectId,
+    });
 
     await this.triggerChannelConfirmation({
       kind: 'created',
       channel,
-      organization: input.organization,
-      project: input.project,
+      organization: input.organizationId,
+      project: input.projectId,
     });
 
     return channel;
   }
 
-  async deleteChannels(
-    input: ProjectSelector & {
-      channels: readonly string[];
-    },
-  ): Promise<readonly AlertChannel[]> {
+  async deleteChannels(input: {
+    channelIds: readonly string[];
+    organizationId: string;
+    projectId: string;
+  }): Promise<readonly AlertChannel[]> {
     this.logger.debug(
       'Deleting Alert Channels (organization=%s, project=%s, size=%s)',
-      input.organization,
-      input.project,
-      input.channels.length,
+      input.organizationId,
+      input.projectId,
+      input.channelIds.length,
     );
     await this.authManager.ensureProjectAccess({
-      ...input,
       scope: ProjectAccessScope.ALERTS,
+      organization: input.organizationId,
+      project: input.projectId,
     });
-    const channels = await this.storage.deleteAlertChannels(input);
+    const channels = await this.storage.deleteAlertChannels({
+      organizationId: input.organizationId,
+      projectId: input.projectId,
+      channelIds: input.channelIds,
+    });
 
     await Promise.all(
       channels.map(channel =>
         this.triggerChannelConfirmation({
           kind: 'deleted',
           channel,
-          organization: input.organization,
-          project: input.project,
+          organization: input.organizationId,
+          project: input.projectId,
         }),
       ),
     );
@@ -107,19 +126,32 @@ export class AlertsManager {
     return this.storage.getAlertChannels(selector);
   }
 
-  async addAlert(input: AlertsModule.AddAlertInput): Promise<Alert> {
+  async addAlert(input: {
+    type: Alert['type'];
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    channelId: string;
+  }): Promise<Alert> {
     this.logger.debug(
       'Adding Alert (organization=%s, project=%s, type=%s)',
-      input.organization,
-      input.project,
+      input.organizationId,
+      input.projectId,
       input.type,
     );
     await this.authManager.ensureProjectAccess({
-      ...input,
       scope: ProjectAccessScope.ALERTS,
+      organization: input.organizationId,
+      project: input.projectId,
     });
 
-    return this.storage.addAlert(input);
+    return this.storage.addAlert({
+      type: input.type,
+      channelId: input.channelId,
+      organizationId: input.organizationId,
+      projectId: input.projectId,
+      targetId: input.targetId,
+    });
   }
 
   async deleteAlerts(

@@ -20,13 +20,13 @@ export const DeleteAlertsButton_DeleteAlertsMutation = graphql(`
 export function DeleteAlertsButton({
   selected,
   onSuccess,
-  organizationId,
-  projectId,
+  organizationSlug,
+  projectSlug,
 }: {
   selected: string[];
   onSuccess(): void;
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
 }) {
   const [mutation, mutate] = useMutation(DeleteAlertsButton_DeleteAlertsMutation);
 
@@ -37,9 +37,9 @@ export function DeleteAlertsButton({
       onClick={async () => {
         await mutate({
           input: {
-            organization: organizationId,
-            project: projectId,
-            alerts: selected,
+            organizationSlug,
+            projectSlug,
+            alertIds: selected,
           },
         });
         onSuccess();

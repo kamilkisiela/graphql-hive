@@ -20,7 +20,7 @@ export const updateTargetValidationSettings: NonNullable<
   const UpdateTargetValidationSettingsModel = z.object({
     percentage: PercentageModel,
     period: z.number().min(1).max(org.monthlyRateLimit.retentionInDays).int(),
-    targets: z.array(z.string()).min(1),
+    targetIds: z.array(z.string()).min(1),
     excludedClients: z.optional(z.array(z.string())),
   });
 
@@ -45,7 +45,7 @@ export const updateTargetValidationSettings: NonNullable<
     target,
     project,
     organization,
-    targets: result.data.targets,
+    targets: result.data.targetIds,
     excludedClients: result.data.excludedClients ?? [],
   });
 

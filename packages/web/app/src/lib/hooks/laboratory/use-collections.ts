@@ -39,9 +39,9 @@ export type DocumentCollectionOperation = Exclude<
 const EMPTY_ARRAY: DocumentCollectionOperation[] = [];
 
 export function useCollections(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): {
   fetching: boolean;
   collections: DocumentCollectionOperation[];
@@ -50,9 +50,9 @@ export function useCollections(props: {
     query: CollectionsQuery,
     variables: {
       selector: {
-        target: props.targetId,
-        organization: props.organizationId,
-        project: props.projectId,
+        targetSlug: props.targetSlug,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
       },
     },
   });

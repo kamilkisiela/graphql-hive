@@ -14,8 +14,8 @@ const CallBackQuery = z.object({
 });
 
 const ConnectParams = z.object({
-  organizationId: z.string({
-    required_error: 'Invalid organizationId',
+  organizationSlug: z.string({
+    required_error: 'Invalid organizationSlug',
   }),
 });
 
@@ -32,9 +32,9 @@ export function connectSlack(server: FastifyInstance) {
       return;
     }
 
-    const { code, state: orgId } = queryResult.data;
+    const { code, state: organizationSlug } = queryResult.data;
 
-    req.log.info('Fetching data from Slack API (orgId=%s)', orgId);
+    req.log.info('Fetching data from Slack API (orgId=%s)', organizationSlug);
 
     const slackResponse = await fetch('https://slack.com/api/oauth.v2.access', {
       method: 'POST',
@@ -66,15 +66,15 @@ export function connectSlack(server: FastifyInstance) {
       `,
       variables: {
         input: {
-          organization: orgId,
+          organizationSlug,
           token,
         },
       },
     });
-    void res.redirect(`/${orgId}/view/settings`);
+    void res.redirect(`/${organizationSlug}/view/settings`);
   });
 
-  server.get('/api/slack/connect/:organizationId', async (req, res) => {
+  server.get('/api/slack/connect/:organizationSlug', async (req, res) => {
     req.log.info('Connect to Slack');
     if (env.slack === null) {
       req.log.error('The Slack integration is not enabled.');
@@ -87,12 +87,12 @@ export function connectSlack(server: FastifyInstance) {
       return;
     }
 
-    const { organizationId } = paramsResult.data;
-    req.log.info('Connect organization to Slack (id=%s)', organizationId);
+    const { organizationSlug } = paramsResult.data;
+    req.log.info('Connect organization to Slack (id=%s)', organizationSlug);
 
     const slackUrl = `https://slack.com/oauth/v2/authorize?scope=incoming-webhook,chat:write,chat:write.public,commands&client_id=${env.slack.clientId}`;
     const redirectUrl = `${env.appBaseUrl}/api/slack/callback`;
 
-    void res.redirect(`${slackUrl}&state=${organizationId}&redirect_uri=${redirectUrl}`);
+    void res.redirect(`${slackUrl}&state=${organizationSlug}&redirect_uri=${redirectUrl}`);
   });
 }

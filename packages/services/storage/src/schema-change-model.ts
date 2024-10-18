@@ -1109,10 +1109,18 @@ export const SchemaCheckModel = z.union([
 export type SchemaCheckInput = z.TypeOf<typeof SchemaCheckInputModel>;
 export type SchemaCheck = z.TypeOf<typeof SchemaCheckModel>;
 
-export const TargetBreadcrumbModel = z.object({
-  organization: z.string(),
-  project: z.string(),
-  target: z.string(),
-});
+export const TargetBreadcrumbModel = z
+  .object({
+    organization_slug: z.string(),
+    project_slug: z.string(),
+    target_slug: z.string(),
+  })
+  .transform(value => {
+    return {
+      organizationSlug: value.organization_slug,
+      projectSlug: value.project_slug,
+      targetSlug: value.target_slug,
+    };
+  });
 
 export type TargetBreadcrumb = z.TypeOf<typeof TargetBreadcrumbModel>;

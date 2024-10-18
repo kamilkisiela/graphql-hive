@@ -79,14 +79,12 @@ const DeleteGitHubIntegrationMutation = graphql(`
   }
 `);
 
-function Integrations(props: { organizationId: string }) {
-  const orgId = props.organizationId;
-
+function Integrations(props: { organizationSlug: string }) {
   const [checkIntegrations] = useQuery({
     query: Integrations_CheckIntegrationsQuery,
     variables: {
       selector: {
-        organization: orgId,
+        organizationSlug: props.organizationSlug,
       },
     },
   });
@@ -116,7 +114,7 @@ function Integrations(props: { organizationId: string }) {
               onClick={async () => {
                 await deleteSlack({
                   input: {
-                    organization: orgId,
+                    organizationSlug: props.organizationSlug,
                   },
                 });
               }}
@@ -126,7 +124,7 @@ function Integrations(props: { organizationId: string }) {
             </Button>
           ) : (
             <Button variant="secondary" asChild>
-              <a href={`/api/slack/connect/${props.organizationId}`}>
+              <a href={`/api/slack/connect/${props.organizationSlug}`}>
                 <SlackIcon className="mr-2" />
                 Connect Slack
               </a>
@@ -146,7 +144,7 @@ function Integrations(props: { organizationId: string }) {
                   onClick={async () => {
                     await deleteGitHub({
                       input: {
-                        organization: orgId,
+                        organizationSlug: props.organizationSlug,
                       },
                     });
                   }}
@@ -155,12 +153,12 @@ function Integrations(props: { organizationId: string }) {
                   Disconnect GitHub
                 </Button>
                 <Button variant="link" asChild>
-                  <a href={`/api/github/connect/${props.organizationId}`}>Adjust permissions</a>
+                  <a href={`/api/github/connect/${props.organizationSlug}`}>Adjust permissions</a>
                 </Button>
               </>
             ) : (
               <Button variant="secondary" asChild>
-                <a href={`/api/github/connect/${props.organizationId}`}>
+                <a href={`/api/github/connect/${props.organizationSlug}`}>
                   <GitHubIcon className="mr-2" />
                   Connect GitHub
                 </a>
@@ -183,7 +181,7 @@ const UpdateOrganizationSlugMutation = graphql(`
       ok {
         updatedOrganizationPayload {
           selector {
-            organization
+            organizationSlug
           }
           organization {
             id
@@ -224,14 +222,14 @@ type SlugFormValues = z.infer<typeof SlugFormSchema>;
 
 const SettingsPageRenderer = (props: {
   organization: FragmentType<typeof SettingsPageRenderer_OrganizationFragment>;
-  organizationId: string;
+  organizationSlug: string;
 }) => {
   const organization = useFragment(SettingsPageRenderer_OrganizationFragment, props.organization);
   const hasAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization.me,
     redirect: true,
-    organizationId: props.organizationId,
+    organizationSlug: props.organizationSlug,
   });
   const router = useRouter();
   const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
@@ -253,7 +251,7 @@ const SettingsPageRenderer = (props: {
       try {
         const result = await slugMutate({
           input: {
-            organization: props.organizationId,
+            organizationSlug: props.organizationSlug,
             slug: data.slug,
           },
         });
@@ -267,9 +265,9 @@ const SettingsPageRenderer = (props: {
             description: 'Organization slug updated',
           });
           void router.navigate({
-            to: '/$organizationId/view/settings',
+            to: '/$organizationSlug/view/settings',
             params: {
-              organizationId:
+              organizationSlug:
                 result.data.updateOrganizationSlug.ok.updatedOrganizationPayload.organization.slug,
             },
           });
@@ -285,7 +283,7 @@ const SettingsPageRenderer = (props: {
         });
       }
     },
-    [slugMutate, props.organizationId],
+    [slugMutate, props.organizationSlug],
   );
 
   return (
@@ -366,7 +364,7 @@ const SettingsPageRenderer = (props: {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-y-4 text-gray-500">
-                  <Integrations organizationId={props.organizationId} />
+                  <Integrations organizationSlug={props.organizationSlug} />
                 </div>
               </CardContent>
             </Card>
@@ -431,7 +429,7 @@ const SettingsPageRenderer = (props: {
                   Delete Organization
                 </Button>
                 <DeleteOrganizationModal
-                  organizationId={props.organizationId}
+                  organizationSlug={props.organizationSlug}
                   isOpen={isDeleteModalOpen}
                   toggleModalOpen={toggleDeleteModalOpen}
                 />
@@ -454,18 +452,18 @@ const OrganizationSettingsPageQuery = graphql(`
   }
 `);
 
-function SettingsPageContent(props: { organizationId: string }) {
+function SettingsPageContent(props: { organizationSlug: string }) {
   const [query] = useQuery({
     query: OrganizationSettingsPageQuery,
     variables: {
       selector: {
-        organization: props.organizationId,
+        organizationSlug: props.organizationSlug,
       },
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -473,12 +471,12 @@ function SettingsPageContent(props: { organizationId: string }) {
   return (
     <OrganizationLayout
       page={Page.Settings}
-      organizationId={props.organizationId}
+      organizationSlug={props.organizationSlug}
       className="flex flex-col gap-y-10"
     >
       {currentOrganization ? (
         <SettingsPageRenderer
-          organizationId={props.organizationId}
+          organizationSlug={props.organizationSlug}
           organization={currentOrganization}
         />
       ) : null}
@@ -486,11 +484,11 @@ function SettingsPageContent(props: { organizationId: string }) {
   );
 }
 
-export function OrganizationSettingsPage(props: { organizationId: string }) {
+export function OrganizationSettingsPage(props: { organizationSlug: string }) {
   return (
     <>
       <Meta title="Organization settings" />
-      <SettingsPageContent organizationId={props.organizationId} />
+      <SettingsPageContent organizationSlug={props.organizationSlug} />
     </>
   );
 }
@@ -499,7 +497,7 @@ export const DeleteOrganizationDocument = graphql(`
   mutation deleteOrganization($selector: OrganizationSelectorInput!) {
     deleteOrganization(selector: $selector) {
       selector {
-        organization
+        organizationSlug
       }
       organization {
         __typename
@@ -512,9 +510,9 @@ export const DeleteOrganizationDocument = graphql(`
 export function DeleteOrganizationModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
+  organizationSlug: string;
 }) {
-  const { organizationId } = props;
+  const { organizationSlug } = props;
   const [, mutate] = useMutation(DeleteOrganizationDocument);
   const { toast } = useToast();
   const router = useRouter();
@@ -522,7 +520,7 @@ export function DeleteOrganizationModal(props: {
   const handleDelete = async () => {
     const { error } = await mutate({
       selector: {
-        organization: organizationId,
+        organizationSlug,
       },
     });
     if (error) {

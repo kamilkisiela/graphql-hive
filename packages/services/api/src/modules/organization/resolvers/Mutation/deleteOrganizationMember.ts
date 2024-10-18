@@ -8,7 +8,7 @@ export const deleteOrganizationMember: NonNullable<
   const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
   const organization = await injector
     .get(OrganizationManager)
-    .deleteMember({ organization: organizationId, user: input.user });
+    .deleteMember({ organization: organizationId, user: input.userId });
 
   return {
     selector: input,

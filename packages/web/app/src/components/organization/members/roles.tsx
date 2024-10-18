@@ -113,7 +113,7 @@ const OrganizationMemberRoleEditor_MeFragment = graphql(`
 function OrganizationMemberRoleEditor(props: {
   mode?: 'edit' | 'read-only';
   close(): void;
-  organizationCleanId: string;
+  organizationSlug: string;
   me: FragmentType<typeof OrganizationMemberRoleEditor_MeFragment>;
   role: FragmentType<typeof OrganizationMemberRoleRow_MemberRoleFragment>;
 }) {
@@ -181,8 +181,8 @@ function OrganizationMemberRoleEditor(props: {
     try {
       const result = await updateMemberRole({
         input: {
-          organization: props.organizationCleanId,
-          role: role.id,
+          organizationSlug: props.organizationSlug,
+          roleId: role.id,
           name: data.name,
           description: data.description,
           organizationAccessScopes: data.organizationScopes.filter(scope =>
@@ -393,7 +393,7 @@ const OrganizationMemberRoleCreator_MeFragment = graphql(`
 
 function OrganizationMemberRoleCreator(props: {
   close(): void;
-  organizationCleanId: string;
+  organizationSlug: string;
   me: FragmentType<typeof OrganizationMemberRoleCreator_MeFragment>;
 }) {
   const me = useFragment(OrganizationMemberRoleCreator_MeFragment, props.me);
@@ -446,7 +446,7 @@ function OrganizationMemberRoleCreator(props: {
     try {
       const result = await createMemberRole({
         input: {
-          organization: props.organizationCleanId,
+          organizationSlug: props.organizationSlug,
           name: data.name,
           description: data.description,
           organizationAccessScopes: data.organizationScopes.filter(scope =>
@@ -601,7 +601,7 @@ function OrganizationMemberRoleCreator(props: {
 }
 
 function OrganizationMemberRoleCreateButton(props: {
-  organizationCleanId: string;
+  organizationSlug: string;
   me: FragmentType<typeof OrganizationMemberRoleCreator_MeFragment>;
 }) {
   const [open, setOpen] = useState(false);
@@ -613,7 +613,7 @@ function OrganizationMemberRoleCreateButton(props: {
       </DialogTrigger>
       {open ? (
         <OrganizationMemberRoleCreator
-          organizationCleanId={props.organizationCleanId}
+          organizationSlug={props.organizationSlug}
           me={props.me}
           close={() => setOpen(false)}
         />
@@ -808,7 +808,7 @@ export function OrganizationMemberRoles(props: {
       >
         {roleToEdit ? (
           <OrganizationMemberRoleEditor
-            organizationCleanId={organization.slug}
+            organizationSlug={organization.slug}
             me={organization.me}
             role={roleToEdit}
             close={() => setRoleToEdit(null)}
@@ -826,7 +826,7 @@ export function OrganizationMemberRoles(props: {
         {roleToShow ? (
           <OrganizationMemberRoleEditor
             mode="read-only"
-            organizationCleanId={organization.slug}
+            organizationSlug={organization.slug}
             me={organization.me}
             role={roleToShow}
             close={() => setRoleToShow(null)}
@@ -860,8 +860,8 @@ export function OrganizationMemberRoles(props: {
                   try {
                     const result = await deleteRole({
                       input: {
-                        organization: organization.slug,
-                        role: roleToDelete.id,
+                        organizationSlug: organization.slug,
+                        roleId: roleToDelete.id,
                       },
                     });
 
@@ -901,7 +901,7 @@ export function OrganizationMemberRoles(props: {
         >
           <OrganizationMemberRoleCreateButton
             me={organization.me}
-            organizationCleanId={organization.slug}
+            organizationSlug={organization.slug}
           />
         </SubPageLayoutHeader>
         <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">

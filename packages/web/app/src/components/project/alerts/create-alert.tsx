@@ -45,8 +45,8 @@ export const CreateAlertModal = (props: {
   toggleModalOpen: () => void;
   targets: FragmentType<typeof CreateAlertModal_TargetFragment>[];
   channels: FragmentType<typeof CreateAlertModal_AlertChannelFragment>[];
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
 }): ReactElement => {
   const { isOpen, toggleModalOpen } = props;
   const targets = useFragment(CreateAlertModal_TargetFragment, props.targets);
@@ -77,10 +77,10 @@ export const CreateAlertModal = (props: {
     async onSubmit(values) {
       const { error, data } = await mutate({
         input: {
-          organization: props.organizationId,
-          project: props.projectId,
-          target: values.target,
-          channel: values.channel,
+          organizationSlug: props.organizationSlug,
+          projectSlug: props.projectSlug,
+          targetSlug: values.target,
+          channelId: values.channel,
           type: values.type,
         },
       });

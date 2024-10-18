@@ -13,7 +13,7 @@ export const downgradeToHobby: NonNullable<MutationResolvers['downgradeToHobby']
   { injector },
 ) => {
   const organizationId = await injector.get(IdTranslator).translateOrganizationId({
-    organization: args.input.organization.organization,
+    organizationSlug: args.input.organization.organizationSlug,
   });
   await injector.get(AuthManager).ensureOrganizationAccess({
     organization: organizationId,

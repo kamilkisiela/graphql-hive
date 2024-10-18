@@ -38,8 +38,8 @@ const IncrementalNativeCompositionSwitch_Mutation = graphql(`
 `);
 
 const IncrementalNativeCompositionSwitch = (props: {
-  organizationCleanId: string;
-  projectCleanId: string;
+  organizationSlug: string;
+  projectSlug: string;
   target: FragmentType<typeof IncrementalNativeCompositionSwitch_TargetFragment>;
 }) => {
   const target = useFragment(IncrementalNativeCompositionSwitch_TargetFragment, props.target);
@@ -67,9 +67,9 @@ const IncrementalNativeCompositionSwitch = (props: {
                 onCheckedChange={nativeComposition => {
                   void mutate({
                     input: {
-                      organization: props.organizationCleanId,
-                      project: props.projectCleanId,
-                      target: target.slug,
+                      organizationSlug: props.organizationSlug,
+                      projectSlug: props.projectSlug,
+                      targetSlug: target.slug,
                       nativeComposition,
                     },
                   });
@@ -153,8 +153,8 @@ export function NativeCompositionSettings(props: {
     query: NativeCompositionSettings_ProjectQuery,
     variables: {
       selector: {
-        organization: organization.slug,
-        project: project.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
       },
     },
     pause: project.isNativeFederationEnabled,
@@ -172,8 +172,8 @@ export function NativeCompositionSettings(props: {
       try {
         const result = await mutate({
           input: {
-            organization: organization.slug,
-            project: project.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
             enabled,
           },
         });
@@ -255,8 +255,8 @@ export function NativeCompositionSettings(props: {
               <div className="flex flex-row gap-4">
                 {project.targets.nodes.map(target => (
                   <IncrementalNativeCompositionSwitch
-                    organizationCleanId={organization.slug}
-                    projectCleanId={project.slug}
+                    organizationSlug={organization.slug}
+                    projectSlug={project.slug}
                     key={target.id}
                     target={target}
                   />

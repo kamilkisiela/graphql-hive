@@ -112,9 +112,9 @@ export function ChangesBlock(
   props: {
     title: string | React.ReactElement;
     criticality: CriticalityLevel;
-    organizationId: string;
-    projectId: string;
-    targetId: string;
+    organizationSlug: string;
+    projectSlug: string;
+    targetSlug: string;
     schemaCheckId: string;
     conditionBreakingChangeMetadata?: FragmentType<
       typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
@@ -138,9 +138,9 @@ export function ChangesBlock(
       <div className="list-inside list-disc space-y-2 text-sm leading-relaxed">
         {changes.map((change, key) => (
           <ChangeItem
-            organizationId={props.organizationId}
-            projectId={props.projectId}
-            targetId={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
             schemaCheckId={props.schemaCheckId}
             key={key}
             change={change}
@@ -170,9 +170,9 @@ function ChangeItem(props: {
   conditionBreakingChangeMetadata: FragmentType<
     typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
   > | null;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   schemaCheckId: string;
 }) {
   const change = isChangesBlock_SchemaChangeWithUsageFragment(props.change)
@@ -234,9 +234,9 @@ function ChangeItem(props: {
         <AccordionContent className="pb-8 pt-4">
           {change.approval && (
             <SchemaChangeApproval
-              organizationId={props.organizationId}
-              projectId={props.projectId}
-              targetId={props.targetId}
+              organizationSlug={props.organizationSlug}
+              projectSlug={props.projectSlug}
+              targetSlug={props.targetSlug}
               schemaCheckId={props.schemaCheckId}
               approval={change.approval}
             />
@@ -270,11 +270,11 @@ function ChangeItem(props: {
                                       <p key={i}>
                                         <Link
                                           className="text-orange-500 hover:text-orange-500"
-                                          to="/$organizationId/$projectId/$targetId/insights/$operationName/$operationHash"
+                                          to="/$organizationSlug/$projectSlug/$targetSlug/insights/$operationName/$operationHash"
                                           params={{
-                                            organizationId: props.organizationId,
-                                            projectId: props.projectId,
-                                            targetId: target.target.slug,
+                                            organizationSlug: props.organizationSlug,
+                                            projectSlug: props.projectSlug,
+                                            targetSlug: target.target.slug,
                                             operationName: `${hash.substring(0, 4)}_${name}`,
                                             operationHash: hash,
                                           }}
@@ -337,11 +337,11 @@ function ChangeItem(props: {
                           <Link
                             key={index}
                             className="text-orange-500 hover:text-orange-500"
-                            to="/$organizationId/$projectId/$targetId/insights/schema-coordinate/$coordinate"
+                            to="/$organizationSlug/$projectSlug/$targetSlug/insights/schema-coordinate/$coordinate"
                             params={{
-                              organizationId: props.organizationId,
-                              projectId: props.projectId,
-                              targetId: target.target.slug,
+                              organizationSlug: props.organizationSlug,
+                              projectSlug: props.projectSlug,
+                              targetSlug: target.target.slug,
                               coordinate: change.path!.join('.'),
                             }}
                             target="_blank"
@@ -387,9 +387,9 @@ function ApprovedByBadge(props: {
 
 function SchemaChangeApproval(props: {
   approval: FragmentType<typeof ChangesBlock_SchemaChangeApprovalFragment>;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   schemaCheckId: string;
 }) {
   const approval = useFragment(ChangesBlock_SchemaChangeApprovalFragment, props.approval);
@@ -397,9 +397,13 @@ function SchemaChangeApproval(props: {
   const approvalDate = format(new Date(approval.approvedAt), 'do MMMM yyyy');
   const schemaCheckPath =
     '/' +
-    [props.organizationId, props.projectId, props.targetId, 'checks', approval.schemaCheckId].join(
-      '/',
-    );
+    [
+      props.organizationSlug,
+      props.projectSlug,
+      props.targetSlug,
+      'checks',
+      approval.schemaCheckId,
+    ].join('/');
 
   return (
     <div className="mb-3">

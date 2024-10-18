@@ -50,9 +50,9 @@ export function DeleteOperationModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
   operationId: string;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const { toast } = useToast();
   const { isOpen, toggleModalOpen, operationId } = props;
@@ -62,9 +62,9 @@ export function DeleteOperationModal(props: {
     const { error } = await mutate({
       id: operationId,
       selector: {
-        target: props.targetId,
-        organization: props.organizationId,
-        project: props.projectId,
+        targetSlug: props.targetSlug,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
       },
     });
     toggleModalOpen();
