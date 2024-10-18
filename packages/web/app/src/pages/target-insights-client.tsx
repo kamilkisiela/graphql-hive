@@ -62,9 +62,9 @@ function ClientView(props: {
     query: ClientView_ClientStatsQuery,
     variables: {
       selector: {
-        organization: props.organizationSlug,
-        project: props.projectSlug,
-        target: props.targetSlug,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
         client: props.clientName,
         period: dateRangeController.resolvedRange,
       },
@@ -93,7 +93,7 @@ function ClientView(props: {
   const totalOperations = query.data?.clientStats?.operations.nodes.length ?? 0;
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationSlug} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   return (
@@ -335,8 +335,12 @@ function ClientView(props: {
 }
 
 const ClientInsightsPageQuery = graphql(`
-  query ClientInsightsPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
-    organization(selector: { organization: $organizationSlug }) {
+  query ClientInsightsPageQuery(
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
+  ) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         slug
@@ -346,28 +350,32 @@ const ClientInsightsPageQuery = graphql(`
       }
     }
     hasCollectedOperations(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     )
   }
 `);
 
 function ClientInsightsPageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   name: string;
 }) {
   const [query] = useQuery({
     query: ClientInsightsPageQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -375,9 +383,9 @@ function ClientInsightsPageContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Insights}
     >
       {currentOrganization ? (
@@ -385,9 +393,9 @@ function ClientInsightsPageContent(props: {
           <ClientView
             clientName={props.name}
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
-            organizationSlug={props.organizationId}
-            projectSlug={props.projectId}
-            targetSlug={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
           />
         ) : (
           <div className="py-8">
@@ -404,9 +412,9 @@ function ClientInsightsPageContent(props: {
 }
 
 export function TargetInsightsClientPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   name: string;
 }) {
   return (

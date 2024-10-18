@@ -36,19 +36,19 @@ const MarkAsValid_SchemaVersionFragment = graphql(`
 
 export function MarkAsValid(props: {
   version: FragmentType<typeof MarkAsValid_SchemaVersionFragment>;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement | null {
   const version = useFragment(MarkAsValid_SchemaVersionFragment, props.version);
   const [mutation, mutate] = useMutation(UpdateSchemaVersionStatusMutation);
   const markAsValid = useCallback(async () => {
     await mutate({
       input: {
-        organization: props.organizationId,
-        project: props.projectId,
-        target: props.targetId,
-        version: version.id,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
+        versionId: version.id,
         valid: true,
       },
     });

@@ -459,14 +459,14 @@ function OrganizationMemberRolesMigrationGroup(props: {
           'roleId' in data
             ? {
                 assignRole: {
-                  organization: props.organizationSlug,
-                  role: data.roleId,
-                  users: data.users,
+                  organizationSlug: props.organizationSlug,
+                  roleId: data.roleId,
+                  userIds: data.users,
                 },
               }
             : {
                 createRole: {
-                  organization: props.organizationSlug,
+                  organizationSlug: props.organizationSlug,
                   name: data.name,
                   description: data.description,
                   organizationScopes: data.organizationScopes.filter(
@@ -479,7 +479,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
                   targetScopes: data.targetScopes.filter((s): s is TargetAccessScope =>
                     Object.values(TargetAccessScope).includes(s as TargetAccessScope),
                   ),
-                  users: data.users,
+                  userIds: data.users,
                 },
               },
       });

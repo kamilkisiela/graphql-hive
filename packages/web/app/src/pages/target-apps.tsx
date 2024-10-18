@@ -37,19 +37,23 @@ const AppTableRow_AppDeploymentFragment = graphql(`
 
 const TargetAppsViewQuery = graphql(`
   query TargetAppsViewQuery(
-    $organizationSlug: ID!
-    $projectSlug: ID!
-    $targetSlug: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $after: String
   ) {
-    organization(selector: { organization: $organizationSlug }) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         isAppDeploymentsEnabled
       }
     }
     target(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     ) {
       id
       latestSchemaVersion {
@@ -74,13 +78,17 @@ const TargetAppsViewQuery = graphql(`
 
 const TargetAppsViewFetchMoreQuery = graphql(`
   query TargetAppsViewFetchMoreQuery(
-    $organizationSlug: ID!
-    $projectSlug: ID!
-    $targetSlug: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $after: String!
   ) {
     target(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     ) {
       id
       appDeployments(first: 20, after: $after) {
@@ -100,9 +108,9 @@ const TargetAppsViewFetchMoreQuery = graphql(`
 `);
 
 function AppTableRow(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   appDeployment: FragmentType<typeof AppTableRow_AppDeploymentFragment>;
 }) {
   const appDeployment = useFragment(AppTableRow_AppDeploymentFragment, props.appDeployment);
@@ -114,9 +122,9 @@ function AppTableRow(props: {
           className="font-mono text-xs font-bold"
           to="/$organizationSlug/$projectSlug/$targetSlug/apps/$appName/$appVersion"
           params={{
-            organizationSlug: props.organizationId,
-            projectSlug: props.projectId,
-            targetSlug: props.targetId,
+            organizationSlug: props.organizationSlug,
+            projectSlug: props.projectSlug,
+            targetSlug: props.targetSlug,
             appName: appDeployment.name,
             appVersion: appDeployment.version,
           }}
@@ -166,13 +174,17 @@ function AppTableRow(props: {
   );
 }
 
-function TargetAppsView(props: { organizationId: string; projectId: string; targetId: string }) {
+function TargetAppsView(props: {
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
+}) {
   const [data] = useQuery({
     query: TargetAppsViewQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
   const client = useClient();
@@ -187,9 +199,9 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
       void router.navigate({
         to: '/$organizationSlug/$projectSlug/$targetSlug',
         params: {
-          organizationSlug: props.organizationId,
-          projectSlug: props.projectId,
-          targetSlug: props.targetId,
+          organizationSlug: props.organizationSlug,
+          projectSlug: props.projectSlug,
+          targetSlug: props.targetSlug,
         },
         replace: true,
       });
@@ -260,9 +272,9 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
               <TableBody>
                 {data.data?.target?.appDeployments?.edges.map(edge => (
                   <AppTableRow
-                    organizationId={props.organizationId}
-                    projectId={props.projectId}
-                    targetId={props.targetId}
+                    organizationSlug={props.organizationSlug}
+                    projectSlug={props.projectSlug}
+                    targetSlug={props.targetSlug}
                     appDeployment={edge.node}
                   />
                 ))}
@@ -283,9 +295,9 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
                   setIsLoadingMore(true);
                   void client
                     .query(TargetAppsViewFetchMoreQuery, {
-                      organizationSlug: props.organizationId,
-                      projectSlug: props.projectId,
-                      targetSlug: props.targetId,
+                      organizationSlug: props.organizationSlug,
+                      projectSlug: props.projectSlug,
+                      targetSlug: props.targetSlug,
                       after: data?.data?.target?.appDeployments?.pageInfo?.endCursor,
                     })
                     .toPromise()
@@ -311,23 +323,23 @@ function TargetAppsView(props: { organizationId: string; projectId: string; targ
 }
 
 export function TargetAppsPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   return (
     <>
       <Meta title="App Deployments" />
       <TargetLayout
-        targetId={props.targetId}
-        projectId={props.projectId}
-        organizationId={props.organizationId}
+        targetSlug={props.targetSlug}
+        projectSlug={props.projectSlug}
+        organizationSlug={props.organizationSlug}
         page={Page.Apps}
       >
         <TargetAppsView
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
         />
       </TargetLayout>
     </>

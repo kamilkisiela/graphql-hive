@@ -188,9 +188,9 @@ function SchemaView(props: {
     scope: TargetAccessScope.RegistryWrite,
     member: organization.me,
     redirect: false,
-    organizationId: organization.slug,
-    projectId: project.slug,
-    targetId: target.slug,
+    organizationSlug: organization.slug,
+    projectSlug: project.slug,
+    targetSlug: target.slug,
   });
 
   const { latestSchemaVersion } = target;
@@ -272,9 +272,9 @@ function SchemaView(props: {
           {canMarkAsValid ? (
             <>
               <MarkAsValid
-                organizationId={organization.slug}
-                projectId={project.slug}
-                targetId={target.slug}
+                organizationSlug={organization.slug}
+                projectSlug={project.slug}
+                targetSlug={target.slug}
                 version={latestSchemaVersion}
               />{' '}
             </>
@@ -287,35 +287,47 @@ function SchemaView(props: {
 }
 
 const TargetSchemaPageQuery = graphql(`
-  query TargetSchemaPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
-    organization(selector: { organization: $organizationSlug }) {
+  query TargetSchemaPageQuery(
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
+  ) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         ...SchemaView_OrganizationFragment
       }
     }
-    project(selector: { organization: $organizationSlug, project: $projectSlug }) {
+    project(selector: { organizationSlug: $organizationSlug, projectSlug: $projectSlug }) {
       ...SchemaView_ProjectFragment
     }
     target(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     ) {
       ...SchemaView_TargetFragment
     }
   }
 `);
 
-function TargetSchemaPage(props: { organizationId: string; projectId: string; targetId: string }) {
+function TargetSchemaPage(props: {
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
+}) {
   const [query] = useQuery({
     query: TargetSchemaPageQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -324,9 +336,9 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
 
   return (
     <TargetLayout
-      targetId={props.targetId}
-      projectId={props.projectId}
-      organizationId={props.organizationId}
+      targetSlug={props.targetSlug}
+      projectSlug={props.projectSlug}
+      organizationSlug={props.organizationSlug}
       page={Page.Schema}
     >
       <div className="flex flex-row items-center justify-between py-6">
@@ -339,9 +351,9 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
             <Link
               to="/$organizationSlug/$projectSlug/$targetSlug/explorer/unused"
               params={{
-                organizationSlug: props.organizationId,
-                projectSlug: props.projectId,
-                targetSlug: props.targetId,
+                organizationSlug: props.organizationSlug,
+                projectSlug: props.projectSlug,
+                targetSlug: props.targetSlug,
               }}
             >
               Unused schema
@@ -352,9 +364,9 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
             <Link
               to="/$organizationSlug/$projectSlug/$targetSlug/explorer/deprecated"
               params={{
-                organizationSlug: props.organizationId,
-                projectSlug: props.projectId,
-                targetSlug: props.targetId,
+                organizationSlug: props.organizationSlug,
+                projectSlug: props.projectSlug,
+                targetSlug: props.targetSlug,
               }}
             >
               Deprecated schema
@@ -371,14 +383,18 @@ function TargetSchemaPage(props: { organizationId: string; projectId: string; ta
   );
 }
 
-export function TargetPage(props: { organizationId: string; projectId: string; targetId: string }) {
+export function TargetPage(props: {
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
+}) {
   return (
     <>
       <Meta title="Schema" />
       <TargetSchemaPage
-        organizationId={props.organizationId}
-        projectId={props.projectId}
-        targetId={props.targetId}
+        organizationSlug={props.organizationSlug}
+        projectSlug={props.projectSlug}
+        targetSlug={props.targetSlug}
       />
     </>
   );

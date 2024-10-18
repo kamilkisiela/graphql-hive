@@ -9,14 +9,14 @@ export const deleteOrganization: NonNullable<MutationResolvers['deleteOrganizati
 ) => {
   const translator = injector.get(IdTranslator);
   const organizationId = await translator.translateOrganizationId({
-    organization: selector.organization,
+    organizationSlug: selector.organizationSlug,
   });
   const organization = await injector.get(OrganizationManager).deleteOrganization({
     organization: organizationId,
   });
   return {
     selector: {
-      organization: organizationId,
+      organizationSlug: organization.slug,
     },
     organization,
   };

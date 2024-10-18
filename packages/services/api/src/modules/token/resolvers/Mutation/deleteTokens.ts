@@ -8,22 +8,22 @@ export const deleteTokens: NonNullable<MutationResolvers['deleteTokens']> = asyn
   { injector },
 ) => {
   const translator = injector.get(IdTranslator);
-  const [organization, project, target] = await Promise.all([
+  const [organizationId, projectId, targetId] = await Promise.all([
     translator.translateOrganizationId(input),
     translator.translateProjectId(input),
     translator.translateTargetId(input),
   ]);
   return {
     selector: {
-      organization: input.organization,
-      project: input.project,
-      target: input.target,
+      organizationSlug: input.organizationSlug,
+      projectSlug: input.projectSlug,
+      targetSlug: input.targetSlug,
     },
     deletedTokens: await injector.get(TokenManager).deleteTokens({
-      target,
-      project,
-      organization,
-      tokens: input.tokens,
+      targetId,
+      projectId,
+      organizationId,
+      tokenIds: input.tokenIds,
     }),
   };
 };

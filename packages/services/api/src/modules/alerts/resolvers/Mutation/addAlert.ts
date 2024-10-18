@@ -23,10 +23,10 @@ export const addAlert: NonNullable<MutationResolvers['addAlert']> = async (
 
   try {
     const alert = await injector.get(AlertsManager).addAlert({
-      organization: organizationId,
-      project: projectId,
-      target: targetId,
-      channel: input.channel,
+      organizationId,
+      projectId,
+      targetId,
+      channelId: input.channelId,
       type: input.type,
     });
 

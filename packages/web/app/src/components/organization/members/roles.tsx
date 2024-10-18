@@ -181,8 +181,8 @@ function OrganizationMemberRoleEditor(props: {
     try {
       const result = await updateMemberRole({
         input: {
-          organization: props.organizationSlug,
-          role: role.id,
+          organizationSlug: props.organizationSlug,
+          roleId: role.id,
           name: data.name,
           description: data.description,
           organizationAccessScopes: data.organizationScopes.filter(scope =>
@@ -446,7 +446,7 @@ function OrganizationMemberRoleCreator(props: {
     try {
       const result = await createMemberRole({
         input: {
-          organization: props.organizationSlug,
+          organizationSlug: props.organizationSlug,
           name: data.name,
           description: data.description,
           organizationAccessScopes: data.organizationScopes.filter(scope =>
@@ -860,8 +860,8 @@ export function OrganizationMemberRoles(props: {
                   try {
                     const result = await deleteRole({
                       input: {
-                        organization: organization.slug,
-                        role: roleToDelete.id,
+                        organizationSlug: organization.slug,
+                        roleId: roleToDelete.id,
                       },
                     });
 

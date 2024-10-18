@@ -294,9 +294,9 @@ export function GraphQLTypeCard(props: {
             <div className="font-normal text-gray-500">{props.kind}</div>
             <div className="font-semibold">
               <GraphQLTypeAsLink
-                organizationId={props.organizationSlug}
-                projectId={props.projectSlug}
-                targetId={props.targetSlug}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
                 type={props.name}
               />
             </div>
@@ -309,9 +309,9 @@ export function GraphQLTypeCard(props: {
             <div className="flex flex-row gap-2">
               {props.implements.map(t => (
                 <GraphQLTypeAsLink
-                  organizationId={props.organizationSlug}
-                  projectId={props.projectSlug}
-                  targetId={props.targetSlug}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   key={t}
                   type={t}
                 />
@@ -330,9 +330,9 @@ export function GraphQLTypeCard(props: {
         ) : null}
         {supergraphMetadata ? (
           <SupergraphMetadataList
-            targetId={props.targetSlug}
-            projectId={props.projectSlug}
-            organizationId={props.organizationSlug}
+            targetSlug={props.targetSlug}
+            projectSlug={props.projectSlug}
+            organizationSlug={props.organizationSlug}
             supergraphMetadata={supergraphMetadata}
           />
         ) : null}
@@ -374,9 +374,9 @@ function GraphQLArguments(props: {
                   deprecationReason={arg.deprecationReason}
                 >
                   <LinkToCoordinatePage
-                    organizationId={props.organizationSlug}
-                    projectId={props.projectSlug}
-                    targetId={props.targetSlug}
+                    organizationSlug={props.organizationSlug}
+                    projectSlug={props.projectSlug}
+                    targetSlug={props.targetSlug}
                     coordinate={coordinate}
                   >
                     {arg.name}
@@ -384,9 +384,9 @@ function GraphQLArguments(props: {
                 </DeprecationNote>
                 {': '}
                 <GraphQLTypeAsLink
-                  organizationId={props.organizationSlug}
-                  projectId={props.projectSlug}
-                  targetId={props.targetSlug}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   type={arg.type}
                 />
                 {arg.description ? <Description description={arg.description} /> : null}
@@ -412,9 +412,9 @@ function GraphQLArguments(props: {
                 deprecationReason={arg.deprecationReason}
               >
                 <LinkToCoordinatePage
-                  organizationId={props.organizationSlug}
-                  projectId={props.projectSlug}
-                  targetId={props.targetSlug}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   coordinate={coordinate}
                 >
                   {arg.name}
@@ -422,9 +422,9 @@ function GraphQLArguments(props: {
               </DeprecationNote>
               {': '}
               <GraphQLTypeAsLink
-                organizationId={props.organizationSlug}
-                projectId={props.projectSlug}
-                targetId={props.targetSlug}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
                 type={arg.type}
               />
             </span>
@@ -536,9 +536,9 @@ export function GraphQLFields(props: {
                   deprecationReason={field.deprecationReason}
                 >
                   <LinkToCoordinatePage
-                    organizationId={props.organizationSlug}
-                    projectId={props.projectSlug}
-                    targetId={props.targetSlug}
+                    organizationSlug={props.organizationSlug}
+                    projectSlug={props.projectSlug}
+                    targetSlug={props.targetSlug}
                     coordinate={coordinate}
                     className="font-semibold"
                   >
@@ -557,9 +557,9 @@ export function GraphQLFields(props: {
                 ) : null}
                 <span className="mr-1">:</span>
                 <GraphQLTypeAsLink
-                  organizationId={props.organizationSlug}
-                  projectId={props.projectSlug}
-                  targetId={props.targetSlug}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   className="font-semibold text-gray-400"
                   type={field.type}
                 />
@@ -568,9 +568,9 @@ export function GraphQLFields(props: {
                 {field.supergraphMetadata ? (
                   <div className="ml-1">
                     <SupergraphMetadataList
-                      targetId={props.targetSlug}
-                      projectId={props.projectSlug}
-                      organizationId={props.organizationSlug}
+                      targetSlug={props.targetSlug}
+                      projectSlug={props.projectSlug}
+                      organizationSlug={props.organizationSlug}
                       supergraphMetadata={field.supergraphMetadata}
                     />
                   </div>
@@ -625,9 +625,9 @@ export function GraphQLInputFields(props: {
                 deprecationReason={field.deprecationReason}
               >
                 <LinkToCoordinatePage
-                  organizationId={props.organizationSlug}
-                  projectId={props.projectSlug}
-                  targetId={props.targetSlug}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   coordinate={coordinate}
                   className="font-semibold text-white"
                 >
@@ -636,9 +636,9 @@ export function GraphQLInputFields(props: {
               </DeprecationNote>
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink
-                organizationId={props.organizationSlug}
-                projectId={props.projectSlug}
-                targetId={props.targetSlug}
+                organizationSlug={props.organizationSlug}
+                projectSlug={props.projectSlug}
+                targetSlug={props.targetSlug}
                 className="font-semibold"
                 type={field.type}
               />
@@ -662,9 +662,9 @@ export function GraphQLInputFields(props: {
 function GraphQLTypeAsLink(props: {
   type: string;
   className?: string;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const router = useRouter();
   const typename = props.type.replace(/[[\]!]+/g, '');
@@ -681,9 +681,9 @@ function GraphQLTypeAsLink(props: {
               className="text-sm font-normal hover:underline hover:underline-offset-2"
               to="/$organizationSlug/$projectSlug/$targetSlug/explorer/$typename"
               params={{
-                organizationSlug: props.organizationId,
-                projectSlug: props.projectId,
-                targetSlug: props.targetId,
+                organizationSlug: props.organizationSlug,
+                projectSlug: props.projectSlug,
+                targetSlug: props.targetSlug,
                 typename,
               }}
               search={router.latestLocation.search}
@@ -697,9 +697,9 @@ function GraphQLTypeAsLink(props: {
               className="text-sm font-normal hover:underline hover:underline-offset-2"
               to="/$organizationSlug/$projectSlug/$targetSlug/insights/schema-coordinate/$coordinate"
               params={{
-                organizationSlug: props.organizationId,
-                projectSlug: props.projectId,
-                targetSlug: props.targetId,
+                organizationSlug: props.organizationSlug,
+                projectSlug: props.projectSlug,
+                targetSlug: props.targetSlug,
                 coordinate: typename,
               }}
               search={router.latestLocation.search}
@@ -720,9 +720,9 @@ export const LinkToCoordinatePage = React.forwardRef<
   {
     coordinate: string;
     children: ReactNode;
-    organizationId: string;
-    projectId: string;
-    targetId: string;
+    organizationSlug: string;
+    projectSlug: string;
+    targetSlug: string;
     className?: string;
   }
 >((props, ref) => {
@@ -734,9 +734,9 @@ export const LinkToCoordinatePage = React.forwardRef<
       className={cn('hover:underline hover:underline-offset-2', props.className)}
       to="/$organizationSlug/$projectSlug/$targetSlug/insights/schema-coordinate/$coordinate"
       params={{
-        organizationSlug: props.organizationId,
-        projectSlug: props.projectId,
-        targetSlug: props.targetId,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
         coordinate: props.coordinate,
       }}
       search={router.latestLocation.search}

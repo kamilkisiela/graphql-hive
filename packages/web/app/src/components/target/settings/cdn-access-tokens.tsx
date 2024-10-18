@@ -46,9 +46,9 @@ const CDNAccessTokenCreateMutation = graphql(`
 function CreateCDNAccessTokenModal(props: {
   onCreateCDNAccessToken: () => void;
   onClose: () => void;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const [createCdnAccessToken, mutate] = useMutation(CDNAccessTokenCreateMutation);
 
@@ -64,9 +64,9 @@ function CreateCDNAccessTokenModal(props: {
       await mutate({
         input: {
           selector: {
-            organization: props.organizationId,
-            project: props.projectId,
-            target: props.targetId,
+            organizationSlug: props.organizationSlug,
+            projectSlug: props.projectSlug,
+            targetSlug: props.targetSlug,
           },
           alias: values.alias,
         },
@@ -193,9 +193,9 @@ function DeleteCDNAccessTokenModal(props: {
   cdnAccessTokenId: string;
   onDeletedAccessTokenId: (deletedAccessTokenId: string) => void;
   onClose: () => void;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const [deleteCdnAccessToken, mutate] = useMutation(CDNAccessTokenDeleteMutation);
 
@@ -232,9 +232,9 @@ function DeleteCDNAccessTokenModal(props: {
             mutate({
               input: {
                 selector: {
-                  organization: props.organizationId,
-                  project: props.projectId,
-                  target: props.targetId,
+                  organizationSlug: props.organizationSlug,
+                  projectSlug: props.projectSlug,
+                  targetSlug: props.targetSlug,
                 },
                 cdnAccessTokenId: props.cdnAccessTokenId,
               },
@@ -335,9 +335,9 @@ const CDNSearchParams = z.discriminatedUnion('cdn', [
 
 export function CDNAccessTokens(props: {
   me: FragmentType<typeof CDNAccessTokens_MeFragment>;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): React.ReactElement {
   const me = useFragment(CDNAccessTokens_MeFragment, props.me);
 
@@ -363,9 +363,9 @@ export function CDNAccessTokens(props: {
     query: CDNAccessTokensQuery,
     variables: {
       selector: {
-        organization: props.organizationId,
-        project: props.projectId,
-        target: props.targetId,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
       },
       first: 10,
       after: endCursors[endCursors.length - 1] ?? null,
@@ -490,9 +490,9 @@ export function CDNAccessTokens(props: {
             reexecuteQuery({ requestPolicy: 'network-only' });
           }}
           onClose={closeModal}
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
         />
       ) : null}
       {searchParams.cdn === 'delete' ? (
@@ -502,9 +502,9 @@ export function CDNAccessTokens(props: {
             reexecuteQuery({ requestPolicy: 'network-only' });
           }}
           onClose={closeModal}
-          organizationId={props.organizationId}
-          projectId={props.projectId}
-          targetId={props.targetId}
+          organizationSlug={props.organizationSlug}
+          projectSlug={props.projectSlug}
+          targetSlug={props.targetSlug}
         />
       ) : null}
     </SubPageLayout>

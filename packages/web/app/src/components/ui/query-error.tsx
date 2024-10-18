@@ -9,11 +9,11 @@ import { Link, useRouter } from '@tanstack/react-router';
 export function QueryError({
   error,
   showError,
-  organizationId,
+  organizationSlug,
 }: {
   error: CombinedError;
   showError?: boolean;
-  organizationId: string | null;
+  organizationSlug: string | null;
 }): ReactElement {
   const router = useRouter();
   const requestId =
@@ -53,11 +53,11 @@ export function QueryError({
                 <p>Don't worry, our technical support got this error reported automatically.</p>
                 <p>
                   If you wish to track it later or share more details with us,{' '}
-                  {organizationId ? (
+                  {organizationSlug ? (
                     <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
                       <Link
                         to="/$organizationSlug/view/support"
-                        params={{ organizationSlug: organizationId }}
+                        params={{ organizationSlug: organizationSlug }}
                       >
                         you can use the support
                       </Link>

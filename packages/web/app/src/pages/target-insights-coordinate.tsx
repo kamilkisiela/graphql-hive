@@ -79,16 +79,16 @@ function SchemaCoordinateView(props: {
     query: SchemaCoordinateView_SchemaCoordinateStatsQuery,
     variables: {
       selector: {
-        organization: props.organizationSlug,
-        project: props.projectSlug,
-        target: props.targetSlug,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
         schemaCoordinate: props.coordinate,
         period: dateRangeController.resolvedRange,
       },
       targetSelector: {
-        organization: props.organizationSlug,
-        project: props.projectSlug,
-        target: props.targetSlug,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
+        targetSlug: props.targetSlug,
       },
       resolution: dateRangeController.resolution,
     },
@@ -114,7 +114,7 @@ function SchemaCoordinateView(props: {
   const totalClients = query.data?.schemaCoordinateStats?.clients.nodes.length ?? 0;
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationSlug} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   return (
@@ -386,11 +386,11 @@ function SchemaCoordinateView(props: {
 
 const TargetSchemaCoordinatePageQuery = graphql(`
   query TargetSchemaCoordinatePageQuery(
-    $organizationSlug: ID!
-    $projectSlug: ID!
-    $targetSlug: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
   ) {
-    organization(selector: { organization: $organizationSlug }) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         slug
@@ -400,28 +400,32 @@ const TargetSchemaCoordinatePageQuery = graphql(`
       }
     }
     hasCollectedOperations(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     )
   }
 `);
 
 function TargetSchemaCoordinatePageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   coordinate: string;
 }) {
   const [query] = useQuery({
     query: TargetSchemaCoordinatePageQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -429,9 +433,9 @@ function TargetSchemaCoordinatePageContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Insights}
     >
       {currentOrganization ? (
@@ -439,9 +443,9 @@ function TargetSchemaCoordinatePageContent(props: {
           <SchemaCoordinateView
             coordinate={props.coordinate}
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
-            organizationSlug={props.organizationId}
-            projectSlug={props.projectId}
-            targetSlug={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
           />
         ) : (
           <div className="py-8">
@@ -458,9 +462,9 @@ function TargetSchemaCoordinatePageContent(props: {
 }
 
 export function TargetInsightsCoordinatePage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   coordinate: string;
 }) {
   return (

@@ -485,9 +485,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
       },
       authToken: token.secret,
@@ -501,9 +501,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         after: endCursor,
       },
@@ -518,9 +518,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         after: endCursor,
       },
@@ -546,9 +546,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         first: 2,
       },
@@ -564,9 +564,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         first: 2,
       },
@@ -591,9 +591,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         first: 1,
       },
@@ -606,9 +606,9 @@ describe('CDN token', () => {
       variables: {
         input: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
           cdnAccessTokenId: paginatedResult.target!.cdnAccessTokens.edges[0].node.id,
         },
@@ -626,9 +626,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         first: 1,
       },
@@ -651,9 +651,9 @@ describe('CDN token', () => {
       document: TargetCDNAccessTokensQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         first: 1,
       },
@@ -667,9 +667,9 @@ describe('CDN token', () => {
       variables: {
         input: {
           selector: {
-            organization: organization.slug,
-            project: project.slug,
-            target: target.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
           },
           cdnAccessTokenId: paginatedResult.target!.cdnAccessTokens.edges[0].node.id,
         },

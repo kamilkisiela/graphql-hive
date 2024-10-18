@@ -575,8 +575,8 @@ describe.each`
       .then(r => r.expectNoGraphQLErrors());
     const createTargetResult = await createTarget(
       {
-        organization: organization.slug,
-        project: project.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
         slug: 'target2',
       },
       ownerToken,
@@ -2667,12 +2667,18 @@ describe('schema publishing changes are persisted', () => {
 
 const SchemaCompareToPreviousVersionQuery = graphql(`
   query SchemaCompareToPreviousVersionQuery(
-    $organization: ID!
-    $project: ID!
-    $target: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $version: ID!
   ) {
-    target(selector: { organization: $organization, project: $project, target: $target }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       schemaVersion(id: $version) {
         id
@@ -2798,9 +2804,9 @@ test('Target.schemaVersion: result is read from the database', async () => {
     const result = await execute({
       document: SchemaCompareToPreviousVersionQuery,
       variables: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
         version: latestVersion.id,
       },
       authToken: ownerToken,
@@ -2893,8 +2899,8 @@ test('Composition Error (Federation 2) can be served from the database', async (
         endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.slug,
-        organization: organization.slug,
+        projectSlug: project.slug,
+        organizationSlug: organization.slug,
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -2937,9 +2943,9 @@ test('Composition Error (Federation 2) can be served from the database', async (
     const result = await execute({
       document: SchemaCompareToPreviousVersionQuery,
       variables: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
         version: latestVersion.id,
       },
       authToken: ownerToken,
@@ -3022,8 +3028,8 @@ test('Composition Network Failure (Federation 2)', async () => {
         endpoint: `http://${serviceAddress}/compose`,
         // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.slug,
-        organization: organization.slug,
+        projectSlug: project.slug,
+        organizationSlug: organization.slug,
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -3062,8 +3068,8 @@ test('Composition Network Failure (Federation 2)', async () => {
       {
         endpoint: `http://${serviceAddress}/no_compose`,
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-        project: project.slug,
-        organization: organization.slug,
+        projectSlug: project.slug,
+        organizationSlug: organization.slug,
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
@@ -3094,9 +3100,9 @@ test('Composition Network Failure (Federation 2)', async () => {
     const result = await execute({
       document: SchemaCompareToPreviousVersionQuery,
       variables: {
-        organization: organization.slug,
-        project: project.slug,
-        target: target.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
         version: latestVersion.id,
       },
       authToken: ownerToken,

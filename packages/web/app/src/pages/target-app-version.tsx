@@ -31,22 +31,26 @@ import { Link, useRouter } from '@tanstack/react-router';
 
 const TargetAppsVersionQuery = graphql(`
   query TargetAppsVersionQuery(
-    $organizationSlug: ID!
-    $projectSlug: ID!
-    $targetSlug: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $appName: String!
     $appVersion: String!
     $first: Int
     $after: String
   ) {
-    organization(selector: { organization: $organizationSlug }) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         isAppDeploymentsEnabled
       }
     }
     target(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     ) {
       id
       appDeployment(appName: $appName, appVersion: $appVersion) {
@@ -73,18 +77,18 @@ const TargetAppsVersionQuery = graphql(`
 `);
 
 export function TargetAppVersionPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   appName: string;
   appVersion: string;
 }) {
   const [data] = useQuery({
     query: TargetAppsVersionQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       appName: props.appName,
       appVersion: props.appVersion,
       first: 20,
@@ -103,9 +107,9 @@ export function TargetAppVersionPage(props: {
       void router.navigate({
         to: '/$organizationSlug/$projectSlug/$targetSlug',
         params: {
-          organizationSlug: props.organizationId,
-          projectSlug: props.projectId,
-          targetSlug: props.targetId,
+          organizationSlug: props.organizationSlug,
+          projectSlug: props.projectSlug,
+          targetSlug: props.targetSlug,
         },
         replace: true,
       });
@@ -121,9 +125,9 @@ export function TargetAppVersionPage(props: {
       <>
         <Meta title="App Version Not found" />
         <TargetLayout
-          targetId={props.targetId}
-          projectId={props.projectId}
-          organizationId={props.organizationId}
+          targetSlug={props.targetSlug}
+          projectSlug={props.projectSlug}
+          organizationSlug={props.organizationSlug}
           page={Page.Apps}
           className="min-h-content"
         >
@@ -150,9 +154,9 @@ export function TargetAppVersionPage(props: {
     <>
       <Meta title={title} />
       <TargetLayout
-        targetId={props.targetId}
-        projectId={props.projectId}
-        organizationId={props.organizationId}
+        targetSlug={props.targetSlug}
+        projectSlug={props.projectSlug}
+        organizationSlug={props.organizationSlug}
         page={Page.Apps}
         className="min-h-content"
       >
@@ -163,9 +167,9 @@ export function TargetAppVersionPage(props: {
                 <Link
                   to="/$organizationSlug/$projectSlug/$targetSlug/apps"
                   params={{
-                    organizationSlug: props.organizationId,
-                    projectSlug: props.projectId,
-                    targetSlug: props.targetId,
+                    organizationSlug: props.organizationSlug,
+                    projectSlug: props.projectSlug,
+                    targetSlug: props.targetSlug,
                   }}
                 >
                   App Deployments
@@ -268,9 +272,9 @@ export function TargetAppVersionPage(props: {
                                 <Link
                                   to="/$organizationSlug/$projectSlug/$targetSlug/laboratory"
                                   params={{
-                                    organizationSlug: props.organizationId,
-                                    projectSlug: props.projectId,
-                                    targetSlug: props.targetId,
+                                    organizationSlug: props.organizationSlug,
+                                    projectSlug: props.projectSlug,
+                                    targetSlug: props.targetSlug,
                                   }}
                                   search={{
                                     operationString: edge.node.body,
@@ -283,9 +287,9 @@ export function TargetAppVersionPage(props: {
                                 <Link
                                   to="/$organizationSlug/$projectSlug/$targetSlug/insights/$operationName/$operationHash"
                                   params={{
-                                    organizationSlug: props.organizationId,
-                                    projectSlug: props.projectId,
-                                    targetSlug: props.targetId,
+                                    organizationSlug: props.organizationSlug,
+                                    projectSlug: props.projectSlug,
+                                    targetSlug: props.targetSlug,
                                     operationName: edge.node.operationName ?? edge.node.hash,
                                     operationHash: edge.node.insightsHash,
                                   }}
@@ -318,9 +322,9 @@ export function TargetAppVersionPage(props: {
                       setIsLoadingMore(true);
                       void client
                         .query(TargetAppsVersionQuery, {
-                          organizationSlug: props.organizationId,
-                          projectSlug: props.projectId,
-                          targetSlug: props.targetId,
+                          organizationSlug: props.organizationSlug,
+                          projectSlug: props.projectSlug,
+                          targetSlug: props.targetSlug,
                           appName: props.appName,
                           appVersion: props.appVersion,
                           first: 20,

@@ -58,9 +58,9 @@ export function GraphQLUnionTypeComponent(props: {
             ) : null}
             {member.supergraphMetadata ? (
               <SupergraphMetadataList
-                targetId={props.targetSlug}
-                projectId={props.projectSlug}
-                organizationId={props.organizationSlug}
+                targetSlug={props.targetSlug}
+                projectSlug={props.projectSlug}
+                organizationSlug={props.organizationSlug}
                 supergraphMetadata={member.supergraphMetadata}
               />
             ) : null}

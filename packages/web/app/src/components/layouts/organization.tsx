@@ -92,7 +92,7 @@ export function OrganizationLayout({
 }: {
   page?: Page;
   className?: string;
-  organizationId: string;
+  organizationSlug: string;
   children: ReactNode;
 }): ReactElement | null {
   const [isModalOpen, toggleModalOpen] = useToggle();
@@ -105,13 +105,13 @@ export function OrganizationLayout({
     OrganizationLayout_OrganizationFragment,
     query.data?.organizations.nodes,
   );
-  const currentOrganization = organizations?.find(org => org.slug === props.organizationId);
+  const currentOrganization = organizations?.find(org => org.slug === props.organizationSlug);
 
   useOrganizationAccess({
     member: currentOrganization?.me ?? null,
     scope: OrganizationAccessScope.Read,
     redirect: true,
-    organizationId: props.organizationId,
+    organizationSlug: props.organizationSlug,
   });
 
   useLastVisitedOrganizationWriter(currentOrganization?.slug);
@@ -119,7 +119,7 @@ export function OrganizationLayout({
   const meInCurrentOrg = currentOrganization?.me;
 
   if (query.error) {
-    return <QueryError error={query.error} organizationId={props.organizationId} />;
+    return <QueryError error={query.error} organizationSlug={props.organizationSlug} />;
   }
 
   return (
@@ -129,14 +129,14 @@ export function OrganizationLayout({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="size-8" />
             <OrganizationSelector
-              currentOrganizationSlug={props.organizationId}
+              currentOrganizationSlug={props.organizationSlug}
               organizations={query.data?.organizations ?? null}
             />
           </div>
           <div>
             <UserMenu
               me={query.data?.me ?? null}
-              currentOrganizationSlug={props.organizationId}
+              currentOrganizationSlug={props.organizationSlug}
               organizations={query.data?.organizations ?? null}
             />
           </div>
@@ -224,7 +224,7 @@ export function OrganizationLayout({
                 New project
               </Button>
               <CreateProjectModal
-                organizationId={props.organizationId}
+                organizationSlug={props.organizationSlug}
                 isOpen={isModalOpen}
                 toggleModalOpen={toggleModalOpen}
                 // reset the form every time it is closed
@@ -316,7 +316,7 @@ function ProjectTypeCard(props: {
 function CreateProjectModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
+  organizationSlug: string;
 }) {
   const [_, mutate] = useMutation(CreateProjectMutation);
   const router = useRouter();
@@ -334,7 +334,7 @@ function CreateProjectModal(props: {
   async function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
     const { data, error } = await mutate({
       input: {
-        organization: props.organizationId,
+        organizationSlug: props.organizationSlug,
         slug: values.projectSlug,
         type: values.projectType,
       },
@@ -344,7 +344,7 @@ function CreateProjectModal(props: {
       void router.navigate({
         to: '/$organizationSlug/$projectSlug',
         params: {
-          organizationSlug: props.organizationId,
+          organizationSlug: props.organizationSlug,
           projectSlug: data.createProject.ok.createdProject.slug,
         },
       });

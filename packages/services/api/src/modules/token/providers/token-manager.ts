@@ -88,15 +88,16 @@ export class TokenManager {
     });
   }
 
-  async deleteTokens(
-    input: {
-      tokens: readonly string[];
-    } & TargetSelector,
-  ): Promise<readonly string[]> {
+  async deleteTokens(input: {
+    tokenIds: readonly string[];
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+  }): Promise<readonly string[]> {
     await this.authManager.ensureTargetAccess({
-      project: input.project,
-      organization: input.organization,
-      target: input.target,
+      project: input.projectId,
+      organization: input.organizationId,
+      target: input.targetId,
       scope: TargetAccessScope.TOKENS_WRITE,
     });
 

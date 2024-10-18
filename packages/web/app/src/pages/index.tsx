@@ -49,7 +49,7 @@ export function IndexPage() {
   }, [router, result]);
 
   if (query.error) {
-    return <QueryError organizationId={result?.organization.slug ?? null} error={query.error} />;
+    return <QueryError organizationSlug={result?.organization.slug ?? null} error={query.error} />;
   }
 
   return (

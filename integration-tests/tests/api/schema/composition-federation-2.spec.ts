@@ -45,8 +45,8 @@ test.concurrent('call an external service to compose and validate services', asy
       endpoint: `http://${dockerAddress}/compose`,
       // eslint-disable-next-line no-process-env
       secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
-      project: project.slug,
-      organization: organization.slug,
+      projectSlug: project.slug,
+      organizationSlug: organization.slug,
     },
     writeToken.secret,
   ).then(r => r.expectNoGraphQLErrors());

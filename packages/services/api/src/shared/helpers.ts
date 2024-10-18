@@ -35,32 +35,6 @@ export function uuid(len = 13) {
   return Math.random().toString(16).substr(2, len);
 }
 
-export function filterSelector(
-  kind: 'organization',
-  selector: OrganizationSelector,
-): OrganizationSelector;
-export function filterSelector(kind: 'project', selector: ProjectSelector): ProjectSelector;
-export function filterSelector(kind: 'target', selector: TargetSelector): TargetSelector;
-export function filterSelector(kind: 'organization' | 'project' | 'target', selector: any): any {
-  switch (kind) {
-    case 'organization':
-      return {
-        organization: selector.organization,
-      };
-    case 'project':
-      return {
-        organization: selector.organization,
-        project: selector.project,
-      };
-    case 'target':
-      return {
-        organization: selector.organization,
-        project: selector.project,
-        target: selector.target,
-      };
-  }
-}
-
 export function stringifySelector<
   T extends {
     [key: string]: any;

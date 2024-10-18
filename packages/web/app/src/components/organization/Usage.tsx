@@ -36,7 +36,7 @@ export function OrganizationUsageEstimationView(props: {
     query: Usage_UsageEstimationQuery,
     variables: {
       input: {
-        organization: organization.slug,
+        organizationSlug: organization.slug,
         month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
       },
@@ -45,7 +45,7 @@ export function OrganizationUsageEstimationView(props: {
 
   return (
     <div className="right-4 top-7">
-      <DataWrapper query={query} organizationId={organization.slug}>
+      <DataWrapper query={query} organizationSlug={organization.slug}>
         {result => (
           <Table>
             <THead>

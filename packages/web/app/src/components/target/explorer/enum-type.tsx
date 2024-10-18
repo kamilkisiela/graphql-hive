@@ -61,9 +61,9 @@ export function GraphQLEnumTypeComponent(props: {
                 deprecationReason={value.deprecationReason}
               >
                 <LinkToCoordinatePage
-                  organizationId={props.organizationSlug}
-                  projectId={props.projectSlug}
-                  targetId={props.targetSlug}
+                  organizationSlug={props.organizationSlug}
+                  projectSlug={props.projectSlug}
+                  targetSlug={props.targetSlug}
                   coordinate={`${ttype.name}.${value.name}`}
                 >
                   {value.name}
@@ -72,9 +72,9 @@ export function GraphQLEnumTypeComponent(props: {
             </div>
             {value.supergraphMetadata ? (
               <SupergraphMetadataList
-                targetId={props.targetSlug}
-                projectId={props.projectSlug}
-                organizationId={props.organizationSlug}
+                targetSlug={props.targetSlug}
+                projectSlug={props.projectSlug}
+                organizationSlug={props.organizationSlug}
                 supergraphMetadata={value.supergraphMetadata}
               />
             ) : null}

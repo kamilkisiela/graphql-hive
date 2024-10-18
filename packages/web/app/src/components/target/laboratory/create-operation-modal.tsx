@@ -92,18 +92,18 @@ export function CreateOperationModal(props: {
   isOpen: boolean;
   close: () => void;
   onSaveSuccess: (args: { id: string; name: string }) => void;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const { toast } = useToast();
   const { isOpen, close, onSaveSuccess } = props;
   const [, mutateCreate] = useMutation(CreateOperationMutation);
 
   const { collections, fetching } = useCollections({
-    organizationId: props.organizationId,
-    projectId: props.projectId,
-    targetId: props.targetId,
+    organizationSlug: props.organizationSlug,
+    projectSlug: props.projectSlug,
+    targetSlug: props.targetSlug,
   });
   const { queryEditor, variableEditor, headerEditor } = useEditorContext({
     nonNull: true,
@@ -122,9 +122,9 @@ export function CreateOperationModal(props: {
   async function onSubmit(values: CreateOperationModalFormValues) {
     const result = await mutateCreate({
       selector: {
-        target: props.targetId,
-        organization: props.organizationId,
-        project: props.projectId,
+        targetSlug: props.targetSlug,
+        organizationSlug: props.organizationSlug,
+        projectSlug: props.projectSlug,
       },
       input: {
         name: values.name,
@@ -161,9 +161,9 @@ export function CreateOperationModal(props: {
       close={close}
       onSubmit={onSubmit}
       isOpen={isOpen}
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       fetching={fetching}
       form={form}
       collections={collections}
@@ -175,10 +175,10 @@ export function CreateOperationModalContent(props: {
   isOpen: boolean;
   close: () => void;
   onSubmit: (values: CreateOperationModalFormValues) => void;
-  organizationId: string;
-  projectId: string;
+  organizationSlug: string;
+  projectSlug: string;
   form: UseFormReturn<CreateOperationModalFormValues>;
-  targetId: string;
+  targetSlug: string;
   fetching: boolean;
   collections: DocumentCollectionOperation[];
 }): ReactElement {

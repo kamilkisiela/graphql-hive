@@ -112,7 +112,7 @@ export function UserMenu(props: {
         <LeaveOrganizationModal
           toggleModalOpen={toggleLeaveOrganizationModalOpen}
           isOpen={isLeaveOrganizationModalOpen}
-          organizationId={currentOrganization.slug}
+          organizationSlug={currentOrganization.slug}
         />
       ) : null}
       <div className="flex flex-row items-center gap-8">
@@ -288,16 +288,16 @@ const LeaveOrganizationModal_LeaveOrganizationMutation = graphql(`
 export function LeaveOrganizationModal(props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organizationId: string;
+  organizationSlug: string;
 }) {
-  const { organizationId } = props;
+  const { organizationSlug } = props;
   const [, mutate] = useMutation(LeaveOrganizationModal_LeaveOrganizationMutation);
   const notify = useNotifications();
 
   async function onSubmit() {
     const result = await mutate({
       input: {
-        organization: organizationId,
+        organizationSlug,
       },
     });
 
@@ -320,7 +320,7 @@ export function LeaveOrganizationModal(props: {
     <LeaveOrganizationModalContent
       isOpen={props.isOpen}
       toggleModalOpen={props.toggleModalOpen}
-      organizationSlug={organizationId}
+      organizationSlug={organizationSlug}
       onSubmit={onSubmit}
     />
   );

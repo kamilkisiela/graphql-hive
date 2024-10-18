@@ -67,9 +67,9 @@ const IncrementalNativeCompositionSwitch = (props: {
                 onCheckedChange={nativeComposition => {
                   void mutate({
                     input: {
-                      organization: props.organizationSlug,
-                      project: props.projectSlug,
-                      target: target.slug,
+                      organizationSlug: props.organizationSlug,
+                      projectSlug: props.projectSlug,
+                      targetSlug: target.slug,
                       nativeComposition,
                     },
                   });
@@ -153,8 +153,8 @@ export function NativeCompositionSettings(props: {
     query: NativeCompositionSettings_ProjectQuery,
     variables: {
       selector: {
-        organization: organization.slug,
-        project: project.slug,
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
       },
     },
     pause: project.isNativeFederationEnabled,
@@ -172,8 +172,8 @@ export function NativeCompositionSettings(props: {
       try {
         const result = await mutate({
           input: {
-            organization: organization.slug,
-            project: project.slug,
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
             enabled,
           },
         });

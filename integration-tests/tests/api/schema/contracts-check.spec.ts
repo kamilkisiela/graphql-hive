@@ -494,9 +494,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
           schemaCheckId,
         },
       },
@@ -522,9 +522,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         id: schemaCheckId,
       },
@@ -670,9 +670,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
           schemaCheckId,
         },
       },
@@ -727,9 +727,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         id: newSchemaCheckId,
       },
@@ -875,9 +875,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
           schemaCheckId,
         },
       },
@@ -932,9 +932,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         id: newSchemaCheckId,
       },
@@ -1073,9 +1073,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
           schemaCheckId,
         },
       },
@@ -1130,9 +1130,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         id: newSchemaCheckId,
       },
@@ -1276,9 +1276,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         id: schemaCheckId,
       },
@@ -1392,9 +1392,9 @@ test.concurrent(
       document: SchemaCheckQuery,
       variables: {
         selector: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
         },
         id: schemaCheckId,
       },
@@ -1412,9 +1412,9 @@ test.concurrent(
       document: ApproveFailedSchemaCheckMutation,
       variables: {
         input: {
-          organization: organization.slug,
-          project: project.slug,
-          target: target.slug,
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
           schemaCheckId,
         },
       },

@@ -5,15 +5,15 @@ import type { MutationResolvers } from './../../../../__generated__/types.next';
 export const updateOrganizationMemberAccess: NonNullable<
   MutationResolvers['updateOrganizationMemberAccess']
 > = async (_, { input }, { injector }) => {
-  const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+  const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
 
   return {
     selector: {
-      organization: input.organization,
+      organizationSlug: input.organizationSlug,
     },
     organization: await injector.get(OrganizationManager).updateMemberAccess({
-      organization,
-      user: input.user,
+      organization: organizationId,
+      user: input.userId,
       organizationScopes: input.organizationScopes,
       projectScopes: input.projectScopes,
       targetScopes: input.targetScopes,

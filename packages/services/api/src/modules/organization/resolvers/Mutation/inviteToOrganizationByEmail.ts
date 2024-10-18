@@ -33,6 +33,6 @@ export const inviteToOrganizationByEmail: NonNullable<
   return await injector.get(OrganizationManager).inviteByEmail({
     organization,
     email: input.email,
-    role: input.role,
+    role: input.roleId,
   });
 };

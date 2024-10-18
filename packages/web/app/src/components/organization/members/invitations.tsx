@@ -120,9 +120,9 @@ function MemberInvitationForm(props: {
     try {
       const result = await invite({
         input: {
-          organization: organization.slug,
+          organizationSlug: organization.slug,
           email: data.email,
-          role: data.role,
+          roleId: data.role,
         },
       });
 
@@ -336,7 +336,7 @@ function Invitation(props: {
                   try {
                     const result = await deleteInvitation({
                       input: {
-                        organization: props.organizationSlug,
+                        organizationSlug: props.organizationSlug,
                         email: invitation.email,
                       },
                     });

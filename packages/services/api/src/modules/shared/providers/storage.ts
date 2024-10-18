@@ -573,17 +573,30 @@ export interface Storage {
 
   getGitHubIntegrationInstallationId(_: OrganizationSelector): Promise<string | null | undefined>;
 
-  addAlertChannel(_: AddAlertChannelInput): Promise<AlertChannel>;
+  addAlertChannel(_: {
+    name: string;
+    organizationId: string;
+    projectId: string;
+    type: AlertChannel['type'];
+    slackChannel?: string | null;
+    webhookEndpoint?: string | null;
+  }): Promise<AlertChannel>;
 
-  deleteAlertChannels(
-    _: ProjectSelector & {
-      channels: readonly string[];
-    },
-  ): Promise<readonly AlertChannel[]>;
+  deleteAlertChannels(_: {
+    channelIds: readonly string[];
+    projectId: string;
+    organizationId: string;
+  }): Promise<readonly AlertChannel[]>;
 
   getAlertChannels(_: ProjectSelector): Promise<readonly AlertChannel[]>;
 
-  addAlert(_: AddAlertInput): Promise<Alert>;
+  addAlert(_: {
+    channelId: string;
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    type: Alert['type'];
+  }): Promise<Alert>;
 
   deleteAlerts(
     _: ProjectSelector & {

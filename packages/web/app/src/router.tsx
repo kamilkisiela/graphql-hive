@@ -331,7 +331,7 @@ const transferOrganizationRoute = createRoute({
   path: 'action/transfer/$organizationSlug/$code',
   component: function TransferOrganizationRoute() {
     const { organizationSlug, code } = transferOrganizationRoute.useParams();
-    return <OrganizationTransferPage organizationId={organizationSlug} code={code} />;
+    return <OrganizationTransferPage organizationSlug={organizationSlug} code={code} />;
   },
 });
 
@@ -351,7 +351,7 @@ const organizationIndexRoute = createRoute({
     const { search, sortBy, sortOrder } = organizationIndexRoute.useSearch();
     return (
       <OrganizationPage
-        organizationId={organizationSlug}
+        organizationSlug={organizationSlug}
         search={search}
         sortBy={sortBy}
         sortOrder={sortOrder}
@@ -367,7 +367,7 @@ const organizationSupportRoute = createRoute({
   path: 'view/support',
   component: function OrganizationSupportRoute() {
     const { organizationSlug } = organizationSupportRoute.useParams();
-    return <OrganizationSupportPage organizationId={organizationSlug} />;
+    return <OrganizationSupportPage organizationSlug={organizationSlug} />;
   },
 });
 
@@ -376,7 +376,9 @@ const organizationSupportTicketRoute = createRoute({
   path: 'view/support/ticket/$ticketId',
   component: function OrganizationSupportTicketRoute() {
     const { organizationSlug, ticketId } = organizationSupportTicketRoute.useParams();
-    return <OrganizationSupportTicketPage organizationId={organizationSlug} ticketId={ticketId} />;
+    return (
+      <OrganizationSupportTicketPage organizationSlug={organizationSlug} ticketId={ticketId} />
+    );
   },
 });
 
@@ -385,7 +387,7 @@ const organizationSubscriptionRoute = createRoute({
   path: 'view/subscription',
   component: function OrganizationSubscriptionRoute() {
     const { organizationSlug } = organizationSubscriptionRoute.useParams();
-    return <OrganizationSubscriptionPage organizationId={organizationSlug} />;
+    return <OrganizationSubscriptionPage organizationSlug={organizationSlug} />;
   },
 });
 
@@ -405,7 +407,7 @@ const organizationSubscriptionManageRoute = createRoute({
   path: 'view/manage-subscription',
   component: function OrganizationSubscriptionManageRoute() {
     const { organizationSlug } = organizationSubscriptionManageRoute.useParams();
-    return <OrganizationSubscriptionManagePage organizationId={organizationSlug} />;
+    return <OrganizationSubscriptionManagePage organizationSlug={organizationSlug} />;
   },
 });
 
@@ -414,7 +416,7 @@ const organizationPolicyRoute = createRoute({
   path: 'view/policy',
   component: function OrganizationPolicyRoute() {
     const { organizationSlug } = organizationPolicyRoute.useParams();
-    return <OrganizationPolicyPage organizationId={organizationSlug} />;
+    return <OrganizationPolicyPage organizationSlug={organizationSlug} />;
   },
 });
 
@@ -423,7 +425,7 @@ const organizationSettingsRoute = createRoute({
   path: 'view/settings',
   component: function OrganizationSettingsRoute() {
     const { organizationSlug } = organizationSettingsRoute.useParams();
-    return <OrganizationSettingsPage organizationId={organizationSlug} />;
+    return <OrganizationSettingsPage organizationSlug={organizationSlug} />;
   },
 });
 
@@ -450,7 +452,7 @@ const organizationMembersRoute = createRoute({
 
     return (
       <OrganizationMembersPage
-        organizationId={organizationSlug}
+        organizationSlug={organizationSlug}
         page={page}
         onPageChange={onPageChange}
       />
@@ -474,8 +476,8 @@ const projectIndexRoute = createRoute({
     const { search, sortBy, sortOrder } = projectIndexRoute.useSearch();
     return (
       <ProjectPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
         search={search}
         sortBy={sortBy}
         sortOrder={sortOrder}
@@ -489,7 +491,7 @@ const projectSettingsRoute = createRoute({
   path: 'view/settings',
   component: function ProjectSettingsRoute() {
     const { organizationSlug, projectSlug } = projectSettingsRoute.useParams();
-    return <ProjectSettingsPage organizationId={organizationSlug} projectId={projectSlug} />;
+    return <ProjectSettingsPage organizationSlug={organizationSlug} projectSlug={projectSlug} />;
   },
 });
 
@@ -498,7 +500,7 @@ const projectPolicyRoute = createRoute({
   path: 'view/policy',
   component: function ProjectPolicyRoute() {
     const { organizationSlug, projectSlug } = projectPolicyRoute.useParams();
-    return <ProjectPolicyPage organizationId={organizationSlug} projectId={projectSlug} />;
+    return <ProjectPolicyPage organizationSlug={organizationSlug} projectSlug={projectSlug} />;
   },
 });
 
@@ -507,7 +509,7 @@ const projectAlertsRoute = createRoute({
   path: 'view/alerts',
   component: function ProjectAlertsRoute() {
     const { organizationSlug, projectSlug } = projectAlertsRoute.useParams();
-    return <ProjectAlertsPage organizationId={organizationSlug} projectId={projectSlug} />;
+    return <ProjectAlertsPage organizationSlug={organizationSlug} projectSlug={projectSlug} />;
   },
 });
 
@@ -524,7 +526,11 @@ const targetIndexRoute = createRoute({
   component: function TargetRoute() {
     const { organizationSlug, projectSlug, targetSlug } = targetIndexRoute.useParams();
     return (
-      <TargetPage organizationId={organizationSlug} projectId={projectSlug} targetId={targetSlug} />
+      <TargetPage
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
+      />
     );
   },
 });
@@ -555,9 +561,9 @@ const targetSettingsRoute = createRoute({
 
     return (
       <TargetSettingsPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         page={page}
       />
     );
@@ -571,9 +577,9 @@ const targetLaboratoryRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetLaboratoryRoute.useParams();
     return (
       <TargetLaboratoryPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -586,9 +592,9 @@ const targetAppsRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetAppsRoute.useParams();
     return (
       <TargetAppsPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -602,9 +608,9 @@ const targetAppVersionRoute = createRoute({
       targetAppVersionRoute.useParams();
     return (
       <TargetAppVersionPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         appName={appName}
         appVersion={appVersion}
       />
@@ -619,9 +625,9 @@ const targetInsightsRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetInsightsRoute.useParams();
     return (
       <TargetInsightsPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -635,9 +641,9 @@ const targetInsightsCoordinateRoute = createRoute({
       targetInsightsCoordinateRoute.useParams();
     return (
       <TargetInsightsCoordinatePage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         coordinate={coordinate}
       />
     );
@@ -652,9 +658,9 @@ const targetInsightsClientRoute = createRoute({
       targetInsightsClientRoute.useParams();
     return (
       <TargetInsightsClientPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         name={name}
       />
     );
@@ -669,9 +675,9 @@ const targetInsightsOperationsRoute = createRoute({
       targetInsightsOperationsRoute.useParams();
     return (
       <TargetInsightsOperationPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         operationName={operationName}
         operationHash={operationHash}
       />
@@ -686,9 +692,9 @@ const targetHistoryRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetHistoryRoute.useParams();
     return (
       <TargetHistoryPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -702,9 +708,9 @@ const targetHistoryVersionRoute = createRoute({
       targetHistoryVersionRoute.useParams();
     return (
       <TargetHistoryVersionPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         versionId={versionId}
       />
     );
@@ -718,9 +724,9 @@ const targetExplorerRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetExplorerRoute.useParams();
     return (
       <TargetExplorerPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -734,9 +740,9 @@ const targetExplorerTypeRoute = createRoute({
       targetExplorerTypeRoute.useParams();
     return (
       <TargetExplorerTypePage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         typename={typename}
       />
     );
@@ -750,9 +756,9 @@ const targetExplorerDeprecatedRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetExplorerDeprecatedRoute.useParams();
     return (
       <TargetExplorerDeprecatedPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -765,9 +771,9 @@ const targetExplorerUnusedRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetExplorerUnusedRoute.useParams();
     return (
       <TargetExplorerUnusedPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -780,9 +786,9 @@ const targetChecksRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = targetChecksRoute.useParams();
     return (
       <TargetChecksPage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
       />
     );
   },
@@ -796,9 +802,9 @@ const targetChecksSingleRoute = createRoute({
       targetChecksSingleRoute.useParams();
     return (
       <TargetChecksSinglePage
-        organizationId={organizationSlug}
-        projectId={projectSlug}
-        targetId={targetSlug}
+        organizationSlug={organizationSlug}
+        projectSlug={projectSlug}
+        targetSlug={targetSlug}
         schemaCheckId={schemaCheckId}
       />
     );

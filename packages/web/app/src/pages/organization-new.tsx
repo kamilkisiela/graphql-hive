@@ -57,7 +57,7 @@ export const CreateOrganizationMutation = graphql(`
       ok {
         createdOrganizationPayload {
           selector {
-            organization
+            organizationSlug
           }
           organization {
             id

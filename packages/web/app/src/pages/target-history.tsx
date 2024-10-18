@@ -15,13 +15,19 @@ import { Link, Outlet, useParams, useRouter } from '@tanstack/react-router';
 
 const HistoryPage_VersionsPageQuery = graphql(`
   query HistoryPage_VersionsPageQuery(
-    $organization: ID!
-    $project: ID!
-    $target: ID!
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
     $first: Int!
     $after: String
   ) {
-    target(selector: { organization: $organization, project: $project, target: $target }) {
+    target(
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
+    ) {
       id
       schemaVersions(first: $first, after: $after) {
         edges {
@@ -64,17 +70,17 @@ function ListPage(props: {
   isLastPage: boolean;
   onLoadMore: (after: string) => void;
   versionId?: string;
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }): ReactElement {
   const { variables, isLastPage, onLoadMore, versionId } = props;
   const [versionsQuery] = useQuery({
     query: HistoryPage_VersionsPageQuery,
     variables: {
-      organization: props.organizationId,
-      project: props.projectId,
-      target: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
       ...variables,
     },
     requestPolicy: 'cache-and-network',
@@ -97,9 +103,9 @@ function ListPage(props: {
             key={version.id}
             to="/$organizationSlug/$projectSlug/$targetSlug/history/$versionId"
             params={{
-              organizationSlug: props.organizationId,
-              projectSlug: props.projectId,
-              targetSlug: props.targetId,
+              organizationSlug: props.organizationSlug,
+              projectSlug: props.projectSlug,
+              targetSlug: props.targetSlug,
               versionId: version.id,
             }}
           >
@@ -158,9 +164,17 @@ function ListPage(props: {
 }
 
 const TargetHistoryPageQuery = graphql(`
-  query TargetHistoryPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
+  query TargetHistoryPageQuery(
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
+  ) {
     target(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     ) {
       id
       latestSchemaVersion {
@@ -171,17 +185,17 @@ const TargetHistoryPageQuery = graphql(`
 `);
 
 function HistoryPageContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   const router = useRouter();
   const [query] = useQuery({
     query: TargetHistoryPageQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
   const [pageVariables, setPageVariables] = useState([{ first: 10, after: null as string | null }]);
@@ -197,9 +211,9 @@ function HistoryPageContent(props: {
       void router.navigate({
         to: '/$organizationSlug/$projectSlug/$targetSlug/history/$versionId',
         params: {
-          organizationSlug: props.organizationId,
-          projectSlug: props.projectId,
-          targetSlug: props.targetId,
+          organizationSlug: props.organizationSlug,
+          projectSlug: props.projectSlug,
+          targetSlug: props.targetSlug,
           versionId: currentTarget.latestSchemaVersion.id,
         },
       });
@@ -207,14 +221,14 @@ function HistoryPageContent(props: {
   }, [versionId, currentTarget?.latestSchemaVersion?.id]);
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.History}
       className="flex flex-row gap-x-6"
     >
@@ -236,9 +250,9 @@ function HistoryPageContent(props: {
                       setPageVariables([...pageVariables, { after, first: 10 }]);
                     }}
                     versionId={versionId}
-                    organizationId={props.organizationId}
-                    projectId={props.projectId}
-                    targetId={props.targetId}
+                    organizationSlug={props.organizationSlug}
+                    projectSlug={props.projectSlug}
+                    targetSlug={props.targetSlug}
                   />
                 ))}
               </div>
@@ -260,9 +274,9 @@ function HistoryPageContent(props: {
 }
 
 export function TargetHistoryPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
 }) {
   return (
     <>

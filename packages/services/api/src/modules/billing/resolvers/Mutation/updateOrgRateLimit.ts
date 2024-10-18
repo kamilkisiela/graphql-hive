@@ -9,7 +9,7 @@ export const updateOrgRateLimit: NonNullable<MutationResolvers['updateOrgRateLim
   { injector },
 ) => {
   const organizationId = await injector.get(IdTranslator).translateOrganizationId({
-    organization: args.selector.organization,
+    organizationSlug: args.selector.organizationSlug,
   });
 
   return injector.get(OrganizationManager).updateRateLimits({

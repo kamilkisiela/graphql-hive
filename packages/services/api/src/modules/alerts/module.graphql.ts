@@ -85,8 +85,8 @@ export default gql`
   }
 
   input AddAlertChannelInput {
-    organization: ID!
-    project: ID!
+    organizationSlug: String!
+    projectSlug: String!
     name: String!
     type: AlertChannelType!
     slack: SlackChannelInput
@@ -102,23 +102,23 @@ export default gql`
   }
 
   input DeleteAlertChannelsInput {
-    organization: ID!
-    project: ID!
-    channels: [ID!]!
+    organizationSlug: String!
+    projectSlug: String!
+    channelIds: [ID!]!
   }
 
   input AddAlertInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-    channel: ID!
+    organizationSlug: String!
+    projectSlug: String!
+    targetSlug: String!
+    channelId: ID!
     type: AlertType!
   }
 
   input DeleteAlertsInput {
-    organization: ID!
-    project: ID!
-    alerts: [ID!]!
+    organizationSlug: String!
+    projectSlug: String!
+    alertIds: [ID!]!
   }
 
   interface AlertChannel {

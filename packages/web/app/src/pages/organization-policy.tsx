@@ -68,12 +68,12 @@ const UpdateSchemaPolicyForOrganization = graphql(`
   }
 `);
 
-function PolicyPageContent(props: { organizationId: string }) {
+function PolicyPageContent(props: { organizationSlug: string }) {
   const [query] = useQuery({
     query: OrganizationPolicyPageQuery,
     variables: {
       selector: {
-        organization: props.organizationId,
+        organizationSlug: props.organizationSlug,
       },
     },
   });
@@ -86,7 +86,7 @@ function PolicyPageContent(props: { organizationId: string }) {
     scope: OrganizationAccessScope.Settings,
     member: currentOrganization?.me ?? null,
     redirect: true,
-    organizationId: props.organizationId,
+    organizationSlug: props.organizationSlug,
   });
 
   const legacyProjects = currentOrganization?.projects.nodes.filter(
@@ -94,13 +94,13 @@ function PolicyPageContent(props: { organizationId: string }) {
   );
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   return (
     <OrganizationLayout
       page={Page.Policy}
-      organizationId={props.organizationId}
+      organizationSlug={props.organizationSlug}
       className="flex flex-col gap-y-10"
     >
       <div>
@@ -165,7 +165,7 @@ function PolicyPageContent(props: { organizationId: string }) {
                 onSave={async (newPolicy, allowOverrides) => {
                   await mutate({
                     selector: {
-                      organization: props.organizationId,
+                      organizationSlug: props.organizationSlug,
                     },
                     policy: newPolicy,
                     allowOverrides,
@@ -216,11 +216,11 @@ function PolicyPageContent(props: { organizationId: string }) {
   );
 }
 
-export function OrganizationPolicyPage(props: { organizationId: string }): ReactElement {
+export function OrganizationPolicyPage(props: { organizationSlug: string }): ReactElement {
   return (
     <>
       <Meta title="Organization Schema Policy" />
-      <PolicyPageContent organizationId={props.organizationId} />
+      <PolicyPageContent organizationSlug={props.organizationSlug} />
     </>
   );
 }

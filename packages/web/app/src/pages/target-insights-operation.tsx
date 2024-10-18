@@ -77,9 +77,9 @@ function OperationView({
     query: Operation_View_OperationBodyQuery,
     variables: {
       selector: {
-        organization: organizationSlug,
-        project: projectSlug,
-        target: targetSlug,
+        organizationSlug,
+        projectSlug,
+        targetSlug,
       },
       hash: operationHash,
     },
@@ -102,9 +102,9 @@ function OperationView({
               period={dateRangeController.resolvedRange}
               selected={selectedClients}
               onFilter={setSelectedClients}
-              organizationId={organizationSlug}
-              projectId={projectSlug}
-              targetId={targetSlug}
+              organizationSlug={organizationSlug}
+              projectSlug={projectSlug}
+              targetSlug={targetSlug}
             />
             <DateRangePicker
               validUnits={['y', 'M', 'w', 'd', 'h']}
@@ -121,9 +121,9 @@ function OperationView({
       </div>
       {!result.fetching && isNotNoQueryOrMutation === false ? (
         <OperationsStats
-          organization={organizationSlug}
-          project={projectSlug}
-          target={targetSlug}
+          organizationSlug={organizationSlug}
+          projectSlug={projectSlug}
+          targetSlug={targetSlug}
           period={dateRangeController.resolvedRange}
           dateRangeText={dateRangeController.selectedPreset.label}
           operationsFilter={operationsList}
@@ -154,8 +154,12 @@ function OperationView({
 }
 
 const OperationInsightsPageQuery = graphql(`
-  query OperationInsightsPageQuery($organizationSlug: ID!, $projectSlug: ID!, $targetSlug: ID!) {
-    organization(selector: { organization: $organizationSlug }) {
+  query OperationInsightsPageQuery(
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
+  ) {
+    organization(selector: { organizationSlug: $organizationSlug }) {
       organization {
         id
         slug
@@ -165,29 +169,33 @@ const OperationInsightsPageQuery = graphql(`
       }
     }
     hasCollectedOperations(
-      selector: { organization: $organizationSlug, project: $projectSlug, target: $targetSlug }
+      selector: {
+        organizationSlug: $organizationSlug
+        projectSlug: $projectSlug
+        targetSlug: $targetSlug
+      }
     )
   }
 `);
 
 function OperationInsightsContent(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   operationHash: string;
   operationName: string;
 }) {
   const [query] = useQuery({
     query: OperationInsightsPageQuery,
     variables: {
-      organizationSlug: props.organizationId,
-      projectSlug: props.projectId,
-      targetSlug: props.targetId,
+      organizationSlug: props.organizationSlug,
+      projectSlug: props.projectSlug,
+      targetSlug: props.targetSlug,
     },
   });
 
   if (query.error) {
-    return <QueryError organizationId={props.organizationId} error={query.error} />;
+    return <QueryError organizationSlug={props.organizationSlug} error={query.error} />;
   }
 
   const currentOrganization = query.data?.organization?.organization;
@@ -195,17 +203,17 @@ function OperationInsightsContent(props: {
 
   return (
     <TargetLayout
-      organizationId={props.organizationId}
-      projectId={props.projectId}
-      targetId={props.targetId}
+      organizationSlug={props.organizationSlug}
+      projectSlug={props.projectSlug}
+      targetSlug={props.targetSlug}
       page={Page.Insights}
     >
       {currentOrganization ? (
         hasCollectedOperations ? (
           <OperationView
-            organizationSlug={props.organizationId}
-            projectSlug={props.projectId}
-            targetSlug={props.targetId}
+            organizationSlug={props.organizationSlug}
+            projectSlug={props.projectSlug}
+            targetSlug={props.targetSlug}
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
             operationHash={props.operationHash}
             operationName={props.operationName}
@@ -225,9 +233,9 @@ function OperationInsightsContent(props: {
 }
 
 export function TargetInsightsOperationPage(props: {
-  organizationId: string;
-  projectId: string;
-  targetId: string;
+  organizationSlug: string;
+  projectSlug: string;
+  targetSlug: string;
   operationHash: string;
   operationName: string;
 }) {
