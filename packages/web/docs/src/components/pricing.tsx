@@ -5,7 +5,9 @@ import { CallToAction, Heading } from '@theguild/components';
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
     <Root delayDuration={0}>
-      <Trigger className="text-left">{children}</Trigger>
+      <Trigger className="hive-focus -mx-1 -my-0.5 rounded px-1 py-0.5 text-left">
+        {children}
+      </Trigger>
       <Content
         sideOffset={5}
         className="bg-green-1000 z-20 rounded p-2 text-sm font-normal leading-4 text-white shadow"
@@ -85,7 +87,7 @@ export function Pricing(): ReactElement {
       <div className="mx-auto box-border w-full max-w-[1200px]">
         <header className="px-6">
           <Heading as="h2" size="md" className="text-green-1000 text-center">
-            <a id="pricing">Pricing</a>
+            Pricing
           </Heading>
           <p className="mx-auto mt-4 max-w-xl text-balance text-center text-green-800 lg:text-wrap">
             All features are available on all plans — including the free&nbsp;plan. Our pricing is
@@ -95,7 +97,7 @@ export function Pricing(): ReactElement {
 
         <div
           // the padding is here so `overflow-auto` doesn't cut button hover states
-          className="-mx-1 overflow-auto px-1"
+          className="-mx-2 overflow-auto px-2"
         >
           <div className="mt-16 flex min-w-[1000px] flex-row items-stretch gap-8 px-6 lg:mt-24 lg:gap-10 xl:gap-12 xl:px-0">
             <Plan
@@ -178,7 +180,7 @@ export function Pricing(): ReactElement {
                     href="https://the-guild.dev"
                     target="_blank"
                     rel="noreferrer"
-                    className="underline hover:text-blue-700"
+                    className="hive-focus -mx-1 -my-0.5 rounded px-1 py-0.5 underline hover:text-blue-700"
                   >
                     The&nbsp;Guild
                   </a>

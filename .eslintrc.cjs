@@ -223,7 +223,7 @@ module.exports = {
         },
         tailwindcss: {
           callees: tailwindCallees,
-          whitelist: ['light'],
+          whitelist: ['light', 'hive-focus', 'hive-focus-within'],
           config: path.join(__dirname, './packages/web/docs/tailwind.config.cjs'),
         },
       },

@@ -49,7 +49,7 @@ export function FrequentlyAskedQuestions({ className }: { className?: string }) 
               >
                 <li>
                   <Accordion.Header>
-                    <Accordion.Trigger className="hover:bg-beige-100/80 -mx-2 my-1 flex w-[calc(100%+1rem)] flex-row items-center justify-between rounded-xl bg-white px-2 py-3 text-left font-medium transition-colors duration-[0.8s] md:my-2 md:py-4">
+                    <Accordion.Trigger className="hive-focus hover:bg-beige-100/80 -mx-2 my-1 flex w-[calc(100%+1rem)] items-center justify-between rounded-xl bg-white px-2 py-3 text-left font-medium transition-colors duration-[.8s] md:my-2 md:py-4">
                       {question}
                       <ChevronDownIcon className="size-5 transition duration-500 ease-in [[data-state='open']_&]:[transform:rotateX(180deg)]" />
                     </Accordion.Trigger>

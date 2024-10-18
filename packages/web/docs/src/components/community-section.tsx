@@ -262,7 +262,7 @@ function SocialPostCard({ post }: { post: SocialPost }) {
       <div className="flex flex-row items-center gap-2">
         <div className="relative">
           <a
-            className="absolute -left-1.5 -top-1.5 z-10 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white"
+            className="hive-focus absolute -left-1.5 -top-1.5 z-10 rounded-full border-2 border-transparent p-[5px] text-white hover:border-white focus-visible:ring-offset-0 focus-visible:ring-offset-green-900"
             href={post.href}
             target="_blank"
             rel="noopener noreferrer"
@@ -291,7 +291,7 @@ function SocialPostCard({ post }: { post: SocialPost }) {
         <p className="text-sm">{post.name}</p>
       </div>
       <blockquote
-        className="mt-4 min-w-[220px] max-w-full whitespace-pre-line [&_.code]:font-mono [&_.code]:text-[0.9em] [&_a:hover]:underline [&_a]:text-blue-500"
+        className="mt-4 min-w-[220px] max-w-full whitespace-pre-line [&_.code]:font-mono [&_.code]:text-[0.9em] [&_a:focus-visible]:[outline-style:solid] [&_a:focus]:outline-[hsl(var(--nextra-primary-hue)_var(--nextra-primary-saturation)_86%)] [&_a:hover]:underline [&_a]:rounded-sm [&_a]:text-blue-500 [&_a]:outline-2 [&_a]:outline-offset-2"
         dangerouslySetInnerHTML={{ __html: post.text }}
       />
     </div>
