@@ -176,10 +176,12 @@ describe('sendChannelConfirmation', () => {
         organization: {
           id: 'org-id',
           cleanId: 'org-clean-id',
+          slug: 'org-clean-id',
         },
         project: {
           id: 'project-id',
           cleanId: 'project-clean-id',
+          slug: 'project-clean-id',
           name: 'project-name',
         },
         kind: 'created',
