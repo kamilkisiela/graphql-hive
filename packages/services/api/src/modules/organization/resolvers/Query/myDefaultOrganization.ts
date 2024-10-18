@@ -24,7 +24,7 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
 
       return {
         selector: {
-          organization: org.cleanId,
+          organization: org.slug,
         },
         organization: org,
       };
@@ -48,7 +48,7 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
       if (org) {
         return {
           selector: {
-            organization: org.cleanId,
+            organization: org.slug,
           },
           organization: org,
         };
@@ -64,7 +64,7 @@ export const myDefaultOrganization: NonNullable<QueryResolvers['myDefaultOrganiz
 
       return {
         selector: {
-          organization: firstOrg.cleanId,
+          organization: firstOrg.slug,
         },
         organization: firstOrg,
       };

@@ -132,7 +132,7 @@ const TargetExplorerTypenamePageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        cleanId
+        slug
         rateLimit {
           retentionInDays
         }
@@ -140,7 +140,7 @@ const TargetExplorerTypenamePageQuery = graphql(`
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
-      cleanId
+      slug
       latestSchemaVersion {
         __typename
         id

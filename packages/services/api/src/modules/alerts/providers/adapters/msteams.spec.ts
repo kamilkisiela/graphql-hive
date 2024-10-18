@@ -111,16 +111,19 @@ describe('TeamsCommunicationAdapter', () => {
           organization: {
             id: 'org-id',
             cleanId: 'org-clean-id',
+            slug: 'org-clean-id',
             name: '',
           },
           project: {
             id: 'project-id',
             cleanId: 'project-clean-id',
+            slug: 'project-clean-id',
             name: 'project-name',
           },
           target: {
             id: 'target-id',
             cleanId: 'target-clean-id',
+            slug: 'target-clean-id',
             name: 'target-name',
           },
 
@@ -173,10 +176,12 @@ describe('sendChannelConfirmation', () => {
         organization: {
           id: 'org-id',
           cleanId: 'org-clean-id',
+          slug: 'org-clean-id',
         },
         project: {
           id: 'project-id',
           cleanId: 'project-clean-id',
+          slug: 'project-clean-id',
           name: 'project-name',
         },
         kind: 'created',

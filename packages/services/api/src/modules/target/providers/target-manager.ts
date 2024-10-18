@@ -121,7 +121,7 @@ export class TargetManager {
       },
       meta: {
         name: deletedTarget.name,
-        cleanId: deletedTarget.cleanId,
+        cleanId: deletedTarget.slug,
       },
     });
 

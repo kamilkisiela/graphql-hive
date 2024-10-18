@@ -47,7 +47,7 @@ export const createTarget: NonNullable<MutationResolvers['createTarget']> = asyn
         selector: {
           organization: input.organization,
           project: input.project,
-          target: result.target.cleanId,
+          target: result.target.slug,
         },
         createdTarget: result.target,
       },

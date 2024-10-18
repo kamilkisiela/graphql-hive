@@ -35,8 +35,8 @@ type RouteSearchProps = z.infer<typeof OrganizationIndexRouteSearch>;
 
 const ProjectCard_ProjectFragment = graphql(`
   fragment ProjectCard_ProjectFragment on Project {
-    cleanId
     id
+    slug
     type
   }
 `);
@@ -85,7 +85,7 @@ const ProjectCard = (props: {
         to="/$organizationId/$projectId"
         params={{
           organizationId: props.cleanOrganizationId ?? 'unknown-yet',
-          projectId: project?.cleanId ?? 'unknown-yet',
+          projectId: project?.slug ?? 'unknown-yet',
         }}
       >
         <TooltipProvider>
@@ -166,7 +166,7 @@ const ProjectCard = (props: {
               <div className="flex flex-row items-center justify-between gap-y-3 px-4 pt-4">
                 {project ? (
                   <div>
-                    <h4 className="line-clamp-2 text-lg font-bold">{project.cleanId}</h4>
+                    <h4 className="line-clamp-2 text-lg font-bold">{project.slug}</h4>
                     <p className="text-xs text-gray-300">{projectTypeFullNames[project.type]}</p>
                   </div>
                 ) : (
@@ -232,14 +232,14 @@ const OrganizationProjectsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        cleanId
+        slug
       }
     }
     projects(selector: { organization: $organizationId }) {
       total
       nodes {
         id
-        cleanId
+        slug
         ...ProjectCard_ProjectFragment
         totalRequests(period: $period)
         requestsOverTime(resolution: $chartResolution, period: $period) {
@@ -322,7 +322,7 @@ function OrganizationPageContent(
     const searchPhrase = props.search;
     const newProjects = searchPhrase
       ? projectsConnection.nodes.filter(project =>
-          project.cleanId.toLowerCase().includes(searchPhrase.toLowerCase()),
+          project.slug.toLowerCase().includes(searchPhrase.toLowerCase()),
         )
       : projectsConnection.nodes.slice();
 
@@ -339,11 +339,11 @@ function OrganizationPageContent(
       }
 
       if (sortKey === 'name') {
-        return a.cleanId.localeCompare(b.cleanId) * sortOrder * -1;
+        return a.slug.localeCompare(b.slug) * sortOrder * -1;
       }
 
       // falls back to sort by name in ascending order
-      return a.cleanId.localeCompare(b.cleanId);
+      return a.slug.localeCompare(b.slug);
     });
   }, [projectsConnection, props.search, sortKey, sortOrder]);
 
@@ -461,7 +461,7 @@ function OrganizationPageContent(
                 {projects.map(project => (
                   <ProjectCard
                     key={project.id}
-                    cleanOrganizationId={currentOrganization.cleanId}
+                    cleanOrganizationId={currentOrganization.slug}
                     days={days}
                     highestNumberOfRequests={highestNumberOfRequests}
                     project={project}

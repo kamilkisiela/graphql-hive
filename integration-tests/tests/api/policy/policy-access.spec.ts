@@ -39,9 +39,9 @@ describe('Policy Access', () => {
           document: query,
           variables: {
             selector: {
-              organization: organization.cleanId,
-              project: project.cleanId,
-              target: target.cleanId,
+              organization: organization.slug,
+              project: project.slug,
+              target: target.slug,
             },
           },
           authToken: memberToken,
@@ -63,9 +63,9 @@ describe('Policy Access', () => {
           document: query,
           variables: {
             selector: {
-              organization: organization.cleanId,
-              project: project.cleanId,
-              target: target.cleanId,
+              organization: organization.slug,
+              project: project.slug,
+              target: target.slug,
             },
           },
           authToken: memberToken,
@@ -107,8 +107,8 @@ describe('Policy Access', () => {
           document: query,
           variables: {
             selector: {
-              organization: organization.cleanId,
-              project: project.cleanId,
+              organization: organization.slug,
+              project: project.slug,
             },
           },
           authToken: memberToken,
@@ -130,8 +130,8 @@ describe('Policy Access', () => {
           document: query,
           variables: {
             selector: {
-              organization: organization.cleanId,
-              project: project.cleanId,
+              organization: organization.slug,
+              project: project.slug,
             },
           },
           authToken: memberToken,
@@ -173,7 +173,7 @@ describe('Policy Access', () => {
           document: query,
           variables: {
             selector: {
-              organization: organization.cleanId,
+              organization: organization.slug,
             },
           },
           authToken: memberToken,
@@ -194,7 +194,7 @@ describe('Policy Access', () => {
           document: query,
           variables: {
             selector: {
-              organization: organization.cleanId,
+              organization: organization.slug,
             },
           },
           authToken: memberToken,

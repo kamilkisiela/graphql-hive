@@ -155,7 +155,7 @@ const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
   ) {
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
-      cleanId
+      slug
       latestSchemaVersion {
         id
       }
@@ -295,7 +295,7 @@ const TargetExplorerUnusedSchemaPageQuery = graphql(`
         rateLimit {
           retentionInDays
         }
-        cleanId
+        slug
       }
     }
     hasCollectedOperations(

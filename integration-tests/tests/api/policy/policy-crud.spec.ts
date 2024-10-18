@@ -25,9 +25,9 @@ describe('Policy CRUD', () => {
           document: TargetCalculatedPolicy,
           variables: {
             selector: {
-              organization: organization.cleanId,
-              project: project.cleanId,
-              target: target.cleanId,
+              organization: organization.slug,
+              project: project.slug,
+              target: target.slug,
             },
           },
           authToken: ownerToken,
@@ -49,9 +49,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.cleanId,
-            project: project.cleanId,
-            target: target.cleanId,
+            organization: organization.slug,
+            project: project.slug,
+            target: target.slug,
           },
         },
         authToken: ownerToken,
@@ -76,9 +76,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.cleanId,
-            project: project.cleanId,
-            target: target.cleanId,
+            organization: organization.slug,
+            project: project.slug,
+            target: target.slug,
           },
         },
         authToken: ownerToken,
@@ -104,9 +104,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.cleanId,
-            project: project.cleanId,
-            target: target.cleanId,
+            organization: organization.slug,
+            project: project.slug,
+            target: target.slug,
           },
         },
         authToken: ownerToken,
@@ -151,9 +151,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.cleanId,
-            project: project.cleanId,
-            target: target.cleanId,
+            organization: organization.slug,
+            project: project.slug,
+            target: target.slug,
           },
         },
         authToken: ownerToken,
@@ -202,9 +202,9 @@ describe('Policy CRUD', () => {
         document: TargetCalculatedPolicy,
         variables: {
           selector: {
-            organization: organization.cleanId,
-            project: project.cleanId,
-            target: target.cleanId,
+            organization: organization.slug,
+            project: project.slug,
+            target: target.slug,
           },
         },
         authToken: ownerToken,
@@ -241,7 +241,7 @@ describe('Policy CRUD', () => {
         const result = await execute({
           document: OrganizationAndProjectsWithSchemaPolicy,
           variables: {
-            organization: organization.cleanId,
+            organization: organization.slug,
           },
           authToken: ownerToken,
         }).then(r => r.expectNoGraphQLErrors());
@@ -337,7 +337,7 @@ describe('Policy CRUD', () => {
         const result = await execute({
           document: OrganizationAndProjectsWithSchemaPolicy,
           variables: {
-            organization: organization.cleanId,
+            organization: organization.slug,
           },
           authToken: ownerToken,
         }).then(r => r.expectNoGraphQLErrors());
@@ -392,7 +392,7 @@ describe('Policy CRUD', () => {
       const result = await execute({
         document: OrganizationAndProjectsWithSchemaPolicy,
         variables: {
-          organization: organization.cleanId,
+          organization: organization.slug,
         },
         authToken: ownerToken,
       }).then(r => r.expectNoGraphQLErrors());

@@ -27,7 +27,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
       organization: {
         name: string;
         id: string;
-        cleanId: string;
+        slug: string;
         email: string;
       };
       period: {
@@ -74,7 +74,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                     We recommend to increase the limit.
                   </mj-text>
                   <mj-button href="${env.hiveServices.webAppUrl}/${
-                    input.organization.cleanId
+                    input.organization.slug
                   }/view/subscription">
                     Manage your subscription
                   </mj-button>
@@ -91,7 +91,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
       organization: {
         name: string;
         id: string;
-        cleanId: string;
+        slug: string;
         email: string;
       };
       period: {
@@ -138,7 +138,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                     We recommend to increase the limit.
                   </mj-text>
                   <mj-button href="${env.hiveServices.webAppUrl}/${
-                    input.organization.cleanId
+                    input.organization.slug
                   }/view/subscription">
                     Manage your subscription
                   </mj-button>

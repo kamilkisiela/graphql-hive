@@ -87,8 +87,9 @@ export default gql`
 
   type Project {
     id: ID!
-    cleanId: ID!
-    name: String! @deprecated(reason: "Use the 'cleanId' field instead.")
+    slug: ID!
+    cleanId: ID! @deprecated(reason: "Use the 'slug' field instead.")
+    name: String! @deprecated(reason: "Use the 'slug' field instead.")
     type: ProjectType!
     buildUrl: String
     validationUrl: String

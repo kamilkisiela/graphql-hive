@@ -29,7 +29,7 @@ const OrganizationPermissions_UpdateMemberAccessMutation = graphql(`
       }
       organization {
         id
-        cleanId
+        slug
       }
     }
   }
@@ -251,7 +251,7 @@ export const PermissionsSpace = memo(
 
 const UsePermissionManager_OrganizationFragment = graphql(`
   fragment UsePermissionManager_OrganizationFragment on Organization {
-    cleanId
+    slug
     me {
       ...CanAccessOrganization_MemberFragment
       ...CanAccessProject_MemberFragment
@@ -312,7 +312,7 @@ export function usePermissionsManager({
       setState('LOADING');
       const result = await mutate({
         input: {
-          organization: organization.cleanId,
+          organization: organization.slug,
           user: member.user.id,
           targetScopes,
           projectScopes,

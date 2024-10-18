@@ -29,7 +29,7 @@ export const CreateAlertModal_AddAlertMutation = graphql(`
 export const CreateAlertModal_TargetFragment = graphql(`
   fragment CreateAlertModal_TargetFragment on Target {
     id
-    cleanId
+    slug
   }
 `);
 
@@ -70,7 +70,7 @@ export const CreateAlertModal = (props: {
       target: Yup.lazy(() =>
         Yup.string()
           .min(1)
-          .equals(targets.map(target => target.cleanId))
+          .equals(targets.map(target => target.slug))
           .required('Must select target'),
       ),
     }),
@@ -143,8 +143,8 @@ export const CreateAlertModal = (props: {
             name="target"
             placeholder="Select target"
             options={targets.map(target => ({
-              value: target.cleanId,
-              name: target.cleanId,
+              value: target.slug,
+              name: target.slug,
             }))}
             value={values.target}
             onChange={handleChange}

@@ -810,13 +810,13 @@ export class SchemaManager {
 
     return this.schemaModuleConfig.schemaCheckLink({
       organization: {
-        cleanId: breadcrumb.organization,
+        slug: breadcrumb.organization,
       },
       project: {
-        cleanId: breadcrumb.project,
+        slug: breadcrumb.project,
       },
       target: {
-        cleanId: breadcrumb.target,
+        slug: breadcrumb.target,
       },
       schemaCheckId: args.schemaCheckId,
     });

@@ -20,7 +20,7 @@ const OrganizationMembersPage_OrganizationFragment = graphql(`
       ...CanAccessOrganization_MemberFragment
       ...OrganizationMemberRoleSwitcher_MemberFragment
     }
-    cleanId
+    slug
     ...OrganizationInvitations_OrganizationFragment
     ...OrganizationMemberRoles_OrganizationFragment
     ...OrganizationMembers_OrganizationFragment
@@ -64,7 +64,7 @@ function PageContent(props: {
     scope: OrganizationAccessScope.Members,
     redirect: true,
     member: organization.me,
-    organizationId: organization.cleanId,
+    organizationId: organization.slug,
   });
 
   if (!organization || !hasAccess) {

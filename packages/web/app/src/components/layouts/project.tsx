@@ -43,7 +43,7 @@ const ProjectLayoutQuery = graphql(`
     organizations {
       nodes {
         id
-        cleanId
+        slug
         me {
           id
           ...CanAccessProject_MemberFragment
@@ -51,7 +51,7 @@ const ProjectLayoutQuery = graphql(`
         projects {
           nodes {
             id
-            cleanId
+            slug
             registryModel
           }
         }
@@ -82,10 +82,10 @@ export function ProjectLayout({
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organizations.nodes.find(
-    node => node.cleanId === props.organizationId,
+    node => node.slug === props.organizationId,
   );
   const currentProject = currentOrganization?.projects.nodes.find(
-    node => node.cleanId === props.projectId,
+    node => node.slug === props.projectId,
   );
 
   useProjectAccess({
@@ -96,7 +96,7 @@ export function ProjectLayout({
     projectId: props.projectId,
   });
 
-  useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
+  useLastVisitedOrganizationWriter(currentOrganization?.slug);
 
   return (
     <>
@@ -121,7 +121,7 @@ export function ProjectLayout({
       </header>
 
       {page === Page.Settings || currentProject?.registryModel !== 'LEGACY' ? null : (
-        <ProjectMigrationToast orgId={props.organizationId} projectId={currentProject.cleanId} />
+        <ProjectMigrationToast orgId={props.organizationId} projectId={currentProject.slug} />
       )}
 
       <div className="relative h-[--tabs-navbar-height] border-b border-gray-800">
@@ -133,8 +133,8 @@ export function ProjectLayout({
                   <Link
                     to="/$organizationId/$projectId"
                     params={{
-                      organizationId: currentOrganization.cleanId,
-                      projectId: currentProject.cleanId,
+                      organizationId: currentOrganization.slug,
+                      projectId: currentProject.slug,
                     }}
                   >
                     Targets
@@ -145,8 +145,8 @@ export function ProjectLayout({
                     <Link
                       to="/$organizationId/$projectId/view/alerts"
                       params={{
-                        organizationId: currentOrganization.cleanId,
-                        projectId: currentProject.cleanId,
+                        organizationId: currentOrganization.slug,
+                        projectId: currentProject.slug,
                       }}
                     >
                       Alerts
@@ -159,8 +159,8 @@ export function ProjectLayout({
                       <Link
                         to="/$organizationId/$projectId/view/policy"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
+                          organizationId: currentOrganization.slug,
+                          projectId: currentProject.slug,
                         }}
                       >
                         Policy
@@ -170,8 +170,8 @@ export function ProjectLayout({
                       <Link
                         to="/$organizationId/$projectId/view/settings"
                         params={{
-                          organizationId: currentOrganization.cleanId,
-                          projectId: currentProject.cleanId,
+                          organizationId: currentOrganization.slug,
+                          projectId: currentProject.slug,
                         }}
                       >
                         Settings
@@ -220,7 +220,7 @@ export const CreateTarget_CreateTargetMutation = graphql(`
         }
         createdTarget {
           id
-          cleanId
+          slug
         }
       }
       error {
@@ -281,13 +281,13 @@ function CreateTargetModal(props: {
         params: {
           organizationId,
           projectId,
-          targetId: data.createTarget.ok.createdTarget.cleanId,
+          targetId: data.createTarget.ok.createdTarget.slug,
         },
       });
       toast({
         variant: 'default',
         title: 'Target created',
-        description: `Your target "${data.createTarget.ok.createdTarget.cleanId}" has been created`,
+        description: `Your target "${data.createTarget.ok.createdTarget.slug}" has been created`,
       });
     } else if (data?.createTarget.error?.inputErrors.slug) {
       form.setError('targetSlug', {

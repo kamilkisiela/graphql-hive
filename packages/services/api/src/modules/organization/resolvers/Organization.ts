@@ -20,6 +20,7 @@ export const Organization: Pick<
   | 'members'
   | 'name'
   | 'owner'
+  | 'slug'
   | 'unassignedMembersToMigrate'
   | '__isTypeOf'
 > = {
@@ -107,4 +108,5 @@ export const Organization: Pick<
         .sort((a, b) => b.members.length - a.members.length)
     );
   },
+  cleanId: organization => organization.slug,
 };

@@ -25,7 +25,7 @@ const OrganizationPolicyPageQuery = graphql(`
         projects {
           nodes {
             id
-            cleanId
+            slug
             registryModel
           }
         }
@@ -133,8 +133,8 @@ function PolicyPageContent(props: { organizationId: string }) {
                   <p className="text-muted-foreground">
                     {legacyProjects.map((p, i, all) => (
                       <>
-                        <code className="italic" key={p.cleanId}>
-                          {p.cleanId}
+                        <code className="italic" key={p.slug}>
+                          {p.slug}
                         </code>
                         {all.length === i - 1 ? ' ' : ', '}
                       </>

@@ -164,7 +164,7 @@ export interface OrganizationGetStarted {
 
 export interface Organization {
   id: string;
-  cleanId: string;
+  slug: string;
   name: string;
   billingPlan: string;
   monthlyRateLimit: {
@@ -280,7 +280,7 @@ export type PaginatedDocumentCollectionOperations = Readonly<{
 
 export interface Project {
   id: string;
-  cleanId: string;
+  slug: string;
   orgId: string;
   name: string;
   type: ProjectType;
@@ -303,7 +303,7 @@ export interface Project {
 
 export interface Target {
   id: string;
-  cleanId: string;
+  slug: string;
   projectId: string;
   orgId: string;
   name: string;

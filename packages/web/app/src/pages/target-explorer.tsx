@@ -107,12 +107,12 @@ const TargetExplorerPageQuery = graphql(`
         rateLimit {
           retentionInDays
         }
-        cleanId
+        slug
       }
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
-      cleanId
+      slug
       latestSchemaVersion {
         id
       }
