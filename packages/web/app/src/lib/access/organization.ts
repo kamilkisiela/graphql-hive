@@ -44,7 +44,7 @@ export function useOrganizationAccess({
           void router.navigate({
             to: '/$organizationSlug',
             params: {
-              organizationSlug: organizationSlug,
+              organizationSlug,
             },
           });
         }

@@ -282,8 +282,8 @@ function CreateTargetModal(props: {
       void router.navigate({
         to: '/$organizationSlug/$projectSlug/$targetSlug',
         params: {
-          organizationSlug: organizationSlug,
-          projectSlug: projectSlug,
+          organizationSlug,
+          projectSlug,
           targetSlug: data.createTarget.ok.createdTarget.slug,
         },
       });

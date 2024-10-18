@@ -2,12 +2,7 @@ import { createHash } from 'node:crypto';
 import type { InjectionToken } from 'graphql-modules';
 import ms from 'ms';
 import { UTCDate } from '@date-fns/utc';
-import type {
-  DateRangeInput,
-  OrganizationSelector,
-  ProjectSelector,
-  TargetSelector,
-} from '../__generated__/types.next';
+import type { DateRangeInput } from '../__generated__/types.next';
 import { DateRange } from './entities';
 
 export {

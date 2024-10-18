@@ -1,5 +1,4 @@
 import { Injectable, Scope } from 'graphql-modules';
-import type { AlertsModule } from '../__generated__/types';
 import type { Alert, AlertChannel } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';

@@ -69,9 +69,9 @@ function OperationRow({
                 className="block max-w-[300px] truncate"
                 to="/$organizationSlug/$projectSlug/$targetSlug/insights/$operationName/$operationHash"
                 params={{
-                  organizationSlug: organizationSlug,
-                  projectSlug: projectSlug,
-                  targetSlug: targetSlug,
+                  organizationSlug,
+                  projectSlug,
+                  targetSlug,
                   operationName: operation.name,
                   operationHash: operation.hash,
                 }}

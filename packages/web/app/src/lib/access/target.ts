@@ -48,9 +48,9 @@ export function useTargetAccess({
           void router.navigate({
             to: '/$organizationSlug/$projectSlug/$targetSlug',
             params: {
-              organizationSlug: organizationSlug,
-              projectSlug: projectSlug,
-              targetSlug: targetSlug,
+              organizationSlug,
+              projectSlug,
+              targetSlug,
             },
           });
         }

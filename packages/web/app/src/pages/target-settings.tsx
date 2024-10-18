@@ -1358,8 +1358,8 @@ export function DeleteTargetModal(props: {
       void router.navigate({
         to: '/$organizationSlug/$projectSlug',
         params: {
-          organizationSlug: organizationSlug,
-          projectSlug: projectSlug,
+          organizationSlug,
+          projectSlug,
         },
       });
     }

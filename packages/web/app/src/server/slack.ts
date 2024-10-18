@@ -66,7 +66,7 @@ export function connectSlack(server: FastifyInstance) {
       `,
       variables: {
         input: {
-          organizationSlug: organizationSlug,
+          organizationSlug,
           token,
         },
       },

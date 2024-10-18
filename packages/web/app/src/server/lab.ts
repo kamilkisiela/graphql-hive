@@ -60,9 +60,9 @@ export function connectLab(server: FastifyInstance) {
       `,
       variables: {
         selector: {
-          organizationSlug: organizationSlug,
-          projectSlug: projectSlug,
-          targetSlug: targetSlug,
+          organizationSlug,
+          projectSlug,
+          targetSlug,
         },
       },
     };

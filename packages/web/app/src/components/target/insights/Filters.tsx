@@ -213,9 +213,9 @@ function OperationsFilterContainer({
     query: OperationsFilterContainer_OperationStatsQuery,
     variables: {
       selector: {
-        organizationSlug: organizationSlug,
-        projectSlug: projectSlug,
-        targetSlug: targetSlug,
+        organizationSlug,
+        projectSlug,
+        targetSlug,
         period,
         operations: [],
       },

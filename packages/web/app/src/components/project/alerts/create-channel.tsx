@@ -68,8 +68,8 @@ export const CreateChannelModal = ({
       async onSubmit(values) {
         const { data, error } = await mutate({
           input: {
-            organizationSlug: organizationSlug,
-            projectSlug: projectSlug,
+            organizationSlug,
+            projectSlug,
             name: values.name,
             type: values.type,
             slack: values.type === AlertChannelType.Slack ? { channel: values.slackChannel } : null,
