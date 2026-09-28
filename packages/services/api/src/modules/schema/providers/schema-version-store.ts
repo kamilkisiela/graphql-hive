@@ -291,12 +291,7 @@ export class SchemaVersionStore {
       changes: args.changes,
     });
 
-    // write to "schema_versions" so we can start serving newer contract versions from that table
-
-    const sharedParams: Omit<
-      Parameters<typeof this.insertSchemaVersion>[1],
-      'previousSchemaVersionId' | 'diffSchemaVersionId'
-    > = {
+    const version = await this.insertSchemaVersion(trx, {
       // make sure they have the same id
       id: contractVersion.id,
       // and same created at date
@@ -319,52 +314,19 @@ export class SchemaVersionStore {
       github: args.github,
       origin: args.origin,
       schemaCompositionErrors: args.schemaCompositionErrors,
+      previousSchemaVersionId: args.previousSchemaVersionId,
+      diffSchemaVersionId: args.diffSchemaVersionId,
       schemaMetadata: null,
       baseSchema: null,
       tags: null,
       metadataAttributes: null,
-    };
-
-    const PreviousVersionIdsModel = z.object({
-      previousSchemaVersionId: z.string().nullable(),
-      diffSchemaVersionId: z.string().nullable(),
     });
 
-    const references: z.TypeOf<typeof PreviousVersionIdsModel> =
-      args.previousSchemaVersionId === null && args.diffSchemaVersionId === null
-        ? { previousSchemaVersionId: null, diffSchemaVersionId: null }
-        : await trx
-            .one(
-              psql`/* resolveContractSchemaVersionReferences */
-                SELECT
-                  CASE WHEN EXISTS (
-                    SELECT 1 FROM "schema_versions" WHERE "id" = ${args.previousSchemaVersionId}
-                  ) THEN ${args.previousSchemaVersionId}::uuid ELSE NULL END AS "previousSchemaVersionId",
-                  CASE WHEN EXISTS (
-                    SELECT 1 FROM "schema_versions" WHERE "id" = ${args.diffSchemaVersionId}
-                  ) THEN ${args.diffSchemaVersionId}::uuid ELSE NULL END AS "diffSchemaVersionId"
-              `,
-            )
-            .then(PreviousVersionIdsModel.parse);
-
-    // Start dual-writing when this contract has no predecessor, or once both predecessor
-    // records have been backfilled into schema_versions. This prevents creating gaps in the
-    // contract version chain while the backfill is still in progress.
-    if (
-      references.diffSchemaVersionId === args.diffSchemaVersionId &&
-      references.previousSchemaVersionId === args.previousSchemaVersionId
-    ) {
-      const version = await this.insertSchemaVersion(trx, {
-        ...sharedParams,
-        ...references,
+    if (args.changes?.length) {
+      await this.insertSchemaVersionChanges(trx, {
+        changes: args.changes,
+        versionId: version.id,
       });
-
-      if (args.changes?.length) {
-        await this.insertSchemaVersionChanges(trx, {
-          changes: args.changes,
-          versionId: version.id,
-        });
-      }
     }
   }
 
