@@ -19,6 +19,20 @@ export const Contract: Pick<
     });
   },
   viewerCanDeleteContract: (contract, _, context) => {
-    return context.injector.get(ContractsManager).getViewerCanDeleteContractForContract(contract);
+    return context.injector
+      .get(ContractsManager)
+      .getViewerCanDeleteContractForContractGraph(contract);
+  },
+  contractName(contract) {
+    return contract.name;
+  },
+  excludeTags(contract) {
+    return contract.config.excludeTags;
+  },
+  includeTags(contract) {
+    return contract.config.includeTags;
+  },
+  removeUnreachableTypesFromPublicApiSchema(contract) {
+    return contract.config.removeUnreachableTypesFromPublicApiSchema;
   },
 };

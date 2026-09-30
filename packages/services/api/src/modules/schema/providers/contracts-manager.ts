@@ -1,32 +1,28 @@
 import { Injectable, Scope } from 'graphql-modules';
 import type { SchemaCheck } from '@hive/storage';
 import * as GraphQLSchema from '../../../__generated__/types';
-import type { Target } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import { Session } from '../../auth/lib/authz';
-import { GraphStore } from '../../graph/providers/graph-store';
+import { ContractGraph, Graph, GraphStore } from '../../graph/providers/graph-store';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
-import { TargetStore } from '../../target/providers/target-store';
 import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import {
   Contracts,
-  type Contract,
   type ContractCheck,
   type ContractVersion,
   type CreateContractInput,
 } from './contracts';
-import type { SchemaVersion } from './schema-version-store';
 
 @Injectable({
   scope: Scope.Operation,
 })
 export class ContractsManager {
   private logger: Logger;
+
   constructor(
     logger: Logger,
     private contracts: Contracts,
-    private targetStore: TargetStore,
     private graphStore: GraphStore,
     private session: Session,
     private idTranslator: IdTranslator,
@@ -87,87 +83,56 @@ export class ContractsManager {
   }
 
   public async deleteContract(args: { contractId: string }) {
-    const contract = await this.contracts.getContractById({ contractId: args.contractId });
-    if (contract === null) {
+    const graph = await this.graphStore.findContractGraphById(args.contractId);
+    if (graph === null) {
       return {
         type: 'error' as const,
         message: 'Contract not found.',
       };
     }
-
-    const breadcrumb = await this.targetStore.getTargetBreadcrumbForTargetId({
-      targetId: contract.targetId,
-    });
-    if (!breadcrumb) {
-      return {
-        type: 'error' as const,
-        message: 'Contract not found.',
-      };
-    }
-
-    const [organizationId, projectId, targetId] = await Promise.all([
-      this.idTranslator.translateOrganizationId(breadcrumb),
-      this.idTranslator.translateProjectId(breadcrumb),
-      this.idTranslator.translateTargetId(breadcrumb),
-    ]);
 
     await this.session.assertPerformAction({
       action: 'target:modifySettings',
-      organizationId,
+      organizationId: graph.organizationId,
       params: {
-        organizationId,
-        projectId,
-        targetId,
+        organizationId: graph.organizationId,
+        projectId: graph.projectId,
+        targetId: graph.targetId,
       },
     });
 
-    return await this.contracts.deleteContract({
-      contract,
-    });
+    return await this.contracts.deleteContractGraph(graph);
   }
 
-  async getViewerCanDeleteContractForContract(contract: Contract): Promise<boolean> {
-    const breadcrumb = await this.targetStore.getTargetBreadcrumbForTargetId({
-      targetId: contract.targetId,
-    });
-
-    if (!breadcrumb) {
-      return false;
-    }
-
-    const [organizationId, projectId, targetId] = await Promise.all([
-      this.idTranslator.translateOrganizationId(breadcrumb),
-      this.idTranslator.translateProjectId(breadcrumb),
-      this.idTranslator.translateTargetId(breadcrumb),
-    ]);
-
+  async getViewerCanDeleteContractForContractGraph(graph: ContractGraph): Promise<boolean> {
     return await this.session.canPerformAction({
       action: 'target:modifySettings',
-      organizationId,
+      organizationId: graph.organizationId,
       params: {
-        organizationId,
-        projectId,
-        targetId,
+        organizationId: graph.organizationId,
+        projectId: graph.projectId,
+        targetId: graph.targetId,
       },
     });
   }
 
-  public async getPaginatedContractsForTarget(args: {
-    target: Target;
-    cursor: string | null;
-    first: number | null;
-  }) {
+  public async getPaginatedContractGraphsForGraph(
+    graph: Graph,
+    args: {
+      cursor: string | null;
+      first: number | null;
+    },
+  ) {
     await this.session.assertPerformAction({
       action: 'project:describe',
-      organizationId: args.target.orgId,
+      organizationId: graph.organizationId,
       params: {
-        organizationId: args.target.orgId,
-        projectId: args.target.projectId,
+        organizationId: graph.organizationId,
+        projectId: graph.projectId,
       },
     });
 
-    return this.contracts.getPaginatedContractsByTargetId({
-      targetId: args.target.id,
+    return await this.graphStore.getPaginatedContractGraphsForGraph(graph, {
       cursor: args.cursor,
       first: args.first,
     });
@@ -210,26 +175,21 @@ export class ContractsManager {
   }
 
   public async getBreakingChangesForContractVersion(contractVersion: ContractVersion) {
-    return await this.contracts.getBreakingChangesForContractVersion({
-      contractVersionId: contractVersion.id,
-    });
+    return (await this.getAllChangesForContractVersion(contractVersion))?.filter(
+      change => change.criticality === 'BREAKING',
+    );
   }
 
   public async getSafeChangesForContractVersion(contractVersion: ContractVersion) {
-    return await this.contracts.getSafeChangesForContractVersion({
-      contractVersionId: contractVersion.id,
-    });
+    return (await this.getAllChangesForContractVersion(contractVersion))?.filter(
+      change => change.criticality !== 'BREAKING',
+    );
   }
 
+  @cache<ContractVersion>(contractVersion => `${contractVersion.source}:${contractVersion.id}`)
   public async getAllChangesForContractVersion(contractVersion: ContractVersion) {
     return await this.contracts.getAllChangesForContractVersion({
-      contractVersionId: contractVersion.id,
-    });
-  }
-
-  public async getContractVersionsForSchemaVersion(schemaVersion: SchemaVersion) {
-    return await this.contracts.getContractVersionsForSchemaVersion({
-      schemaVersionId: schemaVersion.id,
+      contractVersion,
     });
   }
 
@@ -254,22 +214,8 @@ export class ContractsManager {
     return contractChecks;
   }
 
-  public async getIsFirstComposableContractVersionForContractVersion(
-    contractVersion: ContractVersion,
-  ) {
-    const previousContractVersion =
-      await this.getDiffableContractVersionForContractVersion(contractVersion);
-
-    return !!previousContractVersion;
-  }
-
   public async getHasSchemaChangesForContractVersion(contractVersion: ContractVersion) {
-    const [safeChanges, breakingChanges] = await Promise.all([
-      this.getSafeChangesForContractVersion(contractVersion),
-      this.getBreakingChangesForContractVersion(contractVersion),
-    ]);
-
-    return !!(safeChanges?.length || breakingChanges?.length);
+    return !!(await this.getAllChangesForContractVersion(contractVersion))?.length;
   }
 
   public async getHasSchemaCompositionErrorsForContractCheck(contractCheck: ContractCheck) {

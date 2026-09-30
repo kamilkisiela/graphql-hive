@@ -4,7 +4,7 @@ import { Logger } from '../../shared/providers/logger';
 import { onlyDeprecatedDocumentNode } from '../lib/deprecated-graphql';
 import { extractSuperGraphInformation } from '../lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from '../lib/unused-graphql';
-import { ContractsManager } from '../providers/contracts-manager';
+import { Contracts } from '../providers/contracts';
 import { SchemaManager } from '../providers/schema-manager';
 import { SchemaVersionHelper } from '../providers/schema-version-helper';
 import type { SchemaVersionResolvers } from './../../../__generated__/types';
@@ -205,7 +205,9 @@ export const SchemaVersion: SchemaVersionResolvers = {
     return injector.get(SchemaVersionHelper).getIsFirstComposableVersion(version);
   },
   contractVersions: (version, _, { injector }) => {
-    return injector.get(ContractsManager).getContractVersionsForSchemaVersion(version);
+    return injector
+      .get(Contracts)
+      .getContractVersionsForSchemaVersion({ schemaVersionId: version.id });
   },
   subgraphDiffs: async (version, _, { injector }) => {
     return await injector.get(SchemaVersionHelper).getGraphQLSubgraphDiffsForSchemaVersion(version);
