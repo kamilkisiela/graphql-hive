@@ -11,23 +11,20 @@ export default {
   name: '2026.10.09T00-00-01.backfill-contract-schema-versions.ts',
   noTransaction: true,
   async run({ psql, connection }) {
-    const contracts = await connection
+    const contractGraphs = await connection
       .any(
         psql`
         SELECT
-          "contracts"."id"
-          , "contracts"."target_id" AS "targetId"
+          "graphs"."id"
+          , "graphs"."target_id" AS "targetId"
           , "graphs"."name" AS "graphName"
-        FROM "contracts"
-        INNER JOIN "graphs"
-          ON "graphs"."id" = "contracts"."id"
-          AND "graphs"."type" = 'CONTRACT'
-        WHERE "contracts"."is_disabled" = false
+        FROM "graphs"
+        WHERE "graphs"."type" = 'CONTRACT'
       `,
       )
       .then(z.array(ActiveContractModel).parse);
 
-    for (const contract of contracts) {
+    for (const contract of contractGraphs) {
       await connection.transaction('latest version', async trx => {
         const latestVersionId = await trx.maybeOneFirst(psql`
           INSERT INTO "schema_versions" (
