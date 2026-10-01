@@ -1258,7 +1258,7 @@ test.concurrent(
         invalidSchemaPath,
       ]),
     ).rejects.toThrow(
-      '[my-contract] Type Query is in the API schema but all of its fields are @inaccessible.',
+      '[default/my-contract] Type Query is in the API schema but all of its fields are @inaccessible.',
     );
 
     const latest = await latestSchema();

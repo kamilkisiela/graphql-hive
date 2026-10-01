@@ -163,7 +163,7 @@ test.concurrent('schema check with failing contract composition', async ({ expec
   expect(checkResult.schemaCheck.errors?.nodes).toMatchInlineSnapshot(`
     [
       {
-        message: [my-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
+        message: [default/my-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
       },
     ]
   `);
@@ -256,10 +256,10 @@ test.concurrent(
     expect(checkResult.schemaCheck.errors?.nodes).toMatchInlineSnapshot(`
     [
       {
-        message: [my-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
+        message: [default/my-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
       },
       {
-        message: [my-other-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
+        message: [default/my-other-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
       },
     ]
   `);
