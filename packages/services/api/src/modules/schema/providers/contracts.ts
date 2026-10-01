@@ -4,7 +4,6 @@ import {
   PostgresDatabasePool,
   psql,
   UniqueIntegrityConstraintViolationError,
-  type PrimitiveValueExpression,
 } from '@hive/postgres';
 import { invariant } from '@hive/service-common';
 import {
