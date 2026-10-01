@@ -68,7 +68,12 @@ export class ArtifactStorageWriter {
       extractContractName(args.contractName),
     );
     const versionedKey = args.versionId
-      ? buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName, args.versionId)
+      ? buildArtifactStorageKey(
+          args.targetId,
+          args.artifactType,
+          extractContractName(args.contractName),
+          args.versionId,
+        )
       : null;
     const meta = artifactMeta[args.artifactType];
     const body = meta.preprocessor(args.artifact);
