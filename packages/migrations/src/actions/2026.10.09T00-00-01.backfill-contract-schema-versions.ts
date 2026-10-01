@@ -55,8 +55,8 @@ export default {
             , false
             , ${contract.id}
             , jsonb_build_object(
-                'id', ${contract.id}
-                , 'name', ${contract.graphName}
+                'id', ${contract.id}::text
+                , 'name', ${contract.graphName}::text
                 , 'type', 'contract'
               )
             , "contract_versions"."schema_version_id"
@@ -79,7 +79,7 @@ export default {
             , "severity_level"
             , "meta"
             , "is_safe_based_on_usage"
-            )
+          )
           SELECT
             ${latestVersionId}
             , "contract_version_changes"."change_type"
@@ -123,8 +123,8 @@ export default {
             , false
             , ${contract.id}
             , jsonb_build_object(
-              'id', ${contract.id}
-              , 'name', ${contract.graphName}
+              'id', ${contract.id}::text
+              , 'name', ${contract.graphName}::text
               , 'type', 'contract'
             )
             , "contract_versions"."schema_version_id"
@@ -145,7 +145,7 @@ export default {
           return;
         }
 
-        await connection.query(psql`
+        await trx.query(psql`
           INSERT INTO "schema_version_changes" (
             "schema_version_id"
             , "change_type"
