@@ -62,8 +62,6 @@ export class SchemaVersionStore {
   private async insertSchemaVersion(
     trx: CommonQueryMethods,
     args: {
-      id?: string;
-      createdAt?: string;
       isComposable: boolean;
       targetId: string;
       origin: SchemaVersionOrigin;
@@ -98,8 +96,6 @@ export class SchemaVersionStore {
     const query = psql`/* insertSchemaVersion */
       INSERT INTO schema_versions
         (
-          "id",
-          "created_at",
           "record_version",
           "is_composable",
           "target_id",
@@ -126,8 +122,6 @@ export class SchemaVersionStore {
         )
       VALUES
         (
-          ${args.id ?? psql`uuid_generate_v4()`},
-          ${args.createdAt ?? psql`NOW()`},
           '2024-01-10',
           ${args.isComposable},
           ${args.targetId},
@@ -259,43 +253,7 @@ export class SchemaVersionStore {
       meta: SchemaVersionMeta | null;
     },
   ): Promise<void> {
-    // write to "contract_versions" for rollback capabilities
-    const contractVersion = await trx
-      .one(
-        psql`/* insertSchemaVersionContract */
-      INSERT INTO "contract_versions" (
-        "schema_version_id"
-        , "contract_id"
-        , "contract_name"
-        , "schema_composition_errors"
-        , "composite_schema_sdl"
-        , "supergraph_sdl"
-      )
-     VALUES (
-        ${args.schemaVersionId}
-        , ${args.contractId}
-        , ${args.contractName.replace(/^default\//, '')}
-        , ${psql.jsonbOrNull(args.schemaCompositionErrors)}
-        , ${args.compositeSchemaSDL}
-        , ${args.supergraphSDL}
-      )
-      RETURNING
-        "id"
-        , to_json("created_at") AS "createdAt"
-    `,
-      )
-      .then(z.object({ id: z.string().uuid(), createdAt: z.string() }).parse);
-
-    await this.insertSchemaVersionContractChanges(trx, {
-      schemaVersionContractId: contractVersion.id,
-      changes: args.changes,
-    });
-
     const version = await this.insertSchemaVersion(trx, {
-      // make sure they have the same id
-      id: contractVersion.id,
-      // and same created at date
-      createdAt: contractVersion.createdAt,
       sourceSchemaVersionId: args.schemaVersionId,
       graphMetadata: {
         id: args.graph.id,
@@ -328,42 +286,6 @@ export class SchemaVersionStore {
         versionId: version.id,
       });
     }
-  }
-
-  private async insertSchemaVersionContractChanges(
-    trx: CommonQueryMethods,
-    args: {
-      changes: Array<SchemaChangeType> | null;
-      schemaVersionContractId: string;
-    },
-  ) {
-    if (!args.changes?.length) {
-      return;
-    }
-
-    await trx.query(psql`/* insertSchemaVersionContractChanges */
-      INSERT INTO "contract_version_changes" (
-        "contract_version_id",
-        "change_type",
-        "severity_level",
-        "meta",
-        "is_safe_based_on_usage"
-      )
-      SELECT * FROM
-      ${psql.unnest(
-        args.changes.map(change =>
-          // Note: change.criticality.level is actually a computed value from meta
-          [
-            args.schemaVersionContractId,
-            change.type,
-            change.criticality,
-            JSON.stringify(change.meta),
-            change.isSafeBasedOnUsage ?? false,
-          ],
-        ),
-        ['uuid', 'text', 'text', 'jsonb', 'bool'],
-      )}
-    `);
   }
 
   @traceFn('SchemaVersionsStore.createPublishSchemaVersion', {
