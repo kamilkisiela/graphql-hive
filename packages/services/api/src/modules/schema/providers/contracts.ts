@@ -172,12 +172,12 @@ export class Contracts {
       this.artifactStorageWriter.deleteArtifact({
         targetId: graph.targetId,
         artifactType: 'sdl',
-        contractName: graph.name.replace(/^default\//, ''),
+        contractName: graph.name,
       }),
       this.artifactStorageWriter.deleteArtifact({
         targetId: graph.targetId,
         artifactType: 'supergraph',
-        contractName: graph.name.replace(/^default\//, ''),
+        contractName: graph.name,
       }),
     ]);
 
