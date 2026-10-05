@@ -211,7 +211,7 @@ export class GraphStore {
       FROM
         "graphs"
       WHERE
-        "id" = ${graph.id}
+        "source_graph_id" = ${graph.id}
         AND "type" = 'CONTRACT'
         ${
           cursor
@@ -224,8 +224,8 @@ export class GraphStore {
             : psql``
         }
       ORDER BY
-        "created_at" DESC,
-        "id" DESC
+        "created_at" ASC,
+        "id" ASC
       LIMIT ${limit + 1}
     `);
 
