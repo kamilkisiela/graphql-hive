@@ -1188,7 +1188,9 @@ export class SchemaPublisher {
             continue;
           }
 
-          errors.push({ message: `[${formatContractName(contract.contractName)}] Baseline composition failed.` });
+          errors.push({
+            message: `[${formatContractName(contract.contractName)}] Baseline composition failed.`,
+          });
         }
         for (const contract of checkResult.reason.contracts) {
           if (!contract.composition.errors) {
@@ -3904,7 +3906,9 @@ export function getSchemaCheckFailureGithubDetails(reason: SchemaCheckFailureRea
 
   for (const contract of reason.contracts ?? []) {
     if (contract.baselineComposition?.type === 'failure') {
-      errors.push({ message: `[${formatContractName(contract.contractName)}] Baseline composition failed.` });
+      errors.push({
+        message: `[${formatContractName(contract.contractName)}] Baseline composition failed.`,
+      });
     }
 
     if (contract.composition.type === 'failure') {
@@ -4062,5 +4066,5 @@ export function isValidServiceName(service: string): boolean {
 
 /** To not confuse users we strip the "default/" prefix for now from the public API until we actually introduce the concept of graphs. */
 export function formatContractName(name: string) {
- return name.replace(/^default\//, '')
+  return name.replace(/^default\//, '');
 }
