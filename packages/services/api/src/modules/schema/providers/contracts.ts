@@ -69,32 +69,9 @@ export class Contracts {
     let graph: ContractGraph;
     try {
       graph = await this.pool.transaction('create contract', async trx => {
-        const contract = await trx
-          .maybeOne(
-            psql`
-          INSERT INTO "contracts" (
-            "target_id"
-            , "contract_name"
-            , "include_tags"
-            , "exclude_tags"
-            , "remove_unreachable_types_from_public_api_schema"
-          ) VALUES (
-            ${validatedContract.data.targetId}
-            , ${validatedContract.data.contractName}
-            , ${toNullableTextArray(validatedContract.data.includeTags)}
-            , ${toNullableTextArray(validatedContract.data.excludeTags)}
-            , ${validatedContract.data.removeUnreachableTypesFromPublicApiSchema}
-          )
-          RETURNING
-            ${contractFields}
-        `,
-          )
-          .then(ContractModel.parse);
-
         const graph = await this.graphStore.createGraph(
           {
             type: 'CONTRACT',
-            id: contract.id,
             name: `default/${validatedContract.data.contractName}`,
             organizationId: args.organizationId,
             projectId: args.projectId,
@@ -755,22 +732,6 @@ export class Contracts {
     return changes.map(row => HiveSchemaChangeModel.parse(row));
   }
 }
-
-function toNullableTextArray<T extends PrimitiveValueExpression>(value: T[] | null) {
-  if (value === null) {
-    return null;
-  }
-
-  return psql.array(value, 'text');
-}
-
-const contractFields = psql`
-  "id"
-`;
-
-const ContractModel = z.object({
-  id: z.string().uuid(),
-});
 
 const CreateContractInputModel = z
   .object({
