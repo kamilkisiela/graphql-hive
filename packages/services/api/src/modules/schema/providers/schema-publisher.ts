@@ -2524,7 +2524,7 @@ export class SchemaPublisher {
       __typename: 'SchemaPublishSuccess' as const,
       initial: publishResult.state.initial,
       valid: publishResult.state.composable,
-      changes,
+      changes: null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
     };
