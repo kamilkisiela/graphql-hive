@@ -382,5 +382,5 @@ test.concurrent('contractName is lowercased', async ({ expect }) => {
     authToken: ownerToken,
   }).then(r => r.expectNoGraphQLErrors());
 
-  expect(result.createContract.ok?.createdContract.contractName).toBe('default/my_contract-1');
+  expect(result.createContract.ok?.createdContract.contractName).toBe('my_contract-1');
 });

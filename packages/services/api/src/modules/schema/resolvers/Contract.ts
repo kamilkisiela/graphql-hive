@@ -1,5 +1,6 @@
 import { TargetManager } from '../../target/providers/target-manager';
 import { ContractsManager } from '../providers/contracts-manager';
+import { formatContractName } from '../providers/schema-publisher';
 import type { ContractResolvers } from './../../../__generated__/types';
 
 export const Contract: Pick<
@@ -24,7 +25,7 @@ export const Contract: Pick<
       .getViewerCanDeleteContractForContractGraph(contract);
   },
   contractName(contract) {
-    return contract.name;
+    return formatContractName(contract.name);
   },
   excludeTags(contract) {
     return contract.config.excludeTags;
