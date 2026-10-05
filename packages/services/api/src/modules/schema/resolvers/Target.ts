@@ -106,8 +106,7 @@ export const Target: Pick<
       .countSchemaVersionsOfGraph(graph, period ? parseDateRangeInput(period) : null);
   },
   contracts: async (target, args, { injector }) => {
-    const graph = await injector.get(GraphStore).findGraphForTargetIdByName(target.id, 'default');
-    invariant(graph, "No graph with name 'default' exists.");
+    const graph = await injector.get(GraphStore).getDefaultGraphForTargetId(target.id);
 
     return await injector.get(ContractsManager).getPaginatedContractGraphsForGraph(graph, {
       cursor: args.after ?? null,
