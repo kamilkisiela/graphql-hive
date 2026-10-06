@@ -280,7 +280,7 @@ export class GraphStore {
         "source_graph_id" = ${baseGraph.id}
         AND "type" = 'CONTRACT'
       ORDER BY
-        "id" DESC
+        "id" ASC
     `;
 
     const records = await this.pg.any(query);
