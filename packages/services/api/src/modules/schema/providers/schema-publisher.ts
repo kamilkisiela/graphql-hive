@@ -740,19 +740,6 @@ export class SchemaPublisher {
                 sdl: latestVersion.version.compositeSchemaSDL,
                 schemas: ensureCompositeSchemas(latestVersion.schemas).map(toCompositeSchemaInput),
                 contractNames:
-                  /**
-                   * contracts.values() isn't good enough because of an edge case: if a contract that has
-                   * failed composition is deleted, the latest version keeps that composition error flag,
-                   * which means only a new version can clear it. The deleted contract is no longer one of
-                   * the active contracts, so comparing the active contracts against themselves reports
-                   * "no changes" and the publish is ignored. The contract versions of the latest version
-                   * still include the deleted contract (its contract_id is set to null, the name is kept),
-                   * so comparing those against the active contracts detects the removal and a new version
-                   * without the contract is created. The publish flow uses the same source so that check
-                   * and publish agree.
-                   *
-                   * This is confusing and subtle, but an important difference in this one case.
-                   */
                   latestSchemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
               }
             : null,
