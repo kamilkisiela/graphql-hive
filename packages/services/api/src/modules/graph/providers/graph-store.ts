@@ -72,9 +72,7 @@ export class GraphStore {
   }
 
   async createGraph(
-    args:
-      | Pick<BaseGraph, CreateGraphFields>
-      | Pick<ContractGraph, CreateGraphFields>,
+    args: Pick<BaseGraph, CreateGraphFields> | Pick<ContractGraph, CreateGraphFields>,
     trx: CommonQueryMethods = this.pg,
   ): Promise<Graph> {
     this.logger.debug(
@@ -98,7 +96,7 @@ export class GraphStore {
           , "source_graph_id"
         )
         VALUES (
-          , ${args.organizationId}
+          ${args.organizationId}
           , ${args.projectId}
           , ${args.targetId}
           , ${args.name}
