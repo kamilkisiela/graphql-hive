@@ -14,6 +14,7 @@ const BackfilledVersionModel = z.object({
     type: z.literal('contract'),
   }),
   source_schema_version_id: z.string(),
+  diff_schema_version_id: z.string().nullable(),
 });
 
 await describe('migration: backfill-contract-schema-versions', async () => {
@@ -131,7 +132,13 @@ await describe('migration: backfill-contract-schema-versions', async () => {
       const versions = await db
         .any(
           psql`
-          SELECT id, is_composable, graph_id, graph_metadata, source_schema_version_id
+          SELECT
+            id,
+            is_composable,
+            graph_id,
+            graph_metadata,
+            source_schema_version_id,
+            diff_schema_version_id
           FROM schema_versions
           WHERE graph_id = ${activeContract.id}
           ORDER BY is_composable
@@ -150,6 +157,12 @@ await describe('migration: backfill-contract-schema-versions', async () => {
         versions.map(version => version.is_composable),
         [false, true],
       );
+      const latestInvalidVersion = versions.find(version => !version.is_composable);
+      const latestValidVersion = versions.find(version => version.is_composable);
+      assert.ok(latestInvalidVersion);
+      assert.ok(latestValidVersion);
+      assert.equal(latestInvalidVersion.diff_schema_version_id, latestValidVersion.id);
+      assert.equal(latestValidVersion.diff_schema_version_id, null);
       assert.ok(
         versions.every(
           version =>

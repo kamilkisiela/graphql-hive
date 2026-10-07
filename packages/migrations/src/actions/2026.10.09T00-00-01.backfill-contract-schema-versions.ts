@@ -54,6 +54,7 @@ async function insertSchemaChanges(trx: CommonQueryMethods, schemaVersionId: str
 async function insertLatestSchemaVersionForContract(
   trx: CommonQueryMethods,
   contract: z.TypeOf<typeof ContractModel>,
+  latestComposableVersionId: string,
 ) {
   await trx.transaction('insert latest version', async trx => {
     const latestVersionId = await trx
@@ -73,6 +74,7 @@ async function insertLatestSchemaVersionForContract(
         , "graph_id"
         , "graph_metadata"
         , "source_schema_version_id"
+        , "diff_schema_version_id"
       )
       SELECT
         "contract_versions"."id"
@@ -92,6 +94,10 @@ async function insertLatestSchemaVersionForContract(
             , 'type', 'contract'
           )
         , "contract_versions"."schema_version_id"
+        , CASE
+            WHEN "contract_versions"."schema_composition_errors" IS NULL THEN NULL
+            ELSE ${latestComposableVersionId}::uuid
+          END
       FROM "contract_versions"
       WHERE "contract_versions"."contract_id" = ${contract.id}
       ORDER BY "contract_versions"."created_at" DESC, "contract_versions"."id" DESC
@@ -113,9 +119,11 @@ async function insertLatestSchemaVersionForContract(
 async function insertLatestValidSchemaVersionForContract(
   trx: CommonQueryMethods,
   contract: z.TypeOf<typeof ContractModel>,
-): Promise<boolean> {
+): Promise<string | null> {
   return await trx.transaction('latest valid version', async trx => {
-    const latestComposableVersionId = await trx.maybeOneFirst(psql`
+    const latestComposableVersionId = await trx
+      .maybeOneFirst(
+        psql`
       INSERT INTO "schema_versions" (
         "id"
         , "created_at"
@@ -160,15 +168,17 @@ async function insertLatestValidSchemaVersionForContract(
       ON CONFLICT ("id") DO NOTHING
       RETURNING
         "id"
-    `);
+    `,
+      )
+      .then(z.string().nullable().parse);
 
     if (!latestComposableVersionId) {
-      return false;
+      return null;
     }
 
     await insertSchemaChanges(trx, latestComposableVersionId);
 
-    return true;
+    return latestComposableVersionId;
   });
 }
 
@@ -192,17 +202,16 @@ export default {
 
         for (const contract of contractGraphs) {
           await connection.transaction('insert latest schema versions', async trx => {
-            const didInsertLatestValidVersion = await insertLatestValidSchemaVersionForContract(
+            const latestComposableVersionId = await insertLatestValidSchemaVersionForContract(
               trx,
               contract,
             );
 
-            if (!didInsertLatestValidVersion) {
-              // in this case there is no "latest" version
+            if (!latestComposableVersionId) {
               return;
             }
 
-            await insertLatestSchemaVersionForContract(trx, contract);
+            await insertLatestSchemaVersionForContract(trx, contract, latestComposableVersionId);
           });
         }
       });
