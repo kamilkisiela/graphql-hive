@@ -1,10 +1,15 @@
 import { type PostgresDatabasePool } from '@hive/postgres';
 import { runMigrations } from './pg-migrator';
 
-export const runPGMigrations = async (args: { slonik: PostgresDatabasePool; runTo?: string }) =>
+export const runPGMigrations = async (args: {
+  slonik: PostgresDatabasePool;
+  runTo?: string;
+  withRegistryLock: <T>(targetId: string, action: () => Promise<T>) => Promise<T>;
+}) =>
   runMigrations({
     slonik: args.slonik,
     runTo: args.runTo,
+    withRegistryLock: args.withRegistryLock,
     migrations: await Promise.all([
       import('./actions/2021-03-05T19-06-23.initial'),
       import('./actions/2021-03-08T11-02-26.urls'),

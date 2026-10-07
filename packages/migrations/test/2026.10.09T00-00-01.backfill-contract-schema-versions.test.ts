@@ -18,7 +18,13 @@ const BackfilledVersionModel = z.object({
 
 await describe('migration: backfill-contract-schema-versions', async () => {
   await test('backfills the latest composable and non-composable versions of active contracts', async () => {
-    const { db, runTo, complete, seed, done } = await initMigrationTestingEnvironment();
+    const lockedTargetIds: string[] = [];
+    const { db, runTo, complete, seed, done } = await initMigrationTestingEnvironment({
+      async withRegistryLock(targetId, action) {
+        lockedTargetIds.push(targetId);
+        return action();
+      },
+    });
 
     try {
       await runTo('2026.09.24T00-00-01.schema-versions-action-id-nullability.ts');
@@ -119,6 +125,8 @@ await describe('migration: backfill-contract-schema-versions', async () => {
       `);
 
       await complete();
+
+      assert.deepEqual(lockedTargetIds, [target.id]);
 
       const versions = await db
         .any(

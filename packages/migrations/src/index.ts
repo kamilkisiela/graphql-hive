@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+import Redlock from 'redlock';
 import { createConnectionStringProvider, createPostgresDatabasePool } from '@hive/postgres';
-import { generateRdsIamAuthToken } from '@hive/service-common';
+import { createRedisClient, generateRdsIamAuthToken, registryLockId } from '@hive/service-common';
 import { schemaCoordinateStatusMigration } from './actions/2024.07.23T09.36.00.schema-cleanup-tracker';
 import { migrateClickHouse } from './clickhouse';
 import { env } from './environment';
@@ -26,6 +27,19 @@ const slonik = await createPostgresDatabasePool({
   statementTimeout: 10 * 60 * 1000,
 });
 
+const logger = {
+  level: 'info',
+  silent() {},
+  child() {
+    return logger;
+  },
+  debug: console.debug,
+  error: console.error,
+  fatal: console.error,
+  info: console.info,
+  trace: console.debug,
+  warn: console.warn,
+};
 // This is used by production build of this package.
 // We are building a "cli" out of the package, so we need a workaround to pass the command to run.
 
@@ -44,7 +58,24 @@ if (process.env.SCHEMA_COORDINATE_STATUS_MIGRATION === '1') {
 
 try {
   console.log('Running the UP migrations');
-  await runPGMigrations({ slonik });
+  const redis = await createRedisClient(env.redis, { logger });
+  const redlock = new Redlock([redis]);
+
+  try {
+    await runPGMigrations({
+      slonik,
+      withRegistryLock(targetId, action) {
+        return redlock.using(
+          [registryLockId(targetId)],
+          10_000,
+          { retryCount: -1, retryDelay: 1_000 },
+          action,
+        );
+      },
+    });
+  } finally {
+    await redis.quit();
+  }
   if (env.clickhouse) {
     await migrateClickHouse(
       env.isClickHouseMigrator,

@@ -5,6 +5,7 @@ import { Clickhouse } from './clickhouse';
 import { Docker } from './docker';
 import { Environment } from './environment';
 import { Postgres } from './postgres';
+import { Redis } from './redis';
 import { S3 } from './s3';
 
 export type DbMigrations = ReturnType<typeof deployDbMigrations>;
@@ -18,10 +19,12 @@ export function deployDbMigrations({
   force,
   docker,
   postgres,
+  redis,
   cdn,
 }: {
   docker: Docker;
   postgres: Postgres;
+  redis: Redis;
   clickhouse: Clickhouse;
   s3: S3;
   cdn: CDN;
@@ -49,7 +52,13 @@ export function deployDbMigrations({
         IGNORE_RERUN_NONCE: force ? Date.now().toString() : '0',
       },
     },
-    [clickhouse.deployment, clickhouse.service, ...(dependencies || [])],
+    [
+      clickhouse.deployment,
+      clickhouse.service,
+      redis.deployment,
+      redis.service,
+      ...(dependencies || []),
+    ],
     clickhouse.service,
   )
     .withSecret('POSTGRES_HOST', postgres.secret, 'host')
@@ -58,6 +67,9 @@ export function deployDbMigrations({
     .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
     .withSecret('POSTGRES_DB', postgres.secret, 'database')
     .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+    .withSecret('REDIS_HOST', redis.secret, 'host')
+    .withSecret('REDIS_PORT', redis.secret, 'port')
+    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
     .withSecret('CLICKHOUSE_HOST', clickhouse.secret, 'host')
     .withSecret('CLICKHOUSE_PORT', clickhouse.secret, 'port')
     .withSecret('CLICKHOUSE_USERNAME', clickhouse.secret, 'username')

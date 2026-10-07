@@ -16,7 +16,11 @@ export type MigrationExecutor = {
    * You can either return a SQL query to run or instead use the connection within the function to run custom logic.
    * You can also return an array of named steps so you can see the progress in the logs.
    */
-  run: (args: { connection: CommonQueryMethods; psql: typeof psql }) =>
+  run: (args: {
+    connection: CommonQueryMethods;
+    psql: typeof psql;
+    withRegistryLock: <T>(targetId: string, action: () => Promise<T>) => Promise<T>;
+  }) =>
     | Promise<void>
     | TaggedTemplateLiteralInvocation
     | Array<{
@@ -36,7 +40,11 @@ const seedMigrationsIfNotExists = async (args: { connection: CommonQueryMethods 
   `);
 };
 
-async function runMigration(connection: CommonQueryMethods, migration: MigrationExecutor) {
+async function runMigration(
+  connection: CommonQueryMethods,
+  migration: MigrationExecutor,
+  withRegistryLock: <T>(targetId: string, action: () => Promise<T>) => Promise<T>,
+) {
   const exists = await connection.maybeOneFirst(psql`
     SELECT true
     FROM
@@ -52,7 +60,7 @@ async function runMigration(connection: CommonQueryMethods, migration: Migration
   const startTime = Date.now();
   console.log(`Running migration: ${migration.name}`);
 
-  const result = await migration.run({ connection, psql });
+  const result = await migration.run({ connection, psql, withRegistryLock });
   if (Array.isArray(result)) {
     for (const item of result) {
       console.log(`  Starting step ${item.name}`);
@@ -80,6 +88,7 @@ async function runMigration(connection: CommonQueryMethods, migration: Migration
 export async function runMigrations(args: {
   slonik: PostgresDatabasePool;
   migrations: Array<MigrationExecutor | { default: MigrationExecutor }>;
+  withRegistryLock: <T>(targetId: string, action: () => Promise<T>) => Promise<T>;
   runTo?: string;
 }) {
   console.log('Running PG migrations.');
@@ -89,10 +98,10 @@ export async function runMigrations(args: {
   for (let migration of args.migrations) {
     migration = 'default' in migration ? migration.default : migration;
     if (migration.noTransaction === true) {
-      await runMigration(args.slonik, migration);
+      await runMigration(args.slonik, migration, args.withRegistryLock);
     } else {
       await args.slonik.transaction(migration.name, connection =>
-        runMigration(connection, migration),
+        runMigration(connection, migration, args.withRegistryLock),
       );
     }
 

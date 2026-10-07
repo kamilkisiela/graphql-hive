@@ -52,5 +52,6 @@ export {
   type RedisConnectionConfig,
   type RedisClientOptions,
 } from './redis-client';
+export { registryLockId } from './registry-lock';
 export { generateRdsIamAuthToken } from './iam-rds';
 export { Encryptor } from './crypto';
