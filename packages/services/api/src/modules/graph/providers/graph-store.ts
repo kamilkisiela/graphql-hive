@@ -224,8 +224,8 @@ export class GraphStore {
             : psql``
         }
       ORDER BY
-        "created_at" ASC,
-        "id" ASC
+        "created_at" DESC,
+        "id" DESC
       LIMIT ${limit + 1}
     `);
 

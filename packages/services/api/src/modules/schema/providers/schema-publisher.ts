@@ -598,7 +598,7 @@ export class SchemaPublisher {
 
     const contracts =
       project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadActiveContractGraphsWithLatestVersionsForGraphSchemaVersion(
+        ? await this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
             graph,
             latestVersion?.version ?? null,
           )
@@ -1697,7 +1697,7 @@ export class SchemaPublisher {
 
           const contracts =
             project.type === ProjectType.FEDERATION
-              ? await this.contracts.loadActiveContractGraphsWithLatestVersionsForGraphSchemaVersion(
+              ? await this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
                   graph,
                   latestVersion.version,
                 )
@@ -2045,7 +2045,7 @@ export class SchemaPublisher {
 
     const contracts =
       project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadActiveContractGraphsWithLatestVersionsForGraphSchemaVersion(
+        ? await this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
             graph,
             latestVersion?.version ?? null,
           )
@@ -3205,7 +3205,7 @@ export class SchemaPublisher {
 
     const [contractsWithLatestVersions, targetLogEdges] = await Promise.all([
       project.type === ProjectType.FEDERATION
-        ? this.contracts.loadActiveContractGraphsWithLatestVersionsForGraphSchemaVersion(
+        ? this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
             graph,
             targetLatestSchemaVersion,
           )

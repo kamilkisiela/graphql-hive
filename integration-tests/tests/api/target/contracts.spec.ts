@@ -31,6 +31,25 @@ const CreateContractMutation = graphql(`
   }
 `);
 
+const ContractsQuery = graphql(`
+  query ContractsQuery($target: TargetReferenceInput!, $first: Int, $after: String) {
+    target(reference: $target) {
+      contracts(first: $first, after: $after) {
+        edges {
+          node {
+            contractName
+          }
+        }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          endCursor
+        }
+      }
+    }
+  }
+`);
+
 test.concurrent('create contract for Federation project', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { createProject } = await createOrg();
@@ -65,6 +84,63 @@ test.concurrent('create contract for Federation project', async ({ expect }) => 
         },
       },
     },
+  });
+});
+
+test.concurrent('contracts can be paginated without skipping records', async ({ expect }) => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { target } = await createProject(ProjectType.Federation);
+
+  for (const contractName of ['contract-a', 'contract-b', 'contract-c']) {
+    const result = await execute({
+      document: CreateContractMutation,
+      variables: {
+        input: {
+          target: { byId: target.id },
+          contractName,
+          includeTags: ['foo'],
+          removeUnreachableTypesFromPublicApiSchema: true,
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result.createContract.error).toBeNull();
+  }
+
+  const firstPage = await execute({
+    document: ContractsQuery,
+    variables: {
+      target: { byId: target.id },
+      first: 2,
+      after: null,
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(firstPage.target?.contracts.edges.map(edge => edge.node.contractName)).toEqual([
+    'contract-c',
+    'contract-b',
+  ]);
+  expect(firstPage.target?.contracts.pageInfo.hasNextPage).toBe(true);
+
+  const secondPage = await execute({
+    document: ContractsQuery,
+    variables: {
+      target: { byId: target.id },
+      first: 2,
+      after: firstPage.target?.contracts.pageInfo.endCursor ?? null,
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(secondPage.target?.contracts.edges.map(edge => edge.node.contractName)).toEqual([
+    'contract-a',
+  ]);
+  expect(secondPage.target?.contracts.pageInfo).toMatchObject({
+    hasNextPage: false,
+    hasPreviousPage: true,
   });
 });
 

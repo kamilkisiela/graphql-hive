@@ -187,7 +187,7 @@ export class Contracts {
     };
   }
 
-  public async loadActiveContractGraphsWithLatestVersionsForGraphSchemaVersion(
+  public async loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
     graph: Graph,
     schemaVersion: SchemaVersion | null,
   ): Promise<Map<string, ContractWithLatestVersions> | null> {
