@@ -193,7 +193,7 @@ export default {
         for (const contract of contractGraphs) {
           await connection.transaction('insert latest schema versions', async trx => {
             const didInsertLatestValidVersion = await insertLatestValidSchemaVersionForContract(
-              connection,
+              trx,
               contract,
             );
 
@@ -202,7 +202,7 @@ export default {
               return;
             }
 
-            await insertLatestSchemaVersionForContract(connection, contract);
+            await insertLatestSchemaVersionForContract(trx, contract);
           });
         }
       });
