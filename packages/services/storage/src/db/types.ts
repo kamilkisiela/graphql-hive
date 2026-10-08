@@ -70,6 +70,7 @@ export interface contract_checks {
   compared_contract_version_id: string | null;
   composite_schema_sdl_store_id: string | null;
   contract_id: string;
+  contract_name: string | null;
   id: string;
   is_success: boolean;
   safe_schema_changes: any | null;

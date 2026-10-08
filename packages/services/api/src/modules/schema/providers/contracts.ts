@@ -283,7 +283,7 @@ export class Contracts {
         , "contract_checks"."compared_contract_version_id" as "comparedContractVersionId"
         , "contract_checks"."is_success" as "isSuccess"
         , "contract_checks"."contract_id" as "contractId"
-        , "contracts"."contract_name" as "contractName"
+        , COALESCE("graphs"."name", "contract_checks"."contract_name") as "contractName"
         , "contract_checks"."schema_composition_errors" as "schemaCompositionErrors"
         , "contract_checks"."breaking_schema_changes" as "breakingSchemaChanges"
         , "contract_checks"."safe_schema_changes" as "safeSchemaChanges"
@@ -295,7 +295,7 @@ export class Contracts {
       FROM
         "contract_checks"
       LEFT JOIN
-        "contracts" ON "contracts"."id" = "contract_checks"."contract_id"
+        "graphs" ON "contracts"."id" = "contract_checks"."contract_id"
       LEFT JOIN
         "sdl_store" as "s_composite" ON "s_composite"."id" = "contract_checks"."composite_schema_sdl_store_id"
       LEFT JOIN
