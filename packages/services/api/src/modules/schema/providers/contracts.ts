@@ -295,7 +295,7 @@ export class Contracts {
       FROM
         "contract_checks"
       LEFT JOIN
-        "graphs" ON "contracts"."id" = "contract_checks"."contract_id"
+        "graphs" ON "graphs"."id" = "contract_checks"."contract_id"
       LEFT JOIN
         "sdl_store" as "s_composite" ON "s_composite"."id" = "contract_checks"."composite_schema_sdl_store_id"
       LEFT JOIN
