@@ -196,11 +196,21 @@ export default {
       )
       .then(z.array(TargetModel).parse);
 
-    for (const target of targets) {
+    console.log(`Found ${targets.length} target(s).`);
+
+    for (const [targetIndex, target] of targets.entries()) {
+      console.log(`Processing target ${targetIndex + 1}/${targets.length}: ${target.id}`);
+
       await withRegistryLock(target.id, async () => {
         const contractGraphs = await getContractGraphsForTargetId(connection, target.id);
 
-        for (const contract of contractGraphs) {
+        console.log(`Found ${contractGraphs.length} contract graph(s) for target ${target.id}.`);
+
+        for (const [contractIndex, contract] of contractGraphs.entries()) {
+          console.log(
+            `Processing contract ${contractIndex + 1}/${contractGraphs.length} for target ${target.id}: ${contract.id}`,
+          );
+
           await connection.transaction('insert latest schema versions', async trx => {
             const latestComposableVersionId = await insertLatestValidSchemaVersionForContract(
               trx,
@@ -216,5 +226,7 @@ export default {
         }
       });
     }
+
+    console.log(`Finished processing ${targets.length} target(s).`);
   },
 } satisfies MigrationExecutor;
