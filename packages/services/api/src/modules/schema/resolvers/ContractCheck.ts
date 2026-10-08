@@ -5,6 +5,9 @@ export const ContractCheck: ContractCheckResolvers = {
   contractVersion: (contractCheck, _, context) => {
     return context.injector.get(ContractsManager).getContractVersionForContractCheck(contractCheck);
   },
+  contractName(contractCheck) {
+    return contractCheck.contractName;
+  },
   compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
   supergraphSDL: contractCheck => contractCheck.supergraphSdl,
   hasSchemaCompositionErrors: (contractCheck, _, { injector }) => {
