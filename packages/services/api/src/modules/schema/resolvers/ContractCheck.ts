@@ -1,4 +1,5 @@
 import { ContractsManager } from '../providers/contracts-manager';
+import { formatContractName } from '../providers/schema-publisher';
 import type { ContractCheckResolvers } from './../../../__generated__/types';
 
 export const ContractCheck: ContractCheckResolvers = {
@@ -6,7 +7,7 @@ export const ContractCheck: ContractCheckResolvers = {
     return context.injector.get(ContractsManager).getContractVersionForContractCheck(contractCheck);
   },
   contractName(contractCheck) {
-    return contractCheck.contractName;
+    return formatContractName(contractCheck.contractName);
   },
   compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
   supergraphSDL: contractCheck => contractCheck.supergraphSdl,
