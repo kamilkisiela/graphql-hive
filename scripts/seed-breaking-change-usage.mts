@@ -9,6 +9,9 @@
  *
  * Prerequisites: docker compose and the server, usage, usage-ingestor and app services running.
  *
+ * With `CONTRACTS=1` the project is a federation one with two contracts, and the same check also
+ * fails one contract's composition, so the contract failures and the breaking changes share a page.
+ *
  * Usage: `pnpm seed:breaking-change-usage`, or `OWNER_EMAIL=<email> pnpm seed:breaking-change-usage`
  * to skip the prompt (piping an answer into the prompt does not work).
  */
@@ -23,6 +26,7 @@ const { getOrCreateAuth } = await import('./utils/get-or-create-auth');
 const { promptForEmail } = await import('./utils/prompt-for-email');
 const {
   checkSchema,
+  createContract,
   createOrganization,
   createProject,
   createTarget,
@@ -35,6 +39,14 @@ const { legacyCollect } = await import('../integration-tests/testkit/usage');
 const { generateUnique } = await import('../integration-tests/testkit/utils');
 
 const APP_BASE_URL = 'http://localhost:3000';
+const WITH_CONTRACTS = process.env.CONTRACTS === '1';
+const SERVICE = { name: 'funnel', url: 'http://funnel.local/graphql' };
+
+const FEDERATION_LINKS = /* GraphQL */ `
+  extend schema
+    @link(url: "https://specs.apollo.dev/link/v1.0")
+    @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+`;
 const EXTRA_TARGETS = ['app-web', 'app-ios', 'app-android', 'partner-api', 'internal', 'canary'];
 
 const SDL = /* GraphQL */ `
@@ -68,6 +80,19 @@ const CHECK_SDL = /* GraphQL */ `
     health: String
   }
 `;
+
+const FEDERATION_SDL =
+  FEDERATION_LINKS +
+  SDL.replace(/^(\s+(?:funnelClosedWon|funnelCreated|prospectsContacted|prospectsContactedActivity): \w+)$/gm, '$1 @tag(name: "internal")');
+
+// Tagging the one field left on Query fails `public-api`, which excludes `internal`.
+const FEDERATION_CHECK_SDL =
+  FEDERATION_LINKS +
+  /* GraphQL */ `
+    type Query {
+      health: String @tag(name: "internal")
+    }
+  `;
 
 const OPERATIONS = {
   closedWon: {
@@ -135,8 +160,8 @@ const organization = await createOrganization({ slug: generateUnique() }, ownerT
 const projectResult = await createProject(
   {
     organization: { bySelector: { organizationSlug: organization.slug } },
-    type: ProjectType.Single,
-    slug: 'breaking-usage',
+    type: WITH_CONTRACTS ? ProjectType.Federation : ProjectType.Single,
+    slug: WITH_CONTRACTS ? 'breaking-usage-contracts' : 'breaking-usage',
   },
   ownerToken,
 ).then(r => r.expectNoGraphQLErrors());
@@ -182,7 +207,15 @@ const productionSecret = secrets.get('production')!;
 
 console.log('Publishing the schema to production...');
 const published = await publishSchema(
-  { author: 'seed-breaking-change-usage', commit: 'seed', sdl: SDL },
+  WITH_CONTRACTS
+    ? {
+        author: 'seed-breaking-change-usage',
+        commit: 'seed',
+        sdl: FEDERATION_SDL,
+        service: SERVICE.name,
+        url: SERVICE.url,
+      }
+    : { author: 'seed-breaking-change-usage', commit: 'seed', sdl: SDL },
   productionSecret,
   'authorization',
 );
@@ -266,10 +299,32 @@ await updateTargetValidationSettings(
   { authToken: ownerToken },
 ).then(r => r.expectNoGraphQLErrors());
 
+if (WITH_CONTRACTS) {
+  console.log('Adding contracts...');
+  for (const contract of [
+    { contractName: 'public-api', excludeTags: ['internal'] },
+    { contractName: 'partner-api', excludeTags: ['partner'] },
+  ]) {
+    const created = await createContract(
+      {
+        target: { byId: production.id },
+        removeUnreachableTypesFromPublicApiSchema: true,
+        ...contract,
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+    if (created.createContract.error) {
+      console.error(`Contract ${contract.contractName} failed:`, created.createContract.error);
+      process.exit(1);
+    }
+  }
+}
+
 console.log('Running the check...');
-const check = await checkSchema({ sdl: CHECK_SDL }, productionSecret).then(r =>
-  r.expectNoGraphQLErrors(),
-);
+const check = await checkSchema(
+  WITH_CONTRACTS ? { sdl: FEDERATION_CHECK_SDL, service: SERVICE.name } : { sdl: CHECK_SDL },
+  productionSecret,
+).then(r => r.expectNoGraphQLErrors());
 const result = check.schemaCheck as { __typename: string; schemaCheck?: { id: string } | null };
 if (!result.schemaCheck?.id) {
   console.error('The check did not return an id:', result);
