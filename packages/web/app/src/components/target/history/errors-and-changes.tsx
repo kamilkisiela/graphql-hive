@@ -5,6 +5,7 @@ import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon } from 'lucide-react'
 import reactStringReplace from 'react-string-replace';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
+import { BreakingChangeTargets, plural } from '@/components/target/history/breaking-change-targets';
 import { DataTable } from '@/components/ui/data-table/data-table';
 import { DataTableCell } from '@/components/ui/data-table/data-table-cell';
 import { Accordion } from '@/components/ui/primitives/accordion/accordion';
@@ -85,11 +86,35 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
         name
         countFormatted
         percentageFormatted
+        affectedTargets {
+          target {
+            id
+            slug
+            target {
+              id
+              slug
+            }
+          }
+          count
+          countFormatted
+        }
       }
       topAffectedClients {
         name
         countFormatted
         percentageFormatted
+      }
+      affectedTargets {
+        target {
+          id
+          slug
+          target {
+            id
+            slug
+          }
+        }
+        count
+        countFormatted
       }
     }
     affectedAppDeployments(first: 5) {
@@ -163,7 +188,12 @@ export function ChangesBlock(
   return (
     <div>
       {props.title && <h2 className="mb-3 font-bold text-fg-default">{props.title}</h2>}
-      <div className="list-inside list-disc space-y-2 text-sm/relaxed">
+      <div
+        className={clsx(
+          'text-sm/relaxed',
+          props.changesWithUsage ? 'flex flex-col gap-4' : 'list-inside list-disc space-y-2',
+        )}
+      >
         {props.changesWithUsage?.map((change, key) => (
           <ChangeItem
             schemaCheckId={props.schemaCheckId}
@@ -219,8 +249,19 @@ function ChangeItem(
     props.conditionBreakingChangeMetadata,
   );
 
+  // Checks recorded before per-target counts were kept have none, and keep the older layout.
+  const targetUsage =
+    'usageStatistics' in change && change.usageStatistics?.affectedTargets && metadata
+      ? {
+          statistics: change.usageStatistics,
+          affectedTargets: change.usageStatistics.affectedTargets,
+          metadata,
+        }
+      : null;
+
   return (
     <Accordion
+      variant={props.changeWithUsage ? 'boxed' : 'list'}
       items={[
         {
           value: 'item-1',
@@ -240,7 +281,7 @@ function ChangeItem(
                     <CheckIcon className="inline size-3" /> Safe based on usage data
                   </span>
                 )}
-                {'usageStatistics' in change && change.usageStatistics && (
+                {'usageStatistics' in change && change.usageStatistics && !targetUsage && (
                   <>
                     {' '}
                     <span className="inline-flex items-center space-x-1 rounded-sm bg-surface-selected px-2 py-1 align-middle font-bold text-critical">
@@ -284,15 +325,57 @@ function ChangeItem(
               </div>
             </div>
           ),
+          trailing: targetUsage ? (
+            <span className="flex items-center gap-2">
+              <Badge
+                content={`${targetUsage.affectedTargets.length} of ${plural(targetUsage.metadata.settings.targets.length, 'target')}`}
+                variants={{ variant: 'outline' }}
+              />
+              <Badge
+                content={`${plural(targetUsage.statistics.topAffectedOperations.length, 'operation')} • ${plural(targetUsage.statistics.topAffectedClients.length, 'client')}`}
+                variants={{ variant: 'outline' }}
+              />
+            </span>
+          ) : undefined,
           content: (
-            <div className="pt-4 pb-4">
+            <div
+              className={targetUsage ? 'space-y-5' : props.changeWithUsage ? undefined : 'pt-4 pb-4'}
+            >
               {change.approval && (
                 <SchemaChangeApproval
                   schemaCheckId={props.schemaCheckId}
                   approval={change.approval}
                 />
               )}
-              {'usageStatistics' in change && change.usageStatistics && metadata ? (
+              {targetUsage ? (
+                <>
+                  <BreakingChangeTargets
+                    affectedTargets={targetUsage.affectedTargets}
+                    operations={targetUsage.statistics.topAffectedOperations}
+                    targets={targetUsage.metadata.settings.targets}
+                    coordinate={change.path!.join('.')}
+                    period={targetUsage.metadata.period}
+                  />
+                  <section className="space-y-2">
+                    <h4 className="text-sm font-medium text-fg">Affected operations and clients</h4>
+                    <UsageStatisticsPanels
+                      usageStatistics={targetUsage.statistics}
+                      targets={targetUsage.metadata.settings.targets}
+                      period={targetUsage.metadata.period}
+                      withTargets
+                    />
+                  </section>
+                  {props.schemaCheckId &&
+                  'affectedAppDeployments' in change &&
+                  change.affectedAppDeployments?.edges?.length ? (
+                    <AffectedAppDeploymentsPanel
+                      schemaCheckId={props.schemaCheckId}
+                      coordinate={change.path?.join('.')}
+                      connection={change.affectedAppDeployments}
+                    />
+                  ) : null}
+                </>
+              ) : 'usageStatistics' in change && change.usageStatistics && metadata ? (
                 <div>
                   <h4 className="mb-1 text-sm font-medium text-fg">
                     Affected Operations (based on usage)
@@ -404,6 +487,8 @@ function UsageStatisticsPanels(props: {
   usageStatistics: UsageStatistics;
   targets: InsightsTarget[];
   period: { from: string; to: string };
+  /** The targets table above carries the Insights links, so the rows say where they were seen. */
+  withTargets?: boolean;
 }) {
   const { organizationSlug, projectSlug } = useSlugs('target');
   const operationColumns: ColumnDef<AffectedOperation, unknown>[] = [
@@ -413,6 +498,9 @@ function UsageStatisticsPanels(props: {
       meta: { width: 'fill' },
       cell: ({ row }) => {
         const operationName = `${row.original.hash.substring(0, 4)}_${row.original.name}`;
+        if (props.withTargets) {
+          return <DataTableCell kind="text" value={operationName} mono />;
+        }
         const targets = props.targets.flatMap(target =>
           target.target
             ? [
@@ -446,6 +534,24 @@ function UsageStatisticsPanels(props: {
         );
       },
     },
+    ...(props.withTargets
+      ? [
+          {
+            id: 'seenIn',
+            header: 'Seen in',
+            meta: { width: 'md' },
+            cell: ({ row }) => (
+              <DataTableCell
+                kind="text"
+                tone="muted"
+                value={(row.original.affectedTargets ?? [])
+                  .map(affected => affected.target.slug)
+                  .join(', ')}
+              />
+            ),
+          } satisfies ColumnDef<AffectedOperation, unknown>,
+        ]
+      : []),
     ...trafficColumns<AffectedOperation>(),
   ];
   const clientColumns: ColumnDef<AffectedClient, unknown>[] = [
@@ -466,7 +572,7 @@ function UsageStatisticsPanels(props: {
           columns={operationColumns}
           getRowId={operation => operation.hash}
           pagination={{ kind: 'none' }}
-          variants={{ bordered: false }}
+          variants={{ bordered: !!props.withTargets }}
           emptyMessage="No affected operations."
         />
       </div>
@@ -476,7 +582,7 @@ function UsageStatisticsPanels(props: {
           columns={clientColumns}
           getRowId={client => client.name}
           pagination={{ kind: 'none' }}
-          variants={{ bordered: false }}
+          variants={{ bordered: !!props.withTargets }}
           emptyMessage="No affected clients."
         />
       </div>

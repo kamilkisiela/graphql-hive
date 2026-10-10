@@ -167,8 +167,22 @@ const breakingTargets = ['production', 'staging'].map(slug => ({
   target: { __typename: 'Target' as const, id: `${slug}-id`, slug },
 }));
 
-/** `ActiveSchemaCheck_ActiveSchemaCheckQuery` for a check with one breaking change seen in usage. */
-export function breakingSchemaCheck(variables: { schemaCheckId: string }) {
+const productionUsage = {
+  __typename: 'SchemaChangeUsageStatisticsAffectedTarget' as const,
+  target: breakingTargets[0],
+  count: 2,
+  countFormatted: '2',
+};
+
+/**
+ * `ActiveSchemaCheck_ActiveSchemaCheckQuery` for a check with one breaking change seen in usage,
+ * in production only. `withTargets: false` is a check stored before per-target counts were kept.
+ */
+export function breakingSchemaCheck(
+  variables: { schemaCheckId: string },
+  options: { withTargets?: boolean } = {},
+) {
+  const withTargets = options.withTargets ?? true;
   const active = activeSchemaCheck(variables);
   return {
     ...active,
@@ -202,6 +216,7 @@ export function breakingSchemaCheck(variables: { schemaCheckId: string }) {
                         name: 'Products',
                         countFormatted: '1',
                         percentageFormatted: '<0.01%',
+                        affectedTargets: withTargets ? [productionUsage] : null,
                       },
                     ],
                     topAffectedClients: [
@@ -212,6 +227,7 @@ export function breakingSchemaCheck(variables: { schemaCheckId: string }) {
                         percentageFormatted: '<0.01%',
                       },
                     ],
+                    affectedTargets: withTargets ? [productionUsage] : null,
                   },
                   affectedAppDeployments: null,
                 },

@@ -302,7 +302,9 @@ describe('checks route loaders', () => {
 describe('breaking change usage', () => {
   it('opens Insights on the window the check counted usage in', { timeout: 30_000 }, async () => {
     const testClient = client();
-    testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', breakingSchemaCheck);
+    testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', (variables: Record<string, unknown>) =>
+      breakingSchemaCheck(variables as { schemaCheckId: string }, { withTargets: false }),
+    );
     const { router } = renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
     await screen.findByText(CHECKS.first[0]);
     const change = await screen.findByRole(
@@ -336,4 +338,38 @@ describe('breaking change usage', () => {
       to: BREAKING_PERIOD.to,
     });
   });
+
+  it(
+    'lists the targets the change was used in, each to verify, and the rest in a menu',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', (variables: Record<string, unknown>) =>
+        breakingSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+      await screen.findByText(CHECKS.first[0]);
+      const change = await screen.findByRole(
+        'button',
+        { name: /was removed from object type/ },
+        { timeout: 10_000 },
+      );
+      expect(change.textContent).toContain('1 of 2 targets');
+      await act(async () => {
+        fireEvent.click(change);
+      });
+
+      await screen.findByText('Used in 1 of 2 targets during the check window');
+      const verify = screen.getByRole('link', { name: /Verify in Insights/ });
+      const href = verify.getAttribute('href')!;
+      expect(href).toContain('/production/insights/schema-coordinate/Query.products');
+      expect(new URL(href, 'http://x').searchParams.get('from')).toContain(BREAKING_PERIOD.from);
+      expect(screen.getAllByRole('link', { name: /Verify in Insights/ })).toHaveLength(1);
+      expect(screen.getByText('2 requests')).toBeTruthy();
+      expect(screen.getByRole('button', { name: '1 without usage' })).toBeTruthy();
+      // The targets carry the links, so the operation row only says where it was seen.
+      expect(screen.queryByRole('button', { name: 'View live usage in Insights' })).toBeNull();
+      expect(screen.getByText('Seen in')).toBeTruthy();
+    },
+  );
 });
