@@ -16,9 +16,9 @@ const calloutVariants = cva('mt-6 flex items-center gap-4 rounded-lg border px-4
   variants: {
     type: {
       default: 'border-accent-line bg-accent-tint text-accent',
-      error: 'border-critical-line bg-critical-tint text-critical',
-      info: 'border-info-line bg-info-tint text-info',
-      warning: 'border-warning-line bg-warning-tint text-warning',
+      error: 'border-critical-line bg-critical-tint text-critical-text',
+      info: 'border-info-line bg-info-tint text-info-text',
+      warning: 'border-warning-line bg-warning-tint text-warning-text',
     },
   },
   defaultVariants: {

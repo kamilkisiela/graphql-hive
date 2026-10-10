@@ -93,8 +93,8 @@ function AnnotatedSDLView(props: {
               className={cn(
                 'flex items-center border-l-5 pl-1',
                 annotation.metadata.severity === 'warning'
-                  ? 'border-warning-line bg-warning-tint text-warning'
-                  : 'border-critical bg-critical-tint text-critical',
+                  ? 'border-warning-line bg-warning-tint text-warning-text'
+                  : 'border-critical bg-critical-tint text-critical-text',
               )}
             >
               <span>{annotation.metadata.message}</span>

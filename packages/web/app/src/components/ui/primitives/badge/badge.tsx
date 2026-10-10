@@ -10,10 +10,10 @@ const badgeVariants = cva(
         outline: 'border-line font-normal text-fg-default',
         // The semantic states, tinted: a 10% fill of the token under its full-strength text, so
         // a pill never needs its own red or green.
-        success: 'border-transparent bg-success-tint text-success',
-        warning: 'border-transparent bg-warning-tint text-warning',
-        critical: 'border-transparent bg-critical-tint text-critical',
-        info: 'border-transparent bg-info-tint text-info',
+        success: 'border-transparent bg-success-tint text-success-text',
+        warning: 'border-transparent bg-warning-tint text-warning-text',
+        critical: 'border-transparent bg-critical-tint text-critical-text',
+        info: 'border-transparent bg-info-tint text-info-text',
       },
       size: {
         default: 'text-xs',
