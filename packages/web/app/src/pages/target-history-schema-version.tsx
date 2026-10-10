@@ -28,6 +28,10 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import { useQuery } from 'urql';
+import {
+  ContractFailuresTable,
+  formatCount,
+} from '@/components/target/checks/contract-failures-table';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import {
@@ -35,10 +39,6 @@ import {
   CompositionErrorsSection_SchemaErrorConnection,
 } from '@/components/target/history/errors-and-changes';
 import { CodeScrollArea, File, MultiFileDiff } from '@/components/ui/diffs';
-import {
-  ContractFailuresTable,
-  formatCount,
-} from '@/components/target/checks/contract-failures-table';
 import { Link } from '@/components/ui/link';
 import { NotFound } from '@/components/ui/not-found/not-found';
 import { Button } from '@/components/ui/primitives/button/button';

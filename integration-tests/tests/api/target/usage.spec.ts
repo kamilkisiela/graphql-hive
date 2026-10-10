@@ -511,7 +511,11 @@ test.concurrent('records which targets a breaking change was used in', async ({ 
   const productionToken = await createTargetAccessToken({ target: production });
 
   await stagingToken
-    .publishSchema({ author: 'User', commit: 'initial', sdl: 'type Query { ping: String me: String }' })
+    .publishSchema({
+      author: 'User',
+      commit: 'initial',
+      sdl: 'type Query { ping: String me: String }',
+    })
     .then(r => r.expectNoGraphQLErrors());
 
   const me: CollectedOperation = {

@@ -83,7 +83,10 @@ const CHECK_SDL = /* GraphQL */ `
 
 const FEDERATION_SDL =
   FEDERATION_LINKS +
-  SDL.replace(/^(\s+(?:funnelClosedWon|funnelCreated|prospectsContacted|prospectsContactedActivity): \w+)$/gm, '$1 @tag(name: "internal")');
+  SDL.replace(
+    /^(\s+(?:funnelClosedWon|funnelCreated|prospectsContacted|prospectsContactedActivity): \w+)$/gm,
+    '$1 @tag(name: "internal")',
+  );
 
 // Tagging the one field left on Query fails `public-api`, which excludes `internal`.
 const FEDERATION_CHECK_SDL =
@@ -98,7 +101,12 @@ const OPERATIONS = {
   closedWon: {
     operation: 'query FunnelMetricsClosedWon { funnelClosedWon { count } }',
     operationName: 'FunnelMetricsClosedWon',
-    fields: ['Query', 'Query.funnelClosedWon', 'FunnelMetricsClosedWon', 'FunnelMetricsClosedWon.count'],
+    fields: [
+      'Query',
+      'Query.funnelClosedWon',
+      'FunnelMetricsClosedWon',
+      'FunnelMetricsClosedWon.count',
+    ],
   },
   closedWonSummary: {
     operation: 'query FunnelMetricsClosedWonSummary { funnelClosedWon { count } health }',

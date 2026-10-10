@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  CheckIcon,
-  FileDiffIcon,
-  GitCompareIcon,
-  ListIcon,
-  TriangleAlertIcon,
-} from 'lucide-react';
+import { CheckIcon, FileDiffIcon, GitCompareIcon, ListIcon, TriangleAlertIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -101,7 +95,10 @@ function buildChanges(args: {
   legacy: boolean;
 }) {
   const usedCount = clamp(args.usedTargets, 1, 3);
-  const targets = TARGETS.slice(0, usedCount + clamp(args.unusedTargets, 0, TARGETS.length - usedCount));
+  const targets = TARGETS.slice(
+    0,
+    usedCount + clamp(args.unusedTargets, 0, TARGETS.length - usedCount),
+  );
   const used = targets.slice(0, usedCount);
   const spread = (index: number) =>
     index === 0 ? used : index === 1 ? used.slice(0, 1) : used.slice(-1);
@@ -216,11 +213,7 @@ const CONTRACT_STATUS_LEGEND = [
   { icon: <CheckIcon className="size-3.5 text-success" />, label: 'Passed' },
 ];
 
-function CheckPageView(props: {
-  usedTargets: number;
-  unusedTargets: number;
-  operations: number;
-}) {
+function CheckPageView(props: { usedTargets: number; unusedTargets: number; operations: number }) {
   const [graph, setGraph] = useState('default');
   const [tab, setTab] = useState('details');
   const { targets, changes } = buildChanges({ ...props, legacy: false });

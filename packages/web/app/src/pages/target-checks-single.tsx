@@ -16,6 +16,10 @@ import {
   TriangleAlertIcon,
 } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
+import {
+  ContractFailuresTable,
+  formatCount,
+} from '@/components/target/checks/contract-failures-table';
 import { ServiceFilterButton } from '@/components/target/checks/service-filter-button';
 import {
   ChangesBlock,
@@ -29,10 +33,6 @@ import { DownloadButton } from '@/components/ui/diff-editor';
 import { CodeScrollArea, File } from '@/components/ui/diffs';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';
-import {
-  ContractFailuresTable,
-  formatCount,
-} from '@/components/target/checks/contract-failures-table';
 import { Heading } from '@/components/ui/heading';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';

@@ -302,8 +302,10 @@ describe('checks route loaders', () => {
 describe('breaking change usage', () => {
   it('opens Insights on the window the check counted usage in', { timeout: 30_000 }, async () => {
     const testClient = client();
-    testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', (variables: Record<string, unknown>) =>
-      breakingSchemaCheck(variables as { schemaCheckId: string }, { withTargets: false }),
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        breakingSchemaCheck(variables as { schemaCheckId: string }, { withTargets: false }),
     );
     const { router } = renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
     await screen.findByText(CHECKS.first[0]);
@@ -317,8 +319,11 @@ describe('breaking change usage', () => {
     });
 
     const coordinateLink = await screen.findByRole('link', { name: 'staging' });
-    const search = (link: HTMLElement) => new URL(link.getAttribute('href')!, 'http://x').searchParams;
-    expect(coordinateLink.getAttribute('href')).toContain('/insights/schema-coordinate/Query.products');
+    const search = (link: HTMLElement) =>
+      new URL(link.getAttribute('href')!, 'http://x').searchParams;
+    expect(coordinateLink.getAttribute('href')).toContain(
+      '/insights/schema-coordinate/Query.products',
+    );
     expect(search(coordinateLink).get('from')).toContain(BREAKING_PERIOD.from);
     expect(search(coordinateLink).get('to')).toContain(BREAKING_PERIOD.to);
 
@@ -344,8 +349,10 @@ describe('breaking change usage', () => {
     { timeout: 30_000 },
     async () => {
       const testClient = client();
-      testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', (variables: Record<string, unknown>) =>
-        breakingSchemaCheck(variables as { schemaCheckId: string }),
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          breakingSchemaCheck(variables as { schemaCheckId: string }),
       );
       renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
       await screen.findByText(CHECKS.first[0]);

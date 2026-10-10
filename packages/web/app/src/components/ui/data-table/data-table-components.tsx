@@ -196,7 +196,9 @@ export function DataTableRow({
         // Hover means "this row does something": only a clickable or expandable row gets it.
         onClick && (tone === 'default' ? surface[onSurface].hover : toned[tone].hover),
         // The critical tint replaces the stripe rather than layering on it.
-        striped && !critical && (tone === 'default' ? surface[onSurface].stripe : toned[tone].stripe),
+        striped &&
+          !critical &&
+          (tone === 'default' ? surface[onSurface].stripe : toned[tone].stripe),
         critical && 'bg-critical-tint-subtle',
         'data-[state=expanded]:border-b-0 data-[state=expanded]:bg-neutral-3',
         'data-[state=selected]:bg-neutral-12/10 dark:data-[state=selected]:bg-neutral-12/10',

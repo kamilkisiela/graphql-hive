@@ -1,9 +1,9 @@
 import { AlertTriangle } from 'lucide-react';
-import type { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/ui/data-table/data-table';
 import { DataTableCell } from '@/components/ui/data-table/data-table-cell';
 import { Badge } from '@/components/ui/primitives/badge/badge';
 import { Button } from '@/components/ui/primitives/button/button';
+import type { ColumnDef } from '@tanstack/react-table';
 
 export type ContractFailure = {
   key: string;

@@ -22,8 +22,7 @@ export type TargetUsage = {
 
 type Row = TargetUsage & { operations: number };
 
-export const plural = (count: number, noun: string) =>
-  `${count} ${noun}${count === 1 ? '' : 's'}`;
+export const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
 function useCoordinateLink(coordinate: string, period: { from: string; to: string }) {
   const { organizationSlug, projectSlug } = useSlugs('target');
@@ -57,7 +56,11 @@ function UnusedTargetsMenu(props: {
           label: 'No requests during the check window',
           items: props.unused.map(target =>
             target.target
-              ? { label: target.slug, trailingIcon: ExternalLinkIcon, render: link(target.target.slug) }
+              ? {
+                  label: target.slug,
+                  trailingIcon: ExternalLinkIcon,
+                  render: link(target.target.slug),
+                }
               : { label: target.slug, disabled: true, tooltip: 'Target does no longer exist.' },
           ),
         },

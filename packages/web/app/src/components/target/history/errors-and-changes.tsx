@@ -3,9 +3,9 @@ import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
+import { BreakingChangeTargets, plural } from '@/components/target/history/breaking-change-targets';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
-import { BreakingChangeTargets, plural } from '@/components/target/history/breaking-change-targets';
 import { DataTable } from '@/components/ui/data-table/data-table';
 import { DataTableCell } from '@/components/ui/data-table/data-table-cell';
 import { Accordion } from '@/components/ui/primitives/accordion/accordion';
@@ -339,7 +339,9 @@ function ChangeItem(
           ) : undefined,
           content: (
             <div
-              className={targetUsage ? 'space-y-5' : props.changeWithUsage ? undefined : 'pt-4 pb-4'}
+              className={
+                targetUsage ? 'space-y-5' : props.changeWithUsage ? undefined : 'pt-4 pb-4'
+              }
             >
               {change.approval && (
                 <SchemaChangeApproval

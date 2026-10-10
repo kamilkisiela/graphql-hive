@@ -4,7 +4,6 @@ import { ContractFailuresTable, formatCount } from './contract-failures-table';
 
 export const nav: NavPath = 'Components/ContractFailures';
 
-
 const CHECK_FAILURES = [
   {
     key: 'mobile',
@@ -76,8 +75,7 @@ export const Many = createPreview(() => (
         key: name,
         label: name,
         reason: index % 2 ? 'Unapproved breaking changes!' : 'Composition failed.',
-        detail:
-          index % 2 ? formatCount(index, 'breaking change') : formatCount(index + 1, 'error'),
+        detail: index % 2 ? formatCount(index, 'breaking change') : formatCount(index + 1, 'error'),
         onView: () => {},
       }))}
     />

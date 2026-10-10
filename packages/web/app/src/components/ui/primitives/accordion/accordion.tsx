@@ -72,8 +72,7 @@ const headerRowVariants = cva('flex items-center', {
   variants: {
     variant: {
       list: '',
-      boxed:
-        'px-4 transition-colors [&:not(:has([data-disabled])):hover]:bg-surface-hover',
+      boxed: 'px-4 transition-colors [&:not(:has([data-disabled])):hover]:bg-surface-hover',
       plain: '',
     },
   },

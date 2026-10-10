@@ -82,9 +82,7 @@ export const Tokens = createPreview(() => (
             ))}
           </div>
           <span className={`${state.text} text-sm font-medium`}>Aa</span>
-          <span
-            className={`${state.textOnTint} ${state.steps[2]} rounded-md px-2 py-0.5 text-xs`}
-          >
+          <span className={`${state.textOnTint} ${state.steps[2]} rounded-md px-2 py-0.5 text-xs`}>
             -text on tint
           </span>
           <span className="text-2xs text-fg-muted">{state.use}</span>

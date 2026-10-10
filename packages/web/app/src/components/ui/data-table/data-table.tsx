@@ -243,16 +243,19 @@ export function DataTable<TData>({
           {hasHeader ? (
             <DataTableHeader>
               {table.getHeaderGroups().map(headerGroup => (
-                <DataTableRow key={headerGroup.id} onSurface={onSurface}
-                  tone={tone}>
+                <DataTableRow key={headerGroup.id} onSurface={onSurface} tone={tone}>
                   {headerGroup.headers.map(header => {
                     const meta = header.column.columnDef.meta;
                     const label = header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext());
                     return (
-                      <DataTableHead key={header.id} layout={meta} onSurface={onSurface}
-                  tone={tone}>
+                      <DataTableHead
+                        key={header.id}
+                        layout={meta}
+                        onSurface={onSurface}
+                        tone={tone}
+                      >
                         <span className="inline-flex items-center gap-1">
                           {meta?.sortable ? (
                             <SortHeader header={header} label={label} loading={sorting?.loading} />
@@ -273,8 +276,9 @@ export function DataTable<TData>({
                       </DataTableHead>
                     );
                   })}
-                  {hasTrailingColumn ? <DataTableHead compact onSurface={onSurface}
-                  tone={tone} /> : null}
+                  {hasTrailingColumn ? (
+                    <DataTableHead compact onSurface={onSurface} tone={tone} />
+                  ) : null}
                 </DataTableRow>
               ))}
             </DataTableHeader>
@@ -311,8 +315,7 @@ export function DataTable<TData>({
                 </DataTableRow>
               ))
             ) : rows.length === 0 ? (
-              <DataTableRow onSurface={onSurface}
-                  tone={tone}>
+              <DataTableRow onSurface={onSurface} tone={tone}>
                 <DataTableCellSlot colSpan={totalColumnCount} variant="empty">
                   {emptyMessage}
                 </DataTableCellSlot>
@@ -329,7 +332,7 @@ export function DataTable<TData>({
                   <Fragment key={row.id}>
                     <DataTableRow
                       onSurface={onSurface}
-                  tone={tone}
+                      tone={tone}
                       // Counted over data rows, so an expanded panel does not shift the stripes.
                       striped={striped && index % 2 === 1}
                       expanded={row.getIsExpanded()}

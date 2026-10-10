@@ -68,7 +68,8 @@ describe('Accordion', () => {
 
   it('gives a boxed header a hover surface, clipped to the card, and none to the other variants', () => {
     const { container, rerender } = render(<Accordion items={ITEMS} variant="boxed" />);
-    const header = () => screen.getByRole('button', { name: 'Breaking' }).closest('h3')!.parentElement!;
+    const header = () =>
+      screen.getByRole('button', { name: 'Breaking' }).closest('h3')!.parentElement!;
     expect(header().className).toContain('hover]:bg-surface-hover');
     expect((container.firstElementChild!.firstElementChild as HTMLElement).className).toContain(
       'overflow-hidden',
