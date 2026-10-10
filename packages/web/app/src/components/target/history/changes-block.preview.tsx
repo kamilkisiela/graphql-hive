@@ -78,6 +78,7 @@ const metadata = (targets: PreviewTarget[]) =>
   makeFragmentData(
     {
       __typename: 'SchemaCheckConditionalBreakingChangeMetadata' as const,
+      period: { __typename: 'DateRange' as const, ...PERIOD },
       settings: {
         __typename: 'SchemaCheckConditionalBreakingChangeMetadataSettings' as const,
         retentionInDays: 7,

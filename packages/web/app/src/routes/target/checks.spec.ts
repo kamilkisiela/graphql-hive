@@ -1,5 +1,12 @@
 // @vitest-environment jsdom
-import { activeSchemaCheck, CHECKS, checksFixtures, SERVICES } from '@/lib/testing/fixtures/checks';
+import {
+  activeSchemaCheck,
+  BREAKING_PERIOD,
+  breakingSchemaCheck,
+  CHECKS,
+  checksFixtures,
+  SERVICES,
+} from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
 import { renderAtUrl } from '@/lib/testing/router';
 import { createTestClient } from '@/lib/testing/urql';
@@ -289,5 +296,44 @@ describe('checks route loaders', () => {
     expect(active.map(operation => operation.variables)).toEqual([
       { ...SLUGS, schemaCheckId: 'check-2' },
     ]);
+  });
+});
+
+describe('breaking change usage', () => {
+  it('opens Insights on the window the check counted usage in', { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', breakingSchemaCheck);
+    const { router } = renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+    await screen.findByText(CHECKS.first[0]);
+    const change = await screen.findByRole(
+      'button',
+      { name: /was removed from object type/ },
+      { timeout: 10_000 },
+    );
+    await act(async () => {
+      fireEvent.click(change);
+    });
+
+    const coordinateLink = await screen.findByRole('link', { name: 'staging' });
+    const search = (link: HTMLElement) => new URL(link.getAttribute('href')!, 'http://x').searchParams;
+    expect(coordinateLink.getAttribute('href')).toContain('/insights/schema-coordinate/Query.products');
+    expect(search(coordinateLink).get('from')).toContain(BREAKING_PERIOD.from);
+    expect(search(coordinateLink).get('to')).toContain(BREAKING_PERIOD.to);
+
+    // The operation's menu navigates on click rather than through an href.
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'View live usage in Insights' }));
+    });
+    const operationItem = await screen.findByRole('menuitem', { name: 'production' });
+    await act(async () => {
+      fireEvent.click(operationItem);
+    });
+    await waitFor(() =>
+      expect(router.state.location.pathname).toContain('/insights/abcd_Products/abcd1234'),
+    );
+    expect(router.state.location.search).toMatchObject({
+      from: BREAKING_PERIOD.from,
+      to: BREAKING_PERIOD.to,
+    });
   });
 });

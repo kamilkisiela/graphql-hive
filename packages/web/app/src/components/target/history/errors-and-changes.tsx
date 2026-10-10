@@ -36,6 +36,10 @@ const severityLevelMapping = {
 
 export const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphql(`
   fragment ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment on SchemaCheckConditionalBreakingChangeMetadata {
+    period {
+      from
+      to
+    }
     settings {
       retentionInDays
       targets {
@@ -319,6 +323,7 @@ function ChangeItem(
                                   targetSlug: target.target.slug,
                                   coordinate: change.path!.join('.'),
                                 }}
+                                search={{ from: metadata.period.from, to: metadata.period.to }}
                                 target="_blank"
                               >
                                 {target.slug}
@@ -338,6 +343,7 @@ function ChangeItem(
                   <UsageStatisticsPanels
                     usageStatistics={change.usageStatistics}
                     targets={metadata.settings.targets}
+                    period={metadata.period}
                   />
                   {props.schemaCheckId &&
                   'affectedAppDeployments' in change &&
@@ -397,6 +403,7 @@ function trafficColumns<
 function UsageStatisticsPanels(props: {
   usageStatistics: UsageStatistics;
   targets: InsightsTarget[];
+  period: { from: string; to: string };
 }) {
   const { organizationSlug, projectSlug } = useSlugs('target');
   const operationColumns: ColumnDef<AffectedOperation, unknown>[] = [
@@ -420,6 +427,7 @@ function UsageStatisticsPanels(props: {
                       operationName,
                       operationHash: row.original.hash,
                     },
+                    search: { from: props.period.from, to: props.period.to },
                   },
                 },
               ]

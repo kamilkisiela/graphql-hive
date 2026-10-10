@@ -151,3 +151,90 @@ export function checksFixtures(projectType?: ProjectType) {
     ['SchemaChecks_NavigationQuery', schemaChecksNavigation],
   ]);
 }
+
+const DAY = 86_400_000;
+
+// Relative to now so the window stays inside the fixture org's 30 days of retention.
+export const BREAKING_PERIOD = {
+  from: new Date(Date.now() - 7 * DAY).toISOString(),
+  to: new Date(Date.now() - DAY).toISOString(),
+};
+
+const breakingTargets = ['production', 'staging'].map(slug => ({
+  __typename: 'BreakingChangeMetadataTarget' as const,
+  id: `${slug}-id`,
+  slug,
+  target: { __typename: 'Target' as const, id: `${slug}-id`, slug },
+}));
+
+/** `ActiveSchemaCheck_ActiveSchemaCheckQuery` for a check with one breaking change seen in usage. */
+export function breakingSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          hasSchemaChanges: true,
+          hasUnapprovedBreakingChanges: true,
+          breakingSchemaChanges: {
+            __typename: 'SchemaChangeConnection' as const,
+            edges: [
+              {
+                __typename: 'SchemaChangeEdge' as const,
+                node: {
+                  __typename: 'SchemaChange' as const,
+                  path: ['Query', 'products'],
+                  message: "Field 'products' was removed from object type 'Query'",
+                  severityLevel: 'BREAKING',
+                  severityReason: null,
+                  approval: null,
+                  isSafeBasedOnUsage: false,
+                  usageStatistics: {
+                    __typename: 'SchemaChangeUsageStatistics' as const,
+                    topAffectedOperations: [
+                      {
+                        __typename: 'SchemaChangeUsageStatisticsAffectedOperation' as const,
+                        hash: 'abcd1234',
+                        name: 'Products',
+                        countFormatted: '1',
+                        percentageFormatted: '<0.01%',
+                      },
+                    ],
+                    topAffectedClients: [
+                      {
+                        __typename: 'SchemaChangeUsageStatisticsAffectedClient' as const,
+                        name: 'webapp',
+                        countFormatted: '1',
+                        percentageFormatted: '<0.01%',
+                      },
+                    ],
+                  },
+                  affectedAppDeployments: null,
+                },
+              },
+            ],
+          },
+          conditionalBreakingChangeMetadata: {
+            __typename: 'SchemaCheckConditionalBreakingChangeMetadata' as const,
+            period: { __typename: 'DateRange' as const, ...BREAKING_PERIOD },
+            settings: {
+              __typename: 'SchemaCheckConditionalBreakingChangeMetadataSettings' as const,
+              retentionInDays: 7,
+              percentage: 0,
+              excludedClientNames: null,
+              targets: breakingTargets,
+            },
+            usage: {
+              __typename: 'SchemaCheckConditionalBreakingChangeMetadataUsage' as const,
+              totalRequestCountFormatted: '1',
+            },
+          },
+        },
+      },
+    },
+  };
+}
