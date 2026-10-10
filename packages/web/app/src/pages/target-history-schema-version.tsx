@@ -35,7 +35,10 @@ import {
   CompositionErrorsSection_SchemaErrorConnection,
 } from '@/components/target/history/errors-and-changes';
 import { CodeScrollArea, File, MultiFileDiff } from '@/components/ui/diffs';
-import { FailureCard, formatCount } from '@/components/ui/failure-card/failure-card';
+import {
+  ContractFailuresTable,
+  formatCount,
+} from '@/components/target/checks/contract-failures-table';
 import { Link } from '@/components/ui/link';
 import { NotFound } from '@/components/ui/not-found/not-found';
 import { Button } from '@/components/ui/primitives/button/button';
@@ -398,7 +401,7 @@ function SchemaVersionView(props: SchemaVersionViewProps) {
         <div className="mt-3 flex flex-col gap-3">
           {failures.length ? (
             <div className="mb-3">
-              <FailureCard
+              <ContractFailuresTable
                 title={`${failures.length} of ${contractVersions.length} contracts failed`}
                 aside={`${contractVersions.length - failures.length} passed`}
                 items={failures}

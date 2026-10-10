@@ -29,7 +29,10 @@ import { DownloadButton } from '@/components/ui/diff-editor';
 import { CodeScrollArea, File } from '@/components/ui/diffs';
 import { DocsLink } from '@/components/ui/docs-note';
 import { EmptyList } from '@/components/ui/empty-list';
-import { FailureCard, formatCount } from '@/components/ui/failure-card/failure-card';
+import {
+  ContractFailuresTable,
+  formatCount,
+} from '@/components/target/checks/contract-failures-table';
 import { Heading } from '@/components/ui/heading';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -1278,7 +1281,7 @@ function SchemaChecksView(props: {
     <div className="mt-3 flex flex-col gap-3">
       {failures.length ? (
         <div className="mb-3">
-          <FailureCard
+          <ContractFailuresTable
             title={`${failures.length} of ${contractChecks.length} contracts failed`}
             aside={`${contractChecks.length - failures.length} passed`}
             items={failures}
