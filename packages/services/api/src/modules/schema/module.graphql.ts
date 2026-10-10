@@ -567,7 +567,10 @@ export default gql`
       """
       withSafeBasedOnUsageNote: Boolean = true
     ): String! @tag(name: "public")
-    path: [String!]
+    """
+    The schema coordinate the change applies to, split into its parts: ["Query", "user"].
+    """
+    path: [String!] @tag(name: "public")
     """
     Approval metadata for this schema change.
     This field is populated in case the breaking change was manually approved.
@@ -837,7 +840,7 @@ export default gql`
 
   type SchemaCheckConditionalBreakingChangeMetadata {
     period: DateRange! @tag(name: "public")
-    settings: SchemaCheckConditionalBreakingChangeMetadataSettings!
+    settings: SchemaCheckConditionalBreakingChangeMetadataSettings! @tag(name: "public")
     usage: SchemaCheckConditionalBreakingChangeMetadataUsage! @tag(name: "public")
   }
 
