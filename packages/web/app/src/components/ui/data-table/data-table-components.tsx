@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { OnSurface } from '../primitives/shared-styles';
 
@@ -61,10 +62,75 @@ const surface = {
 } as const satisfies Record<OnSurface, Record<string, string>>;
 
 // A borderless table sits on whatever holds it, a popover or a panel, so it brings no fill.
-export function wrapperClass(onSurface: OnSurface, bordered: boolean) {
+export type DataTableTone = 'default' | 'critical' | 'warning';
+
+const toned = {
+  critical: {
+    wrapper: 'border-critical-line bg-critical-tint-subtle',
+    head: 'bg-critical-tint',
+    stripe: 'bg-critical-tint/40',
+    hover: 'hover:bg-critical-tint',
+    line: 'border-critical-line-subtle',
+    titleLine: 'border-critical-line',
+    icon: 'text-critical',
+  },
+  warning: {
+    wrapper: 'border-warning-line bg-warning-tint-subtle',
+    head: 'bg-warning-tint',
+    stripe: 'bg-warning-tint/40',
+    hover: 'hover:bg-warning-tint',
+    line: 'border-warning-line-subtle',
+    titleLine: 'border-warning-line',
+    icon: 'text-warning',
+  },
+} as const satisfies Record<Exclude<DataTableTone, 'default'>, Record<string, string>>;
+
+export function wrapperClass(
+  onSurface: OnSurface,
+  bordered: boolean,
+  tone: DataTableTone = 'default',
+) {
   return cn(
     'overflow-hidden rounded-md',
-    bordered && cn('border-line border', surface[onSurface].wrapper),
+    bordered &&
+      (tone === 'default'
+        ? cn('border-line border', surface[onSurface].wrapper)
+        : cn('border', toned[tone].wrapper)),
+  );
+}
+
+export function DataTableTitleBar({
+  label,
+  icon: Icon,
+  aside,
+  tone = 'default',
+}: {
+  label: React.ReactNode;
+  icon?: LucideIcon;
+  aside?: React.ReactNode;
+  tone?: DataTableTone;
+}) {
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2 border-b px-4 py-2.5',
+        tone === 'default' ? 'border-line' : toned[tone].titleLine,
+      )}
+    >
+      {Icon ? (
+        <Icon
+          className={cn(
+            'size-4 shrink-0',
+            tone === 'default' ? 'text-fg-secondary' : toned[tone].icon,
+          )}
+        />
+      ) : null}
+      <span className="text-sm font-medium text-fg">{label}</span>
+      {/* Held to the title's line height so a compact button does not make the bar taller. */}
+      {aside ? (
+        <span className="ml-auto flex h-5 items-center text-xs text-fg-secondary">{aside}</span>
+      ) : null}
+    </div>
   );
 }
 
@@ -102,10 +168,12 @@ export function DataTableRow({
   muted = false,
   disabled = false,
   critical = false,
+  tone = 'default',
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   onSurface?: OnSurface;
+  tone?: DataTableTone;
   /** This row takes the stripe tint. The table decides which rows, counting data rows only. */
   striped?: boolean;
   expanded?: boolean;
@@ -123,11 +191,12 @@ export function DataTableRow({
       data-state={expanded ? 'expanded' : selected ? 'selected' : undefined}
       onClick={onClick}
       className={cn(
-        'border-b border-line transition-colors',
+        'border-b transition-colors',
+        tone === 'default' ? 'border-line' : toned[tone].line,
         // Hover means "this row does something": only a clickable or expandable row gets it.
-        onClick && surface[onSurface].hover,
+        onClick && (tone === 'default' ? surface[onSurface].hover : toned[tone].hover),
         // The critical tint replaces the stripe rather than layering on it.
-        striped && !critical && surface[onSurface].stripe,
+        striped && !critical && (tone === 'default' ? surface[onSurface].stripe : toned[tone].stripe),
         critical && 'bg-critical-tint-subtle',
         'data-[state=expanded]:border-b-0 data-[state=expanded]:bg-neutral-3',
         'data-[state=selected]:bg-neutral-12/10 dark:data-[state=selected]:bg-neutral-12/10',
@@ -146,20 +215,23 @@ export function DataTableHead({
   compact,
   layout,
   onSurface = 'base',
+  tone = 'default',
 }: {
   children?: React.ReactNode;
   compact?: boolean;
   layout?: DataTableColumnLayout;
   onSurface?: OnSurface;
+  tone?: DataTableTone;
 }) {
+  const head = tone === 'default' ? surface[onSurface].head : toned[tone].head;
   if (compact) {
-    return <th className={cn('h-10 w-10', surface[onSurface].head)} aria-hidden />;
+    return <th className={cn('h-10 w-10', head)} aria-hidden />;
   }
   return (
     <th
       className={cn(
         'h-10 px-4 text-left align-middle text-xs font-normal whitespace-nowrap text-fg-secondary',
-        surface[onSurface].head,
+        head,
         layoutClass(layout),
       )}
     >
