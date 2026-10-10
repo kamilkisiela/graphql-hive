@@ -34,7 +34,7 @@ const severityLevelMapping = {
   [SeverityLevelType.Dangerous]: clsx('text-warning'),
 } as Record<SeverityLevelType, string>;
 
-const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphql(`
+export const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphql(`
   fragment ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment on SchemaCheckConditionalBreakingChangeMetadata {
     settings {
       retentionInDays
@@ -65,7 +65,7 @@ const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
   }
 `);
 
-const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
+export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
   fragment ChangesBlock_SchemaChangeWithUsageFragment on SchemaChange {
     path
     message(withSafeBasedOnUsageNote: false)

@@ -113,6 +113,7 @@ export default defineConfig({
       children: [
         { label: 'BillingPlanPicker' },
         { label: 'Calendar' },
+        { label: 'ChangesBlock' },
         { label: 'CompositionErrors' },
         { label: 'ContractFailures' },
         { label: 'DataTable' },
