@@ -1285,6 +1285,10 @@ const AffectedAppDeploymentsModel = z.array(AffectedAppDeploymentModel);
 
 export type AffectedAppDeployments = z.TypeOf<typeof AffectedAppDeploymentsModel>;
 
+const AffectedTargetsModel = z.array(z.object({ id: z.string(), count: z.number() }));
+
+type AffectedTargets = z.TypeOf<typeof AffectedTargetsModel>;
+
 export const HiveSchemaChangeModel = z
   .intersection(
     SchemaChangeModel,
@@ -1303,6 +1307,8 @@ export const HiveSchemaChangeModel = z
               hash: z.string(),
               name: z.string(),
               count: z.number(),
+              /** Checks recorded before per-target counts were kept have none. */
+              affectedTargets: AffectedTargetsModel.optional(),
             }),
           ),
           topAffectedClients: z.array(
@@ -1311,6 +1317,7 @@ export const HiveSchemaChangeModel = z
               count: z.number(),
             }),
           ),
+          affectedTargets: AffectedTargetsModel.optional(),
         })
         .nullable()
         .optional()
@@ -1340,8 +1347,14 @@ export const HiveSchemaChangeModel = z
       readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
       isSafeBasedOnUsage: boolean;
       usageStatistics: {
-        topAffectedOperations: { hash: string; name: string; count: number }[];
+        topAffectedOperations: {
+          hash: string;
+          name: string;
+          count: number;
+          affectedTargets?: AffectedTargets;
+        }[];
         topAffectedClients: { name: string; count: number }[];
+        affectedTargets?: AffectedTargets;
       } | null;
       affectedAppDeployments:
         | {

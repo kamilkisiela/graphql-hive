@@ -451,6 +451,135 @@ test.concurrent('check usage from two selected targets', async ({ expect }) => {
   expect(usedCheckResult.schemaCheck.valid).toEqual(true);
 });
 
+const BreakingChangeAffectedTargetsQuery = graphql(`
+  query BreakingChangeAffectedTargets($target: TargetReferenceInput!, $id: ID!) {
+    target(reference: $target) {
+      schemaCheck(id: $id) {
+        breakingSchemaChanges {
+          edges {
+            node {
+              path
+              usageStatistics {
+                affectedTargets {
+                  target {
+                    id
+                  }
+                  count
+                }
+                topAffectedOperations {
+                  name
+                  affectedTargets {
+                    target {
+                      id
+                    }
+                    count
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+test.concurrent('records which targets a breaking change was used in', async ({ expect }) => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, createProject } = await createOrg();
+  const {
+    project,
+    target: staging,
+    createTargetAccessToken,
+    toggleTargetValidation,
+    waitForRequestsCollected,
+  } = await createProject(ProjectType.Single);
+
+  const production = await createTarget(
+    {
+      slug: 'production-usage',
+      project: {
+        bySelector: { organizationSlug: organization.slug, projectSlug: project.slug },
+      },
+    },
+    ownerToken,
+  )
+    .then(r => r.expectNoGraphQLErrors())
+    .then(r => r.createTarget.ok!.createdTarget);
+
+  const stagingToken = await createTargetAccessToken({});
+  const productionToken = await createTargetAccessToken({ target: production });
+
+  await stagingToken
+    .publishSchema({ author: 'User', commit: 'initial', sdl: 'type Query { ping: String me: String }' })
+    .then(r => r.expectNoGraphQLErrors());
+
+  const me: CollectedOperation = {
+    timestamp: Date.now(),
+    operation: 'query me { me }',
+    operationName: 'me',
+    fields: ['Query', 'Query.me'],
+    execution: { ok: true, duration: 200_000_000, errorsTotal: 0 },
+  };
+  expect((await productionToken.collectLegacyOperations([me, me])).status).toEqual(200);
+  expect((await stagingToken.collectLegacyOperations([me])).status).toEqual(200);
+  await waitForRequestsCollected(2, { target: production });
+  await waitForRequestsCollected(1);
+
+  await toggleTargetValidation(true);
+  await updateTargetValidationSettings(
+    {
+      target: {
+        bySelector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: staging.slug,
+        },
+      },
+      conditionalBreakingChangeConfiguration: {
+        percentage: 0,
+        period: 2,
+        targetIds: [production.id, staging.id],
+      },
+    },
+    { authToken: ownerToken },
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const check = await stagingToken
+    .checkSchema('type Query { ping: String }')
+    .then(r => r.expectNoGraphQLErrors());
+  if (check.schemaCheck.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${check.schemaCheck.__typename}`);
+  }
+
+  const result = await execute({
+    document: BreakingChangeAffectedTargetsQuery,
+    variables: {
+      target: {
+        bySelector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: staging.slug,
+        },
+      },
+      id: check.schemaCheck.schemaCheck!.id,
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  const change = result.target?.schemaCheck?.breakingSchemaChanges?.edges.find(
+    edge => edge.node.path?.join('.') === 'Query.me',
+  )?.node;
+  const byTarget = [
+    { target: { id: production.id }, count: 2 },
+    { target: { id: staging.id }, count: 1 },
+  ];
+  expect(change?.usageStatistics?.affectedTargets).toEqual(byTarget);
+  expect(change?.usageStatistics?.topAffectedOperations).toEqual([
+    { name: 'me', affectedTargets: byTarget },
+  ]);
+});
+
 test.concurrent('check usage not from excluded client names', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, createProject } = await createOrg();

@@ -651,9 +651,33 @@ export class RegistryChecks {
               }),
             ]);
 
+            const operations = topAffectedOperations ?? [];
+            const [affectedTargets, operationTargets] = await Promise.all([
+              this.operationsReader.countCoordinatePerTarget({
+                targetIds: settings.targetIds,
+                excludedClients: settings.excludedClientNames,
+                period: settings.period,
+                schemaCoordinate: checkCoordinate,
+              }),
+              Promise.all(
+                operations.map(operation =>
+                  this.operationsReader.getOperationCountsPerTarget({
+                    targetIds: settings.targetIds,
+                    excludedClients: settings.excludedClientNames,
+                    period: settings.period,
+                    hash: operation.hash,
+                  }),
+                ),
+              ),
+            ]);
+
             change.usageStatistics = {
-              topAffectedOperations: topAffectedOperations ?? [],
+              topAffectedOperations: operations.map((operation, index) => ({
+                ...operation,
+                affectedTargets: toAffectedTargets(operationTargets[index]),
+              })),
               topAffectedClients: topAffectedClients ?? [],
+              affectedTargets: toAffectedTargets(affectedTargets),
             };
           }
 
@@ -1075,4 +1099,8 @@ function isNullToRequiredArgumentChange(change: Awaited<ReturnType<Inspector['di
     return `${oldType}!` === newType;
   }
   return false;
+}
+
+function toAffectedTargets(counts: Array<{ targetId: string; count: number }>) {
+  return counts.map(({ targetId, count }) => ({ id: targetId, count }));
 }

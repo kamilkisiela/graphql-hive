@@ -3448,11 +3448,13 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
       name: string;
       hash: string;
       count: number;
+      affectedTargets?: Array<{ id: string; count: number }>;
     }>;
     topAffectedClients: Array<{
       name: string;
       count: number;
     }>;
+    affectedTargets?: Array<{ id: string; count: number }>;
   };
   affectedAppDeployments: null | AffectedAppDeployments;
 } {

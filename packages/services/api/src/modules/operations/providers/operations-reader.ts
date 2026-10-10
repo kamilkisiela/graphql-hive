@@ -435,6 +435,187 @@ export class OperationsReader {
     return stats;
   }
 
+  /** Like `countCoordinate`, but split by the target the requests were reported to. */
+  countCoordinatePerTarget = batchBy<
+    {
+      schemaCoordinate: string;
+      targetIds: readonly string[];
+      period: DateRange;
+      excludedClients?: readonly string[] | null;
+    },
+    Array<{ targetId: string; count: number }>
+  >(
+    item =>
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
+    async items => {
+      const counts = await this.countCoordinatesPerTarget({
+        targetIds: items[0].targetIds,
+        excludedClients: items[0].excludedClients,
+        period: items[0].period,
+        schemaCoordinates: items.map(item => item.schemaCoordinate),
+      });
+      return items.map(item => counts.get(item.schemaCoordinate) ?? []);
+    },
+  );
+
+  private async countCoordinatesPerTarget(args: {
+    schemaCoordinates: readonly string[];
+    targetIds: readonly string[];
+    period: DateRange;
+    excludedClients?: readonly string[] | null;
+  }) {
+    const conditions = [sql`(coordinate IN (${sql.array(args.schemaCoordinates, 'String')}))`];
+
+    if (Array.isArray(args.excludedClients) && args.excludedClients.length > 0) {
+      conditions.push(sql`
+        hash NOT IN (
+          SELECT hash FROM (
+            SELECT
+              hash,
+              countIf(client_name NOT IN (${sql.array(
+                args.excludedClients,
+                'String',
+              )})) as non_excluded_clients_total
+            FROM clients_daily ${this.createFilter({
+              target: args.targetIds,
+              period: args.period,
+            })}
+            GROUP BY hash
+          ) WHERE non_excluded_clients_total = 0
+        )
+      `);
+    }
+
+    const query = this.pickAggregationByPeriod({
+      period: args.period,
+      query: aggregationTableName => sql`
+            SELECT
+              coordinate,
+              target,
+              sum(total) as total
+            FROM ${aggregationTableName('coordinates')}
+            ${this.createFilter({
+              target: args.targetIds,
+              period: args.period,
+              extra: conditions,
+            })}
+            GROUP BY coordinate, target
+          `,
+      queryId: aggregation => `count_coordinates_per_target_${aggregation}`,
+      timeout: 30_000,
+    });
+
+    const res = await this.clickHouse.query<{
+      total: string;
+      coordinate: string;
+      target: string;
+    }>(query);
+
+    const counts = new Map<string, Array<{ targetId: string; count: number }>>();
+    for (const row of res.data) {
+      const count = ensureNumber(row.total);
+      if (count <= 0) {
+        continue;
+      }
+      let list = counts.get(row.coordinate);
+      if (!list) {
+        list = [];
+        counts.set(row.coordinate, list);
+      }
+      list.push({ targetId: row.target, count });
+    }
+    for (const list of counts.values()) {
+      list.sort((a, b) => b.count - a.count);
+    }
+    return counts;
+  }
+
+  /** Request totals of operations, split by the target the requests were reported to. */
+  getOperationCountsPerTarget = batchBy<
+    {
+      hash: string;
+      targetIds: readonly string[];
+      period: DateRange;
+      excludedClients?: readonly string[] | null;
+    },
+    Array<{ targetId: string; count: number }>
+  >(
+    item =>
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
+    async items => {
+      const counts = await this._getOperationCountsPerTarget({
+        targetIds: items[0].targetIds,
+        excludedClients: items[0].excludedClients ?? null,
+        period: items[0].period,
+        hashes: Array.from(new Set(items.map(item => item.hash))),
+      });
+      return items.map(item => counts.get(item.hash) ?? []);
+    },
+  );
+
+  private async _getOperationCountsPerTarget(args: {
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+    hashes: string[];
+  }) {
+    const filter = (table: string) => sql`
+      PREWHERE
+        ${sql.raw(`"${table}"`)}."target" IN (${sql.array(args.targetIds, 'String')})
+        AND ${sql.raw(`"${table}"`)}."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+        AND ${sql.raw(`"${table}"`)}."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+        AND ${sql.raw(`"${table}"`)}."hash" IN (${sql.longArray(args.hashes, 'String')})
+        ${args.excludedClients ? sql`AND ${sql.raw(`"${table}"`)}."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+    `;
+
+    const rows = await this.clickHouse
+      .postQuery({
+        queryId: '_getOperationCountsPerTarget',
+        query: sql`
+          SELECT "hash", "target", SUM("total") AS "count"
+          FROM (
+            SELECT "operations_daily"."hash" AS "hash", "operations_daily"."target" AS "target", "operations_daily"."total" AS "total"
+            FROM "operations_daily"
+            ${filter('operations_daily')}
+
+            UNION ALL
+
+            SELECT "subscription_operations_daily"."hash" AS "hash", "subscription_operations_daily"."target" AS "target", "subscription_operations_daily"."total" AS "total"
+            FROM "subscription_operations_daily"
+            ${filter('subscription_operations_daily')}
+          )
+          GROUP BY "hash", "target"
+          ORDER BY "count" DESC
+        `,
+        timeout: 10_000,
+      })
+      .then(result =>
+        z
+          .array(
+            z.object({
+              hash: z.string(),
+              target: z.string(),
+              count: z.string().transform(ensureNumber),
+            }),
+          )
+          .parse(result.data),
+      );
+
+    const counts = new Map<string, Array<{ targetId: string; count: number }>>();
+    for (const row of rows) {
+      if (row.count <= 0) {
+        continue;
+      }
+      let list = counts.get(row.hash);
+      if (!list) {
+        list = [];
+        counts.set(row.hash, list);
+      }
+      list.push({ targetId: row.target, count: row.count });
+    }
+    return counts;
+  }
+
   countCoordinateFailure = batchBy<
     {
       schemaCoordinate: string;

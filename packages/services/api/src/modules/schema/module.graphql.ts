@@ -617,6 +617,35 @@ export default gql`
     List of top clients that are affected by this schema change.
     """
     topAffectedClients: [SchemaChangeUsageStatisticsAffectedClient!]! @tag(name: "public")
+    """
+    The targets the schema coordinate was used in during the period, with their request counts.
+    Only targets with usage are listed, most requests first.
+    Null for checks recorded before per-target counts were kept.
+    """
+    affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
+  }
+
+  type SchemaChangeUsageStatisticsAffectedTarget {
+    """
+    The target, as the conditional breaking change settings recorded it.
+    """
+    target: BreakingChangeMetadataTarget! @tag(name: "public")
+    """
+    The number of requests reported to this target in the period.
+    """
+    count: Float! @tag(name: "public")
+    """
+    Human readable count value.
+    """
+    countFormatted: String!
+    """
+    The share of the total traffic, in percent.
+    """
+    percentage: Float! @tag(name: "public")
+    """
+    Human readable percentage value.
+    """
+    percentageFormatted: String!
   }
 
   type SchemaChangeUsageStatisticsAffectedOperation {
@@ -644,6 +673,12 @@ export default gql`
     Human readable percentage value.
     """
     percentageFormatted: String!
+    """
+    The targets the operation was reported to during the period, with their request counts.
+    Only targets with usage are listed, most requests first.
+    Null for checks recorded before per-target counts were kept.
+    """
+    affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
   }
 
   type SchemaChangeUsageStatisticsAffectedClient {

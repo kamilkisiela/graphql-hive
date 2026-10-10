@@ -37,6 +37,14 @@ export class BreakingSchemaChangeUsageHelper {
         ? Math.max(1, metadata.usage.totalRequestCount)
         : 1;
     const targetIds = metadata?.settings.targets.map(target => target.id) ?? [];
+    const targetNames = new Map(metadata?.settings.targets.map(target => [target.id, target.name]));
+    const toAffectedTargets = (counts: Array<{ id: string; count: number }> | undefined) =>
+      counts?.map(({ id, count }) => ({
+        id,
+        name: targetNames.get(id) ?? id,
+        count,
+        percentage: (count / totalRequestCount) * 100,
+      })) ?? null;
 
     return {
       topAffectedOperations: schemaChange.usageStatistics.topAffectedOperations.map(operation => {
@@ -46,6 +54,7 @@ export class BreakingSchemaChangeUsageHelper {
           ...operation,
           percentage,
           targetIds,
+          affectedTargets: toAffectedTargets(operation.affectedTargets),
         };
       }),
       topAffectedClients: schemaChange.usageStatistics.topAffectedClients.map(client => {
@@ -59,6 +68,7 @@ export class BreakingSchemaChangeUsageHelper {
           percentageFormatted: formatPercentage(percentage),
         };
       }),
+      affectedTargets: toAffectedTargets(schemaChange.usageStatistics.affectedTargets),
     };
   }
 }
