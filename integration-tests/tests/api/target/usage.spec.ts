@@ -642,6 +642,102 @@ test.concurrent('records which targets a breaking change was used in', async ({ 
   ]);
 });
 
+async function checkArgumentMadeRequired(operations: CollectedOperation[]) {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { organization, createProject } = await createOrg();
+  const {
+    project,
+    target,
+    createTargetAccessToken,
+    toggleTargetValidation,
+    waitForRequestsCollected,
+  } = await createProject(ProjectType.Single);
+  const token = await createTargetAccessToken({});
+
+  await token
+    .publishSchema({
+      author: 'User',
+      commit: 'initial',
+      sdl: 'type Query { foo(a: String): String }',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+  const collected = await token.collectLegacyOperations(operations);
+  if (collected.status !== 200) {
+    throw new Error(`Usage was rejected with status ${collected.status}`);
+  }
+  await waitForRequestsCollected(operations.length);
+  await toggleTargetValidation(true);
+
+  const check = await token
+    .checkSchema('type Query { foo(a: String!): String }')
+    .then(r => r.expectNoGraphQLErrors());
+  const schemaCheckId = (check.schemaCheck as { schemaCheck?: { id: string } | null }).schemaCheck
+    ?.id;
+
+  const result = await execute({
+    document: BreakingChangeAffectedTargetsQuery,
+    variables: {
+      target: {
+        bySelector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
+        },
+      },
+      id: schemaCheckId!,
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  return {
+    target,
+    change: result.target?.schemaCheck?.breakingSchemaChanges?.edges[0]?.node,
+  };
+}
+
+const execution = { ok: true, duration: 200_000_000, errorsTotal: 0 };
+const withArgument: CollectedOperation = {
+  timestamp: Date.now(),
+  operation: 'query withA { foo(a: "x") }',
+  operationName: 'withA',
+  fields: ['Query', 'Query.foo', 'Query.foo.a', 'Query.foo.a!'],
+  execution,
+};
+
+test.concurrent(
+  'counts an argument made required on its field, with every operation of the field',
+  async ({ expect }) => {
+    const withoutArgument: CollectedOperation = {
+      timestamp: Date.now(),
+      operation: 'query withoutA { foo }',
+      operationName: 'withoutA',
+      fields: ['Query', 'Query.foo'],
+      execution,
+    };
+    const { target, change } = await checkArgumentMadeRequired([withArgument, withoutArgument]);
+
+    expect(change?.usageStatistics?.schemaCoordinate).toEqual('Query.foo');
+    expect(change?.usageStatistics?.affectedTargets).toEqual([
+      { target: { id: target.id }, count: 2, operationCount: 2 },
+    ]);
+    // The operations that leave the argument out are the ones the change breaks.
+    expect(
+      change?.usageStatistics?.topAffectedOperations.map(operation => operation.name).sort(),
+    ).toEqual(['withA', 'withoutA']);
+  },
+);
+
+test.concurrent(
+  'keeps no per-target counts for an argument made required that every request passes',
+  async ({ expect }) => {
+    const { change } = await checkArgumentMadeRequired([withArgument, withArgument]);
+
+    expect(change?.path).toEqual(['Query', 'foo', 'a']);
+    expect(change?.usageStatistics?.affectedTargets).toBeNull();
+    expect(change?.usageStatistics?.schemaCoordinate).toBeNull();
+  },
+);
+
 test.concurrent('check usage not from excluded client names', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, createProject } = await createOrg();

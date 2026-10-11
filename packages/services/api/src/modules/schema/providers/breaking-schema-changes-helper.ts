@@ -38,16 +38,19 @@ export class BreakingSchemaChangeUsageHelper {
         : 1;
     const targetIds = metadata?.settings.targets.map(target => target.id) ?? [];
     const targetNames = new Map(metadata?.settings.targets.map(target => [target.id, target.name]));
+    // Without the check's metadata there are no names or totals to report against.
     const toAffectedTargets = (
       counts: Array<{ id: string; count: number; operationCount?: number }> | undefined,
     ) =>
-      counts?.map(({ id, count, operationCount }) => ({
-        id,
-        name: targetNames.get(id) ?? id,
-        count,
-        operationCount: operationCount ?? null,
-        percentage: (count / totalRequestCount) * 100,
-      })) ?? null;
+      (metadata &&
+        counts?.map(({ id, count, operationCount }) => ({
+          id,
+          name: targetNames.get(id) ?? id,
+          count,
+          operationCount: operationCount ?? null,
+          percentage: (count / totalRequestCount) * 100,
+        }))) ||
+      null;
 
     return {
       topAffectedOperations: schemaChange.usageStatistics.topAffectedOperations.map(operation => {

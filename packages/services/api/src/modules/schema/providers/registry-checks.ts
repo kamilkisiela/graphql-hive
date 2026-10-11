@@ -608,13 +608,14 @@ export class RegistryChecks {
               .join('.');
           }
 
-          const totalRequestCounts = await this.operationsReader.countCoordinate({
+          // Split by target so a breaking verdict can say where the requests came from.
+          const requestsPerTarget = await this.operationsReader.countCoordinatePerTarget({
             targetIds: settings.targetIds,
             excludedClients: settings.excludedClientNames,
             period: settings.period,
             schemaCoordinate: checkCoordinate,
           });
-          const totalRequests = totalRequestCounts[checkCoordinate] ?? 0;
+          const totalRequests = requestsPerTarget.reduce((sum, target) => sum + target.count, 0);
           let isBreaking = totalRequests >= Math.max(settings.requestCountThreshold, 1);
           if (isBreaking) {
             const useAdvancedNullabilityCheck = requiresAdvancedNullabilityCheck(change);
@@ -636,59 +637,30 @@ export class RegistryChecks {
               }
             }
 
-            // Per-target counts only explain a breaking verdict, and must never fail the check.
-            const perTarget = <T>(read: Promise<T>) =>
-              isBreaking
-                ? read.catch(error => {
-                    this.logger.error(error, 'Failed to count usage per target.');
-                    return undefined;
-                  })
-                : Promise.resolve(undefined);
-
-            const [topAffectedClients, topAffectedOperations, affectedTargets] = await Promise.all([
+            // On the verdict's coordinate, so the operations and clients match the per-target counts.
+            const [topAffectedClients, topAffectedOperations] = await Promise.all([
               this.operationsReader.getTopClientsForSchemaCoordinate({
                 targetIds: settings.targetIds,
                 excludedClients: settings.excludedClientNames,
                 period: settings.period,
-                schemaCoordinate: change.breakingChangeSchemaCoordinate,
+                schemaCoordinate: checkCoordinate,
               }),
               this.operationsReader.getTopOperationsForSchemaCoordinate({
                 targetIds: settings.targetIds,
                 excludedClients: settings.excludedClientNames,
                 period: settings.period,
-                schemaCoordinate: change.breakingChangeSchemaCoordinate,
+                schemaCoordinate: checkCoordinate,
               }),
-              perTarget(
-                this.operationsReader.countCoordinatePerTarget({
-                  targetIds: settings.targetIds,
-                  excludedClients: settings.excludedClientNames,
-                  period: settings.period,
-                  schemaCoordinate: checkCoordinate,
-                }),
-              ),
             ]);
 
-            const operations = topAffectedOperations ?? [];
-            const operationTargets = await Promise.all(
-              operations.map(operation =>
-                perTarget(
-                  this.operationsReader.getOperationCountsPerTarget({
-                    targetIds: settings.targetIds,
-                    excludedClients: settings.excludedClientNames,
-                    period: settings.period,
-                    hash: operation.hash,
-                  }),
-                ),
-              ),
-            );
-
             change.usageStatistics = {
-              topAffectedOperations: operations.map((operation, index) => ({
-                ...operation,
-                affectedTargets: operationTargets[index],
-              })),
+              topAffectedOperations: (topAffectedOperations ?? []).map(operation =>
+                isBreaking ? operation : { ...operation, affectedTargets: undefined },
+              ),
               topAffectedClients: topAffectedClients ?? [],
-              ...(affectedTargets ? { affectedTargets, schemaCoordinate: checkCoordinate } : {}),
+              ...(isBreaking
+                ? { affectedTargets: requestsPerTarget, schemaCoordinate: checkCoordinate }
+                : {}),
             };
           }
 
