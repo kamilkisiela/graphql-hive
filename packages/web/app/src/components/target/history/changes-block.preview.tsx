@@ -142,7 +142,11 @@ function buildChanges(args: {
           })),
           affectedTargets: args.legacy
             ? null
-            : used.map(target => targetUsage(target, countFor(target))),
+            : used.map(target => ({
+                ...targetUsage(target, countFor(target)),
+                operationCount: countFor(target),
+              })),
+          schemaCoordinate: args.legacy ? null : change.type,
         },
         affectedAppDeployments: null,
       },

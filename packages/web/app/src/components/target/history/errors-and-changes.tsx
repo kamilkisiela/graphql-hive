@@ -3,7 +3,10 @@ import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
-import { BreakingChangeTargets, plural } from '@/components/target/history/breaking-change-targets';
+import {
+  BreakingChangeTargets,
+  countOf,
+} from '@/components/target/history/breaking-change-targets';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import { DataTable } from '@/components/ui/data-table/data-table';
@@ -115,7 +118,9 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
         }
         count
         countFormatted
+        operationCount
       }
+      schemaCoordinate
     }
     affectedAppDeployments(first: 5) {
       edges {
@@ -251,10 +256,14 @@ function ChangeItem(
 
   // Checks recorded before per-target counts were kept have none, and keep the older layout.
   const targetUsage =
-    'usageStatistics' in change && change.usageStatistics?.affectedTargets && metadata
+    'usageStatistics' in change &&
+    !change.isSafeBasedOnUsage &&
+    change.usageStatistics?.affectedTargets &&
+    metadata
       ? {
           statistics: change.usageStatistics,
           affectedTargets: change.usageStatistics.affectedTargets,
+          coordinate: change.usageStatistics.schemaCoordinate ?? change.path!.join('.'),
           metadata,
         }
       : null;
@@ -328,11 +337,16 @@ function ChangeItem(
           trailing: targetUsage ? (
             <span className="flex items-center gap-2">
               <Badge
-                content={`${targetUsage.affectedTargets.length} of ${plural(targetUsage.metadata.settings.targets.length, 'target')}`}
+                content={`${targetUsage.affectedTargets.length} of ${countOf(targetUsage.metadata.settings.targets.length, 'target')}`}
                 variants={{ variant: 'outline' }}
               />
               <Badge
-                content={`${plural(targetUsage.statistics.topAffectedOperations.length, 'operation')} • ${plural(targetUsage.statistics.topAffectedClients.length, 'client')}`}
+                content={`${countOf(
+                  targetUsage.statistics.topAffectedOperations.length,
+                  'operation',
+                  // The top operations stop at ten, so ten means at least ten.
+                  targetUsage.statistics.topAffectedOperations.length >= 10 ? '10+' : undefined,
+                )} • ${countOf(targetUsage.statistics.topAffectedClients.length, 'client')}`}
                 variants={{ variant: 'outline' }}
               />
             </span>
@@ -353,9 +367,8 @@ function ChangeItem(
                 <>
                   <BreakingChangeTargets
                     affectedTargets={targetUsage.affectedTargets}
-                    operations={targetUsage.statistics.topAffectedOperations}
                     targets={targetUsage.metadata.settings.targets}
-                    coordinate={change.path!.join('.')}
+                    coordinate={targetUsage.coordinate}
                     period={targetUsage.metadata.period}
                   />
                   <section className="space-y-2">

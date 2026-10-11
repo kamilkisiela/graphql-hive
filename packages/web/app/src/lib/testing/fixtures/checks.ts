@@ -180,7 +180,7 @@ const productionUsage = {
  */
 export function breakingSchemaCheck(
   variables: { schemaCheckId: string },
-  options: { withTargets?: boolean } = {},
+  options: { withTargets?: boolean; safe?: boolean } = {},
 ) {
   const withTargets = options.withTargets ?? true;
   const active = activeSchemaCheck(variables);
@@ -206,7 +206,7 @@ export function breakingSchemaCheck(
                   severityLevel: 'BREAKING',
                   severityReason: null,
                   approval: null,
-                  isSafeBasedOnUsage: false,
+                  isSafeBasedOnUsage: options.safe ?? false,
                   usageStatistics: {
                     __typename: 'SchemaChangeUsageStatistics' as const,
                     topAffectedOperations: [
@@ -227,7 +227,10 @@ export function breakingSchemaCheck(
                         percentageFormatted: '<0.01%',
                       },
                     ],
-                    affectedTargets: withTargets ? [productionUsage] : null,
+                    affectedTargets: withTargets
+                      ? [{ ...productionUsage, operationCount: 1 }]
+                      : null,
+                    schemaCoordinate: withTargets ? 'Query.products' : null,
                   },
                   affectedAppDeployments: null,
                 },

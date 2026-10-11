@@ -373,10 +373,38 @@ describe('breaking change usage', () => {
       expect(new URL(href, 'http://x').searchParams.get('from')).toContain(BREAKING_PERIOD.from);
       expect(screen.getAllByRole('link', { name: /Verify in Insights/ })).toHaveLength(1);
       expect(screen.getByText('2 requests')).toBeTruthy();
+      expect(screen.getByText('from 1 operation')).toBeTruthy();
       expect(screen.getByRole('button', { name: '1 without usage' })).toBeTruthy();
       // The targets carry the links, so the operation row only says where it was seen.
       expect(screen.queryByRole('button', { name: 'View live usage in Insights' })).toBeNull();
       expect(screen.getByText('Seen in')).toBeTruthy();
+    },
+  );
+
+  it(
+    'shows no targets table on a change that is safe based on usage',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          breakingSchemaCheck(variables as { schemaCheckId: string }, { safe: true }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+      await screen.findByText(CHECKS.first[0]);
+      const change = await screen.findByRole(
+        'button',
+        { name: /was removed from object type/ },
+        { timeout: 10_000 },
+      );
+      expect(change.textContent).toContain('Safe based on usage data');
+      expect(change.textContent).not.toContain('of 2 targets');
+      await act(async () => {
+        fireEvent.click(change);
+      });
+      expect(screen.queryByText(/during the check window/)).toBeNull();
+      expect(screen.queryByRole('link', { name: /Verify in Insights/ })).toBeNull();
     },
   );
 });

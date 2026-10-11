@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/primitives/badge/badge';
 import { Button } from '@/components/ui/primitives/button/button';
 import { Menu } from '@/components/ui/primitives/floating/menu/menu';
 import { useSlugs } from '@/lib/hooks';
+import { pluralize } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -18,11 +19,12 @@ export type TargetUsage = {
   target: CheckTarget;
   count: number;
   countFormatted: string;
+  operationCount: number | null;
 };
 
-type Row = TargetUsage & { operations: number };
-
-export const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
+/** "3 targets", "1 operation". */
+export const countOf = (count: number, noun: string, label = String(count)) =>
+  `${label} ${pluralize(count, noun, `${noun}s`)}`;
 
 function useCoordinateLink(coordinate: string, period: { from: string; to: string }) {
   const { organizationSlug, projectSlug } = useSlugs('target');
@@ -72,8 +74,6 @@ function UnusedTargetsMenu(props: {
 /** The targets a breaking change was used in during the check window, each to verify in Insights. */
 export function BreakingChangeTargets(props: {
   affectedTargets: TargetUsage[];
-  /** Each operation's targets, to count the operations behind a target's requests. */
-  operations: Array<{ affectedTargets: TargetUsage[] | null }>;
   targets: CheckTarget[];
   coordinate: string;
   period: { from: string; to: string };
@@ -81,14 +81,9 @@ export function BreakingChangeTargets(props: {
   const link = useCoordinateLink(props.coordinate, props.period);
   const used = new Set(props.affectedTargets.map(affected => affected.target.id));
   const unused = props.targets.filter(target => !used.has(target.id));
-  const rows: Row[] = props.affectedTargets.map(affected => ({
-    ...affected,
-    operations: props.operations.filter(operation =>
-      operation.affectedTargets?.some(entry => entry.target.id === affected.target.id),
-    ).length,
-  }));
+  const rows = props.affectedTargets;
 
-  const columns: ColumnDef<Row, unknown>[] = [
+  const columns: ColumnDef<TargetUsage, unknown>[] = [
     {
       id: 'target',
       meta: { width: 'md' },
@@ -109,12 +104,12 @@ export function BreakingChangeTargets(props: {
       cell: ({ row }) => (
         <span className="inline-flex items-center gap-2">
           <Badge
-            content={`${row.original.countFormatted} ${row.original.count === 1 ? 'request' : 'requests'}`}
+            content={countOf(row.original.count, 'request', row.original.countFormatted)}
             variants={{ variant: 'outline' }}
           />
-          {row.original.operations ? (
+          {row.original.operationCount ? (
             <span className="text-xs text-fg-secondary">
-              from {plural(row.original.operations, 'operation')}
+              from {countOf(row.original.operationCount, 'operation')}
             </span>
           ) : null}
         </span>
@@ -141,7 +136,7 @@ export function BreakingChangeTargets(props: {
       pagination={{ kind: 'none' }}
       variants={{ tone: 'critical' }}
       title={{
-        label: `Used in ${rows.length} of ${plural(props.targets.length, 'target')} during the check window`,
+        label: `Used in ${rows.length} of ${countOf(props.targets.length, 'target')} during the check window`,
         icon: AlertTriangleIcon,
         aside: unused.length ? (
           <UnusedTargetsMenu unused={unused} coordinate={props.coordinate} period={props.period} />
