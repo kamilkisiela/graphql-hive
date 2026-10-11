@@ -37,7 +37,6 @@ import {
 } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { TargetStore } from '../../target/providers/target-store';
-import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { Contracts } from './contracts';
 import { CompositionOrchestrator } from './orchestrator/composition-orchestrator';
@@ -81,7 +80,6 @@ export class SchemaManager {
     private targetManager: TargetManager,
     private schemaHelper: SchemaHelper,
     private contracts: Contracts,
-    private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
     private idTranslator: IdTranslator,
     private schemaVersions: SchemaVersionStore,
     private graphs: GraphStore,
@@ -763,15 +761,6 @@ export class SchemaManager {
         schemaCheckId,
       );
       return null;
-    }
-
-    if (schemaCheck.breakingSchemaChanges && schemaCheck.conditionalBreakingChangeMetadata) {
-      for (const change of schemaCheck.breakingSchemaChanges) {
-        this.breakingSchemaChangeUsageHelper.registerMetadataForBreakingSchemaChange(
-          change,
-          schemaCheck.conditionalBreakingChangeMetadata,
-        );
-      }
     }
 
     return schemaCheck;

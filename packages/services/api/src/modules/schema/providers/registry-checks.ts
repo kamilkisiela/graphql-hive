@@ -608,58 +608,65 @@ export class RegistryChecks {
               .join('.');
           }
 
-          // Split by target so a breaking verdict can say where the requests came from.
-          const requestsPerTarget = await this.operationsReader.countCoordinatePerTarget({
+          const totalRequestCounts = await this.operationsReader.countCoordinate({
             targetIds: settings.targetIds,
             excludedClients: settings.excludedClientNames,
             period: settings.period,
             schemaCoordinate: checkCoordinate,
           });
-          const totalRequests = requestsPerTarget.reduce((sum, target) => sum + target.count, 0);
+          const totalRequests = totalRequestCounts[checkCoordinate] ?? 0;
           let isBreaking = totalRequests >= Math.max(settings.requestCountThreshold, 1);
-          if (isBreaking) {
-            const useAdvancedNullabilityCheck = requiresAdvancedNullabilityCheck(change);
+          const useAdvancedNullabilityCheck = requiresAdvancedNullabilityCheck(change);
+          if (isBreaking && useAdvancedNullabilityCheck) {
+            const advancedNullabilityTotalRequests = await this.operationsReader.countCoordinate({
+              targetIds: settings.targetIds,
+              excludedClients: settings.excludedClientNames,
+              period: settings.period,
+              schemaCoordinate: `${change.breakingChangeSchemaCoordinate}!`,
+            });
 
-            if (useAdvancedNullabilityCheck) {
-              const advancedNullabilityTotalRequests = await this.operationsReader.countCoordinate({
-                targetIds: settings.targetIds,
-                excludedClients: settings.excludedClientNames,
-                period: settings.period,
-                schemaCoordinate: `${change.breakingChangeSchemaCoordinate}!`,
-              });
-
-              if (
-                advancedNullabilityTotalRequests[`${change.breakingChangeSchemaCoordinate}!`] >=
-                totalRequests
-              ) {
-                // All requests for this coordinate provide the value for the coordinate. So moving to non-null is allowed.
-                isBreaking = false;
-              }
+            if (
+              advancedNullabilityTotalRequests[`${change.breakingChangeSchemaCoordinate}!`] >=
+              totalRequests
+            ) {
+              // All requests for this coordinate provide the value for the coordinate. So moving to non-null is allowed.
+              isBreaking = false;
             }
+          }
 
-            // On the verdict's coordinate, so the operations and clients match the per-target counts.
+          if (isBreaking) {
             const [topAffectedClients, topAffectedOperations] = await Promise.all([
               this.operationsReader.getTopClientsForSchemaCoordinate({
                 targetIds: settings.targetIds,
                 excludedClients: settings.excludedClientNames,
                 period: settings.period,
-                schemaCoordinate: checkCoordinate,
+                schemaCoordinate: change.breakingChangeSchemaCoordinate,
               }),
               this.operationsReader.getTopOperationsForSchemaCoordinate({
                 targetIds: settings.targetIds,
                 excludedClients: settings.excludedClientNames,
                 period: settings.period,
-                schemaCoordinate: checkCoordinate,
+                schemaCoordinate: change.breakingChangeSchemaCoordinate,
               }),
             ]);
+            const operations = topAffectedOperations ?? [];
+            const perTarget = await this.countUsagePerTarget({
+              settings,
+              coordinate: checkCoordinate,
+              providedCoordinate: useAdvancedNullabilityCheck
+                ? `${change.breakingChangeSchemaCoordinate}!`
+                : null,
+              hashes: operations.map(operation => operation.hash),
+            });
 
             change.usageStatistics = {
-              topAffectedOperations: (topAffectedOperations ?? []).map(operation =>
-                isBreaking ? operation : { ...operation, affectedTargets: undefined },
-              ),
+              topAffectedOperations: operations.map((operation, index) => ({
+                ...operation,
+                affectedTargets: perTarget?.operations[index],
+              })),
               topAffectedClients: topAffectedClients ?? [],
-              ...(isBreaking
-                ? { affectedTargets: requestsPerTarget, schemaCoordinate: checkCoordinate }
+              ...(perTarget
+                ? { affectedTargets: perTarget.targets, schemaCoordinate: checkCoordinate }
                 : {}),
             };
           }
@@ -945,6 +952,61 @@ export class RegistryChecks {
       project.id,
     );
     return true;
+  }
+
+  /**
+   * Best effort: on failure the check goes on without it. With `providedCoordinate`, only requests
+   * that omit the value count, which is what breaks when an input becomes required.
+   */
+  private async countUsagePerTarget(args: {
+    settings: ConditionalBreakingChangeDiffConfig;
+    coordinate: string;
+    providedCoordinate: string | null;
+    hashes: string[];
+  }) {
+    const read = {
+      targetIds: args.settings.targetIds,
+      excludedClients: args.settings.excludedClientNames,
+      period: args.settings.period,
+    };
+    try {
+      const [onCoordinate, provided, operations] = await Promise.all([
+        this.operationsReader.countCoordinatePerTarget({
+          ...read,
+          schemaCoordinate: args.coordinate,
+        }),
+        args.providedCoordinate
+          ? this.operationsReader.countCoordinatePerTarget({
+              ...read,
+              schemaCoordinate: args.providedCoordinate,
+            })
+          : Promise.resolve([]),
+        Promise.all(
+          args.hashes.map(hash =>
+            this.operationsReader.getOperationCountsPerTarget({ ...read, hash }),
+          ),
+        ),
+      ]);
+
+      if (!args.providedCoordinate) {
+        return { targets: onCoordinate, operations };
+      }
+      const providedCounts = new Map(provided.map(target => [target.id, target.count]));
+      const targets = onCoordinate
+        .map(target => ({
+          id: target.id,
+          count: target.count - (providedCounts.get(target.id) ?? 0),
+        }))
+        .filter(target => target.count > 0)
+        .sort((a, b) => b.count - a.count);
+      return { targets, operations };
+    } catch (error) {
+      this.logger.error(
+        'Failed to count breaking change usage per target (error=%s)',
+        String(error),
+      );
+      return null;
+    }
   }
 }
 

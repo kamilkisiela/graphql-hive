@@ -609,7 +609,7 @@ test.concurrent('records which targets a breaking change was used in', async ({ 
     { target: { id: production.id }, count: 2, operationCount: 1 },
     { target: { id: staging.id }, count: 1, operationCount: 1 },
   ]);
-  // A check read from the list has no metadata of its own loaded; targets still get their names.
+  // Read from the list, targets still get their names.
   const listed = await execute({
     document: BreakingChangeAffectedTargetsListQuery,
     variables: {
@@ -705,7 +705,7 @@ const withArgument: CollectedOperation = {
 };
 
 test.concurrent(
-  'counts an argument made required on its field, with every operation of the field',
+  'counts only the requests that leave out an argument made required',
   async ({ expect }) => {
     const withoutArgument: CollectedOperation = {
       timestamp: Date.now(),
@@ -718,23 +718,115 @@ test.concurrent(
 
     expect(change?.usageStatistics?.schemaCoordinate).toEqual('Query.foo');
     expect(change?.usageStatistics?.affectedTargets).toEqual([
-      { target: { id: target.id }, count: 2, operationCount: 2 },
+      { target: { id: target.id }, count: 1, operationCount: null },
     ]);
-    // The operations that leave the argument out are the ones the change breaks.
-    expect(
-      change?.usageStatistics?.topAffectedOperations.map(operation => operation.name).sort(),
-    ).toEqual(['withA', 'withoutA']);
   },
 );
 
 test.concurrent(
-  'keeps no per-target counts for an argument made required that every request passes',
+  'keeps no usage for an argument made required that every request passes',
   async ({ expect }) => {
     const { change } = await checkArgumentMadeRequired([withArgument, withArgument]);
 
     expect(change?.path).toEqual(['Query', 'foo', 'a']);
-    expect(change?.usageStatistics?.affectedTargets).toBeNull();
-    expect(change?.usageStatistics?.schemaCoordinate).toBeNull();
+    expect(change?.usageStatistics).toBeNull();
+  },
+);
+
+test.concurrent(
+  'leaves out a target only excluded clients used, even when others send the same operation',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, createProject } = await createOrg();
+    const {
+      project,
+      target: staging,
+      createTargetAccessToken,
+      toggleTargetValidation,
+      waitForRequestsCollected,
+    } = await createProject(ProjectType.Single);
+    const canary = await createTarget(
+      {
+        slug: 'canary',
+        project: {
+          bySelector: { organizationSlug: organization.slug, projectSlug: project.slug },
+        },
+      },
+      ownerToken,
+    )
+      .then(r => r.expectNoGraphQLErrors())
+      .then(r => r.createTarget.ok!.createdTarget);
+    const stagingToken = await createTargetAccessToken({});
+    const canaryToken = await createTargetAccessToken({ target: canary });
+
+    await stagingToken
+      .publishSchema({
+        author: 'User',
+        commit: 'initial',
+        sdl: 'type Query { ping: String me: String }',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const me = (client: string): CollectedOperation => ({
+      timestamp: Date.now(),
+      operation: 'query me { me }',
+      operationName: 'me',
+      fields: ['Query', 'Query.me'],
+      execution: { ok: true, duration: 200_000_000, errorsTotal: 0 },
+      metadata: { client: { name: client, version: '1' } },
+    });
+    expect((await stagingToken.collectLegacyOperations([me('webapp')])).status).toEqual(200);
+    expect((await canaryToken.collectLegacyOperations([me('internal-bot')])).status).toEqual(200);
+    await waitForRequestsCollected(1);
+    await waitForRequestsCollected(1, { target: canary });
+
+    await toggleTargetValidation(true);
+    await updateTargetValidationSettings(
+      {
+        target: {
+          bySelector: {
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: staging.slug,
+          },
+        },
+        conditionalBreakingChangeConfiguration: {
+          percentage: 0,
+          period: 2,
+          targetIds: [canary.id, staging.id],
+          excludedClients: ['internal-bot'],
+        },
+      },
+      { authToken: ownerToken },
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const check = await stagingToken
+      .checkSchema('type Query { ping: String }')
+      .then(r => r.expectNoGraphQLErrors());
+    const schemaCheckId = (check.schemaCheck as { schemaCheck?: { id: string } | null }).schemaCheck
+      ?.id;
+
+    const result = await execute({
+      document: BreakingChangeAffectedTargetsQuery,
+      variables: {
+        target: {
+          bySelector: {
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: staging.slug,
+          },
+        },
+        id: schemaCheckId!,
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    const change = result.target?.schemaCheck?.breakingSchemaChanges?.edges.find(
+      edge => edge.node.path?.join('.') === 'Query.me',
+    )?.node;
+
+    expect(change?.usageStatistics?.affectedTargets).toEqual([
+      { target: { id: staging.id }, count: 1, operationCount: 1 },
+    ]);
   },
 );
 

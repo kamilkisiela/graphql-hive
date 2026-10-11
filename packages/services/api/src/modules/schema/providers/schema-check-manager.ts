@@ -22,7 +22,7 @@ export class SchemaCheckManager {
     private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
   ) {}
 
-  /** Usage needs the check's metadata, which only a check loaded by id registered before. */
+  // Usage reads names and totals from the check's metadata.
   private withUsageMetadata(schemaCheck: SchemaCheck) {
     const metadata = schemaCheck.conditionalBreakingChangeMetadata;
     if (metadata) {
@@ -123,6 +123,11 @@ export class SchemaCheckManager {
         retentionInDays: schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays,
         excludedClientNames:
           schemaCheck.conditionalBreakingChangeMetadata.settings.excludedClientNames,
+        excludedAppDeploymentNames:
+          schemaCheck.conditionalBreakingChangeMetadata.settings.excludedAppDeploymentNames,
+        breakingChangeFormula:
+          schemaCheck.conditionalBreakingChangeMetadata.settings.breakingChangeFormula,
+        requestCount: schemaCheck.conditionalBreakingChangeMetadata.settings.requestCount,
         targets: schemaCheck.conditionalBreakingChangeMetadata.settings.targets,
       },
       usage: {

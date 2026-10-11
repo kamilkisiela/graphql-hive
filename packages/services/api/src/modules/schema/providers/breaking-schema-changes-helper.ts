@@ -38,7 +38,7 @@ export class BreakingSchemaChangeUsageHelper {
         : 1;
     const targetIds = metadata?.settings.targets.map(target => target.id) ?? [];
     const targetNames = new Map(metadata?.settings.targets.map(target => [target.id, target.name]));
-    // Without the check's metadata there are no names or totals to report against.
+    // Names and totals come from the check's metadata.
     const toAffectedTargets = (
       counts: Array<{ id: string; count: number; operationCount?: number }> | undefined,
     ) =>

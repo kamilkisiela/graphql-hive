@@ -568,7 +568,7 @@ export default gql`
       withSafeBasedOnUsageNote: Boolean = true
     ): String! @tag(name: "public")
     """
-    The schema coordinate the change applies to, split into its parts: ["Query", "user"].
+    The schema coordinate the change applies to, split into its parts.
     """
     path: [String!] @tag(name: "public")
     """
@@ -618,15 +618,13 @@ export default gql`
     """
     topAffectedClients: [SchemaChangeUsageStatisticsAffectedClient!]! @tag(name: "public")
     """
-    The targets the schema coordinate was used in during the period, with their request counts.
-    Only targets with usage are listed, most requests first.
-    Null for checks recorded before per-target counts were kept.
+    Targets the change's usage came from during the period, most requests first.
+    Null for checks recorded before these counts were kept.
     """
     affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
     """
-    The schema coordinate the per-target counts were taken on, to look the usage up in Insights.
-    It can differ from the change's path, for example the parent field of an argument made required.
-    Null for checks recorded before per-target counts were kept.
+    The coordinate the per-target counts were taken on, to look the usage up in Insights.
+    It can differ from the change's path. Null for checks recorded before these counts were kept.
     """
     schemaCoordinate: String @tag(name: "public")
   }
@@ -637,11 +635,12 @@ export default gql`
     """
     target: BreakingChangeMetadataTarget! @tag(name: "public")
     """
-    The number of requests reported to this target in the period.
+    Requests to this target in the period.
     """
     count: Float! @tag(name: "public")
     """
-    How many distinct operations sent those requests. Null on an operation's own targets.
+    Distinct operations that sent those requests. Null on an operation's own targets and for an
+    argument made required.
     """
     operationCount: Int @tag(name: "public")
     """
@@ -684,9 +683,8 @@ export default gql`
     """
     percentageFormatted: String!
     """
-    The targets the operation was reported to during the period, with their request counts.
-    Only targets with usage are listed, most requests first.
-    Null for checks recorded before per-target counts were kept.
+    Targets the operation was reported to during the period, most requests first.
+    Null for checks recorded before these counts were kept.
     """
     affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
   }
@@ -869,6 +867,11 @@ export default gql`
     percentage: Float! @tag(name: "public")
     excludedClientNames: [String!] @tag(name: "public")
     excludedAppDeploymentNames: [String!] @tag(name: "public")
+    """
+    Whether 'percentage' or 'requestCount' decided which changes were breaking.
+    """
+    breakingChangeFormula: BreakingChangeFormulaType! @tag(name: "public")
+    requestCount: Int! @tag(name: "public")
     targets: [BreakingChangeMetadataTarget!]! @tag(name: "public")
   }
 
