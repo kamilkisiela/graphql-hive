@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/primitives/badge/badge';
 import { Button } from '@/components/ui/primitives/button/button';
 import { Menu } from '@/components/ui/primitives/floating/menu/menu';
 import { useSlugs } from '@/lib/hooks';
-import { pluralize } from '@/lib/utils';
+import { formatCount } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -21,10 +21,6 @@ export type TargetUsage = {
   countFormatted: string;
   operationCount: number | null;
 };
-
-/** "3 targets", "1 operation". */
-export const countOf = (count: number, noun: string, label = String(count)) =>
-  `${label} ${pluralize(count, noun, `${noun}s`)}`;
 
 function useCoordinateLink(coordinate: string, period: { from: string; to: string }) {
   const { organizationSlug, projectSlug } = useSlugs('target');
@@ -104,12 +100,12 @@ export function BreakingChangeTargets(props: {
       cell: ({ row }) => (
         <span className="inline-flex items-center gap-2">
           <Badge
-            content={countOf(row.original.count, 'request', row.original.countFormatted)}
+            content={formatCount(row.original.count, 'request', row.original.countFormatted)}
             variants={{ variant: 'outline' }}
           />
           {row.original.operationCount ? (
             <span className="text-xs text-fg-secondary">
-              from {countOf(row.original.operationCount, 'operation')}
+              from {formatCount(row.original.operationCount, 'operation')}
             </span>
           ) : null}
         </span>
@@ -136,7 +132,7 @@ export function BreakingChangeTargets(props: {
       pagination={{ kind: 'none' }}
       variants={{ tone: 'critical' }}
       title={{
-        label: `Used in ${rows.length} of ${countOf(props.targets.length, 'target')} during the check window`,
+        label: `Used in ${rows.length} of ${formatCount(props.targets.length, 'target')} during the check window`,
         icon: AlertTriangleIcon,
         aside: unused.length ? (
           <UnusedTargetsMenu unused={unused} coordinate={props.coordinate} period={props.period} />

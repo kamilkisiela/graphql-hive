@@ -16,10 +16,7 @@ import {
   TriangleAlertIcon,
 } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
-import {
-  ContractFailuresTable,
-  formatCount,
-} from '@/components/target/checks/contract-failures-table';
+import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { ServiceFilterButton } from '@/components/target/checks/service-filter-button';
 import {
   ChangesBlock,
@@ -54,7 +51,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
-import { cn } from '@/lib/utils';
+import { cn, formatCount } from '@/lib/utils';
 import { SDLDiffView, SDLView } from './target-history-schema-version';
 
 /** A status icon inside a tab, explained on hover. */

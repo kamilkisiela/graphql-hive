@@ -28,10 +28,7 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import { useQuery } from 'urql';
-import {
-  ContractFailuresTable,
-  formatCount,
-} from '@/components/target/checks/contract-failures-table';
+import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import {
@@ -56,7 +53,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { SeverityLevelType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
-import { cn } from '@/lib/utils';
+import { cn, formatCount } from '@/lib/utils';
 
 /** A status icon inside a tab, explained on hover. */
 function StatusTooltip(props: { icon: React.ReactNode; label: string }) {

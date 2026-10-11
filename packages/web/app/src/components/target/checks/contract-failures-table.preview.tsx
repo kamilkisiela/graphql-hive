@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
-import { ContractFailuresTable, formatCount } from './contract-failures-table';
+import { formatCount } from '@/lib/utils';
+import { ContractFailuresTable } from './contract-failures-table';
 
 export const nav: NavPath = 'Components/ContractFailures';
 

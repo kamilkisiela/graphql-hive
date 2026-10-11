@@ -3,10 +3,7 @@ import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
-import {
-  BreakingChangeTargets,
-  countOf,
-} from '@/components/target/history/breaking-change-targets';
+import { BreakingChangeTargets } from '@/components/target/history/breaking-change-targets';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import { DataTable } from '@/components/ui/data-table/data-table';
@@ -20,6 +17,7 @@ import { ScrollArea } from '@/components/ui/primitives/scroll-area/scroll-area';
 import { FragmentType, graphql, useFragment, type DocumentType } from '@/gql';
 import { SeverityLevelType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
+import { formatCount } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -337,16 +335,16 @@ function ChangeItem(
           trailing: targetUsage ? (
             <span className="flex items-center gap-2">
               <Badge
-                content={`${targetUsage.affectedTargets.length} of ${countOf(targetUsage.metadata.settings.targets.length, 'target')}`}
+                content={`${targetUsage.affectedTargets.length} of ${formatCount(targetUsage.metadata.settings.targets.length, 'target')}`}
                 variants={{ variant: 'outline' }}
               />
               <Badge
-                content={`${countOf(
+                content={`${formatCount(
                   targetUsage.statistics.topAffectedOperations.length,
                   'operation',
                   // The top operations stop at ten, so ten means at least ten.
                   targetUsage.statistics.topAffectedOperations.length >= 10 ? '10+' : undefined,
-                )} • ${countOf(targetUsage.statistics.topAffectedClients.length, 'client')}`}
+                )} • ${formatCount(targetUsage.statistics.topAffectedClients.length, 'client')}`}
                 variants={{ variant: 'outline' }}
               />
             </span>

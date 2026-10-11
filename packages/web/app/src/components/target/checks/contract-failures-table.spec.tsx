@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
+import { formatCount } from '@/lib/utils';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ContractFailuresTable, formatCount } from './contract-failures-table';
+import { ContractFailuresTable } from './contract-failures-table';
 
 describe('ContractFailuresTable', () => {
   it('names each failure with its reason and scopes the page from its row', () => {

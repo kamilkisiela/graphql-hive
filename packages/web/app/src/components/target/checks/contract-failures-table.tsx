@@ -13,10 +13,6 @@ export type ContractFailure = {
   onView?: () => void;
 };
 
-export function formatCount(count: number, noun: string) {
-  return `${count} ${noun}${count === 1 ? '' : 's'}`;
-}
-
 export function ContractFailuresTable(props: {
   title: string;
   aside?: string;
