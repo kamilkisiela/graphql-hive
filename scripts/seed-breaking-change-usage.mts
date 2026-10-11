@@ -1,19 +1,9 @@
 /**
- * Seeds a schema check whose breaking changes were seen in usage across several targets, so the
- * per-target usage on a check can be reviewed locally.
+ * Seeds a check whose breaking changes were used across several targets, in a new org for your
+ * email. `CONTRACTS=1` makes it a federation project whose check also fails one contract.
  *
- * Creates a new org under your email with one single-schema project and nine targets, reports
- * operations to some of them, turns on conditional breaking changes on production across all
- * nine, and runs a check that removes four types: two used in more than one target, one in a
- * single target, and one never used (so it comes out safe based on usage).
- *
- * Prerequisites: docker compose and the server, usage, usage-ingestor and app services running.
- *
- * With `CONTRACTS=1` the project is a federation one with two contracts, and the same check also
- * fails one contract's composition, so the contract failures and the breaking changes share a page.
- *
- * Usage: `pnpm seed:breaking-change-usage`, or `OWNER_EMAIL=<email> pnpm seed:breaking-change-usage`
- * to skip the prompt (piping an answer into the prompt does not work).
+ * Needs docker compose and the server, usage, usage-ingestor and app services. `OWNER_EMAIL=<email>`
+ * skips the prompt; piping an answer into it does not work.
  */
 import 'reflect-metadata';
 import { ProjectType, TargetAccessScope } from '../integration-tests/testkit/gql/graphql';
@@ -131,8 +121,7 @@ const OPERATIONS = {
   },
 } as const;
 
-// Which operations each target reports, and how many times. ProspectsContactedActivity is never
-// reported, so its removal is safe based on usage.
+// ProspectsContactedActivity is never reported, so its removal is safe based on usage.
 const USAGE: Record<string, Array<{ op: keyof typeof OPERATIONS; times: number }>> = {
   production: [
     { op: 'closedWon', times: 2 },
