@@ -227,8 +227,9 @@ const published = await publishSchema(
   productionSecret,
   'authorization',
 );
-if (published.rawBody.errors?.length) {
-  console.error('Schema publish failed:', published.rawBody.errors);
+const publishResult = published.rawBody.data?.schemaPublish;
+if (published.rawBody.errors?.length || publishResult?.__typename !== 'SchemaPublishSuccess') {
+  console.error('Schema publish failed:', published.rawBody.errors ?? publishResult);
   process.exit(1);
 }
 
