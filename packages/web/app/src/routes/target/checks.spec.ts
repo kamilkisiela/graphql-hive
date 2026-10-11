@@ -407,4 +407,26 @@ describe('breaking change usage', () => {
       expect(screen.queryByRole('link', { name: /Verify in Insights/ })).toBeNull();
     },
   );
+
+  it('keeps the older layout when no target had usage', { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        breakingSchemaCheck(variables as { schemaCheckId: string }, { noTargetUsage: true }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+    await screen.findByText(CHECKS.first[0]);
+    const change = await screen.findByRole(
+      'button',
+      { name: /was removed from object type/ },
+      { timeout: 10_000 },
+    );
+    expect(change.textContent).not.toContain('0 of 2 targets');
+    await act(async () => {
+      fireEvent.click(change);
+    });
+    expect(screen.queryByText(/during the check window/)).toBeNull();
+    await screen.findByText(/target insights for live usage data/);
+  });
 });

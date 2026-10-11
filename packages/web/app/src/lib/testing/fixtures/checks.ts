@@ -177,7 +177,7 @@ const productionUsage = {
 /** One breaking change used in production. `withTargets: false` predates per-target counts. */
 export function breakingSchemaCheck(
   variables: { schemaCheckId: string },
-  options: { withTargets?: boolean; safe?: boolean } = {},
+  options: { withTargets?: boolean; safe?: boolean; noTargetUsage?: boolean } = {},
 ) {
   const withTargets = options.withTargets ?? true;
   const active = activeSchemaCheck(variables);
@@ -224,9 +224,11 @@ export function breakingSchemaCheck(
                         percentageFormatted: '<0.01%',
                       },
                     ],
-                    affectedTargets: withTargets
-                      ? [{ ...productionUsage, operationCount: 1 }]
-                      : null,
+                    affectedTargets: !withTargets
+                      ? null
+                      : options.noTargetUsage
+                        ? []
+                        : [{ ...productionUsage, operationCount: 1 }],
                     schemaCoordinate: withTargets ? 'Query.products' : null,
                   },
                   affectedAppDeployments: null,

@@ -273,12 +273,19 @@ export function DataTableCellSlot({
 export function DataTableExpandedRow({
   colSpan,
   children,
+  tone = 'default',
 }: {
   colSpan: number;
   children: React.ReactNode;
+  tone?: DataTableTone;
 }) {
   return (
-    <tr className="border-b border-line bg-neutral-3">
+    <tr
+      className={cn(
+        'border-b',
+        tone === 'default' ? 'border-line bg-neutral-3' : cn(toned[tone].line, toned[tone].head),
+      )}
+    >
       <DataTableCellSlot colSpan={colSpan} variant="panel">
         {children}
       </DataTableCellSlot>
@@ -290,14 +297,16 @@ export function DataTableFooterRow({
   label,
   value,
   columnCount,
+  tone = 'default',
 }: {
   label: React.ReactNode;
   value: React.ReactNode;
   columnCount: number;
+  tone?: DataTableTone;
 }) {
   return (
     <tfoot>
-      <tr className="border-t border-line">
+      <tr className={cn('border-t', tone === 'default' ? 'border-line' : toned[tone].titleLine)}>
         <td
           colSpan={Math.max(1, columnCount - 1)}
           className="h-12 px-4 align-middle font-medium text-fg"

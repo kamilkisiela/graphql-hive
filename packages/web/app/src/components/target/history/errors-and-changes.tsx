@@ -250,7 +250,7 @@ function ChangeItem(
   const targetUsage =
     'usageStatistics' in change &&
     !change.isSafeBasedOnUsage &&
-    change.usageStatistics?.affectedTargets &&
+    change.usageStatistics?.affectedTargets?.length &&
     metadata
       ? {
           statistics: change.usageStatistics,

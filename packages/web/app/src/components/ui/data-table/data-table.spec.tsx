@@ -432,6 +432,17 @@ describe('DataTable', () => {
     );
     expect(wrapper().className).not.toContain('critical');
     expect(container.querySelector('th')?.className).not.toContain('critical');
+
+    rerender(
+      <DataTable
+        data={ROWS}
+        columns={COLUMNS}
+        getRowId={row => row.id}
+        variants={{ tone: 'critical' }}
+        footer={{ label: 'Total', value: 6 }}
+      />,
+    );
+    expect(container.querySelector('tfoot tr')?.className).toContain('border-critical-line');
   });
 
   it('renders the footer, the loading row and the empty message', () => {

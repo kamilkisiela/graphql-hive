@@ -363,7 +363,7 @@ export function DataTable<TData>({
                       ) : null}
                     </DataTableRow>
                     {renderSubComponent && row.getIsExpanded() ? (
-                      <DataTableExpandedRow colSpan={totalColumnCount}>
+                      <DataTableExpandedRow colSpan={totalColumnCount} tone={tone}>
                         {renderSubComponent(row)}
                       </DataTableExpandedRow>
                     ) : null}
@@ -377,6 +377,7 @@ export function DataTable<TData>({
               label={footer.label}
               value={footer.value}
               columnCount={totalColumnCount}
+              tone={tone}
             />
           ) : null}
         </table>
