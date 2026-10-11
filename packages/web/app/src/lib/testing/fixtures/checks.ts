@@ -174,10 +174,7 @@ const productionUsage = {
   countFormatted: '2',
 };
 
-/**
- * `ActiveSchemaCheck_ActiveSchemaCheckQuery` for a check with one breaking change seen in usage,
- * in production only. `withTargets: false` is a check stored before per-target counts were kept.
- */
+/** One breaking change used in production. `withTargets: false` predates per-target counts. */
 export function breakingSchemaCheck(
   variables: { schemaCheckId: string },
   options: { withTargets?: boolean; safe?: boolean } = {},

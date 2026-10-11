@@ -570,6 +570,7 @@ export const cacheOptions = {
     DurationValues: noKey,
     OrganizationPayload: noKey,
     SchemaChange: noKey,
+    SchemaChangeUsageStatisticsAffectedTarget: noKey,
     GitHubIntegration: noKey,
     GitHubRepository: noKey,
     SchemaExplorer: noKey,

@@ -133,7 +133,14 @@ function buildChanges(args: {
             percentageFormatted: '<0.01%',
             affectedTargets: args.legacy
               ? null
-              : operation.targets.map(target => targetUsage(target, 1)),
+              : operation.targets.map(target => ({
+                  __typename: 'SchemaChangeUsageStatisticsAffectedTarget' as const,
+                  target: {
+                    __typename: 'BreakingChangeMetadataTarget' as const,
+                    id: target.id,
+                    slug: target.slug,
+                  },
+                })),
           })),
           topAffectedClients: CLIENTS.map(client => ({
             __typename: 'SchemaChangeUsageStatisticsAffectedClient' as const,

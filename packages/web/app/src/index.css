@@ -187,7 +187,7 @@
     --warning: 40 88% 41%;
     --critical: 0 69% 46%;
 
-    /* Text needs 4.5:1 on its own tint, even over a toned table; the hues above are too light for that. */
+    /* Text on its own tint needs 4.5:1, even over a toned table; the hues above are too light. */
     --success-text: 130 50% 30%;
     --info-text: 206 96% 32%;
     --warning-text: 40 88% 28%;

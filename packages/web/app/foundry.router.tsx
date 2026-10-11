@@ -33,7 +33,7 @@ function SlotOutlet() {
 
 const rootRoute = createRootRoute({ component: SlotOutlet });
 
-// `useSlugs` reads the app's route ids, so the slug routes sit under pathless layouts with the same ids.
+// `useSlugs` reads the app's route ids, so the slugs nest under layouts with the same ids.
 const authenticatedRoute = createRoute({ getParentRoute: () => rootRoute, id: 'authenticated' });
 const withHeaderRoute = createRoute({
   getParentRoute: () => authenticatedRoute,

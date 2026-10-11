@@ -67,7 +67,6 @@ function UnusedTargetsMenu(props: {
   );
 }
 
-/** The targets a breaking change was used in during the check window, each to verify in Insights. */
 export function BreakingChangeTargets(props: {
   affectedTargets: TargetUsage[];
   targets: CheckTarget[];

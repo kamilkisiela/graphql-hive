@@ -91,13 +91,7 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
           target {
             id
             slug
-            target {
-              id
-              slug
-            }
           }
-          count
-          countFormatted
         }
       }
       topAffectedClients {
@@ -252,7 +246,7 @@ function ChangeItem(
     props.conditionBreakingChangeMetadata,
   );
 
-  // Checks recorded before per-target counts were kept have none, and keep the older layout.
+  // Older checks have no per-target counts and keep the old layout.
   const targetUsage =
     'usageStatistics' in change &&
     !change.isSafeBasedOnUsage &&
@@ -342,7 +336,7 @@ function ChangeItem(
                 content={`${formatCount(
                   targetUsage.statistics.topAffectedOperations.length,
                   'operation',
-                  // The top operations stop at ten, so ten means at least ten.
+                  // Ten is the cap, so ten means at least ten.
                   targetUsage.statistics.topAffectedOperations.length >= 10 ? '10+' : undefined,
                 )} • ${formatCount(targetUsage.statistics.topAffectedClients.length, 'client')}`}
                 variants={{ variant: 'outline' }}
@@ -500,7 +494,7 @@ function UsageStatisticsPanels(props: {
   usageStatistics: UsageStatistics;
   targets: InsightsTarget[];
   period: { from: string; to: string };
-  /** The targets table above carries the Insights links, so the rows say where they were seen. */
+  /** The targets table links to Insights; operation rows only say where they ran. */
   withTargets?: boolean;
 }) {
   const { organizationSlug, projectSlug } = useSlugs('target');

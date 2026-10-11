@@ -61,7 +61,6 @@ const surface = {
   },
 } as const satisfies Record<OnSurface, Record<string, string>>;
 
-// A borderless table sits on whatever holds it, a popover or a panel, so it brings no fill.
 export type DataTableTone = 'default' | 'critical' | 'warning';
 
 const toned = {
@@ -85,6 +84,7 @@ const toned = {
   },
 } as const satisfies Record<Exclude<DataTableTone, 'default'>, Record<string, string>>;
 
+// A borderless table sits on whatever holds it, a popover or a panel, so it brings no fill.
 export function wrapperClass(
   onSurface: OnSurface,
   bordered: boolean,
