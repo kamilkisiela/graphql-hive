@@ -636,7 +636,16 @@ export class RegistryChecks {
               }
             }
 
-            const [topAffectedClients, topAffectedOperations] = await Promise.all([
+            // Per-target counts only explain a breaking verdict, and must never fail the check.
+            const perTarget = <T>(read: Promise<T>) =>
+              isBreaking
+                ? read.catch(error => {
+                    this.logger.error(error, 'Failed to count usage per target.');
+                    return undefined;
+                  })
+                : Promise.resolve(undefined);
+
+            const [topAffectedClients, topAffectedOperations, affectedTargets] = await Promise.all([
               this.operationsReader.getTopClientsForSchemaCoordinate({
                 targetIds: settings.targetIds,
                 excludedClients: settings.excludedClientNames,
@@ -649,18 +658,20 @@ export class RegistryChecks {
                 period: settings.period,
                 schemaCoordinate: change.breakingChangeSchemaCoordinate,
               }),
+              perTarget(
+                this.operationsReader.countCoordinatePerTarget({
+                  targetIds: settings.targetIds,
+                  excludedClients: settings.excludedClientNames,
+                  period: settings.period,
+                  schemaCoordinate: checkCoordinate,
+                }),
+              ),
             ]);
 
             const operations = topAffectedOperations ?? [];
-            const [affectedTargets, operationTargets] = await Promise.all([
-              this.operationsReader.countCoordinatePerTarget({
-                targetIds: settings.targetIds,
-                excludedClients: settings.excludedClientNames,
-                period: settings.period,
-                schemaCoordinate: checkCoordinate,
-              }),
-              Promise.all(
-                operations.map(operation =>
+            const operationTargets = await Promise.all(
+              operations.map(operation =>
+                perTarget(
                   this.operationsReader.getOperationCountsPerTarget({
                     targetIds: settings.targetIds,
                     excludedClients: settings.excludedClientNames,
@@ -669,15 +680,15 @@ export class RegistryChecks {
                   }),
                 ),
               ),
-            ]);
+            );
 
             change.usageStatistics = {
               topAffectedOperations: operations.map((operation, index) => ({
                 ...operation,
-                affectedTargets: toAffectedTargets(operationTargets[index]),
+                affectedTargets: operationTargets[index],
               })),
               topAffectedClients: topAffectedClients ?? [],
-              affectedTargets: toAffectedTargets(affectedTargets),
+              ...(affectedTargets ? { affectedTargets, schemaCoordinate: checkCoordinate } : {}),
             };
           }
 
@@ -1099,8 +1110,4 @@ function isNullToRequiredArgumentChange(change: Awaited<ReturnType<Inspector['di
     return `${oldType}!` === newType;
   }
   return false;
-}
-
-function toAffectedTargets(counts: Array<{ targetId: string; count: number }>) {
-  return counts.map(({ targetId, count }) => ({ id: targetId, count }));
 }

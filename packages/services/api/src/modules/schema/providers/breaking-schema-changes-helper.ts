@@ -38,11 +38,14 @@ export class BreakingSchemaChangeUsageHelper {
         : 1;
     const targetIds = metadata?.settings.targets.map(target => target.id) ?? [];
     const targetNames = new Map(metadata?.settings.targets.map(target => [target.id, target.name]));
-    const toAffectedTargets = (counts: Array<{ id: string; count: number }> | undefined) =>
-      counts?.map(({ id, count }) => ({
+    const toAffectedTargets = (
+      counts: Array<{ id: string; count: number; operationCount?: number }> | undefined,
+    ) =>
+      counts?.map(({ id, count, operationCount }) => ({
         id,
         name: targetNames.get(id) ?? id,
         count,
+        operationCount: operationCount ?? null,
         percentage: (count / totalRequestCount) * 100,
       })) ?? null;
 
@@ -69,6 +72,7 @@ export class BreakingSchemaChangeUsageHelper {
         };
       }),
       affectedTargets: toAffectedTargets(schemaChange.usageStatistics.affectedTargets),
+      schemaCoordinate: schemaChange.usageStatistics.schemaCoordinate ?? null,
     };
   }
 }

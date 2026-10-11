@@ -1285,7 +1285,9 @@ const AffectedAppDeploymentsModel = z.array(AffectedAppDeploymentModel);
 
 export type AffectedAppDeployments = z.TypeOf<typeof AffectedAppDeploymentsModel>;
 
-const AffectedTargetsModel = z.array(z.object({ id: z.string(), count: z.number() }));
+const AffectedTargetsModel = z.array(
+  z.object({ id: z.string(), count: z.number(), operationCount: z.number().optional() }),
+);
 
 type AffectedTargets = z.TypeOf<typeof AffectedTargetsModel>;
 
@@ -1318,6 +1320,8 @@ export const HiveSchemaChangeModel = z
             }),
           ),
           affectedTargets: AffectedTargetsModel.optional(),
+          /** The coordinate the per-target counts were taken on; it can differ from the change's path. */
+          schemaCoordinate: z.string().optional(),
         })
         .nullable()
         .optional()
@@ -1355,6 +1359,7 @@ export const HiveSchemaChangeModel = z
         }[];
         topAffectedClients: { name: string; count: number }[];
         affectedTargets?: AffectedTargets;
+        schemaCoordinate?: string;
       } | null;
       affectedAppDeployments:
         | {

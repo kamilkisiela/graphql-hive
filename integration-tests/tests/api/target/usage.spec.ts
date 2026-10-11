@@ -460,11 +460,13 @@ const BreakingChangeAffectedTargetsQuery = graphql(`
             node {
               path
               usageStatistics {
+                schemaCoordinate
                 affectedTargets {
                   target {
                     id
                   }
                   count
+                  operationCount
                 }
                 topAffectedOperations {
                   name
@@ -473,6 +475,34 @@ const BreakingChangeAffectedTargetsQuery = graphql(`
                       id
                     }
                     count
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+const BreakingChangeAffectedTargetsListQuery = graphql(`
+  query BreakingChangeAffectedTargetsList($target: TargetReferenceInput!) {
+    target(reference: $target) {
+      schemaChecks(first: 1) {
+        edges {
+          node {
+            breakingSchemaChanges {
+              edges {
+                node {
+                  path
+                  usageStatistics {
+                    affectedTargets {
+                      target {
+                        slug
+                      }
+                      percentage
+                    }
                   }
                 }
               }
@@ -574,13 +604,41 @@ test.concurrent('records which targets a breaking change was used in', async ({ 
   const change = result.target?.schemaCheck?.breakingSchemaChanges?.edges.find(
     edge => edge.node.path?.join('.') === 'Query.me',
   )?.node;
-  const byTarget = [
-    { target: { id: production.id }, count: 2 },
-    { target: { id: staging.id }, count: 1 },
-  ];
-  expect(change?.usageStatistics?.affectedTargets).toEqual(byTarget);
+  expect(change?.usageStatistics?.schemaCoordinate).toEqual('Query.me');
+  expect(change?.usageStatistics?.affectedTargets).toEqual([
+    { target: { id: production.id }, count: 2, operationCount: 1 },
+    { target: { id: staging.id }, count: 1, operationCount: 1 },
+  ]);
+  // A check read from the list has no metadata of its own loaded; targets still get their names.
+  const listed = await execute({
+    document: BreakingChangeAffectedTargetsListQuery,
+    variables: {
+      target: {
+        bySelector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: staging.slug,
+        },
+      },
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+  const listedChange = listed.target?.schemaChecks.edges[0]?.node.breakingSchemaChanges?.edges.find(
+    edge => edge.node.path?.join('.') === 'Query.me',
+  )?.node;
+  expect(
+    listedChange?.usageStatistics?.affectedTargets?.map(affected => affected.target.slug),
+  ).toEqual([production.slug, staging.slug]);
+  expect(listedChange?.usageStatistics?.affectedTargets?.[0].percentage).toBeLessThanOrEqual(100);
+
   expect(change?.usageStatistics?.topAffectedOperations).toEqual([
-    { name: 'me', affectedTargets: byTarget },
+    {
+      name: 'me',
+      affectedTargets: [
+        { target: { id: production.id }, count: 2 },
+        { target: { id: staging.id }, count: 1 },
+      ],
+    },
   ]);
 });
 

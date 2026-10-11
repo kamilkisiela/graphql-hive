@@ -3454,7 +3454,8 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
       name: string;
       count: number;
     }>;
-    affectedTargets?: Array<{ id: string; count: number }>;
+    affectedTargets?: Array<{ id: string; count: number; operationCount?: number }>;
+    schemaCoordinate?: string;
   };
   affectedAppDeployments: null | AffectedAppDeployments;
 } {

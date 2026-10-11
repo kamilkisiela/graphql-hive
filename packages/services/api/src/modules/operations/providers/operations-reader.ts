@@ -435,7 +435,10 @@ export class OperationsReader {
     return stats;
   }
 
-  /** Like `countCoordinate`, but split by the target the requests were reported to. */
+  /**
+   * Like `countCoordinate`, but split by the target the requests were reported to, with how many
+   * distinct operations sent them.
+   */
   countCoordinatePerTarget = batchBy<
     {
       schemaCoordinate: string;
@@ -443,7 +446,7 @@ export class OperationsReader {
       period: DateRange;
       excludedClients?: readonly string[] | null;
     },
-    Array<{ targetId: string; count: number }>
+    Array<{ id: string; count: number; operationCount: number }>
   >(
     item =>
       `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
@@ -492,7 +495,8 @@ export class OperationsReader {
             SELECT
               coordinate,
               target,
-              sum(total) as total
+              sum(total) as total,
+              uniqExact(hash) as operations
             FROM ${aggregationTableName('coordinates')}
             ${this.createFilter({
               target: args.targetIds,
@@ -507,27 +511,19 @@ export class OperationsReader {
 
     const res = await this.clickHouse.query<{
       total: string;
+      operations: string;
       coordinate: string;
       target: string;
     }>(query);
 
-    const counts = new Map<string, Array<{ targetId: string; count: number }>>();
-    for (const row of res.data) {
-      const count = ensureNumber(row.total);
-      if (count <= 0) {
-        continue;
-      }
-      let list = counts.get(row.coordinate);
-      if (!list) {
-        list = [];
-        counts.set(row.coordinate, list);
-      }
-      list.push({ targetId: row.target, count });
-    }
-    for (const list of counts.values()) {
-      list.sort((a, b) => b.count - a.count);
-    }
-    return counts;
+    return groupByKey(
+      res.data.map(row => ({
+        key: row.coordinate,
+        id: row.target,
+        count: ensureNumber(row.total),
+        operationCount: ensureNumber(row.operations),
+      })),
+    );
   }
 
   /** Request totals of operations, split by the target the requests were reported to. */
@@ -538,7 +534,7 @@ export class OperationsReader {
       period: DateRange;
       excludedClients?: readonly string[] | null;
     },
-    Array<{ targetId: string; count: number }>
+    Array<{ id: string; count: number }>
   >(
     item =>
       `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
@@ -601,19 +597,7 @@ export class OperationsReader {
           .parse(result.data),
       );
 
-    const counts = new Map<string, Array<{ targetId: string; count: number }>>();
-    for (const row of rows) {
-      if (row.count <= 0) {
-        continue;
-      }
-      let list = counts.get(row.hash);
-      if (!list) {
-        list = [];
-        counts.set(row.hash, list);
-      }
-      list.push({ targetId: row.target, count: row.count });
-    }
-    return counts;
+    return groupByKey(rows.map(row => ({ key: row.hash, id: row.target, count: row.count })));
   }
 
   countCoordinateFailure = batchBy<
@@ -3317,4 +3301,21 @@ export class OperationsReader {
   }): string {
     return [type, field, argument].filter(Boolean).join('.');
   }
+}
+
+/** Groups per-target rows by their key, dropping empty ones, most requests first. */
+function groupByKey<T extends { key: string; count: number }>(rows: T[]) {
+  const groups = new Map<string, Array<Omit<T, 'key'>>>();
+  for (const { key, ...row } of rows) {
+    if (row.count <= 0) {
+      continue;
+    }
+    const group = groups.get(key) ?? [];
+    group.push(row);
+    groups.set(key, group);
+  }
+  for (const group of groups.values()) {
+    group.sort((a, b) => b.count - a.count);
+  }
+  return groups;
 }

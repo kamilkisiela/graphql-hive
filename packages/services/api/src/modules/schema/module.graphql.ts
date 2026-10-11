@@ -623,6 +623,12 @@ export default gql`
     Null for checks recorded before per-target counts were kept.
     """
     affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
+    """
+    The schema coordinate the per-target counts were taken on, to look the usage up in Insights.
+    It can differ from the change's path, for example the parent field of an argument made required.
+    Null for checks recorded before per-target counts were kept.
+    """
+    schemaCoordinate: String @tag(name: "public")
   }
 
   type SchemaChangeUsageStatisticsAffectedTarget {
@@ -634,6 +640,10 @@ export default gql`
     The number of requests reported to this target in the period.
     """
     count: Float! @tag(name: "public")
+    """
+    How many distinct operations sent those requests. Null on an operation's own targets.
+    """
+    operationCount: Int @tag(name: "public")
     """
     Human readable count value.
     """

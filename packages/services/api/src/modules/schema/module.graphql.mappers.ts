@@ -318,6 +318,7 @@ export type SchemaChangeUsageStatisticsAffectedTargetMapper = {
   id: string;
   name: string;
   count: number;
+  operationCount: number | null;
   percentage: number;
 };
 
