@@ -579,7 +579,6 @@ export class OperationsReader {
             ${filter('subscription_operations_daily')}
           )
           GROUP BY "hash", "target"
-          ORDER BY "count" DESC
         `,
         timeout: 10_000,
       })

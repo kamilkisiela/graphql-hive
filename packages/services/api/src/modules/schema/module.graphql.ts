@@ -618,13 +618,14 @@ export default gql`
     """
     topAffectedClients: [SchemaChangeUsageStatisticsAffectedClient!]! @tag(name: "public")
     """
-    Targets the change's usage came from during the period, most requests first.
-    Null for checks recorded before these counts were kept.
+    Targets the change's usage came from during the period, most requests first. With excluded
+    clients the counts can differ from the total that made the change breaking.
+    Null when the counts are not available, as for checks recorded before they were kept.
     """
     affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
     """
     The coordinate the per-target counts were taken on, to look the usage up in Insights.
-    It can differ from the change's path. Null for checks recorded before these counts were kept.
+    It can differ from the change's path. Null when the counts are not available.
     """
     schemaCoordinate: String @tag(name: "public")
   }
@@ -684,7 +685,7 @@ export default gql`
     percentageFormatted: String!
     """
     Targets the operation was reported to during the period, most requests first.
-    Null for checks recorded before these counts were kept.
+    Null when the counts are not available.
     """
     affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
   }

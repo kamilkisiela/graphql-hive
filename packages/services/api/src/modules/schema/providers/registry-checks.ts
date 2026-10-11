@@ -635,7 +635,12 @@ export class RegistryChecks {
           }
 
           if (isBreaking) {
-            const [topAffectedClients, topAffectedOperations] = await Promise.all([
+            const read = {
+              targetIds: settings.targetIds,
+              excludedClients: settings.excludedClientNames,
+              period: settings.period,
+            };
+            const [topAffectedClients, topAffectedOperations, targets] = await Promise.all([
               this.operationsReader.getTopClientsForSchemaCoordinate({
                 targetIds: settings.targetIds,
                 excludedClients: settings.excludedClientNames,
@@ -648,25 +653,30 @@ export class RegistryChecks {
                 period: settings.period,
                 schemaCoordinate: change.breakingChangeSchemaCoordinate,
               }),
+              this.countTargetUsage({
+                read,
+                coordinate: checkCoordinate,
+                providedCoordinate: useAdvancedNullabilityCheck
+                  ? `${change.breakingChangeSchemaCoordinate}!`
+                  : null,
+              }),
             ]);
             const operations = topAffectedOperations ?? [];
-            const perTarget = await this.countUsagePerTarget({
-              settings,
-              coordinate: checkCoordinate,
-              providedCoordinate: useAdvancedNullabilityCheck
-                ? `${change.breakingChangeSchemaCoordinate}!`
-                : null,
-              hashes: operations.map(operation => operation.hash),
-            });
+            const operationTargets = targets?.length
+              ? await this.countOperationTargetUsage(
+                  read,
+                  operations.map(operation => operation.hash),
+                )
+              : null;
 
             change.usageStatistics = {
               topAffectedOperations: operations.map((operation, index) => ({
                 ...operation,
-                affectedTargets: perTarget?.operations[index],
+                affectedTargets: operationTargets?.[index],
               })),
               topAffectedClients: topAffectedClients ?? [],
-              ...(perTarget
-                ? { affectedTargets: perTarget.targets, schemaCoordinate: checkCoordinate }
+              ...(targets?.length
+                ? { affectedTargets: targets, schemaCoordinate: checkCoordinate }
                 : {}),
             };
           }
@@ -955,51 +965,39 @@ export class RegistryChecks {
   }
 
   /**
-   * Best effort: on failure the check goes on without it. With `providedCoordinate`, only requests
-   * that omit the value count, which is what breaks when an input becomes required.
+   * Best effort, like the next one: on failure the check goes on without it. With
+   * `providedCoordinate`, only requests that omit the value count, which is what breaks when an
+   * input becomes required.
    */
-  private async countUsagePerTarget(args: {
-    settings: ConditionalBreakingChangeDiffConfig;
+  private async countTargetUsage(args: {
+    read: PerTargetRead;
     coordinate: string;
     providedCoordinate: string | null;
-    hashes: string[];
   }) {
-    const read = {
-      targetIds: args.settings.targetIds,
-      excludedClients: args.settings.excludedClientNames,
-      period: args.settings.period,
-    };
     try {
-      const [onCoordinate, provided, operations] = await Promise.all([
+      const [onCoordinate, provided] = await Promise.all([
         this.operationsReader.countCoordinatePerTarget({
-          ...read,
+          ...args.read,
           schemaCoordinate: args.coordinate,
         }),
         args.providedCoordinate
           ? this.operationsReader.countCoordinatePerTarget({
-              ...read,
+              ...args.read,
               schemaCoordinate: args.providedCoordinate,
             })
           : Promise.resolve([]),
-        Promise.all(
-          args.hashes.map(hash =>
-            this.operationsReader.getOperationCountsPerTarget({ ...read, hash }),
-          ),
-        ),
       ]);
-
       if (!args.providedCoordinate) {
-        return { targets: onCoordinate, operations };
+        return onCoordinate;
       }
       const providedCounts = new Map(provided.map(target => [target.id, target.count]));
-      const targets = onCoordinate
+      return onCoordinate
         .map(target => ({
           id: target.id,
           count: target.count - (providedCounts.get(target.id) ?? 0),
         }))
         .filter(target => target.count > 0)
         .sort((a, b) => b.count - a.count);
-      return { targets, operations };
     } catch (error) {
       this.logger.error(
         'Failed to count breaking change usage per target (error=%s)',
@@ -1008,7 +1006,24 @@ export class RegistryChecks {
       return null;
     }
   }
+
+  private async countOperationTargetUsage(read: PerTargetRead, hashes: string[]) {
+    try {
+      return await Promise.all(
+        hashes.map(hash => this.operationsReader.getOperationCountsPerTarget({ ...read, hash })),
+      );
+    } catch (error) {
+      this.logger.error('Failed to count operation usage per target (error=%s)', String(error));
+      return null;
+    }
+  }
 }
+
+type PerTargetRead = {
+  targetIds: readonly string[];
+  excludedClients: readonly string[] | null;
+  period: DateRange;
+};
 
 type SubgraphDefinition = {
   serviceName: string;

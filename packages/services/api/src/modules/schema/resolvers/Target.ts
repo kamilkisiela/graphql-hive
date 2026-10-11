@@ -84,6 +84,7 @@ export const Target: Pick<
           'breakingSchemaChanges',
           'hasSchemaChanges',
           'hasUnapprovedBreakingChanges',
+          'cliApprovalMetadata',
         ].map(fieldName => [typeName, fieldName] as const),
       ),
     );
