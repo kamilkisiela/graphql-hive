@@ -30,6 +30,7 @@ function useCoordinateLink(coordinate: string, period: { from: string; to: strin
       params={{ organizationSlug, projectSlug, targetSlug, coordinate }}
       search={{ from: period.from, to: period.to }}
       target="_blank"
+      preload={false}
     />
   );
 }
