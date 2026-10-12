@@ -830,6 +830,68 @@ test.concurrent(
   },
 );
 
+const SchemaCoordinateSupergraphMetadataQuery = graphql(`
+  query SchemaCoordinateSupergraphMetadata(
+    $target: TargetReferenceInput!
+    $period: DateRangeInput!
+    $coordinate: String!
+  ) {
+    target(reference: $target) {
+      schemaCoordinateStats(period: $period, schemaCoordinate: $coordinate) {
+        totalRequests
+        supergraphMetadata {
+          ownedByServiceNames
+        }
+      }
+    }
+  }
+`);
+
+test.concurrent(
+  'returns coordinate insights for a target with usage but no published schema',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { organization, createProject } = await createOrg();
+    const { project, target, createTargetAccessToken, waitForRequestsCollected } =
+      await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({});
+
+    const collected = await token.collectLegacyOperations([
+      {
+        timestamp: Date.now(),
+        operation: 'query me { me }',
+        operationName: 'me',
+        fields: ['Query', 'Query.me'],
+        execution: { ok: true, duration: 200_000_000, errorsTotal: 0 },
+      },
+    ]);
+    expect(collected.status).toEqual(200);
+    await waitForRequestsCollected(1);
+
+    const result = await execute({
+      document: SchemaCoordinateSupergraphMetadataQuery,
+      variables: {
+        target: {
+          bySelector: {
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
+          },
+        },
+        period: {
+          from: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          to: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        },
+        coordinate: 'Query.me',
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result.target?.schemaCoordinateStats.totalRequests).toEqual(1);
+    expect(result.target?.schemaCoordinateStats.supergraphMetadata).toBeNull();
+  },
+);
+
 test.concurrent('check usage not from excluded client names', async ({ expect }) => {
   const { createOrg, ownerToken } = await initSeed().createOwner();
   const { organization, createProject } = await createOrg();
