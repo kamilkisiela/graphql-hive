@@ -9,6 +9,8 @@ import {
 import { ProjectType, ResourceAssignmentModeType } from 'testkit/gql/graphql';
 import { assertNonNull, assertNonNullish } from 'testkit/utils';
 import { GetObjectCommand, NoSuchKey, S3Client } from '@aws-sdk/client-s3';
+import { SchemaVersionStore } from '@hive/api/modules/schema/providers/schema-version-store';
+import { psql } from '@hive/postgres';
 import { initSeed } from '../../../testkit/seed';
 
 const s3Client = new S3Client({
@@ -407,6 +409,84 @@ test.concurrent('promote non-existing schema version yields error', async ({ exp
     ok: {},
     error: {
       message: 'Schema Version not found.',
+    },
+  });
+});
+
+test.concurrent('promote contract schema version yields error', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, createOrganizationAccessToken } = await createOrg();
+  const { target, fetchVersions } = await createProject(ProjectType.Federation);
+  const { privateAccessKey } = await createOrganizationAccessToken({
+    resources: {
+      mode: ResourceAssignmentModeType.All,
+    },
+    permissions: [
+      'schemaVersion:publish',
+      'target:modifySettings',
+      'project:describe',
+      'schemaVersion:promote',
+    ],
+  });
+
+  await createContract(
+    {
+      contractName: 'public',
+      target: {
+        byId: target.id,
+      },
+      includeTags: ['public'],
+      removeUnreachableTypesFromPublicApiSchema: true,
+    },
+    privateAccessKey,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  await publishSchema(
+    {
+      author: 'a',
+      commit: 'a',
+      sdl: /* GraphQL */ `
+        type Query {
+          public: String! @tag(name: "public")
+        }
+      `,
+      service: 'a',
+      url: 'http://a',
+      target: {
+        byId: target.id,
+      },
+    },
+    privateAccessKey,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  const [publishedVersion] = await fetchVersions(1);
+  assertNonNullish(publishedVersion);
+  const version = await getSchemaVersionWithAllDetails(
+    target.id,
+    publishedVersion.id,
+    privateAccessKey,
+  );
+  const contractVersion = version?.contractVersions?.edges.at(0)?.node;
+  assertNonNullish(contractVersion);
+
+  const promoteResult = await schemaVersionPromote(
+    {
+      source: {
+        fromSchemaVersionById: contractVersion.id,
+      },
+      target: {
+        toTarget: {
+          byId: target.id,
+        },
+      },
+    },
+    privateAccessKey,
+  ).then(r => r.expectNoGraphQLErrors());
+
+  expect(promoteResult.schemaVersionPromote).toMatchObject({
+    ok: {},
+    error: {
+      message: 'A contract schema version can not be promoted.',
     },
   });
 });
@@ -1185,3 +1265,257 @@ test.concurrent('promote monolith version to empty target', async () => {
   expect(promoteResult.schemaVersionPromote.error).toEqual(null);
   assertNonNullish(promoteResult.schemaVersionPromote.ok);
 });
+
+test.concurrent(
+  'promote schema version within target diffs a contract version composed from scratch against the latest contract version of the target',
+  async ({ expect }) => {
+    const seed = initSeed();
+    const { createOrg } = await seed.createOwner();
+    const { createProject, createOrganizationAccessToken } = await createOrg();
+    const { target, fetchVersions } = await createProject(ProjectType.Federation);
+    const { privateAccessKey } = await createOrganizationAccessToken({
+      resources: {
+        mode: ResourceAssignmentModeType.All,
+      },
+      permissions: [
+        'schemaVersion:publish',
+        'target:modifySettings',
+        'project:describe',
+        'schemaVersion:promote',
+      ],
+    });
+
+    await publishSchema(
+      {
+        author: 'a',
+        commit: 'a',
+        sdl: /* GraphQL */ `
+          type Query {
+            a: String!
+            b: String! @tag(name: "public")
+          }
+        `,
+        service: 'a',
+        url: 'http://a',
+        target: {
+          byId: target.id,
+        },
+      },
+      privateAccessKey,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    await createContract(
+      {
+        contractName: 'public',
+        target: {
+          byId: target.id,
+        },
+        includeTags: ['public'],
+        removeUnreachableTypesFromPublicApiSchema: true,
+      },
+      privateAccessKey,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    await publishSchema(
+      {
+        author: 'a',
+        commit: 'b',
+        sdl: /* GraphQL */ `
+          type Query {
+            a: String!
+            b: String! @tag(name: "public")
+            c: String! @tag(name: "public")
+          }
+        `,
+        service: 'a',
+        url: 'http://a',
+        target: {
+          byId: target.id,
+        },
+      },
+      privateAccessKey,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const [latestVersion, firstVersion] = await fetchVersions(2);
+    assertNonNullish(latestVersion);
+    assertNonNullish(firstVersion);
+
+    const latestVersionDetails = await getSchemaVersionWithAllDetails(
+      target.id,
+      latestVersion.id,
+      privateAccessKey,
+    );
+    const latestContractVersion = latestVersionDetails?.contractVersions?.edges.at(0)?.node;
+    assertNonNullish(latestContractVersion);
+
+    const promoteResult = await schemaVersionPromote(
+      {
+        source: {
+          fromSchemaVersionById: firstVersion.id,
+        },
+        target: {
+          toTarget: {
+            byId: target.id,
+          },
+        },
+      },
+      privateAccessKey,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(promoteResult.schemaVersionPromote).toMatchObject({
+      ok: {},
+      error: null,
+    });
+
+    const [promotedVersion] = await fetchVersions(1);
+    assertNonNullish(promotedVersion);
+
+    const promotedVersionDetails = await getSchemaVersionWithAllDetails(
+      target.id,
+      promotedVersion.id,
+      privateAccessKey,
+    );
+    const promotedContractVersion = promotedVersionDetails?.contractVersions?.edges.at(0)?.node;
+    assertNonNullish(promotedContractVersion);
+
+    // The promoted version predates the contract, so the contract is composed from scratch
+    // and compared against the latest contract version of the target, which still has "c".
+    expect(
+      promotedContractVersion.breakingSchemaChanges?.edges.map(edge => edge.node.message),
+    ).toEqual(["Field 'c' was removed from object type 'Query'"]);
+
+    await using db = await seed.createDbConnection();
+    const schemaVersions = new SchemaVersionStore(db.pool);
+    await expect(
+      schemaVersions.getSchemaVersionById(promotedContractVersion.id),
+    ).resolves.toMatchObject({
+      previousSchemaVersionId: latestContractVersion.id,
+      diffSchemaVersionId: latestContractVersion.id,
+    });
+  },
+);
+
+test.concurrent(
+  'promote schema version to another target composes the contracts of the target promoted to',
+  async ({ expect }) => {
+    const seed = initSeed();
+    const { createOrg } = await seed.createOwner();
+    const { createProject, createOrganizationAccessToken } = await createOrg();
+    const { target, fetchVersions, createTarget } = await createProject(ProjectType.Federation);
+    const createTargetResult = await createTarget().then(r => r.expectNoGraphQLErrors());
+    const otherTarget = createTargetResult.createTarget.ok?.createdTarget;
+    assertNonNullish(otherTarget);
+    const { privateAccessKey } = await createOrganizationAccessToken({
+      resources: {
+        mode: ResourceAssignmentModeType.All,
+      },
+      permissions: [
+        'schemaVersion:publish',
+        'target:modifySettings',
+        'project:describe',
+        'schemaVersion:promote',
+      ],
+    });
+
+    const sourceContractId = await createContract(
+      {
+        contractName: 'source',
+        target: {
+          byId: target.id,
+        },
+        includeTags: ['source'],
+        removeUnreachableTypesFromPublicApiSchema: true,
+      },
+      privateAccessKey,
+    )
+      .then(r => r.expectNoGraphQLErrors())
+      .then(r => r.createContract.ok?.createdContract.id);
+    assertNonNullish(sourceContractId);
+
+    const destinationContractId = await createContract(
+      {
+        contractName: 'destination',
+        target: {
+          byId: otherTarget.id,
+        },
+        includeTags: ['destination'],
+        removeUnreachableTypesFromPublicApiSchema: true,
+      },
+      privateAccessKey,
+    )
+      .then(r => r.expectNoGraphQLErrors())
+      .then(r => r.createContract.ok?.createdContract.id);
+    assertNonNullish(destinationContractId);
+
+    await publishSchema(
+      {
+        author: 'a',
+        commit: 'a',
+        sdl: /* GraphQL */ `
+          type Query {
+            a: String! @tag(name: "source")
+            b: String! @tag(name: "destination")
+          }
+        `,
+        service: 'a',
+        url: 'http://a',
+        target: {
+          byId: target.id,
+        },
+      },
+      privateAccessKey,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const promoteResult = await schemaVersionPromote(
+      {
+        source: {
+          fromTarget: {
+            byId: target.id,
+          },
+        },
+        target: {
+          toTarget: {
+            byId: otherTarget.id,
+          },
+        },
+      },
+      privateAccessKey,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    expect(promoteResult.schemaVersionPromote).toMatchObject({
+      ok: {},
+      error: null,
+    });
+
+    const [promotedVersion] = await fetchVersions(1, otherTarget);
+    assertNonNullish(promotedVersion);
+
+    const promotedVersionDetails = await getSchemaVersionWithAllDetails(
+      otherTarget.id,
+      promotedVersion.id,
+      privateAccessKey,
+    );
+    expect(promotedVersionDetails?.contractVersions?.edges.length).toEqual(1);
+    const promotedContractVersion = promotedVersionDetails?.contractVersions?.edges.at(0)?.node;
+    assertNonNullish(promotedContractVersion);
+    expect(promotedContractVersion.contractName).toEqual('destination');
+    expect(promotedContractVersion.compositeSchemaSDL).toContain('b: String!');
+    expect(promotedContractVersion.compositeSchemaSDL).not.toContain('a: String!');
+
+    // The contract version belongs to the contract graph of the target promoted to,
+    // while the contract graph of the source target only has the published version.
+    await using db = await seed.createDbConnection();
+    const schemaVersions = new SchemaVersionStore(db.pool);
+    await expect(
+      schemaVersions.getSchemaVersionById(promotedContractVersion.id),
+    ).resolves.toMatchObject({
+      targetId: otherTarget.id,
+      graphId: destinationContractId,
+    });
+    await expect(
+      db.pool.oneFirst(psql`
+        SELECT count(*)::int FROM "schema_versions" WHERE "graph_id" = ${sourceContractId}
+      `),
+    ).resolves.toEqual(1);
+  },
+);

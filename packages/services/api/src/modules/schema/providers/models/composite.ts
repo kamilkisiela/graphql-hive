@@ -94,29 +94,48 @@ export class CompositeModel {
                     supergraphSDL: null,
                   },
             schemaChanges: null,
+            supergraphChanges: null,
           };
         }
 
-        const diffCheck = args.skipDiff
-          ? null
-          : await this.checks.diff({
-              conditionalBreakingChangeConfig: args.conditionalBreakingChangeDiffConfig,
-              includeUrlChanges: false,
-              // contracts were introduced after this, so we do not need to filter out federation.
-              filterOutFederationChanges: false,
-              approvedChanges: contract.approvedChanges ?? null,
-              existingSdl:
-                /** if the baseline composition is provided we use that one over the latest schema */
-                contract.baselineComposition?.compositeSchemaSDL ??
-                contract.latestValidVersion?.compositeSchemaSdl ??
-                null,
-              incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
-              failDiffOnDangerousChange: args.failDiffOnDangerousChange ?? false,
-              failAllDangerousChanges: args.failAllDangerousChanges ?? true,
-              failDangerousChangeTypes: args.failDangerousChangeTypes ?? [],
-              filterNestedChanges: true,
-              getAffectedAppDeployments: args.getAffectedAppDeployments,
-            });
+        const [diffCheck, supergraphDiffCheck] = args.skipDiff
+          ? [null, null]
+          : await Promise.all([
+              this.checks.diff({
+                conditionalBreakingChangeConfig: args.conditionalBreakingChangeDiffConfig,
+                includeUrlChanges: false,
+                // contracts were introduced after this, so we do not need to filter out federation.
+                filterOutFederationChanges: false,
+                approvedChanges: contract.approvedChanges ?? null,
+                existingSdl:
+                  /** if the baseline composition is provided we use that one over the latest schema */
+                  contract.baselineComposition?.compositeSchemaSDL ??
+                  contract.latestValidVersion?.compositeSchemaSdl ??
+                  null,
+                incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
+                failDiffOnDangerousChange: args.failDiffOnDangerousChange ?? false,
+                failAllDangerousChanges: args.failAllDangerousChanges ?? true,
+                failDangerousChangeTypes: args.failDangerousChangeTypes ?? [],
+                filterNestedChanges: true,
+                getAffectedAppDeployments: args.getAffectedAppDeployments,
+              }),
+              this.checks.diff({
+                existingSdl:
+                  contract.baselineComposition?.supergraphSDL ??
+                  contract.latestValidVersion?.supergraphSdl ??
+                  null,
+                incomingSdl: contractCompositionResult?.result?.supergraph ?? null,
+                approvedChanges: null,
+                conditionalBreakingChangeConfig: null,
+                includeUrlChanges: false,
+                filterOutFederationChanges: false,
+                failDiffOnDangerousChange: false,
+                filterNestedChanges: true,
+                getAffectedAppDeployments: null,
+                failAllDangerousChanges: false,
+                failDangerousChangeTypes: [],
+              }),
+            ]);
 
         const state = {
           contractId: contract.contract.id,
@@ -129,6 +148,7 @@ export class CompositeModel {
             supergraphSDL: contractCompositionResult.result.supergraph,
           },
           schemaChanges: diffCheck?.result ?? diffCheck?.reason ?? null,
+          supergraphChanges: supergraphDiffCheck?.result ?? supergraphDiffCheck?.reason ?? null,
         };
 
         if (diffCheck?.status === 'failed') {
@@ -773,6 +793,7 @@ export class CompositeModel {
             supergraph: contractCheck.composition.supergraphSDL ?? null,
             fullSchemaSdl: contractCheck.composition.compositeSchemaSDL ?? null,
             changes: contractCheck.schemaChanges?.all ?? null,
+            supergraphChanges: contractCheck.supergraphChanges?.all ?? null,
           })) ?? null,
       },
     };
@@ -966,6 +987,7 @@ export class CompositeModel {
             supergraph: contractCheck.composition.supergraphSDL,
             fullSchemaSdl: contractCheck.composition.compositeSchemaSDL,
             changes: contractCheck.schemaChanges?.all ?? null,
+            supergraphChanges: contractCheck.supergraphChanges?.all ?? null,
           })) ?? null,
       },
     };

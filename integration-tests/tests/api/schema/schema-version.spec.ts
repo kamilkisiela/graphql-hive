@@ -1,6 +1,7 @@
 import { ProjectType } from 'testkit/gql/graphql';
 import { assertNonNullish } from 'testkit/utils';
 import { psql } from '@hive/postgres';
+import { createContract, getSchemaVersionWithAllDetails } from '../../../testkit/flow';
 import { DocumentType, graphql } from '../../../testkit/gql';
 import { execute } from '../../../testkit/graphql';
 import { initSeed } from '../../../testkit/seed';
@@ -42,6 +43,182 @@ const PaginatedSchemaVersionsQuery = graphql(/* GraphQL */ `
     }
   }
 `);
+
+const SchemaVersionGraphScopeQuery = graphql(/* GraphQL */ `
+  query SchemaVersionGraphScopeQuery(
+    $projectRef: ProjectReferenceInput!
+    $targetRef: TargetReferenceInput!
+    $baseVersionId: ID!
+    $contractVersionId: ID!
+    $period: DateRangeInput
+  ) {
+    project(reference: $projectRef) {
+      schemaVersionsCount(period: $period)
+    }
+    target(reference: $targetRef) {
+      baseVersion: schemaVersion(id: $baseVersionId) {
+        id
+      }
+      contractVersion: schemaVersion(id: $contractVersionId) {
+        id
+      }
+      schemaVersionsCount(period: $period)
+    }
+  }
+`);
+
+test.concurrent(
+  'schema version lookup and counts only include default graph versions',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { project, target, createTargetAccessToken, fetchVersions } = await createProject(
+      ProjectType.Federation,
+    );
+    const token = await createTargetAccessToken({});
+
+    await createContract(
+      {
+        target: { byId: target.id },
+        contractName: 'public',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        includeTags: ['public'],
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const period = {
+      from: new Date(Date.now() - 60_000).toISOString(),
+      to: new Date(Date.now() + 60_000).toISOString(),
+    };
+
+    await token
+      .publishSchema({
+        commit: 'base-version',
+        service: 'products',
+        url: 'http://products.com',
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            product: String @tag(name: "public")
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const [baseVersion] = await fetchVersions(1);
+    assertNonNullish(baseVersion);
+    const details = await getSchemaVersionWithAllDetails(target.id, baseVersion.id, ownerToken);
+    const contractVersion = details?.contractVersions?.edges.at(0)?.node;
+    assertNonNullish(contractVersion);
+
+    for (const countPeriod of [null, period]) {
+      const result = await execute({
+        document: SchemaVersionGraphScopeQuery,
+        authToken: ownerToken,
+        variables: {
+          projectRef: { byId: project.id },
+          targetRef: { byId: target.id },
+          baseVersionId: baseVersion.id,
+          contractVersionId: contractVersion.id,
+          period: countPeriod,
+        },
+      }).then(r => r.expectNoGraphQLErrors());
+
+      expect(result.target?.baseVersion?.id).toBe(baseVersion.id);
+      expect(result.target?.contractVersion).toBeNull();
+      expect(result.target?.schemaVersionsCount).toBe(1);
+      expect(result.project?.schemaVersionsCount).toBe(1);
+    }
+  },
+);
+
+test.concurrent(
+  'schema version pagination excludes contract versions from the default graph',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createTargetAccessToken, target } = await createProject(ProjectType.Federation);
+    const token = await createTargetAccessToken({});
+
+    await token
+      .publishSchema({
+        commit: 'before-contract',
+        service: 'products',
+        url: 'http://products.com',
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            product: String @tag(name: "public")
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const createContractResult = await createContract(
+      {
+        target: { byId: target.id },
+        contractName: 'public',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        includeTags: ['public'],
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+    expect(createContractResult.createContract.error).toBeNull();
+
+    await token
+      .publishSchema({
+        commit: 'with-contract',
+        service: 'products',
+        url: 'http://products.com',
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            product: String @tag(name: "public")
+            internalProduct: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const commits: Array<string | null> = [];
+    let after: string | null = null;
+    let result: DocumentType<typeof PaginatedSchemaVersionsQuery>;
+
+    do {
+      result = await execute({
+        document: PaginatedSchemaVersionsQuery,
+        authToken: token.secret,
+        variables: {
+          targetRef: { byId: target.id },
+          first: 1,
+          after,
+        },
+      }).then(r => r.expectNoGraphQLErrors());
+
+      const connection = result.target?.schemaVersions;
+      assertNonNullish(connection);
+      expect(connection.edges).toHaveLength(1);
+
+      commits.push(connection.edges[0].node.meta?.commit ?? null);
+      after = connection.pageInfo.endCursor;
+      if (!connection.pageInfo.hasNextPage) {
+        break;
+      }
+    } while (after);
+
+    expect(commits).toEqual(['with-contract', 'before-contract']);
+  },
+);
 
 test.concurrent(
   'schema version pagination excludes legacy versions without duplicates',
@@ -111,12 +288,12 @@ test.concurrent(
 );
 
 test.concurrent(
-  'schema version pagination includes legacy versions without duplicates for backfilled graph',
-  async () => {
+  'schema version pagination includes legacy versions and excludes contract versions for backfilled graph',
+  async ({ expect }) => {
     const seed = initSeed();
-    const { createOrg } = await seed.createOwner();
+    const { createOrg, ownerToken } = await seed.createOwner();
     const { createProject } = await createOrg();
-    const { createTargetAccessToken, target } = await createProject(ProjectType.Single);
+    const { createTargetAccessToken, target } = await createProject(ProjectType.Federation);
     const token = await createTargetAccessToken({});
     await using db = await seed.createDbConnection();
 
@@ -130,7 +307,17 @@ test.concurrent(
       await token
         .publishSchema({
           commit,
-          sdl: `type Query { ${commit.replace('-', '_')}: String }`,
+          service: 'products',
+          url: 'http://products.com',
+          sdl: `
+            extend schema
+              @link(url: "https://specs.apollo.dev/link/v1.0")
+              @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+            type Query {
+              ${commit.replace('-', '_')}: String @tag(name: "public")
+            }
+          `,
         })
         .then(r => r.expectNoGraphQLErrors());
     }
@@ -143,11 +330,32 @@ test.concurrent(
     WHERE "target_id" = ${target.id}
     `);
 
+    const createContractResult = await createContract(
+      {
+        target: { byId: target.id },
+        contractName: 'public',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        includeTags: ['public'],
+      },
+      ownerToken,
+    ).then(r => r.expectNoGraphQLErrors());
+    expect(createContractResult.createContract.error).toBeNull();
+
     for (const commit of ['linked-1', 'linked-2']) {
       await token
         .publishSchema({
           commit,
-          sdl: `type Query { ${commit.replace('-', '_')}: String }`,
+          service: 'products',
+          url: 'http://products.com',
+          sdl: `
+            extend schema
+              @link(url: "https://specs.apollo.dev/link/v1.0")
+              @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+            type Query {
+              ${commit.replace('-', '_')}: String @tag(name: "public")
+            }
+          `,
         })
         .then(r => r.expectNoGraphQLErrors());
     }

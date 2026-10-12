@@ -6,7 +6,7 @@ import {
   UniqueIntegrityConstraintViolationError,
   type PrimitiveValueExpression,
 } from '@hive/postgres';
-import { invariant } from '@hive/service-common';
+import { fail, invariant } from '@hive/service-common';
 import {
   decodeCreatedAtAndUUIDIdBasedCursor,
   encodeCreatedAtAndUUIDIdBasedCursor,
@@ -17,7 +17,7 @@ import {
   type SchemaCheckApprovalMetadata,
 } from '@hive/storage';
 import { isUUID } from '../../../shared/is-uuid';
-import { GraphStore } from '../../graph/providers/graph-store';
+import { GraphStore, type Graph } from '../../graph/providers/graph-store';
 import { Logger } from '../../shared/providers/logger';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import { SchemaVersion } from './schema-version-store';
@@ -297,33 +297,29 @@ export class Contracts {
     return records;
   }
 
-  public async loadActiveContractsWithLatestValidContractVersionsByTargetId(args: {
-    targetId: string;
-  }) {
-    const contracts = await this.getActiveContractsByTargetId(args);
+  public async loadActiveContractsWithLatestVersionsForGraphSchemaVersion(
+    graph: Graph,
+    schemaVersion: SchemaVersion | null,
+  ): Promise<Map<string, ContractWithLatestVersions> | null> {
+    const contracts = await this.getActiveContractsByTargetId({ targetId: graph.targetId });
     if (contracts === null) {
       return null;
     }
 
-    const contractIds = contracts.map(c => c.id);
+    const contractGraphs = await this.graphStore.findContractGraphsForGraph(graph);
+    const map = new Map<string, ContractWithLatestVersions>();
 
-    const latestValidContractVersions = await this.loadLatestValidContractVersionsByTargetId({
-      targetId: args.targetId,
-      contractIds,
-    });
+    if (schemaVersion === null) {
+      for (const contract of contracts) {
+        map.set(contract.id, {
+          contract,
+          graph: contractGraphs.get(contract.id) ?? fail('Contract graph must exist.'),
+          latestVersion: null,
+          latestValidVersion: null,
+        });
+      }
 
-    return contracts.map(contract => ({
-      contract,
-      latestValidVersion: latestValidContractVersions.get(contract.id) ?? null,
-    }));
-  }
-
-  public async loadContractsWithLatestValidContractVersioAndLatestContractVersionForSchemaVersion(
-    schemaVersion: SchemaVersion,
-  ): Promise<Array<ContractWithLatestVersions> | null> {
-    const contracts = await this.getActiveContractsByTargetId({ targetId: schemaVersion.targetId });
-    if (contracts === null) {
-      return null;
+      return map;
     }
 
     const contractIds = contracts.map(contract => contract.id);
@@ -364,17 +360,14 @@ export class Contracts {
           ${contractVersionsFields}
         FROM
           "contract_versions"
-        JOIN (
-          VALUES
-          ${psql.unnest(
-            contractIdsWhereWeNeedToGetTheLatestValidVersion.map(version => [
-              version.contractId,
-              version.createdAt,
-            ]),
-            ['uuid', 'timestamptz'],
-          )}
-        ) AS "filters" ("ccontract_id", "cutoff_date")
-          ON "ccontract_id" = "filters"."ccontract_id"
+        JOIN ${psql.unnest(
+          contractIdsWhereWeNeedToGetTheLatestValidVersion.map(version => [
+            version.contractId,
+            version.createdAt,
+          ]),
+          ['uuid', 'timestamptz'],
+        )} AS "filters" ("ccontract_id", "cutoff_date")
+          ON "contract_versions"."contract_id" = "filters"."ccontract_id"
         WHERE
           "created_at" < filters."cutoff_date"
           AND "schema_composition_errors" IS NULL
@@ -391,14 +384,16 @@ export class Contracts {
       }
     }
 
-    return contracts.map(
-      contract =>
-        ({
-          contract,
-          latestVersion: latestContractVersionsByContractId.get(contract.id) ?? null,
-          latestValidVersion: latestValidContractVersionByContractId.get(contract.id) ?? null,
-        }) as ContractWithLatestVersions,
-    );
+    for (const contract of contracts) {
+      map.set(contract.id, {
+        contract,
+        graph: contractGraphs.get(contract.id) ?? fail('Contract graph must exist.'),
+        latestVersion: latestContractVersionsByContractId.get(contract.id) ?? null,
+        latestValidVersion: latestValidContractVersionByContractId.get(contract.id) ?? null,
+      } as ContractWithLatestVersions);
+    }
+
+    return map;
   }
 
   public async getPaginatedContractsByTargetId(args: {
@@ -1121,6 +1116,7 @@ export type PaginatedContractCheckConnection = Readonly<{
 
 export type ContractWithLatestVersions = {
   contract: Contract;
+  graph: Graph;
   latestVersion: ContractVersion | null;
   latestValidVersion: ValidContractVersion | null;
 };

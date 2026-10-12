@@ -3,6 +3,7 @@ import { ProjectType, ResourceAssignmentModeType } from 'testkit/gql/graphql';
 import { initSeed } from 'testkit/seed';
 import { assertNonNullish } from 'testkit/utils';
 import { SchemaVersionStore } from '@hive/api/modules/schema/providers/schema-version-store';
+import { psql } from '@hive/postgres';
 
 test.concurrent('creating a target creates its default graph', async ({ expect }) => {
   const seed = initSeed();
@@ -76,6 +77,57 @@ test.concurrent(
 
     expect(await schemaVersions.getMaybeLatestSchemaVersionForGraph(graph)).toMatchObject({
       graphId: graph.id,
+    });
+  },
+);
+
+test.concurrent(
+  'legacy schema versions resolve to the backfilled base graph',
+  async ({ expect }) => {
+    const seed = initSeed();
+    const { createOrg } = await seed.createOwner();
+    const { createProject } = await createOrg();
+    const { target, createTargetAccessToken } = await createProject(ProjectType.Federation);
+    const token = await createTargetAccessToken({});
+
+    await token
+      .publishSchema({
+        commit: 'legacy',
+        sdl: 'type Query { ping: String }',
+        service: 'service',
+        url: 'http://service',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const graphStore = await seed.getGraphStore();
+    const graph = await graphStore.findGraphForTargetIdByName(target.id, 'default');
+    assertNonNullish(graph);
+
+    await using db = await seed.createDbConnection();
+    const schemaVersions = new SchemaVersionStore(db.pool);
+    const version = await schemaVersions.getMaybeLatestSchemaVersionForGraph(graph);
+    assertNonNullish(version);
+
+    await db.pool.query(psql`
+      UPDATE "graphs"
+      SET "is_backfilled" = TRUE
+      WHERE "id" = ${graph.id}
+    `);
+    await db.pool.query(psql`
+      UPDATE "schema_versions"
+      SET "graph_id" = NULL
+      WHERE "id" = ${version.id}
+    `);
+
+    const legacyVersion = await schemaVersions.getSchemaVersionById(version.id);
+    assertNonNullish(legacyVersion);
+    expect(legacyVersion.graphId).toBeNull();
+
+    expect(await graphStore.findGraphForSchemaVersion(legacyVersion)).toMatchObject({
+      id: graph.id,
+      targetId: target.id,
+      type: 'BASE',
+      isBackfilled: true,
     });
   },
 );
