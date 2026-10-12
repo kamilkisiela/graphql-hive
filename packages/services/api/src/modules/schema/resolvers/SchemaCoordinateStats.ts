@@ -5,11 +5,7 @@ import { SchemaVersionHelper } from '../providers/schema-version-helper';
 import type { SchemaCoordinateStatsResolvers } from './../../../__generated__/types';
 
 export const SchemaCoordinateStats: Pick<SchemaCoordinateStatsResolvers, 'supergraphMetadata'> = {
-  supergraphMetadata: async (
-    { organization, project, target, schemaCoordinate },
-    _,
-    { injector },
-  ) => {
+  supergraphMetadata: async ({ target, schemaCoordinate }, _, { injector }) => {
     // Usage can arrive with no composable version: nothing published yet, or every publish failed.
     const graph = await injector.get(GraphStore).getDefaultGraphForTargetId(target);
     const latestVersion = await injector
