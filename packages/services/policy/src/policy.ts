@@ -26,7 +26,7 @@ type RulemapValidationType = {
 
 export function normalizeAjvSchema(
   schema: GraphQLESLintRule['meta']['schema'],
-): GraphQLESLintRule['meta']['schema'] {
+): GraphQLESLintRule['meta']['schema'] | null {
   if (Array.isArray(schema)) {
     if (schema.length === 0) {
       return null;

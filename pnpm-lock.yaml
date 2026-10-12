@@ -48,6 +48,9 @@ catalogs:
     '@graphql-tools/schema':
       specifier: 10.1.3
       version: 10.1.3
+    '@graphql-tools/utils':
+      specifier: 12.0.3
+      version: 12.0.3
     '@graphql-typed-document-node/core':
       specifier: 3.2.0
       version: 3.2.0
@@ -1654,6 +1657,9 @@ importers:
       '@graphql-eslint/eslint-plugin':
         specifier: 'catalog:'
         version: 3.20.1(patch_hash=91077daaea51b48fac14a0301370b60c64c27b7e0762fc27f73eb9aa4bfeb632)(@babel/core@7.29.7)(@types/node@25.9.9)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)
+      '@graphql-tools/utils':
+        specifier: 'catalog:'
+        version: 12.0.3(graphql@16.14.2)
       '@hive/service-common':
         specifier: workspace:*
         version: link:../service-common
@@ -1666,6 +1672,9 @@ importers:
       '@types/eslint':
         specifier: 8.56.12
         version: 8.56.12
+      '@types/lodash.lowercase':
+        specifier: 4.3.7
+        version: 4.3.7
       ajv:
         specifier: 'catalog:'
         version: 8.18.0
@@ -1681,6 +1690,12 @@ importers:
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
+      json-schema-to-ts:
+        specifier: 2.9.1
+        version: 2.9.1
+      lodash.lowercase:
+        specifier: 4.3.0
+        version: 4.3.0
       pino-pretty:
         specifier: 'catalog:'
         version: 11.3.0
@@ -1706,7 +1721,7 @@ importers:
         specifier: 4.1.1
         version: 4.1.1(graphql@16.14.2)
       '@graphql-tools/utils':
-        specifier: 12.0.3
+        specifier: 'catalog:'
         version: 12.0.3(graphql@16.14.2)
       '@hive/service-common':
         specifier: workspace:*
@@ -9607,6 +9622,9 @@ packages:
   '@types/lodash.debounce@4.0.9':
     resolution: {integrity: sha512-Ma5JcgTREwpLRwMM+XwBR7DaWe96nC38uCBDFKZWbNKD+osjVzdpnUSwBcqCptrp16sSOLBAUb50Car5I0TCsQ==}
 
+  '@types/lodash.lowercase@4.3.7':
+    resolution: {integrity: sha512-cyjXwXsUW8jj+aONNwOeOfuod4cqxmZvXwLp+MZvjdcvXSve1+fRxC0aT/Yx0bbP3L36SGPwr1Kv3uVV8k8AjQ==}
+
   '@types/lodash.sortby@4.7.9':
     resolution: {integrity: sha512-PDmjHnOlndLS59GofH0pnxIs+n9i4CWeXGErSB5JyNFHu2cmvW6mQOaUKjG8EDPkni14IgF8NsRW8bKvFzTm9A==}
 
@@ -13252,6 +13270,10 @@ packages:
   json-schema-ref-resolver@3.0.0:
     resolution: {integrity: sha512-hOrZIVL5jyYFjzk7+y7n5JDzGlU8rfWDuYyHwGa2WA8/pcmMHezp2xsVwxrebD/Q9t8Nc5DboieySDpCp4WG4A==}
 
+  json-schema-to-ts@2.9.1:
+    resolution: {integrity: sha512-8MNpRGERlCUWYeJwsWkMrJ0MWzBz49dfqpG+n9viiIlP4othaahbiaNQZuBzmPxRLUhOv1QJMCzW5WE8nHFGIQ==}
+    engines: {node: '>=16'}
+
   json-schema-to-typescript@15.0.3:
     resolution: {integrity: sha512-iOKdzTUWEVM4nlxpFudFsWyUiu/Jakkga4OZPEt7CGoSEsAsUgdOZqR6pcgx2STBek9Gm4hcarJpXSzIvZ/hKA==}
     engines: {node: '>=16.0.0'}
@@ -16627,6 +16649,9 @@ packages:
 
   trough@2.1.0:
     resolution: {integrity: sha512-AqTiAOLcj85xS7vQ8QkAV41hPDIJ71XJB4RCUrzo/1GM2CQwhkJGaf9Hgr7BOugMRpgGUrqRg/DrBDl4H40+8g==}
+
+  ts-algebra@1.2.2:
+    resolution: {integrity: sha512-kloPhf1hq3JbCPOTYoOWDKxebWjNb2o/LKnNfkWhxVVisFFmMJPPdJeGoGmM+iRLyoXAR61e08Pb+vUXINg8aA==}
 
   ts-api-utils@1.4.3:
     resolution: {integrity: sha512-i3eMG77UTMD0hZhgRS562pv83RC6ukSAC2GMNWc+9dieh/+jDM5u5YG+NHX6VNDRHQcHwmsTHctP9LhbC3WxVw==}
@@ -22397,7 +22422,7 @@ snapshots:
 
   '@manypkg/find-root@1.1.0':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       '@types/node': 12.20.55
       find-up: 4.1.0
       fs-extra: 8.1.0
@@ -22410,7 +22435,7 @@ snapshots:
 
   '@manypkg/get-packages@1.1.3':
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       '@changesets/types': 4.1.0
       '@manypkg/find-root': 1.1.0
       fs-extra: 8.1.0
@@ -27263,6 +27288,10 @@ snapshots:
     dependencies:
       '@types/lodash': 4.17.23
 
+  '@types/lodash.lowercase@4.3.7':
+    dependencies:
+      '@types/lodash': 4.17.23
+
   '@types/lodash.sortby@4.7.9':
     dependencies:
       '@types/lodash': 4.17.13
@@ -31525,6 +31554,12 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
+  json-schema-to-ts@2.9.1:
+    dependencies:
+      '@babel/runtime': 7.29.7
+      '@types/json-schema': 7.0.15
+      ts-algebra: 1.2.2
+
   json-schema-to-typescript@15.0.3:
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.6.1
@@ -32593,7 +32628,7 @@ snapshots:
 
   mjml-accordion@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32601,7 +32636,7 @@ snapshots:
 
   mjml-body@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32609,7 +32644,7 @@ snapshots:
 
   mjml-button@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32617,7 +32652,7 @@ snapshots:
 
   mjml-carousel@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32625,7 +32660,7 @@ snapshots:
 
   mjml-cli@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       chokidar: 3.6.0
       glob: 7.2.3
       js-beautify: 1.14.6
@@ -32640,7 +32675,7 @@ snapshots:
 
   mjml-column@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32648,7 +32683,7 @@ snapshots:
 
   mjml-core@4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       cheerio: 1.0.0-rc.10
       detect-node: 2.0.4
       js-beautify: 1.14.6
@@ -32662,7 +32697,7 @@ snapshots:
 
   mjml-divider@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32670,7 +32705,7 @@ snapshots:
 
   mjml-group@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32678,7 +32713,7 @@ snapshots:
 
   mjml-head-attributes@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32686,7 +32721,7 @@ snapshots:
 
   mjml-head-breakpoint@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32694,7 +32729,7 @@ snapshots:
 
   mjml-head-font@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32702,7 +32737,7 @@ snapshots:
 
   mjml-head-html-attributes@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32710,7 +32745,7 @@ snapshots:
 
   mjml-head-preview@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32718,7 +32753,7 @@ snapshots:
 
   mjml-head-style@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32726,7 +32761,7 @@ snapshots:
 
   mjml-head-title@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32734,7 +32769,7 @@ snapshots:
 
   mjml-head@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32742,7 +32777,7 @@ snapshots:
 
   mjml-hero@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32750,7 +32785,7 @@ snapshots:
 
   mjml-image@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32758,7 +32793,7 @@ snapshots:
 
   mjml-migrate@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       js-beautify: 1.14.6
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
@@ -32769,7 +32804,7 @@ snapshots:
 
   mjml-navbar@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32777,14 +32812,14 @@ snapshots:
 
   mjml-parser-xml@4.14.0:
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       detect-node: 2.0.4
       htmlparser2: 4.1.0
       lodash: 4.18.1
 
   mjml-preset-core@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       mjml-accordion: 4.14.0(encoding@0.1.13)
       mjml-body: 4.14.0(encoding@0.1.13)
       mjml-button: 4.14.0(encoding@0.1.13)
@@ -32815,7 +32850,7 @@ snapshots:
 
   mjml-raw@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32823,7 +32858,7 @@ snapshots:
 
   mjml-section@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32831,7 +32866,7 @@ snapshots:
 
   mjml-social@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32839,7 +32874,7 @@ snapshots:
 
   mjml-spacer@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32847,7 +32882,7 @@ snapshots:
 
   mjml-table@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32855,7 +32890,7 @@ snapshots:
 
   mjml-text@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
     transitivePeerDependencies:
@@ -32863,11 +32898,11 @@ snapshots:
 
   mjml-validator@4.13.0:
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
 
   mjml-wrapper@4.14.0(encoding@0.1.13):
     dependencies:
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.7
       lodash: 4.18.1
       mjml-core: 4.14.0(patch_hash=52f1e476e154edea0222aa95e55676888525198d882becc3b362511b77fd7e7f)(encoding@0.1.13)
       mjml-section: 4.14.0(encoding@0.1.13)
@@ -35549,6 +35584,8 @@ snapshots:
   trim-lines@3.0.1: {}
 
   trough@2.1.0: {}
+
+  ts-algebra@1.2.2: {}
 
   ts-api-utils@1.4.3(typescript@5.7.3):
     dependencies:
