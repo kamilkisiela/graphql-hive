@@ -1,17 +1,30 @@
+import { Linter } from 'eslint';
+import { rules as graphqlEslintRules, parseForESLint } from '@graphql-eslint/eslint-plugin';
 import { lint, type RulesConfig } from '../src/engine/linter.js';
-import { createInputValidationSchema, schemaPolicyCheck } from '../src/policy';
+import { createInputValidationSchema } from '../src/policy';
 import { composedSchema, subgraphSdl } from './fixtures/schemas';
 import { storedPolicies } from './fixtures/stored-policies';
 
 const validation = createInputValidationSchema();
 
+// The policy service's previous engine, kept here as the reference until eslint is removed.
+const linter = new Linter();
+linter.defineParser('@graphql-eslint/eslint-plugin', { parseForESLint });
+for (const [ruleId, rule] of Object.entries(graphqlEslintRules)) {
+  linter.defineRule(ruleId, rule as any);
+}
+
 // The engine never produces fixes or suggestions; everything else must match ESLint exactly.
 async function eslintMessages(input: { source: string; schema: string; policy: RulesConfig }) {
-  const messages = await schemaPolicyCheck({
-    source: input.source,
-    schema: input.schema,
-    policy: input.policy as any,
-  });
+  const messages = linter.verify(
+    input.source,
+    {
+      parser: '@graphql-eslint/eslint-plugin',
+      parserOptions: { schema: input.schema },
+      rules: input.policy as Linter.RulesRecord,
+    },
+    'schema.graphql',
+  );
   return messages.map(({ fix: _fix, suggestions: _suggestions, ...message }) => message);
 }
 
