@@ -4,9 +4,9 @@ COPY builder-config.yaml .
 COPY extension-hiveauth/ ./extension-hiveauth/
 COPY extension-statsviz/ ./extension-statsviz/
 
-FROM golang:1.25-bookworm AS builder
+FROM golang:1.26-bookworm AS builder
 
-ARG OTEL_VERSION=0.140.0
+ARG OTEL_VERSION=0.162.0
 
 WORKDIR /build
 
@@ -21,7 +21,7 @@ COPY --from=config extension-statsviz/ ./extension-statsviz/
 RUN CGO_ENABLED=0 builder --config=/build/builder-config.yaml
 
 # Stage 2: Final Image
-FROM alpine:3.22
+FROM alpine:3.24
 
 WORKDIR /app
 
