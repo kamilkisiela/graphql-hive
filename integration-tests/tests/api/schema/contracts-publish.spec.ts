@@ -1172,3 +1172,80 @@ test.concurrent('deleting a missing contract returns an error', async ({ expect 
 
   expect(result?.deleteContract.error?.message).toEqual('Contract not found.');
 });
+
+test.concurrent(
+  'schema publish after deleting a contract creates a new schema version without the contract',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createTargetAccessToken, fetchVersions, target } = await createProject(
+      ProjectType.Federation,
+    );
+    const writeToken = await createTargetAccessToken({});
+
+    const createContractResult = await execute({
+      document: CreateContractMutation,
+      variables: {
+        input: {
+          target: { byId: target.id },
+          contractName: 'my-contract',
+          removeUnreachableTypesFromPublicApiSchema: true,
+          includeTags: ['toyota'],
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    const contractId = createContractResult.createContract.ok?.createdContract.id;
+    assertNonNullish(contractId);
+
+    const sdl = /* GraphQL */ `
+      extend schema
+        @link(url: "https://specs.apollo.dev/link/v1.0")
+        @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+      type Query {
+        hello: String
+        helloHidden: String @tag(name: "toyota")
+      }
+    `;
+
+    const publishResult = await writeToken
+      .publishSchema({
+        sdl,
+        service: 'hello',
+        url: 'http://hello.com',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const deleteResult = await execute({
+      document: DeleteContractMutation,
+      variables: {
+        input: {
+          contract: { byId: contractId },
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(deleteResult.deleteContract.ok?.deletedContractId).toEqual(contractId);
+
+    // The subgraph did not change, but the set of contracts did.
+    const republishResult = await writeToken
+      .publishSchema({
+        sdl,
+        service: 'hello',
+        url: 'http://hello.com',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+    expect(republishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    await expect(fetchVersions(2)).resolves.toHaveLength(2);
+
+    const latestVersion = await execute({
+      document: LatestSchemaVersionContractVersionsQuery,
+      variables: { target: { byId: target.id } },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(latestVersion.target?.latestSchemaVersion?.contractVersions).toEqual(null);
+  },
+);

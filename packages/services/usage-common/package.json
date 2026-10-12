@@ -3,6 +3,6 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "graphql": "16.9.0"
+    "graphql": "catalog:"
   }
 }

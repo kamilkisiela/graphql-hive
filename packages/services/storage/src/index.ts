@@ -1408,6 +1408,15 @@ export async function createStorage(
           v.created_at >= ${period.from.toISOString()}
           AND
           v.created_at < ${period.to.toISOString()}
+          AND (
+            /* Legacy records */
+            v.graph_metadata IS NULL
+            OR (
+              /* Default graph records, contract versions are excluded */
+              v.graph_metadata->>'name' = 'default'
+              AND v.graph_metadata->>'type' = 'default'
+            )
+          )
         GROUP by o.id
       `,
         )

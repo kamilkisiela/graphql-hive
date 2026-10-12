@@ -217,7 +217,7 @@ services:
   # See docs/DEVELOPMENT.md for usage notes.
 
   grafana-dashboard-init:
-    image: alpine:3.20
+    image: alpine:3.24
     profiles:
       - observability
     command: >

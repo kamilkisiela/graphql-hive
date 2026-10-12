@@ -561,6 +561,8 @@ export const cacheOptions = {
     FailuresOverTime: noKey,
     DurationOverTime: noKey,
     SchemaCoordinateStats: noKey,
+    ErrorStatsValues: noKey,
+    ErrorCodesOverTime: noKey,
     ClientStats: noKey,
     ClientStatsValues: noKey,
     ClientVersionStatsValues: noKey,

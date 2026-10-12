@@ -15,5 +15,8 @@ jobs:
         with:
           actor: test-unit
 
+      - name: build workspace dependencies
+        run: pnpm turbo build --filter=@graphql-hive/core --filter=@graphql-hive/yoga
+
       - name: unit tests
         run: pnpm test

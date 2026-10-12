@@ -231,8 +231,19 @@ export function schemaProvider(providerConfig: SchemaProviderConfig) {
           psql`/* findLatestComposableSchemaVersion */
         SELECT sv.id
         FROM schema_versions as sv
-        WHERE sv.target_id = ${args.targetId} AND sv.is_composable IS TRUE
-        ORDER BY sv.created_at DESC
+        WHERE
+          sv.target_id = ${args.targetId}
+          AND sv.is_composable IS TRUE
+          AND (
+            /* Legacy records */
+            sv.graph_metadata IS NULL
+            OR (
+              /* Default graph records, contract versions of the target are excluded */
+              sv.graph_metadata->>'name' = 'default'
+              AND sv.graph_metadata->>'type' = 'default'
+            )
+          )
+        ORDER BY sv.created_at DESC, sv.id DESC
         LIMIT 1
       `,
         )

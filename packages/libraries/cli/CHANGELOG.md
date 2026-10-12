@@ -1,5 +1,32 @@
 # @graphql-hive/cli
 
+## 0.67.0
+
+### Minor Changes
+
+- [#8678](https://github.com/graphql-hive/console/pull/8678)
+  [`5124f15`](https://github.com/graphql-hive/console/commit/5124f154e100819f19fbe2c4b94540f8e04ac560)
+  Thanks [@jdolle](https://github.com/jdolle)! - `hive schema:publish --github` now exits with code
+  1 (error `[300]`) when the publish is rejected, for example by breaking changes or
+  `--fail-on-composition-error`. Previously it exited with 0 whenever the GitHub check-run was
+  updated. `--force` still reports a forced success, as without `--github`.
+
+  **Note for self-hosted Hive:** `hive schema:publish --github` relies on a new field added to the
+  Hive GraphQL API (`GitHubSchemaPublishSuccess`). If you self-host Hive and the CLI reports error
+  `[125]` (unsupported Hive server version), deploy the latest Hive backend before upgrading the
+  CLI.
+
+### Patch Changes
+
+- [#8670](https://github.com/graphql-hive/console/pull/8670)
+  [`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Address vulnerability
+  [GHSA-7mx3-vvmw-hjmv](https://github.com/advisories/GHSA-7mx3-vvmw-hjmv).
+
+- Updated dependencies
+  [[`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)]:
+  - @graphql-hive/core@0.23.1
+
 ## 0.66.0
 
 ### Minor Changes

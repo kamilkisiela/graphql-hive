@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { GraphQLError, type GraphQLResolveInfo, type ValidationRule } from 'graphql';
 import { createClient } from 'graphql-ws';
-import { useServer as useWSServer } from 'graphql-ws/lib/use/ws';
+import { useServer as useWSServer } from 'graphql-ws/use/ws';
 import { createLogger, createSchema, createYoga, type Plugin } from 'graphql-yoga';
 import { describe, expect, test, vi } from 'vitest';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -1279,20 +1279,20 @@ describe('subscription usage reporting', () => {
         {
           execute: (args: any) => args.rootValue.execute(args),
           subscribe: (args: any) => args.rootValue.subscribe(args),
-          onSubscribe: async (ctx, msg) => {
+          onSubscribe: async (ctx, _id, params) => {
             const { schema, execute, subscribe, contextFactory, parse, validate } =
               yoga.getEnveloped({
                 ...ctx,
                 req: ctx.extra.request,
                 socket: ctx.extra.socket,
-                params: msg.payload,
+                params,
               });
 
             const args = {
               schema,
-              operationName: msg.payload.operationName,
-              document: parse(msg.payload.query),
-              variableValues: msg.payload.variables,
+              operationName: params.operationName,
+              document: parse(params.query),
+              variableValues: params.variables,
               contextValue: await contextFactory(),
               rootValue: {
                 execute,
