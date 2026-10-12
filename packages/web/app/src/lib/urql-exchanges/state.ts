@@ -29,11 +29,22 @@ function start(key: number) {
   update();
 }
 
+let scheduled = false;
+
+// urql dispatches from inside a component's render, so notifying there would update the indicator
+// mid-render. The count moves only with the notify, so a snapshot never changes unannounced.
 function update() {
-  inflightCount = inflightRequests.size;
-  for (const listener of listeners) {
-    listener();
+  if (scheduled) {
+    return;
   }
+  scheduled = true;
+  queueMicrotask(() => {
+    scheduled = false;
+    inflightCount = inflightRequests.size;
+    for (const listener of listeners) {
+      listener();
+    }
+  });
 }
 
 function getUniqueKey(op: Operation) {
