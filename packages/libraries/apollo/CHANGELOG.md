@@ -1,5 +1,18 @@
 # @graphql-hive/apollo
 
+## 0.48.9
+
+### Patch Changes
+
+- [#8670](https://github.com/graphql-hive/console/pull/8670)
+  [`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Address vulnerability
+  [GHSA-7mx3-vvmw-hjmv](https://github.com/advisories/GHSA-7mx3-vvmw-hjmv).
+
+- Updated dependencies
+  [[`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)]:
+  - @graphql-hive/core@0.23.1
+
 ## 0.48.8
 
 ### Patch Changes
