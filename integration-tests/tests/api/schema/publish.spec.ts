@@ -4643,7 +4643,6 @@ test.concurrent(
     await schemaVersions.createPublishSchemaVersion({
       schema: brokenSdl,
       author: 'Jochen',
-      async actionFn() {},
       base_schema: null,
       commit: '123',
       changes: [],
