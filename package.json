@@ -191,6 +191,7 @@
       "@graphql-hive/gateway-plugin-console-sdk": "workspace:",
       "@graphql-hive/yoga": "workspace:",
       "@graphql-hive/core": "workspace:",
+      "@graphql-tools/url-loader@7.x.x>@graphql-tools/executor-legacy-ws": "-",
       "graphql@16.x.x": "catalog:"
     },
     "patchedDependencies": {
