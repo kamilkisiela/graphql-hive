@@ -25,7 +25,7 @@
     "dotenv": "catalog:",
     "esbuild": "catalog:",
     "fastify": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "itty-router": "catalog:",
     "itty-router-extras": "0.4.6",
     "toucan-js": "catalog:",

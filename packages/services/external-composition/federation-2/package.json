@@ -14,7 +14,7 @@
     "@hive/service-common": "workspace:*",
     "@whatwg-node/server": "catalog:",
     "dotenv": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "lru-cache": "catalog:",
     "zod": "3.25.76"
   }

@@ -29,7 +29,7 @@
     "date-fns": "catalog:",
     "dotenv": "catalog:",
     "got": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "p-limit": "catalog:",
     "pg-promise": "catalog:",
     "tslib": "2.8.1",

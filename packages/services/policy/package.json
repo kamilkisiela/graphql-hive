@@ -18,7 +18,7 @@
     "dotenv": "catalog:",
     "eslint": "8.57.1",
     "fastify": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "pino-pretty": "catalog:",
     "zod": "3.25.76",
     "zod-validation-error": "catalog:"

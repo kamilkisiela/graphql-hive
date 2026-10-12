@@ -12,9 +12,9 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@envelop/core": "5.6.0",
-    "@envelop/graphql-jit": "11.2.0",
-    "@envelop/graphql-modules": "9.2.0",
+    "@envelop/core": "5.6.1",
+    "@envelop/graphql-jit": "11.2.1",
+    "@envelop/graphql-modules": "9.2.1",
     "@escape.tech/graphql-armor-max-aliases": "2.6.2",
     "@escape.tech/graphql-armor-max-depth": "2.4.2",
     "@escape.tech/graphql-armor-max-directives": "2.3.1",
@@ -43,7 +43,7 @@
     "dotenv": "catalog:",
     "fastify": "catalog:",
     "got": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "graphql-yoga": "catalog:",
     "hyperid": "4.0.0",
     "openid-client": "6.8.2",

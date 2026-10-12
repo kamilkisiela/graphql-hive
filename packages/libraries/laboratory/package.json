@@ -39,10 +39,10 @@
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "tslib": "^2.8.1",
-    "zod": "^4.1.12"
+    "zod": "^4.6.5"
   },
   "dependencies": {
-    "@graphql-tools/url-loader": "^9.1.7",
+    "@graphql-tools/url-loader": "^9.1.12",
     "dompurify": "catalog:",
     "graphql-language-service": "^5.5.0",
     "radix-ui": "^1.4.3",
@@ -88,7 +88,7 @@
     "date-fns": "catalog:",
     "esbuild": "catalog:",
     "graphql": "^16.14.0",
-    "graphql-ws": "6.0.6",
+    "graphql-ws": "catalog:",
     "graphql-yoga": "catalog:",
     "happy-dom": "^20.10.6",
     "jsdom": "catalog:",
@@ -111,7 +111,7 @@
     "vite": "npm:rolldown-vite@7.1.14",
     "vite-plugin-monaco-editor": "^1.1.0",
     "ws": "catalog:",
-    "zod": "^4.3.6"
+    "zod": "^4.6.5"
   },
   "publishConfig": {
     "access": "public"

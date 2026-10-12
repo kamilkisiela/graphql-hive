@@ -30,6 +30,9 @@ jobs:
           codegen: true
           actor: test-e2e
 
+      - name: build workspace dependencies
+        run: pnpm turbo build --filter=@graphql-hive/core --filter=@graphql-hive/yoga
+
       - name: install playwright browsers
         timeout-minutes: 15
         run: pnpm exec playwright install chromium --with-deps

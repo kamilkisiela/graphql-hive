@@ -22,7 +22,7 @@
     "prettier": "catalog:"
   },
   "devDependencies": {
-    "@graphql-hive/gateway": "2.10.4",
+    "@graphql-hive/gateway": "2.15.2",
     "@types/js-yaml": "4.0.9",
     "@types/node": "catalog:",
     "json-schema-to-typescript": "15.0.3",
