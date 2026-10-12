@@ -49,7 +49,7 @@ import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { TargetStore } from '../../target/providers/target-store';
 import { toGraphQLSchemaCheck } from '../to-graphql-schema-check';
-import { ArtifactStorageWriter } from './artifact-storage-writer';
+import { ArtifactStorageWriter, GraphManifestModel } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
 import { Contracts, type ContractWithLatestVersions } from './contracts';
@@ -1745,71 +1745,62 @@ export class SchemaPublisher {
           if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
             this.logger.debug('Delete accepted');
             if (input.dryRun !== true) {
-              const schemaVersion = await this.schemaVersions.deleteSubgraphFromGraph(graph, {
-                service: {
-                  name: affectedService.service_name,
-                  versionId: affectedService.id,
-                },
-                composable: deleteResult.state.composable,
-                diffSchemaVersionId: latestComposableVersion?.version.id ?? null,
-                changes: deleteResult.state.changes,
-                contracts:
-                  deleteResult.state.contracts?.map(contractResult => {
-                    const contract = contracts?.get(contractResult.contractId);
-                    invariant(contract, 'Contract should exist.');
-                    return this.toCreateContractVersionInput(contract, contractResult);
-                  }) ?? null,
-                ...(deleteResult.state.fullSchemaSdl
-                  ? {
-                      compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
-                      supergraphSDL: deleteResult.state.supergraph,
-                      supergraphChanges: deleteResult.state.supergraphChanges,
-                      schemaCompositionErrors: null,
-                      tags: deleteResult.state.tags,
-                      schemaMetadata: deleteResult.state.schemaMetadata,
-                      metadataAttributes: deleteResult.state.metadataAttributes,
-                    }
-                  : {
-                      compositeSchemaSDL: null,
-                      supergraphSDL: null,
-                      supergraphChanges: null,
-                      schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
-                      tags: null,
-                      schemaMetadata: null,
-                      metadataAttributes: null,
-                    }),
-                actionFn: async (versionId: string) => {
-                  if (deleteResult.state.composable) {
-                    const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
-                    for (const contract of deleteResult.state.contracts ?? []) {
-                      if (contract.fullSchemaSdl && contract.supergraph) {
-                        contracts.push({
-                          name: contract.contractName,
-                          sdl: contract.fullSchemaSdl,
-                          supergraph: contract.supergraph,
-                        });
+              const { schemaVersion, contractSchemaVersions } =
+                await this.schemaVersions.deleteSubgraphFromGraph(graph, {
+                  service: {
+                    name: affectedService.service_name,
+                    versionId: affectedService.id,
+                  },
+                  composable: deleteResult.state.composable,
+                  diffSchemaVersionId: latestComposableVersion?.version.id ?? null,
+                  changes: deleteResult.state.changes,
+                  contracts:
+                    deleteResult.state.contracts?.map(contractResult => {
+                      const contract = contracts?.get(contractResult.contractId);
+                      invariant(contract, 'Contract should exist.');
+                      return this.toCreateContractVersionInput(contract, contractResult);
+                    }) ?? null,
+                  ...(deleteResult.state.fullSchemaSdl
+                    ? {
+                        compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
+                        supergraphSDL: deleteResult.state.supergraph,
+                        supergraphChanges: deleteResult.state.supergraphChanges,
+                        schemaCompositionErrors: null,
+                        tags: deleteResult.state.tags,
+                        schemaMetadata: deleteResult.state.schemaMetadata,
+                        metadataAttributes: deleteResult.state.metadataAttributes,
                       }
-                    }
+                    : {
+                        compositeSchemaSDL: null,
+                        supergraphSDL: null,
+                        supergraphChanges: null,
+                        schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
+                        tags: null,
+                        schemaMetadata: null,
+                        metadataAttributes: null,
+                      }),
+                  conditionalBreakingChangeMetadata:
+                    await this.getConditionalBreakingChangeMetadata({
+                      conditionalBreakingChangeConfiguration,
+                      organizationId: selector.organizationId,
+                      projectId: selector.projectId,
+                      targetId: selector.targetId,
+                    }),
+                });
 
-                    await this.publishToCDN({
-                      target,
-                      project,
-                      supergraph: deleteResult.state.supergraph,
-                      fullSchemaSdl: deleteResult.state.fullSchemaSdl,
-                      // pass all schemas except the one we are deleting
-                      schemas: deleteResult.state.schemas,
-                      contracts,
-                      versionId,
-                    });
-                  }
-                },
-                conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
-                  conditionalBreakingChangeConfiguration,
-                  organizationId: selector.organizationId,
-                  projectId: selector.projectId,
-                  targetId: selector.targetId,
-                }),
-              });
+              if (deleteResult.state.composable) {
+                await this.publishToCDN({
+                  project,
+                  supergraph: deleteResult.state.supergraph,
+                  fullSchemaSdl: deleteResult.state.fullSchemaSdl,
+                  // pass all schemas except the one we are deleting
+                  schemas: deleteResult.state.schemas,
+                  schemaVersion,
+                  contractSchemaVersions: contractSchemaVersions,
+                  versionId: schemaVersion.id,
+                  graphId: graph.id,
+                });
+              }
 
               const changes = deleteResult.state.changes ?? [];
               const errors = [
@@ -1828,7 +1819,7 @@ export class SchemaPublisher {
                     project,
                     target,
                     schema: {
-                      id: schemaVersion.versionId,
+                      id: schemaVersion.id,
                       commit: schemaVersion.id,
                       valid: deleteResult.state.composable,
                     },
@@ -2352,9 +2343,13 @@ export class SchemaPublisher {
       serviceUrl = pushedSchema.serviceUrl;
     }
 
-    let schemaVersion: SchemaVersion;
+    let result: {
+      schemaVersion: SchemaVersion;
+      contractSchemaVersions: Array<SchemaVersion> | null;
+    };
+
     try {
-      schemaVersion = await this.schemaVersions.createPublishSchemaVersion({
+      result = await this.schemaVersions.createPublishSchemaVersion({
         graph,
         valid: composable,
         organizationId: organizationId,
@@ -2380,30 +2375,6 @@ export class SchemaPublisher {
         schemaRevisionId: input.schemaRevisionId,
         revision: input.revision,
         github,
-        actionFn: async (versionId: string) => {
-          if (composable && fullSchemaSdl) {
-            const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
-            for (const contract of publishState.contracts ?? []) {
-              if (contract.fullSchemaSdl && contract.supergraph) {
-                contracts.push({
-                  name: contract.contractName,
-                  sdl: contract.fullSchemaSdl,
-                  supergraph: contract.supergraph,
-                });
-              }
-            }
-
-            await this.publishToCDN({
-              target,
-              project,
-              supergraph,
-              fullSchemaSdl,
-              schemas,
-              contracts,
-              versionId,
-            });
-          }
-        },
         changes,
         diffSchemaVersionId: latestComposable?.version.id ?? null,
         previousSchemaVersion: latestVersion?.version.id ?? null,
@@ -2449,6 +2420,19 @@ export class SchemaPublisher {
       throw error;
     }
 
+    if (composable && fullSchemaSdl) {
+      await this.publishToCDN({
+        project,
+        supergraph,
+        fullSchemaSdl,
+        schemas,
+        schemaVersion: result.schemaVersion,
+        contractSchemaVersions: result.contractSchemaVersions,
+        versionId: result.schemaVersion.id,
+        graphId: graph.id,
+      });
+    }
+
     if (changes.length > 0 || errors.length > 0) {
       void this.alertsManager
         .triggerSchemaChangeNotifications({
@@ -2456,9 +2440,9 @@ export class SchemaPublisher {
           project,
           target,
           schema: {
-            id: schemaVersion.id,
+            id: result.schemaVersion.id,
             commit: input.commit,
-            valid: schemaVersion.isComposable,
+            valid: result.schemaVersion.isComposable,
           },
           changes,
           messages,
@@ -2490,7 +2474,7 @@ export class SchemaPublisher {
             },
             version: latestVersion
               ? {
-                  id: schemaVersion.id,
+                  id: result.schemaVersion.id,
                 }
               : undefined,
           })
@@ -3325,27 +3309,28 @@ export class SchemaPublisher {
     // NOTE: We re-use the values (sdl; errors; etc) from the existing origin values were possible to ensure a promotion results in the !!exact state!!
     // e.g. if we would compose from scratch but the external composition has changed a promotion would be unpredictable
     // the only exception is contracts, as the contract definitions might have changed and we might not have a contract version in the origin schema version
-    const schemaVersion = await this.schemaVersions.createPromotionSchemaVersion({
-      target: {
-        target,
-        graph,
-        latestVersion: targetLatestSchemaVersion,
-        latestValidVersion: targetLatestValidSchemaVersion,
-      },
-      origin: {
-        target: originTarget,
-        graph: originGraph,
-        version: originSchemaVersion,
-        publicSchemaSdl: originPublicSchemaSdl,
-        supergraphSdl: originSupergraphSdl,
-      },
-      meta,
-      schemaLogs: schemaLogDiffs,
-      publicSchemaChanges,
-      supergraphSchemaChanges,
-      contracts,
-      conditionalBreakingChangeMetadata,
-    });
+    const { schemaVersion, contractSchemaVersions } =
+      await this.schemaVersions.createPromotionSchemaVersion({
+        target: {
+          target,
+          graph,
+          latestVersion: targetLatestSchemaVersion,
+          latestValidVersion: targetLatestValidSchemaVersion,
+        },
+        origin: {
+          target: originTarget,
+          graph: originGraph,
+          version: originSchemaVersion,
+          publicSchemaSdl: originPublicSchemaSdl,
+          supergraphSdl: originSupergraphSdl,
+        },
+        meta,
+        schemaLogs: schemaLogDiffs,
+        publicSchemaChanges,
+        supergraphSchemaChanges,
+        contracts,
+        conditionalBreakingChangeMetadata,
+      });
 
     if (schemaVersion.schemaCompositionErrors === null) {
       invariant(
@@ -3355,21 +3340,10 @@ export class SchemaPublisher {
 
       this.logger.debug('update CDN state for target. (targetId=%s)', target.id);
 
-      const publishContracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
-      for (const contract of contracts ?? []) {
-        if (contract.compositeSchemaSDL && contract.supergraphSDL) {
-          publishContracts.push({
-            name: contract.contractName,
-            sdl: contract.compositeSchemaSDL,
-            supergraph: contract.supergraphSDL,
-          });
-        }
-      }
-
       await this.publishToCDN({
-        target,
         project,
-        contracts: publishContracts,
+        schemaVersion,
+        contractSchemaVersions,
         schemas: ensureCompositeSchemas(
           originLogEdges
             .map(edge => edge.node)
@@ -3378,6 +3352,7 @@ export class SchemaPublisher {
         fullSchemaSdl: schemaVersion.compositeSchemaSDL,
         supergraph: schemaVersion.supergraphSDL,
         versionId: schemaVersion.id,
+        graphId: graph.id,
       });
     }
 
@@ -3574,24 +3549,64 @@ export class SchemaPublisher {
     }
   }
 
+  private async publishGraphManifest(args: {
+    schemaVersion: SchemaVersion;
+    contractSchemaVersions: Array<SchemaVersion> | null;
+  }) {
+    const referenceDate = new Date();
+    const manifest: z.TypeOf<typeof GraphManifestModel> = {
+      graphs: {},
+    };
+
+    for (const schemaVersion of [args.schemaVersion, ...(args.contractSchemaVersions ?? [])]) {
+      invariant(schemaVersion.graphMetadata, 'Schema version must have graph metadata.');
+      if (!schemaVersion.isComposable) {
+        continue;
+      }
+
+      manifest.graphs[schemaVersion.graphMetadata.name] = {
+        id: schemaVersion.graphMetadata.id,
+        currentVersion: {
+          id: schemaVersion.id,
+          artifactPath:
+            schemaVersion.graphMetadata.type === 'contract'
+              ? `/artifacts/v1/${args.schemaVersion.targetId}/version/${schemaVersion.id}/contracts/${formatContractName(schemaVersion.graphMetadata.name)}`
+              : `/artifacts/v1/${schemaVersion.targetId}/version/${schemaVersion.id}`,
+        },
+      };
+    }
+
+    await this.artifactStorageWriter.writeArtifact({
+      targetId: args.schemaVersion.targetId,
+      artifactType: 'manifest.json',
+      artifact: manifest,
+      contractName: null,
+      referenceDate,
+    });
+  }
+
   @traceFn('SchemaPublisher.publishToCDN')
   private async publishToCDN({
-    target,
+    schemaVersion,
+    contractSchemaVersions,
     project,
     supergraph,
     fullSchemaSdl,
     schemas,
-    contracts,
     versionId,
+    graphId,
   }: {
-    target: Target;
+    schemaVersion: SchemaVersion;
+    contractSchemaVersions: null | Array<SchemaVersion>;
     project: Project;
     supergraph: string | null;
     fullSchemaSdl: string;
     schemas: readonly SchemaInput[];
-    contracts: null | Array<{ name: string; supergraph: string; sdl: string }>;
     versionId: string;
+    graphId: string;
   }) {
+    const referenceDate = new Date();
+
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
       for (const schema of schemas) {
@@ -3602,13 +3617,15 @@ export class SchemaPublisher {
 
       if (metadata.length > 0) {
         await this.artifactStorageWriter.writeArtifact({
-          targetId: target.id,
+          targetId: schemaVersion.targetId,
           // SINGLE project can have only one metadata, we need to pass it as an object,
           // COMPOSITE projects can have multiple metadata, we need to pass it as an array
           artifact: project.type === ProjectType.SINGLE ? metadata[0] : metadata,
           artifactType: 'metadata',
           contractName: null,
           versionId,
+          graphId,
+          referenceDate,
         });
       }
     };
@@ -3616,7 +3633,7 @@ export class SchemaPublisher {
     const publishCompositeSchema = async () => {
       await Promise.all([
         this.artifactStorageWriter.writeArtifact({
-          targetId: target.id,
+          targetId: schemaVersion.targetId,
           artifactType: 'services',
           artifact: schemas.map(s => ({
             name: s.serviceName,
@@ -3625,24 +3642,30 @@ export class SchemaPublisher {
           })),
           contractName: null,
           versionId,
+          graphId,
+          referenceDate,
         }),
         this.artifactStorageWriter.writeArtifact({
-          targetId: target.id,
+          targetId: schemaVersion.targetId,
           artifactType: 'sdl',
           artifact: fullSchemaSdl,
           contractName: null,
           versionId,
+          graphId,
+          referenceDate,
         }),
       ]);
     };
 
     const publishSingleSchema = async () => {
       await this.artifactStorageWriter.writeArtifact({
-        targetId: target.id,
+        targetId: schemaVersion.targetId,
         artifactType: 'sdl',
         artifact: fullSchemaSdl,
         contractName: null,
         versionId,
+        graphId,
+        referenceDate,
       });
     };
 
@@ -3657,37 +3680,52 @@ export class SchemaPublisher {
 
         actions.push(
           this.artifactStorageWriter.writeArtifact({
-            targetId: target.id,
+            targetId: schemaVersion.targetId,
             artifactType: 'supergraph',
             artifact: supergraph,
             contractName: null,
             versionId,
+            graphId,
+            referenceDate,
           }),
         );
       }
-      if (contracts) {
-        this.logger.debug('Publishing contracts to CDN');
 
-        for (const contract of contracts) {
-          this.logger.debug('Publishing contract to CDN (contractName=%s)', contract.name);
-          actions.push(
-            this.artifactStorageWriter.writeArtifact({
-              targetId: target.id,
-              artifactType: 'sdl',
-              artifact: contract.sdl,
-              contractName: contract.name,
-              versionId,
-            }),
-            this.artifactStorageWriter.writeArtifact({
-              targetId: target.id,
-              artifactType: 'supergraph',
-              artifact: contract.supergraph,
-              contractName: contract.name,
-              versionId,
-            }),
-          );
+      for (const contractVersion of contractSchemaVersions ?? []) {
+        if (!contractVersion.supergraphSDL || !contractVersion.compositeSchemaSDL) {
+          continue;
         }
+
+        invariant(contractVersion.graphMetadata, 'Graph metadata must exist for new records.');
+
+        this.logger.debug(
+          'Publishing contract to CDN (contractName=%s)',
+          contractVersion.graphMetadata.name,
+        );
+
+        const contractName = formatContractName(contractVersion.graphMetadata.name);
+
+        actions.push(
+          this.artifactStorageWriter.writeArtifact({
+            targetId: schemaVersion.targetId,
+            artifactType: 'sdl',
+            artifact: contractVersion.compositeSchemaSDL,
+            contractName,
+            versionId: contractVersion.id,
+            graphId: contractVersion.graphMetadata.id,
+          }),
+          this.artifactStorageWriter.writeArtifact({
+            targetId: schemaVersion.targetId,
+            artifactType: 'supergraph',
+            artifact: contractVersion.supergraphSDL,
+            contractName,
+            versionId: contractVersion.id,
+            graphId: contractVersion.graphMetadata.id,
+          }),
+        );
       }
+
+      await this.publishGraphManifest({ schemaVersion, contractSchemaVersions });
     }
 
     await Promise.all(actions);

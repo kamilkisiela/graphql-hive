@@ -53,8 +53,16 @@ type CDNFetchResult = {
   contents: string;
   /** SHA-256 Hash */
   hash: string;
-  /** Schema Version ID as on Hive Console (optional) */
+  /** Schema Version ID as on Hive Console (optional)
+   * @deprecated Please us `graphVersionId` instead.
+   */
   schemaVersionId: null | string;
+  /** The graph id of the artifact. */
+  graphVersionId: null | string;
+  /** The graph id of the artifact. */
+  graphId: null | string;
+  /** When the artifact was last modified. */
+  lastModified: null | string;
 };
 
 function isRequestOk(response: Response) {
@@ -133,10 +141,20 @@ export function createCDNArtifactFetcher(args: CreateCDNArtifactFetcherArgs): CD
     }
 
     const contents = await response.text();
+    const graphVersionId =
+      response.headers.get('x-hive-graph-version-id') ??
+      response.headers.get('x-hive-schema-version-id') ??
+      null;
+    const graphId = response.headers.get('x-hive-graph-id') ?? null;
+    const lastModified = response.headers.get('last-modified') ?? null;
+
     const result: CDNFetchResult = {
       hash: await createHash('SHA-256').update(contents).digest('base64'),
       contents,
-      schemaVersionId: response.headers.get('x-hive-schema-version-id') ?? null,
+      schemaVersionId: graphVersionId,
+      graphVersionId,
+      graphId,
+      lastModified,
     };
 
     const etag = response.headers.get('etag');
