@@ -16,7 +16,8 @@ type Event =
         | 'introspection'
         | 'services'
         | 'sdl.graphql'
-        | 'sdl.graphqls';
+        | 'sdl.graphqls'
+        | 'manifest.json';
     }
   | {
       type: 'app-deployment-operation';

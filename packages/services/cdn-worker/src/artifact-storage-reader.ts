@@ -30,7 +30,12 @@ export function buildArtifactStorageKey(
 
 type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 
-export type ArtifactsType = SDLArtifactTypes | 'metadata' | 'services' | 'supergraph';
+export type ArtifactsType =
+  | SDLArtifactTypes
+  | 'metadata'
+  | 'services'
+  | 'supergraph'
+  | 'manifest.json';
 
 const OperationS3BucketKeyModel = zod.tuple([
   zod.string().uuid(),
