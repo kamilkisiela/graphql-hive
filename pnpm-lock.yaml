@@ -1672,6 +1672,9 @@ importers:
       '@types/eslint':
         specifier: 8.56.12
         version: 8.56.12
+      '@types/esquery':
+        specifier: 1.5.4
+        version: 1.5.4
       '@types/lodash.lowercase':
         specifier: 4.3.7
         version: 4.3.7
@@ -1684,6 +1687,9 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1(patch_hash=08d9d41d21638cb74d0f9f34877a8839601a4e5a8263066ff23e7032addbcba0)
+      esquery:
+        specifier: 1.5.0
+        version: 1.5.0
       fastify:
         specifier: 'catalog:'
         version: 5.12.5
@@ -9555,6 +9561,9 @@ packages:
 
   '@types/eslint@8.56.12':
     resolution: {integrity: sha512-03ruubjWyOHlmljCVoxSuNDdmfZDzsrrz0P2LeJsOXr+ZwFQ+0yQIwNCwt/GYhV7Z31fgtXJTAEs+FYlEL851g==}
+
+  '@types/esquery@1.5.4':
+    resolution: {integrity: sha512-yYO4Q8H+KJHKW1rEeSzHxcZi90durqYgWVfnh5K6ZADVBjBv2e1NEveYX5yT2bffgN7RqzH3k9930m+i2yBoMA==}
 
   '@types/estree-jsx@1.0.0':
     resolution: {integrity: sha512-3qvGd0z8F2ENTGr/GG1yViqfiKmRfrXVx5sJyHGFu3z7m5g5utCQtGp/g29JnjflhtQJBv1WDQukHiT58xPcYQ==}
@@ -27216,6 +27225,10 @@ snapshots:
       '@types/estree': 1.0.6
       '@types/json-schema': 7.0.15
 
+  '@types/esquery@1.5.4':
+    dependencies:
+      '@types/estree': 1.0.8
+
   '@types/estree-jsx@1.0.0':
     dependencies:
       '@types/estree': 1.0.8
@@ -29715,7 +29728,7 @@ snapshots:
       clean-regexp: 1.0.0
       core-js-compat: 3.49.0
       eslint: 8.57.1(patch_hash=08d9d41d21638cb74d0f9f34877a8839601a4e5a8263066ff23e7032addbcba0)
-      esquery: 1.7.0
+      esquery: 1.5.0
       globals: 15.15.0
       indent-string: 4.0.0
       is-builtin-module: 3.2.1
