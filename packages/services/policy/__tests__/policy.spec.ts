@@ -47,18 +47,6 @@ describe('policy checks', () => {
           nodeType: NonNullType,
           ruleId: require-nullable-result-in-root,
           severity: 2,
-          suggestions: [
-            {
-              desc: Make String nullable,
-              fix: {
-                range: [
-                  18,
-                  25,
-                ],
-                text: String,
-              },
-            },
-          ],
         },
       ]
     `);

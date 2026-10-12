@@ -1,21 +1,8 @@
-import { GraphQLESLintRule, rules, type CategoryType } from '@graphql-eslint/eslint-plugin';
+import { rules } from './engine/rules';
+import type { GraphQLESLintRule } from './engine/types';
 
 type AllRulesType = typeof rules;
 type RuleName = keyof AllRulesType;
-
-const SKIPPED_RULES: RuleName[] = [
-  // Skipped because in order to operate, it needs operations.
-  // Also it does not make sense to run it as part of a schema check.
-  'no-unused-fields',
-];
-
-function isRelevantCategory(category?: CategoryType | CategoryType[]): boolean {
-  if (!category) {
-    return false;
-  }
-
-  return Array.isArray(category) ? category.includes('Schema') : category === 'Schema';
-}
 
 // Some rules have configurations for operations (like "alphabetize") and we do not want to expose them.
 function patchRulesConfig<T extends RuleName>(
@@ -57,18 +44,9 @@ function patchRulesConfig<T extends RuleName>(
   return ruleDef as GraphQLESLintRule;
 }
 
-// We are using only rules that are running on the schema (SDL) and not on operations.
-// Also, we do not need to run GraphQL validation rules because they are already running as part of Hive
-// Schema checks.
-// Some rule are mixed (like "alphabetize") so we are patch and "hiding" some of their configurations.
-export const RELEVANT_RULES = Object.entries(rules)
-  .filter(
-    ([ruleName, rule]) =>
-      isRelevantCategory(rule.meta.docs?.category) &&
-      rule.meta.docs?.graphQLJSRuleName === undefined &&
-      !SKIPPED_RULES.includes(ruleName as RuleName),
-  )
-  .map(
-    ([ruleName, rule]) =>
-      [ruleName, patchRulesConfig(ruleName as RuleName, rule)] as [RuleName, GraphQLESLintRule],
-  );
+// The engine only carries graphql-eslint's schema (SDL) rules. Some are mixed (like "alphabetize"),
+// so we patch them to hide their operation configurations.
+export const RELEVANT_RULES = Object.entries(rules).map(
+  ([ruleName, rule]) =>
+    [ruleName, patchRulesConfig(ruleName as RuleName, rule)] as [RuleName, GraphQLESLintRule],
+);
