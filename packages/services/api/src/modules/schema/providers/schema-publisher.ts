@@ -10,7 +10,7 @@ import lodash from 'lodash';
 import promClient from 'prom-client';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
-import { fail, invariant, trace, traceFn } from '@hive/service-common';
+import { fail, invariant, registryLockId, trace, traceFn } from '@hive/service-common';
 import type {
   ConditionalBreakingChangeMetadata,
   SchemaChangeType,
@@ -143,10 +143,6 @@ function revisionNotFoundResult(revision: string) {
     changes: [],
     errors: [{ message: `Schema revision '${revision}' was not found.` }],
   };
-}
-
-function registryLockId(targetId: string) {
-  return `registry-lock:${targetId}`;
 }
 
 function assertNonNull<T>(value: T | null, message: string): T {

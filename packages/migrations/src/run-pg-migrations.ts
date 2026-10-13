@@ -1,10 +1,15 @@
 import { type PostgresDatabasePool } from '@hive/postgres';
 import { runMigrations } from './pg-migrator';
 
-export const runPGMigrations = async (args: { slonik: PostgresDatabasePool; runTo?: string }) =>
+export const runPGMigrations = async (args: {
+  slonik: PostgresDatabasePool;
+  runTo?: string;
+  withRegistryLock: <T>(targetId: string, action: () => Promise<T>) => Promise<T>;
+}) =>
   runMigrations({
     slonik: args.slonik,
     runTo: args.runTo,
+    withRegistryLock: args.withRegistryLock,
     migrations: await Promise.all([
       import('./actions/2021-03-05T19-06-23.initial'),
       import('./actions/2021-03-08T11-02-26.urls'),
@@ -141,5 +146,6 @@ export const runPGMigrations = async (args: { slonik: PostgresDatabasePool; runT
       import('./actions/2026.10.02T00-00-02.backfill-graphs'),
       import('./actions/2026.10.07T00-00-00.schema-checks-service-filter-index'),
       import('./actions/2026.10.09T00-00-00.schema-versions-legacy-pagination-index'),
+      import('./actions/2026.10.09T00-00-01.backfill-contract-schema-versions'),
     ]),
   });

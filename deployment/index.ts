@@ -114,6 +114,7 @@ const dbMigrations = deployDbMigrations({
   clickhouse,
   docker,
   postgres,
+  redis,
   s3,
   cdn,
   environment,

@@ -7,3 +7,4 @@ import './2025.01.09T00-00-00.legacy-member-scopes.test';
 import './2026.06.05T00-00-00.metric-alert-filter-shared-only.test';
 import './2026.10.02T00-00-02.backfill-graphs.test';
 import './2026.10.07T00-00-00.schema-checks-service-filter-index.test';
+import './2026.10.09T00-00-01.backfill-contract-schema-versions.test';
