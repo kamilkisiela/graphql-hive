@@ -1,8 +1,26 @@
 diff --git a/cjs/rules/no-unreachable-types.js b/cjs/rules/no-unreachable-types.js
-index a3c0ee23c61d97142dca320d85e9cc28fc643677..beee60afe96e6b0bb0866dad663d0ebb1e0a248e 100644
+index a3c0ee23c61d97142dca320d85e9cc28fc643677..cebef69180b899bad96b6ef5d19988860141717b 100644
 --- a/cjs/rules/no-unreachable-types.js
 +++ b/cjs/rules/no-unreachable-types.js
-@@ -78,8 +78,15 @@ function getReachableTypes(schema) {
+@@ -50,7 +50,6 @@ const KINDS = [
+   import_graphql.Kind.ENUM_TYPE_DEFINITION,
+   import_graphql.Kind.ENUM_TYPE_EXTENSION
+ ];
+-let reachableTypesCache;
+ const RequestDirectiveLocations = /* @__PURE__ */ new Set([
+   import_graphql.DirectiveLocation.QUERY,
+   import_graphql.DirectiveLocation.MUTATION,
+@@ -62,9 +61,6 @@ const RequestDirectiveLocations = /* @__PURE__ */ new Set([
+   import_graphql.DirectiveLocation.VARIABLE_DEFINITION
+ ]);
+ function getReachableTypes(schema) {
+-  if (reachableTypesCache) {
+-    return reachableTypesCache;
+-  }
+   const reachableTypes = /* @__PURE__ */ new Set();
+   const collect = (node) => {
+     const typeName = (0, import_utils.getTypeName)(node);
+@@ -78,8 +74,15 @@ function getReachableTypes(schema) {
        for (const { astNode } of [...objects, ...interfaces]) {
          (0, import_graphql.visit)(astNode, visitor);
        }
@@ -20,6 +38,16 @@ index a3c0ee23c61d97142dca320d85e9cc28fc643677..beee60afe96e6b0bb0866dad663d0ebb
      }
    };
    const visitor = {
+@@ -113,8 +116,7 @@ function getReachableTypes(schema) {
+       }
+     }
+   }
+-  reachableTypesCache = reachableTypes;
+-  return reachableTypesCache;
++  return reachableTypes;
+ }
+ const rule = {
+   meta: {
 diff --git a/cjs/rules/relay-edge-types.js b/cjs/rules/relay-edge-types.js
 index 4f02b7a21bd793e4812528bb8feb324c3f242861..d455c48487a55712518b6811ab41bd74cb08ddaf 100644
 --- a/cjs/rules/relay-edge-types.js
@@ -169,10 +197,28 @@ index d952cee1e10976459e7c5836b86ba6540c45fdb6..d314997bfd26477c7d823cad397eb5d6
      [ruleId]: {
        meta: {
 diff --git a/esm/rules/no-unreachable-types.js b/esm/rules/no-unreachable-types.js
-index 17e9394c80ebb2257ec6145421fafa227872d0ca..f39ad76d7948ccc4e35f6b7d4adb26dee9e4a71b 100644
+index 17e9394c80ebb2257ec6145421fafa227872d0ca..e71fd1d67d6e510dc40f451c5d43afdfeba41fec 100644
 --- a/esm/rules/no-unreachable-types.js
 +++ b/esm/rules/no-unreachable-types.js
-@@ -51,8 +51,15 @@ function getReachableTypes(schema) {
+@@ -23,7 +23,6 @@ const KINDS = [
+   Kind.ENUM_TYPE_DEFINITION,
+   Kind.ENUM_TYPE_EXTENSION
+ ];
+-let reachableTypesCache;
+ const RequestDirectiveLocations = /* @__PURE__ */ new Set([
+   DirectiveLocation.QUERY,
+   DirectiveLocation.MUTATION,
+@@ -35,9 +34,6 @@ const RequestDirectiveLocations = /* @__PURE__ */ new Set([
+   DirectiveLocation.VARIABLE_DEFINITION
+ ]);
+ function getReachableTypes(schema) {
+-  if (reachableTypesCache) {
+-    return reachableTypesCache;
+-  }
+   const reachableTypes = /* @__PURE__ */ new Set();
+   const collect = (node) => {
+     const typeName = getTypeName(node);
+@@ -51,8 +47,15 @@ function getReachableTypes(schema) {
        for (const { astNode } of [...objects, ...interfaces]) {
          visit(astNode, visitor);
        }
@@ -190,7 +236,7 @@ index 17e9394c80ebb2257ec6145421fafa227872d0ca..f39ad76d7948ccc4e35f6b7d4adb26de
      }
    };
    const visitor = {
-@@ -74,6 +81,11 @@ function getReachableTypes(schema) {
+@@ -74,6 +77,11 @@ function getReachableTypes(schema) {
      if (type == null ? void 0 : type.astNode) {
        visit(type.astNode, visitor);
      }
@@ -202,6 +248,16 @@ index 17e9394c80ebb2257ec6145421fafa227872d0ca..f39ad76d7948ccc4e35f6b7d4adb26de
    }
    for (const node of schema.getDirectives()) {
      if (node.locations.some((location) => RequestDirectiveLocations.has(location))) {
+@@ -86,8 +94,7 @@ function getReachableTypes(schema) {
+       }
+     }
+   }
+-  reachableTypesCache = reachableTypes;
+-  return reachableTypesCache;
++  return reachableTypes;
+ }
+ const rule = {
+   meta: {
 diff --git a/esm/rules/relay-edge-types.js b/esm/rules/relay-edge-types.js
 index 7a7eb179786103d9d72a4a84fb4bf811d11a4286..6fb12a5f56b71f56c9a14018d0494e9c7584f935 100644
 --- a/esm/rules/relay-edge-types.js

@@ -320,7 +320,7 @@ patchedDependencies:
     hash: 1018befc9149cbc43bc2bf8982d52090a580e68df34b46674234f4e58eb6d0a0
     path: patches/@graphiql__react@1.0.0-alpha.4.patch
   '@graphql-eslint/eslint-plugin@3.20.1':
-    hash: 92716d09c5dd6166f88ca95d28b39ad4491682d48574a36c391e9875dd5060bb
+    hash: 91077daaea51b48fac14a0301370b60c64c27b7e0762fc27f73eb9aa4bfeb632
     path: patches/@graphql-eslint__eslint-plugin@3.20.1.patch
   '@slonik/pg-driver@48.19.0':
     hash: e12360d0c0740724e0317b8f5e2e4b4ab6cca28dd48bf04eef7ce550e8f08519
@@ -386,7 +386,7 @@ importers:
         version: 4.0.1(graphql@16.14.2)
       '@graphql-eslint/eslint-plugin':
         specifier: 'catalog:'
-        version: 3.20.1(patch_hash=92716d09c5dd6166f88ca95d28b39ad4491682d48574a36c391e9875dd5060bb)(@babel/core@7.29.7)(@types/node@24.13.3)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)
+        version: 3.20.1(patch_hash=91077daaea51b48fac14a0301370b60c64c27b7e0762fc27f73eb9aa4bfeb632)(@babel/core@7.29.7)(@types/node@24.13.3)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)
       '@graphql-inspector/cli':
         specifier: 7.0.0
         version: 7.0.0(@types/node@24.13.3)(graphql@16.14.2)
@@ -1653,7 +1653,7 @@ importers:
     devDependencies:
       '@graphql-eslint/eslint-plugin':
         specifier: 'catalog:'
-        version: 3.20.1(patch_hash=92716d09c5dd6166f88ca95d28b39ad4491682d48574a36c391e9875dd5060bb)(@babel/core@7.29.7)(@types/node@25.9.9)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)
+        version: 3.20.1(patch_hash=91077daaea51b48fac14a0301370b60c64c27b7e0762fc27f73eb9aa4bfeb632)(@babel/core@7.29.7)(@types/node@25.9.9)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)
       '@hive/service-common':
         specifier: workspace:*
         version: link:../service-common
@@ -20051,7 +20051,7 @@ snapshots:
       parse-filepath: 1.0.2
       tslib: 2.8.1
 
-  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=92716d09c5dd6166f88ca95d28b39ad4491682d48574a36c391e9875dd5060bb)(@babel/core@7.29.7)(@types/node@24.13.3)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)':
+  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=91077daaea51b48fac14a0301370b60c64c27b7e0762fc27f73eb9aa4bfeb632)(@babel/core@7.29.7)(@types/node@24.13.3)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)':
     dependencies:
       '@babel/code-frame': 7.29.7
       '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.29.7)(graphql@16.14.2)
@@ -20074,7 +20074,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=92716d09c5dd6166f88ca95d28b39ad4491682d48574a36c391e9875dd5060bb)(@babel/core@7.29.7)(@types/node@25.9.9)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)':
+  '@graphql-eslint/eslint-plugin@3.20.1(patch_hash=91077daaea51b48fac14a0301370b60c64c27b7e0762fc27f73eb9aa4bfeb632)(@babel/core@7.29.7)(@types/node@25.9.9)(cosmiconfig-toml-loader@1.0.0)(encoding@0.1.13)(graphql@16.14.2)':
     dependencies:
       '@babel/code-frame': 7.29.7
       '@graphql-tools/code-file-loader': 7.3.23(@babel/core@7.29.7)(graphql@16.14.2)
