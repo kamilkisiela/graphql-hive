@@ -293,17 +293,11 @@ function ChangeItem(
                     </span>
                   </>
                 ) : null}
-                {change.approval && (
-                  <>
-                    {' '}
-                    <ApprovedByBadge approval={change.approval} />
-                  </>
-                )}
               </div>
             </div>
           ),
           trailing:
-            change.isSafeBasedOnUsage || usageStatistics ? (
+            change.isSafeBasedOnUsage || usageStatistics || change.approval ? (
               <span className="flex items-center gap-2">
                 {change.isSafeBasedOnUsage ? (
                   <Badge
@@ -324,6 +318,7 @@ function ChangeItem(
                     variants={{ variant: 'critical' }}
                   />
                 ) : null}
+                {change.approval ? <ApprovedByBadge approval={change.approval} /> : null}
               </span>
             ) : undefined,
           content: (
@@ -723,9 +718,11 @@ function ApprovedByBadge(props: {
     approval.approvedBy?.displayName ?? approval.cliApprovalMetadata?.displayName ?? '<unknown>';
 
   return (
-    <span className="cursor-pointer text-success">
-      <CheckIcon className="inline size-3" /> Approved by {approvalName}
-    </span>
+    <Badge
+      icon={CheckIcon}
+      content={`Approved by ${approvalName}`}
+      variants={{ variant: 'success' }}
+    />
   );
 }
 
