@@ -145,6 +145,10 @@ export type SchemaCheckSuccess = {
     composition: SuccessCompositionState;
     /** schema changes from the main graph to the latest valid schema version or baseline graph */
     schemaChanges: null | GroupedSchemaChanges;
+    /** schema changes for the checked service without conditional breaking change detection */
+    serviceSchemaChanges?: Array<SchemaChangeType> | null;
+    /** schema changes for the composed supergraph without conditional breaking change detection */
+    supergraphSchemaChanges?: Array<SchemaChangeType> | null;
     /** schema policy warnings of the main graph composition */
     schemaPolicy: null | {
       errors: null;
@@ -162,6 +166,10 @@ export type SchemaCheckFailureReason = {
   composition: CompositionState;
   /** schema changes from the main graph to the latest valid schema version or baseline graph */
   schemaChanges: null | GroupedSchemaChanges;
+  /** schema changes for the checked service without conditional breaking change detection */
+  serviceSchemaChanges?: Array<SchemaChangeType> | null;
+  /** schema changes for the composed supergraph without conditional breaking change detection */
+  supergraphSchemaChanges?: Array<SchemaChangeType> | null;
   /** schema policy warnings of the main graph composition */
   schemaPolicy: null | {
     errors: SchemaCheckWarning[] | null;
@@ -375,6 +383,8 @@ export function buildSchemaCheckFailureState(args: {
             supergraphSDL: args.compositionCheck.result.supergraph ?? null,
           },
     schemaChanges: args.diffCheck.reason ?? args.diffCheck.result ?? null,
+    serviceSchemaChanges: null,
+    supergraphSchemaChanges: null,
     schemaPolicy: args.policyCheck?.reason ?? args.policyCheck?.result ?? null,
     contracts:
       args.contractChecks?.map(contractCheck => {

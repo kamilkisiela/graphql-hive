@@ -1430,6 +1430,8 @@ const SchemaCheckSharedPolicyFields = {
 const SchemaCheckSharedChangesFields = {
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  serviceSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  supergraphSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
 };
 
 const ManuallyApprovedSchemaCheckFields = {
@@ -1514,6 +1516,7 @@ const ContractCheckInput = z.object({
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  supergraphSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   baselineCompositeSchemaSdl: z.string().nullable(),
   baselineSupergraphSchemaSdl: z.string().nullable(),
   baselineCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),

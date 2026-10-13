@@ -2454,6 +2454,8 @@ export async function createStorage(
             , "schema_composition_errors"
             , "breaking_schema_changes"
             , "safe_schema_changes"
+            , "service_schema_changes"
+            , "supergraph_schema_changes"
             , "schema_policy_warnings"
             , "schema_policy_errors"
             , "composite_schema_sdl_store_id"
@@ -2486,6 +2488,8 @@ export async function createStorage(
             , ${psql.jsonbOrNull(args.schemaCompositionErrors)}
             , ${psql.jsonbOrNull(args.breakingSchemaChanges?.map(toSerializableSchemaChange))}
             , ${psql.jsonbOrNull(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
+            , ${psql.jsonbOrNull(args.serviceSchemaChanges?.map(toSerializableSchemaChange))}
+            , ${psql.jsonbOrNull(args.supergraphSchemaChanges?.map(toSerializableSchemaChange))}
             , ${psql.jsonbOrNull(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
             , ${psql.jsonbOrNull(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
             , ${compositeSchemaSdlHash}
@@ -2559,6 +2563,7 @@ export async function createStorage(
                 , "schema_composition_errors"
                 , "breaking_schema_changes"
                 , "safe_schema_changes"
+                , "supergraph_schema_changes"
                 , "baseline_supergraph_sdl_store_id"
                 , "baseline_composite_schema_sdl_store_id"
                 , "baseline_schema_composition_errors"
@@ -2574,6 +2579,7 @@ export async function createStorage(
                 , ${psql.jsonbOrNull(contract.schemaCompositionErrors)}
                 , ${psql.jsonbOrNull(contract.breakingSchemaChanges?.map(toSerializableSchemaChange))}
                 , ${psql.jsonbOrNull(contract.safeSchemaChanges?.map(toSerializableSchemaChange))}
+                , ${psql.jsonbOrNull(contract.supergraphSchemaChanges?.map(toSerializableSchemaChange))}
                 , ${baselineSupergraphSchemaSdlHash}
                 , ${baselinePublicSdlHash}
                 , ${psql.jsonbOrNull(contract.baselineCompositionErrors)}
@@ -3515,10 +3521,14 @@ const schemaCheckSQLFields = (include?: { sdl?: boolean; changes?: boolean }) =>
       ? psql`
         , c."breaking_schema_changes" as "breakingSchemaChanges"
         , c."safe_schema_changes" as "safeSchemaChanges"
+        , c."service_schema_changes" as "serviceSchemaChanges"
+        , c."supergraph_schema_changes" as "supergraphSchemaChanges"
       `
       : psql`
         , null as "breakingSchemaChanges"
         , null as "safeSchemaChanges"
+        , null as "serviceSchemaChanges"
+        , null as "supergraphSchemaChanges"
       `
   }
   , c."schema_policy_warnings" as "schemaPolicyWarnings"

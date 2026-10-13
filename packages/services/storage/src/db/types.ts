@@ -76,6 +76,7 @@ export interface contract_checks {
   safe_schema_changes: any | null;
   schema_check_id: string;
   schema_composition_errors: any | null;
+  supergraph_schema_changes: any | null;
   supergraph_sdl_store_id: string | null;
 }
 
@@ -452,7 +453,9 @@ export interface schema_checks {
   schema_sdl_store_id: string | null;
   schema_version_id: string | null;
   service_name: string | null;
+  service_schema_changes: any | null;
   service_url: string | null;
+  supergraph_schema_changes: any | null;
   supergraph_sdl: string | null;
   supergraph_sdl_store_id: string | null;
   target_id: string;

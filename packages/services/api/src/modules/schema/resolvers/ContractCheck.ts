@@ -34,6 +34,11 @@ export const ContractCheck: ContractCheckResolvers = {
       ...(contractCheck.safeSchemaChanges ?? []),
     ];
   },
+  supergraphSchemaChanges: contractCheck => {
+    return contractCheck.supergraphSchemaChanges?.length
+      ? contractCheck.supergraphSchemaChanges
+      : null;
+  },
   async baseline(contractCheck, _arg, { injector }) {
     return injector.get(ContractsManager).getContractBaselineForContractCheck(contractCheck);
   },

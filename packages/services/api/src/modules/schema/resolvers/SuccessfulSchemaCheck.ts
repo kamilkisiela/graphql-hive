@@ -73,6 +73,12 @@ export const SuccessfulSchemaCheck: SuccessfulSchemaCheckResolvers = {
   schemaChanges: (schemaCheck, _, { injector }) => {
     return injector.get(SchemaCheckManager).getAllSchemaChanges(schemaCheck);
   },
+  serviceSchemaChanges: (schemaCheck, _, { injector }) => {
+    return injector.get(SchemaCheckManager).getServiceSchemaChanges(schemaCheck);
+  },
+  supergraphSchemaChanges: (schemaCheck, _, { injector }) => {
+    return injector.get(SchemaCheckManager).getSupergraphSchemaChanges(schemaCheck);
+  },
   baseline: async (schemaCheck, _arg, { injector }) => {
     return injector.get(SchemaCheckManager).getGraphQLSchemaCheckBaseline(schemaCheck);
   },

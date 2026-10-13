@@ -440,6 +440,8 @@ export class RegistryChecks {
     existing: Pick<SchemaInput, 'sdl'> | null;
     /** The incoming SDL */
     incoming: Pick<SchemaInput, 'sdl'> | null;
+    /** Whether changes nested under another change should be excluded. */
+    filterNestedChanges: boolean;
   }) {
     let existingSchema: GraphQLSchema | null;
     let incomingSchema: GraphQLSchema | null;
@@ -474,11 +476,16 @@ export class RegistryChecks {
         reason: 'Incoming schema is invalid.',
       } satisfies CheckResult;
     }
-    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema);
+
+    const result = await this.inspector.diff(
+      existingSchema,
+      incomingSchema,
+      args.filterNestedChanges ? [DiffRule.simplifyChanges] : [],
+    );
 
     return {
       status: 'completed',
-      result: inspectorChanges,
+      result,
     } satisfies CheckResult;
   }
 

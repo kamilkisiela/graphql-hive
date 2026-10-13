@@ -60,6 +60,14 @@ export class SchemaCheckManager {
     return schemaCheck.breakingSchemaChanges;
   }
 
+  getServiceSchemaChanges(schemaCheck: SchemaCheck) {
+    return schemaCheck.serviceSchemaChanges?.length ? schemaCheck.serviceSchemaChanges : null;
+  }
+
+  getSupergraphSchemaChanges(schemaCheck: SchemaCheck) {
+    return schemaCheck.supergraphSchemaChanges?.length ? schemaCheck.supergraphSchemaChanges : null;
+  }
+
   getSchemaVersion(schemaCheck: SchemaCheck) {
     if (schemaCheck.schemaVersionId === null) {
       return null;
