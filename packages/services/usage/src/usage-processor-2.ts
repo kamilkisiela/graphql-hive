@@ -284,6 +284,10 @@ export const usageProcessorV2 = traceInlineSync(
         },
         metadata: {
           client,
+          graph: {
+            graphId: operation.metadata?.graph?.graphId,
+            graphVersionId: operation.metadata?.graph?.graphVersionId,
+          },
         },
       });
 
@@ -338,6 +342,10 @@ export const usageProcessorV2 = traceInlineSync(
           : undefined,
         metadata: {
           client,
+          graph: {
+            graphId: operation.metadata?.graph?.graphId,
+            graphVersionId: operation.metadata?.graph?.graphVersionId,
+          },
         },
       });
     }
@@ -382,50 +390,56 @@ const OperationMapRecordSchema = tb.Object(
 
 type OperationMapRecord = tb.Static<typeof OperationMapRecordSchema>;
 
-const TrackedErrorSchema = tb.Object({ coordinate: tb.String(), code: tb.Optional(tb.String()) });
+const TrackedErrorSchema = tb.Object(
+  { coordinate: tb.String(), code: tb.Optional(tb.String()) },
+  {
+    title: 'TrackedError',
+    description:
+      'Error for a schema coordinate, with the code returned from the GraphQL extensions.',
+  },
+);
 
 const SubgraphRequestSchema = tb.Object(
   {
-    /** Delta start time from "timestamp" */
     start: tb.Integer({
+      description: 'Delta start time from "timestamp". Unsigned 64-bit integer, capped at 2^63.',
       minimum: 0,
       maximum: Math.pow(2, 63),
     }),
 
-    /** How long the request took */
     duration: tb.Integer({
+      description: 'How long the request took. Unsigned 64-bit integer, capped at 2^63.',
       minimum: 0,
       maximum: Math.pow(2, 63),
     }),
 
-    /** HTTP Status Code */
     status: tb.Optional(
       tb.Integer({
+        description: 'HTTP status code.',
         minimum: 0,
         maximum: 599,
       }),
     ),
 
-    /** Number of times the field has been requested. Regardless of success or failure */
-    fields: tb.Record(tb.String(), tb.Number()),
+    fields: tb.Record(tb.String(), tb.Number(), {
+      description:
+        'Number of times each field has been requested, regardless of success or failure.',
+    }),
 
-    /** Error code for a coordinate, with a code returned from the graphql extensions */
     errors: tb.Optional(tb.Array(TrackedErrorSchema)),
 
-    /** Which subgraph resolved this path */
-    subgraph: tb.String(),
+    subgraph: tb.String({ description: 'Which subgraph resolved this path.' }),
 
-    /**
-     * If this is an entity request, then this is the coordinate in the original operation that is being resolved.
-     * If undefined, then the path is assumed to be 'Query'.
-     */
-    paths: tb.Union([tb.String(), tb.Array(tb.String(), { minItems: 1 })]),
+    paths: tb.Union([tb.String(), tb.Array(tb.String(), { minItems: 1 })], {
+      description:
+        'If this is an entity request, the coordinate in the original operation that is being resolved. ' +
+        "If undefined, the path is assumed to be 'Query'.",
+    }),
 
-    /**
-     * What type of request this is. Root is if resolving a root query/mutation field. Entity is
-     * if resolving an entity type in federation.
-     * */
-    type: tb.Union([tb.Literal('ROOT'), tb.Literal('ENTITY')]),
+    type: tb.Union([tb.Literal('ROOT'), tb.Literal('ENTITY')], {
+      description:
+        'ROOT if resolving a root query/mutation field, ENTITY if resolving an entity type in federation.',
+    }),
   },
   {
     title: 'SubgraphRequest',
@@ -437,6 +451,7 @@ const ExecutionSchema = tb.Type.Object(
   {
     ok: tb.Type.Boolean(),
     duration: tb.Type.Integer({
+      description: 'How long the operation took. Unsigned 64-bit integer, capped at 2^63.',
       // https://clickhouse.com/docs/en/sql-reference/data-types/int-uint
       minimum: 0,
       // Maximum value is 18_446_744_073_709_551_615, but we stick to Math.pow(2, 63).
@@ -468,9 +483,23 @@ const ClientSchema = tb.Type.Object(
   },
 );
 
+const UUIDType = tb.Type.String({ format: 'uuid' });
+
+const GraphSchema = tb.Type.Object(
+  {
+    graphId: UUIDType,
+    graphVersionId: UUIDType,
+  },
+  {
+    title: 'Graph',
+    additionalProperties: false,
+  },
+);
+
 const MetadataSchema = tb.Type.Object(
   {
     client: OptionalAndNullable(ClientSchema),
+    graph: OptionalAndNullable(GraphSchema),
   },
   {
     title: 'Metadata',
@@ -480,7 +509,7 @@ const MetadataSchema = tb.Type.Object(
 
 const PersistedDocumentHash = tb.Type.String({
   title: 'PersistedDocumentHash',
-  // appName/appVersion/hash
+  description: 'Persisted document identifier in the format "appName~appVersion~hash".',
   pattern: '^[a-zA-Z0-9_-]{1,64}~[a-zA-Z0-9._-]{1,64}~([A-Za-z]|[0-9]|_){1,128}$',
 });
 
@@ -498,9 +527,11 @@ tb.TypeRegistry.Set<number>('UnixTimestampInMs', (_, value) =>
   typeof value === 'number' ? isUnixTimestamp(value) : false,
 );
 
-const UnixTimestampInMs = tb.Type.Unsafe<number>({ [tb.Kind]: 'UnixTimestampInMs' });
+const UnixTimestampInMs = tb.Type.Unsafe<number>({
+  [tb.Kind]: 'UnixTimestampInMs',
+  description: 'Unix timestamp in milliseconds.',
+});
 
-/** Query + Mutation */
 const RequestOperationSchema = tb.Type.Object(
   {
     timestamp: UnixTimestampInMs,
@@ -511,11 +542,11 @@ const RequestOperationSchema = tb.Type.Object(
   },
   {
     title: 'RequestOperation',
+    description: 'Query or mutation operation.',
     additionalProperties: false,
   },
 );
 
-/** Subscription / Live Query */
 const SubscriptionOperationSchema = tb.Type.Object(
   {
     timestamp: UnixTimestampInMs,
@@ -525,6 +556,7 @@ const SubscriptionOperationSchema = tb.Type.Object(
   },
   {
     title: 'SubscriptionOperation',
+    description: 'Subscription or live query operation.',
     additionalProperties: false,
   },
 );
