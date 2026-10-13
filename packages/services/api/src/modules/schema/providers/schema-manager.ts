@@ -274,16 +274,6 @@ export class SchemaManager {
     return this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id);
   }
 
-  async getServiceNamesOfVersion(schemaVersion: SchemaVersion) {
-    const project = await this.projectManager.getProjectById(schemaVersion.projectId);
-    // Single-schema pushes carry no service name, so there is nothing to list.
-    if (project.type === ProjectType.SINGLE) {
-      return null;
-    }
-    this.logger.debug('Fetching service names (schemaVersionId=%s)', schemaVersion.id);
-    return this.schemaVersions.getServiceNamesBySchemaVersionId(schemaVersion.id);
-  }
-
   async getMatchingServiceSchemaOfVersions(versions: { before: string | null; after: string }) {
     this.logger.debug('Fetching service schema of versions (selector=%o)', versions);
     return this.schemaVersions.getMatchingServiceSchemaOfVersions(versions);
