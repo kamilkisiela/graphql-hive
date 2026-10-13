@@ -102,9 +102,6 @@ export function createLaboratoryHelper(page: Page): LaboratoryHelper {
 
   const helper: LaboratoryHelper = {
     async openSeededTarget(slug, search = '') {
-      await page.addInitScript(() => {
-        window.localStorage.setItem('hive:laboratory:welcome-dialog-shown', 'true');
-      });
       await page.goto(`/${slug}/laboratory${search}`, { waitUntil: 'domcontentloaded' });
       await expect(page.locator('.hive-laboratory-host')).toBeVisible({ timeout: 30_000 });
     },

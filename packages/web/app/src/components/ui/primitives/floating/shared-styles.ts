@@ -98,17 +98,15 @@ export type FloatingProps = {
   /**
    * Element that triggers the floating panel.
    *
-   * A function when the trigger has to be composed with another wrapper that owns the same
-   * element. `GraphiQLTooltip` in `pages/target-laboratory.tsx` is the case this exists for: it
-   * destructures only `{ children, align, side, sideOffset, label }` and forwards nothing, so
-   * passing it as an element would swallow the trigger props and the panel would never open.
-   * Given a function you apply the props yourself, and any wrapper can sit outside:
+   * A function when the trigger has to be composed with a wrapper that owns the same element
+   * and does not forward unknown props; passed as an element, such a wrapper would swallow the
+   * trigger props and the panel would never open. Given a function you apply the props yourself:
    *
    * ```tsx
    * trigger={props => (
-   *   <GraphiQLTooltip label={label}>
-   *     <GraphiQLButton {...props} />
-   *   </GraphiQLTooltip>
+   *   <SomeTooltip label={label}>
+   *     <Button {...props} />
+   *   </SomeTooltip>
    * )}
    * ```
    */

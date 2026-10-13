@@ -46,7 +46,7 @@ src/routes/
   tree.ts                    root.addChildren([...]) mirroring every route's getParentRoute
   root.tsx                   root route, 404, logout, join
   anonymous.tsx              /auth/* (pathless `anonymous` parent)
-  authenticated.tsx          /, /dev, /manage, /org/new, transfer (pathless `authenticated` parent: the session gate)
+  authenticated.tsx          /, /manage, /org/new, transfer (pathless `authenticated` parent: the session gate)
   with-header.tsx            the header, once, above the routes below (pathless `with-header` parent)
   oidc-request.tsx           $organizationSlug/oidc-request, the OIDC interstitial
   organization/route.tsx     $organizationSlug layout + index, support, subscription

@@ -8,9 +8,5 @@ export const targetLaboratoryRoute = createRoute({
   path: 'laboratory',
   validateSearch: () => ({}) as { operation?: string; operationString?: string },
   loader: loader => requireLayoutFlag.target(loader, 'viewerCanViewLaboratory'),
-  component: function TargetLaboratoryRoute() {
-    const { operation } = targetLaboratoryRoute.useSearch();
-
-    return <TargetLaboratoryPage selectedOperationId={operation} />;
-  },
+  component: TargetLaboratoryPage,
 });

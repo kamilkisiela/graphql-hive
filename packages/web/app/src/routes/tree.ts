@@ -124,7 +124,7 @@ export const routeTree = root.addChildren([
   authenticatedRoute.addChildren([
     indexRoute,
     nativeCompositionDiffRoute,
-      newOrgPage,
+    newOrgPage,
     manageRoute,
     transferOrganizationRoute,
     withHeaderRoute.addChildren([

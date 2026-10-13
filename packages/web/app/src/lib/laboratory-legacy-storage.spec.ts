@@ -85,6 +85,7 @@ describe('migrateLegacyLaboratoryStorage', () => {
 
   it('clears every key the GraphiQL tab left behind and keeps the rest', () => {
     localStorage.setItem('hive:laboratory:type', 'graphiql');
+    localStorage.setItem('hive:laboratory:welcome-dialog-shown', 'true');
     localStorage.setItem(OLD_ENABLED, 'true');
     localStorage.setItem('hive:operation-abc', '{"query":"{ a }"}');
     localStorage.setItem('graphiql:tabState', '{"tabs":[]}');

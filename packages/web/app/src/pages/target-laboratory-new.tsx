@@ -10,11 +10,10 @@ import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Button } from '@/components/ui/primitives/button/button';
-import { Dialog } from '@/components/ui/primitives/overlays/dialog/dialog';
 import { ToggleGroup } from '@/components/ui/primitives/toggle-group/toggle-group';
 import { graphql, useFragment } from '@/gql';
 import { TargetEnvPlugin } from '@/laboratory/plugins/target-env';
-import { useLocalStorage, useSlugs, useToggle } from '@/lib/hooks';
+import { useSlugs, useToggle } from '@/lib/hooks';
 import { useCurrentOperationWithFetchingState } from '@/lib/hooks/laboratory/use-current-operation';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
@@ -726,7 +725,7 @@ const TargetLaboratoryPageQuery = graphql(`
   }
 `);
 
-function LaboratoryPageContent(props: { selectedOperationId?: string }) {
+function LaboratoryPageContent() {
   const { organizationSlug, projectSlug, targetSlug } = useSlugs('target');
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
@@ -864,40 +863,12 @@ function LaboratoryPageContent(props: { selectedOperationId?: string }) {
   );
 }
 
-export function TargetLaboratoryPage(props: { selectedOperationId: string | undefined }) {
-  const [isWelcomeDialogShown, setIsWelcomeDialogShown] = useLocalStorage(
-    'hive:laboratory:welcome-dialog-shown',
-    'false',
-  );
-
-  // Read once: the effect below marks it shown on the first render, so the dialog owns its own
-  // open state from then on.
-  const [welcomeOpen, setWelcomeOpen] = useState(isWelcomeDialogShown === 'false');
-
-  useEffect(() => {
-    if (isWelcomeDialogShown === 'false') {
-      setIsWelcomeDialogShown('true');
-    }
-  }, [isWelcomeDialogShown]);
-
+export function TargetLaboratoryPage() {
   return (
     <>
       <Meta title="Schema laboratory" />
-      <Dialog
-        open={welcomeOpen}
-        onOpenChange={setWelcomeOpen}
-        width="sm"
-        title="Welcome to new Hive Laboratory"
-        description="Hive Laboratory is a new way to explore your GraphQL schema and run queries against your GraphQL API."
-        footer={
-          <Button onSurface="raised" onClick={() => setWelcomeOpen(false)}>
-            Get started
-          </Button>
-        }
-      >
-      </Dialog>
       <LayoutContent className="flex h-(--content-height) flex-col pb-0">
-        <LaboratoryPageContent {...props} />
+        <LaboratoryPageContent />
       </LayoutContent>
     </>
   );

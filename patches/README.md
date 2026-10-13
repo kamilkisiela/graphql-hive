@@ -15,17 +15,6 @@ extension node so composition does not throw, and de-duplicates repeated errors 
 
 Retire when Federation v1 support is dropped. The package is frozen at 0.38.1 upstream.
 
-## `@graphiql__react@1.0.0-alpha.4.patch` and `graphiql@4.0.0-alpha.5.patch`
-
-The old GraphiQL laboratory, still reachable through the GraphiQL / Hive Laboratory switch on the
-Laboratory page. The patches add `addTab(state)`, `setTabState`,
-`updateActiveTabValues({ id, title })`, and reset-instead-of-vanish when the last tab is closed;
-those are used by `use-operation-collections-plugin.tsx`, `edit-operation-modal.tsx` and
-`target-laboratory.tsx`. The `isMacOs` export exists for the patched `graphiql` bundle itself, and
-the `onModifyHeaders` hook in the same patches is unused.
-
-Retire together with the old laboratory.
-
 ## `@graphql-eslint__eslint-plugin@3.20.1.patch`
 
 The policy service lints customer schemas with this plugin at runtime, and `scripts/runify.ts`

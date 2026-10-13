@@ -4,8 +4,14 @@ const OLD_ENV_KEY = 'hive:laboratory:environment';
 const OLD_ENABLED_KEY = 'hive:laboratory:isPreflightScriptEnabled';
 const ENV_KEY = 'hive:laboratory:env';
 const ENABLED_KEY = 'hive:laboratory:preflightEnabled';
-// Everything else the GraphiQL tab left behind: its page switch, its drafts and GraphiQL's own store.
-const LEGACY_KEYS = ['hive:laboratory:type', OLD_ENV_KEY, OLD_ENABLED_KEY];
+// Everything else the GraphiQL tab left behind: its page switch, its welcome dialog, its drafts
+// and GraphiQL's own store.
+const LEGACY_KEYS = [
+  'hive:laboratory:type',
+  'hive:laboratory:welcome-dialog-shown',
+  OLD_ENV_KEY,
+  OLD_ENABLED_KEY,
+];
 const LEGACY_PREFIXES = ['hive:operation-', 'graphiql:'];
 
 // The GraphiQL tab kept env as raw editor text and the toggle as a JSON boolean. Copies only

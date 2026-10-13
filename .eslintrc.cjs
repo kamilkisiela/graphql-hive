@@ -259,8 +259,6 @@ module.exports = {
               'ring-offset-.*',
               // Data attribute variants with custom animations (for Radix UI components)
               'data-\\[side=(top|right|bottom|left)\\]:animate-slide-(up|down|left|right)-fade',
-              // GraphiQL classes
-              'graphiql-.*',
               // hive classes
               'hive-.*',
               // Schema diff custom classes (defined in index.css)
