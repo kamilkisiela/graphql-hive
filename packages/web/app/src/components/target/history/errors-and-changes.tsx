@@ -246,6 +246,8 @@ function ChangeItem(
     props.conditionBreakingChangeMetadata,
   );
 
+  const usageStatistics = 'usageStatistics' in change ? (change.usageStatistics ?? null) : null;
+
   // Older checks have no per-target counts and keep the old layout.
   const targetUsage =
     'usageStatistics' in change &&
@@ -276,32 +278,6 @@ function ChangeItem(
             >
               <div>
                 <span className="text-fg-secondary">{labelize(change.message)}</span>
-                {change.isSafeBasedOnUsage && (
-                  <span className="cursor-pointer text-warning">
-                    {' '}
-                    <CheckIcon className="inline size-3" /> Safe based on usage data
-                  </span>
-                )}
-                {'usageStatistics' in change && change.usageStatistics && !targetUsage && (
-                  <>
-                    {' '}
-                    <span className="inline-flex items-center space-x-1 rounded-sm bg-surface-selected px-2 py-1 align-middle font-bold text-critical">
-                      <ActivityIcon className="size-4 stroke-[1px]" />
-                      <span className="text-xs">
-                        {change.usageStatistics.topAffectedOperations.length}
-                        {change.usageStatistics.topAffectedOperations.length > 10 ? '+' : ''}{' '}
-                        {change.usageStatistics.topAffectedOperations.length === 1
-                          ? 'operation'
-                          : 'operations'}{' '}
-                        by {change.usageStatistics.topAffectedClients.length}{' '}
-                        {change.usageStatistics.topAffectedClients.length === 1
-                          ? 'client'
-                          : 'clients'}{' '}
-                        affected
-                      </span>
-                    </span>
-                  </>
-                )}
                 {'affectedAppDeployments' in change && change.affectedAppDeployments?.totalCount ? (
                   <>
                     {' '}
@@ -326,23 +302,30 @@ function ChangeItem(
               </div>
             </div>
           ),
-          trailing: targetUsage ? (
-            <span className="flex items-center gap-2">
-              <Badge
-                content={`${targetUsage.affectedTargets.length} of ${formatCount(targetUsage.metadata.settings.targets.length, 'target')}`}
-                variants={{ variant: 'outline' }}
-              />
-              <Badge
-                content={`${formatCount(
-                  targetUsage.statistics.topAffectedOperations.length,
-                  'operation',
-                  // Ten is the cap, so ten means at least ten.
-                  targetUsage.statistics.topAffectedOperations.length >= 10 ? '10+' : undefined,
-                )} • ${formatCount(targetUsage.statistics.topAffectedClients.length, 'client')}`}
-                variants={{ variant: 'outline' }}
-              />
-            </span>
-          ) : undefined,
+          trailing:
+            change.isSafeBasedOnUsage || usageStatistics ? (
+              <span className="flex items-center gap-2">
+                {change.isSafeBasedOnUsage ? (
+                  <Badge
+                    icon={CheckIcon}
+                    content="Safe based on usage data"
+                    variants={{ variant: 'warning' }}
+                  />
+                ) : null}
+                {usageStatistics ? (
+                  <Badge
+                    icon={ActivityIcon}
+                    content={`${formatCount(
+                      usageStatistics.topAffectedOperations.length,
+                      'operation',
+                      // Ten is the cap, so ten means at least ten.
+                      usageStatistics.topAffectedOperations.length >= 10 ? '10+' : undefined,
+                    )} by ${formatCount(usageStatistics.topAffectedClients.length, 'client')} affected`}
+                    variants={{ variant: 'critical' }}
+                  />
+                ) : null}
+              </span>
+            ) : undefined,
           content: (
             <div
               className={

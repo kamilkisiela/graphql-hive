@@ -361,7 +361,7 @@ describe('breaking change usage', () => {
         { name: /was removed from object type/ },
         { timeout: 10_000 },
       );
-      expect(change.textContent).toContain('1 of 2 targets');
+      expect(change.textContent).toContain('1 operation by 1 client affected');
       await act(async () => {
         fireEvent.click(change);
       });
@@ -399,7 +399,6 @@ describe('breaking change usage', () => {
         { timeout: 10_000 },
       );
       expect(change.textContent).toContain('Safe based on usage data');
-      expect(change.textContent).not.toContain('of 2 targets');
       await act(async () => {
         fireEvent.click(change);
       });
@@ -422,7 +421,6 @@ describe('breaking change usage', () => {
       { name: /was removed from object type/ },
       { timeout: 10_000 },
     );
-    expect(change.textContent).not.toContain('0 of 2 targets');
     await act(async () => {
       fireEvent.click(change);
     });
