@@ -9,9 +9,6 @@ import type { CreateChannel_AddAlertChannelMutation } from '@/components/project
 import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
 import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/project/alerts/delete-channels-button';
 import type { AlertForm_AddMetricAlertRuleMutation } from '@/components/target/alerts/alert-form';
-import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
-import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
-import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
 import type {
   CDNAccessTokenCreateMutation,
   CDNAccessTokenDeleteMutation,
@@ -19,7 +16,6 @@ import type {
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/target/settings/registry-access-token';
 import { graphql } from '@/gql';
 import schema from '@/gql/schema';
-import { CollectionsQuery } from '@/lib/hooks/laboratory/use-collections';
 import type { JoinOrganizationPage_JoinOrganizationMutation } from '@/pages/organization-join';
 import type { CreateOrganizationMutation } from '@/pages/organization-new';
 import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
@@ -303,89 +299,6 @@ const addAlert: TypedDocumentNodeUpdateResolver<typeof CreateAlertModal_AddAlert
   });
 };
 
-const deleteDocumentCollection: TypedDocumentNodeUpdateResolver<DeleteCollectionMutationType> = (
-  mutation,
-  args,
-  cache,
-) => {
-  cache.updateQuery(
-    {
-      query: CollectionsQuery,
-      variables: {
-        selector: args.selector,
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-
-      return {
-        ...data,
-        target: Object.assign(
-          {},
-          data.target,
-          mutation.deleteDocumentCollection.ok?.updatedTarget || {},
-        ),
-      };
-    },
-  );
-};
-
-const deleteOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
-  DeleteOperationMutationType
-> = (mutation, args, cache) => {
-  cache.updateQuery(
-    {
-      query: CollectionsQuery,
-      variables: {
-        selector: args.selector,
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-
-      return {
-        ...data,
-        target: Object.assign(
-          {},
-          data.target,
-          mutation.deleteOperationInDocumentCollection.ok?.updatedTarget || {},
-        ),
-      };
-    },
-  );
-};
-
-const createOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
-  CreateOperationMutationType
-> = (mutation, args, cache) => {
-  cache.updateQuery(
-    {
-      query: CollectionsQuery,
-      variables: {
-        selector: args.selector,
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-
-      return {
-        ...data,
-        target: Object.assign(
-          {},
-          data.target,
-          mutation.createOperationInDocumentCollection.ok?.updatedTarget || {},
-        ),
-      };
-    },
-  );
-};
-
 const deleteSavedFilter: TypedDocumentNodeUpdateResolver<
   typeof ManageFilters_DeleteSavedFilterMutation
 > = ({ deleteSavedFilter }, args, cache) => {
@@ -488,9 +401,6 @@ export const Mutation = {
   addAlertChannel,
   deleteAlertChannels,
   addAlert,
-  deleteDocumentCollection,
-  deleteOperationInDocumentCollection,
-  createOperationInDocumentCollection,
   deleteSavedFilter,
   createCdnAccessToken,
   deleteCdnAccessToken,
