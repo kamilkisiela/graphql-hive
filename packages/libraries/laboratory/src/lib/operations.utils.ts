@@ -1204,6 +1204,21 @@ export function searchSchemaPaths(
   };
 }
 
+/** Later headers replace earlier ones by name, compared case-insensitively. */
+export function mergeHeaders(
+  base: Record<string, string>,
+  override: Record<string, string>,
+): Record<string, string> {
+  const overridden = new Set(Object.keys(override).map(name => name.toLowerCase()));
+
+  return {
+    ...Object.fromEntries(
+      Object.entries(base).filter(([name]) => !overridden.has(name.toLowerCase())),
+    ),
+    ...override,
+  };
+}
+
 export function handleTemplate(query: string, env: Record<string, any>) {
   return query.replace(/\{\{(.*?)\}\}/g, (match, p1) => {
     return get(env, p1) ?? match;

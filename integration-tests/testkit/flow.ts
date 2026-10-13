@@ -1240,6 +1240,13 @@ export function getSchemaVersionWithAllDetails(
                   previousContractVersion {
                     id
                   }
+                  breakingSchemaChanges {
+                    edges {
+                      node {
+                        message
+                      }
+                    }
+                  }
                 }
               }
             }

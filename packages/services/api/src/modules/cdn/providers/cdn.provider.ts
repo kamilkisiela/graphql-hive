@@ -8,7 +8,7 @@ import { HiveError } from '../../../shared/errors';
 import { isUUID } from '../../../shared/is-uuid';
 import { AuditLogRecorder } from '../../audit-logs/providers/audit-log-recorder';
 import { Session } from '../../auth/lib/authz';
-import type { Contract } from '../../schema/providers/contracts';
+import type { ContractGraph } from '../../graph/providers/graph-store';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { S3Writer } from '../../shared/providers/s3-writer';
@@ -51,12 +51,12 @@ export class CdnProvider {
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
   }
 
-  getCdnUrlForContract(contract: Contract): string {
+  getCdnUrlForContractGraph(graph: ContractGraph): string {
     if (this.config.providers.cloudflare) {
-      return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${contract.targetId}/contracts/${contract.contractName}`;
+      return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${graph.targetId}/contracts/${graph.name.replace(/^default\//, '')}`;
     }
     if (this.config.providers.api) {
-      return `${this.config.providers.api.baseUrl}/artifacts/v1/${contract.targetId}/contracts/${contract.contractName}`;
+      return `${this.config.providers.api.baseUrl}/artifacts/v1/${graph.targetId}/contracts/${graph.name.replace(/^default\//, '')}`;
     }
 
     throw new HiveError(`CDN is not configured, cannot resolve CDN contract url.`);

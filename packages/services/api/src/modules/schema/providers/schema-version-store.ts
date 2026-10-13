@@ -40,6 +40,11 @@ const GraphMetadataModel = z.discriminatedUnion('type', [
 
 type GraphMetadata = z.TypeOf<typeof GraphMetadataModel>;
 
+type GithubMeta = null | {
+  sha: string;
+  repository: string;
+};
+
 @Injectable({
   scope: Scope.Operation,
   global: true,
@@ -74,10 +79,7 @@ export class SchemaVersionStore {
       > | null;
       metadataAttributes: Record<string, string[]> | null;
       hasContractCompositionErrors: boolean;
-      github: null | {
-        sha: string;
-        repository: string;
-      };
+      github: GithubMeta;
       meta: SchemaVersionMeta | null;
       conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadata | null;
       /** The UUID of the graph this schema version belongs to */
@@ -240,66 +242,50 @@ export class SchemaVersionStore {
       compositeSchemaSDL: string | null;
       supergraphSDL: string | null;
       schemaCompositionErrors: Array<SchemaCompositionError> | null;
-    },
-  ): Promise<string> {
-    const id = await trx.oneFirst(psql`/* insertSchemaVersionContract */
-      INSERT INTO "contract_versions" (
-        "schema_version_id"
-        , "contract_id"
-        , "contract_name"
-        , "schema_composition_errors"
-        , "composite_schema_sdl"
-        , "supergraph_sdl"
-      )
-     VALUES (
-        ${args.schemaVersionId}
-        , ${args.contractId}
-        , ${args.contractName}
-        , ${psql.jsonbOrNull(args.schemaCompositionErrors)}
-        , ${args.compositeSchemaSDL}
-        , ${args.supergraphSDL}
-      )
-      RETURNING
-        "id"
-    `);
-
-    return z.string().parse(id);
-  }
-
-  private async insertSchemaVersionContractChanges(
-    trx: CommonQueryMethods,
-    args: {
       changes: Array<SchemaChangeType> | null;
-      schemaVersionContractId: string;
+      supergraphChanges: Array<SchemaChangeType> | null;
+      previousSchemaVersionId: string | null;
+      diffSchemaVersionId: string | null;
+      graph: Graph;
+      origin: SchemaVersionOrigin;
+      github: GithubMeta;
+      conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadata | null;
+      meta: SchemaVersionMeta | null;
     },
-  ) {
-    if (!args.changes?.length) {
-      return;
-    }
+  ): Promise<void> {
+    const version = await this.insertSchemaVersion(trx, {
+      sourceSchemaVersionId: args.schemaVersionId,
+      graphMetadata: {
+        id: args.graph.id,
+        name: args.graph.name,
+        type: 'contract',
+      },
+      isComposable: !args.schemaCompositionErrors?.length,
+      targetId: args.graph.targetId,
+      supergraphSDL: args.supergraphSDL,
+      compositeSchemaSDL: args.compositeSchemaSDL,
+      graphId: args.graph.id,
+      hasContractCompositionErrors: false,
+      supergraphChanges: args.supergraphChanges,
+      meta: args.meta,
+      conditionalBreakingChangeMetadata: args.conditionalBreakingChangeMetadata,
+      github: args.github,
+      origin: args.origin,
+      schemaCompositionErrors: args.schemaCompositionErrors,
+      previousSchemaVersionId: args.previousSchemaVersionId,
+      diffSchemaVersionId: args.diffSchemaVersionId,
+      schemaMetadata: null,
+      baseSchema: null,
+      tags: null,
+      metadataAttributes: null,
+    });
 
-    await trx.query(psql`/* insertSchemaVersionContractChanges */
-      INSERT INTO "contract_version_changes" (
-        "contract_version_id",
-        "change_type",
-        "severity_level",
-        "meta",
-        "is_safe_based_on_usage"
-      )
-      SELECT * FROM
-      ${psql.unnest(
-        args.changes.map(change =>
-          // Note: change.criticality.level is actually a computed value from meta
-          [
-            args.schemaVersionContractId,
-            change.type,
-            change.criticality,
-            JSON.stringify(change.meta),
-            change.isSafeBasedOnUsage ?? false,
-          ],
-        ),
-        ['uuid', 'text', 'text', 'jsonb', 'bool'],
-      )}
-    `);
+    if (args.changes?.length) {
+      await this.insertSchemaVersionChanges(trx, {
+        changes: args.changes,
+        versionId: version.id,
+      });
+    }
   }
 
   @traceFn('SchemaVersionsStore.createPublishSchemaVersion', {
@@ -403,6 +389,25 @@ export class SchemaVersionStore {
         schemaRevisionId: args.schemaRevisionId,
       });
 
+      const origin: SchemaVersionOriginPublish = {
+        type: 'publish',
+        revision: args.service ? null : args.revision,
+        services: args.service
+          ? [
+              {
+                name: args.service.name,
+                versionId: newLog.id,
+                revision: args.revision,
+              },
+            ]
+          : null,
+      };
+
+      const meta: SchemaVersionMeta = {
+        author: args.author,
+        commit: args.commit,
+      };
+
       // creates a new version
       const version = await this.insertSchemaVersion(trx, {
         isComposable: args.valid,
@@ -414,19 +419,7 @@ export class SchemaVersionStore {
           type: 'default',
         },
         sourceSchemaVersionId: null,
-        origin: {
-          type: 'publish',
-          revision: args.service ? null : args.revision,
-          services: args.service
-            ? [
-                {
-                  name: args.service.name,
-                  versionId: newLog.id,
-                  revision: args.revision,
-                },
-              ]
-            : null,
-        },
+        origin,
         baseSchema: args.base_schema,
         previousSchemaVersionId: args.previousSchemaVersion,
         diffSchemaVersionId: args.diffSchemaVersionId,
@@ -435,10 +428,7 @@ export class SchemaVersionStore {
         supergraphChanges: args.supergraphChanges,
         schemaCompositionErrors: args.schemaCompositionErrors,
         github: args.github,
-        meta: {
-          author: args.author,
-          commit: args.commit,
-        },
+        meta,
         tags: args.tags,
         schemaMetadata: args.schemaMetadata,
         metadataAttributes: args.metadataAttributes,
@@ -483,17 +473,22 @@ export class SchemaVersionStore {
       });
 
       for (const contract of args.contracts ?? []) {
-        const schemaVersionContractId = await this.insertSchemaVersionContract(trx, {
+        await this.insertSchemaVersionContract(trx, {
           schemaVersionId: version.id,
+          changes: contract.changes,
           contractId: contract.contractId,
           contractName: contract.contractName,
           schemaCompositionErrors: contract.schemaCompositionErrors,
           compositeSchemaSDL: contract.compositeSchemaSDL,
           supergraphSDL: contract.supergraphSDL,
-        });
-        await this.insertSchemaVersionContractChanges(trx, {
-          schemaVersionContractId,
-          changes: contract.changes,
+          graph: contract.graph,
+          origin,
+          github: args.github,
+          supergraphChanges: contract.supergraphChanges,
+          conditionalBreakingChangeMetadata: args.conditionalBreakingChangeMetadata,
+          diffSchemaVersionId: contract.diffSchemaVersionId,
+          previousSchemaVersionId: contract.previousSchemaVersionId,
+          meta,
         });
       }
 
@@ -614,14 +609,16 @@ export class SchemaVersionStore {
           }).parse,
         );
 
+      const origin: SchemaVersionOriginDelete = {
+        type: 'delete',
+        services: [{ name: args.service.name, versionId: args.service.versionId }],
+      };
+
       // creates a new version
       const newVersion = await this.insertSchemaVersion(trx, {
         isComposable: args.composable,
         targetId: graph.targetId,
-        origin: {
-          type: 'delete',
-          services: [{ name: args.service.name, versionId: args.service.versionId }],
-        },
+        origin,
         baseSchema: latestVersion.baseSchema,
         previousSchemaVersionId: latestVersion.id,
         diffSchemaVersionId: args.diffSchemaVersionId,
@@ -676,17 +673,22 @@ export class SchemaVersionStore {
       }
 
       for (const contract of args.contracts ?? []) {
-        const schemaVersionContractId = await this.insertSchemaVersionContract(trx, {
+        await this.insertSchemaVersionContract(trx, {
           schemaVersionId: newVersion.id,
           contractId: contract.contractId,
           contractName: contract.contractName,
           schemaCompositionErrors: contract.schemaCompositionErrors,
           compositeSchemaSDL: contract.compositeSchemaSDL,
           supergraphSDL: contract.supergraphSDL,
-        });
-        await this.insertSchemaVersionContractChanges(trx, {
-          schemaVersionContractId,
           changes: contract.changes,
+          graph: contract.graph,
+          origin,
+          github: null,
+          supergraphChanges: contract.supergraphChanges,
+          conditionalBreakingChangeMetadata: args.conditionalBreakingChangeMetadata,
+          diffSchemaVersionId: contract.diffSchemaVersionId,
+          previousSchemaVersionId: contract.previousSchemaVersionId,
+          meta: null,
         });
       }
 
@@ -1580,17 +1582,19 @@ export class SchemaVersionStore {
     conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
   }) {
     return await this.pg.transaction('createPromotionSchemaVersion', async trx => {
+      const origin: SchemaVersionOriginPromotion = {
+        type: 'promotion',
+        source: {
+          schemaVersion: { id: args.origin.version.id },
+          target: { id: args.origin.target.id, name: args.origin.target.name },
+          graph: { id: args.origin.graph.id, name: args.origin.graph.name },
+        },
+      };
+
       const schemaVersion = await this.insertSchemaVersion(trx, {
         isComposable: args.origin.version.isComposable,
         targetId: args.target.target.id,
-        origin: {
-          type: 'promotion',
-          source: {
-            schemaVersion: { id: args.origin.version.id },
-            target: { id: args.origin.target.id, name: args.origin.target.name },
-            graph: { id: args.origin.graph.id, name: args.origin.graph.name },
-          },
-        },
+        origin,
         baseSchema: args.origin.version.baseSchema,
         previousSchemaVersionId: args.target.latestVersion?.id ?? null,
         diffSchemaVersionId: args.target.latestValidVersion?.id ?? null,
@@ -1711,17 +1715,22 @@ export class SchemaVersionStore {
       }
 
       for (const contract of args.contracts ?? []) {
-        const schemaVersionContractId = await this.insertSchemaVersionContract(trx, {
+        await this.insertSchemaVersionContract(trx, {
           schemaVersionId: schemaVersion.id,
           contractId: contract.contractId,
           contractName: contract.contractName,
           schemaCompositionErrors: contract.schemaCompositionErrors,
           compositeSchemaSDL: contract.compositeSchemaSDL,
           supergraphSDL: contract.supergraphSDL,
-        });
-        await this.insertSchemaVersionContractChanges(trx, {
-          schemaVersionContractId,
           changes: contract.changes,
+          graph: contract.graph,
+          origin,
+          github: args.origin.version.github,
+          supergraphChanges: contract.supergraphChanges,
+          conditionalBreakingChangeMetadata: args.conditionalBreakingChangeMetadata,
+          diffSchemaVersionId: contract.diffSchemaVersionId,
+          previousSchemaVersionId: contract.previousSchemaVersionId,
+          meta: args.meta,
         });
       }
 
@@ -1775,10 +1784,14 @@ const schemaLogFields = (prefix = psql``) => psql`
 export type CreateContractVersionInput = {
   contractId: string;
   contractName: string;
+  graph: Graph;
   compositeSchemaSDL: string | null;
   supergraphSDL: string | null;
   schemaCompositionErrors: Array<SchemaCompositionError> | null;
   changes: null | Array<SchemaChangeType>;
+  supergraphChanges: null | Array<SchemaChangeType>;
+  previousSchemaVersionId: string | null;
+  diffSchemaVersionId: string | null;
 };
 
 const SchemaLogBase = z.object({
@@ -1864,7 +1877,7 @@ const SchemaVersionOriginPromotionModel = z.object({
   }),
 });
 
-// type SchemaVersionOriginPromotion = z.TypeOf<typeof SchemaVersionOriginPromotionModel>;
+type SchemaVersionOriginPromotion = z.TypeOf<typeof SchemaVersionOriginPromotionModel>;
 
 const SchemaVersionOriginPublishServiceModel = z.object({
   name: z.string(),
@@ -1879,6 +1892,8 @@ const SchemaVersionOriginPublishModel = z.object({
   services: z.tuple([SchemaVersionOriginPublishServiceModel]).nullable(),
 });
 
+type SchemaVersionOriginPublish = z.TypeOf<typeof SchemaVersionOriginPublishModel>;
+
 const SchemaVersionOriginDeleteModel = z.object({
   type: z.literal('delete'),
   services: z.array(
@@ -1889,7 +1904,7 @@ const SchemaVersionOriginDeleteModel = z.object({
   ),
 });
 
-// type SchemaVersionOriginPublish = z.TypeOf<typeof SchemaVersionOriginPublishModel>;
+type SchemaVersionOriginDelete = z.TypeOf<typeof SchemaVersionOriginDeleteModel>;
 
 const SchemaVersionOriginModel = z.union([
   SchemaVersionOriginPromotionModel,

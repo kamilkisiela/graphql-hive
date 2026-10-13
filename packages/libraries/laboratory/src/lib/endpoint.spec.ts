@@ -141,6 +141,73 @@ describe('useEndpoint', () => {
     });
   });
 
+  describe('preflight', () => {
+    it('keeps env and plugin state when preflight is disabled', async () => {
+      type Props = Parameters<typeof useEndpoint>[0];
+      const setEnv = vi.fn();
+      const setPluginsState = vi.fn();
+
+      renderHook(() =>
+        useEndpoint({
+          defaultEndpoint: ENDPOINT,
+          settingsApi: settingsApiWithHeaders(
+            '{"authorization":"Bearer {{token}}","x-slug":"{{plugins.target.slug}}"}',
+          ),
+          envApi: { env: { variables: { token: 'secret' } }, setEnv } as Props['envApi'],
+          pluginsApi: {
+            plugins: [],
+            pluginsState: { target: { slug: 'x' } },
+            setPluginsState,
+          } as unknown as Props['pluginsApi'],
+          preflightApi: {
+            runPreflight: vi.fn().mockResolvedValue(null),
+          } as unknown as Props['preflightApi'],
+        }),
+      );
+
+      await advance(600);
+
+      expect(setEnv).not.toHaveBeenCalled();
+      expect(setPluginsState).not.toHaveBeenCalled();
+      expect(load).toHaveBeenCalledWith(
+        ENDPOINT,
+        expect.objectContaining({ headers: { authorization: 'Bearer secret', 'x-slug': 'x' } }),
+      );
+    });
+
+    it('lets preflight headers win and sends them verbatim', async () => {
+      type Props = Parameters<typeof useEndpoint>[0];
+      const setEnv = vi.fn();
+
+      renderHook(() =>
+        useEndpoint({
+          defaultEndpoint: ENDPOINT,
+          settingsApi: settingsApiWithHeaders('{"Authorization":"Bearer {{token}}","x-op":"mine"}'),
+          envApi: { env: { variables: { token: 'secret' } }, setEnv } as Props['envApi'],
+          preflightApi: {
+            runPreflight: vi.fn().mockResolvedValue({
+              status: 'success',
+              env: { variables: { token: 'secret' } },
+              headers: { authorization: 'from-preflight {{token}}' },
+              pluginsState: {},
+              logs: [],
+            }),
+          } as unknown as Props['preflightApi'],
+        }),
+      );
+
+      await advance(600);
+
+      expect(setEnv).toHaveBeenCalledWith({ variables: { token: 'secret' } });
+      expect(load).toHaveBeenCalledWith(
+        ENDPOINT,
+        expect.objectContaining({
+          headers: { 'x-op': 'mine', authorization: 'from-preflight {{token}}' },
+        }),
+      );
+    });
+  });
+
   describe('descriptions', () => {
     it('requests them when the docs pane is enabled', async () => {
       renderHook(() => useEndpoint({ defaultEndpoint: ENDPOINT, enableDocs: true }));

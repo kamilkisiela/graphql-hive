@@ -281,6 +281,7 @@ export const Tab = (props: {
                 'group relative flex h-full cursor-pointer items-center gap-2 border-t-2 border-transparent px-3 pb-1 text-sm text-muted-foreground transition-all hover:text-foreground',
                 props.activeTab?.id === props.item.id && 'border-primary bg-card text-foreground',
               )}
+              data-state={props.activeTab?.id === props.item.id ? 'active' : 'inactive'}
               onClick={() => {
                 props.setActiveTab(props.item);
               }}
@@ -297,8 +298,10 @@ export const Tab = (props: {
               {tabName}
               {props.isOperationLoading(props.item.id) && <Spinner className="size-3" />}
               {props.item.readOnly && <LockIcon className="size-3 text-gray-400" />}
-              <XIcon
-                className="size-3 text-muted-foreground"
+              <button
+                type="button"
+                aria-label="Close tab"
+                className="flex"
                 onMouseDown={e => {
                   e.stopPropagation();
                 }}
@@ -306,7 +309,9 @@ export const Tab = (props: {
                   e.stopPropagation();
                   props.handleDeleteTab(props.item.id);
                 }}
-              />
+              >
+                <XIcon className="size-3 text-muted-foreground" />
+              </button>
             </div>
           </div>
           <div className="mb-px w-px bg-border" />

@@ -1,7 +1,8 @@
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
 import type { SchemaChangeType, SchemaCompositionError } from '@hive/storage';
-import type { Contract, ValidContractVersion } from '../contracts';
+import { ContractGraph } from '../../../graph/providers/graph-store';
+import type { ValidContractVersion } from '../contracts';
 import type { SchemaCoordinatesDiffResult } from '../inspector';
 import type {
   ContractCompositionResult,
@@ -117,6 +118,7 @@ type ContractState = {
   /** the baseline schema used for comparison instead of the latest valid schema version */
   baselineComposition: null | CompositionState;
   schemaChanges: null | GroupedSchemaChanges;
+  supergraphChanges: null | GroupedSchemaChanges;
 };
 
 export type ContractStateSuccess = ContractState & {
@@ -212,13 +214,14 @@ export type SchemaPublishFailureReason =
       coordinatesDiff: SchemaCoordinatesDiffResult;
     };
 
-type ContractResult = {
+export type ContractResult = {
   contractId: string;
   contractName: string;
   compositionErrors: Array<SchemaCompositionError> | null;
   supergraph: string | null;
   fullSchemaSdl: string | null;
   changes: Array<SchemaChangeType> | null;
+  supergraphChanges: Array<SchemaChangeType> | null;
 };
 
 type SchemaPublishSuccess = {
@@ -340,6 +343,7 @@ export type ContractCheckInput = {
   contractName: string;
   compositionCheck: ContractCompositionResult;
   diffCheck: SchemaDiffResult;
+  supergraphDiffCheck: SchemaDiffResult;
 };
 
 export function buildSchemaCheckFailureState(args: {
@@ -379,6 +383,10 @@ export function buildSchemaCheckFailureState(args: {
           contractName: contractCheck.contractName,
           baselineComposition: null,
           schemaChanges: contractCheck.diffCheck.reason ?? contractCheck.diffCheck.result ?? null,
+          supergraphChanges:
+            contractCheck.supergraphDiffCheck.reason ??
+            contractCheck.supergraphDiffCheck.result ??
+            null,
         };
 
         if (
@@ -420,7 +428,7 @@ export function buildSchemaCheckFailureState(args: {
 }
 
 export type ContractInput = {
-  contract: Contract;
+  graph: Pick<ContractGraph, 'id' | 'name' | 'config'>;
   latestValidVersion: Pick<
     ValidContractVersion,
     'contractName' | 'compositeSchemaSdl' | 'supergraphSdl'

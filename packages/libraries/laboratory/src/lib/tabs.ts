@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { LaboratoryEnv } from './env';
 import type { LaboratoryHistoryRequest } from './history';
@@ -81,6 +81,8 @@ export interface LaboratoryTabsActions {
   addTab: (tab: Omit<LaboratoryTab, 'id'>) => LaboratoryTab;
   updateTab: (id: string, data: LaboratoryTabData) => void;
   deleteTab: (tabId: string) => void;
+  /** Points operation tabs at an operation's persisted id. */
+  replaceOperationId: (previousId: string, id: string) => void;
 }
 
 export const useTabs = (props: {
@@ -96,6 +98,12 @@ export const useTabs = (props: {
       props.defaultTabs?.[0] ??
       null,
   );
+
+  // Persisted ids arrive after the fact, so the rename reads the latest state, not a closure.
+  const tabsRef = useRef(tabs);
+  tabsRef.current = tabs;
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
 
   const setActiveTab = useCallback(
     (tab: LaboratoryTab) => {
@@ -143,6 +151,26 @@ export const useTabs = (props: {
     [tabs, props],
   );
 
+  const replaceOperationId = useCallback(
+    (previousId: string, id: string) => {
+      const isOperationTab = (tab: LaboratoryTab): tab is LaboratoryTabOperation =>
+        tab.type === 'operation';
+      const follow = (tab: LaboratoryTab): LaboratoryTab =>
+        isOperationTab(tab) && tab.data.id === previousId
+          ? { ...tab, data: { ...tab.data, id } }
+          : tab;
+
+      const newTabs = tabsRef.current.map(follow);
+      _setTabs(newTabs);
+      props.onTabsChange?.(newTabs);
+
+      if (activeTabRef.current) {
+        _setActiveTab(follow(activeTabRef.current));
+      }
+    },
+    [props],
+  );
+
   return {
     activeTab,
     setActiveTab,
@@ -151,5 +179,6 @@ export const useTabs = (props: {
     addTab,
     deleteTab,
     updateTab,
+    replaceOperationId,
   };
 };

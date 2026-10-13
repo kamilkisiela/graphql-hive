@@ -91,16 +91,19 @@ export const Preflight = () => {
                 `
                   interface Lab {
                     environment: {
-                      set: (key: string, value: string) => void;
+                      /** Stored as text. Anything else is dropped with a warning. */
+                      set: (key: string, value: string | number | boolean | null) => void;
                       get: (key: string) => string;
                       delete: (key: string) => void;
                     };
                     request: {
+                      /** Sent as-is and win over the operation's own headers. */
                       headers: Headers;
                     };
                     /**
                      * Asks the user for a value before the request runs. The title labels the
-                     * input; placeholder and description are optional hints.
+                     * input; placeholder and description are optional hints. Resolves null when
+                     * the prompt is dismissed; an empty field cannot be submitted.
                      */
                     prompt: (
                       title: string,
@@ -280,9 +283,13 @@ export const Preflight = () => {
               </div>
             </div>
             <ScrollArea className="h-full">
-              <div className="flex flex-col gap-1.5 p-3 whitespace-pre-wrap">
+              <div
+                role="log"
+                aria-label="Preflight logs"
+                className="flex flex-col gap-1.5 p-3 whitespace-pre-wrap"
+              >
                 {logs.map((log, i) => (
-                  <div className="gap-2 font-mono" key={i}>
+                  <div className="gap-2 font-mono" data-level={log.level} key={i}>
                     <span className="text-xs text-muted-foreground">{log.createdAt}</span>{' '}
                     <span
                       className={cn('text-xs font-medium', {

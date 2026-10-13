@@ -1408,6 +1408,15 @@ export async function createStorage(
           v.created_at >= ${period.from.toISOString()}
           AND
           v.created_at < ${period.to.toISOString()}
+          AND (
+            /* Legacy records */
+            v.graph_metadata IS NULL
+            OR (
+              /* Default graph records, contract versions are excluded */
+              v.graph_metadata->>'name' = 'default'
+              AND v.graph_metadata->>'type' = 'default'
+            )
+          )
         GROUP by o.id
       `,
         )
@@ -2544,6 +2553,7 @@ export async function createStorage(
                 , "compared_contract_version_id"
                 , "is_success"
                 , "contract_id"
+                , "contract_name"
                 , "composite_schema_sdl_store_id"
                 , "supergraph_sdl_store_id"
                 , "schema_composition_errors"
@@ -2558,6 +2568,7 @@ export async function createStorage(
                 , ${contract.comparedContractVersionId}
                 , ${contract.isSuccess}
                 , ${contract.contractId}
+                , ${contract.contractName.replace(/^default\//, '')}
                 , ${compositeSchemaSdlHash}
                 , ${supergraphSchemaSdlHash}
                 , ${psql.jsonbOrNull(contract.schemaCompositionErrors)}

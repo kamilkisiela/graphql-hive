@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
 
@@ -19,31 +19,44 @@ type ChartProps = {
  */
 export function Chart({ option, height, onEvents }: ChartProps) {
   const elementRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<echarts.ECharts | null>(null);
+  const [chart, setChart] = useState<echarts.ECharts | null>(null);
 
+  // A 0x0 mount (a chart under display: none) makes ECharts warn and lay out at zero, so the
+  // instance waits for the container's first real size.
   useLayoutEffect(() => {
     const element = elementRef.current;
     if (!element) {
       return;
     }
-    const chart = echarts.init(element);
-    chartRef.current = chart;
-    const observer = new ResizeObserver(() => chart.resize());
+    let instance: echarts.ECharts | null = null;
+    const init = () => {
+      instance = echarts.init(element);
+      setChart(instance);
+    };
+    if (element.clientWidth && element.clientHeight) {
+      init();
+    }
+    const observer = new ResizeObserver(([entry]) => {
+      if (instance) {
+        instance.resize();
+      } else if (entry.contentRect.width && entry.contentRect.height) {
+        init();
+      }
+    });
     observer.observe(element);
     return () => {
       observer.disconnect();
-      chart.dispose();
-      chartRef.current = null;
+      instance?.dispose();
+      setChart(null);
     };
   }, []);
 
   // Merged, not replaced, so a re-render with the same data does not replay the entry animation.
   useLayoutEffect(() => {
-    chartRef.current?.setOption(option);
-  }, [option]);
+    chart?.setOption(option);
+  }, [chart, option]);
 
   useEffect(() => {
-    const chart = chartRef.current;
     if (!chart || !onEvents) {
       return;
     }
@@ -56,7 +69,7 @@ export function Chart({ option, height, onEvents }: ChartProps) {
         chart.off(name, handler);
       }
     };
-  }, [onEvents]);
+  }, [chart, onEvents]);
 
   // ECharts writes a fixed pixel width onto its mount. Out of normal flow, that width cannot become
   // the min-content width of the flex column a chart sits in, which would stop the page shrinking.

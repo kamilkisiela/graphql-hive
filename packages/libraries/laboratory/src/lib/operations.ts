@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   DocumentNode,
   ExecutionResult,
@@ -25,6 +25,7 @@ import {
   deletePathFromQuery,
   getOperationName,
   handleTemplate,
+  mergeHeaders,
   removeArgFromField,
 } from './operations.utils';
 import { LaboratoryPlugin, LaboratoryPluginsActions, LaboratoryPluginsState } from './plugins';
@@ -60,6 +61,8 @@ export interface LaboratoryOperationsActions {
     operation: Omit<LaboratoryOperation, 'id'> & { id?: string },
   ) => LaboratoryOperation;
   setOperations: (operations: LaboratoryOperation[]) => void;
+  /** Renames an operation in place once the host has stored it under its own id. */
+  replaceOperationId: (previousId: string, id: string) => void;
   updateActiveOperation: (operation: Partial<Omit<LaboratoryOperation, 'id'>>) => void;
   deleteOperation: (operationId: string) => void;
   /** With a schema, an abstract field is given `__typename` so it is never selection-less. */
@@ -178,6 +181,21 @@ export const useOperations = (
     (operations: LaboratoryOperation[]) => {
       _setOperations(operations);
       props.onOperationsChange?.(operations);
+    },
+    [props],
+  );
+
+  // Persisted ids arrive after the fact, so the rename reads the latest state, not a closure.
+  const operationsRef = useRef(operations);
+  operationsRef.current = operations;
+
+  const replaceOperationId = useCallback(
+    (previousId: string, id: string) => {
+      const newOperations = operationsRef.current.map(o =>
+        o.id === previousId ? { ...o, id } : o,
+      );
+      _setOperations(newOperations);
+      props.onOperationsChange?.(newOperations);
     },
     [props],
   );
@@ -397,8 +415,12 @@ export const useOperations = (
         const preflightResult = await props.preflightApi?.runPreflight?.(plugins, pluginsState);
         env = preflightResult?.env ?? { variables: {} };
         headers = preflightResult?.headers ?? {};
-        pluginsState = preflightResult?.pluginsState ?? {};
-        props.pluginsApi?.setPluginsState(pluginsState);
+
+        // Null means preflight is disabled, not that it produced empty state.
+        if (preflightResult) {
+          pluginsState = preflightResult.pluginsState;
+          props.pluginsApi?.setPluginsState(pluginsState);
+        }
       }
 
       if (env && Object.keys(env?.variables ?? {}).length > 0) {
@@ -416,10 +438,7 @@ export const useOperations = (
           )
         : {};
 
-      const mergedHeaders = {
-        ...headers,
-        ...parsedHeaders,
-      };
+      const mergedHeaders = mergeHeaders(parsedHeaders, headers);
 
       const variables = activeOperation.variables
         ? JSON.parse(
@@ -535,6 +554,7 @@ export const useOperations = (
   return {
     operations,
     setOperations,
+    replaceOperationId,
     runActiveOperation,
     setActiveOperation,
     activeOperation,

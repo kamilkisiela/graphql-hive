@@ -16,7 +16,7 @@
     "agentkeepalive": "catalog:",
     "dotenv": "catalog:",
     "got": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "kafkajs": "catalog:",
     "pino-pretty": "catalog:",
     "tiny-lru": "11.4.7",

@@ -67,7 +67,7 @@
     "fast-json-stable-stringify": "catalog:",
     "got": "catalog:",
     "graphile-worker": "0.16.6",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "graphql-modules": "3.1.2",
     "graphql-parse-resolve-info": "4.13.0",
     "graphql-scalars": "2.0.0",

@@ -94,3 +94,48 @@ describe('useTabs', () => {
     ]);
   });
 });
+
+describe('useTabs replaceOperationId', () => {
+  it('points the tab and the active tab at the persisted operation id', () => {
+    const onTabsChange = vi.fn();
+    const { result } = renderHook(() =>
+      useTabs({
+        defaultTabs: [operationTab('t1'), operationTab('t2')],
+        defaultActiveTabId: 't1',
+        onTabsChange,
+      }),
+    );
+
+    act(() => {
+      result.current.replaceOperationId('op-t1', 'server-op');
+    });
+
+    expect(result.current.tabs.map(t => (t.data as { id: string }).id)).toEqual([
+      'server-op',
+      'op-t2',
+    ]);
+    expect((result.current.activeTab?.data as { id: string }).id).toBe('server-op');
+    expect(onTabsChange).toHaveBeenCalledWith(result.current.tabs);
+  });
+});
+
+describe('useTabs replaceOperationId after later changes', () => {
+  // The host answers a save asynchronously, so the rename may run through a callback captured
+  // before more tabs were added; it must not write the older tab list back.
+  it('keeps tabs added after the callback was captured', () => {
+    const { result } = renderHook(() => useTabs({ defaultTabs: [operationTab('t1')] }));
+    const staleReplace = result.current.replaceOperationId;
+
+    act(() => {
+      result.current.addTab({ type: 'operation', data: { id: 'op-t2', name: 't2' } });
+    });
+    act(() => {
+      staleReplace('op-t1', 'server-op');
+    });
+
+    expect(result.current.tabs.map(t => (t.data as { id: string }).id)).toEqual([
+      'server-op',
+      'op-t2',
+    ]);
+  });
+});

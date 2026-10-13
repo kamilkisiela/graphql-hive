@@ -142,3 +142,98 @@ describe('useCollections', () => {
     expect(onCollectionUpdate).toHaveBeenCalledWith(expect.objectContaining({ id: collectionId! }));
   });
 });
+
+describe('useCollections persisted ids', () => {
+  const flush = () => act(async () => {});
+
+  it('adopts the id a host returns for a new collection', async () => {
+    const onCollectionsChange = vi.fn();
+    const { result } = renderHook(() =>
+      useCollections({
+        onCollectionsChange,
+        onCollectionCreate: () => Promise.resolve({ id: 'server-c1' }),
+      }),
+    );
+
+    act(() => {
+      result.current.addCollection({ name: 'New' });
+    });
+    await flush();
+
+    expect(result.current.collections.map(c => c.id)).toEqual(['server-c1']);
+    expect(onCollectionsChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ id: 'server-c1' }),
+    ]);
+  });
+
+  it('creates the operations a collection was created with, under the persisted id', async () => {
+    const onCollectionOperationCreate = vi.fn(() => Promise.resolve({ id: 'server-op1' }));
+    const onOperationIdChange = vi.fn();
+    const { result } = renderHook(() =>
+      useCollections({
+        onCollectionCreate: () => ({ id: 'server-c1' }),
+        onCollectionOperationCreate,
+        onOperationIdChange,
+      }),
+    );
+
+    act(() => {
+      result.current.addCollection({ name: 'New', operations: [operation('op1')] });
+    });
+    await flush();
+
+    expect(onCollectionOperationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'server-c1' }),
+      expect.objectContaining({ id: 'op1' }),
+    );
+    expect(result.current.collections[0].operations.map(o => o.id)).toEqual(['server-op1']);
+    expect(onOperationIdChange).toHaveBeenCalledWith('op1', 'server-op1');
+  });
+
+  it('adopts the id of an operation saved into an existing collection', async () => {
+    const onOperationIdChange = vi.fn();
+    const { result } = renderHook(() =>
+      useCollections({
+        onCollectionOperationCreate: () => Promise.resolve({ id: 'server-op1' }),
+        onOperationIdChange,
+      }),
+    );
+
+    let collectionId: string;
+    act(() => {
+      collectionId = result.current.addCollection({ name: 'New' }).id;
+    });
+    await flush();
+    act(() => {
+      result.current.addOperationToCollection(collectionId, operation('op1'));
+    });
+    await flush();
+
+    expect(result.current.collections[0].operations.map(o => o.id)).toEqual(['server-op1']);
+    expect(onOperationIdChange).toHaveBeenCalledWith('op1', 'server-op1');
+  });
+
+  it('keeps local ids when the host returns nothing', async () => {
+    const onOperationIdChange = vi.fn();
+    const { result } = renderHook(() =>
+      useCollections({
+        onCollectionCreate: () => undefined,
+        onCollectionOperationCreate: () => undefined,
+        onOperationIdChange,
+      }),
+    );
+
+    let created: LaboratoryCollection;
+    act(() => {
+      created = result.current.addCollection({ name: 'New' });
+    });
+    act(() => {
+      result.current.addOperationToCollection(created.id, operation('op1'));
+    });
+    await flush();
+
+    expect(result.current.collections[0].id).toBe(created!.id);
+    expect(result.current.collections[0].operations[0].id).toBe('op1');
+    expect(onOperationIdChange).not.toHaveBeenCalled();
+  });
+});

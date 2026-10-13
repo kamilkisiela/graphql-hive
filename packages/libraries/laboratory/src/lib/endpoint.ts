@@ -9,7 +9,7 @@ import { debounce, type DebouncedFunc } from 'lodash';
 import { toast } from 'sonner';
 import { LaboratoryEnv, LaboratoryEnvActions, LaboratoryEnvState } from '@/lib/env';
 import { LaboratoryOperationsActions, LaboratoryOperationsState } from '@/lib/operations';
-import { handleTemplate } from '@/lib/operations.utils';
+import { handleTemplate, mergeHeaders } from '@/lib/operations.utils';
 import { LaboratoryPluginsActions, LaboratoryPluginsState } from '@/lib/plugins';
 import { LaboratoryPreflightActions, LaboratoryPreflightState } from '@/lib/preflight';
 import { asyncInterval } from '@/lib/utils';
@@ -149,7 +149,8 @@ export const useEndpoint = (props: {
             } catch {}
           }
 
-          let stringifiedHeaders = JSON.stringify(sourceHeaders);
+          const stringifiedHeaders = JSON.stringify(sourceHeaders);
+          let preflightHeaders: Record<string, string> = {};
 
           if (stringifiedHeaders.includes('{{')) {
             try {
@@ -158,17 +159,14 @@ export const useEndpoint = (props: {
                 props.pluginsApi?.pluginsState ?? {},
               );
 
-              props?.envApi?.setEnv(preflightResult?.env ?? { variables: {} });
-              props?.pluginsApi?.setPluginsState(preflightResult?.pluginsState ?? {});
+              // Null means preflight is disabled; the stored env and plugin state stay in use.
+              if (preflightResult) {
+                props.envApi?.setEnv(preflightResult.env);
+                props.pluginsApi?.setPluginsState(preflightResult.pluginsState);
 
-              env = preflightResult?.env?.variables ?? {};
-              plugins = preflightResult?.pluginsState ?? {};
-
-              if (preflightResult?.headers) {
-                stringifiedHeaders = JSON.stringify({
-                  ...sourceHeaders,
-                  ...preflightResult?.headers,
-                });
+                env = preflightResult.env.variables;
+                plugins = preflightResult.pluginsState;
+                preflightHeaders = preflightResult.headers;
               }
             } catch (error: unknown) {
               toast.error('Failed to run preflight');
@@ -188,6 +186,9 @@ export const useEndpoint = (props: {
             toast.error('Failed to parse headers');
             parsedHeaders = {};
           }
+
+          // Preflight values are sent verbatim, so they merge after templating.
+          parsedHeaders = mergeHeaders(parsedHeaders, preflightHeaders);
 
           const result = await loader.load(endpoint, {
             subscriptionsEndpoint: endpoint,

@@ -310,11 +310,12 @@ function ChecksPageContent() {
       </div>
       {hasSchemaChecks && <Outlet />}
       {hasSchemaChecks && !hasActiveSchemaCheck && (
-        <EmptyList
-          className="my-4 mt-6 justify-center border-0 py-8"
-          title="Select a schema check"
-          description="A list of your schema checks is available on the left."
-        />
+        <div className="my-4 mt-6 w-full border-0 py-8">
+          <EmptyList
+            title="Select a schema check"
+            description="A list of your schema checks is available on the left."
+          />
+        </div>
       )}
     </>
   );

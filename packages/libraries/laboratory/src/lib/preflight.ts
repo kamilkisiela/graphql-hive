@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import cryptoJsSource from 'crypto-js/crypto-js.js?raw';
 import type { LaboratoryEnv, LaboratoryEnvActions, LaboratoryEnvState } from './env';
 import { LaboratoryPlugin } from './plugins';
+import { PREFLIGHT_ALLOWED_GLOBALS } from './preflight-allowed-globals';
 
 export interface LaboratoryPreflightLog {
   level: 'log' | 'warn' | 'error' | 'info' | 'system';
@@ -83,6 +84,38 @@ export const PREFLIGHT_TIMEOUT = 30_000;
  */
 export const isValidEnvValue = (value: unknown) =>
   value === null || ['string', 'number', 'boolean'].includes(typeof value);
+
+/**
+ * A function or `Headers` cannot cross postMessage; the clone error would fail the run.
+ * Injected by source like `isValidEnvValue`, so no outer references.
+ */
+export const toLogText = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  try {
+    return String(value);
+  } catch {
+    return Object.prototype.toString.call(value);
+  }
+};
+
+// Shadowed as parameters of the script function, so only valid identifiers. Injected by source.
+export const blockedGlobalNames = (names: Iterable<string>, allowed: ReadonlySet<string>) => {
+  const blocked = new Set<string>();
+
+  for (const name of names) {
+    if (/^[A-Za-z_$][\w$]*$/.test(name) && !allowed.has(name)) {
+      blocked.add(name);
+    }
+  }
+
+  // Not a worker global; undefined instead of a ReferenceError.
+  blocked.add('window');
+
+  return Array.from(blocked);
+};
 
 export interface LaboratoryPreflightRunOptions {
   /** Aborting terminates the worker and settles the run as an error. */
@@ -319,6 +352,9 @@ export async function runIsolatedLabScript(
         // Declared out here because the catch below needs it too, and a const inside the try
         // would be out of scope exactly when a script has just failed.
         const readLineAndColumn = ${readLineAndColumn.toString()};
+        const toLogText = ${toLogText.toString()};
+        const blockedGlobalNames = ${blockedGlobalNames.toString()};
+        const allowedGlobals = new Set(${JSON.stringify(Array.from(PREFLIGHT_ALLOWED_GLOBALS))});
 
         self.onmessage = async (event) => {
           if (event.data.type === 'prompt:result') {
@@ -332,7 +368,7 @@ export async function runIsolatedLabScript(
                 self.postMessage({
                   type: 'log',
                   level,
-                  message: args,
+                  message: args.map(toLogText),
                   ...readLineAndColumn(new Error().stack, 8),
                 });
               };
@@ -353,6 +389,7 @@ export async function runIsolatedLabScript(
               const isValidEnvValue = ${isValidEnvValue.toString()};
 
               const lab = Object.freeze({
+                CryptoJS,
                 environment: {
                   get: (key) => env.variables[key],
                   set: (key, value) => {
@@ -394,21 +431,29 @@ export async function runIsolatedLabScript(
                 }
               });
   
-              // Make CryptoJS available globally in the script context.
-              // The script sits on its own line so reported lines and columns map back to it
-              // by a fixed offset, rather than the first line being shifted by 'with(lab){'.
+              // for...in adds the enumerable worker members on the prototype chain.
+              const globalNames = Object.getOwnPropertyNames(globalThis);
+              for (const name in globalThis) {
+                globalNames.push(name);
+              }
+              const blockedGlobals = blockedGlobalNames(globalNames, allowedGlobals);
+
+              // call('undefined'): sloppy mode would otherwise make this the worker scope.
+              // The script sits on its own line so reported lines map back by a fixed offset.
               const AsyncFunction = async function () {}.constructor;
-              await new AsyncFunction('lab', 'CryptoJS', 'with(lab){\\n' + event.data.script + '\\n}')(lab, CryptoJS);
+              await new AsyncFunction('lab', 'CryptoJS', ...blockedGlobals, 'with(lab){\\n' + event.data.script + '\\n}').call('undefined', lab, CryptoJS);
 
               self.postMessage({ type: 'result', env: env, headers: Object.fromEntries(lab.request.headers.entries()), pluginsState: state });
             } catch (err) {
+              const message = err && err.message ? err.message : toLogText(err);
+
               self.postMessage({
                 type: 'log',
                 level: 'error',
-                message: [err && err.message ? err.message : String(err)],
+                message: [message],
                 ...readLineAndColumn(err && err.stack),
               });
-              self.postMessage({ type: 'result', error: err.message || String(err) });
+              self.postMessage({ type: 'result', error: message });
             }
           }
         };

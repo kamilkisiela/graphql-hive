@@ -21,6 +21,7 @@ import {
 import { gitInfo } from '../../helpers/git';
 import { loadSchemaSdl, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
 import * as TargetInput from '../../helpers/target-input';
+import { Texture } from '../../helpers/texture/texture';
 
 const schemaPublishMutation = graphql(/* GraphQL */ `
   mutation schemaPublish($input: SchemaPublishInput!) {
@@ -69,6 +70,62 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
     }
   }
 `);
+
+/** Only used with `--github`, so that servers without this field keep working for other publishes. */
+const schemaPublishGitHubMutation = graphql(/* GraphQL */ `
+  mutation CLI_SchemaPublishGitHubMutation($input: SchemaPublishInput!) {
+    schemaPublish(input: $input) {
+      __typename
+      ... on SchemaPublishSuccess {
+        initial
+        valid
+        successMessage: message
+        linkToWebsite
+        changes {
+          edges {
+            __typename
+          }
+          ...RenderChanges_schemaChanges
+        }
+      }
+      ... on SchemaPublishError {
+        valid
+        linkToWebsite
+        changes {
+          edges {
+            __typename
+          }
+          ...RenderChanges_schemaChanges
+        }
+        errors {
+          ...RenderErrors_SchemaErrorConnectionFragment
+        }
+      }
+      ... on SchemaPublishMissingServiceError {
+        missingServiceError: message
+      }
+      ... on SchemaPublishMissingUrlError {
+        missingUrlError: message
+      }
+      ... on SchemaPublishRetry {
+        reason
+      }
+      ... on GitHubSchemaPublishSuccess {
+        message
+        isValid
+      }
+      ... on GitHubSchemaPublishError {
+        message
+      }
+    }
+  }
+`);
+
+/** GitHub results are only returned for requests that use `schemaPublishGitHubMutation`. */
+type GitHubSchemaPublishSuccessResult = Extract<
+  DocumentType<typeof schemaPublishGitHubMutation>['schemaPublish'],
+  { __typename: 'GitHubSchemaPublishSuccess' }
+>;
 
 export default class SchemaPublish extends Command<typeof SchemaPublish> {
   static description = 'publishes schema';
@@ -326,14 +383,23 @@ export default class SchemaPublish extends Command<typeof SchemaPublish> {
       /** Gateway timeout is 60 seconds. */
       const timeout = 55_000;
 
-      let result: DocumentType<typeof schemaPublishMutation> | null = null;
+      let result:
+        | DocumentType<typeof schemaPublishMutation>
+        | DocumentType<typeof schemaPublishGitHubMutation>
+        | null = null;
 
       do {
-        result = await api.request({
-          operation: schemaPublishMutation,
-          variables: { input },
-          timeout,
-        });
+        result = usesGitHubApp
+          ? await api.request({
+              operation: schemaPublishGitHubMutation,
+              variables: { input },
+              timeout,
+            })
+          : await api.request({
+              operation: schemaPublishMutation,
+              variables: { input },
+              timeout,
+            });
 
         const payload = result.schemaPublish;
 
@@ -379,7 +445,13 @@ export default class SchemaPublish extends Command<typeof SchemaPublish> {
 
           handleRejectedPublish(payload.linkToWebsite);
         } else if (payload.__typename === 'GitHubSchemaPublishSuccess') {
-          this.logSuccess(payload.message);
+          const gitHubResult = payload as GitHubSchemaPublishSuccessResult;
+          if (gitHubResult.isValid) {
+            this.logSuccess(gitHubResult.message);
+          } else {
+            this.log(Texture.failure(gitHubResult.message));
+            handleRejectedPublish();
+          }
         } else {
           throw new APIError(payload.message);
         }

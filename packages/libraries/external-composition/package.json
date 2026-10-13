@@ -64,7 +64,7 @@
     "@types/node": "catalog:",
     "esbuild": "catalog:",
     "fastify": "catalog:",
-    "graphql": "16.9.0"
+    "graphql": "catalog:"
   },
   "publishConfig": {
     "access": "public",

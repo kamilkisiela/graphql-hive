@@ -3,6 +3,7 @@ import zod from 'zod';
 import {
   parseClickHouseConfigFromEnvironment,
   parsePostgresConfigFromEnvironment,
+  parseRedisConfigFromEnvironment,
 } from '@hive/service-common';
 
 if (!process.env.RELEASE) {
@@ -53,16 +54,25 @@ const postgresConfigResult = parsePostgresConfigFromEnvironment(
   configs.base.success ? configs.base.data.AWS_REGION : undefined,
 );
 
-if (postgresConfigResult.type === 'error') {
-  environmentErrors.push(...postgresConfigResult.errors);
-}
+const redisConfigResult = parseRedisConfigFromEnvironment(
+  process.env,
+  configs.base.success ? configs.base.data.AWS_REGION : undefined,
+);
 
 const clickhouseConfigResult = process.env.CLICKHOUSE_PROTOCOL
   ? parseClickHouseConfigFromEnvironment(process.env)
   : null;
 
+if (postgresConfigResult.type === 'error') {
+  environmentErrors.push(...postgresConfigResult.errors);
+}
+
 if (clickhouseConfigResult?.type === 'error') {
   environmentErrors.push(...clickhouseConfigResult.errors);
+}
+
+if (redisConfigResult.type === 'error') {
+  environmentErrors.push(...redisConfigResult.errors);
 }
 
 if (environmentErrors.length) {
@@ -88,6 +98,10 @@ export const env = {
       ? postgresConfigResult.config
       : raiseInvariant('Unreachable: postgres config errors are caught above via process.exit(1)'),
   clickhouse: clickhouseConfigResult?.type === 'ok' ? clickhouseConfigResult.config : null,
+  redis:
+    redisConfigResult.type === 'ok'
+      ? redisConfigResult.config
+      : raiseInvariant('Unreachable: redis config errors are caught above via process.exit(1)'),
   isMigrator: base.MIGRATOR === 'up',
   isClickHouseMigrator: base.CLICKHOUSE_MIGRATOR === 'up',
   isHiveCloud: base.CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD === '1',

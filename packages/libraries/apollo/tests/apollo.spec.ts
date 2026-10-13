@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { execute, subscribe } from 'graphql';
 import { createClient } from 'graphql-ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import { useServer } from 'graphql-ws/use/ws';
 import nock from 'nock';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { WebSocket, WebSocketServer } from 'ws';

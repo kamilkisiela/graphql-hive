@@ -44,6 +44,18 @@ describe('Preflight', () => {
     expect(screen.getByText('(2:1)')).toBeDefined();
   });
 
+  it('marks each log line with its level inside a log region', () => {
+    mount({
+      preflightLogs: [
+        { level: 'warn', message: ['careful'], createdAt: '2026-01-01T00:00:00.000Z' },
+      ],
+    });
+
+    const list = screen.getByRole('log', { name: 'Preflight logs' });
+
+    expect(list.querySelector('[data-level="warn"]')?.textContent).toContain('careful');
+  });
+
   // The script runs in the browser of whoever opens the lab, so the warning is for readers
   // as much as for the person allowed to edit it.
   it.each([true, false])('warns about secrets when editable is %s', canUpdate => {

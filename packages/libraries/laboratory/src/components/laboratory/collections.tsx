@@ -107,6 +107,7 @@ export const CollectionItem = (props: { collection: LaboratoryCollection }) => {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   className="p-1!"
+                  aria-label="Save collection name"
                   onClick={e => {
                     e.stopPropagation();
 
@@ -121,6 +122,7 @@ export const CollectionItem = (props: { collection: LaboratoryCollection }) => {
                 </InputGroupButton>
                 <InputGroupButton
                   className="p-1!"
+                  aria-label="Cancel renaming"
                   onClick={e => {
                     e.stopPropagation();
 
@@ -154,6 +156,7 @@ export const CollectionItem = (props: { collection: LaboratoryCollection }) => {
                 <TooltipTrigger asChild>
                   <Button
                     variant="link"
+                    aria-label="Edit collection"
                     className="p-1! pr-0! text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
                     onClick={e => {
                       e.stopPropagation();
@@ -173,6 +176,7 @@ export const CollectionItem = (props: { collection: LaboratoryCollection }) => {
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="link"
+                        aria-label="Delete collection"
                         className="p-1! pr-0! text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
                         onClick={e => {
                           e.stopPropagation();
@@ -254,6 +258,7 @@ export const CollectionItem = (props: { collection: LaboratoryCollection }) => {
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="link"
+                            aria-label="Delete operation"
                             className="ml-auto p-1! pr-0! text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
                             onClick={e => {
                               e.stopPropagation();
@@ -377,6 +382,7 @@ export const Collections = () => {
                   <Button
                     variant="ghost"
                     size="icon-sm"
+                    aria-label="Add collection"
                     className="size-6 rounded-sm p-1!"
                     onClick={openAddCollectionDialog}
                   >
@@ -401,6 +407,7 @@ export const Collections = () => {
             <Button
               variant="ghost"
               size="icon-sm"
+              aria-label="Clear search"
               className="absolute top-1/2 right-5 size-6 -translate-y-1/2 rounded-sm p-1!"
               onClick={() => setSearch('')}
             >

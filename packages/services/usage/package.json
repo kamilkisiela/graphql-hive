@@ -20,7 +20,7 @@
     "@trpc/client": "catalog:",
     "ajv": "catalog:",
     "dotenv": "catalog:",
-    "graphql": "16.9.0",
+    "graphql": "catalog:",
     "kafkajs": "catalog:",
     "lru-cache": "catalog:",
     "p-limit": "catalog:",

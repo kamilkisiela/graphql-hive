@@ -255,6 +255,38 @@ describe('schema:publish --github', () => {
     expect(result.stdout).toMatch(/Schema revision \S*abc\S* was not found\./);
     expect(result.stderr).toContain('[300]');
   });
+
+  test('an accepted publish exits with 0', async () => {
+    const result = await runAgainstRegistry(
+      publishResponse({
+        __typename: 'GitHubSchemaPublishSuccess',
+        message: 'No breaking changes',
+        isValid: true,
+      }),
+      [...publishArgs, '--github'],
+      githubEnv,
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('No breaking changes');
+    expect(result.requests[0].operationName).toBe('CLI_SchemaPublishGitHubMutation');
+  });
+
+  test('a rejected publish exits with 1 and error code 300', async () => {
+    const result = await runAgainstRegistry(
+      publishResponse({
+        __typename: 'GitHubSchemaPublishSuccess',
+        message: 'Detected 1 error',
+        isValid: false,
+      }),
+      [...publishArgs, '--github'],
+      githubEnv,
+    );
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('Detected 1 error');
+    expect(result.stderr).toContain('[300]');
+  });
 });
 
 describe('schema:publish', () => {
@@ -274,6 +306,7 @@ describe('schema:publish', () => {
     expect(result.stdout).toContain('Composition failed');
     expect(result.stderr).toContain('[300]');
     expect(result.requests[0].operationName).toBe('schemaPublish');
+    expect(result.requests[0].query).toMatch(/on GitHubSchemaPublishSuccess \{\s*message\s*\}/);
   });
 
   test('a file together with --revision is a conflicting options error', async () => {

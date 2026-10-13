@@ -22,7 +22,11 @@ import { useEndpoint } from '../../lib/endpoint';
 import { useEnv } from '../../lib/env';
 import { useHistory } from '../../lib/history';
 import { keepEditorMouseMovesInShadowRoot } from '../../lib/monaco-shadow-dom';
-import { useOperations } from '../../lib/operations';
+import {
+  useOperations,
+  type LaboratoryOperationsActions,
+  type LaboratoryOperationsState,
+} from '../../lib/operations';
 import { LaboratoryPluginTab, usePlugins } from '../../lib/plugins';
 import { usePreflight, usePreflightPrompt } from '../../lib/preflight';
 import { useSettings } from '../../lib/settings';
@@ -263,6 +267,7 @@ const LaboratoryContent = () => {
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Collections"
                 onClick={() => setActivePanel(activePanel === 'collections' ? null : 'collections')}
                 className={cn('text-muted-foreground hover:text-foreground', {
                   'text-foreground': activePanel === 'collections',
@@ -287,6 +292,7 @@ const LaboratoryContent = () => {
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="History"
                 onClick={() => setActivePanel(activePanel === 'history' ? null : 'history')}
                 className={cn('text-muted-foreground hover:text-foreground', {
                   'text-foreground': activePanel === 'history',
@@ -312,6 +318,7 @@ const LaboratoryContent = () => {
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label="Documentation"
                   onClick={() => setActivePanel(activePanel === 'docs' ? null : 'docs')}
                   className={cn('text-muted-foreground hover:text-foreground', {
                     'text-foreground': activePanel === 'docs',
@@ -339,9 +346,9 @@ const LaboratoryContent = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setActivePanel(activePanel === 'history' ? null : 'history')}
+                    aria-label="Settings"
                     className={cn('text-muted-foreground hover:text-foreground', {
-                      'text-foreground': activePanel === 'history',
+                      'text-foreground': activePanel === 'settings',
                     })}
                   >
                     <SettingsIcon className="size-5" />
@@ -516,9 +523,17 @@ export const Laboratory = (
   const pluginsApi = usePlugins(props);
   const testsApi = useTests(props);
   const tabsApi = useTabs(props);
+  // Operations are set up after collections, so the id hand-off reaches them through a ref.
+  const operationsApiRef = useRef<(LaboratoryOperationsState & LaboratoryOperationsActions) | null>(
+    null,
+  );
   const collectionsApi = useCollections({
     ...props,
     tabsApi,
+    onOperationIdChange: (previousId, id) => {
+      operationsApiRef.current?.replaceOperationId(previousId, id);
+      tabsApi.replaceOperationId(previousId, id);
+    },
   });
   const docsApi = useDocs({
     defaultActivePanel: collectionsApi.collections.length > 0 ? 'collections' : null,
@@ -533,6 +548,7 @@ export const Laboratory = (
     pluginsApi,
     checkPermissions,
   });
+  operationsApiRef.current = operationsApi;
   const endpointApi = useEndpoint({
     ...props,
     settingsApi,

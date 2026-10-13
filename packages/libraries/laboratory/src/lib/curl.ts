@@ -1,5 +1,5 @@
 import { Kind, parse, print, type DocumentNode } from 'graphql';
-import { handleTemplate } from './operations.utils';
+import { handleTemplate, mergeHeaders } from './operations.utils';
 import type { LaboratorySettings } from './settings';
 
 export type BuildCurlCommandInput = {
@@ -10,7 +10,7 @@ export type BuildCurlCommandInput = {
   headers?: string | null;
   extensions?: string | null;
   operationName?: string | null;
-  /** Headers produced by preflight; operation headers win on conflict. */
+  /** Headers produced by preflight; they win over operation headers on conflict. */
   preflightHeaders?: Record<string, string>;
   env?: Record<string, unknown>;
   pluginsState?: Record<string, unknown>;
@@ -73,11 +73,13 @@ const selectOperation = (query: string, operationName?: string | null): string =
 export function buildCurlCommand(input: BuildCurlCommandInput): string {
   const scope = { ...input.env, plugins: input.pluginsState ?? {} };
 
-  const headers: Record<string, string> = {
-    'content-type': 'application/json',
-    ...input.preflightHeaders,
-    ...(parseTemplatedJson(input.headers, scope) as Record<string, string>),
-  };
+  const headers = mergeHeaders(
+    {
+      'content-type': 'application/json',
+      ...(parseTemplatedJson(input.headers, scope) as Record<string, string>),
+    },
+    input.preflightHeaders ?? {},
+  );
 
   const body: Record<string, unknown> = {
     query: selectOperation(input.query, input.operationName),

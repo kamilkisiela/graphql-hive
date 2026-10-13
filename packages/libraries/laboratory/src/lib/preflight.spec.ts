@@ -1,10 +1,13 @@
 // @vitest-environment happy-dom
+import { createHash } from 'node:crypto';
 import { act, renderHook } from '@testing-library/react';
 import {
+  blockedGlobalNames,
   isValidEnvValue,
   PREFLIGHT_TIMEOUT,
   readLineAndColumn,
   runIsolatedLabScript,
+  toLogText,
   usePreflight,
   usePreflightPrompt,
   type LaboratoryPreflightPromptRequest,
@@ -164,11 +167,43 @@ describe('isValidEnvValue', () => {
   });
 });
 
+describe('blockedGlobalNames', () => {
+  const allowed = new Set(['fetch', 'console']);
+
+  it('keeps valid identifiers that are not allowed, then window', () => {
+    const names = ['fetch', 'self', 'foo-bar', '0', '@wry/context:Slot', 'console', 'process'];
+
+    expect(blockedGlobalNames(names, allowed)).toEqual(['self', 'process', 'window']);
+  });
+
+  it('dedupes names seen through both enumerations', () => {
+    expect(blockedGlobalNames(['self', 'self', 'window'], allowed)).toEqual(['self', 'window']);
+  });
+});
+
+describe('toLogText', () => {
+  it.each([
+    ['a string', 'a string'],
+    [42, '42'],
+    [null, 'null'],
+    [undefined, 'undefined'],
+    [new Error('boom'), 'Error: boom'],
+    [Object.create(null), '[object Object]'],
+  ])('turns %s into text', (value, expected) => {
+    expect(toLogText(value)).toBe(expected);
+  });
+});
+
 // The suite drives the message protocol with a fake worker, so nothing else here executes the
 // generated worker source. A ReferenceError in it silently costs a run: the script's failure is
 // swallowed, no result is posted, and the lab waits for the timeout.
 describe('the generated worker source', () => {
-  const runWorkerSource = async (script: string) => {
+  const runWorkerSource = async (
+    script: string,
+    options: {
+      answerPrompt?: (request: { title: string; defaultValue?: string }) => string | null;
+    } = {},
+  ) => {
     let workerSource = '';
     URL.createObjectURL = vi.fn((blob: Blob) => {
       void blob.text().then(text => (workerSource = text));
@@ -180,8 +215,27 @@ describe('the generated worker source', () => {
 
     const posted: any[] = [];
     const self: Record<string, any> = {
-      postMessage: (message: any) => posted.push(message),
-      console: globalThis.console,
+      postMessage: (message: any) => {
+        // Like the real boundary: an uncloneable value throws back into the script.
+        posted.push(structuredClone(message));
+
+        // The main thread answers on a later task.
+        if (message.type === 'prompt' && options.answerPrompt) {
+          setTimeout(() => {
+            void self.onmessage({
+              data: { type: 'prompt:result', value: options.answerPrompt?.(message) },
+            });
+          }, 0);
+        }
+      },
+      // The script's AsyncFunction sees the real global, not this fake `self`; in a worker they
+      // are the same object. Unstubbed in afterEach.
+      get console() {
+        return globalThis.console;
+      },
+      set console(value) {
+        vi.stubGlobal('console', value);
+      },
     };
 
     // In a worker `self` is the global scope, so what the source hangs off it — CryptoJS, the
@@ -218,6 +272,121 @@ describe('the generated worker source', () => {
     expect(posted).toContainEqual(
       expect.objectContaining({ type: 'result', env: { variables: {} } }),
     );
+  });
+
+  it('reports a non-Error throw instead of going quiet', async () => {
+    const posted = await runWorkerSource('throw null;');
+
+    expect(posted).toContainEqual(expect.objectContaining({ type: 'result', error: 'null' }));
+  });
+
+  it('logs values that cannot be structured-cloned', async () => {
+    const posted = await runWorkerSource('console.log(lab.request.headers, () => {}, null);');
+
+    const log = posted.find(message => message.type === 'log');
+    expect(log.message).toHaveLength(3);
+    expect(log.message.every((part: unknown) => typeof part === 'string')).toBe(true);
+    expect(log.message[2]).toBe('null');
+    expect(posted).toContainEqual(
+      expect.objectContaining({ type: 'result', env: { variables: {} } }),
+    );
+  });
+
+  it('hides worker and host globals from the script', async () => {
+    const posted = await runWorkerSource(
+      'console.log(typeof self, typeof globalThis, typeof postMessage, typeof process);',
+    );
+
+    expect(posted).toContainEqual(
+      expect.objectContaining({
+        type: 'log',
+        message: ['undefined', 'undefined', 'undefined', 'undefined'],
+      }),
+    );
+  });
+
+  it('keeps the allowed globals reachable', async () => {
+    const posted = await runWorkerSource(
+      'console.log(typeof fetch, typeof setTimeout, typeof URL, typeof TextEncoder, typeof crypto, typeof Uint8Array, typeof Intl, typeof CryptoJS, typeof lab);',
+    );
+
+    expect(posted).toContainEqual(
+      expect.objectContaining({
+        type: 'log',
+        message: [
+          'function',
+          'function',
+          'function',
+          'function',
+          'object',
+          'function',
+          'object',
+          'object',
+          'object',
+        ],
+      }),
+    );
+  });
+
+  it('does not hand the script the worker scope as this', async () => {
+    const posted = await runWorkerSource('console.log(String(this), typeof this.postMessage);');
+
+    expect(posted).toContainEqual(
+      expect.objectContaining({ type: 'log', message: ['undefined', 'undefined'] }),
+    );
+  });
+
+  it('hands the script null for an empty prompt answer', async () => {
+    const posted = await runWorkerSource('console.log(await lab.prompt("Noun"));', {
+      answerPrompt: () => '',
+    });
+
+    expect(posted).toContainEqual(expect.objectContaining({ type: 'log', message: ['null'] }));
+  });
+
+  it('exposes CryptoJS on lab and as a bare name', async () => {
+    const posted = await runWorkerSource(
+      'console.log(typeof lab.CryptoJS.SHA256, typeof CryptoJS.SHA256);',
+    );
+
+    expect(posted).toContainEqual(
+      expect.objectContaining({ type: 'log', message: ['function', 'function'] }),
+    );
+  });
+
+  // The same saved script runs on both laboratory tabs.
+  it('runs a script written for the GraphiQL tab', async () => {
+    const script = [
+      "console.log('preflight worker is running');",
+      "lab.environment.set('ran-at', new Date().toISOString());",
+      "console.info('ran-at =', lab.environment.get('ran-at'));",
+      "const digest = lab.CryptoJS.SHA256('hive').toString();",
+      "console.info('sha256(hive) =', digest);",
+      "lab.request.headers.set('x-preflight-test', digest.slice(0, 8));",
+      "const answer = await lab.prompt('Type anything to confirm the prompt bridge works', 'ok');",
+      "console.warn('prompt returned:', answer);",
+    ].join('\n');
+
+    const posted = await runWorkerSource(script, { answerPrompt: () => 'ok' });
+
+    const digest = createHash('sha256').update('hive').digest('hex');
+    const result = posted.find(message => message.type === 'result');
+    expect(result.error).toBeUndefined();
+    expect(Date.parse(result.env.variables['ran-at'])).not.toBeNaN();
+    expect(result.headers).toEqual({ 'x-preflight-test': digest.slice(0, 8) });
+
+    expect(posted).toContainEqual(
+      expect.objectContaining({
+        type: 'prompt',
+        title: 'Type anything to confirm the prompt bridge works',
+        defaultValue: 'ok',
+      }),
+    );
+
+    const messages = posted.filter(message => message.type === 'log').map(m => m.message);
+    expect(messages).toContainEqual(['preflight worker is running']);
+    expect(messages).toContainEqual(['sha256(hive) =', digest]);
+    expect(messages).toContainEqual(['prompt returned:', 'ok']);
   });
 });
 

@@ -1,5 +1,97 @@
 # hive
 
+## 14.0.0
+
+### Major Changes
+
+- [#8563](https://github.com/graphql-hive/console/pull/8563)
+  [`a892ec8`](https://github.com/graphql-hive/console/commit/a892ec822056740958391d0dd4fc958c4b96486f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - **BREAKING CHANGE** Require the migration service
+  to be configured with `REDIS_HOST`, `REDIS_PORT`, and `REDIS_PASSWORD`. These variables must
+  connect to the same Redis instance used by the API so database migrations can acquire the schema
+  registry lock before modifying registry state.
+
+- [#8563](https://github.com/graphql-hive/console/pull/8563)
+  [`a892ec8`](https://github.com/graphql-hive/console/commit/a892ec822056740958391d0dd4fc958c4b96486f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - **BREAKING CHANGE**: Before upgrading to this
+  version, you must first upgrade to `hive@13.1.0`. Do not upgrade directly from an earlier version
+  while the system is serving traffic.
+
+  To perform a rolling upgrade:
+
+  1. Upgrade all running services to `hive@13.1.0`.
+  2. Wait until all database migrations for `hive@13.1.0` have completed successfully and that
+     version is serving traffic.
+  3. Upgrade all services to this major version and wait for the database migration to complete.
+
+  If downtime is acceptable, you can instead stop all traffic and running services, then upgrade
+  directly to this version and run the migrations before bringing the system back online.
+
+  ***
+
+  Backfill latest contract versions from `contract_versions` to `schema_versions`.
+
+- [#8593](https://github.com/graphql-hive/console/pull/8593)
+  [`a8e7955`](https://github.com/graphql-hive/console/commit/a8e795598ad16586e35c58621a501f7897765c51)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - **BREAKING CHANGE**: Contract schemas are now
+  stored exclusively as schema versions. Hive no longer writes contract updates to the legacy
+  contract tables.
+
+## 13.1.0
+
+### Minor Changes
+
+- [#8678](https://github.com/graphql-hive/console/pull/8678)
+  [`5124f15`](https://github.com/graphql-hive/console/commit/5124f154e100819f19fbe2c4b94540f8e04ac560)
+  Thanks [@jdolle](https://github.com/jdolle)! - Report schema publish results to the Hive CLI when
+  the GitHub integration is used.
+
+  `GitHubSchemaPublishSuccess` now has an `isValid` field, so the CLI can fail a CI job when a
+  `--github` publish is rejected.
+
+- [#8683](https://github.com/graphql-hive/console/pull/8683)
+  [`085d06d`](https://github.com/graphql-hive/console/commit/085d06df2c43a82adc676e63cf6c4fa0dd441d0c)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Use Node.js
+  [v24.21.0](https://nodejs.org/en/blog/release/v24.21.0).
+
+- [#8562](https://github.com/graphql-hive/console/pull/8562)
+  [`d182abd`](https://github.com/graphql-hive/console/commit/d182abdf928f57905b7bfdd7e7e1a95e152ca938)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Introduce temporary dual writes of contract
+  versions to both the `contract_versions` and `schema_versions` table. This release is an
+  intermediate rollout step required to bring the database and application into a consistent state
+  before subsequent graph-related changes are deployed.
+
+### Patch Changes
+
+- [#8562](https://github.com/graphql-hive/console/pull/8562)
+  [`d182abd`](https://github.com/graphql-hive/console/commit/d182abdf928f57905b7bfdd7e7e1a95e152ca938)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Promoting a schema version to a different target
+  now composes the contracts of the target the version is promoted to, instead of copying the
+  contract versions of the source target.
+
+- [#8670](https://github.com/graphql-hive/console/pull/8670)
+  [`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Address vulnerability
+  [GHSA-7mx3-vvmw-hjmv](https://github.com/advisories/GHSA-7mx3-vvmw-hjmv).
+
+- [#8542](https://github.com/graphql-hive/console/pull/8542)
+  [`5e3ca16`](https://github.com/graphql-hive/console/commit/5e3ca169022b6561eb984aa642e3b22e53338421)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add a partial index on `schema_versions` records
+  without a `graph_metadata`, so that listing the schema versions of a graph that was backfilled
+  from a target does not scan every newer record of that target.
+
+- [#8643](https://github.com/graphql-hive/console/pull/8643)
+  [`4b8bd44`](https://github.com/graphql-hive/console/commit/4b8bd440b6fde60b77bccfd42987bdd627290258)
+  Thanks [@jdolle](https://github.com/jdolle)! - Fix the schema service composition scheduler
+  leaving a terminated worker in the pool after a handled composition error. The next composition
+  assigned to that worker was silently dropped and timed out after 60 seconds. Workers are now kept
+  alive after handled errors, and any worker that exits is replaced immediately.
+
+- [#8670](https://github.com/graphql-hive/console/pull/8670)
+  [`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Address vulnerability
+  [GHSA-qqmp-wf37-98f9](https://github.com/advisories/GHSA-qqmp-wf37-98f9).
+
 ## 13.0.0
 
 ### Major Changes

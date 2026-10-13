@@ -45,6 +45,7 @@ describe('getSchemaCheckFailureGithubDetails', () => {
             supergraphSDL: null,
           },
           schemaChanges: null,
+          supergraphChanges: null,
         },
       ],
     });

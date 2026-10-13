@@ -1,426 +1,276 @@
-import type { Page, Request } from '@playwright/test';
 import { expect, test } from '../fixtures';
+import type { SeedProject } from '../fixtures';
+import type { LaboratoryHelper } from '../helpers/laboratory';
 
-const selectors = {
-  buttonGraphiQLPreflight: '[aria-label*="Preflight Script"]',
-  buttonModalCy: 'preflight-modal-button',
-  buttonToggleCy: 'toggle-preflight',
-  buttonHeaders: '[data-name="headers"]',
-  headersEditor: {
-    textArea: '.graphiql-editor-tool .graphiql-editor:last-child textarea',
-  },
-  graphiql: {
-    buttonExecute: '.graphiql-execute-button',
-  },
+const QUERY = 'query PreflightTest { __typename }';
+const PROMPT_SCRIPT = `const username = await lab.prompt('Enter your username');
+console.info(username);`;
+const LEVELS_SCRIPT = `console.log('Hello_world');
+console.info(1);
+console.warn(true);
+console.error('Fatal');
+throw new TypeError('Test');`;
 
-  modal: {
-    buttonSubmitCy: 'preflight-modal-submit',
-  },
+let slug: string;
+let project: SeedProject;
+
+const openWithOperation = async (laboratory: LaboratoryHelper) => {
+  await laboratory.openSeededTarget(slug);
+  await laboratory.addOperationTab();
+  await laboratory.setEditorValue('operation', QUERY);
 };
 
-function waitForLabRequest(page: Page, predicate: (request: Request) => boolean = () => true) {
-  return page.waitForRequest(
-    request =>
-      request.method() === 'POST' && request.url().includes('/api/lab/') && predicate(request),
-  );
-}
-
-async function waitForPreflightSaved(page: Page) {
-  await expect(
-    page.getByText('Preflight script has been updated successfully', { exact: true }).last(),
-  ).toBeVisible();
-}
-
-test.beforeEach(async ({ page, seed, auth, laboratory }) => {
-  const { accessToken, slug, refreshToken } = await seed.seedTarget();
-  await auth.useSession({ refreshToken, accessToken });
-  await laboratory.openSeededTarget(slug);
-  await laboratory.updateEditorValue('query PreflightTest { __typename }');
-  await expect.poll(() => laboratory.getEditorValue()).toContain('PreflightTest');
-  await page.locator(selectors.buttonGraphiQLPreflight).click();
-});
-
-test.describe('Laboratory > Preflight Script', () => {
-  test('regression: loads even if local storage is set to {}', async ({ page }) => {
-    await page.evaluate(() => {
-      window.localStorage.setItem('hive:laboratory:environment', '{}');
-    });
-    await page.reload();
-    await page.locator(selectors.buttonGraphiQLPreflight).click();
-    await expect(page.locator(`[data-cy="${selectors.buttonModalCy}"]`)).toBeVisible();
+test.describe('Laboratory > Preflight', () => {
+  test.beforeEach(async ({ seed, auth }) => {
+    const seeded = await seed.seedTarget();
+    slug = seeded.slug;
+    project = seeded.project;
+    await auth.useSession({ refreshToken: seeded.refreshToken, accessToken: seeded.accessToken });
   });
 
-  test('mini script editor is read only', async ({ page }) => {
-    await page.locator(`[data-cy="${selectors.buttonToggleCy}"]`).click();
-    await expect(page.locator('[data-cy="preflight-editor-mini"]')).not.toContainText('Loading');
-    await page.locator('[data-cy="preflight-editor-mini"]').click();
-    await page.locator('[data-cy="preflight-editor-mini"] textarea').pressSequentially('x');
-    await expect(page.locator('[data-cy="preflight-editor-mini"] textarea')).not.toHaveValue('x');
-  });
-});
-
-test.describe('Preflight Script Modal', () => {
-  const script = 'console.log("Hello_world")';
-  const env = '{"foo":123}';
-
-  test.beforeEach(async ({ page, laboratory }) => {
-    await page.locator('[data-cy="preflight-modal-button"]').click();
-    await laboratory.setMonacoEditorContents('env-editor', env);
-  });
-
-  test('save script and environment variables when submitting', async ({ page, laboratory }) => {
-    await laboratory.setMonacoEditorContents('preflight-editor', script);
-    await page.locator('[data-cy="preflight-modal-submit"]').click();
-    await waitForPreflightSaved(page);
-    await expect(page.locator('[data-cy="env-editor-mini"]')).toContainText(env);
-    await page.locator('[data-cy="toggle-preflight"]').click();
-    await expect(page.locator('[data-cy="preflight-editor-mini"]')).toContainText(script);
-    await page.reload();
-    await page.locator(selectors.buttonGraphiQLPreflight).click();
-    await expect(page.locator('[data-cy="env-editor-mini"]')).toContainText(env);
-    await expect(page.locator('[data-cy="preflight-editor-mini"]')).toContainText(script);
-  });
-
-  test('logs show console/error information', async ({ page, laboratory }) => {
-    await laboratory.setMonacoEditorContents('preflight-editor', script);
-    await page.locator('[data-cy="run-preflight"]').click();
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('log: Hello_world (1:1)');
-
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `console.info(1); console.warn(true); console.error('Fatal'); throw new TypeError('Test')`,
-    );
-
-    await page.locator('[data-cy="run-preflight"]').click();
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('log: Hello_world (1:1)');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText('info: 1');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText('warn: true');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText('error: Fatal');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText('error: Test');
-  });
-
-  test('prompt and pass the awaited response', async ({ page, laboratory }) => {
-    await laboratory.setMonacoEditorContents('preflight-editor', script);
-
-    await page.locator('[data-cy="run-preflight"]').click();
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('log: Hello_world (1:1)');
-
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `const username = await lab.prompt('Enter your username'); console.info(username);`,
-    );
-
-    await page.locator('[data-cy="run-preflight"]').click();
-    await page.locator('[data-cy="prompt"] input').fill('test-username');
-    await page.locator('[data-cy="prompt"] form').evaluate(form => {
-      (form as HTMLFormElement).requestSubmit();
-    });
-
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('log: Hello_world (1:1)');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText('info: test-username');
-  });
-
-  test('prompt and cancel', async ({ page, laboratory }) => {
-    await laboratory.setMonacoEditorContents('preflight-editor', script);
-
-    await page.locator('[data-cy="run-preflight"]').click();
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('log: Hello_world (1:1)');
-
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `const username = await lab.prompt('Enter your username'); console.info(username);`,
-    );
-
-    await page.locator('[data-cy="run-preflight"]').click();
-    await page.locator('[data-cy="prompt"] input').fill('test-username');
-    await page.locator('[data-cy="prompt-cancel"]').click();
-
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('log: Hello_world (1:1)');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText('info: null');
-  });
-
-  test('script execution updates environment variables', async ({ page, laboratory }) => {
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      'lab.environment.set(\'my-test\', "TROLOLOL")',
-    );
-
-    await page.locator('[data-cy="run-preflight"]').click();
-    await expect(page.locator('[data-cy="env-editor"]')).toContainText('"my-test": "TROLOLOL"');
-  });
-
-  test('`crypto-js` can be used for generating hashes', async ({ page, laboratory }) => {
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      'console.log(lab.CryptoJS.SHA256("test"))',
-    );
-    await page.locator('[data-cy="run-preflight"]').click();
-    await expect
-      .poll(() => page.locator('[data-cy="console-output"]').textContent())
-      .toContain('info: Using crypto-js version:');
-    await expect(page.locator('[data-cy="console-output"]')).toContainText(
-      'log: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
-    );
-  });
-});
-
-test.describe('Execution', () => {
-  test('result.request.headers are added to the graphiql request base headers', async ({
+  test('saves the script to the target and the env to the browser', async ({
     page,
     laboratory,
   }) => {
-    const preflightHeaders = {
-      foo: 'bar',
-    };
-    await page.locator(`[data-cy="${selectors.buttonToggleCy}"]`).click();
-    await page.locator(`[data-cy="${selectors.buttonModalCy}"]`).click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `lab.request.headers.append('foo', '${preflightHeaders.foo}')`,
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
+    const saved = page.waitForResponse(response =>
+      (response.request().postData() ?? '').includes('LaboratoryUpdatePreflightScript'),
     );
-    await page.locator(`[data-cy="${selectors.modal.buttonSubmitCy}"]`).click();
-    await waitForPreflightSaved(page);
+    await laboratory.setEditorValue('preflight', 'console.log("Hello_world")');
+    await saved;
+    await laboratory.openEnvTab();
+    await laboratory.setEditorValue('env', 'foo=123');
 
-    const requestPromise = waitForLabRequest(page, request => request.headers().foo === 'bar');
-    await page.locator(selectors.graphiql.buttonExecute).click();
-    await requestPromise;
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(page.locator('.hive-laboratory-host')).toBeVisible({ timeout: 30_000 });
+
+    await laboratory.openPreflightTab();
+    await expect
+      .poll(() => laboratory.getEditorValue('preflight'))
+      .toBe('console.log("Hello_world")');
+    await laboratory.openEnvTab();
+    await expect.poll(() => laboratory.getEditorValue('env')).toContain('foo=123');
   });
 
-  test('result.request.headers take precedence over graphiql request base headers', async ({
-    page,
+  test('logs every console level and a thrown error with its position', async ({ laboratory }) => {
+    await project.updatePreflightScript({ sourceCode: LEVELS_SCRIPT });
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
+
+    await laboratory.runPreflightTest();
+
+    const logs = laboratory.logs();
+    await expect(logs.locator('[data-level="log"]')).toContainText(['Hello_world']);
+    await expect(logs.locator('[data-level="log"]')).toContainText('(1:1)');
+    await expect(logs.locator('[data-level="info"]')).toContainText('1');
+    await expect(logs.locator('[data-level="warn"]')).toContainText('true');
+    await expect(logs.locator('[data-level="error"]')).toContainText(['Fatal', 'Test']);
+  });
+
+  test('hands a prompt answer back to the script', async ({ laboratory }) => {
+    await project.updatePreflightScript({ sourceCode: PROMPT_SCRIPT });
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
+
+    await laboratory.runPreflightTest();
+    await laboratory.answerPrompt('Enter your username', 'test-username');
+
+    await expect(laboratory.logs().locator('[data-level="info"]')).toContainText('test-username');
+  });
+
+  test('hands null to the script when the prompt is cancelled', async ({ laboratory }) => {
+    await project.updatePreflightScript({ sourceCode: PROMPT_SCRIPT });
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
+
+    await laboratory.runPreflightTest();
+    await laboratory.cancelPrompt();
+
+    await expect(laboratory.logs().locator('[data-level="info"]')).toContainText('null');
+  });
+
+  test('writes environment variables set by the script into the env editor', async ({
     laboratory,
   }) => {
-    const baseHeaders = {
-      accept: 'application/json, multipart/mixed',
-    };
-    await expect(page.locator('.graphiql-query-editor .cm-s-graphiql')).toBeVisible();
-    const integrityCheck = waitForLabRequest(page, request => {
-      return request.headers().accept?.includes(baseHeaders.accept);
+    await project.updatePreflightScript({
+      sourceCode: `lab.environment.set('my-test', 'TROLOLOL');`,
     });
-    await page.locator(selectors.graphiql.buttonExecute).click();
-    await integrityCheck;
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
 
-    const preflightHeaders = {
-      accept: 'application/graphql-response+json; charset=utf-8, application/json; charset=utf-8',
-    };
-    await page.locator(`[data-cy="${selectors.buttonToggleCy}"]`).click();
-    await page.locator(`[data-cy="${selectors.buttonModalCy}"]`).click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `lab.request.headers.append('accept', '${preflightHeaders.accept}')`,
-    );
-    await page.locator(`[data-cy="${selectors.modal.buttonSubmitCy}"]`).click();
-    await waitForPreflightSaved(page);
+    await laboratory.runPreflightTest();
+    await laboratory.openEnvTab();
 
-    const requestPromise = waitForLabRequest(page, request =>
-      request.headers().accept?.includes(preflightHeaders.accept),
-    );
-    await page.locator(selectors.graphiql.buttonExecute).click();
-    await requestPromise;
+    await expect.poll(() => laboratory.getEditorValue('env')).toContain('my-test=TROLOLOL');
   });
 
-  test('result.request.headers are NOT substituted with environment variables', async ({
-    page,
-    laboratory,
-  }) => {
-    const barEnvVarInterpolation = '{{bar}}';
-    await page.locator(selectors.buttonHeaders).click();
-    await page.locator(selectors.headersEditor.textArea).fill(
-      JSON.stringify({
-        foo_static: barEnvVarInterpolation,
-      }),
-    );
-
-    await page.locator(`[data-cy="${selectors.buttonToggleCy}"]`).click();
-    await page.locator(`[data-cy="${selectors.buttonModalCy}"]`).click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `
-      lab.environment.set('bar', 'BAR_VALUE')
-      lab.request.headers.append('foo_preflight', '${barEnvVarInterpolation}')
-    `,
-    );
-    await page.locator(`[data-cy="${selectors.modal.buttonSubmitCy}"]`).click();
-    await waitForPreflightSaved(page);
-
-    const requestPromise = waitForLabRequest(page, request => {
-      const headers = request.headers();
-
-      return headers.foo_preflight === barEnvVarInterpolation && headers.foo_static === 'BAR_VALUE';
+  test('exposes crypto-js as lab.CryptoJS', async ({ laboratory }) => {
+    await project.updatePreflightScript({
+      sourceCode: `console.log(lab.CryptoJS.SHA256('test').toString());`,
     });
-    await page.locator(selectors.graphiql.buttonExecute).click();
-    await requestPromise;
-  });
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
 
-  test('header placeholders are substituted with environment variables', async ({
-    page,
-    laboratory,
-  }) => {
-    await page.locator('[data-cy="toggle-preflight"]').click();
-    await page.locator('[data-name="headers"]').click();
-    await page
-      .locator('.graphiql-editor-tool .graphiql-editor:last-child textarea')
-      .fill('{ "__test": "{{foo}} bar {{nonExist}}" }');
-    await laboratory.setMonacoEditorContents('env-editor-mini', '{"foo":"injected"}');
+    await laboratory.runPreflightTest();
 
-    const requestPromise = page.waitForRequest(request => {
-      return (
-        request.method() === 'POST' && request.headers().__test === 'injected bar {{nonExist}}'
-      );
-    });
-    await page.locator('.graphiql-execute-button').click();
-    await requestPromise;
-  });
-
-  test('executed script updates update env editor and substitute headers', async ({
-    page,
-    laboratory,
-  }) => {
-    await page.locator('[data-cy="toggle-preflight"]').click();
-    await page.locator('[data-name="headers"]').click();
-    await page
-      .locator('.graphiql-editor-tool .graphiql-editor:last-child textarea')
-      .fill('{ "__test": "{{foo}}" }');
-    await page.locator('[data-cy="preflight-modal-button"]').click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      "lab.environment.set('foo', '92')",
-    );
-    await page.locator('[data-cy="preflight-modal-submit"]').click();
-    await waitForPreflightSaved(page);
-
-    const requestPromise = waitForLabRequest(page, request => {
-      return request.headers().__test === '92';
-    });
-    await page.locator('.graphiql-execute-button').click();
-    await requestPromise;
-  });
-
-  test('execute, prompt and use it in headers', async ({ page, laboratory }) => {
-    await page.locator('[data-cy="toggle-preflight"]').click();
-
-    await page.locator('[data-name="headers"]').click();
-    await page.locator('[data-name="headers"]').click();
-    await page
-      .locator('.graphiql-editor-tool .graphiql-editor:last-child textarea')
-      .fill('{ "__test": "{{username}}" }');
-
-    await page.locator('[data-cy="preflight-modal-button"]').click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `const username = await lab.prompt('Enter your username'); lab.environment.set('username', username);`,
-    );
-    await page.locator('[data-cy="preflight-modal-submit"]').click();
-    await waitForPreflightSaved(page);
-
-    const requestPromise = waitForLabRequest(page, request => {
-      return request.headers().__test === 'foo';
-    });
-    await page.locator('.graphiql-execute-button').click();
-
-    await page.locator('[data-cy="prompt"] input').fill('foo');
-    await page.locator('[data-cy="prompt"] form').evaluate(form => {
-      (form as HTMLFormElement).requestSubmit();
-    });
-
-    await requestPromise;
-  });
-
-  test('disabled script is not executed', async ({ page, laboratory }) => {
-    await page.locator('[data-name="headers"]').click();
-    await page
-      .locator('.graphiql-editor-tool .graphiql-editor:last-child textarea')
-      .fill('{ "__test": "{{foo}}" }');
-    await page.locator('[data-cy="preflight-modal-button"]').click();
-    await laboratory.setMonacoEditorContents('preflight-editor', "lab.environment.set('foo', 92)");
-    await laboratory.setMonacoEditorContents('env-editor', '{"foo":10}');
-
-    await page.locator('[data-cy="preflight-modal-submit"]').click();
-    await waitForPreflightSaved(page);
-
-    const requestPromise = waitForLabRequest(page, request => {
-      return request.headers().__test === '10';
-    });
-    await page.locator('.graphiql-execute-button').click();
-    await requestPromise;
-  });
-
-  test('logs are visible when opened', async ({ page, laboratory }) => {
-    await page.locator('[data-cy="toggle-preflight"]').click();
-
-    await page.locator('[data-cy="preflight-modal-button"]').click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `console.info(1); console.warn(true); console.error('Fatal'); throw new TypeError('Test')`,
-    );
-    await page.locator('[data-cy="preflight-modal-submit"]').click();
-    await waitForPreflightSaved(page);
-
-    const requestPromise = waitForLabRequest(page);
-
-    await page.getByRole('button', { name: 'Preflight Script Logs' }).click();
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toBeVisible();
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'No logs available',
-    );
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'Execute a query to see logs',
-    );
-
-    await page.locator('.graphiql-execute-button').click();
-    await requestPromise;
-
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'log: Running script...',
-    );
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText('info: 1');
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText('warn: true');
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText('error: Fatal');
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText('error: Test');
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'log: Script failed',
+    await expect(laboratory.logs().locator('[data-level="log"]')).toContainText(
+      '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
     );
   });
 
-  test('logs are cleared when requested', async ({ page, laboratory }) => {
-    await page.locator('[data-cy="toggle-preflight"]').click();
+  test('clears the preflight logs on request', async ({ laboratory }) => {
+    await project.updatePreflightScript({ sourceCode: `console.log('Hello_world');` });
+    await laboratory.openSeededTarget(slug);
+    await laboratory.openPreflightTab();
+    await laboratory.runPreflightTest();
+    await expect(laboratory.logs()).toContainText('Hello_world');
 
-    await page.locator('[data-cy="preflight-modal-button"]').click();
-    await laboratory.setMonacoEditorContents(
-      'preflight-editor',
-      `console.info(1); console.warn(true); console.error('Fatal'); throw new TypeError('Test')`,
-    );
-    await page.locator('[data-cy="preflight-modal-submit"]').click();
-    await waitForPreflightSaved(page);
+    await laboratory.logs().page().getByRole('button', { name: 'Clear' }).click();
 
-    const requestPromise = waitForLabRequest(page);
-    await page.locator('.graphiql-execute-button').click();
-    await requestPromise;
+    await expect(laboratory.logs()).toBeHidden();
+    await expect(laboratory.logs().page().getByText('No logs yet')).toBeVisible();
+  });
 
-    await page.getByRole('button', { name: 'Preflight Script Logs' }).click();
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toBeVisible();
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'log: Running script...',
-    );
+  test('carries the GraphiQL env and toggle over on first visit', async ({ page, laboratory }) => {
+    await project.updatePreflightScript({ sourceCode: `console.log('legacy');` });
+    await page.addInitScript(() => {
+      window.localStorage.setItem('hive:laboratory:environment', '{"foo":"bar","count":2}');
+      window.localStorage.setItem('hive:laboratory:isPreflightScriptEnabled', 'true');
+    });
+    await openWithOperation(laboratory);
 
-    await page.locator('#preflight-logs button[data-cy="erase-logs"]').click();
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'No logs available',
-    );
-    await expect(page.locator('#preflight-logs [data-cy="logs"]')).toContainText(
-      'Execute a query to see logs',
-    );
+    await expect(page.getByRole('button', { name: 'Disable preflight' })).toBeVisible();
+    await laboratory.openEnvTab();
+    const env = await laboratory.getEditorValue('env');
+    expect(env).toContain('foo=bar');
+    expect(env).toContain('count=2');
+  });
+
+  test.describe('execution', () => {
+    test('sends headers the script appends', async ({ laboratory }) => {
+      await project.updatePreflightScript({
+        sourceCode: `lab.request.headers.append('foo', 'bar');`,
+      });
+      await openWithOperation(laboratory);
+      await laboratory.enablePreflight();
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+
+      expect((await request).headers().foo).toBe('bar');
+    });
+
+    test('lets a preflight header win over the operation header', async ({ laboratory }) => {
+      await project.updatePreflightScript({
+        sourceCode: `lab.request.headers.append('x-test', 'from-preflight');`,
+      });
+      await openWithOperation(laboratory);
+      await laboratory.setEditorValue('headers', '{"x-test":"from-operation"}');
+      await laboratory.enablePreflight();
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+
+      expect((await request).headers()['x-test']).toBe('from-preflight');
+    });
+
+    test('templates operation headers but sends preflight headers verbatim', async ({
+      laboratory,
+    }) => {
+      await project.updatePreflightScript({
+        sourceCode: `lab.environment.set('bar', 'BAR_VALUE');
+lab.request.headers.append('foo_preflight', '{{bar}}');`,
+      });
+      await openWithOperation(laboratory);
+      await laboratory.setEditorValue('headers', '{"foo_static":"{{bar}}"}');
+      await laboratory.enablePreflight();
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+
+      const headers = (await request).headers();
+      expect(headers.foo_preflight).toBe('{{bar}}');
+      expect(headers.foo_static).toBe('BAR_VALUE');
+    });
+
+    test('substitutes env editor values into headers and leaves unknown names', async ({
+      laboratory,
+    }) => {
+      await openWithOperation(laboratory);
+      await laboratory.openEnvTab();
+      await laboratory.setEditorValue('env', 'foo=injected');
+      await laboratory.activateTab('PreflightTest');
+      await laboratory.setEditorValue('headers', '{"__test":"{{foo}} bar {{nonExist}}"}');
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+
+      expect((await request).headers().__test).toBe('injected bar {{nonExist}}');
+    });
+
+    test('uses env values the script sets for header substitution', async ({ laboratory }) => {
+      await project.updatePreflightScript({ sourceCode: `lab.environment.set('foo', '92');` });
+      await openWithOperation(laboratory);
+      await laboratory.setEditorValue('headers', '{"__test":"{{foo}}"}');
+      await laboratory.enablePreflight();
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+
+      expect((await request).headers().__test).toBe('92');
+    });
+
+    test('feeds a prompt answer through env into a header', async ({ laboratory }) => {
+      await project.updatePreflightScript({
+        sourceCode: `const username = await lab.prompt('Enter your username');
+lab.environment.set('username', username);`,
+      });
+      await openWithOperation(laboratory);
+      await laboratory.setEditorValue('headers', '{"__test":"{{username}}"}');
+      await laboratory.enablePreflight();
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+      await laboratory.answerPrompt('Enter your username', 'foo');
+
+      expect((await request).headers().__test).toBe('foo');
+    });
+
+    test('does not run a disabled script', async ({ laboratory }) => {
+      await project.updatePreflightScript({ sourceCode: `lab.environment.set('foo', 92);` });
+      await openWithOperation(laboratory);
+      await laboratory.openEnvTab();
+      await laboratory.setEditorValue('env', 'foo=10');
+      await laboratory.activateTab('PreflightTest');
+      await laboratory.setEditorValue('headers', '{"__test":"{{foo}}"}');
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+
+      expect((await request).headers().__test).toBe('10');
+    });
+
+    test('shows the run logs in the response pane', async ({ page, laboratory }) => {
+      await project.updatePreflightScript({
+        sourceCode: `console.info(1);
+console.warn(true);
+console.error('Fatal');`,
+      });
+      await openWithOperation(laboratory);
+      await laboratory.enablePreflight();
+
+      const request = laboratory.waitForLabRequest('PreflightTest');
+      await laboratory.runOperation();
+      await request;
+
+      const tab = page.getByRole('tab', { name: 'Preflight' });
+      await tab.click();
+      // Request and response panes both have tab panels; follow this tab's own panel.
+      const pane = page.locator(`[id="${await tab.getAttribute('aria-controls')}"]`);
+      await expect(pane).toContainText('1');
+      await expect(pane).toContainText('true');
+      await expect(pane).toContainText('Fatal');
+    });
   });
 });

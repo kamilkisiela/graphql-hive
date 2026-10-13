@@ -1,5 +1,69 @@
 # @graphql-hive/laboratory
 
+## 0.4.0
+
+### Minor Changes
+
+- [#8654](https://github.com/graphql-hive/console/pull/8654)
+  [`b156ad7`](https://github.com/graphql-hive/console/commit/b156ad73cf8e0a6d114af7438c0ae207f62f4bcb)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Headers set by a preflight script
+  now win over the operation's own headers on every path: operation runs, the cURL export and
+  introspection. Names compare case-insensitively, so `Authorization` in the operation and
+  `authorization` from the script no longer produce a doubled header. Preflight values are sent
+  verbatim, never templated. This matches what the GraphiQL tab did.
+
+- [#8654](https://github.com/graphql-hive/console/pull/8654)
+  [`b156ad7`](https://github.com/graphql-hive/console/commit/b156ad73cf8e0a6d114af7438c0ae207f62f4bcb)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Preflight scripts now see an
+  allow-list of globals, the model the GraphiQL tab used: the JavaScript built-ins, `fetch`, timers,
+  `URL`, `TextEncoder`/`TextDecoder`, Web Crypto, `Headers`/`Request`/`Response`, `AbortController`,
+  `structuredClone`, `Intl`, typed arrays and `CryptoJS`. Worker internals such as `self`,
+  `globalThis`, `postMessage`, `importScripts`, `location`, `navigator`, `indexedDB`, `caches`,
+  `WebSocket`, `XMLHttpRequest`, `eval` and `Function` read as `undefined`, and `this` is no longer
+  the worker scope. The full list lives in `src/lib/preflight-allowed-globals.ts`.
+
+### Patch Changes
+
+- [#8658](https://github.com/graphql-hive/console/pull/8658)
+  [`fcd57a8`](https://github.com/graphql-hive/console/commit/fcd57a8081335902a6b6e3d33c45efe5c67fa78a)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Icon-only controls now have
+  accessible names: the left rail (Collections, History, Documentation, Settings), the collections
+  pane (add, search clear, edit, save and cancel rename, delete collection, delete operation) and
+  the tab close control, which is now a real button. Tabs expose `data-state="active" | "inactive"`,
+  and preflight log lines carry `data-level` inside a `role="log"` list. The Settings rail button no
+  longer toggles the history panel when clicked.
+
+- [#8658](https://github.com/graphql-hive/console/pull/8658)
+  [`fcd57a8`](https://github.com/graphql-hive/console/commit/fcd57a8081335902a6b6e3d33c45efe5c67fa78a)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Hosts can hand persisted ids back
+  to the lab: `onCollectionCreate` and `onCollectionOperationCreate` may return `{ id }`, or a
+  promise of it, and the lab adopts the id for the collection, the saved operation, its working copy
+  and its tab. Operations a collection is created with are now reported through
+  `onCollectionOperationCreate` as well. Before this, a collection created in the current session
+  kept a local id, so saving operations into it, renaming it or deleting it could not reach the
+  host's store until the page was reloaded.
+
+- [#8654](https://github.com/graphql-hive/console/pull/8654)
+  [`b156ad7`](https://github.com/graphql-hive/console/commit/b156ad73cf8e0a6d114af7438c0ae207f62f4bcb)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Preflight console arguments are
+  converted to text inside the worker, so logging a function, `lab` or `lab.request.headers` no
+  longer fails the run with a clone error. A script that throws a non-Error value now reports it
+  instead of waiting for the timeout.
+
+- [#8654](https://github.com/graphql-hive/console/pull/8654)
+  [`b156ad7`](https://github.com/graphql-hive/console/commit/b156ad73cf8e0a6d114af7438c0ae207f62f4bcb)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Restore `lab.CryptoJS` in
+  preflight scripts. It had been dropped from the `lab` object, so only the bare `CryptoJS` global
+  worked and scripts written for the GraphiQL tab failed on `lab.CryptoJS.*`, even though the editor
+  typings offered it. The typings also accept numbers, booleans and `null` in `lab.environment.set`,
+  as the runtime always did.
+
+- [#8654](https://github.com/graphql-hive/console/pull/8654)
+  [`b156ad7`](https://github.com/graphql-hive/console/commit/b156ad73cf8e0a6d114af7438c0ae207f62f4bcb)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - A disabled preflight no longer
+  clears the stored environment and plugin state. Introspection and operation runs keep
+  interpolating `{{variables}}` from them while the toggle is off, as the GraphiQL tab did.
+
 ## 0.3.2
 
 ### Patch Changes

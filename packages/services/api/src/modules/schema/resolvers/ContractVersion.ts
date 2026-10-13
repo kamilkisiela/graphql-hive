@@ -1,4 +1,5 @@
 import { ContractsManager } from '../providers/contracts-manager';
+import { formatContractName } from '../providers/schema-publisher';
 import type { ContractVersionResolvers } from './../../../__generated__/types';
 
 export const ContractVersion: ContractVersionResolvers = {
@@ -34,5 +35,8 @@ export const ContractVersion: ContractVersionResolvers = {
       .getIsFirstComposableVersionForContractVersion(contractVersion),
   schemaChanges: async (contractVersion, _, context) => {
     return context.injector.get(ContractsManager).getAllChangesForContractVersion(contractVersion);
+  },
+  contractName(contractVersion) {
+    return formatContractName(contractVersion.contractName);
   },
 };

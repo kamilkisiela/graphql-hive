@@ -892,6 +892,11 @@ export default gql`
 
   type GitHubSchemaPublishSuccess {
     message: String!
+    """
+    Whether the registry accepted the schema, like SchemaPublishSuccess.
+    False means the publish was rejected and nothing was stored, like SchemaPublishError.
+    """
+    isValid: Boolean!
   }
 
   type GitHubSchemaPublishError {

@@ -1,5 +1,13 @@
 # @graphql-hive/gateway-plugin-console-sdk
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies
+  [[`e2edb6b`](https://github.com/graphql-hive/console/commit/e2edb6ba53215786d17da7e16840f3562eac0e37)]:
+  - @graphql-hive/core@0.23.1
+
 ## 0.1.7
 
 ### Patch Changes

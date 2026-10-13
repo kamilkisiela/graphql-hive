@@ -115,6 +115,27 @@ That only reaches introspection the Lab performs itself: if you pass `defaultSch
 build it with descriptions or the pane will have nothing to show. `introspectionFromSchema` includes
 them by default, so the usual `introspectionFromSchema(buildSchema(sdl))` needs no extra options.
 
+### Preflight scripts
+
+A preflight script runs in a Web Worker before each request, and before introspection when the
+introspection headers contain `{{…}}`. It sees a `lab` object:
+
+- `lab.environment.get/set/delete`: values are stored as text and interpolated into headers,
+  variables and extensions as `{{name}}`. `set` accepts strings, numbers, booleans and `null`;
+  anything else is dropped with a warning.
+- `lab.request.headers`: a `Headers` sent as-is, winning over the operation's own headers.
+- `await lab.prompt(title, defaultValue?, { placeholder?, description? })`: asks the user and
+  resolves `null` when dismissed.
+- `lab.CryptoJS`, also reachable as the bare `CryptoJS`.
+- `lab.plugins.*`: objects contributed by plugins.
+
+The body runs inside `with(lab)`, so bare `environment.set()` also works, which means sloppy mode.
+Only the globals listed in `src/lib/preflight-allowed-globals.ts` are visible; worker internals such
+as `self`, `postMessage` and `importScripts` read as `undefined`, and `this` is not the worker
+scope. Console arguments are converted to text. A run is stopped after 30 seconds of execution, not
+counting time spent waiting on a prompt. Scripts written for the GraphiQL-based Hive Console tab run
+unchanged.
+
 ### Styling and rendering
 
 The Lab bundles its own styles and injects them into its shadow root, so there is no CSS file to

@@ -210,6 +210,29 @@ describe('policy checks', () => {
     );
   });
 
+  it('refreshes reachable types per run', async () => {
+    const caller = schemaPolicyApiRouter.createCaller({ req: { log: console } as any });
+    const unreachableSchema = `type Query { foo: String } type Foo { id: ID! }`;
+    const reachableSchema = `type Query { foo: Foo } type Foo { id: ID! }`;
+    const policy = { 'no-unreachable-types': [2] as [2] };
+
+    const unreachableResult = await caller.checkPolicy({
+      source: unreachableSchema,
+      schema: unreachableSchema,
+      target: '1',
+      policy,
+    });
+    expect(unreachableResult.map(r => r.message)).toEqual(['Object type `Foo` is unreachable.']);
+
+    const reachableResult = await caller.checkPolicy({
+      source: reachableSchema,
+      schema: reachableSchema,
+      target: '1',
+      policy,
+    });
+    expect(reachableResult).toHaveLength(0);
+  });
+
   it('should support type extensions', async () => {
     const result = await schemaPolicyApiRouter
       .createCaller({ req: { log: console } as any })

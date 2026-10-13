@@ -12,17 +12,18 @@ describe('buildCurlCommand', () => {
     expect(command).toContain('"query":"{\\n  me {\\n    id\\n  }\\n}"');
   });
 
-  it('lets operation headers win over preflight headers', () => {
+  it('lets preflight headers win over operation headers', () => {
     const command = buildCurlCommand({
       endpoint: ENDPOINT,
       query: '{ me { id } }',
       preflightHeaders: { authorization: 'from-preflight', 'x-trace': 'keep-me' },
-      headers: '{"authorization":"from-operation"}',
+      headers: '{"Authorization":"from-operation","x-op":"mine"}',
     });
 
-    expect(command).toContain(`-H 'authorization: from-operation'`);
-    expect(command).not.toContain('from-preflight');
+    expect(command).toContain(`-H 'authorization: from-preflight'`);
+    expect(command).not.toContain('from-operation');
     expect(command).toContain(`-H 'x-trace: keep-me'`);
+    expect(command).toContain(`-H 'x-op: mine'`);
   });
 
   it('substitutes env and plugin templates the way the executor does', () => {

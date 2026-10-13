@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { LaboratoryOperation } from './operations';
 import type { LaboratoryTabsActions, LaboratoryTabsState } from './tabs';
@@ -45,14 +45,17 @@ export interface LaboratoryCollectionsState {
   collections: LaboratoryCollection[];
 }
 
+/** A host may answer a create with the id it stored, and the lab adopts it. */
+export type LaboratoryPersisted = void | { id: string } | Promise<void | { id: string }>;
+
 export interface LaboratoryCollectionsCallbacks {
-  onCollectionCreate?: (collection: LaboratoryCollection) => void;
+  onCollectionCreate?: (collection: LaboratoryCollection) => LaboratoryPersisted;
   onCollectionUpdate?: (collection: LaboratoryCollection) => void;
   onCollectionDelete?: (collection: LaboratoryCollection) => void;
   onCollectionOperationCreate?: (
     collection: LaboratoryCollection,
     operation: LaboratoryCollectionOperation,
-  ) => void;
+  ) => LaboratoryPersisted;
   onCollectionOperationUpdate?: (
     collection: LaboratoryCollection,
     operation: LaboratoryCollectionOperation,
@@ -63,15 +66,58 @@ export interface LaboratoryCollectionsCallbacks {
   ) => void;
 }
 
+const whenPersisted = (result: LaboratoryPersisted, adopt: (id: string) => void) => {
+  void Promise.resolve(result).then(persisted => {
+    if (persisted?.id) {
+      adopt(persisted.id);
+    }
+  });
+};
+
 export const useCollections = (
   props: {
     defaultCollections?: LaboratoryCollection[];
     onCollectionsChange?: (collections: LaboratoryCollection[]) => void;
+    /** A saved operation took its persisted id; working copies and tabs follow it. */
+    onOperationIdChange?: (previousId: string, id: string) => void;
     tabsApi?: LaboratoryTabsState & LaboratoryTabsActions;
   } & LaboratoryCollectionsCallbacks,
 ): LaboratoryCollectionsState & LaboratoryCollectionsActions => {
   const [collections, setCollections] = useState<LaboratoryCollection[]>(
     props.defaultCollections ?? [],
+  );
+
+  // Persisted ids arrive after the fact, so adoption reads the last committed value.
+  const collectionsRef = useRef(collections);
+
+  const commit = useCallback(
+    (next: LaboratoryCollection[]) => {
+      collectionsRef.current = next;
+      setCollections(next);
+      props.onCollectionsChange?.(next);
+    },
+    [props],
+  );
+
+  const adoptCollectionId = useCallback(
+    (previousId: string, id: string) => {
+      commit(collectionsRef.current.map(c => (c.id === previousId ? { ...c, id } : c)));
+    },
+    [commit],
+  );
+
+  const adoptOperationId = useCallback(
+    (collectionId: string, previousId: string, id: string) => {
+      commit(
+        collectionsRef.current.map(c =>
+          c.id === collectionId
+            ? { ...c, operations: c.operations.map(o => (o.id === previousId ? { ...o, id } : o)) }
+            : c,
+        ),
+      );
+      props.onOperationIdChange?.(previousId, id);
+    },
+    [commit, props],
   );
 
   const addCollection = useCallback(
@@ -90,14 +136,27 @@ export const useCollections = (
             createdAt: new Date().toISOString(),
           })) ?? [],
       };
-      const newCollections = [...collections, newCollection];
-      setCollections(newCollections);
-      props.onCollectionsChange?.(newCollections);
-      props.onCollectionCreate?.(newCollection);
+      commit([...collections, newCollection]);
+
+      void Promise.resolve(props.onCollectionCreate?.(newCollection)).then(persisted => {
+        const collectionId = persisted?.id ?? newCollection.id;
+
+        if (persisted?.id) {
+          adoptCollectionId(newCollection.id, persisted.id);
+        }
+
+        const persistedCollection = { ...newCollection, id: collectionId };
+
+        for (const operation of newCollection.operations) {
+          whenPersisted(props.onCollectionOperationCreate?.(persistedCollection, operation), id =>
+            adoptOperationId(collectionId, operation.id, id),
+          );
+        }
+      });
 
       return newCollection;
     },
-    [collections, props],
+    [collections, props, commit, adoptCollectionId, adoptOperationId],
   );
 
   const addOperation = useCallback(
@@ -116,30 +175,30 @@ export const useCollections = (
           : collection,
       );
 
-      setCollections(newCollections);
-      props.onCollectionsChange?.(newCollections);
+      commit(newCollections);
 
       const updatedCollection = newCollections.find(collection => collection.id === collectionId);
 
       if (updatedCollection) {
         props.onCollectionUpdate?.(updatedCollection);
-        props.onCollectionOperationCreate?.(updatedCollection, newOperation);
+        whenPersisted(props.onCollectionOperationCreate?.(updatedCollection, newOperation), id =>
+          adoptOperationId(collectionId, newOperation.id, id),
+        );
       }
     },
-    [collections, props],
+    [collections, props, commit, adoptOperationId],
   );
 
   const deleteCollection = useCallback(
     (collectionId: string) => {
       const collectionToDelete = collections.find(collection => collection.id === collectionId);
       const newCollections = collections.filter(collection => collection.id !== collectionId);
-      setCollections(newCollections);
-      props.onCollectionsChange?.(newCollections);
+      commit(newCollections);
       if (collectionToDelete) {
         props.onCollectionDelete?.(collectionToDelete);
       }
     },
-    [collections, props],
+    [collections, props, commit],
   );
 
   const deleteOperation = useCallback(
@@ -159,8 +218,7 @@ export const useCollections = (
             }
           : collection,
       );
-      setCollections(newCollections);
-      props.onCollectionsChange?.(newCollections);
+      commit(newCollections);
       const updatedCollection = newCollections.find(collection => collection.id === collectionId);
       if (updatedCollection) {
         props.onCollectionUpdate?.(updatedCollection);
@@ -169,7 +227,7 @@ export const useCollections = (
         }
       }
     },
-    [collections, props],
+    [collections, props, commit],
   );
 
   const updateCollection = useCallback(
@@ -180,14 +238,13 @@ export const useCollections = (
       const newCollections = collections.map(c =>
         c.id === collectionId ? { ...c, ...collection } : c,
       );
-      setCollections(newCollections);
-      props.onCollectionsChange?.(newCollections);
+      commit(newCollections);
       const updatedCollection = newCollections.find(collection => collection.id === collectionId);
       if (updatedCollection) {
         props.onCollectionUpdate?.(updatedCollection);
       }
     },
-    [collections, props],
+    [collections, props, commit],
   );
 
   const updateOperation = useCallback(
@@ -214,8 +271,7 @@ export const useCollections = (
           }),
         };
       });
-      setCollections(newCollections);
-      props.onCollectionsChange?.(newCollections);
+      commit(newCollections);
       const updatedCollection = newCollections.find(collection => collection.id === collectionId);
       if (updatedCollection) {
         props.onCollectionUpdate?.(updatedCollection);
@@ -224,7 +280,7 @@ export const useCollections = (
         }
       }
     },
-    [collections, props],
+    [collections, props, commit],
   );
 
   return {

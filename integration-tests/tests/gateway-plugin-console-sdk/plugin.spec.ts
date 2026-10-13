@@ -582,9 +582,10 @@ describe.each(['js', 'rust'] as const)('GraphQL Hive Plugin (%s)', gatewayType =
         errors: [
           {
             extensions: {
-              code: INTERNAL_SERVER_ERROR,
+              code: OOPSIE,
+              serviceName: users,
             },
-            message: Unexpected error.,
+            message: Something went wrong,
             path: [
               users,
               0,

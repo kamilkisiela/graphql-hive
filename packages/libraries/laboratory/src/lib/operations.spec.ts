@@ -221,4 +221,119 @@ describe('runActiveOperation', () => {
     expect(source.wasReturned()).toBe(true);
     await waitFor(() => expect(result.current.stopActiveOperation).toBeFalsy());
   });
+
+  it('keeps env and plugin state when preflight is disabled', async () => {
+    type Props = Parameters<typeof useOperations>[0];
+    executor.mockResolvedValue({ data: {} });
+    const setPluginsState = vi.fn();
+
+    const { result } = renderHook(() =>
+      useOperations({
+        checkPermissions: () => true,
+        defaultOperations: [
+          {
+            ...op('op1'),
+            headers: '{"authorization":"Bearer {{token}}","x-slug":"{{plugins.target.slug}}"}',
+          },
+        ],
+        tabsApi: tabsApiFor('op1'),
+        envApi: { env: { variables: { token: 'secret' } }, setEnv: vi.fn() } as Props['envApi'],
+        pluginsApi: {
+          plugins: [],
+          pluginsState: { target: { slug: 'x' } },
+          setPluginsState,
+        } as unknown as Props['pluginsApi'],
+        preflightApi: {
+          runPreflight: vi.fn().mockResolvedValue(null),
+        } as unknown as Props['preflightApi'],
+      }),
+    );
+
+    await act(async () => {
+      await result.current.runActiveOperation('http://localhost:4000/graphql');
+    });
+
+    expect(setPluginsState).not.toHaveBeenCalled();
+    expect(executor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extensions: expect.objectContaining({
+          headers: { authorization: 'Bearer secret', 'x-slug': 'x' },
+        }),
+      }),
+    );
+  });
+
+  it('lets preflight headers win over operation headers', async () => {
+    type Props = Parameters<typeof useOperations>[0];
+    executor.mockResolvedValue({ data: {} });
+
+    const { result } = renderHook(() =>
+      useOperations({
+        checkPermissions: () => true,
+        defaultOperations: [
+          { ...op('op1'), headers: '{"Authorization":"from-operation","x-op":"mine"}' },
+        ],
+        tabsApi: tabsApiFor('op1'),
+        preflightApi: {
+          runPreflight: vi.fn().mockResolvedValue({
+            status: 'success',
+            env: { variables: {} },
+            headers: { authorization: 'from-preflight' },
+            pluginsState: {},
+            logs: [],
+          }),
+        } as unknown as Props['preflightApi'],
+      }),
+    );
+
+    await act(async () => {
+      await result.current.runActiveOperation('http://localhost:4000/graphql');
+    });
+
+    expect(executor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extensions: expect.objectContaining({
+          headers: { 'x-op': 'mine', authorization: 'from-preflight' },
+        }),
+      }),
+    );
+  });
+});
+
+describe('replaceOperationId', () => {
+  it('renames an operation in place and fires onOperationsChange', () => {
+    const onOperationsChange = vi.fn();
+    const { result } = renderHook(() =>
+      useOperations({
+        checkPermissions: () => true,
+        defaultOperations: [op('local-1'), op('other')],
+        onOperationsChange,
+      }),
+    );
+
+    act(() => {
+      result.current.replaceOperationId('local-1', 'server-1');
+    });
+
+    expect(result.current.operations.map(o => o.id)).toEqual(['server-1', 'other']);
+    expect(onOperationsChange).toHaveBeenCalledWith(result.current.operations);
+  });
+});
+
+describe('replaceOperationId after later changes', () => {
+  it('keeps operations added after the callback was captured', () => {
+    const { result } = renderHook(() =>
+      useOperations({ checkPermissions: () => true, defaultOperations: [op('local-1')] }),
+    );
+    const staleReplace = result.current.replaceOperationId;
+
+    act(() => {
+      result.current.addOperation({ ...op('later'), id: 'later' });
+    });
+    act(() => {
+      staleReplace('local-1', 'server-1');
+    });
+
+    expect(result.current.operations.map(o => o.id)).toEqual(['server-1', 'later']);
+  });
 });

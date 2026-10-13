@@ -8,13 +8,19 @@ import { createLaboratoryHelper, type LaboratoryHelper } from './helpers/laborat
 import { createOIDCHelper, type OIDCHelper } from './helpers/oidc';
 import { createUsageHelper, type UsageHelper } from './helpers/usage';
 
+type SeedOwner = Awaited<ReturnType<ReturnType<typeof initSeed>['createOwner']>>;
+type SeedOrg = Awaited<ReturnType<SeedOwner['createOrg']>>;
+/** The testkit project handle, for seeding collections and preflight scripts through the API. */
+export type SeedProject = Awaited<ReturnType<SeedOrg['createProject']>>;
+
 export type SeedHelper = {
   seedOrg(): Promise<{ slug: string; accessToken: string; refreshToken: string; email: string }>;
-  seedTarget(type: ProjectType): Promise<{
+  seedTarget(type?: ProjectType): Promise<{
     slug: string;
     accessToken: string;
     refreshToken: string;
     email: string;
+    project: SeedProject;
     resources: {
       organizationId: string;
       projectId: string;
@@ -70,6 +76,7 @@ async function createSeedHelper(): Promise<SeedHelper> {
         accessToken: owner.ownerToken,
         refreshToken: owner.ownerRefreshToken,
         email: owner.ownerEmail,
+        project,
         resources: {
           organizationId: org.organization.id,
           projectId: project.project.id,
