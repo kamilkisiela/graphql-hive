@@ -97,7 +97,7 @@ describe('engine linter matches ESLint', () => {
   });
 
   it('ignores a byte order mark', async () => {
-    const input = { source: `﻿${composedSchema}`, schema: composedSchema, policy: everyRule };
+    const input = { source: `\uFEFF${composedSchema}`, schema: composedSchema, policy: everyRule };
 
     await expectSameAsEslint(input);
   });

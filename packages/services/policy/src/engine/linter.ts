@@ -34,7 +34,7 @@ type Node = { type: string; parent?: Node | null; range: AST.Range; loc: any; [k
 
 export function lint(input: { source: string; schema: string; rules: RulesConfig }): LintMessage[] {
   // ESLint strips a BOM, and turns a leading shebang into a JS line comment for the parser only.
-  const text = input.source.replace(/^﻿/, '');
+  const text = input.source.replace(/^\uFEFF/, '');
 
   let parsed: { ast: AST.Program; schema: GraphQLSchema };
   try {
