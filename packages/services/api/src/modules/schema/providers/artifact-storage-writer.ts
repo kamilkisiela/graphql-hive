@@ -144,9 +144,7 @@ export class ArtifactStorageWriter {
 
     // Write to latest key (always) - only after versioned succeeds
     const latestResults = await this.s3.write(latestKey, 'artifact_latest', {
-      headers: {
-        'content-type': meta.contentType,
-      },
+      headers,
       body,
     });
 
