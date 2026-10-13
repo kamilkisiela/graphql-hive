@@ -6,18 +6,15 @@ import {
   UniqueIntegrityConstraintViolationError,
   type PrimitiveValueExpression,
 } from '@hive/postgres';
-import { fail, invariant } from '@hive/service-common';
+import { invariant } from '@hive/service-common';
 import {
-  decodeCreatedAtAndUUIDIdBasedCursor,
-  encodeCreatedAtAndUUIDIdBasedCursor,
   HiveSchemaChangeModel,
   SchemaCompositionErrorModel,
   toSerializableSchemaChange,
   type SchemaChangeType,
   type SchemaCheckApprovalMetadata,
 } from '@hive/storage';
-import { isUUID } from '../../../shared/is-uuid';
-import { GraphStore, type Graph } from '../../graph/providers/graph-store';
+import { GraphStore, type ContractGraph, type Graph } from '../../graph/providers/graph-store';
 import { Logger } from '../../shared/providers/logger';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import { SchemaVersion } from './schema-version-store';
@@ -70,9 +67,9 @@ export class Contracts {
       };
     }
 
-    let contract: Contract;
+    let graph: ContractGraph;
     try {
-      contract = await this.pool.transaction('create contract', async trx => {
+      graph = await this.pool.transaction('create contract', async trx => {
         const contract = await trx
           .maybeOne(
             psql`
@@ -95,28 +92,28 @@ export class Contracts {
           )
           .then(ContractModel.parse);
 
-        // Only create the graph record if the source graph id already exists
-        if (args.sourceGraphId) {
-          await this.graphStore.createGraph(
-            {
-              type: 'CONTRACT',
-              id: contract.id,
-              name: `default/${validatedContract.data.contractName}`,
-              organizationId: args.organizationId,
-              projectId: args.projectId,
-              targetId: validatedContract.data.targetId,
-              config: {
-                includeTags: validatedContract.data.includeTags,
-                excludeTags: validatedContract.data.excludeTags,
-                removeUnreachableTypesFromPublicApiSchema:
-                  validatedContract.data.removeUnreachableTypesFromPublicApiSchema,
-              },
-              sourceGraphId: args.sourceGraphId,
+        const graph = await this.graphStore.createGraph(
+          {
+            type: 'CONTRACT',
+            id: contract.id,
+            name: `default/${validatedContract.data.contractName}`,
+            organizationId: args.organizationId,
+            projectId: args.projectId,
+            targetId: validatedContract.data.targetId,
+            config: {
+              includeTags: validatedContract.data.includeTags,
+              excludeTags: validatedContract.data.excludeTags,
+              removeUnreachableTypesFromPublicApiSchema:
+                validatedContract.data.removeUnreachableTypesFromPublicApiSchema,
             },
-            trx,
-          );
-        }
-        return contract;
+            sourceGraphId: args.sourceGraphId,
+          },
+          trx,
+        );
+
+        invariant(graph.type === 'CONTRACT', 'Created graph must be a contract graph.');
+
+        return graph;
       });
     } catch (err: unknown) {
       if (
@@ -137,183 +134,74 @@ export class Contracts {
     this.logger.debug(
       'Created contract successfully. (targetId=%s, contractId=%s, contractName=%s)',
       args.contract.targetId,
-      contract.id,
-      contract.contractName,
+      graph.id,
+      graph.name,
     );
 
     return {
       type: 'success' as const,
-      contract,
+      graph,
     };
   }
 
-  async getContractById(args: { contractId: string }) {
-    this.logger.debug('Load contract by id. (contractId=%s)', args.contractId);
+  async deleteContractGraph(graph: ContractGraph) {
+    this.logger.debug('Delete contract (graphId=%s)', graph.id);
 
-    if (!isUUID(args.contractId)) {
-      this.logger.debug('Invalid id provided, must be UUID. (contractId=%s)', args.contractId);
-      return null;
-    }
-
-    const record = await this.pool.maybeOne(psql`
-      SELECT
-        ${contractFields}
-      FROM
-        "contracts"
-      WHERE
-        "id" = ${args.contractId}
-    `);
-
-    if (!record) {
-      return null;
-    }
-
-    return ContractModel.parse(record);
-  }
-
-  async deleteContract(args: { contract: Contract }) {
-    this.logger.debug('Delete contract (contractId=%s)', args.contract.id);
-
-    const record = await this.pool.transaction('delete contract', async trx => {
-      const record = await trx.maybeOne(psql`
-        DELETE FROM
-          "contracts"
-        WHERE
-          "id" = ${args.contract.id}
-        RETURNING
-          "id"
-      `);
-
-      await this.graphStore.deleteGraphByTargetIdAndName(
-        args.contract.targetId,
-        `default/${args.contract.contractName}`,
-        trx,
+    await this.pool.transaction('disable contract', async trx => {
+      await trx.maybeOne(
+        psql`
+          DELETE
+          FROM
+            "contracts"
+          WHERE
+            "id" = ${graph.id}
+        `,
       );
 
-      return z.object({ id: z.string().uuid() }).nullable().parse(record);
+      await this.graphStore.deleteGraph(graph, trx);
     });
 
-    if (!record) {
-      return {
-        type: 'error' as const,
-        message: 'Contract not found.',
-      };
-    }
-
-    this.logger.debug('Deleted contract. (contractId=%s)', args.contract.id);
+    this.logger.debug('Deleted contract graph. (graphId=%s)', graph.id);
 
     this.logger.debug(
-      'Delete contract artifacts sdl and supergraph from CDN. (contractId=%s)',
-      args.contract.id,
+      'Delete contract graph artifacts sdl and supergraph from CDN. (graphId=%s)',
+      graph.id,
     );
 
     await Promise.all([
       this.artifactStorageWriter.deleteArtifact({
-        targetId: args.contract.targetId,
+        targetId: graph.targetId,
         artifactType: 'sdl',
-        contractName: args.contract.contractName,
+        contractName: graph.name,
       }),
       this.artifactStorageWriter.deleteArtifact({
-        targetId: args.contract.targetId,
+        targetId: graph.targetId,
         artifactType: 'supergraph',
-        contractName: args.contract.contractName,
+        contractName: graph.name,
       }),
     ]);
 
     return {
       type: 'success' as const,
-      contractId: record.id,
+      contractId: graph.id,
     };
   }
 
-  public async getActiveContractsByTargetId(args: {
-    targetId: string;
-  }): Promise<null | Array<Contract>> {
-    this.logger.debug('Load active contracts for target. (targetId=%s)', args.targetId);
-    const result = await this.pool.any(psql`
-      SELECT
-        ${contractFields}
-      FROM
-        "contracts"
-      WHERE
-        "target_id" = ${args.targetId}
-        AND "is_disabled" = false
-      ORDER BY
-        "created_at" ASC
-    `);
-
-    if (result.length === 0) {
-      this.logger.debug('No active contracts found for target. (targetId=%s)', args.targetId);
-      return null;
-    }
-    this.logger.debug(
-      '%s active contract(s) found for target. (targetId=%s)',
-      result.length,
-      args.targetId,
-    );
-    return result.map(contract => ContractModel.parse(contract));
-  }
-
-  /**
-   * Load all the latest valid contract versions for the list of contract ids.
-   */
-  private async loadLatestValidContractVersionsByTargetId(args: {
-    targetId: string;
-    contractIds: Array<string>;
-  }) {
-    this.logger.debug(
-      'Load latest valid contract versions for contracts. (targetId=%s, contractIds=%s)',
-      args.targetId,
-      args.contractIds.join(','),
-    );
-
-    const result = await this.pool.any(psql`
-      SELECT DISTINCT ON ("contract_id")
-        ${contractVersionsFields}
-      FROM
-        "contract_versions"
-      WHERE
-        "contract_id" = ANY(${psql.array(args.contractIds, 'uuid')})
-        AND "schema_composition_errors" IS NULL
-      ORDER BY
-        "contract_id" ASC
-        , "created_at" DESC
-    `);
-
-    const records = new Map(
-      result.map(raw => {
-        const record = ValidContractVersionModel.parse(raw);
-        return [record.contractId, record];
-      }),
-    );
-
-    this.logger.debug(
-      '%n valid contract version(s) found for contracts. (targetId=%s, contractIds=%s)',
-      records.size,
-      args.targetId,
-      args.contractIds.join(','),
-    );
-
-    return records;
-  }
-
-  public async loadActiveContractsWithLatestVersionsForGraphSchemaVersion(
+  public async loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
     graph: Graph,
     schemaVersion: SchemaVersion | null,
   ): Promise<Map<string, ContractWithLatestVersions> | null> {
-    const contracts = await this.getActiveContractsByTargetId({ targetId: graph.targetId });
-    if (contracts === null) {
+    const contractGraphs = await this.graphStore.findContractGraphsForGraph(graph);
+    if (contractGraphs.size === 0) {
       return null;
     }
 
-    const contractGraphs = await this.graphStore.findContractGraphsForGraph(graph);
     const map = new Map<string, ContractWithLatestVersions>();
 
     if (schemaVersion === null) {
-      for (const contract of contracts) {
-        map.set(contract.id, {
-          contract,
-          graph: contractGraphs.get(contract.id) ?? fail('Contract graph must exist.'),
+      for (const graph of contractGraphs.values()) {
+        map.set(graph.id, {
+          graph,
           latestVersion: null,
           latestValidVersion: null,
         });
@@ -322,29 +210,32 @@ export class Contracts {
       return map;
     }
 
-    const contractIds = contracts.map(contract => contract.id);
+    const graphIds = contractGraphs
+      .values()
+      .map(graph => graph.id)
+      .toArray();
 
-    const latestContractVersionQueryResult = await this.pool.any(psql`
-      SELECT DISTINCT ON ("contract_id")
-        ${contractVersionsFields}
-      FROM
-        "contract_versions"
-      WHERE
-        "schema_version_id" = ${schemaVersion.id}
-        AND "contract_id" = ANY(${psql.array(contractIds, 'uuid')})
-      ORDER BY
-        "contract_id" ASC
-        , "created_at" DESC
-    `);
+    const contractSchemaVersions = await this.pool
+      .any(
+        psql`
+        SELECT
+          ${primaryContractVersionFields}
+        FROM
+          "schema_versions"
+        WHERE
+          "graph_id" = ANY(${psql.array(graphIds, 'uuid')})
+          AND "source_schema_version_id" = ${schemaVersion.id}
+          AND "graph_metadata"->>'type' = 'contract'
+      `,
+      )
+      .then(z.array(PrimaryContractVersionModel).parse);
 
     const contractIdsWhereWeNeedToGetTheLatestValidVersion: Array<ContractVersion> = [];
 
     const latestContractVersionsByContractId = new Map<string, ContractVersion>();
     const latestValidContractVersionByContractId = new Map<string, ValidContractVersion>();
 
-    for (const raw of latestContractVersionQueryResult) {
-      const record = ContractVersionModel.parse(raw);
-      // If we looked of the version via the contract id it must be non-null :)
+    for (const record of contractSchemaVersions) {
       invariant(record.contractId, 'Contract id must exist.');
       latestContractVersionsByContractId.set(record.contractId, record);
       if (record.isComposable === false) {
@@ -354,122 +245,26 @@ export class Contracts {
       }
     }
 
-    if (contractIdsWhereWeNeedToGetTheLatestValidVersion.length) {
-      const latestValidContractVersionQueryResult = await this.pool.any(psql`
-        SELECT DISTINCT ON ("contract_id")
-          ${contractVersionsFields}
-        FROM
-          "contract_versions"
-        JOIN ${psql.unnest(
-          contractIdsWhereWeNeedToGetTheLatestValidVersion.map(version => [
-            version.contractId,
-            version.createdAt,
-          ]),
-          ['uuid', 'timestamptz'],
-        )} AS "filters" ("ccontract_id", "cutoff_date")
-          ON "contract_versions"."contract_id" = "filters"."ccontract_id"
-        WHERE
-          "created_at" < filters."cutoff_date"
-          AND "schema_composition_errors" IS NULL
-        ORDER BY
-          "contract_id" ASC
-          , "created_at" DESC
-      `);
-
-      for (const raw of latestValidContractVersionQueryResult) {
-        const record = ValidContractVersionModel.parse(raw);
-        // If we looked of the version via the contract id it must be non-null :)
-        invariant(record.contractId, 'Contract id must exist.');
-        latestValidContractVersionByContractId.set(record.contractId, record);
+    for (const version of contractIdsWhereWeNeedToGetTheLatestValidVersion) {
+      invariant(version.contractId, 'Contract id must exist.');
+      const pointerVersion = version.diffSchemaVersionId
+        ? await this.getContractVersionById({ contractVersionId: version.diffSchemaVersionId })
+        : null;
+      if (pointerVersion?.isComposable) {
+        latestValidContractVersionByContractId.set(version.contractId, pointerVersion);
+        continue;
       }
     }
 
-    for (const contract of contracts) {
-      map.set(contract.id, {
-        contract,
-        graph: contractGraphs.get(contract.id) ?? fail('Contract graph must exist.'),
-        latestVersion: latestContractVersionsByContractId.get(contract.id) ?? null,
-        latestValidVersion: latestValidContractVersionByContractId.get(contract.id) ?? null,
+    for (const graph of contractGraphs.values()) {
+      map.set(graph.id, {
+        graph,
+        latestVersion: latestContractVersionsByContractId.get(graph.id) ?? null,
+        latestValidVersion: latestValidContractVersionByContractId.get(graph.id) ?? null,
       } as ContractWithLatestVersions);
     }
 
     return map;
-  }
-
-  public async getPaginatedContractsByTargetId(args: {
-    targetId: string;
-    first: null | number;
-    cursor: null | string;
-  }): Promise<PaginatedContractConnection> {
-    this.logger.debug('Load paginated contracts for target. (targetId=%s)', args.targetId);
-
-    let cursor: null | {
-      createdAt: string;
-      id: string;
-    } = null;
-
-    const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
-
-    if (args.cursor) {
-      cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
-    }
-
-    const result = await this.pool.any(psql` /* getPaginatedContractsByTargetId */
-      SELECT
-        ${contractFields}
-      FROM
-        "contracts"
-      WHERE
-        "target_id" = ${args.targetId}
-        AND "is_disabled" = false
-        ${
-          cursor
-            ? psql`
-                AND (
-                  (
-                    c."created_at" = ${cursor.createdAt}
-                    AND c."id" < ${cursor.id}
-                  )
-                  OR c."created_at" < ${cursor.createdAt}
-                )
-              `
-            : psql``
-        }
-      ORDER BY
-        "target_id" ASC,
-        "created_at" DESC,
-        "id" DESC
-      LIMIT ${limit + 1}
-    `);
-
-    let edges = result.map(row => {
-      const node = ContractModel.parse(row);
-
-      return {
-        node,
-        get cursor() {
-          return encodeCreatedAtAndUUIDIdBasedCursor(node);
-        },
-      };
-    });
-
-    const hasNextPage = edges.length > limit;
-
-    edges = edges.slice(0, limit);
-
-    return {
-      edges,
-      pageInfo: {
-        hasNextPage,
-        hasPreviousPage: cursor !== null,
-        get endCursor() {
-          return edges[edges.length - 1]?.cursor ?? '';
-        },
-        get startCursor() {
-          return edges[0]?.cursor ?? '';
-        },
-      },
-    };
   }
 
   public async getContractChecksBySchemaCheckId(args: {
@@ -488,7 +283,7 @@ export class Contracts {
         , "contract_checks"."compared_contract_version_id" as "comparedContractVersionId"
         , "contract_checks"."is_success" as "isSuccess"
         , "contract_checks"."contract_id" as "contractId"
-        , "contracts"."contract_name" as "contractName"
+        , COALESCE("graphs"."name", "contract_checks"."contract_name") as "contractName"
         , "contract_checks"."schema_composition_errors" as "schemaCompositionErrors"
         , "contract_checks"."breaking_schema_changes" as "breakingSchemaChanges"
         , "contract_checks"."safe_schema_changes" as "safeSchemaChanges"
@@ -500,7 +295,7 @@ export class Contracts {
       FROM
         "contract_checks"
       LEFT JOIN
-        "contracts" ON "contracts"."id" = "contract_checks"."contract_id"
+        "graphs" ON "graphs"."id" = "contract_checks"."contract_id"
       LEFT JOIN
         "sdl_store" as "s_composite" ON "s_composite"."id" = "contract_checks"."composite_schema_sdl_store_id"
       LEFT JOIN
@@ -725,84 +520,132 @@ export class Contracts {
       args.contractVersionId,
     );
 
-    const result = await this.pool.maybeOne(psql`
+    const primaryResult = await this.pool.maybeOne(psql`
       SELECT
-        ${contractVersionsFields}
+        ${primaryContractVersionFields}
+      FROM
+        "schema_versions"
+      WHERE
+        "id" = ${args.contractVersionId}
+        AND "source_schema_version_id" IS NOT NULL
+        AND "graph_metadata"->>'type' = 'contract'
+    `);
+
+    if (primaryResult) {
+      return PrimaryContractVersionModel.parse(primaryResult);
+    }
+
+    const legacyResult = await this.pool.maybeOne(psql`
+      SELECT
+        ${legacyContractVersionFields}
       FROM
         "contract_versions"
       WHERE
         "id" = ${args.contractVersionId}
     `);
 
-    if (result === null) {
+    if (legacyResult === null) {
       this.logger.debug('No contract version found by id. (id=%s)', args.contractVersionId);
       return null;
     }
 
     this.logger.debug('Contract version found by id. (id=%s)', args.contractVersionId);
 
-    return ContractVersionModel.parse(result);
+    return LegacyContractVersionModel.parse(legacyResult);
   }
 
   public async getPreviousContractVersionForContractVersion(args: {
     contractVersion: ContractVersion;
   }) {
-    const result = await this.pool.maybeOne(psql`
-      SELECT
-        ${contractVersionsFields}
-      FROM
-        "contract_versions"
-      WHERE
-        "contract_id" = ${args.contractVersion.contractId}
-        AND (
-          (
-            "created_at" = ${args.contractVersion.createdAt}
-            AND "id" < ${args.contractVersion.id}
-          )
-          OR "created_at" < ${args.contractVersion.createdAt}
-        )
-      ORDER BY
-        "contract_id" ASC
-        , "created_at" DESC
-      LIMIT 1
-    `);
+    if (args.contractVersion.source === 'schema_versions') {
+      if (args.contractVersion.previousSchemaVersionId) {
+        const pointerVersion = await this.getContractVersionById({
+          contractVersionId: args.contractVersion.previousSchemaVersionId,
+        });
+        if (pointerVersion) {
+          return pointerVersion;
+        }
+      }
 
-    if (!result) {
-      return null;
+      const primaryVersion = await this.getPrimaryContractVersionBefore(
+        args.contractVersion,
+        false,
+      );
+      if (primaryVersion) {
+        return primaryVersion;
+      }
     }
 
-    return ContractVersionModel.parse(result);
+    return await this.getLegacyContractVersionBefore(args.contractVersion, false);
   }
 
   public async getDiffableContractVersionForContractVersion(args: {
     contractVersion: ContractVersion;
-  }) {
+  }): Promise<ValidContractVersion | null> {
+    if (args.contractVersion.source === 'schema_versions') {
+      if (args.contractVersion.diffSchemaVersionId) {
+        const version = await this.getContractVersionById({
+          contractVersionId: args.contractVersion.diffSchemaVersionId,
+        });
+        if (version?.isComposable) {
+          return version;
+        }
+      }
+
+      const primaryVersion = await this.getPrimaryContractVersionBefore(args.contractVersion, true);
+      if (primaryVersion?.isComposable) {
+        return primaryVersion;
+      }
+    }
+
+    const legacyVersion = await this.getLegacyContractVersionBefore(args.contractVersion, true);
+    return legacyVersion?.isComposable ? legacyVersion : null;
+  }
+
+  private async getPrimaryContractVersionBefore(
+    contractVersion: ContractVersion,
+    onlyComposable: boolean,
+  ) {
     const result = await this.pool.maybeOne(psql`
       SELECT
-        ${contractVersionsFields}
+        ${primaryContractVersionFields}
       FROM
-        "contract_versions"
+        "schema_versions"
       WHERE
-        "contract_id" = ${args.contractVersion.contractId}
-        AND "schema_composition_errors" IS NULL
-        AND (
-          (
-            "created_at" = ${args.contractVersion.createdAt}
-            AND "id" < ${args.contractVersion.id}
-          )
-          OR "created_at" < ${args.contractVersion.createdAt}
-        )
+        COALESCE("graph_id"::text, "graph_metadata"->>'id') = ${contractVersion.contractId}
+        AND "source_schema_version_id" IS NOT NULL
+        AND "graph_metadata"->>'type' = 'contract'
+        ${onlyComposable ? psql`AND "is_composable" = true` : psql``}
+        AND ("created_at", "id") < (${contractVersion.createdAt}, ${contractVersion.id})
       ORDER BY
-        "contract_id" ASC
-        , "created_at" DESC
+        "created_at" DESC,
+        "id" DESC
       LIMIT 1
     `);
 
-    if (!result) {
-      return null;
-    }
+    return result ? PrimaryContractVersionModel.parse(result) : null;
+  }
 
-    return ValidContractVersionModel.parse(result);
+  private async getLegacyContractVersionBefore(
+    contractVersion: ContractVersion,
+    onlyComposable: boolean,
+  ) {
+    const result = await this.pool.maybeOne(psql`
+      SELECT
+        ${legacyContractVersionFields}
+      FROM
+        "contract_versions"
+      WHERE
+        "contract_id" = ${contractVersion.contractId}
+        ${onlyComposable ? psql`AND "schema_composition_errors" IS NULL` : psql``}
+        AND ("created_at", "id") < (${contractVersion.createdAt}, ${contractVersion.id})
+      ORDER BY
+        "created_at" DESC,
+        "id" DESC
+      LIMIT 1
+    `);
+
+    return result ? LegacyContractVersionModel.parse(result) : null;
   }
 
   public async getContractVersionsForSchemaVersion(args: { schemaVersionId: string }) {
@@ -811,17 +654,44 @@ export class Contracts {
       args.schemaVersionId,
     );
 
-    const result = await this.pool.any(psql`
-      SELECT
-        ${contractVersionsFields}
-      FROM
-        "contract_versions"
-      WHERE
-        "schema_version_id" = ${args.schemaVersionId}
-      ORDER BY
-        "created_at" DESC
-        , "contract_name" ASC
-    `);
+    const [primaryVersions, legacyVersions] = await Promise.all([
+      this.pool
+        .any(
+          psql`
+          SELECT
+            ${primaryContractVersionFields}
+          FROM
+            "schema_versions"
+          WHERE
+            "source_schema_version_id" = ${args.schemaVersionId}
+            AND "graph_metadata"->>'type' = 'contract'
+        `,
+        )
+        .then(z.array(PrimaryContractVersionModel).parse),
+      this.pool
+        .any(
+          psql`
+          SELECT
+            ${legacyContractVersionFields}
+          FROM
+            "contract_versions"
+          WHERE
+            "schema_version_id" = ${args.schemaVersionId}
+        `,
+        )
+        .then(z.array(LegacyContractVersionModel).parse),
+    ]);
+
+    const primaryIds = new Set(primaryVersions.map(version => version.id));
+    const result = [
+      ...primaryVersions,
+      ...legacyVersions.filter(row => !primaryIds.has(row.id)),
+    ].sort(
+      (left, right) =>
+        right.createdAt.localeCompare(left.createdAt) ||
+        left.contractName.localeCompare(right.contractName) ||
+        right.id.localeCompare(left.id),
+    );
 
     if (result.length === 0) {
       this.logger.debug(
@@ -838,7 +708,7 @@ export class Contracts {
     );
 
     const edges = result.map(row => {
-      const node = ContractVersionModel.parse(row);
+      const node = row;
       return {
         node,
         get cursor() {
@@ -862,56 +732,21 @@ export class Contracts {
     };
   }
 
-  public async getBreakingChangesForContractVersion(args: { contractVersionId: string }) {
+  public async getAllChangesForContractVersion(args: { contractVersion: ContractVersion }) {
+    const isPrimary = args.contractVersion.source === 'schema_versions';
     const changes = await this.pool.any(psql`
       SELECT
         "change_type" as "type",
         "meta",
         "is_safe_based_on_usage" as "isSafeBasedOnUsage"
       FROM
-        "contract_version_changes"
+        ${isPrimary ? psql`"schema_version_changes"` : psql`"contract_version_changes"`}
       WHERE
-        "contract_version_id" = ${args.contractVersionId}
-        AND "severity_level" = 'BREAKING'
-    `);
-
-    if (changes.length === 0) {
-      return null;
-    }
-
-    return changes.map(row => HiveSchemaChangeModel.parse(row));
-  }
-
-  public async getSafeChangesForContractVersion(args: { contractVersionId: string }) {
-    const changes = await this.pool.any(psql`
-      SELECT
-        "change_type" as "type",
-        "meta",
-        "is_safe_based_on_usage" as "isSafeBasedOnUsage"
-      FROM
-        "contract_version_changes"
-      WHERE
-        "contract_version_id" = ${args.contractVersionId}
-        AND "severity_level" <> 'BREAKING'
-    `);
-
-    if (changes.length === 0) {
-      return null;
-    }
-
-    return changes.map(row => HiveSchemaChangeModel.parse(row));
-  }
-
-  public async getAllChangesForContractVersion(args: { contractVersionId: string }) {
-    const changes = await this.pool.any(psql`
-      SELECT
-        "change_type" as "type",
-        "meta",
-        "is_safe_based_on_usage" as "isSafeBasedOnUsage"
-      FROM
-        "contract_version_changes"
-      WHERE
-        "contract_version_id" = ${args.contractVersionId}
+        ${
+          isPrimary
+            ? psql`"schema_version_id" = ${args.contractVersion.id}`
+            : psql`"contract_version_id" = ${args.contractVersion.id}`
+        }
     `);
 
     if (changes.length === 0) {
@@ -932,31 +767,11 @@ function toNullableTextArray<T extends PrimitiveValueExpression>(value: T[] | nu
 
 const contractFields = psql`
   "id"
-  , "target_id" as "targetId"
-  , "contract_name" as "contractName"
-  , "include_tags" as "includeTags"
-  , "exclude_tags" as "excludeTags"
-  , "remove_unreachable_types_from_public_api_schema" as "removeUnreachableTypesFromPublicApiSchema"
-  , to_json("created_at") as "createdAt"
 `;
 
 const ContractModel = z.object({
   id: z.string().uuid(),
-  targetId: z.string().uuid(),
-  contractName: z.string(),
-  includeTags: z
-    .array(z.string())
-    .nullable()
-    .transform(tags => (tags?.length === 0 ? null : tags)),
-  excludeTags: z
-    .array(z.string())
-    .nullable()
-    .transform(tags => (tags?.length === 0 ? null : tags)),
-  removeUnreachableTypesFromPublicApiSchema: z.boolean(),
-  createdAt: z.string(),
 });
-
-export type Contract = z.TypeOf<typeof ContractModel>;
 
 const CreateContractInputModel = z
   .object({
@@ -1005,58 +820,117 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
   return false;
 }
 
-const contractVersionsFields = psql`
+const legacyContractVersionFields = psql`
   "id"
   , "schema_version_id" as "schemaVersionId"
   , "contract_id" as "contractId"
-  , "contract_name" as "contractName"
+  , 'default/'||"contract_name"  as "contractName"
   , "schema_composition_errors" as "schemaCompositionErrors"
   , "composite_schema_sdl" as "compositeSchemaSdl"
   , "supergraph_sdl" as "supergraphSdl"
   , to_json("created_at") as "createdAt"
+  , NULL::uuid as "previousSchemaVersionId"
+  , NULL::uuid as "diffSchemaVersionId"
 `;
 
-const ValidContractVersionModel = z
-  .object({
-    id: z.string().uuid(),
-    schemaVersionId: z.string().uuid(),
-    contractId: z.string().nullable(),
-    contractName: z.string(),
-    schemaCompositionErrors: z.null(),
-    compositeSchemaSdl: z.string().nullable(),
-    supergraphSdl: z.string(),
-    createdAt: z.string(),
-  })
-  .transform(record => ({
-    ...record,
-    isComposable: true as const,
-  }));
+const ContractVersionBaseModel = z.object({
+  id: z.string().uuid(),
+  schemaVersionId: z.string().uuid(),
+  contractId: z.string().uuid().nullable(),
+  contractName: z.string(),
+  compositeSchemaSdl: z.string().nullable(),
+  createdAt: z.string(),
+  previousSchemaVersionId: z.string().uuid().nullable(),
+  diffSchemaVersionId: z.string().uuid().nullable(),
+});
 
-const InvalidContractVersionModel = z
+const ValidContractVersionFieldsModel = ContractVersionBaseModel.extend({
+  schemaCompositionErrors: z.null(),
+  supergraphSdl: z.string(),
+  isComposable: z.literal(true),
+});
+
+const InvalidContractVersionFieldsModel = ContractVersionBaseModel.extend({
+  schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
+  supergraphSdl: z.string().nullable(),
+  isComposable: z.literal(false),
+});
+
+const ContractVersionFieldsModel = z.discriminatedUnion('isComposable', [
+  ValidContractVersionFieldsModel,
+  InvalidContractVersionFieldsModel,
+]);
+
+const LegacyContractVersionRawModel = z
   .object({
     id: z.string().uuid(),
     schemaVersionId: z.string().uuid(),
-    contractId: z.string().nullable(),
+    contractId: z.string().uuid().nullable(),
     contractName: z.string(),
     schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
     compositeSchemaSdl: z.string().nullable(),
     supergraphSdl: z.string().nullable(),
     createdAt: z.string(),
+    previousSchemaVersionId: z.null(),
+    diffSchemaVersionId: z.null(),
   })
   .transform(record => ({
     ...record,
-    isComposable: false as const,
+    source: 'contract_versions' as const,
+    isComposable: record.schemaCompositionErrors === null && record.supergraphSdl !== null,
   }));
 
-const ContractVersionModel = z.union([ValidContractVersionModel, InvalidContractVersionModel]);
+const LegacyContractVersionModel = LegacyContractVersionRawModel.pipe(
+  ContractVersionFieldsModel.and(z.object({ source: z.literal('contract_versions') })),
+);
+
+const primaryContractVersionFields = psql`
+  "id"
+  , "source_schema_version_id" as "schemaVersionId"
+  , COALESCE("graph_id"::text, "graph_metadata"->>'id') as "contractId"
+  , "graph_metadata"->>'name' as "contractName"
+  , "schema_composition_errors" as "schemaCompositionErrors"
+  , "composite_schema_sdl" as "compositeSchemaSdl"
+  , "supergraph_sdl" as "supergraphSdl"
+  , to_json("created_at") as "createdAt"
+  , "previous_schema_version_id" as "previousSchemaVersionId"
+  , "diff_schema_version_id" as "diffSchemaVersionId"
+  , "is_composable" as "isComposable"
+`;
+
+const PrimaryContractVersionModel = z
+  .object({
+    id: z.string().uuid(),
+    schemaVersionId: z.string().uuid(),
+    contractId: z.string().uuid(),
+    contractName: z.string(),
+    schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
+    compositeSchemaSdl: z.string().nullable(),
+    supergraphSdl: z.string().nullable(),
+    createdAt: z.string(),
+    previousSchemaVersionId: z.string().uuid().nullable(),
+    diffSchemaVersionId: z.string().uuid().nullable(),
+    isComposable: z.boolean(),
+  })
+  .transform(record => ({
+    ...record,
+    source: 'schema_versions' as const,
+  }))
+  .pipe(ContractVersionFieldsModel.and(z.object({ source: z.literal('schema_versions') })));
+
+const ContractVersionModel = z.union([PrimaryContractVersionModel, LegacyContractVersionModel]);
 
 export type ContractVersion = z.TypeOf<typeof ContractVersionModel>;
-
-export type ValidContractVersion = z.TypeOf<typeof ValidContractVersionModel>;
+export type ContractVersionSource = ContractVersion['source'];
+export type ValidContractVersion = ContractVersion & {
+  isComposable: true;
+  schemaCompositionErrors: null;
+  supergraphSdl: string;
+};
 
 export type PaginatedContractConnection = Readonly<{
   edges: ReadonlyArray<{
-    node: Contract;
+    node: ContractGraph;
     cursor: string;
   }>;
   pageInfo: Readonly<{
@@ -1115,13 +989,12 @@ export type PaginatedContractCheckConnection = Readonly<{
 }>;
 
 export type ContractWithLatestVersions = {
-  contract: Contract;
-  graph: Graph;
+  graph: ContractGraph;
   latestVersion: ContractVersion | null;
   latestValidVersion: ValidContractVersion | null;
 };
 
 export type ContractWithLatestValidVersion = {
-  contract: Contract;
+  graph: ContractGraph;
   latestValidVersion: ValidContractVersion | null;
 };

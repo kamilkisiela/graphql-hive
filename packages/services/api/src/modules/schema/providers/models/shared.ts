@@ -1,7 +1,8 @@
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
 import type { SchemaChangeType, SchemaCompositionError } from '@hive/storage';
-import type { Contract, ValidContractVersion } from '../contracts';
+import { ContractGraph } from '../../../graph/providers/graph-store';
+import type { ValidContractVersion } from '../contracts';
 import type { SchemaCoordinatesDiffResult } from '../inspector';
 import type {
   ContractCompositionResult,
@@ -427,7 +428,7 @@ export function buildSchemaCheckFailureState(args: {
 }
 
 export type ContractInput = {
-  contract: Contract;
+  graph: Pick<ContractGraph, 'id' | 'name' | 'config'>;
   latestValidVersion: Pick<
     ValidContractVersion,
     'contractName' | 'compositeSchemaSdl' | 'supergraphSdl'

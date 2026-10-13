@@ -24,6 +24,15 @@ const artifactMeta = {
   },
 } as const;
 
+function extractContractName(contractName: string | null): null | string {
+  if (contractName === null) {
+    return null;
+  }
+  const parts = contractName.split('/');
+
+  return parts[parts.length - 1] ?? null;
+}
+
 /**
  * Write an Artifact to an S3 bucket.
  */
@@ -53,9 +62,18 @@ export class ArtifactStorageWriter {
     contractName: null | string;
     versionId?: string | null;
   }) {
-    const latestKey = buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName);
+    const latestKey = buildArtifactStorageKey(
+      args.targetId,
+      args.artifactType,
+      extractContractName(args.contractName),
+    );
     const versionedKey = args.versionId
-      ? buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName, args.versionId)
+      ? buildArtifactStorageKey(
+          args.targetId,
+          args.artifactType,
+          extractContractName(args.contractName),
+          args.versionId,
+        )
       : null;
     const meta = artifactMeta[args.artifactType];
     const body = meta.preprocessor(args.artifact);
@@ -150,7 +168,11 @@ export class ArtifactStorageWriter {
       args.artifactType,
       args.contractName,
     );
-    const key = buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName);
+    const key = buildArtifactStorageKey(
+      args.targetId,
+      args.artifactType,
+      extractContractName(args.contractName),
+    );
 
     const results = await this.s3.request(key, {
       method: 'DELETE',

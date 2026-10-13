@@ -274,7 +274,7 @@ export class SchemaVersionStore {
      VALUES (
         ${args.schemaVersionId}
         , ${args.contractId}
-        , ${args.contractName}
+        , ${args.contractName.replace(/^default\//, '')}
         , ${psql.jsonbOrNull(args.schemaCompositionErrors)}
         , ${args.compositeSchemaSDL}
         , ${args.supergraphSDL}

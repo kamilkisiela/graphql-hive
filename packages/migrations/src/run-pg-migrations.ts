@@ -147,5 +147,6 @@ export const runPGMigrations = async (args: {
       import('./actions/2026.10.07T00-00-00.schema-checks-service-filter-index'),
       import('./actions/2026.10.09T00-00-00.schema-versions-legacy-pagination-index'),
       import('./actions/2026.10.09T00-00-01.backfill-contract-schema-versions'),
+      import('./actions/2026.10.09T00-00-02.contract-check-name'),
     ]),
   });

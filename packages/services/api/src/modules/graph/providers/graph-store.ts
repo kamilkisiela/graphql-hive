@@ -2,6 +2,10 @@ import { Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
 import { PostgresDatabasePool, psql, type CommonQueryMethods } from '@hive/postgres';
 import { invariant } from '@hive/service-common';
+import {
+  decodeCreatedAtAndUUIDIdBasedCursor,
+  encodeCreatedAtAndUUIDIdBasedCursor,
+} from '@hive/storage';
 import { batch } from '../../../shared/helpers';
 import type { SchemaVersion } from '../../schema/providers/schema-version-store';
 import { Logger } from '../../shared/providers/logger';
@@ -178,24 +182,85 @@ export class GraphStore {
     return graph;
   }
 
-  async deleteGraphByTargetIdAndName(
-    targetId: string,
-    graphName: string,
-    trx: CommonQueryMethods = this.pg,
-  ): Promise<void> {
-    this.logger.debug(
-      'delete graph by target id and name (targetId=%s, graphName=%s)',
-      targetId,
-      graphName,
-    );
+  async findContractGraphById(id: string): Promise<ContractGraph | null> {
+    const record = await this.pg.maybeOne(psql`
+      SELECT
+        ${graphFields}
+      FROM
+        "graphs"
+      WHERE
+        "id" = ${id}
+        AND "type" = 'CONTRACT'
+    `);
+
+    return record ? ContractGraphModel.parse(record) : null;
+  }
+
+  async getPaginatedContractGraphsForGraph(
+    graph: Graph,
+    args: {
+      first: number | null;
+      cursor: string | null;
+    },
+  ) {
+    const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+    const cursor = args.cursor ? decodeCreatedAtAndUUIDIdBasedCursor(args.cursor) : null;
+    const records = await this.pg.any(psql`
+      SELECT
+        ${graphFields}
+      FROM
+        "graphs"
+      WHERE
+        "source_graph_id" = ${graph.id}
+        AND "type" = 'CONTRACT'
+        ${
+          cursor
+            ? psql`
+                AND (
+                  ("created_at" = ${cursor.createdAt} AND "id" < ${cursor.id})
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+            : psql``
+        }
+      ORDER BY
+        "created_at" DESC,
+        "id" DESC
+      LIMIT ${limit + 1}
+    `);
+
+    const graphs = records.map(record => ContractGraphModel.parse(record));
+    const edges = graphs.slice(0, limit).map(node => ({
+      node,
+      get cursor() {
+        return encodeCreatedAtAndUUIDIdBasedCursor(node);
+      },
+    }));
+
+    return {
+      edges,
+      pageInfo: {
+        hasNextPage: graphs.length > limit,
+        hasPreviousPage: cursor !== null,
+        get endCursor() {
+          return edges[edges.length - 1]?.cursor ?? '';
+        },
+        get startCursor() {
+          return edges[0]?.cursor ?? '';
+        },
+      },
+    };
+  }
+
+  async deleteGraph(graph: Graph, trx: CommonQueryMethods = this.pg): Promise<void> {
+    this.logger.debug('delete graph (graphId=%s)', graph.id);
 
     const query = psql`
       DELETE
       FROM
         "graphs"
       WHERE
-        "target_id" = ${targetId}
-        AND "name" = ${graphName}
+        "id" = ${graph.id}
     `;
 
     await trx.query(query);
@@ -214,6 +279,8 @@ export class GraphStore {
       WHERE
         "source_graph_id" = ${baseGraph.id}
         AND "type" = 'CONTRACT'
+      ORDER BY
+        "id" ASC
     `;
 
     const records = await this.pg.any(query);
