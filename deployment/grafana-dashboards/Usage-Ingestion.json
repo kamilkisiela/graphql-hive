@@ -57,6 +57,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Reports the usage service finished collecting, per second, by outcome (success, error, not_ready). Errors here happened after authentication; see the Errors row for the cause.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -73,12 +74,12 @@
               }
             ]
           },
-          "unit": "ops"
+          "unit": "suffix: reports/s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 0,
         "y": 1
@@ -117,6 +118,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Operations buffered in the usage service after a failed Kafka send, waiting for retry. Sustained growth means Kafka is unreachable; it drains to 0 when sends recover.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -138,7 +140,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 5,
         "y": 1
@@ -177,6 +179,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Operations the usage service gave up on: the fallback queue hit its size limit, or a report could not be split below the Kafka message size limit. Any non-zero value is data loss.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -198,7 +201,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 10,
         "y": 1
@@ -224,7 +227,7 @@
           },
           "editorMode": "code",
           "expr": "sum(rate({__name__=~\"usage_fallback_dropped_operations(_total)?\"}[$__rate_interval]))",
-          "legendFormat": "fallback queue full",
+          "legendFormat": "queue full",
           "range": true,
           "refId": "A"
         },
@@ -235,12 +238,12 @@
           },
           "editorMode": "code",
           "expr": "sum(rate({__name__=~\"usage_operations_dropped_payload_too_large(_total)?\"}[$__rate_interval]))",
-          "legendFormat": "payload too large",
+          "legendFormat": "oversized",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Operations permanently dropped per second",
+      "title": "Dropped operations per second",
       "type": "stat"
     },
     {
@@ -248,6 +251,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Ingestor processing errors, and poison pills: messages whose ClickHouse write failed and whose Kafka offset was left uncommitted. The same poison pill repeating means a stuck partition.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -269,7 +273,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 5,
         "x": 15,
         "y": 1
@@ -319,6 +323,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Operations the ingestor wrote to ClickHouse divided by operations the usage service collected, over the range. Well below 100% for long means a Kafka backlog or ingestor failures; short excursions above 100% are batch timing.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -340,7 +345,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
+        "h": 4,
         "w": 4,
         "x": 20,
         "y": 1
@@ -371,7 +376,7 @@
           "refId": "A"
         }
       ],
-      "title": "Processed / collected",
+      "title": "Processed %",
       "type": "stat"
     },
     {
@@ -384,842 +389,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
-      },
-      "id": 7,
-      "panels": [],
-      "title": "Who is sending (Envoy access logs)",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto",
-              "wrapText": false
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
-      "id": 8,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "frameIndex": 1,
-        "showHeader": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum by (path) (count_over_time({namespace=\"contour\", container_name=\"envoy\"} | json | __error__=`` | path =~ `/usage(/.*)?` | path =~ `/usage(/$targetId.*)?` [$__interval]))",
-          "legendFormat": "{{path}}",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Requests by target path (legacy route shows as /usage)",
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "labelsToFields": false,
-            "reducers": ["sum"]
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "sort": [
-              {
-                "desc": true,
-                "field": "Total"
-              }
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "renameByName": {
-              "Field": "Path"
-            }
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 16
-      },
-      "id": 9,
-      "panels": [],
-      "title": "Errors",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 17
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": ["sum"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Total",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum by (path, response_code) (count_over_time({namespace=\"contour\", container_name=\"envoy\"} | json | __error__=`` | path =~ `/usage(/.*)?` | path =~ `/usage(/$targetId.*)?` | response_code =~ `$status` | response_code != 200 [$__interval]))",
-          "legendFormat": "{{path}} {{response_code}}",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Non-200 responses by target path and status",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 0,
-        "y": 25
-      },
-      "id": 11,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (targetId, orgId) (rate({__name__=~\"usage_rate_limit_dropped(_total)?\", targetId=~\"$targetId\", orgId=~\"$orgId\"}[$__rate_interval]))",
-          "legendFormat": "{{orgId}} / {{targetId}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Rate-limited reports by target",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 8,
-        "y": 25
-      },
-      "id": 12,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum by (target) (count_over_time({container_name=\"usage-service\"} | json | msg =~ `Detected invalid operation.*` | regexp `target=(?P<target>[0-9a-f-]{36})` | target =~ `$targetId` [$__interval]))",
-          "legendFormat": "{{target}}",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Invalid operations by target",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 16,
-        "y": 25
-      },
-      "id": 13,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "sum by (reason) (rate({__name__=~\"usage_operations_invalid(_total)?\"}[$__rate_interval]))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{reason}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Invalid operations by reason",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "reqs"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 32
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "min", "max"],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "sum(rate({__name__=~\"usage_http_requests_no_token(_total)?\"}[$__rate_interval]))",
-          "interval": "",
-          "legendFormat": "No token",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "sum(rate({__name__=~\"usage_http_requests_invalid_token(_total)?\"}[$__rate_interval]))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Unknown legacy token",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "exemplar": true,
-          "expr": "sum(rate({__name__=~\"usage_http_requests_no_access(_total)?\"}[$__rate_interval]))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "No access",
-          "refId": "C"
-        }
-      ],
-      "title": "Auth rejections",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 32
-      },
-      "id": 15,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (version) (rate({__name__=~\"used_api_version(_total)?\"}[$__rate_interval]))",
-          "legendFormat": "{{version}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "API version header",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 39
-      },
-      "id": 16,
-      "options": {
-        "legend": {
-          "calcs": ["sum"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Total",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "editorMode": "code",
-          "expr": "sum by (event) (count_over_time({container_name=\"usage-service\"} | json | msg =~ `(Report validation failed|Detected invalid operation|Failed to collect|No access|Token not found|Failed to check rate limit|Failed to get retention info|Not ready to collect report).*` | regexp `\"msg\":\"(?P<event>[A-Za-z][A-Za-z ]*[A-Za-z])` [$__interval]))",
-          "legendFormat": "{{event}}",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Usage service error events",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 46
-      },
-      "id": 17,
-      "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "editorMode": "code",
-          "expr": "{container_name=\"usage-service\"} | json | msg =~ `(Report validation failed|Detected invalid operation|Failed to collect|No access|Token not found|Failed to check rate limit|Failed to get retention info|Not ready to collect report).*` | targetId =~ `$targetId` or target =~ `$targetId`",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Usage service error details",
-      "type": "logs"
-    },
-    {
-      "collapsed": false,
-      "datasource": {
-        "type": "datasource",
-        "uid": "grafana"
-      },
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 56
+        "y": 5
       },
       "id": 18,
       "panels": [],
@@ -1231,6 +401,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Operations received by the usage service, successfully sent to Kafka (collected), and written to ClickHouse by the ingestor (processed). The three lines should track each other; a persistent gap is loss or lag.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1283,15 +454,15 @@
               }
             ]
           },
-          "unit": "ops/s"
+          "unit": "ops"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 12,
         "x": 0,
-        "y": 57
+        "y": 6
       },
       "id": 19,
       "options": {
@@ -1315,8 +486,34 @@
           "exemplar": true,
           "expr": "sum(rate(usage_operations_total[$__rate_interval]))",
           "interval": "",
-          "legendFormat": "operations",
+          "legendFormat": "received",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum(rate({__name__=~\"usage_operation_writes(_total)?\"}[$__rate_interval]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "collected",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "exemplar": true,
+          "expr": "sum(rate({__name__=~\"usage_ingested_operation_writes(_total)?\"}[$__rate_interval]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "processed",
+          "refId": "C"
         }
       ],
       "title": "Operations per second",
@@ -1327,6 +524,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "Reports accepted by the usage service, and the share still arriving in the legacy (v1) format.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1374,21 +572,22 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "suffix: reports/s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 12,
         "x": 12,
-        "y": 57
+        "y": 6
       },
       "id": 20,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
         },
@@ -1434,6 +633,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
+      "description": "p95 of each stage inside the usage service (report parsing, collect, compress, Kafka send) and of its calls to the commerce service for rate-limit and retention checks.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1490,7 +690,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 64
+        "y": 15
       },
       "id": 21,
       "options": {
@@ -1570,7 +770,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
-      "description": "Handler - the async function that runs after the request is parsed\n\nRequest - from receiving to responding",
+      "description": "p95 of the whole HTTP request (receive to respond) and of the handler alone, the async function that runs after the request is parsed. The difference is parsing and auth.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1631,7 +831,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 64
+        "y": 15
       },
       "id": 22,
       "options": {
@@ -1654,7 +854,7 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.999, sum(rate(usage_http_request_duration_seconds_bucket[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(usage_http_request_duration_seconds_bucket[$__rate_interval])) by (le))",
           "hide": false,
           "legendFormat": "Request",
           "range": true,
@@ -1666,7 +866,7 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.999, sum(rate(usage_http_request_handler_duration_seconds_bucket[$__rate_interval])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(usage_http_request_handler_duration_seconds_bucket[$__rate_interval])) by (le))",
           "hide": false,
           "instant": false,
           "legendFormat": "Handler",
@@ -1674,7 +874,7 @@
           "refId": "A"
         }
       ],
-      "title": "HTTP request duration (p99.9)",
+      "title": "HTTP request duration (p95)",
       "type": "timeseries"
     },
     {
@@ -1687,7 +887,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 23
       },
       "id": 23,
       "panels": [],
@@ -1699,114 +899,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 73
-      },
-      "id": 24,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "sum(rate({__name__=~\"usage_operation_writes(_total)?\"}[$__rate_interval]))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Collected",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "exemplar": true,
-          "expr": "sum(rate({__name__=~\"usage_ingested_operation_writes(_total)?\"}[$__rate_interval]))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "Processed",
-          "refId": "A"
-        }
-      ],
-      "title": "Collected vs processed operations",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
+      "description": "ClickHouse insert requests per second from the ingestor, by target table and HTTP status. Any series with a non-200 status is rejected inserts.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1854,15 +947,109 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "suffix: writes/s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 26,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (table, status) (label_replace(rate(usage_ingestor_write_duration_seconds_count[$__rate_interval]), \"table\", \"$1\", \"query\", \"(?s)INSERT INTO \\\"?([a-z_]+)\\\"?.*\"))",
+          "legendFormat": "{{status}} {{table}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ClickHouse write status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Operations, registry records and operation errors the ingestor failed to write to ClickHouse, per second.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
         "w": 12,
         "x": 12,
-        "y": 73
+        "y": 24
       },
       "id": 25,
       "options": {
@@ -1920,97 +1107,7 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 80
-      },
-      "id": 26,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (table, status) (label_replace(rate(usage_ingestor_write_duration_seconds_count[$__rate_interval]), \"table\", \"$1\", \"query\", \"(?s)INSERT INTO \\\"?([a-z_]+)\\\"?.*\"))",
-          "legendFormat": "{{status}} {{table}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "ClickHouse write status",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
+      "description": "p95 of ingestor message processing (decompress, parse, write) and of each ClickHouse insert by table.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2064,10 +1161,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 80
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 32
       },
       "id": 27,
       "options": {
@@ -2110,43 +1207,6 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 87
-      },
-      "id": 28,
-      "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
-          },
-          "editorMode": "code",
-          "expr": "{container_name=\"usage-ingestor-service\"} | json | msg =~ `.*offset not committed.*`",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Poison-pill messages (targets affected)",
-      "type": "logs"
-    },
-    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -2156,11 +1216,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 95
+        "y": 40
       },
-      "id": 29,
+      "id": 9,
       "panels": [],
-      "title": "Dependencies — usage-service (left) / usage-ingestor-service (right)",
+      "title": "Errors",
       "type": "row"
     },
     {
@@ -2168,1387 +1228,18 @@
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
-      "description": "service_readiness gauge (reportReadiness in service-common) summed over usage-service pods vs. the number of scraped pods. Red when none are ready or none are scraped.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red"
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 96
-      },
-      "id": 32,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum(service_readiness{pod=~\"usage-service-.*\"})",
-          "legendFormat": "ready",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "count(service_readiness{pod=~\"usage-service-.*\"})",
-          "legendFormat": "total",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "usage-service · ready pods",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Number of times process_start_time_seconds changed for a usage-service pod within the dashboard range: container restarts (e.g. OOM kill, crash) that keep the pod name. New pods from scaling or rollouts are not counted.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 96
-      },
-      "id": 33,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum(changes(process_start_time_seconds{pod=~\"usage-service-.*\"}[$__range]))",
-          "legendFormat": "restarts",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "usage-service · process restarts (range)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "service_readiness gauge (reportReadiness in service-common) summed over usage-ingestor-service pods vs. the number of scraped pods. Red when none are ready or none are scraped.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red"
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 96
-      },
-      "id": 34,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum(service_readiness{pod=~\"usage-ingestor-service-.*\"})",
-          "legendFormat": "ready",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "count(service_readiness{pod=~\"usage-ingestor-service-.*\"})",
-          "legendFormat": "total",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "usage-ingestor-service · ready pods",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Number of times process_start_time_seconds changed for a usage-ingestor-service pod within the dashboard range: container restarts (e.g. OOM kill, crash) that keep the pod name. New pods from scaling or rollouts are not counted.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "noValue": "0",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 96
-      },
-      "id": 35,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum(changes(process_start_time_seconds{pod=~\"usage-ingestor-service-.*\"}[$__range]))",
-          "legendFormat": "restarts",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "usage-ingestor-service · process restarts (range)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Total (user + system) CPU time per pod as a share of one core (1 = one full core). Compare with the pod CPU limit in deployment/services.",
+      "description": "Reports rejected because the organization is over its usage quota (rate limit answered by the commerce service), by target.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisSoftMin": 0,
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 100
-      },
-      "id": 36,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (rate(process_cpu_seconds_total{pod=~\"usage-service-.*\"}[$__rate_interval]))",
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "usage-service · CPU",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "RSS vs. V8 heap (used / total) and external (Buffer) memory per pod. usage-service runs with --max-old-space-size-percentage=80 of the pod memory limit. Pod memory limits are not exported as metrics, so there is no limit line.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 107
-      },
-      "id": 37,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "process_resident_memory_bytes{pod=~\"usage-service-.*\"}",
-          "legendFormat": "RSS {{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_heap_size_used_bytes{pod=~\"usage-service-.*\"}",
-          "legendFormat": "heap used {{pod}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_heap_size_total_bytes{pod=~\"usage-service-.*\"}",
-          "legendFormat": "heap total {{pod}}",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_external_memory_bytes{pod=~\"usage-service-.*\"}",
-          "legendFormat": "external {{pod}}",
-          "range": true,
-          "refId": "D"
-        }
-      ],
-      "title": "usage-service · memory",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Node.js event loop lag per pod. A sustained p99 above ~100 ms means the process is CPU-bound and cannot keep up with HTTP / Kafka / ClickHouse I/O.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 114
-      },
-      "id": 38,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_eventloop_lag_p50_seconds{pod=~\"usage-service-.*\"}",
-          "legendFormat": "p50 {{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_eventloop_lag_p99_seconds{pod=~\"usage-service-.*\"}",
-          "legendFormat": "p99 {{pod}}",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "usage-service · event loop lag (p50 / p99)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Seconds spent in V8 garbage collection per second, per pod (all GC kinds). Values approaching 0.1 (10%) indicate heap pressure; correlate with the memory panel above.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 121
-      },
-      "id": 39,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (rate(nodejs_gc_duration_seconds_sum{pod=~\"usage-service-.*\"}[$__rate_interval]))",
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "usage-service · GC time share",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "libuv active handles (sockets, timers) and in-flight requests per pod. A steadily growing handle count without matching traffic is a connection or timer leak.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 128
-      },
-      "id": 40,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_active_handles_total{pod=~\"usage-service-.*\"}",
-          "legendFormat": "handles {{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_active_requests_total{pod=~\"usage-service-.*\"}",
-          "legendFormat": "requests {{pod}}",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "usage-service · active handles / requests",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Total (user + system) CPU time per pod as a share of one core (1 = one full core). Compare with the pod CPU limit in deployment/services.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 100
-      },
-      "id": 41,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (rate(process_cpu_seconds_total{pod=~\"usage-ingestor-service-.*\"}[$__rate_interval]))",
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "usage-ingestor-service · CPU",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "RSS vs. V8 heap (used / total) and external (Buffer) memory per pod. Pod memory limits are not exported as metrics, so there is no limit line.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 107
-      },
-      "id": 42,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "process_resident_memory_bytes{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "RSS {{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_heap_size_used_bytes{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "heap used {{pod}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_heap_size_total_bytes{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "heap total {{pod}}",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_external_memory_bytes{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "external {{pod}}",
-          "range": true,
-          "refId": "D"
-        }
-      ],
-      "title": "usage-ingestor-service · memory",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Node.js event loop lag per pod. A sustained p99 above ~100 ms means the process is CPU-bound and cannot keep up with HTTP / Kafka / ClickHouse I/O.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 114
-      },
-      "id": 43,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_eventloop_lag_p50_seconds{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "p50 {{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_eventloop_lag_p99_seconds{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "p99 {{pod}}",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "usage-ingestor-service · event loop lag (p50 / p99)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "Seconds spent in V8 garbage collection per second, per pod (all GC kinds). Values approaching 0.1 (10%) indicate heap pressure; correlate with the memory panel above.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 121
-      },
-      "id": 44,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (rate(nodejs_gc_duration_seconds_sum{pod=~\"usage-ingestor-service-.*\"}[$__rate_interval]))",
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "usage-ingestor-service · GC time share",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "description": "libuv active handles (sockets, timers) and in-flight requests per pod. A steadily growing handle count without matching traffic is a connection or timer leak.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 128
-      },
-      "id": 45,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "lastNotNull", "max", "min"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Last *",
-          "sortDesc": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.4.0-79146",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_active_handles_total{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "handles {{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "nodejs_active_requests_total{pod=~\"usage-ingestor-service-.*\"}",
-          "legendFormat": "requests {{pod}}",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "usage-ingestor-service · active handles / requests",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
-      },
-      "description": "kafkajs producer DISCONNECT and REQUEST_TIMEOUT events logged by the usage service (packages/services/usage/src/usage.ts, producer.on handlers). Any sustained count means reports are waiting in the fallback queue.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "axisSoftMin": 0,
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "bars",
             "fillOpacity": 60,
             "gradientMode": "none",
@@ -3557,10 +1248,9 @@
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 1,
-            "pointSize": 6,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -3575,89 +1265,86 @@
             }
           },
           "mappings": [],
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "none"
+          "unit": "suffix: reports/s",
+          "noValue": "0"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 0,
-        "y": 135
+        "y": 41
       },
-      "id": 46,
+      "id": 11,
       "options": {
         "legend": {
-          "calcs": ["sum"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Total",
-          "sortDesc": true
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
+          "mode": "single",
+          "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0-79146",
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "grafanacloud-logs"
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum by (event) (count_over_time({container_name=\"usage-service\"} | json | msg =~ `Kafka producer: (disconnected|request timeout)` | regexp `Kafka producer: (?P<event>[a-z ]+)` [$__interval]))",
-          "legendFormat": "{{event}}",
-          "queryType": "range",
+          "expr": "sum by (targetId, orgId) (rate({__name__=~\"usage_rate_limit_dropped(_total)?\", targetId=~\"$targetId\", orgId=~\"$orgId\"}[$__rate_interval]))",
+          "legendFormat": "{{orgId}} / {{targetId}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "usage-service · Kafka producer events (logs)",
+      "title": "Rate-limited reports by target",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "loki",
-        "uid": "grafanacloud-logs"
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
       },
-      "description": "kafkajs consumer crash / disconnect / stop events logged by the ingestor (packages/services/usage-ingestor/src/ingestor.ts, consumer.on handlers). A crash marks the pod unhealthy until the consumer fetches again.",
+      "description": "Operations dropped during report validation in the usage service, by reason.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisSoftMin": 0,
             "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "bars",
-            "fillOpacity": 60,
+            "drawStyle": "line",
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 1,
-            "pointSize": 6,
+            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -3665,67 +1352,2115 @@
             "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "normal"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
           "mappings": [],
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
-          "unit": "none"
+          "unit": "ops",
+          "noValue": "0"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 12,
-        "y": 135
+        "y": 41
       },
-      "id": 47,
+      "id": 13,
       "options": {
         "legend": {
-          "calcs": ["sum"],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "sortBy": "Total",
-          "sortDesc": true
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
+          "mode": "single",
+          "sort": "none"
         }
       },
-      "pluginVersion": "11.4.0-79146",
       "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum by (reason) (rate({__name__=~\"usage_operations_invalid(_total)?\"}[$__rate_interval]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{reason}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Invalid operations by reason",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Requests rejected before collection: no token, a token without usage:report access, or an unknown legacy token.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum(rate({__name__=~\"usage_http_requests_no_token(_total)?\"}[$__rate_interval]))",
+          "interval": "",
+          "legendFormat": "No token",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "sum(rate({__name__=~\"usage_http_requests_invalid_token(_total)?\"}[$__rate_interval]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "Unknown legacy token",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "exemplar": true,
+          "expr": "sum(rate({__name__=~\"usage_http_requests_no_access(_total)?\"}[$__rate_interval]))",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "No access",
+          "refId": "C"
+        }
+      ],
+      "title": "Auth rejections",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Requests by x-usage-api-version header value. \"invalid\" means the client sent no or an unsupported version and was rejected with 401.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (version) (rate({__name__=~\"used_api_version(_total)?\"}[$__rate_interval]))",
+          "legendFormat": "{{version}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "API version header",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "id": 48,
+      "panels": [
         {
           "datasource": {
             "type": "loki",
             "uid": "grafanacloud-logs"
           },
-          "editorMode": "code",
-          "expr": "sum by (event) (count_over_time({container_name=\"usage-ingestor-service\"} | json | msg =~ `Consumer (crashed|disconnected|stopped).*` | regexp `Consumer (?P<event>[a-z]+)` [$__interval]))",
-          "legendFormat": "{{event}}",
-          "queryType": "range",
-          "refId": "A"
+          "description": "Non-200 responses on /usage paths from Envoy access logs, by path and status. Filter with the Target ID and Status Code variables.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 60,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 59
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": ["sum"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "sum by (path, response_code) (count_over_time({namespace=\"contour\", container_name=\"envoy\"} | json | __error__=`` | path =~ `/usage(/.*)?` | path =~ `/usage(/$targetId.*)?` | response_code =~ `$status` | response_code != 200 [$__interval]))",
+              "legendFormat": "{{path}} {{response_code}}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Non-200 responses by target path and status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "Targets whose reports contained invalid operations, from usage service logs. Use it to find which client to contact.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 60,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 67
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "sum by (target) (count_over_time({container_name=\"usage-service\"} | json | msg =~ `Detected invalid operation.*` | regexp `target=(?P<target>[0-9a-f-]{36})` | target =~ `$targetId` [$__interval]))",
+              "legendFormat": "{{target}}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Invalid operations by target",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "Usage service error log events per interval, by message prefix.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 60,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 67
+          },
+          "id": 16,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "sum by (event) (count_over_time({container_name=\"usage-service\"} | json | msg =~ `(Report validation failed|Detected invalid operation|Failed to collect|No access|Token not found|Failed to check rate limit|Failed to get retention info|Not ready to collect report).*` | regexp `\"msg\":\"(?P<event>[A-Za-z][A-Za-z ]*[A-Za-z])` [$__interval]))",
+              "legendFormat": "{{event}}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Usage service error events",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "Raw usage service error log lines behind the events above, filtered by Target ID.",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 74
+          },
+          "id": 17,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "{container_name=\"usage-service\"} | json | msg =~ `(Report validation failed|Detected invalid operation|Failed to collect|No access|Token not found|Failed to check rate limit|Failed to get retention info|Not ready to collect report).*` | targetId =~ `$targetId` or target =~ `$targetId`",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Usage service error details",
+          "type": "logs"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "Ingestor log lines for messages whose write failed and were left uncommitted, so the affected target id can be read from the message.",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 80
+          },
+          "id": 28,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": false
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "{container_name=\"usage-ingestor-service\"} | json | msg =~ `.*offset not committed.*`",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Poison-pill messages (targets affected)",
+          "type": "logs"
         }
       ],
-      "title": "usage-ingestor-service · Kafka consumer events (logs)",
-      "type": "timeseries"
+      "title": "Error drill-down (logs)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "id": 7,
+      "panels": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "Requests on /usage paths from Envoy access logs, grouped by path (the target id). The legacy route has no target in the path and shows as /usage.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": false
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 60
+          },
+          "id": 8,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": ["sum"],
+              "show": false
+            },
+            "frameIndex": 1,
+            "showHeader": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "sum by (path) (count_over_time({namespace=\"contour\", container_name=\"envoy\"} | json | __error__=`` | path =~ `/usage(/.*)?` | path =~ `/usage(/$targetId.*)?` [$__interval]))",
+              "legendFormat": "{{path}}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests by target path (legacy route shows as /usage)",
+          "transformations": [
+            {
+              "id": "reduce",
+              "options": {
+                "labelsToFields": false,
+                "reducers": ["sum"]
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Total"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "Field": "Path"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        }
+      ],
+      "title": "Who is sending (Envoy access logs)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
+      },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 60
+      },
+      "id": 29,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "service_readiness gauge (reportReadiness in service-common) summed over usage-service pods vs. the number of scraped pods. Red when none are ready or none are scraped.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 61
+          },
+          "id": 32,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum(service_readiness{pod=~\"usage-service-.*\"})",
+              "legendFormat": "ready",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "count(service_readiness{pod=~\"usage-service-.*\"})",
+              "legendFormat": "total",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "usage-service · ready pods",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Number of times process_start_time_seconds changed for a usage-service pod within the dashboard range: container restarts (e.g. OOM kill, crash) that keep the pod name. New pods from scaling or rollouts are not counted.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 61
+          },
+          "id": 33,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum(changes(process_start_time_seconds{pod=~\"usage-service-.*\"}[$__range]))",
+              "legendFormat": "restarts",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "usage-service · process restarts (range)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "service_readiness gauge (reportReadiness in service-common) summed over usage-ingestor-service pods vs. the number of scraped pods. Red when none are ready or none are scraped.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red"
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 61
+          },
+          "id": 34,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value_and_name"
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum(service_readiness{pod=~\"usage-ingestor-service-.*\"})",
+              "legendFormat": "ready",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "count(service_readiness{pod=~\"usage-ingestor-service-.*\"})",
+              "legendFormat": "total",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "usage-ingestor-service · ready pods",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Number of times process_start_time_seconds changed for a usage-ingestor-service pod within the dashboard range: container restarts (e.g. OOM kill, crash) that keep the pod name. New pods from scaling or rollouts are not counted.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 61
+          },
+          "id": 35,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "value"
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum(changes(process_start_time_seconds{pod=~\"usage-ingestor-service-.*\"}[$__range]))",
+              "legendFormat": "restarts",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "usage-ingestor-service · process restarts (range)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Total (user + system) CPU time per pod as a share of one core (1 = one full core). Compare with the pod CPU limit in deployment/services.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 65
+          },
+          "id": 36,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (rate(process_cpu_seconds_total{pod=~\"usage-service-.*\"}[$__rate_interval]))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "usage-service · CPU",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Total (user + system) CPU time per pod as a share of one core (1 = one full core). Compare with the pod CPU limit in deployment/services.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 65
+          },
+          "id": 41,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (rate(process_cpu_seconds_total{pod=~\"usage-ingestor-service-.*\"}[$__rate_interval]))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "usage-ingestor-service · CPU",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "RSS vs. V8 heap (used / total) and external (Buffer) memory per pod. usage-service runs with --max-old-space-size-percentage=80 of the pod memory limit. Pod memory limits are not exported as metrics, so there is no limit line.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 74
+          },
+          "id": 37,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "process_resident_memory_bytes{pod=~\"usage-service-.*\"}",
+              "legendFormat": "RSS {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_heap_size_used_bytes{pod=~\"usage-service-.*\"}",
+              "legendFormat": "heap used {{pod}}",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_heap_size_total_bytes{pod=~\"usage-service-.*\"}",
+              "legendFormat": "heap total {{pod}}",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_external_memory_bytes{pod=~\"usage-service-.*\"}",
+              "legendFormat": "external {{pod}}",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "usage-service · memory",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "RSS vs. V8 heap (used / total) and external (Buffer) memory per pod. Pod memory limits are not exported as metrics, so there is no limit line.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 74
+          },
+          "id": 42,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "process_resident_memory_bytes{pod=~\"usage-ingestor-service-.*\"}",
+              "legendFormat": "RSS {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_heap_size_used_bytes{pod=~\"usage-ingestor-service-.*\"}",
+              "legendFormat": "heap used {{pod}}",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_heap_size_total_bytes{pod=~\"usage-ingestor-service-.*\"}",
+              "legendFormat": "heap total {{pod}}",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_external_memory_bytes{pod=~\"usage-ingestor-service-.*\"}",
+              "legendFormat": "external {{pod}}",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "usage-ingestor-service · memory",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Node.js event loop lag per pod. A sustained p99 above ~100 ms means the process is CPU-bound and cannot keep up with HTTP / Kafka / ClickHouse I/O.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 84
+          },
+          "id": 38,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_eventloop_lag_p50_seconds{pod=~\"usage-service-.*\"}",
+              "legendFormat": "p50 {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_eventloop_lag_p99_seconds{pod=~\"usage-service-.*\"}",
+              "legendFormat": "p99 {{pod}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "usage-service · event loop lag (p50 / p99)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Node.js event loop lag per pod. A sustained p99 above ~100 ms means the process is CPU-bound and cannot keep up with HTTP / Kafka / ClickHouse I/O.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 84
+          },
+          "id": 43,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_eventloop_lag_p50_seconds{pod=~\"usage-ingestor-service-.*\"}",
+              "legendFormat": "p50 {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "nodejs_eventloop_lag_p99_seconds{pod=~\"usage-ingestor-service-.*\"}",
+              "legendFormat": "p99 {{pod}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "usage-ingestor-service · event loop lag (p50 / p99)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Seconds spent in V8 garbage collection per second, per pod (all GC kinds). Values approaching 0.1 (10%) indicate heap pressure; correlate with the memory panel above.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 93
+          },
+          "id": 39,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (rate(nodejs_gc_duration_seconds_sum{pod=~\"usage-service-.*\"}[$__rate_interval]))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "usage-service · GC time share",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "description": "Seconds spent in V8 garbage collection per second, per pod (all GC kinds). Values approaching 0.1 (10%) indicate heap pressure; correlate with the memory panel above.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 93
+          },
+          "id": 44,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PROM_DATASOURCE_UID"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (rate(nodejs_gc_duration_seconds_sum{pod=~\"usage-ingestor-service-.*\"}[$__rate_interval]))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "usage-ingestor-service · GC time share",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "kafkajs producer DISCONNECT and REQUEST_TIMEOUT events logged by the usage service (packages/services/usage/src/usage.ts, producer.on handlers). Any sustained count means reports are waiting in the fallback queue.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "bars",
+                "fillOpacity": 60,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 102
+          },
+          "id": 46,
+          "options": {
+            "legend": {
+              "calcs": ["sum"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "sum by (event) (count_over_time({container_name=\"usage-service\"} | json | msg =~ `Kafka producer: (disconnected|request timeout)` | regexp `Kafka producer: (?P<event>[a-z ]+)` [$__interval]))",
+              "legendFormat": "{{event}}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "usage-service · Kafka producer events (logs)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "kafkajs consumer crash / disconnect / stop events logged by the ingestor (packages/services/usage-ingestor/src/ingestor.ts, consumer.on handlers). A crash marks the pod unhealthy until the consumer fetches again.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "bars",
+                "fillOpacity": 60,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "smooth",
+                "lineWidth": 1,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "normal"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 102
+          },
+          "id": 47,
+          "options": {
+            "legend": {
+              "calcs": ["sum"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Total",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "11.4.0-79146",
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "sum by (event) (count_over_time({container_name=\"usage-ingestor-service\"} | json | msg =~ `Consumer (crashed|disconnected|stopped).*` | regexp `Consumer (?P<event>[a-z]+)` [$__interval]))",
+              "legendFormat": "{{event}}",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "usage-ingestor-service · Kafka consumer events (logs)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Process health — usage-service (left) / usage-ingestor-service (right)",
+      "type": "row"
     }
   ],
   "preload": false,
-  "refresh": "5s",
+  "refresh": "30s",
   "revision": 1,
   "schemaVersion": 41,
   "style": "dark",
