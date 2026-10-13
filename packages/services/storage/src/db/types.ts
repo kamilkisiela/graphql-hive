@@ -444,7 +444,6 @@ export interface schema_checks {
   manual_approval_user_id: string | null;
   meta: any | null;
   safe_schema_changes: any | null;
-  service_schema_changes: any | null;
   schema_composition_errors: any | null;
   schema_policy_errors: any | null;
   schema_policy_warnings: any | null;
@@ -454,6 +453,7 @@ export interface schema_checks {
   schema_sdl_store_id: string | null;
   schema_version_id: string | null;
   service_name: string | null;
+  service_schema_changes: any | null;
   service_url: string | null;
   supergraph_schema_changes: any | null;
   supergraph_sdl: string | null;
