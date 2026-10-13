@@ -188,6 +188,8 @@ export class SingleModel {
           contracts: null,
           schemaPolicy: null,
           schemaChanges: null,
+          serviceSchemaChanges: null,
+          supergraphSchemaChanges: null,
         },
       };
     }
@@ -257,6 +259,8 @@ export class SingleModel {
                 supergraphSDL: effectiveBaselineCompositionCheck.result.supergraph,
               }
             : null,
+          serviceSchemaChanges: null,
+          supergraphSchemaChanges: null,
         },
       };
     }
@@ -275,6 +279,8 @@ export class SingleModel {
             }
           : null,
         schemaChanges: diffCheck.result ?? null,
+        serviceSchemaChanges: null,
+        supergraphSchemaChanges: null,
         schemaPolicy: policyCheck.result ?? null,
         composition: {
           type: 'success',

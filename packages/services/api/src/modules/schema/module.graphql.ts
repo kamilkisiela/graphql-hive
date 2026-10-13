@@ -1564,6 +1564,8 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
+    serviceSchemaChanges: SchemaChangeConnection
+    supergraphSchemaChanges: SchemaChangeConnection
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
@@ -1787,6 +1789,8 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
+    serviceSchemaChanges: SchemaChangeConnection
+    supergraphSchemaChanges: SchemaChangeConnection
     """
     Breaking changes can exist in an successful schema check if the check was manually approved.
     """
@@ -1896,6 +1900,8 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
+    serviceSchemaChanges: SchemaChangeConnection
+    supergraphSchemaChanges: SchemaChangeConnection
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection

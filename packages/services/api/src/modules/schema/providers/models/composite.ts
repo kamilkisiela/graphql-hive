@@ -221,6 +221,7 @@ export class CompositeModel {
     latestComposable: {
       isComposable: boolean;
       sdl: string | null;
+      supergraphSdl: string | null;
       schemas: CompositeSchemaInput[];
     } | null;
     baseSchema: string | null;
@@ -374,6 +375,8 @@ export class CompositeModel {
           contracts: null,
           schemaPolicy: null,
           schemaChanges: null,
+          serviceSchemaChanges: null,
+          supergraphSchemaChanges: null,
         },
       };
     }
@@ -405,60 +408,92 @@ export class CompositeModel {
           conditionalBreakingChangeDiffConfig?.excludedAppDeploymentNames ?? null,
       });
 
-    const [diffCheck, policyCheck, contractChecks] = await Promise.all([
-      this.checks.diff({
-        includeUrlChanges: false,
-        filterOutFederationChanges: project.type === ProjectType.FEDERATION,
-        approvedChanges,
-        existingSdl: existingPublicSchemaSdl,
-        incomingSdl:
-          compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
-        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
-        failDiffOnDangerousChange: failDiffOnDangerousChange ?? false,
-        failAllDangerousChanges: failAllDangerousChanges ?? true,
-        failDangerousChangeTypes: failDangerousChangeTypes ?? [],
-        filterNestedChanges,
-        getAffectedAppDeployments,
-      }),
-      this.checks.policyCheck({
-        selector,
-        // if schema check does not compose then there's no point in linting. Pass in null in this case.
-        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
-        modifiedSdl: incoming.sdl,
-      }),
-      this.getContractCheckStates({
-        contracts:
-          contracts?.map((contract, index) => ({
-            graph: contract.graph,
-            baselineComposition: baselineCompositionCheck?.result.contracts?.[index]
-              ? baselineCompositionCheck?.result.contracts?.[index].status === 'completed'
-                ? {
-                    type: 'success',
-                    errors: null,
-                    compositeSchemaSDL:
-                      baselineCompositionCheck.result.contracts[index].result.fullSchemaSdl,
-                    supergraphSDL:
-                      baselineCompositionCheck.result.contracts[index].result.supergraph,
-                  }
-                : {
-                    type: 'failure',
-                    errors: baselineCompositionCheck.result.contracts[index].reason.errors,
-                    compositeSchemaSDL: null,
-                    supergraphSDL: null,
-                  }
-              : null,
-            latestValidVersion: contract.latestValidVersion,
-            approvedChanges: contract.approvedChanges,
-          })) ?? null,
-        compositionCheck,
-        conditionalBreakingChangeDiffConfig,
-        failDiffOnDangerousChange,
-        failAllDangerousChanges,
-        failDangerousChangeTypes,
-        getAffectedAppDeployments,
-        skipDiff: baselineMatchesHead,
-      }),
-    ]);
+    const [diffCheck, serviceDiffCheck, supergraphDiffCheck, policyCheck, contractChecks] =
+      await Promise.all([
+        this.checks.diff({
+          includeUrlChanges: false,
+          filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+          approvedChanges,
+          existingSdl: existingPublicSchemaSdl,
+          incomingSdl:
+            compositionCheck.result?.fullSchemaSdl ??
+            compositionCheck.reason?.fullSchemaSdl ??
+            null,
+          conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+          failDiffOnDangerousChange: failDiffOnDangerousChange ?? false,
+          failAllDangerousChanges: failAllDangerousChanges ?? true,
+          failDangerousChangeTypes: failDangerousChangeTypes ?? [],
+          filterNestedChanges,
+          getAffectedAppDeployments,
+        }),
+        baselineMatchesHead
+          ? null
+          : this.checks.serviceDiff({
+              existing:
+                baseline === null
+                  ? (latest?.schemas.find(schema => schema.serviceName === incoming.serviceName) ??
+                    null)
+                  : baseline,
+              incoming,
+            }),
+        baselineMatchesHead
+          ? null
+          : this.checks.diff({
+              existingSdl:
+                baselineCompositionCheck?.result.supergraph ??
+                latestComposable?.supergraphSdl ??
+                null,
+              incomingSdl: compositionCheck.result?.supergraph ?? null,
+              approvedChanges: null,
+              conditionalBreakingChangeConfig: null,
+              includeUrlChanges: false,
+              filterOutFederationChanges: false,
+              failDiffOnDangerousChange: false,
+              filterNestedChanges: true,
+              getAffectedAppDeployments: null,
+              failAllDangerousChanges: false,
+              failDangerousChangeTypes: [],
+            }),
+        this.checks.policyCheck({
+          selector,
+          // if schema check does not compose then there's no point in linting. Pass in null in this case.
+          incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          modifiedSdl: incoming.sdl,
+        }),
+        this.getContractCheckStates({
+          contracts:
+            contracts?.map((contract, index) => ({
+              graph: contract.graph,
+              baselineComposition: baselineCompositionCheck?.result.contracts?.[index]
+                ? baselineCompositionCheck?.result.contracts?.[index].status === 'completed'
+                  ? {
+                      type: 'success',
+                      errors: null,
+                      compositeSchemaSDL:
+                        baselineCompositionCheck.result.contracts[index].result.fullSchemaSdl,
+                      supergraphSDL:
+                        baselineCompositionCheck.result.contracts[index].result.supergraph,
+                    }
+                  : {
+                      type: 'failure',
+                      errors: baselineCompositionCheck.result.contracts[index].reason.errors,
+                      compositeSchemaSDL: null,
+                      supergraphSDL: null,
+                    }
+                : null,
+              latestValidVersion: contract.latestValidVersion,
+              approvedChanges: contract.approvedChanges,
+            })) ?? null,
+          compositionCheck,
+          conditionalBreakingChangeDiffConfig,
+          failDiffOnDangerousChange,
+          failAllDangerousChanges,
+          failDangerousChangeTypes,
+          getAffectedAppDeployments,
+          skipDiff: baselineMatchesHead,
+        }),
+      ]);
+
     this.logger.debug('diff check status: %o', diffCheck);
     this.logger.debug('policy check status: %o', policyCheck);
 
@@ -498,6 +533,9 @@ export class CompositeModel {
                 },
           schemaPolicy: policyCheck.result ?? policyCheck.reason ?? null,
           schemaChanges: diffCheck.reason ?? diffCheck.result ?? null,
+          serviceSchemaChanges: serviceDiffCheck?.result ?? null,
+          supergraphSchemaChanges:
+            supergraphDiffCheck?.result?.all ?? supergraphDiffCheck?.reason?.all ?? null,
           contracts: contractChecks,
         },
       };
@@ -523,6 +561,8 @@ export class CompositeModel {
         },
         schemaPolicy: policyCheck.result ?? null,
         schemaChanges: diffCheck.result ?? null,
+        serviceSchemaChanges: serviceDiffCheck?.result ?? null,
+        supergraphSchemaChanges: supergraphDiffCheck?.result?.all ?? null,
 
         contracts:
           contractChecks?.map(contractCheck => {

@@ -747,6 +747,9 @@ export class SchemaPublisher {
             ? {
                 isComposable: latestComposableVersion.version.isComposable,
                 sdl: latestComposableVersion.version.compositeSchemaSDL,
+                supergraphSdl: await this.schemaVersionHelper.getSupergraphSdl(
+                  latestComposableVersion.version,
+                ),
                 schemas: ensureCompositeSchemas(latestComposableVersion.schemas).map(
                   toCompositeSchemaInput,
                 ),
@@ -810,6 +813,8 @@ export class SchemaPublisher {
         isSuccess: false,
         breakingSchemaChanges: checkResult.reason.schemaChanges?.breaking ?? null,
         safeSchemaChanges: checkResult.reason.schemaChanges?.safe ?? null,
+        serviceSchemaChanges: checkResult.reason.serviceSchemaChanges ?? null,
+        supergraphSchemaChanges: checkResult.reason.supergraphSchemaChanges ?? null,
         schemaPolicyWarnings: checkResult.reason.schemaPolicy?.warnings ?? null,
         schemaPolicyErrors: checkResult.reason.schemaPolicy?.errors ?? null,
         ...(checkResult.reason.composition.errors
@@ -874,6 +879,8 @@ export class SchemaPublisher {
         isSuccess: true,
         breakingSchemaChanges: checkResult.state?.schemaChanges?.breaking ?? null,
         safeSchemaChanges: checkResult.state?.schemaChanges?.safe ?? null,
+        serviceSchemaChanges: checkResult.state.serviceSchemaChanges ?? null,
+        supergraphSchemaChanges: checkResult.state.supergraphSchemaChanges ?? null,
         schemaPolicyWarnings: checkResult.state?.schemaPolicy?.warnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
@@ -939,6 +946,8 @@ export class SchemaPublisher {
         schemaVersionId: latestVersion.version.id ?? null,
         breakingSchemaChanges: null,
         safeSchemaChanges: null,
+        serviceSchemaChanges: null,
+        supergraphSchemaChanges: null,
         schemaPolicyWarnings: null,
         schemaPolicyErrors: null,
         ...(compositeSchemaSdl
