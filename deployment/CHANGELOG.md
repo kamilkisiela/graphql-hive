@@ -1,5 +1,42 @@
 # hive
 
+## 14.0.0
+
+### Major Changes
+
+- [#8563](https://github.com/graphql-hive/console/pull/8563)
+  [`a892ec8`](https://github.com/graphql-hive/console/commit/a892ec822056740958391d0dd4fc958c4b96486f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - **BREAKING CHANGE** Require the migration service
+  to be configured with `REDIS_HOST`, `REDIS_PORT`, and `REDIS_PASSWORD`. These variables must
+  connect to the same Redis instance used by the API so database migrations can acquire the schema
+  registry lock before modifying registry state.
+
+- [#8563](https://github.com/graphql-hive/console/pull/8563)
+  [`a892ec8`](https://github.com/graphql-hive/console/commit/a892ec822056740958391d0dd4fc958c4b96486f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - **BREAKING CHANGE**: Before upgrading to this
+  version, you must first upgrade to `hive@13.1.0`. Do not upgrade directly from an earlier version
+  while the system is serving traffic.
+
+  To perform a rolling upgrade:
+
+  1. Upgrade all running services to `hive@13.1.0`.
+  2. Wait until all database migrations for `hive@13.1.0` have completed successfully and that
+     version is serving traffic.
+  3. Upgrade all services to this major version and wait for the database migration to complete.
+
+  If downtime is acceptable, you can instead stop all traffic and running services, then upgrade
+  directly to this version and run the migrations before bringing the system back online.
+
+  ***
+
+  Backfill latest contract versions from `contract_versions` to `schema_versions`.
+
+- [#8593](https://github.com/graphql-hive/console/pull/8593)
+  [`a8e7955`](https://github.com/graphql-hive/console/commit/a8e795598ad16586e35c58621a501f7897765c51)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - **BREAKING CHANGE**: Contract schemas are now
+  stored exclusively as schema versions. Hive no longer writes contract updates to the legacy
+  contract tables.
+
 ## 13.1.0
 
 ### Minor Changes
