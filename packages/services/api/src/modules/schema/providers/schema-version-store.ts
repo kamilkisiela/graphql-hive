@@ -62,8 +62,6 @@ export class SchemaVersionStore {
   private async insertSchemaVersion(
     trx: CommonQueryMethods,
     args: {
-      id?: string;
-      createdAt?: string;
       isComposable: boolean;
       targetId: string;
       origin: SchemaVersionOrigin;
@@ -98,8 +96,6 @@ export class SchemaVersionStore {
     const query = psql`/* insertSchemaVersion */
       INSERT INTO schema_versions
         (
-          "id",
-          "created_at",
           "record_version",
           "is_composable",
           "target_id",
@@ -126,8 +122,6 @@ export class SchemaVersionStore {
         )
       VALUES
         (
-          ${args.id ?? psql`uuid_generate_v4()`},
-          ${args.createdAt ?? psql`NOW()`},
           '2024-01-10',
           ${args.isComposable},
           ${args.targetId},
@@ -259,48 +253,7 @@ export class SchemaVersionStore {
       meta: SchemaVersionMeta | null;
     },
   ): Promise<void> {
-    // write to "contract_versions" for rollback capabilities
-    const contractVersion = await trx
-      .one(
-        psql`/* insertSchemaVersionContract */
-      INSERT INTO "contract_versions" (
-        "schema_version_id"
-        , "contract_id"
-        , "contract_name"
-        , "schema_composition_errors"
-        , "composite_schema_sdl"
-        , "supergraph_sdl"
-      )
-     VALUES (
-        ${args.schemaVersionId}
-        , ${args.contractId}
-        , ${args.contractName}
-        , ${psql.jsonbOrNull(args.schemaCompositionErrors)}
-        , ${args.compositeSchemaSDL}
-        , ${args.supergraphSDL}
-      )
-      RETURNING
-        "id"
-        , to_json("created_at") AS "createdAt"
-    `,
-      )
-      .then(z.object({ id: z.string().uuid(), createdAt: z.string() }).parse);
-
-    await this.insertSchemaVersionContractChanges(trx, {
-      schemaVersionContractId: contractVersion.id,
-      changes: args.changes,
-    });
-
-    // write to "schema_versions" so we can start serving newer contract versions from that table
-
-    const sharedParams: Omit<
-      Parameters<typeof this.insertSchemaVersion>[1],
-      'previousSchemaVersionId' | 'diffSchemaVersionId'
-    > = {
-      // make sure they have the same id
-      id: contractVersion.id,
-      // and same created at date
-      createdAt: contractVersion.createdAt,
+    const version = await this.insertSchemaVersion(trx, {
       sourceSchemaVersionId: args.schemaVersionId,
       graphMetadata: {
         id: args.graph.id,
@@ -319,89 +272,20 @@ export class SchemaVersionStore {
       github: args.github,
       origin: args.origin,
       schemaCompositionErrors: args.schemaCompositionErrors,
+      previousSchemaVersionId: args.previousSchemaVersionId,
+      diffSchemaVersionId: args.diffSchemaVersionId,
       schemaMetadata: null,
       baseSchema: null,
       tags: null,
       metadataAttributes: null,
-    };
-
-    const PreviousVersionIdsModel = z.object({
-      previousSchemaVersionId: z.string().nullable(),
-      diffSchemaVersionId: z.string().nullable(),
     });
 
-    const references: z.TypeOf<typeof PreviousVersionIdsModel> =
-      args.previousSchemaVersionId === null && args.diffSchemaVersionId === null
-        ? { previousSchemaVersionId: null, diffSchemaVersionId: null }
-        : await trx
-            .one(
-              psql`/* resolveContractSchemaVersionReferences */
-                SELECT
-                  CASE WHEN EXISTS (
-                    SELECT 1 FROM "schema_versions" WHERE "id" = ${args.previousSchemaVersionId}
-                  ) THEN ${args.previousSchemaVersionId}::uuid ELSE NULL END AS "previousSchemaVersionId",
-                  CASE WHEN EXISTS (
-                    SELECT 1 FROM "schema_versions" WHERE "id" = ${args.diffSchemaVersionId}
-                  ) THEN ${args.diffSchemaVersionId}::uuid ELSE NULL END AS "diffSchemaVersionId"
-              `,
-            )
-            .then(PreviousVersionIdsModel.parse);
-
-    // Start dual-writing when this contract has no predecessor, or once both predecessor
-    // records have been backfilled into schema_versions. This prevents creating gaps in the
-    // contract version chain while the backfill is still in progress.
-    if (
-      references.diffSchemaVersionId === args.diffSchemaVersionId &&
-      references.previousSchemaVersionId === args.previousSchemaVersionId
-    ) {
-      const version = await this.insertSchemaVersion(trx, {
-        ...sharedParams,
-        ...references,
+    if (args.changes?.length) {
+      await this.insertSchemaVersionChanges(trx, {
+        changes: args.changes,
+        versionId: version.id,
       });
-
-      if (args.changes?.length) {
-        await this.insertSchemaVersionChanges(trx, {
-          changes: args.changes,
-          versionId: version.id,
-        });
-      }
     }
-  }
-
-  private async insertSchemaVersionContractChanges(
-    trx: CommonQueryMethods,
-    args: {
-      changes: Array<SchemaChangeType> | null;
-      schemaVersionContractId: string;
-    },
-  ) {
-    if (!args.changes?.length) {
-      return;
-    }
-
-    await trx.query(psql`/* insertSchemaVersionContractChanges */
-      INSERT INTO "contract_version_changes" (
-        "contract_version_id",
-        "change_type",
-        "severity_level",
-        "meta",
-        "is_safe_based_on_usage"
-      )
-      SELECT * FROM
-      ${psql.unnest(
-        args.changes.map(change =>
-          // Note: change.criticality.level is actually a computed value from meta
-          [
-            args.schemaVersionContractId,
-            change.type,
-            change.criticality,
-            JSON.stringify(change.meta),
-            change.isSafeBasedOnUsage ?? false,
-          ],
-        ),
-        ['uuid', 'text', 'text', 'jsonb', 'bool'],
-      )}
-    `);
   }
 
   @traceFn('SchemaVersionsStore.createPublishSchemaVersion', {

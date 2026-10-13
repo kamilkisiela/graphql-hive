@@ -1524,6 +1524,7 @@ const SchemaCheckSharedInputFields = {
 
 const ContractCheckInput = z.object({
   contractId: z.string(),
+  contractName: z.string(),
   comparedContractVersionId: z.string().uuid().nullable(),
   isSuccess: z.boolean(),
   compositeSchemaSdl: z.string().nullable(),

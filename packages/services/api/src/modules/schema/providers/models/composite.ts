@@ -76,8 +76,8 @@ export class CompositeModel {
         ) {
           return {
             isSuccessful: false,
-            contractId: contract.contract.id,
-            contractName: contract.contract.contractName,
+            contractId: contract.graph.id,
+            contractName: contract.graph.name,
             baselineComposition: contract.baselineComposition ?? null,
             composition:
               contractCompositionResult.status === 'completed'
@@ -138,8 +138,8 @@ export class CompositeModel {
             ]);
 
         const state = {
-          contractId: contract.contract.id,
-          contractName: contract.contract.contractName,
+          contractId: contract.graph.id,
+          contractName: contract.graph.name,
           baselineComposition: contract.baselineComposition ?? null,
           composition: {
             type: 'success' as const,
@@ -253,7 +253,7 @@ export class CompositeModel {
     const schemas = schemaSwapResult ? schemaSwapResult.schemas : [incoming];
     schemas.sort((a, b) => a.serviceName.localeCompare(b.serviceName));
 
-    const contractNames = contracts?.map(({ contract }) => contract.contractName) ?? null;
+    const contractNames = contracts?.map(({ graph }) => graph.name) ?? null;
     const baseline = input.baselineSdl ? { ...incoming, sdl: input.baselineSdl } : null;
 
     const incomingChecksumInput = {
@@ -297,13 +297,13 @@ export class CompositeModel {
     }
 
     const contractCompositionInput: ContractsInputType | null =
-      contracts?.map(({ contract }) => ({
-        id: contract.id,
+      contracts?.map(({ graph }) => ({
+        id: graph.id,
         filter: {
-          exclude: contract.excludeTags,
-          include: contract.includeTags,
+          exclude: graph.config.excludeTags,
+          include: graph.config.includeTags,
           removeUnreachableTypesFromPublicApiSchema:
-            contract.removeUnreachableTypesFromPublicApiSchema,
+            graph.config.removeUnreachableTypesFromPublicApiSchema,
         },
       })) ?? null;
 
@@ -429,7 +429,7 @@ export class CompositeModel {
       this.getContractCheckStates({
         contracts:
           contracts?.map((contract, index) => ({
-            contract: contract.contract,
+            graph: contract.graph,
             baselineComposition: baselineCompositionCheck?.result.contracts?.[index]
               ? baselineCompositionCheck?.result.contracts?.[index].status === 'completed'
                 ? {
@@ -622,7 +622,7 @@ export class CompositeModel {
         : null,
       incoming: {
         schema: incoming,
-        contractNames: contracts?.map(contract => contract.contract.contractName) ?? null,
+        contractNames: contracts?.map(contract => contract.graph.name) ?? null,
       },
     });
 
@@ -653,13 +653,13 @@ export class CompositeModel {
       schemas,
       baseSchema,
       contracts:
-        contracts?.map(({ contract }) => ({
-          id: contract.id,
+        contracts?.map(({ graph }) => ({
+          id: graph.id,
           filter: {
-            exclude: contract.excludeTags,
-            include: contract.includeTags,
+            exclude: graph.config.excludeTags,
+            include: graph.config.includeTags,
             removeUnreachableTypesFromPublicApiSchema:
-              contract.removeUnreachableTypesFromPublicApiSchema,
+              graph.config.removeUnreachableTypesFromPublicApiSchema,
           },
         })) ?? null,
     });
@@ -853,13 +853,13 @@ export class CompositeModel {
       schemas,
       baseSchema,
       contracts:
-        contracts?.map(({ contract }) => ({
-          id: contract.id,
+        contracts?.map(({ graph }) => ({
+          id: graph.id,
           filter: {
-            exclude: contract.excludeTags,
-            include: contract.includeTags,
+            exclude: graph.config.excludeTags,
+            include: graph.config.includeTags,
             removeUnreachableTypesFromPublicApiSchema:
-              contract.removeUnreachableTypesFromPublicApiSchema,
+              graph.config.removeUnreachableTypesFromPublicApiSchema,
           },
         })) ?? null,
     });

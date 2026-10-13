@@ -3,9 +3,9 @@ import type { SchemaChangeType, SchemaCheck, SchemaCheckApprovalMetadata } from 
 import type { SchemaError } from '../../__generated__/types';
 import type { DateRange, PushedCompositeSchema, SingleSchema } from '../../shared/entities';
 import type { PromiseOrValue } from '../../shared/helpers';
+import type { ContractGraph } from '../graph/providers/graph-store';
 import type { SuperGraphInformation } from './lib/federation-super-graph';
 import type {
-  Contract,
   ContractCheck,
   ContractVersion,
   PaginatedContractConnection,
@@ -289,7 +289,7 @@ export type SuccessfulSchemaCheckMapper = {
 
 export type SchemaPolicyWarningConnectionMapper = ReadonlyArray<SchemaCheckWarning>;
 
-export type ContractMapper = Contract;
+export type ContractMapper = ContractGraph;
 export type ContractConnectionMapper = PaginatedContractConnection;
 export type ContractCheckMapper = ContractCheck;
 export type ContractVersionMapper = ContractVersion;

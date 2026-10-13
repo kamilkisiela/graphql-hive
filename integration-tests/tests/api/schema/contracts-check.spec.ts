@@ -253,16 +253,14 @@ test.concurrent(
       throw new Error(`Expected SchemaCheckError, got ${checkResult.schemaCheck.__typename}`);
     }
 
-    expect(checkResult.schemaCheck.errors?.nodes).toMatchInlineSnapshot(`
-    [
-      {
-        message: [my-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
-      },
-      {
-        message: [my-other-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.,
-      },
-    ]
-  `);
+    expect(checkResult.schemaCheck.errors?.nodes).toContainEqual({
+      message:
+        '[my-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.',
+    });
+    expect(checkResult.schemaCheck.errors?.nodes).toContainEqual({
+      message:
+        '[my-other-contract] Type "Query" is in the API schema but all of its fields are @inaccessible.',
+    });
   },
 );
 

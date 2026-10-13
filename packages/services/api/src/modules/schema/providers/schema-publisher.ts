@@ -10,7 +10,7 @@ import lodash from 'lodash';
 import promClient from 'prom-client';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
-import { fail, invariant, trace, traceFn } from '@hive/service-common';
+import { fail, invariant, registryLockId, trace, traceFn } from '@hive/service-common';
 import type {
   ConditionalBreakingChangeMetadata,
   SchemaChangeType,
@@ -143,10 +143,6 @@ function revisionNotFoundResult(revision: string) {
     changes: [],
     errors: [{ message: `Schema revision '${revision}' was not found.` }],
   };
-}
-
-function registryLockId(targetId: string) {
-  return `registry-lock:${targetId}`;
 }
 
 function assertNonNull<T>(value: T | null, message: string): T {
@@ -602,7 +598,7 @@ export class SchemaPublisher {
 
     const contracts =
       project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadActiveContractsWithLatestVersionsForGraphSchemaVersion(
+        ? await this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
             graph,
             latestVersion?.version ?? null,
           )
@@ -744,19 +740,6 @@ export class SchemaPublisher {
                 sdl: latestVersion.version.compositeSchemaSDL,
                 schemas: ensureCompositeSchemas(latestVersion.schemas).map(toCompositeSchemaInput),
                 contractNames:
-                  /**
-                   * contracts.values() isn't good enough because of an edge case: if a contract that has
-                   * failed composition is deleted, the latest version keeps that composition error flag,
-                   * which means only a new version can clear it. The deleted contract is no longer one of
-                   * the active contracts, so comparing the active contracts against themselves reports
-                   * "no changes" and the publish is ignored. The contract versions of the latest version
-                   * still include the deleted contract (its contract_id is set to null, the name is kept),
-                   * so comparing those against the active contracts detects the removal and a new version
-                   * without the contract is created. The publish flow uses the same source so that check
-                   * and publish agree.
-                   *
-                   * This is confusing and subtle, but an important difference in this one case.
-                   */
                   latestSchemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
               }
             : null,
@@ -777,8 +760,9 @@ export class SchemaPublisher {
             contracts
               ?.values()
               .map(contract => ({
-                ...contract,
-                approvedChanges: approvedContractChanges?.get(contract.contract.id) ?? null,
+                graph: contract.graph,
+                latestValidVersion: contract.latestValidVersion,
+                approvedChanges: approvedContractChanges?.get(contract.graph.id) ?? null,
               }))
               .toArray() ?? null,
           conditionalBreakingChangeDiffConfig:
@@ -1148,7 +1132,7 @@ export class SchemaPublisher {
           ...(checkResult.state?.contracts?.flatMap(contract => [
             ...(contract.schemaChanges?.all?.map(change => ({
               ...change,
-              message: `[${contract.contractName}] ${change.message}`,
+              message: `[${formatContractName(contract.contractName)}] ${change.message}`,
             })) ?? []),
           ]) ?? []),
         ],
@@ -1191,7 +1175,9 @@ export class SchemaPublisher {
             continue;
           }
 
-          errors.push({ message: `[${contract.contractName}] Baseline composition failed.` });
+          errors.push({
+            message: `[${formatContractName(contract.contractName)}] Baseline composition failed.`,
+          });
         }
         for (const contract of checkResult.reason.contracts) {
           if (!contract.composition.errors) {
@@ -1201,7 +1187,7 @@ export class SchemaPublisher {
           errors.push(
             ...contract.composition.errors.map(error => ({
               ...error,
-              message: `[${contract.contractName}] ${error.message}`,
+              message: `[${formatContractName(contract.contractName)}] ${error.message}`,
             })),
           );
         }
@@ -1219,7 +1205,7 @@ export class SchemaPublisher {
               )
               .map(change => ({
                 ...change,
-                message: `[${contract.contractName}] ${change.message}`,
+                message: `[${formatContractName(contract.contractName)}] ${change.message}`,
               })),
           );
         }
@@ -1234,7 +1220,7 @@ export class SchemaPublisher {
           ...(checkResult.reason.contracts?.flatMap(contract => [
             ...(contract.schemaChanges?.all?.map(change => ({
               ...change,
-              message: `[${contract.contractName}] ${change.message}`,
+              message: `[${formatContractName(contract.contractName)}] ${change.message}`,
             })) ?? []),
           ]) ?? []),
         ],
@@ -1281,7 +1267,7 @@ export class SchemaPublisher {
         })) ?? []),
         ...(contractVersions?.edges.flatMap(edge => [
           ...(edge.node.schemaCompositionErrors?.map(error => ({
-            message: `[${edge.node.contractName}] ${error.message}`,
+            message: `[${formatContractName(edge.node.contractName)}] ${error.message}`,
             source: error.source,
           })) ?? []),
         ]) ?? []),
@@ -1429,7 +1415,7 @@ export class SchemaPublisher {
     };
 
     const [contracts, latestVersion] = await Promise.all([
-      this.contracts.getActiveContractsByTargetId({ targetId: selector.targetId }),
+      this.graphStore.findContractGraphsForGraph(graph),
       this.schemaManager.getLatestSchemaVersionWithSchemaLogsForGraph({
         graph,
       }),
@@ -1469,9 +1455,9 @@ export class SchemaPublisher {
           project: selector.projectId,
           target: selector.targetId,
           service: input.service?.toLowerCase(),
-          contracts: contracts?.map(contract => ({
+          contracts: contracts.values().map(contract => ({
             contractId: contract.id,
-            contractName: contract.contractName,
+            contractName: contract.name,
           })),
           // We include the latest version ID to avoid caching a schema publication that targets different versions.
           // When deleting a schema, and publishing it again, the latest version ID will be different.
@@ -1711,7 +1697,7 @@ export class SchemaPublisher {
 
           const contracts =
             project.type === ProjectType.FEDERATION
-              ? await this.contracts.loadActiveContractsWithLatestVersionsForGraphSchemaVersion(
+              ? await this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
                   graph,
                   latestVersion.version,
                 )
@@ -1746,7 +1732,7 @@ export class SchemaPublisher {
             },
             conditionalBreakingChangeDiffConfig:
               conditionalBreakingChangeConfiguration?.conditionalBreakingChangeDiffConfig ?? null,
-            contracts: contracts?.size ? Array.from(contracts.values()) : null,
+            contracts: contracts?.size ? contracts.values().toArray() : null,
             failDiffOnDangerousChange,
             failAllDangerousChanges,
             failDangerousChangeTypes,
@@ -2059,7 +2045,7 @@ export class SchemaPublisher {
 
     const contracts =
       project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadActiveContractsWithLatestVersionsForGraphSchemaVersion(
+        ? await this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
             graph,
             latestVersion?.version ?? null,
           )
@@ -2275,7 +2261,7 @@ export class SchemaPublisher {
         contract =>
           contract.compositionErrors?.map(err => ({
             ...err,
-            message: `[${contract.contractName}] ${err.message}`,
+            message: `[${formatContractName(contract.contractName)}] ${err.message}`,
           })) ?? [],
       ) ?? [];
 
@@ -2953,12 +2939,12 @@ export class SchemaPublisher {
       targetId: args.target.id,
       schemas,
       contracts: args.contractsWithLatestVersions.map(contract => ({
-        id: contract.contract.id,
+        id: contract.graph.id,
         filter: {
           removeUnreachableTypesFromPublicApiSchema:
-            contract.contract.removeUnreachableTypesFromPublicApiSchema,
-          exclude: contract.contract.excludeTags,
-          include: contract.contract.includeTags,
+            contract.graph.config.removeUnreachableTypesFromPublicApiSchema,
+          exclude: contract.graph.config.excludeTags,
+          include: contract.graph.config.includeTags,
         },
       })),
     });
@@ -2971,8 +2957,8 @@ export class SchemaPublisher {
           compositeSchemaSDL: null,
           supergraphSDL: null,
           schemaCompositionErrors: result.reason.errors,
-          contractId: contract.contract.id,
-          contractName: contract.contract.contractName,
+          contractId: contract.graph.id,
+          contractName: contract.graph.name,
           graph: contract.graph,
           diffSchemaVersionId: contract?.latestValidVersion?.id ?? null,
           previousSchemaVersionId: contract?.latestVersion?.id ?? null,
@@ -2990,8 +2976,8 @@ export class SchemaPublisher {
           compositeSchemaSDL: null,
           supergraphSDL: null,
           schemaCompositionErrors: contractResult.reason.errors,
-          contractId: contract.contract.id,
-          contractName: contract.contract.contractName,
+          contractId: contract.graph.id,
+          contractName: contract.graph.name,
           graph: contract.graph,
           diffSchemaVersionId: contract?.latestValidVersion?.id ?? null,
           previousSchemaVersionId: contract?.latestVersion?.id ?? null,
@@ -3038,8 +3024,8 @@ export class SchemaPublisher {
         compositeSchemaSDL: contractResult.result.fullSchemaSdl,
         supergraphSDL: contractResult.result.supergraph,
         schemaCompositionErrors: null,
-        contractId: contract.contract.id,
-        contractName: contract.contract.contractName,
+        contractId: contract.graph.id,
+        contractName: contract.graph.name,
         graph: contract.graph,
         diffSchemaVersionId: contract?.latestValidVersion?.id ?? null,
         previousSchemaVersionId: contract?.latestVersion?.id ?? null,
@@ -3219,7 +3205,7 @@ export class SchemaPublisher {
 
     const [contractsWithLatestVersions, targetLogEdges] = await Promise.all([
       project.type === ProjectType.FEDERATION
-        ? this.contracts.loadActiveContractsWithLatestVersionsForGraphSchemaVersion(
+        ? this.contracts.loadContractGraphsWithLatestVersionsForGraphSchemaVersion(
             graph,
             targetLatestSchemaVersion,
           )
@@ -3907,20 +3893,22 @@ export function getSchemaCheckFailureGithubDetails(reason: SchemaCheckFailureRea
 
   for (const contract of reason.contracts ?? []) {
     if (contract.baselineComposition?.type === 'failure') {
-      errors.push({ message: `[${contract.contractName}] Baseline composition failed.` });
+      errors.push({
+        message: `[${formatContractName(contract.contractName)}] Baseline composition failed.`,
+      });
     }
 
     if (contract.composition.type === 'failure') {
       errors.push(
         ...contract.composition.errors.map(error => ({
-          message: `[${contract.contractName}] ${error.message}`,
+          message: `[${formatContractName(contract.contractName)}] ${error.message}`,
         })),
       );
     }
 
     errors.push(
       ...(contract.schemaChanges?.breaking?.map(change => ({
-        message: `[${contract.contractName}] ${change.message}`,
+        message: `[${formatContractName(contract.contractName)}] ${change.message}`,
       })) ?? []),
     );
   }
@@ -4010,7 +3998,7 @@ export function buildSchemaCheckSuccessGithubOutput(input: {
       coreChanges.length ? changesToMarkdown(coreChanges, printListOfChanges) : null,
       ...contractChanges.map(contract =>
         [
-          `## Contract "${contract.contractName}"`,
+          `## Contract "${formatContractName(contract.contractName)}"`,
           changesToMarkdown(contract.changes, printListOfChanges),
         ].join('\n'),
       ),
@@ -4061,4 +4049,9 @@ const SchemaCheckContextIdModel = z
 
 export function isValidServiceName(service: string): boolean {
   return service.length <= 64 && /^[a-zA-Z][\w_-]*$/g.test(service);
+}
+
+/** To not confuse users we strip the "default/" prefix for now from the public API until we actually introduce the concept of graphs. */
+export function formatContractName(name: string) {
+  return name.replace(/^default\//, '');
 }

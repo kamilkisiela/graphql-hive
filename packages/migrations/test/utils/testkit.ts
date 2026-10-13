@@ -19,7 +19,12 @@ config({
 import { env } from '../../src/environment';
 import z from 'zod';
 
-export async function initMigrationTestingEnvironment() {
+const fallbackRegistryLock: <T>(targetId: string, action: () => Promise<T>) => Promise<T> = (_, action) => action()
+
+export async function initMigrationTestingEnvironment(args?: {
+  withRegistryLock?: <T>(targetId: string, action: () => Promise<T>) => Promise<T>;
+}) {
+  const withRegistryLock = args?.withRegistryLock ?? fallbackRegistryLock;
   const pgp = pgpFactory();
   const db = pgp(createConnectionString({
     ...env.postgres,
@@ -48,7 +53,7 @@ export async function initMigrationTestingEnvironment() {
     connectionString,
     db: slonik,
     async runTo(name: string) {
-      await runPGMigrations({ slonik, runTo: name });
+      await runPGMigrations({ slonik, runTo: name, withRegistryLock });
     },
     seed: {
       async user({
@@ -111,7 +116,7 @@ export async function initMigrationTestingEnvironment() {
       },
     },
     async complete() {
-      await runPGMigrations({ slonik });
+      await runPGMigrations({ slonik, withRegistryLock });
     },
     async done(deleteDb = true) {
       try {

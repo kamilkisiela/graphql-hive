@@ -134,6 +134,8 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       MIGRATOR: 'up'
       CLICKHOUSE_MIGRATOR: 'up'
@@ -142,6 +144,9 @@ services:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '${REDIS_PASSWORD}'
       CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: 'clickhouse'
       CLICKHOUSE_PORT: '8123'

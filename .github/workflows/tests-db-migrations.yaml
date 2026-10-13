@@ -16,6 +16,10 @@ jobs:
           POSTGRES_DB: registry
         options: >-
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
 
     env:
       POSTGRES_HOST: localhost
@@ -23,6 +27,9 @@ jobs:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: registry
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ''
 
     steps:
       - name: checkout
