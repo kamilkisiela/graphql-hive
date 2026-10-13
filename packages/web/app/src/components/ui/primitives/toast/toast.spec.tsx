@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { useEffect } from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { ToastProvider, useToast, type ToastOptions } from './toast';
 
@@ -33,6 +34,25 @@ describe('Toast', () => {
       fireEvent.click(toast.querySelector('button[aria-label="Close"]')!);
     });
     expect(screen.queryByRole('alertdialog', { hidden: true })).toBeNull();
+  });
+
+  it('keeps the toast function stable as toasts open, so an effect depending on it runs once', () => {
+    const onEffect = vi.fn();
+    function ToastOnMount() {
+      const { toast } = useToast();
+      useEffect(() => {
+        onEffect();
+        toast({ title: 'Verification email sent' });
+      }, [toast]);
+      return null;
+    }
+    render(
+      <ToastProvider>
+        <ToastOnMount />
+      </ToastProvider>,
+    );
+    expect(onEffect).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByRole('dialog', { hidden: true })).toHaveLength(1);
   });
 
   it('hides after 5 seconds if not interacted with', () => {

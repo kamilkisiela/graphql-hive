@@ -25,20 +25,21 @@ const timeoutByVariant: Record<ToastVariant, number> = {
 };
 
 export function useToast() {
-  const manager = BaseToast.useToastManager();
+  // The manager changes on every toast; add/close don't, which keeps `toast` safe in effect deps.
+  const { add, close } = BaseToast.useToastManager();
 
   const toast = useCallback(
     ({ title, description, variant = 'default', duration }: ToastOptions) => {
-      const id = manager.add({
+      const id = add({
         title,
         description,
         type: variant,
         timeout: duration ?? timeoutByVariant[variant],
         priority: variant === 'destructive' ? 'high' : 'low',
       });
-      return { id, dismiss: () => manager.close(id) };
+      return { id, dismiss: () => close(id) };
     },
-    [manager],
+    [add, close],
   );
 
   return { toast };
