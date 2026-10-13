@@ -66,6 +66,8 @@ export class ArtifactStorageWriter {
     artifact: unknown;
     contractName: null | string;
     versionId?: string | null;
+    /** versioned contracts are historically stored under the source graph ID */
+    contractSourceSchemaVersionId?: string | null;
     graphId?: string | null;
     /** When the artifact update was initiated. */
     referenceDate?: Date;
@@ -75,12 +77,13 @@ export class ArtifactStorageWriter {
       args.artifactType,
       extractContractName(args.contractName),
     );
-    const versionedKey = args.versionId
+    const storageVersionId = args.contractSourceSchemaVersionId ?? args.versionId;
+    const versionedKey = storageVersionId
       ? buildArtifactStorageKey(
           args.targetId,
           args.artifactType,
           extractContractName(args.contractName),
-          args.versionId,
+          storageVersionId,
         )
       : null;
     const meta = artifactMeta[args.artifactType];
