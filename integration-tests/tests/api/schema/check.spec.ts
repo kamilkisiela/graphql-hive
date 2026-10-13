@@ -3171,6 +3171,12 @@ test.concurrent(
       await token.checkSchema(sdl, service).then(r => r.expectNoGraphQLErrors());
     }
 
+    // A new service whose first check fails composition is listed too.
+    const failedCheck = await token
+      .checkSchema('type Query { stock: String }', 'reviews')
+      .then(r => r.expectNoGraphQLErrors());
+    expect(failedCheck.schemaCheck.__typename).toBe('SchemaCheckError');
+
     const result = await execute({
       document: SchemaCheckServiceNamesQuery,
       variables: {
@@ -3183,7 +3189,12 @@ test.concurrent(
       authToken: ownerToken,
     }).then(r => r.expectNoGraphQLErrors());
 
-    expect(result.target?.schemaCheckServiceNames).toEqual(['accounts', 'products', 'users']);
+    expect(result.target?.schemaCheckServiceNames).toEqual([
+      'accounts',
+      'products',
+      'reviews',
+      'users',
+    ]);
   },
 );
 
