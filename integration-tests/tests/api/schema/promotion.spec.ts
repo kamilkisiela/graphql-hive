@@ -643,6 +643,9 @@ test.concurrent(
     assertNonNullish(s3Artifact);
     expect(s3Artifact.metadata).toEqual({
       'x-hive-schema-version-id': promotedVersion.id,
+      'x-hive-graph-id': expect.any(String),
+      'x-hive-graph-version-id': promotedVersion.id,
+      'x-hive-updated-at': expect.any(String),
     });
   },
 );
@@ -709,6 +712,9 @@ test.concurrent(
     assertNonNullish(s3Artifact);
     expect(s3Artifact.metadata).toEqual({
       'x-hive-schema-version-id': promotedVersion.id,
+      'x-hive-graph-id': expect.any(String),
+      'x-hive-graph-version-id': promotedVersion.id,
+      'x-hive-updated-at': expect.any(String),
     });
   },
 );
