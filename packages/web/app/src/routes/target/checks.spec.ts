@@ -5,6 +5,7 @@ import {
   breakingSchemaCheck,
   CHECKS,
   checksFixtures,
+  policyFailedSchemaCheck,
   SERVICES,
 } from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
@@ -427,4 +428,26 @@ describe('breaking change usage', () => {
     expect(screen.queryByText(/during the check window/)).toBeNull();
     await screen.findByText(/target insights for live usage data/);
   });
+});
+
+describe('failed check status', () => {
+  it(
+    'says a check failed on its policy errors, in the header and the graph picker',
+    {
+      timeout: 30_000,
+    },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          policyFailedSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-policy`, { client: testClient });
+
+      await screen.findByText('2 schema policy errors', {}, { timeout: 10_000 });
+      expect(screen.getByText('Failed')).toBeTruthy();
+      expect(screen.getByLabelText('Schema policy errors.')).toBeTruthy();
+    },
+  );
 });

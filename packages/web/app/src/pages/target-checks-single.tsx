@@ -57,7 +57,14 @@ import { SDLDiffView, SDLView } from './target-history-schema-version';
 /** A status icon inside a tab, explained on hover. */
 function StatusTooltip(props: { icon: ReactNode; label: string }) {
   return (
-    <Tooltip trigger={<span className="inline-flex">{props.icon}</span>} content={props.label} />
+    <Tooltip
+      trigger={
+        <span className="inline-flex" role="img" aria-label={props.label}>
+          {props.icon}
+        </span>
+      }
+      content={props.label}
+    />
   );
 }
 
@@ -1160,6 +1167,13 @@ const SchemaChecksView_SchemaCheckFragment = graphql(`
     hasSchemaCompositionErrors
     hasSchemaChanges
     hasUnapprovedBreakingChanges
+    schemaPolicyErrors {
+      edges {
+        node {
+          message
+        }
+      }
+    }
     contractChecks {
       edges {
         node {
@@ -1349,6 +1363,8 @@ type CheckStatusFlags = {
   hasSchemaChanges: boolean;
   /** Only a contract check has one; a failed baseline sets neither flag above. */
   baseline?: { compositionErrors: ReadonlyArray<unknown> | null } | null;
+  /** Only the default graph runs the policy. */
+  schemaPolicyErrors?: { edges: ReadonlyArray<unknown> } | null;
 };
 
 /** The glyph and the words for a check's outcome; the trigger takes the glyph, the list both. */
@@ -1363,6 +1379,12 @@ function checkStatus(check: CheckStatusFlags, changedLabel: string) {
     return {
       icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
       label: 'Unapproved breaking changes!',
+    };
+  }
+  if (check.schemaPolicyErrors?.edges.length) {
+    return {
+      icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
+      label: 'Schema policy errors.',
     };
   }
   if (check.baseline?.compositionErrors?.length) {
@@ -1422,6 +1444,24 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
         }
       }
     }
+    hasSchemaCompositionErrors
+    breakingSchemaChanges {
+      edges {
+        node {
+          isSafeBasedOnUsage
+          approval {
+            __typename
+          }
+        }
+      }
+    }
+    schemaPolicyErrors {
+      edges {
+        node {
+          message
+        }
+      }
+    }
     ...SchemaCheckView_SchemaCheckFragment
   }
 `);
@@ -1447,6 +1487,30 @@ export const ActiveSchemaCheckQuery = graphql(`
     }
   }
 `);
+
+/** What made a check fail, in the order the page lists them. */
+function failureReasons(check: {
+  hasSchemaCompositionErrors: boolean;
+  breakingSchemaChanges: {
+    edges: ReadonlyArray<{ node: { isSafeBasedOnUsage: boolean; approval: unknown } }>;
+  } | null;
+  schemaPolicyErrors: { edges: ReadonlyArray<unknown> } | null;
+  contractChecks: { edges: ReadonlyArray<{ node: { isSuccess: boolean } }> } | null;
+}) {
+  const unapproved =
+    check.breakingSchemaChanges?.edges.filter(
+      edge => edge.node.approval == null && !edge.node.isSafeBasedOnUsage,
+    ).length ?? 0;
+  const policyErrors = check.schemaPolicyErrors?.edges.length ?? 0;
+  const failedContracts =
+    check.contractChecks?.edges.filter(edge => !edge.node.isSuccess).length ?? 0;
+  return [
+    check.hasSchemaCompositionErrors ? 'Composition failed' : null,
+    unapproved ? formatCount(unapproved, 'unapproved breaking change') : null,
+    policyErrors ? formatCount(policyErrors, 'schema policy error') : null,
+    failedContracts ? formatCount(failedContracts, 'contract') + ' failed' : null,
+  ].filter((reason): reason is string => reason !== null);
+}
 
 const ActiveSchemaCheck = (props: { schemaCheckId: string | null }): React.ReactElement | null => {
   const { schemaCheckId } = props;
@@ -1506,6 +1570,8 @@ const ActiveSchemaCheck = (props: { schemaCheckId: string | null }): React.React
     );
   }
 
+  const reasons = failureReasons(schemaCheck);
+
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col">
       <div className="py-6">
@@ -1524,7 +1590,14 @@ const ActiveSchemaCheck = (props: { schemaCheckId: string | null }): React.React
                       term: 'Status',
                       description:
                         schemaCheck.__typename === 'FailedSchemaCheck' ? (
-                          <span className="text-critical">Failed</span>
+                          <>
+                            <span className="text-critical">Failed</span>
+                            {reasons.length ? (
+                              <span className="block text-xs text-fg-secondary">
+                                {reasons.join(' · ')}
+                              </span>
+                            ) : null}
+                          </>
                         ) : (
                           'Success'
                         ),
