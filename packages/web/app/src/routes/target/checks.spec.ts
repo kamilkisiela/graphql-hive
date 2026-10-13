@@ -156,7 +156,7 @@ describe('service filter', () => {
   });
 
   it(
-    'shows a service from the URL that the latest version does not know',
+    'shows a service from the URL that no check lists',
     { timeout: 30_000 },
     async () => {
       renderAtUrl(`${CHECKS_PAGE}?filter_service=ghost`, { client: client() });

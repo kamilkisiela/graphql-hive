@@ -44,7 +44,7 @@ export const CHECKS = {
   nextCursor: 'cursor-2',
 } as const;
 
-/** The services of the latest valid version, as `ChecksPageQuery` returns them. */
+/** The services that have checks, as `ChecksPageQuery` returns them. */
 export const SERVICES = ['products', 'users'] as const;
 
 /** `SchemaChecks_NavigationQuery`, answered per page and filter. */
@@ -82,11 +82,7 @@ export function checksPage(projectType: ProjectType = 'FEDERATION') {
       __typename: 'Target' as const,
       id: TARGET_ID,
       project: { __typename: 'Project' as const, id: 'project-1', type: projectType },
-      latestValidSchemaVersion: {
-        __typename: 'SchemaVersion' as const,
-        id: 'version-1',
-        serviceNames: projectType === 'SINGLE' ? null : [...SERVICES],
-      },
+      schemaCheckServiceNames: projectType === 'SINGLE' ? null : [...SERVICES],
       schemaChecks: {
         __typename: 'SchemaCheckConnection' as const,
         edges: [
