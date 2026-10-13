@@ -5,7 +5,6 @@ import FastifyStatic from '@fastify/static';
 import { env, getPublicEnvVars } from '../env/backend';
 import { connectGithub } from './github';
 import { connectLab } from './lab';
-import { registerPreflightWorkerEmbedRoute } from './preflight-embed';
 import { connectSlack } from './slack';
 
 const __dirname = new URL('.', import.meta.url).pathname;
@@ -88,22 +87,6 @@ async function main() {
   connectSlack(server);
   connectGithub(server);
   connectLab(server);
-
-  registerPreflightWorkerEmbedRoute(
-    server,
-    isDev
-      ? {
-          appRoot,
-          transformHtml: (url, html) => {
-            const devServer = server.vite.devServer;
-            if (!devServer) {
-              throw new Error('Vite dev server is not ready');
-            }
-            return devServer.transformIndexHtml(url, html);
-          },
-        }
-      : null,
-  );
 
   server.get('*', (req, reply) => {
     // Never serve the SPA shell for a missing asset. Browsers require JavaScript
