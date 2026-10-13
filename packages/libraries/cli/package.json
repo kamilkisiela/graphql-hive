@@ -25,6 +25,7 @@
     "/bin",
     "/dist",
     "/errors.json",
+    "/hive.schema.json",
     "/oclif.manifest.json"
   ],
   "keywords": [
