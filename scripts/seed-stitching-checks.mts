@@ -100,7 +100,7 @@ const checks = [
     sdl: services[2].sdl.replace('total: Int!', 'total: Int!\n        status: String'),
   },
   {
-    // Never published, so it is missing from the latest valid version and the filter's options.
+    // Never published, yet listed in the filter's options because it has a check.
     service: 'reviews',
     expect: 'passes, first check of a new service',
     sdl: /* GraphQL */ `
