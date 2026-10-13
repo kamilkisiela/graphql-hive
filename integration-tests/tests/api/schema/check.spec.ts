@@ -169,6 +169,16 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
             }
           }
         }
+        serviceSchemaChanges {
+          nodes {
+            message
+          }
+        }
+        supergraphSchemaChanges {
+          nodes {
+            message
+          }
+        }
         schemaPolicyWarnings {
           edges {
             node {
@@ -218,6 +228,114 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
     }
   }
 `);
+
+test.concurrent(
+  'persists service and supergraph changes for a composite schema check',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createTargetAccessToken, project, target } = await createProject(
+      ProjectType.Federation,
+    );
+    const token = await createTargetAccessToken({});
+
+    await token
+      .publishSchema({
+        service: 'products',
+        url: 'http://products.local',
+        sdl: /* GraphQL */ `
+          extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
+          type Query {
+            product: Product
+          }
+
+          type Product @key(fields: "id") {
+            id: ID!
+            name: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const result = await token
+      .checkSchema(
+        /* GraphQL */ `
+          extend schema
+            @link(
+              url: "https://specs.apollo.dev/federation/v2.3"
+              import: ["@key", "@shareable", "@composeDirective"]
+            )
+            @link(url: "https://example.com/feature/v1.0", import: ["@feature"])
+            @composeDirective(name: "@feature")
+
+          directive @feature on FIELD_DEFINITION
+
+          type Query {
+            product: Product
+          }
+
+          type Product @key(fields: "id") {
+            id: ID!
+            name: String @shareable @feature
+          }
+        `,
+        'products',
+      )
+      .then(r => r.expectNoGraphQLErrors());
+
+    invariant(result.schemaCheck.__typename === 'SchemaCheckSuccess');
+    invariant(result.schemaCheck.schemaCheck?.id);
+
+    const schemaCheck = await execute({
+      document: SchemaCheckQuery,
+      variables: {
+        selector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
+        },
+        id: result.schemaCheck.schemaCheck.id,
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(schemaCheck.target?.schemaCheck).toMatchObject({
+      serviceSchemaChanges: {
+        nodes: [
+          {
+            message: "Directive 'feature' was added",
+          },
+          {
+            message: "Directive 'shareable' was added to field 'Product.name'",
+          },
+          {
+            message: "Directive 'feature' was added to field 'Product.name'",
+          },
+          {
+            message: "Directive 'link' was added to schema",
+          },
+          {
+            message: "Directive 'composeDirective' was added to schema",
+          },
+        ],
+      },
+      supergraphSchemaChanges: {
+        nodes: [
+          {
+            message: "Directive 'feature' was added",
+          },
+          {
+            message: "Directive 'feature' was added to field 'Product.name'",
+          },
+          {
+            message: "Directive 'link' was added to schema",
+          },
+        ],
+      },
+    });
+  },
+);
 
 const ApproveFailedSchemaCheckMutation = graphql(/* GraphQL */ `
   mutation ApproveFailedSchemaCheck($input: ApproveFailedSchemaCheckInput!) {
@@ -2087,14 +2205,23 @@ describe.concurrent('schema check with a baseline service schema', () => {
     'compares the baseline against the head when the head matches the registry',
     async ({ expect }) => {
       const { createOrg } = await initSeed().createOwner();
-      const { createProject } = await createOrg();
-      const { createTargetAccessToken } = await createProject(ProjectType.Federation);
+      const { createProject, organization } = await createOrg();
+      const { createTargetAccessToken, project, target } = await createProject(
+        ProjectType.Federation,
+      );
       const token = await createTargetAccessToken({});
 
       const headSdl = /* GraphQL */ `
         extend schema
           @link(url: "https://specs.apollo.dev/link/v1.0")
-          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key"])
+          @link(
+            url: "https://specs.apollo.dev/federation/v2.3"
+            import: ["@key", "@shareable", "@composeDirective"]
+          )
+          @link(url: "https://example.com/feature/v1.0", import: ["@feature"])
+          @composeDirective(name: "@feature")
+
+        directive @feature on FIELD_DEFINITION
 
         type Query {
           product: Product
@@ -2102,6 +2229,7 @@ describe.concurrent('schema check with a baseline service schema', () => {
 
         type Product @key(fields: "id") {
           id: ID!
+          name: String @shareable @feature
         }
       `;
 
@@ -2121,7 +2249,7 @@ describe.concurrent('schema check with a baseline service schema', () => {
             sdl: /* GraphQL */ `
               extend schema
                 @link(url: "https://specs.apollo.dev/link/v1.0")
-                @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key"])
+                @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
 
               type Query {
                 product: Product
@@ -2129,6 +2257,7 @@ describe.concurrent('schema check with a baseline service schema', () => {
 
               type Product @key(fields: "id") {
                 id: ID!
+                name: String
                 removedInHead: String
               }
             `,
@@ -2159,8 +2288,51 @@ describe.concurrent('schema check with a baseline service schema', () => {
               criticality: 'Breaking',
               message: "Field 'removedInHead' was removed from object type 'Product'",
             },
+            {
+              criticality: 'Safe',
+              message: "Directive 'feature' was added",
+            },
+            {
+              criticality: 'Dangerous',
+              message: "Directive 'feature' was added to field 'Product.name'",
+            },
           ],
-          total: 1,
+          total: 3,
+        },
+      });
+
+      invariant(result.schemaCheck.schemaCheck?.id);
+      const schemaCheck = await execute({
+        document: SchemaCheckQuery,
+        variables: {
+          selector: {
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
+          },
+          id: result.schemaCheck.schemaCheck.id,
+        },
+        authToken: token.secret,
+      }).then(r => r.expectNoGraphQLErrors());
+
+      expect(schemaCheck.target?.schemaCheck).toMatchObject({
+        serviceSchemaChanges: {
+          nodes: [
+            { message: "Directive 'feature' was added" },
+            { message: "Field 'removedInHead' was removed from object type 'Product'" },
+            { message: "Directive 'shareable' was added to field 'Product.name'" },
+            { message: "Directive 'feature' was added to field 'Product.name'" },
+            { message: "Directive 'link' was added to schema" },
+            { message: "Directive 'composeDirective' was added to schema" },
+          ],
+        },
+        supergraphSchemaChanges: {
+          nodes: [
+            { message: "Field 'removedInHead' was removed from object type 'Product'" },
+            { message: "Directive 'feature' was added" },
+            { message: "Directive 'feature' was added to field 'Product.name'" },
+            { message: "Directive 'link' was added to schema" },
+          ],
         },
       });
     },
