@@ -37,7 +37,10 @@ export class SingleModel {
     incoming: Pick<SingleSchemaInput, 'sdl'>;
     existing: Pick<SingleSchemaInput, 'sdl'> | null;
   }) {
-    return this.checks.serviceDiff(args);
+    return this.checks.serviceDiff({
+      ...args,
+      filterNestedChanges: false,
+    });
   }
 
   @traceFn('Single modern: check', {

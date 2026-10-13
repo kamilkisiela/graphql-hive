@@ -175,6 +175,7 @@ export class CompositeModel {
       existing:
         args.existing?.find(schema => schema.serviceName === args.input.serviceName) ?? null,
       incoming: args.input,
+      filterNestedChanges: false,
     });
   }
 
@@ -435,6 +436,7 @@ export class CompositeModel {
                     null)
                   : baseline,
               incoming,
+              filterNestedChanges: true,
             }),
         baselineMatchesHead
           ? null
