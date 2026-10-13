@@ -4,7 +4,6 @@ import {
   PostgresDatabasePool,
   psql,
   UniqueIntegrityConstraintViolationError,
-  type PrimitiveValueExpression,
 } from '@hive/postgres';
 import { invariant } from '@hive/service-common';
 import {
@@ -70,32 +69,9 @@ export class Contracts {
     let graph: ContractGraph;
     try {
       graph = await this.pool.transaction('create contract', async trx => {
-        const contract = await trx
-          .maybeOne(
-            psql`
-          INSERT INTO "contracts" (
-            "target_id"
-            , "contract_name"
-            , "include_tags"
-            , "exclude_tags"
-            , "remove_unreachable_types_from_public_api_schema"
-          ) VALUES (
-            ${validatedContract.data.targetId}
-            , ${validatedContract.data.contractName}
-            , ${toNullableTextArray(validatedContract.data.includeTags)}
-            , ${toNullableTextArray(validatedContract.data.excludeTags)}
-            , ${validatedContract.data.removeUnreachableTypesFromPublicApiSchema}
-          )
-          RETURNING
-            ${contractFields}
-        `,
-          )
-          .then(ContractModel.parse);
-
         const graph = await this.graphStore.createGraph(
           {
             type: 'CONTRACT',
-            id: contract.id,
             name: `default/${validatedContract.data.contractName}`,
             organizationId: args.organizationId,
             projectId: args.projectId,
@@ -118,7 +94,7 @@ export class Contracts {
     } catch (err: unknown) {
       if (
         err instanceof UniqueIntegrityConstraintViolationError &&
-        err.constraint === 'contracts_target_id_contract_name_key'
+        err.constraint === 'graphs_target_id_name_key'
       ) {
         return {
           type: 'error' as const,
@@ -147,19 +123,7 @@ export class Contracts {
   async deleteContractGraph(graph: ContractGraph) {
     this.logger.debug('Delete contract (graphId=%s)', graph.id);
 
-    await this.pool.transaction('disable contract', async trx => {
-      await trx.maybeOne(
-        psql`
-          DELETE
-          FROM
-            "contracts"
-          WHERE
-            "id" = ${graph.id}
-        `,
-      );
-
-      await this.graphStore.deleteGraph(graph, trx);
-    });
+    await this.graphStore.deleteGraph(graph);
 
     this.logger.debug('Deleted contract graph. (graphId=%s)', graph.id);
 
@@ -295,7 +259,8 @@ export class Contracts {
       FROM
         "contract_checks"
       LEFT JOIN
-        "graphs" ON "graphs"."id" = "contract_checks"."contract_id"
+        "graphs"
+          ON "graphs"."id" = "contract_checks"."contract_id"
       LEFT JOIN
         "sdl_store" as "s_composite" ON "s_composite"."id" = "contract_checks"."composite_schema_sdl_store_id"
       LEFT JOIN
@@ -313,10 +278,21 @@ export class Contracts {
                   "contract_checks"."is_success" = FALSE
                   AND "contract_checks"."schema_composition_errors" IS NULL
                   AND "contract_checks"."breaking_schema_changes" IS NOT NULL
-
               )`
             : psql``
         }
+        ${
+          psql``
+          // Contract checks can outlive their graph after a historical cascade-delete bug.
+          // Keep only rows whose contract name is still available, either from the current
+          // graph or from the name stored on the check (which we introduced to mitigate the cascade-delete bug)
+          // so every returned record is valid and can be displayed.
+          // Any record that cannot be displayed is treated as non-existing...
+        }
+        AND (
+          "contract_checks"."contract_name" IS NOT NULL
+          OR "graphs"."name" IS NOT NULL
+        )
       ORDER BY
         "contract_checks"."schema_check_id" ASC
         , "contract_checks"."contract_id" ASC
@@ -756,22 +732,6 @@ export class Contracts {
     return changes.map(row => HiveSchemaChangeModel.parse(row));
   }
 }
-
-function toNullableTextArray<T extends PrimitiveValueExpression>(value: T[] | null) {
-  if (value === null) {
-    return null;
-  }
-
-  return psql.array(value, 'text');
-}
-
-const contractFields = psql`
-  "id"
-`;
-
-const ContractModel = z.object({
-  id: z.string().uuid(),
-});
 
 const CreateContractInputModel = z
   .object({
