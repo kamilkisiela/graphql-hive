@@ -200,8 +200,6 @@
       "@graphql-eslint/eslint-plugin@3.20.1": "patches/@graphql-eslint__eslint-plugin@3.20.1.patch",
       "got@14.4.7": "patches/got@14.4.7.patch",
       "oclif@4.22.65": "patches/oclif@4.22.65.patch",
-      "graphiql@4.0.0-alpha.5": "patches/graphiql@4.0.0-alpha.5.patch",
-      "@graphiql/react@1.0.0-alpha.4": "patches/@graphiql__react@1.0.0-alpha.4.patch",
       "p-cancelable@4.0.1": "patches/p-cancelable@4.0.1.patch",
       "@slonik/pg-driver@48.19.0": "patches/@slonik__pg-driver@48.19.0.patch"
     },
