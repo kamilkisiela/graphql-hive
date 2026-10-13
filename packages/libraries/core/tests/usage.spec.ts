@@ -1279,3 +1279,106 @@ test('new logger option', async () => {
     ]
   `);
 });
+
+describe('graph version', () => {
+  const graphId = '3c4bb3b0-3f8b-4b4b-8d1a-6a0b1e1f1e01';
+  const graphVersionId = '9a8f8f5c-2a3a-4d2e-9b6c-0c8b2b4c5d02';
+
+  function createReportingHive() {
+    const fetchSpy = vi.fn(async (_url: RequestInfo | URL, _init?: RequestInit) => {
+      return new Response(null, { status: 200 });
+    });
+
+    const hive = createHive({
+      enabled: true,
+      debug: false,
+      agent: {
+        timeout: 500,
+        maxRetries: 0,
+        sendInterval: 10,
+        logger: createHiveTestingLogger(),
+        fetch: fetchSpy,
+      },
+      token: 'Token',
+      selfHosting: {
+        graphqlEndpoint: 'http://localhost/graphql',
+        applicationUrl: 'http://localhost/',
+        usageEndpoint: 'http://localhost/200',
+      },
+      usage: true,
+    });
+
+    return {
+      hive,
+      async getReport() {
+        await hive.dispose();
+        expect(fetchSpy).toHaveBeenCalledOnce();
+        const [url, init] = fetchSpy.mock.calls[0];
+        expect(String(url)).toBe('http://localhost/200');
+        expect(init?.method).toBe('POST');
+        return JSON.parse(init?.body as string) as Report;
+      },
+    };
+  }
+
+  const graph = { graphId, graphVersionId };
+
+  test('collectUsage attaches the provided graph', async () => {
+    const { hive, getReport } = createReportingHive();
+
+    await hive
+      .collectUsage({ graph })
+      .finish({ schema, document: op, operationName: 'deleteProject' }, {});
+
+    const report = await getReport();
+    expect(report.operations?.[0].metadata?.graph).toEqual(graph);
+  });
+
+  test('collectRequest attaches the provided graph', async () => {
+    const { hive, getReport } = createReportingHive();
+
+    hive.collectRequest({
+      args: { schema, document: op, operationName: 'deleteProject' },
+      result: {},
+      duration: 1,
+      graph,
+    });
+    await waitFor(10);
+
+    const report = await getReport();
+    expect(report.operations?.[0].metadata?.graph).toEqual(graph);
+  });
+
+  test('collectSubscriptionUsage attaches the provided graph', async () => {
+    const { hive, getReport } = createReportingHive();
+
+    hive.collectSubscriptionUsage({
+      args: { schema, document: op2, operationName: 'getProject' },
+      graph,
+    });
+    await waitFor(10);
+
+    const report = await getReport();
+    expect(report.subscriptionOperations?.[0].metadata?.graph).toEqual(graph);
+  });
+
+  test('omits graph metadata when not provided', async () => {
+    const { hive, getReport } = createReportingHive();
+
+    await hive.collectUsage().finish({ schema, document: op, operationName: 'deleteProject' }, {});
+
+    const report = await getReport();
+    expect(report.operations?.[0].metadata?.graph).toBeUndefined();
+  });
+
+  test('omits graph metadata when an id is not a UUID', async () => {
+    const { hive, getReport } = createReportingHive();
+
+    await hive
+      .collectUsage({ graph: { graphId: 'not-a-uuid', graphVersionId } })
+      .finish({ schema, document: op, operationName: 'deleteProject' }, {});
+
+    const report = await getReport();
+    expect(report.operations?.[0].metadata?.graph).toBeUndefined();
+  });
+});

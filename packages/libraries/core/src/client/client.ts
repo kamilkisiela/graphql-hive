@@ -60,8 +60,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
     schemaReporter.report({ schema });
   }
 
-  function collectUsage() {
-    return usage.collect();
+  function collectUsage(...args: Parameters<typeof usage.collect>) {
+    return usage.collect(...args);
   }
 
   function collectRequest(...args: Parameters<typeof usage.collectRequest>) {
