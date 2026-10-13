@@ -397,3 +397,211 @@ describe('updateMetricAlertRule through the cache', () => {
     page.unsubscribe();
   });
 });
+
+// The lab seeds its collections from this query on every mount, so the list it selects
+// (operations(first: 100)) has to be the field the mutations write.
+describe('laboratory operation mutations through the cache', () => {
+  const selector = { organizationSlug: 'acme', projectSlug: 'shop', targetSlug: 'staging' };
+  const operation = (id: string) => ({
+    __typename: 'DocumentCollectionOperation' as const,
+    id,
+    name: id,
+    query: '{ a }',
+    variables: '{}',
+    headers: '{}',
+  });
+  const target = (ids: string[]) => ({
+    __typename: 'Target' as const,
+    id: 'target-1',
+    documentCollections: {
+      __typename: 'DocumentCollectionConnection' as const,
+      edges: [
+        {
+          __typename: 'DocumentCollectionEdge' as const,
+          cursor: 'c1',
+          node: {
+            __typename: 'DocumentCollection' as const,
+            id: 'c1',
+            name: 'C',
+            description: '',
+            operations: {
+              __typename: 'DocumentCollectionOperationsConnection' as const,
+              edges: ids.map(id => ({
+                __typename: 'DocumentCollectionOperationEdge' as const,
+                cursor: id,
+                node: operation(id),
+              })),
+            },
+          },
+        },
+      ],
+    },
+  });
+  const laboratory = (ids: string[]) => ({
+    __typename: 'Query',
+    target: {
+      ...target(ids),
+      preflightScript: null,
+      viewerCanModifyPreflightScript: true,
+      viewerCanModifyLaboratory: true,
+    },
+  });
+  const listed = (result: { data?: unknown }) =>
+    (
+      result.data as {
+        target: {
+          documentCollections: {
+            edges: { node: { operations: { edges: { node: { id: string } }[] } } }[];
+          };
+        };
+      }
+    ).target.documentCollections.edges[0].node.operations.edges.map(edge => edge.node.id);
+
+  it('drops a deleted operation from the list the page reads', { timeout: 30_000 }, async () => {
+    const { pipe, subscribe } = await import('wonka');
+    const { createTestClient } = await import('@/lib/testing/urql');
+    const { LaboratoryQuery, DeleteOperationMutation } = await import(
+      '@/pages/target-laboratory-new'
+    );
+    const client = createTestClient(
+      new Map<string, unknown>([
+        ['Laboratory', laboratory(['op-1', 'op-2'])],
+        [
+          'LaboratoryDeleteOperation',
+          {
+            __typename: 'Mutation',
+            deleteOperationInDocumentCollection: {
+              __typename: 'DeleteDocumentCollectionOperationResult',
+              error: null,
+              ok: {
+                __typename: 'DeleteDocumentCollectionOperationOkPayload',
+                deletedId: 'op-1',
+                updatedTarget: target(['op-2']),
+              },
+            },
+          },
+        ],
+      ]),
+    );
+
+    const page = pipe(
+      client.query(LaboratoryQuery, { selector }),
+      subscribe(() => {}),
+    );
+    await client.mutation(DeleteOperationMutation, { selector, id: 'op-1' }).toPromise();
+    const reread = await client.query(LaboratoryQuery, { selector }).toPromise();
+
+    expect(listed(reread)).toEqual(['op-2']);
+    expect(client.seen.filter(name => name === 'Laboratory')).toHaveLength(1);
+    page.unsubscribe();
+  });
+
+  it('adds a created collection without refetching the page', { timeout: 30_000 }, async () => {
+    const { pipe, subscribe } = await import('wonka');
+    const { createTestClient } = await import('@/lib/testing/urql');
+    const { LaboratoryQuery, CreateCollectionMutation } = await import(
+      '@/pages/target-laboratory-new'
+    );
+    const created = {
+      __typename: 'DocumentCollection' as const,
+      id: 'c2',
+      name: 'D',
+      description: '',
+      operations: { __typename: 'DocumentCollectionOperationsConnection' as const, edges: [] },
+    };
+    const client = createTestClient(
+      new Map<string, unknown>([
+        ['Laboratory', laboratory(['op-1'])],
+        [
+          'LaboratoryCreateCollection',
+          {
+            __typename: 'Mutation',
+            createDocumentCollection: {
+              __typename: 'ModifyDocumentCollectionResult',
+              error: null,
+              ok: {
+                __typename: 'ModifyDocumentCollectionOkPayload',
+                updatedTarget: {
+                  __typename: 'Target',
+                  id: 'target-1',
+                  documentCollections: {
+                    __typename: 'DocumentCollectionConnection',
+                    edges: [
+                      {
+                        __typename: 'DocumentCollectionEdge',
+                        cursor: 'c1',
+                        node: { __typename: 'DocumentCollection', id: 'c1', name: 'C' },
+                      },
+                      { __typename: 'DocumentCollectionEdge', cursor: 'c2', node: created },
+                    ],
+                  },
+                },
+                collection: created,
+              },
+            },
+          },
+        ],
+      ]),
+    );
+
+    const page = pipe(
+      client.query(LaboratoryQuery, { selector }),
+      subscribe(() => {}),
+    );
+    await client
+      .mutation(CreateCollectionMutation, { selector, input: { name: 'D', description: '' } })
+      .toPromise();
+    const reread = await client.query(LaboratoryQuery, { selector }).toPromise();
+
+    const collections = (
+      reread.data as { target: { documentCollections: { edges: { node: { id: string } }[] } } }
+    ).target.documentCollections.edges.map(edge => edge.node.id);
+    expect(collections).toEqual(['c1', 'c2']);
+    expect(client.seen.filter(name => name === 'Laboratory')).toHaveLength(1);
+    page.unsubscribe();
+  });
+
+  it('adds a created operation to the list the page reads', { timeout: 30_000 }, async () => {
+    const { pipe, subscribe } = await import('wonka');
+    const { createTestClient } = await import('@/lib/testing/urql');
+    const { LaboratoryQuery, CreateOperationMutation } = await import(
+      '@/pages/target-laboratory-new'
+    );
+    const client = createTestClient(
+      new Map<string, unknown>([
+        ['Laboratory', laboratory(['op-1'])],
+        [
+          'LaboratoryCreateOperation',
+          {
+            __typename: 'Mutation',
+            createOperationInDocumentCollection: {
+              __typename: 'ModifyDocumentCollectionOperationResult',
+              error: null,
+              ok: {
+                __typename: 'ModifyDocumentCollectionOperationOkPayload',
+                operation: operation('op-2'),
+                updatedTarget: target(['op-1', 'op-2']),
+              },
+            },
+          },
+        ],
+      ]),
+    );
+
+    const page = pipe(
+      client.query(LaboratoryQuery, { selector }),
+      subscribe(() => {}),
+    );
+    await client
+      .mutation(CreateOperationMutation, {
+        selector,
+        input: { collectionId: 'c1', name: 'op-2', query: '{ a }', variables: '{}', headers: '{}' },
+      })
+      .toPromise();
+    const reread = await client.query(LaboratoryQuery, { selector }).toPromise();
+
+    expect(listed(reread)).toEqual(['op-1', 'op-2']);
+    expect(client.seen.filter(name => name === 'Laboratory')).toHaveLength(1);
+    page.unsubscribe();
+  });
+});

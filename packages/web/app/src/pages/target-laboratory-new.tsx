@@ -143,6 +143,7 @@ export const CreateCollectionMutation = graphql(`
         collection {
           id
           name
+          description
           operations(first: 100) {
             edges {
               cursor
@@ -201,7 +202,7 @@ const UpdateOperationMutation = graphql(`
   }
 `);
 
-const CreateOperationMutation = graphql(`
+export const CreateOperationMutation = graphql(`
   mutation LaboratoryCreateOperation(
     $selector: TargetSelectorInput!
     $input: CreateDocumentCollectionOperationInput!
@@ -222,10 +223,14 @@ const CreateOperationMutation = graphql(`
               cursor
               node {
                 id
-                operations {
+                operations(first: 100) {
                   edges {
                     node {
                       id
+                      name
+                      query
+                      variables
+                      headers
                     }
                     cursor
                   }
@@ -278,7 +283,7 @@ export const DeleteOperationMutation = graphql(`
               cursor
               node {
                 id
-                operations {
+                operations(first: 100) {
                   edges {
                     node {
                       id
