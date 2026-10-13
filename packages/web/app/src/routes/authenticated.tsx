@@ -1,6 +1,5 @@
 import Session from 'supertokens-auth-react/recipe/session';
 import { authenticated } from '@/components/authenticated-container';
-import { DevPage } from '@/pages/dev';
 import { IndexPage } from '@/pages/index';
 import { ManagePage } from '@/pages/manage';
 import { NativeCompositionDiff } from '@/pages/native-composition-diff';
@@ -27,12 +26,6 @@ export const indexRoute = createRoute({
   getParentRoute: () => authenticatedRoute,
   path: '/',
   component: IndexPage,
-});
-
-export const devRoute = createRoute({
-  getParentRoute: () => authenticatedRoute,
-  path: 'dev',
-  component: DevPage,
 });
 
 export const nativeCompositionDiffRoute = createRoute({

@@ -12,7 +12,6 @@ import {
 } from './anonymous';
 import {
   authenticatedRoute,
-  devRoute,
   indexRoute,
   manageRoute,
   nativeCompositionDiffRoute,
@@ -125,8 +124,7 @@ export const routeTree = root.addChildren([
   authenticatedRoute.addChildren([
     indexRoute,
     nativeCompositionDiffRoute,
-    devRoute,
-    newOrgPage,
+      newOrgPage,
     manageRoute,
     transferOrganizationRoute,
     withHeaderRoute.addChildren([
