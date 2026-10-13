@@ -19,7 +19,10 @@ test('can fetch artifact', async () => {
   expect(result).toMatchInlineSnapshot(`
     {
       contents: type Query { hello: String },
+      graphId: null,
+      graphVersionId: 69,
       hash: lPMnu/9YxAJHyFqOBpHcrya5Bihef1wDGz7iKcif5nY=,
+      lastModified: null,
       schemaVersionId: 69,
     }
   `);
@@ -66,7 +69,10 @@ test('calls mirror if main source is not working', async () => {
   expect(result).toMatchInlineSnapshot(`
     {
       contents: type Query { hello: String },
+      graphId: null,
+      graphVersionId: 69,
       hash: lPMnu/9YxAJHyFqOBpHcrya5Bihef1wDGz7iKcif5nY=,
+      lastModified: null,
       schemaVersionId: 69,
     }
   `);
