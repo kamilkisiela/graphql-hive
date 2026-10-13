@@ -257,7 +257,7 @@ catalogs:
       version: 3.4.0
 
 overrides:
-  graphql-jit: ^0.8.10
+  graphql-jit: 0.8.10
   graphile-worker>@types/pg: 8.11.10
   esbuild: 0.28.1
   csstype: 3.1.2
