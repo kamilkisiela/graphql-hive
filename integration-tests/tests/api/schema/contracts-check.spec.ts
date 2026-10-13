@@ -364,6 +364,11 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
                   }
                 }
               }
+              supergraphSchemaChanges {
+                nodes {
+                  message
+                }
+              }
             }
           }
         }
@@ -496,6 +501,13 @@ test.concurrent(
                 compositionErrors: null,
               },
               breakingSchemaChanges: {
+                nodes: [
+                  {
+                    message: "Field 'baseOnly' was removed from object type 'Product'",
+                  },
+                ],
+              },
+              supergraphSchemaChanges: {
                 nodes: [
                   {
                     message: "Field 'baseOnly' was removed from object type 'Product'",

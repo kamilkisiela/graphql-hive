@@ -858,6 +858,7 @@ export class SchemaPublisher {
             baselineCompositionErrors: contract.baselineComposition?.errors ?? null,
             breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
             safeSchemaChanges: contract.schemaChanges?.safe ?? null,
+            supergraphSchemaChanges: contract.supergraphChanges?.all ?? null,
           })) ?? null,
         schemaProposalId: input.schemaProposalId ?? null,
         schemaProposalChanges: proposalChanges,
@@ -916,6 +917,7 @@ export class SchemaPublisher {
             schemaCompositionErrors: null,
             breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
             safeSchemaChanges: contract.schemaChanges?.safe ?? null,
+            supergraphSchemaChanges: contract.supergraphChanges?.all ?? null,
           })) ?? null,
         schemaProposalId: input.schemaProposalId ?? null,
         schemaProposalChanges: proposalChanges,
@@ -1004,6 +1006,7 @@ export class SchemaPublisher {
                 baselineCompositeSchemaSdl: baselineSdl ? edge.node.compositeSchemaSdl : null,
                 breakingSchemaChanges: null,
                 safeSchemaChanges: null,
+                supergraphSchemaChanges: null,
               })),
             )
           : null,

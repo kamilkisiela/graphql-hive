@@ -2563,6 +2563,7 @@ export async function createStorage(
                 , "schema_composition_errors"
                 , "breaking_schema_changes"
                 , "safe_schema_changes"
+                , "supergraph_schema_changes"
                 , "baseline_supergraph_sdl_store_id"
                 , "baseline_composite_schema_sdl_store_id"
                 , "baseline_schema_composition_errors"
@@ -2578,6 +2579,7 @@ export async function createStorage(
                 , ${psql.jsonbOrNull(contract.schemaCompositionErrors)}
                 , ${psql.jsonbOrNull(contract.breakingSchemaChanges?.map(toSerializableSchemaChange))}
                 , ${psql.jsonbOrNull(contract.safeSchemaChanges?.map(toSerializableSchemaChange))}
+                , ${psql.jsonbOrNull(contract.supergraphSchemaChanges?.map(toSerializableSchemaChange))}
                 , ${baselineSupergraphSchemaSdlHash}
                 , ${baselinePublicSdlHash}
                 , ${psql.jsonbOrNull(contract.baselineCompositionErrors)}

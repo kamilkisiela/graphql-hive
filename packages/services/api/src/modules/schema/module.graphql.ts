@@ -1622,6 +1622,7 @@ export default gql`
     schemaCompositionErrors: SchemaErrorConnection @tag(name: "public")
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
+    supergraphSchemaChanges: SchemaChangeConnection
 
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection

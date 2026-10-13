@@ -1516,6 +1516,7 @@ const ContractCheckInput = z.object({
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  supergraphSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   baselineCompositeSchemaSdl: z.string().nullable(),
   baselineSupergraphSchemaSdl: z.string().nullable(),
   baselineCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),

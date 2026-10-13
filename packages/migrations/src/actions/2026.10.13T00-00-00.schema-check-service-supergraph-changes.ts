@@ -7,5 +7,9 @@ export default {
       ADD COLUMN "service_schema_changes" jsonb
       , ADD COLUMN "supergraph_schema_changes" jsonb
     ;
+
+    ALTER TABLE "contract_checks"
+      ADD COLUMN "supergraph_schema_changes" jsonb
+    ;
   `,
 } satisfies MigrationExecutor;

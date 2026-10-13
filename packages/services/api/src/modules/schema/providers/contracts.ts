@@ -287,6 +287,7 @@ export class Contracts {
         , "contract_checks"."schema_composition_errors" as "schemaCompositionErrors"
         , "contract_checks"."breaking_schema_changes" as "breakingSchemaChanges"
         , "contract_checks"."safe_schema_changes" as "safeSchemaChanges"
+        , "contract_checks"."supergraph_schema_changes" as "supergraphSchemaChanges"
         , "s_composite"."sdl" as "compositeSchemaSdl"
         , "s_supergraph"."sdl" as "supergraphSdl"
         , "contract_checks"."baseline_schema_composition_errors" as "baselineSchemaCompositionErrors"
@@ -962,6 +963,7 @@ const ContractCheckModel = z.object({
   supergraphSdl: z.string().nullable(),
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  supergraphSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
 
   baselineSchemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
   baselineCompositeSchemaSdl: z.string().nullable(),
