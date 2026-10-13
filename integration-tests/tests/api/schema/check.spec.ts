@@ -3187,25 +3187,28 @@ test.concurrent(
   },
 );
 
-test.concurrent('schemaCheckServiceNames is null for a single-schema project', async ({ expect }) => {
-  const { createOrg, ownerToken } = await initSeed().createOwner();
-  const { createProject, organization } = await createOrg();
-  const { createTargetAccessToken, project, target } = await createProject(ProjectType.Single);
-  const token = await createTargetAccessToken({});
+test.concurrent(
+  'schemaCheckServiceNames is null for a single-schema project',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createTargetAccessToken, project, target } = await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({});
 
-  await token.checkSchema('type Query { ping: String }').then(r => r.expectNoGraphQLErrors());
+    await token.checkSchema('type Query { ping: String }').then(r => r.expectNoGraphQLErrors());
 
-  const result = await execute({
-    document: SchemaCheckServiceNamesQuery,
-    variables: {
-      selector: {
-        organizationSlug: organization.slug,
-        projectSlug: project.slug,
-        targetSlug: target.slug,
+    const result = await execute({
+      document: SchemaCheckServiceNamesQuery,
+      variables: {
+        selector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
+        },
       },
-    },
-    authToken: ownerToken,
-  }).then(r => r.expectNoGraphQLErrors());
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
 
-  expect(result.target?.schemaCheckServiceNames).toBeNull();
-});
+    expect(result.target?.schemaCheckServiceNames).toBeNull();
+  },
+);
