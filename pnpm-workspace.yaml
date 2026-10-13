@@ -117,3 +117,4 @@ minimumReleaseAgeExclude:
   - graphql-modules
   - 'react-foundry'
   - 'graphql-scalars'
+  - graphql-jit
