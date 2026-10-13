@@ -734,6 +734,16 @@ export class SchemaManager {
     return paginatedResult;
   }
 
+  async getSchemaCheckServiceNamesForTarget(target: Target) {
+    const project = await this.projectManager.getProjectById(target.projectId);
+    // Single-schema checks carry no service name, so there is nothing to list.
+    if (project.type === ProjectType.SINGLE) {
+      return null;
+    }
+    this.logger.debug('Fetching schema check service names (targetId=%s)', target.id);
+    return this.storage.getSchemaCheckServiceNamesForTarget({ targetId: target.id });
+  }
+
   async findSchemaCheckForTarget(target: Target, schemaCheckId: string) {
     this.logger.debug(
       'Find schema check (targetId=%s, schemaCheckId=%s)',

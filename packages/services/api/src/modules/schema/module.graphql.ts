@@ -225,6 +225,11 @@ export default gql`
       filters: SchemaChecksFilter
     ): SchemaCheckConnection! @tag(name: "public")
     """
+    Lowercased, sorted names of the services that have schema checks in this target.
+    Null for single-schema projects.
+    """
+    schemaCheckServiceNames: [String!]
+    """
     Paginated list of schema versions, ordered from recent to oldest.
     """
     schemaVersions(

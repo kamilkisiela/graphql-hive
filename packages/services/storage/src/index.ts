@@ -2771,6 +2771,37 @@ export async function createStorage(
       }
       return approvedSchemaChanges;
     },
+    async getSchemaCheckServiceNamesForTarget(args) {
+      // Postgres has no skip scan for DISTINCT, so a plain DISTINCT reads every check of the
+      // target. The recursive form seeks schema_checks_connection_pagination_by_service once
+      // per service instead.
+      return pool
+        .anyFirst(
+          psql`/* getSchemaCheckServiceNamesForTarget */
+            WITH RECURSIVE "services" AS (
+              (
+                SELECT "service_name"
+                FROM "schema_checks"
+                WHERE "target_id" = ${args.targetId} AND "service_name" IS NOT NULL
+                ORDER BY "service_name" ASC
+                LIMIT 1
+              )
+              UNION ALL
+              SELECT (
+                SELECT c."service_name"
+                FROM "schema_checks" AS c
+                WHERE c."target_id" = ${args.targetId} AND c."service_name" > s."service_name"
+                ORDER BY c."service_name" ASC
+                LIMIT 1
+              )
+              FROM "services" AS s
+              WHERE s."service_name" IS NOT NULL
+            )
+            SELECT "service_name" FROM "services" WHERE "service_name" IS NOT NULL
+          `,
+        )
+        .then(z.array(z.string()).parse);
+    },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {
         createdAt: string;
