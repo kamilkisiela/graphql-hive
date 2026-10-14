@@ -12,6 +12,7 @@ import {
   InfoIcon,
   ListIcon,
   Loader2,
+  ScaleIcon,
   ShieldAlertIcon,
   TriangleAlertIcon,
 } from 'lucide-react';
@@ -851,7 +852,7 @@ function useDefaultSchemaView(props: {
   items.push({
     value: 'policy',
     label: 'Policy',
-    icon: TriangleAlertIcon,
+    icon: ScaleIcon,
     attrs: { 'data-testid': 'policy-view-btn' },
     disabled:
       !schemaCheck.schemaPolicyWarnings &&

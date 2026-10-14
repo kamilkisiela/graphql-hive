@@ -8,6 +8,7 @@ import {
   GitCompare,
   Info,
   List,
+  Scale,
 } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { FailureCard } from '../failure-card/failure-card';
@@ -29,6 +30,12 @@ const CONTRACTS: Array<{ value: string; label: string; status: ContractStatus }>
   { value: 'mobile', label: 'mobile', status: 'failed' },
 ];
 
+const STATUS_STATE: Record<ContractStatus, string> = {
+  failed: 'Failed',
+  changed: 'Schema changed',
+  ok: 'Passed',
+};
+
 const STATUS_LABEL: Record<ContractStatus, string> = {
   failed: 'Composition failed.',
   changed: 'Schema changed',
@@ -41,7 +48,7 @@ function StatusGlyph({ status }: { status: ContractStatus }) {
   return <Check className="size-3.5 shrink-0 text-success" />;
 }
 
-/** The picker as the pages build it: the contract's name, its status under a tooltip at the far end. */
+/** The picker as the pages build it: the contract's name, its status in words at the far end, the reason on hover. */
 function ContractSelect(props: { value: string; onValueChange: (value: string) => void }) {
   return (
     <Select
@@ -52,8 +59,9 @@ function ContractSelect(props: { value: string; onValueChange: (value: string) =
         trailing: (
           <Tooltip
             trigger={
-              <span className="inline-flex">
+              <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
                 <StatusGlyph status={entry.status} />
+                {STATUS_STATE[entry.status]}
               </span>
             }
             content={STATUS_LABEL[entry.status]}
@@ -126,7 +134,7 @@ function checkViews(contract: string): TabbedViewItem[] {
       tooltip: 'Composition did not succeed. No Supergraph available.',
       content: null,
     },
-    { value: 'policy', label: 'Policy', icon: AlertTriangle, disabled: true, content: null },
+    { value: 'policy', label: 'Policy', icon: Scale, disabled: true, content: null },
   ];
 }
 
@@ -171,14 +179,7 @@ export const ChecksPage = createPreview(() => {
             }))}
           />
         </div>
-        <ScopeBar
-          picker={<ContractSelect value={contract} onValueChange={setContract} />}
-          legend={[
-            { icon: <StatusGlyph status="failed" />, label: 'Failed' },
-            { icon: <StatusGlyph status="changed" />, label: 'Schema changed' },
-            { icon: <StatusGlyph status="ok" />, label: 'Passed' },
-          ]}
-        />
+        <ScopeBar picker={<ContractSelect value={contract} onValueChange={setContract} />} />
         <TabbedView items={checkViews(contract)} defaultValue="details" />
       </div>
     </div>
