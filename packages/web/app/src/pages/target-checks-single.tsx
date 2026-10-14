@@ -1542,7 +1542,7 @@ const ActiveSchemaCheck = (props: { schemaCheckId: string | null }): React.React
                         schemaCheck.__typename === 'FailedSchemaCheck' ? (
                           <span className="text-critical">Failed</span>
                         ) : (
-                          'Success'
+                          'Passed'
                         ),
                     },
                     ...(schemaCheck.serviceName
