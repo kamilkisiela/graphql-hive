@@ -732,7 +732,11 @@ export class SchemaManager {
     return paginatedResult;
   }
 
-  async findSchemaCheckForTarget(target: Target, schemaCheckId: string) {
+  async findSchemaCheckForTarget(
+    target: Target,
+    schemaCheckId: string,
+    options: { withSDL?: boolean } = {},
+  ) {
     this.logger.debug(
       'Find schema check (targetId=%s, schemaCheckId=%s)',
       target.id,
@@ -752,6 +756,7 @@ export class SchemaManager {
     const schemaCheck = await this.storage.findSchemaCheck({
       targetId: target.id,
       schemaCheckId,
+      withSDL: options.withSDL,
     });
 
     if (schemaCheck == null) {

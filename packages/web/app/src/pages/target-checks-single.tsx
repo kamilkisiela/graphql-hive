@@ -26,6 +26,14 @@ import {
 } from '@/components/target/history/errors-and-changes';
 import { PagedBreakingChanges, SafeChangeGroups } from '@/components/target/history/paged-changes';
 import { useChangePageLoaders } from '@/components/target/checks/change-pages';
+import {
+  SDL_TABS,
+  useCheckSdl,
+  useContractCheckSdl,
+  withCheckSdl,
+  withContractCheckSdl,
+  withSdlState,
+} from '@/components/target/checks/check-sdl';
 import { CopyText } from '@/components/ui/copy-text';
 import { DownloadButton } from '@/components/ui/diff-editor';
 import { CodeScrollArea, File } from '@/components/ui/diffs';
@@ -541,13 +549,9 @@ function ConditionalBreakingChangesMetadataSection(props: {
 const DefaultSchemaView_SchemaCheckFragment = graphql(`
   fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
     id
-    schemaSDL
     serviceName
     hasSchemaCompositionErrors
     baseline {
-      sdl
-      publicSdl
-      supergraphSdl
       compositionErrors {
         message
       }
@@ -558,13 +562,7 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
     meta {
       commit
     }
-    ... on SuccessfulSchemaCheck {
-      compositeSchemaSDL
-      supergraphSDL
-    }
     ... on FailedSchemaCheck {
-      compositeSchemaSDL
-      supergraphSDL
       compositionErrors {
         ...CompositionErrorsSection_SchemaErrorConnection
       }
@@ -628,9 +626,14 @@ function useDefaultSchemaView(props: {
   schemaCheck: FragmentType<typeof DefaultSchemaView_SchemaCheckFragment>;
   projectType: ProjectType;
 }): CheckView {
-  const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
-  const changePages = useChangePageLoaders({ schemaCheckId: schemaCheck.id });
   const [selectedView, setSelectedView] = useState<string>('details');
+  const checkFragment = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
+  const sdl = useCheckSdl({
+    schemaCheckId: checkFragment.id,
+    pause: !SDL_TABS.has(selectedView),
+  });
+  const schemaCheck = withCheckSdl(checkFragment, sdl.data);
+  const changePages = useChangePageLoaders({ schemaCheckId: schemaCheck.id });
   const [scrollToLine, setScrollToLine] = useState<number | undefined>();
 
   const items: TabbedViewItem[] = [
@@ -773,10 +776,10 @@ function useDefaultSchemaView(props: {
     label: 'Public Schema',
     icon: FileDiffIcon,
     attrs: { 'data-testid': 'schema-view-btn' },
-    disabled: !schemaCheck.compositeSchemaSDL,
-    tooltip: schemaCheck.compositeSchemaSDL
-      ? undefined
-      : 'Composition did not succeed. No public schema SDL available.',
+    disabled: schemaCheck.hasSchemaCompositionErrors,
+    tooltip: schemaCheck.hasSchemaCompositionErrors
+      ? 'Composition did not succeed. No public schema SDL available.'
+      : undefined,
     content:
       schemaCheck.baseline?.publicSdl === schemaCheck.compositeSchemaSDL ? (
         <SDLSingleView
@@ -818,10 +821,10 @@ function useDefaultSchemaView(props: {
       label: 'Supergraph',
       icon: FileDiffIcon,
       attrs: { 'data-testid': 'supergraph-view-btn' },
-      disabled: !schemaCheck.supergraphSDL,
-      tooltip: schemaCheck.supergraphSDL
-        ? undefined
-        : 'Composition did not succeed. No Supergraph available.',
+      disabled: schemaCheck.hasSchemaCompositionErrors,
+      tooltip: schemaCheck.hasSchemaCompositionErrors
+        ? 'Composition did not succeed. No Supergraph available.'
+        : undefined,
       content:
         schemaCheck?.baseline?.supergraphSdl === schemaCheck.supergraphSDL ? (
           <SDLSingleView
@@ -885,13 +888,26 @@ function useDefaultSchemaView(props: {
   });
 
   return {
-    items,
+    items: items.map(item => withSdlState(item, sdl, missingSdlMessage)),
     value: selectedView,
     onValueChange: value => {
       setScrollToLine(undefined);
       setSelectedView(value);
     },
   };
+}
+
+function missingSdlMessage(
+  data: { compositeSchemaSDL?: string | null; supergraphSDL?: string | null },
+  tab: string,
+) {
+  if (tab === 'schema' && !data.compositeSchemaSDL) {
+    return 'Composition did not succeed. No public schema SDL available.';
+  }
+  if (tab === 'supergraph' && !data.supergraphSDL) {
+    return 'Composition did not succeed. No Supergraph available.';
+  }
+  return null;
 }
 
 const ContractCheckView_ContractCheckFragment = graphql(`
@@ -912,11 +928,8 @@ const ContractCheckView_ContractCheckFragment = graphql(`
     safeSchemaChangeGroups {
       ...PagedChanges_SafeChangeGroupFragment
     }
-    compositeSchemaSDL
-    supergraphSDL
+    hasSchemaCompositionErrors
     baseline {
-      publicSdl
-      supergraphSdl
       compositionErrors {
         message
       }
@@ -949,22 +962,28 @@ function useContractCheckView(props: {
   schemaCheck: FragmentType<typeof ContractCheckView_SchemaCheckFragment>;
   projectType: ProjectType;
 }): CheckView | null {
-  const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
+  const contractFragment = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
   const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
   const changePages = useChangePageLoaders({
     schemaCheckId: schemaCheck.id,
-    contractCheckId: contractCheck?.id,
+    contractCheckId: contractFragment?.id,
   });
 
   // Another contract starts on Details again, since a view can be disabled on one and not the other.
   const [selectedView, setSelectedView] = useResetState<string>(
     () => 'details',
-    [contractCheck?.id],
+    [contractFragment?.id],
   );
+  const sdl = useContractCheckSdl({
+    schemaCheckId: schemaCheck.id,
+    contractCheckId: contractFragment?.id,
+    pause: !SDL_TABS.has(selectedView),
+  });
 
-  if (!contractCheck) {
+  if (!contractFragment) {
     return null;
   }
+  const contractCheck = withContractCheckSdl(contractFragment, sdl.data);
 
   const items: TabbedViewItem[] = [
     {
@@ -1020,10 +1039,10 @@ function useContractCheckView(props: {
       value: 'schema',
       label: 'Public Schema',
       icon: FileDiffIcon,
-      disabled: !contractCheck.compositeSchemaSDL,
-      tooltip: contractCheck.compositeSchemaSDL
-        ? undefined
-        : 'Composition did not succeed. No public schema SDL available.',
+      disabled: contractCheck.hasSchemaCompositionErrors,
+      tooltip: contractCheck.hasSchemaCompositionErrors
+        ? 'Composition did not succeed. No public schema SDL available.'
+        : undefined,
       content:
         contractCheck?.baseline?.publicSdl === contractCheck.compositeSchemaSDL ? (
           <SDLSingleView
@@ -1065,10 +1084,10 @@ function useContractCheckView(props: {
       value: 'supergraph',
       label: 'Supergraph',
       icon: FileDiffIcon,
-      disabled: !contractCheck.supergraphSDL,
-      tooltip: contractCheck.supergraphSDL
-        ? undefined
-        : 'Composition did not succeed. No Supergraph available.',
+      disabled: contractCheck.hasSchemaCompositionErrors,
+      tooltip: contractCheck.hasSchemaCompositionErrors
+        ? 'Composition did not succeed. No Supergraph available.'
+        : undefined,
       content:
         contractCheck?.baseline?.supergraphSdl === contractCheck?.supergraphSDL ? (
           <SDLSingleView
@@ -1105,7 +1124,11 @@ function useContractCheckView(props: {
     });
   }
 
-  return { items, value: selectedView, onValueChange: setSelectedView };
+  return {
+    items: items.map(item => withSdlState(item, sdl, missingSdlMessage)),
+    value: selectedView,
+    onValueChange: setSelectedView,
+  };
 }
 
 const SchemaPolicyEditor_PolicyWarningsFragment = graphql(`

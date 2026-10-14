@@ -130,10 +130,7 @@ export function activeSchemaCheck(variables: { schemaCheckId: string }) {
           hasSchemaCompositionErrors: false,
           hasSchemaChanges: false,
           hasUnapprovedBreakingChanges: false,
-          schemaSDL: 'type Query { products: [String!]! }',
           baseline: null,
-          compositeSchemaSDL: null,
-          supergraphSDL: null,
           unapprovedBreakingSchemaChangeCount: 0,
           breakingSchemaChanges: null,
           safeSchemaChangeGroups: [],
@@ -437,6 +434,27 @@ export function safeChangesPage(variables: {
             },
           },
         ],
+      },
+    },
+  };
+}
+
+const PRODUCTS_SDL = 'type Query { products: [String!]! }';
+
+/** `CheckSdlQuery`: the SDLs a schema tab loads when it first opens. */
+export function checkSdl(variables: { schemaCheckId: string }) {
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'SuccessfulSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        schemaSDL: PRODUCTS_SDL,
+        baseline: null,
+        compositeSchemaSDL: PRODUCTS_SDL,
+        supergraphSDL: PRODUCTS_SDL,
       },
     },
   };

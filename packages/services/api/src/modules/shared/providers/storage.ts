@@ -505,7 +505,12 @@ export interface Storage {
   /**
    * Find schema check for a given ID and target.
    */
-  findSchemaCheck(input: { targetId: string; schemaCheckId: string }): Promise<SchemaCheck | null>;
+  findSchemaCheck(input: {
+    targetId: string;
+    schemaCheckId: string;
+    /** Skips reading the check's six SDLs; their fields come back empty. Defaults to true. */
+    withSDL?: boolean;
+  }): Promise<SchemaCheck | null>;
   /**
    * Retrieve paginated schema checks for a given target.
    */

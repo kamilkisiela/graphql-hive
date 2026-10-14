@@ -5,6 +5,7 @@ import {
   breakingSchemaCheck,
   breakingChangesPage,
   CHECKS,
+  checkSdl,
   checksFixtures,
   manyChangesSchemaCheck,
   policyFailedSchemaCheck,
@@ -559,5 +560,55 @@ describe('paged changes', () => {
       }),
     );
     await waitFor(() => expect(within(groupNav).getByText('2 / 3')).toBeTruthy());
+  });
+});
+
+describe('schema tabs', () => {
+  // The SDL viewer virtualizes with observers jsdom does not have; nothing here scrolls.
+  beforeEach(() => {
+    class NoopObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    }
+    vi.stubGlobal('IntersectionObserver', NoopObserver);
+    vi.stubGlobal('ResizeObserver', NoopObserver);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('loads the SDLs once, when a schema tab first opens', { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', activeSchemaCheck);
+    testClient.fixtures.set('CheckSdlQuery', (variables: Record<string, unknown>) =>
+      checkSdl(variables as { schemaCheckId: string }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-sdl`, { client: testClient });
+
+    const details = await screen.findByTestId('details-view-btn', {}, { timeout: 10_000 });
+    expect(testClient.requests('CheckSdlQuery')).toHaveLength(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('schema-view-btn'));
+    });
+    await waitFor(() => expect(screen.queryByText('Loading schema…')).toBeNull());
+    expect(screen.queryByText('The schema could not be loaded.')).toBeNull();
+    expect(testClient.requests('CheckSdlQuery').map(request => request.variables)).toEqual([
+      expect.objectContaining({ schemaCheckId: 'check-sdl' }),
+    ]);
+
+    // Back and forth again reads the SDLs from the cache.
+    await act(async () => {
+      fireEvent.click(details);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('supergraph-view-btn'));
+    });
+    await waitFor(() => expect(screen.queryByText('Loading schema…')).toBeNull());
+    expect(testClient.requests('CheckSdlQuery')).toHaveLength(1);
   });
 });
