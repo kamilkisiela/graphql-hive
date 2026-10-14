@@ -11,12 +11,16 @@ import {
   S3WriteMetric,
 } from '../../shared/providers/s3-writer';
 import {
+  type BatchCancelEvent,
   type BatchProcessedEvent,
   type BatchProcessEvent,
   type BatchProcessingErrorEvent,
 } from './persisted-document-ingester';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** How long a batch may take before the scheduler cancels it in the worker and fails the request. */
+export const PERSISTED_DOCUMENT_BATCH_TIMEOUT_MS = 50_000;
 
 type PendingTaskRecord = {
   resolve: (data: BatchProcessedEvent) => void;
@@ -58,7 +62,7 @@ export function deserializeWorkerError(error: SerializedWorkerError): Error {
 export class PersistedDocumentScheduler {
   private logger: Logger;
   private workers: Array<
-    (input: BatchProcessEvent['data']) => Promise<BatchProcessedEvent['data']>
+    (input: BatchProcessEvent['data'], signal: AbortSignal) => Promise<BatchProcessedEvent['data']>
   >;
 
   constructor(logger: Logger) {
@@ -124,27 +128,58 @@ export class PersistedDocumentScheduler {
 
     const { logger } = this;
 
-    return async function batchProcess(data: BatchProcessEvent['data']) {
+    return async function batchProcess(data: BatchProcessEvent['data'], signal: AbortSignal) {
+      const abortedByClient = () =>
+        setErrorSource(new Error('Request aborted by the client.'), 'client');
+
+      if (signal.aborted) {
+        throw abortedByClient();
+      }
+
       const id = crypto.randomUUID();
       const d = Promise.withResolvers<BatchProcessedEvent>();
-      const timeout = setTimeout(() => {
-        task.reject(
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+
+      const cleanup = () => {
+        clearTimeout(timeout);
+        signal.removeEventListener('abort', onAbort);
+      };
+
+      /**
+       * Fails the caller right away and tells the worker to stop the batch.
+       * The record stays in `tasks` so the worker's final message can still report the metrics of
+       * the cancelled batch; it is removed once that message arrives (or the worker exits).
+       */
+      const cancel = (reason: Error) => {
+        worker.postMessage({
+          event: 'CANCEL',
+          id,
+          reason: reason.message,
+        } satisfies BatchCancelEvent);
+        cleanup();
+        d.reject(reason);
+      };
+
+      const onAbort = () => cancel(abortedByClient());
+
+      timeout = setTimeout(() => {
+        cancel(
           setErrorSource(
             new Error('Timeout, worker did not respond within time.'),
             'persisted-documents-worker',
           ),
         );
-      }, 50_000);
+      }, PERSISTED_DOCUMENT_BATCH_TIMEOUT_MS);
 
       const task: PendingTaskRecord = {
         resolve: data => {
           tasks.delete(id);
-          clearTimeout(timeout);
+          cleanup();
           d.resolve(data);
         },
         reject: err => {
           tasks.delete(id);
-          clearTimeout(timeout);
+          cleanup();
           d.reject(err);
         },
         onMetrics(data) {
@@ -160,6 +195,7 @@ export class PersistedDocumentScheduler {
         },
       };
 
+      signal.addEventListener('abort', onAbort, { once: true });
       tasks.set(id, task);
       const time = process.hrtime();
 
@@ -183,14 +219,14 @@ export class PersistedDocumentScheduler {
   }
 
   @traceFn('PersistedDocumentScheduler.processBatch', {
-    initAttributes: data => ({
+    initAttributes: (data, _) => ({
       'hive.target.id': data.targetId,
       'hive.appDeployment.documentCount': data.documents.length,
       'hive.appDeployment.id': data.appDeployment.id,
       'hive.appDeployment.version': data.appDeployment.version,
     }),
   })
-  async processBatch(data: BatchProcessEvent['data']) {
-    return this.getRandomWorker()(data);
+  async processBatch(data: BatchProcessEvent['data'], signal: AbortSignal) {
+    return this.getRandomWorker()(data, signal);
   }
 }

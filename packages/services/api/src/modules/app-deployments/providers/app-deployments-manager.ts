@@ -137,18 +137,21 @@ export class AppDeploymentsManager {
     });
   }
 
-  async addDocumentsToAppDeployment(args: {
-    reference: GraphQLSchema.TargetReferenceInput | null;
-    appDeployment: {
-      name: string;
-      version: string;
-    };
-    documents: ReadonlyArray<{
-      hash: string;
-      body: string;
-    }>;
-  }) {
-    return this.internalAddDocumentsToAppDeployment(args).then(
+  async addDocumentsToAppDeployment(
+    args: {
+      reference: GraphQLSchema.TargetReferenceInput | null;
+      appDeployment: {
+        name: string;
+        version: string;
+      };
+      documents: ReadonlyArray<{
+        hash: string;
+        body: string;
+      }>;
+    },
+    signal: AbortSignal,
+  ) {
+    return this.internalAddDocumentsToAppDeployment(args, signal).then(
       result => {
         registryOperationOutcomeCount.inc({
           operation: 'persisted_document_upload',
@@ -176,17 +179,20 @@ export class AppDeploymentsManager {
     );
   }
 
-  private async internalAddDocumentsToAppDeployment(args: {
-    reference: GraphQLSchema.TargetReferenceInput | null;
-    appDeployment: {
-      name: string;
-      version: string;
-    };
-    documents: ReadonlyArray<{
-      hash: string;
-      body: string;
-    }>;
-  }) {
+  private async internalAddDocumentsToAppDeployment(
+    args: {
+      reference: GraphQLSchema.TargetReferenceInput | null;
+      appDeployment: {
+        name: string;
+        version: string;
+      };
+      documents: ReadonlyArray<{
+        hash: string;
+        body: string;
+      }>;
+    },
+    signal: AbortSignal,
+  ) {
     const selector = await this.idTranslator.resolveTargetReference({
       reference: args.reference,
     });
@@ -209,11 +215,14 @@ export class AppDeploymentsManager {
     const target = await this.targetManager.getTargetById(selector);
     const graph = await this.graphs.getDefaultGraphForTargetId(target.id);
 
-    return await this.appDeployments.addDocumentsToAppDeployment({
-      graph,
-      appDeployment: args.appDeployment,
-      operations: args.documents,
-    });
+    return await this.appDeployments.addDocumentsToAppDeployment(
+      {
+        graph,
+        appDeployment: args.appDeployment,
+        operations: args.documents,
+      },
+      signal,
+    );
   }
 
   async activateAppDeployment(args: {
