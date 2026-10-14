@@ -27,7 +27,7 @@ describe('migrateLegacyLaboratoryStorage', () => {
     expect(JSON.parse(localStorage.getItem(ENV)!)).toEqual({
       variables: { token: 'abc', retries: '3', debug: 'true', none: 'null' },
     });
-    expect(localStorage.getItem(OLD_ENV)).not.toBeNull();
+    expect(localStorage.getItem(OLD_ENV)).toBeNull();
   });
 
   it.each([
@@ -81,6 +81,25 @@ describe('migrateLegacyLaboratoryStorage', () => {
     migrateLegacyLaboratoryStorage();
 
     expect(localStorage.getItem(ENABLED)).toBe('false');
+  });
+
+  it('clears every key the GraphiQL tab left behind and keeps the rest', () => {
+    localStorage.setItem('hive:laboratory:type', 'graphiql');
+    localStorage.setItem('hive:laboratory:welcome-dialog-shown', 'true');
+    localStorage.setItem(OLD_ENABLED, 'true');
+    localStorage.setItem('hive:operation-abc', '{"query":"{ a }"}');
+    localStorage.setItem('graphiql:tabState', '{"tabs":[]}');
+    localStorage.setItem('graphiql:queries', '[]');
+    localStorage.setItem('hive:laboratory:operations', '[]');
+    localStorage.setItem('hive-theme', 'dark');
+
+    migrateLegacyLaboratoryStorage();
+
+    expect(dump()).toEqual([
+      ['hive-theme', 'dark'],
+      ['hive:laboratory:operations', '[]'],
+      [ENABLED, 'true'],
+    ]);
   });
 
   it('changes nothing on a second run', () => {

@@ -225,7 +225,7 @@ src/routes/target/alerts.tsx              the gate; activity: default range, loa
 src/routes/target/apps.tsx                loaderDeps on the sort, and on the settled search term; warm beside the gate
 src/routes/target/proposals.tsx           the gate; list and proposal warm + revalidate beside it, loaderDeps on the
                                           stage filter and on version + ts
-src/routes/target/laboratory.tsx          the gate alone
+src/routes/target/laboratory.ts           the gate alone
 src/lib/testing/urql.ts                   createTestClient on cacheOptions; fixtures/ and mocks/ beside it
 ```
 

@@ -10,13 +10,11 @@ import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Button } from '@/components/ui/primitives/button/button';
-import { Dialog } from '@/components/ui/primitives/overlays/dialog/dialog';
 import { ToggleGroup } from '@/components/ui/primitives/toggle-group/toggle-group';
 import { graphql, useFragment } from '@/gql';
 import { TargetEnvPlugin } from '@/laboratory/plugins/target-env';
-import { useLocalStorage, useSlugs, useToggle } from '@/lib/hooks';
+import { useSlugs, useToggle } from '@/lib/hooks';
 import { useCurrentOperationWithFetchingState } from '@/lib/hooks/laboratory/use-current-operation';
-import { TargetLaboratoryPageQuery } from '@/lib/hooks/laboratory/use-operation-collections-plugin';
 import { useOperationFromQueryString } from '@/lib/hooks/laboratory/useOperationFromQueryString';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { loadHistory, saveHistory } from '@/lib/laboratory-history-storage';
@@ -144,6 +142,7 @@ export const CreateCollectionMutation = graphql(`
         collection {
           id
           name
+          description
           operations(first: 100) {
             edges {
               cursor
@@ -202,7 +201,7 @@ const UpdateOperationMutation = graphql(`
   }
 `);
 
-const CreateOperationMutation = graphql(`
+export const CreateOperationMutation = graphql(`
   mutation LaboratoryCreateOperation(
     $selector: TargetSelectorInput!
     $input: CreateDocumentCollectionOperationInput!
@@ -223,10 +222,14 @@ const CreateOperationMutation = graphql(`
               cursor
               node {
                 id
-                operations {
+                operations(first: 100) {
                   edges {
                     node {
                       id
+                      name
+                      query
+                      variables
+                      headers
                     }
                     cursor
                   }
@@ -279,7 +282,7 @@ export const DeleteOperationMutation = graphql(`
               cursor
               node {
                 id
-                operations {
+                operations(first: 100) {
                   edges {
                     node {
                       id
@@ -695,11 +698,34 @@ function useLaboratoryState() {
   };
 }
 
-function LaboratoryPageContent(props: {
-  selectedOperationId?: string;
-  defaultLaboratoryTab: 'graphiql' | 'hive-laboratory';
-  onLaboratoryTabChange: (tab: 'graphiql' | 'hive-laboratory') => void;
-}) {
+const TargetLaboratoryPageQuery = graphql(`
+  query TargetLaboratoryPageQuery(
+    $organizationSlug: String!
+    $projectSlug: String!
+    $targetSlug: String!
+  ) {
+    target(
+      reference: {
+        bySelector: {
+          organizationSlug: $organizationSlug
+          projectSlug: $projectSlug
+          targetSlug: $targetSlug
+        }
+      }
+    ) {
+      id
+      graphqlEndpointUrl
+      latestSchemaVersion {
+        id
+        sdl
+      }
+      viewerCanModifyLaboratory
+    }
+    ...Laboratory_IsCDNEnabledFragment
+  }
+`);
+
+function LaboratoryPageContent() {
   const { organizationSlug, projectSlug, targetSlug } = useSlugs('target');
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
@@ -761,26 +787,6 @@ function LaboratoryPageContent(props: {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <Title>Laboratory</Title>
-              <div className="h-4 w-px bg-line" />
-              <ToggleGroup
-                aria-label="Laboratory version"
-                value={props.defaultLaboratoryTab}
-                onValueChange={value =>
-                  props.onLaboratoryTabChange(value as 'graphiql' | 'hive-laboratory')
-                }
-                options={[
-                  { value: 'graphiql', label: 'GraphiQL' },
-                  {
-                    value: 'hive-laboratory',
-                    label: (
-                      <>
-                        Hive Laboratory
-                        <span className="ml-1 size-2 rounded-full bg-accent" />
-                      </>
-                    ),
-                  },
-                ]}
-              />
             </div>
             <Subtitle>
               Explore your GraphQL schema and run queries against your GraphQL API.
@@ -857,48 +863,12 @@ function LaboratoryPageContent(props: {
   );
 }
 
-export function TargetLaboratoryPage(props: {
-  selectedOperationId: string | undefined;
-  defaultLaboratoryTab: 'graphiql' | 'hive-laboratory';
-  onLaboratoryTabChange: (tab: 'graphiql' | 'hive-laboratory') => void;
-}) {
-  const [isWelcomeDialogShown, setIsWelcomeDialogShown] = useLocalStorage(
-    'hive:laboratory:welcome-dialog-shown',
-    'false',
-  );
-
-  // Read once: the effect below marks it shown on the first render, so the dialog owns its own
-  // open state from then on.
-  const [welcomeOpen, setWelcomeOpen] = useState(isWelcomeDialogShown === 'false');
-
-  useEffect(() => {
-    if (isWelcomeDialogShown === 'false') {
-      setIsWelcomeDialogShown('true');
-    }
-  }, [isWelcomeDialogShown]);
-
+export function TargetLaboratoryPage() {
   return (
     <>
       <Meta title="Schema laboratory" />
-      <Dialog
-        open={welcomeOpen}
-        onOpenChange={setWelcomeOpen}
-        width="sm"
-        title="Welcome to new Hive Laboratory"
-        description="Hive Laboratory is a new way to explore your GraphQL schema and run queries against your GraphQL API."
-        footer={
-          <Button onSurface="raised" onClick={() => setWelcomeOpen(false)}>
-            Get started
-          </Button>
-        }
-      >
-        <p className="text-sm text-fg-default">
-          You always can switch to the old GraphiQL based Laboratory by using the tab switcher in
-          the top left cornder.
-        </p>
-      </Dialog>
       <LayoutContent className="flex h-(--content-height) flex-col pb-0">
-        <LaboratoryPageContent {...props} />
+        <LaboratoryPageContent />
       </LayoutContent>
     </>
   );

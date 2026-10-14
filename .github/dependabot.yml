@@ -11,10 +11,6 @@ updates:
     schedule:
       interval: 'daily'
     groups:
-      graphiql:
-        patterns:
-          - 'graphiql'
-          - '@graphiql/*'
       yoga:
         patterns:
           - 'envelop'

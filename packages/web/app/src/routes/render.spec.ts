@@ -98,8 +98,6 @@ const pages: Array<{ url: string; current: string }> = [
 describe('chrome at every page', () => {
   beforeEach(() => {
     client.current = createTestClient(layoutFixtures());
-    // The laboratory greets a first visit with a modal, which hides the chrome from role queries.
-    localStorage.setItem('hive:laboratory:welcome-dialog-shown', 'true');
   });
 
   // The header is owned by the layout route, so moving between sibling pages keeps the same DOM
@@ -773,10 +771,6 @@ describe('permission gates', () => {
     [`${TARGET}/proposals/new`, 'viewerCanViewSchemaProposals'],
     [`${TARGET}/proposals/proposal-1`, 'viewerCanViewSchemaProposals'],
   ] as const;
-
-  beforeEach(() => {
-    localStorage.setItem('hive:laboratory:welcome-dialog-shown', 'true');
-  });
 
   it.each(gates)(
     '%s sends a viewer without %s to the target, replacing the entry',

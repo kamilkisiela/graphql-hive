@@ -95,16 +95,6 @@ import {
   type CreateTargetFormValues,
 } from '@/components/target/create-target-form';
 import {
-  CollectionForm,
-  CollectionFormSchema,
-  type CollectionFormValues,
-} from '@/components/target/laboratory/collection-form';
-import {
-  OperationForm,
-  OperationFormSchema,
-  type OperationFormValues,
-} from '@/components/target/laboratory/operation-form';
-import {
   AppDeploymentProtectionForm,
   AppDeploymentProtectionFormSchema,
   type AppDeploymentProtectionFormValues,
@@ -154,7 +144,6 @@ import {
   ProjectType,
   TokenExpirationPeriod,
 } from '@/gql/graphql';
-import type { DocumentCollectionOperation } from '@/lib/hooks/laboratory/use-collections';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 export const nav: NavPath = 'Primitives/FormControls/Form/Component Examples';
@@ -191,16 +180,6 @@ const ENTRIES = [
   {
     source: 'components/target/create-target-form.tsx',
     what: 'New target, in a dialog',
-    coveredBy: 'Create',
-  },
-  {
-    source: 'components/target/laboratory/collection-form.tsx',
-    what: 'New or edited collection, in a dialog',
-    coveredBy: 'Create',
-  },
-  {
-    source: 'components/target/laboratory/operation-form.tsx',
-    what: 'New or edited operation, in a dialog; creating also picks the collection',
     coveredBy: 'Create',
   },
   {
@@ -562,58 +541,6 @@ function CreateTargetExample() {
   );
 }
 
-function CollectionExample() {
-  const [submitted, setSubmitted] = useState<CollectionFormValues | null>(null);
-  const form = useForm<CollectionFormValues>({
-    mode: 'onChange',
-    resolver: zodResolver(CollectionFormSchema),
-    defaultValues: { name: '', description: '' },
-  });
-  return (
-    <CallSite
-      source="components/target/laboratory/create-collection-modal.tsx"
-      origin="base"
-      note="In a dialog, submitted from the footer by the form's id."
-    >
-      <Raised width="dialog-lg">
-        <CollectionForm form={form} onSubmit={setSubmitted} />
-        <Submitted values={submitted} />
-      </Raised>
-    </CallSite>
-  );
-}
-
-const COLLECTIONS = [
-  { id: 'c1', name: 'Checkout' },
-  { id: 'c2', name: 'Smoke tests' },
-] as unknown as DocumentCollectionOperation[];
-
-function OperationExample() {
-  const [submitted, setSubmitted] = useState<OperationFormValues | null>(null);
-  const form = useForm<OperationFormValues>({
-    mode: 'onChange',
-    resolver: zodResolver(OperationFormSchema),
-    defaultValues: { name: '', collectionId: '' },
-  });
-  return (
-    <CallSite
-      source="components/target/laboratory/create-operation-modal.tsx, edit-operation-modal.tsx"
-      origin="base"
-      note="In a dialog. Creating picks the collection too; editing passes no collections and only renames."
-    >
-      <Raised width="dialog-lg">
-        <OperationForm
-          form={form}
-          onSubmit={setSubmitted}
-          id="preview-operation-form"
-          collections={COLLECTIONS}
-        />
-        <Submitted values={submitted} />
-      </Raised>
-    </CallSite>
-  );
-}
-
 export const Create = createPreview({
   label: 'Create',
   render: () => (
@@ -621,8 +548,6 @@ export const Create = createPreview({
       <CreateOrganizationExample />
       <CreateProjectExample />
       <CreateTargetExample />
-      <CollectionExample />
-      <OperationExample />
     </div>
   ),
 });

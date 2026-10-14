@@ -30,7 +30,6 @@ const examples: Record<string, string> = {
   '/anonymous/auth/callback/$provider': '/auth/callback/github',
   '/anonymous/auth/verify-email': '/auth/verify-email',
   '/authenticated/': '/',
-  '/authenticated/dev': '/dev',
   '/authenticated/manage': '/manage',
   '/authenticated/org/new': '/org/new',
   '/authenticated/native-composition-compatibility-report/$projectId':
@@ -125,7 +124,6 @@ describe('route tree', () => {
         /authenticated,
         /authenticated/,
         /authenticated/action/transfer/$organizationSlug/$code,
-        /authenticated/dev,
         /authenticated/manage,
         /authenticated/native-composition-compatibility-report/$projectId,
         /authenticated/org/new,

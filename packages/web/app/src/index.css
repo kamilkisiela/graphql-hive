@@ -461,10 +461,6 @@
   }
 }
 
-.hive-badge-is-changed:after {
-  @apply absolute right-2 size-1.5 rounded-full border border-b-accent bg-accent-muted content-[''];
-}
-
 /*
  * Thin, muted scrollbar. The standard properties cover Firefox, Chromium 121+ and Safari 18.2+;
  * the -webkit- rules cover older Chromium and Safari, which ignore the standard ones. Browsers

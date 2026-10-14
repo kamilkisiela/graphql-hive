@@ -135,10 +135,12 @@ test.describe('Laboratory > Preflight', () => {
   test('carries the GraphiQL env and toggle over on first visit', async ({ page, laboratory }) => {
     await project.updatePreflightScript({ sourceCode: `console.log('legacy');` });
     await page.addInitScript(() => {
+      window.localStorage.setItem('hive:laboratory:type', 'graphiql');
       window.localStorage.setItem('hive:laboratory:environment', '{"foo":"bar","count":2}');
       window.localStorage.setItem('hive:laboratory:isPreflightScriptEnabled', 'true');
     });
     await openWithOperation(laboratory);
+    expect(await page.evaluate(() => localStorage.getItem('hive:laboratory:type'))).toBeNull();
 
     await expect(page.getByRole('button', { name: 'Disable preflight' })).toBeVisible();
     await laboratory.openEnvTab();

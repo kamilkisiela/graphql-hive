@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { useThemeMenuEntry } from '@/components/theme/theme-switcher';
-import { GraphQLIcon } from '@/components/ui/brand-icon';
 import { Avatar } from '@/components/ui/primitives/avatar/avatar';
 import { Menu } from '@/components/ui/primitives/floating/menu/menu';
 import { AlertDialog } from '@/components/ui/primitives/overlays/alert-dialog/alert-dialog';
@@ -217,11 +216,6 @@ export function UserMenu({ withOrganization = true }: { withOrganization?: boole
                       label: 'Manage Instance',
                       icon: TrendingUpIcon,
                       render: <Link to="/manage" />,
-                    },
-                    env.nodeEnv === 'development' && {
-                      label: 'Dev GraphiQL',
-                      icon: GraphQLIcon,
-                      render: <Link to="/dev" />,
                     },
                   ],
                   [
