@@ -134,7 +134,7 @@ export class PersistedDocumentScheduler {
             'persisted-documents-worker',
           ),
         );
-      }, 50_000);
+      }, 20_000);
 
       const task: PendingTaskRecord = {
         resolve: data => {
