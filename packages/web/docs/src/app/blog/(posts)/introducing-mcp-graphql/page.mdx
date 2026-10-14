@@ -1,0 +1,97 @@
+---
+title: 'Introducing: GraphQL MCP server'
+authors: blurrah
+tags: [graphql, mcp]
+date: 2025-05-26
+description:
+  A new MCP server that connects AI models to GraphQL endpoints with full schema awareness and dynamic querying capabilities.
+---
+
+TL;DR
+
+- The GraphQL MCP server allows AI models to interact with **any** GraphQL server and is fully open source and MIT licensed
+- It allows introspection of both local and remote schema's
+- It supports both query and mutation operations, where mutations are opt-in
+- It uses a single tool call for complete flexibility in how you want to interact with your schema
+- Future updates will also allow for specific tool generation for an operation and persisted documents support
+- You can access it at [github.com/blurrah/mcp-graphql](https://github.com/blurrah/mcp-graphql)
+
+------
+Most MCP servers force you to create narrow, specific tools for each API endpoint. Want to query user data? One tool. Need to fetch posts? Another tool. Want to combine users and their posts? You're out of luck unless you anticipated that exact use case.
+
+This approach means:
+- Developers spend time building tools for every possible interaction
+- AI interactions feel rigid and constrained
+- Users hit walls when their requests don't match predefined tools
+- Complex data relationships require multiple tool calls and manual composition
+
+The GraphQL MCP server connects AI models directly to your GraphQL endpoints with full schema awareness. Rather than constraining interactions to predefined tools, it lets AI compose any valid GraphQL operation based on your schema and user requests.
+
+It does this by allowing AI applications to introspect a local or remote schema and use it as extra context to execute queries and/or mutations on your GraphQL server. There's a single query tool call that allows any kind of operation with any kind of variables to be filled in by the model.
+
+## GraphQL and MCP
+
+GraphQL and MCP are perfectly suited for eachother. Where most MCP servers create specific, narrow tools, with GraphQL the AI gets direct access to the schema and can compose any valid GraphQL operation on the spot.
+
+This means:
+- No need to anticipate every possible use case upfront
+- The AI can combine data in ways you never explicitly programmed
+- Users can ask natural questions without being limited to your predefined interface
+
+In many ways this is exactly what MCP is built for rather than just exposing individual API endpoints.
+
+This way of allowing any kind of operation works great with models as they're quite adept at reading GraphQL schema SDL's and creating operations based on that information. Schema's are fully typed and often well documented, leading to a lot of useful context for an AI to work with.
+
+This also opens up some interesting testing possibilities. Unlike frontend applications that follow predictable query patterns, the AI can explore your entire schema space - making deeply nested queries, testing edge cases, or trying operations that might cause performance issues. You can even prompt it to deliberately search for recursive query vulnerabilities or operations that might cause errors.
+
+## How it works
+- `mcp-graphql` is available as an NPM package
+- You can download and run it using `npx mcp-graphql` where you can use certain environment variables
+- Example for Claude Desktop:
+```json
+{
+    "mcpServers": {
+        "mcp-graphql": {
+            "command": "npx",
+            "args": ["mcp-graphql"],
+            "env": {
+                "ENDPOINT": "http://localhost:3000/graphql"
+            }
+        }
+    }
+}
+```
+
+### What it looks like in practice
+
+Once set up, you can ask natural questions like "Show me users who posted in the last week and their most popular posts." The AI reads your GraphQL schema, understands the relationships between users and posts, and composes something like:
+
+```graphql
+query RecentActiveUsers {
+  users(where: { posts: { some: { createdAt: { gte: "2025-01-19" } } } }) {
+    name
+    email
+    posts(orderBy: { likes: desc }, take: 3, where: { createdAt: { gte: "2025-01-19" } }) {
+      title
+      likes
+      createdAt
+    }
+  }
+}
+```
+
+With traditional MCP servers, this would require separate tools for users, posts, filtering, and sorting - if you even anticipated this exact combination.
+
+## The future
+
+There's a few neat things coming up for the server.
+
+### Create tool calls for specific operations
+
+We're building support for outputting specific operations as individual tool calls.
+This gives you more control on queries and mutations you'd like to output and also work with large schema's that can exceed context sizes for smaller models.
+
+You can track progress for it on [this PR](https://github.com/blurrah/mcp-graphql/pull/3)
+
+Will also support persisted documents in the future allowing you to work with production API's that lock down calls
+
