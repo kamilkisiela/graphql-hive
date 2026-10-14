@@ -20,7 +20,7 @@ describe('collectSchemaCoordinates', () => {
       typeInfo: new TypeInfo(schema),
     });
 
-    expect(Array.from(result)).toEqual(['Query.hello']);
+    expect(Array.from(result)).toEqual(['Query.hello', 'String']);
   });
   test('two primitive field schema coordinates', () => {
     const schema = buildSchema(/* GraphQL */ `
@@ -42,7 +42,7 @@ describe('collectSchemaCoordinates', () => {
       typeInfo: new TypeInfo(schema),
     });
 
-    expect(Array.from(result)).toEqual(['Query.hello', 'Query.hi']);
+    expect(Array.from(result)).toEqual(['Query.hello', 'String', 'Query.hi']);
   });
   test('primitive field with arguments schema coordinates', () => {
     const schema = buildSchema(/* GraphQL */ `
@@ -63,9 +63,9 @@ describe('collectSchemaCoordinates', () => {
     });
     expect(Array.from(result)).toEqual([
       'Query.hello',
+      'String',
       'Query.hello.message!',
       'Query.hello.message',
-      'String',
     ]);
   });
 
@@ -126,7 +126,7 @@ describe('collectSchemaCoordinates', () => {
       variables: null,
       typeInfo: new TypeInfo(schema),
     });
-    expect(Array.from(result)).toEqual(['Query.node', 'Node.id']);
+    expect(Array.from(result)).toEqual(['Query.node', 'Node.id', 'ID']);
   });
   test('collected fields contain exact resolutions on inline fragment spread', () => {
     const schema = buildSchema(/* GraphQL */ `
@@ -162,7 +162,7 @@ describe('collectSchemaCoordinates', () => {
       variables: null,
       typeInfo: new TypeInfo(schema),
     });
-    expect(Array.from(result).sort()).toEqual(['Query.node', 'Node.id', 'User.id'].sort());
+    expect(Array.from(result).sort()).toEqual(['Query.node', 'Node.id', 'User.id', 'ID'].sort());
   });
 
   test('custom scalar as argument', () => {
@@ -184,7 +184,32 @@ describe('collectSchemaCoordinates', () => {
       typeInfo: new TypeInfo(schema),
     });
     expect(Array.from(result).sort()).toEqual(
-      ['Query.random', 'Query.random.json', 'Query.random.json!', 'JSON'].sort(),
+      ['Query.random', 'Query.random.json', 'Query.random.json!', 'JSON', 'String'].sort(),
+    );
+  });
+
+  test('custom and built-in scalars as field return type', () => {
+    const schema = buildSchema(/* GraphQL */ `
+      type Query {
+        createdAt: DateTime!
+        name: String
+      }
+      scalar DateTime
+    `);
+    const result = collectSchemaCoordinates({
+      documentNode: parse(/* GraphQL */ `
+        query {
+          createdAt
+          name
+        }
+      `),
+      schema,
+      processVariables: false,
+      variables: null,
+      typeInfo: new TypeInfo(schema),
+    });
+    expect(Array.from(result).sort()).toEqual(
+      ['Query.createdAt', 'Query.name', 'DateTime', 'String'].sort(),
     );
   });
 
@@ -219,6 +244,7 @@ describe('collectSchemaCoordinates', () => {
         'I.json',
         'I.json!',
         'JSON',
+        'String',
       ].sort(),
     );
   });
@@ -327,7 +353,7 @@ describe('collectSchemaCoordinates', () => {
       variables: null,
       typeInfo: new TypeInfo(schema),
     });
-    expect(Array.from(result).sort()).toEqual(['Query.random'].sort());
+    expect(Array.from(result).sort()).toEqual(['Query.random', 'String'].sort());
   });
 
   test('unused nullable input field', () => {
@@ -645,6 +671,7 @@ describe('collectSchemaCoordinates', () => {
         'FilterInput.pagination',
         'FilterInput.pagination!',
         'FilterInput.type',
+        'ID',
         'Int',
         'PaginationInput.limit',
         'Project.id',
@@ -655,6 +682,7 @@ describe('collectSchemaCoordinates', () => {
         'Query.projects',
         'Query.projects.filter',
         'Query.projects.filter!',
+        'String',
       ].sort(),
     );
   });

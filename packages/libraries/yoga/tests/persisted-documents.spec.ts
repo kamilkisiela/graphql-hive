@@ -562,7 +562,7 @@ test('usage reporting for persisted document', async () => {
     ace78a32bbf8a79071356e5d5b13c5c83baf4e14: {
       operation: '{hi}',
       operationName: 'anonymous',
-      fields: ['Query.hi'],
+      fields: ['Query.hi', 'String'],
     },
   });
 });
@@ -666,6 +666,7 @@ test('usage reporting for persisted document (subscription)', async () => {
           74cf03b67c3846231d04927b02e1fca45e727223: {
             fields: [
               Subscription.hi,
+              String,
             ],
             operation: subscription{hi},
             operationName: anonymous,
@@ -814,6 +815,7 @@ test('usage reporting with batch execution and persisted documents', async () =>
       07188723c7bd37a812cb478cc980f83fe5b4026c: {
         fields: [
           Query.a,
+          String,
         ],
         operation: {a},
         operationName: anonymous,
@@ -821,6 +823,7 @@ test('usage reporting with batch execution and persisted documents', async () =>
       e8571e61911eea36db5ef7a3ed222aacb0cd5ba1: {
         fields: [
           Query.b,
+          String,
         ],
         operation: {b},
         operationName: anonymous,

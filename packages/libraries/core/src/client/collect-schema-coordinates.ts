@@ -217,9 +217,12 @@ export function collectSchemaCoordinates(args: {
         // Deleting an enum value that is used,
         // should be a breaking change
         // as it changes the output of the field.
+        // Scalars are collected for the same reason.
         const fieldType = getNamedType(field.type);
         if (fieldType instanceof GraphQLEnumType) {
           markEntireTypeAsUsed(fieldType);
+        } else if (isScalarType(fieldType)) {
+          markAsUsed(makeId(fieldType.name));
         }
       },
       VariableDefinition(node) {
