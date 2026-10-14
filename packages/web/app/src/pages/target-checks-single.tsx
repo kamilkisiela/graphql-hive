@@ -19,12 +19,13 @@ import { useMutation, useQuery } from 'urql';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { ServiceFilterButton } from '@/components/target/checks/service-filter-button';
 import {
-  ChangesBlock,
   CompositionErrorsList,
   CompositionErrorsSection,
   labelize,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { PagedBreakingChanges, SafeChangeGroups } from '@/components/target/history/paged-changes';
+import { useChangePageLoaders } from '@/components/target/checks/change-pages';
 import { CopyText } from '@/components/ui/copy-text';
 import { DownloadButton } from '@/components/ui/diff-editor';
 import { CodeScrollArea, File } from '@/components/ui/diffs';
@@ -568,19 +569,17 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
         ...CompositionErrorsSection_SchemaErrorConnection
       }
     }
-    breakingSchemaChanges {
+    hasSchemaChanges
+    breakingSchemaChanges(first: 50) {
+      totalCount
       edges {
         node {
           ...ChangesBlock_SchemaChangeWithUsageFragment
         }
       }
     }
-    safeSchemaChanges {
-      edges {
-        node {
-          ...ChangesBlock_SchemaChangeFragment
-        }
-      }
+    safeSchemaChangeGroups {
+      ...PagedChanges_SafeChangeGroupFragment
     }
     schemaPolicyWarnings {
       ...SchemaPolicyEditor_PolicyWarningsFragment
@@ -630,6 +629,7 @@ function useDefaultSchemaView(props: {
   projectType: ProjectType;
 }): CheckView {
   const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
+  const changePages = useChangePageLoaders({ schemaCheckId: schemaCheck.id });
   const [selectedView, setSelectedView] = useState<string>('details');
   const [scrollToLine, setScrollToLine] = useState<number | undefined>();
 
@@ -642,8 +642,7 @@ function useDefaultSchemaView(props: {
       content: (
         <div className="p-5">
           {!schemaCheck.schemaPolicyWarnings?.edges?.length &&
-            !schemaCheck.safeSchemaChanges?.edges?.length &&
-            !schemaCheck.breakingSchemaChanges?.edges?.length &&
+            !schemaCheck.hasSchemaChanges &&
             !schemaCheck.schemaPolicyErrors?.edges?.length &&
             !schemaCheck.hasSchemaCompositionErrors &&
             !schemaCheck.baseline?.compositionErrors?.length && <NoGraphChanges />}
@@ -657,22 +656,26 @@ function useDefaultSchemaView(props: {
           {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.compositionErrors && (
             <CompositionErrorsSection compositionErrors={schemaCheck.compositionErrors} />
           )}
-          {schemaCheck.breakingSchemaChanges?.edges.length ? (
+          {schemaCheck.breakingSchemaChanges?.totalCount ? (
             <div className="mb-5">
-              <ChangesBlock
+              <PagedBreakingChanges
                 schemaCheckId={schemaCheck.id}
                 title={<BreakingChangesTitle />}
-                changesWithUsage={schemaCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
+                firstPage={schemaCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
+                totalCount={schemaCheck.breakingSchemaChanges.totalCount}
+                loadPage={changePages.loadBreakingPage}
+                resetKey={schemaCheck.id}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
           ) : null}
-          {schemaCheck.safeSchemaChanges ? (
+          {schemaCheck.safeSchemaChangeGroups.length ? (
             <div className="mb-5">
-              <ChangesBlock
+              <SafeChangeGroups
                 schemaCheckId={schemaCheck.id}
-                title="Safe Changes"
-                changes={schemaCheck.safeSchemaChanges.edges.map(edge => edge.node)}
+                groups={schemaCheck.safeSchemaChangeGroups}
+                loadPage={changePages.loadSafePage}
+                resetKey={schemaCheck.id}
               />
             </div>
           ) : null}
@@ -897,19 +900,17 @@ const ContractCheckView_ContractCheckFragment = graphql(`
     schemaCompositionErrors {
       ...CompositionErrorsSection_SchemaErrorConnection
     }
-    breakingSchemaChanges {
+    hasSchemaChanges
+    breakingSchemaChanges(first: 50) {
+      totalCount
       edges {
         node {
           ...ChangesBlock_SchemaChangeWithUsageFragment
         }
       }
     }
-    safeSchemaChanges {
-      edges {
-        node {
-          ...ChangesBlock_SchemaChangeFragment
-        }
-      }
+    safeSchemaChangeGroups {
+      ...PagedChanges_SafeChangeGroupFragment
     }
     compositeSchemaSDL
     supergraphSDL
@@ -950,6 +951,10 @@ function useContractCheckView(props: {
 }): CheckView | null {
   const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
   const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
+  const changePages = useChangePageLoaders({
+    schemaCheckId: schemaCheck.id,
+    contractCheckId: contractCheck?.id,
+  });
 
   // Another contract starts on Details again, since a view can be disabled on one and not the other.
   const [selectedView, setSelectedView] = useResetState<string>(
@@ -978,27 +983,30 @@ function useContractCheckView(props: {
           {contractCheck.schemaCompositionErrors && (
             <CompositionErrorsSection compositionErrors={contractCheck.schemaCompositionErrors} />
           )}
-          {contractCheck.breakingSchemaChanges?.edges.length && (
+          {contractCheck.breakingSchemaChanges?.totalCount ? (
             <div className="mb-2">
-              <ChangesBlock
+              <PagedBreakingChanges
                 schemaCheckId={schemaCheck.id}
                 title={<BreakingChangesTitle />}
-                changesWithUsage={contractCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
+                firstPage={contractCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
+                totalCount={contractCheck.breakingSchemaChanges.totalCount}
+                loadPage={changePages.loadBreakingPage}
+                resetKey={contractCheck.id}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
-          )}
-          {contractCheck.safeSchemaChanges && (
+          ) : null}
+          {contractCheck.safeSchemaChangeGroups.length ? (
             <div className="mb-2">
-              <ChangesBlock
+              <SafeChangeGroups
                 schemaCheckId={schemaCheck.id}
-                title="Safe Changes"
-                changes={contractCheck.safeSchemaChanges.edges.map(edge => edge.node)}
+                groups={contractCheck.safeSchemaChangeGroups}
+                loadPage={changePages.loadSafePage}
+                resetKey={contractCheck.id}
               />
             </div>
-          )}
-          {!contractCheck.breakingSchemaChanges &&
-          !contractCheck.safeSchemaChanges &&
+          ) : null}
+          {!contractCheck.hasSchemaChanges &&
           !contractCheck.schemaCompositionErrors &&
           !contractCheck.baseline?.compositionErrors?.length ? (
             <NoGraphChanges />
@@ -1189,16 +1197,7 @@ const SchemaChecksView_SchemaCheckFragment = graphql(`
               }
             }
           }
-          breakingSchemaChanges {
-            edges {
-              node {
-                isSafeBasedOnUsage
-                approval {
-                  __typename
-                }
-              }
-            }
-          }
+          unapprovedBreakingSchemaChangeCount
           baseline {
             compositionErrors {
               message
@@ -1328,9 +1327,7 @@ function contractFailure(check: {
   hasSchemaCompositionErrors: boolean;
   hasUnapprovedBreakingChanges: boolean;
   schemaCompositionErrors: { edges: ReadonlyArray<unknown> } | null;
-  breakingSchemaChanges: {
-    edges: ReadonlyArray<{ node: { isSafeBasedOnUsage: boolean; approval: unknown } }>;
-  } | null;
+  unapprovedBreakingSchemaChangeCount: number;
   baseline: { compositionErrors: ReadonlyArray<unknown> | null } | null;
 }): { reason: string; detail?: string } | null {
   if (check.hasSchemaCompositionErrors) {
@@ -1341,10 +1338,7 @@ function contractFailure(check: {
     };
   }
   if (check.hasUnapprovedBreakingChanges) {
-    const count =
-      check.breakingSchemaChanges?.edges.filter(
-        edge => edge.node.approval == null && !edge.node.isSafeBasedOnUsage,
-      ).length ?? 0;
+    const count = check.unapprovedBreakingSchemaChangeCount;
     return {
       reason: 'Unapproved breaking changes!',
       detail: count ? formatCount(count, 'breaking change') : undefined,
@@ -1445,16 +1439,7 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
       }
     }
     hasSchemaCompositionErrors
-    breakingSchemaChanges {
-      edges {
-        node {
-          isSafeBasedOnUsage
-          approval {
-            __typename
-          }
-        }
-      }
-    }
+    unapprovedBreakingSchemaChangeCount
     schemaPolicyErrors {
       edges {
         node {
@@ -1491,16 +1476,11 @@ export const ActiveSchemaCheckQuery = graphql(`
 /** What made a check fail, in the order the page lists them. */
 function failureReasons(check: {
   hasSchemaCompositionErrors: boolean;
-  breakingSchemaChanges: {
-    edges: ReadonlyArray<{ node: { isSafeBasedOnUsage: boolean; approval: unknown } }>;
-  } | null;
+  unapprovedBreakingSchemaChangeCount: number;
   schemaPolicyErrors: { edges: ReadonlyArray<unknown> } | null;
   contractChecks: { edges: ReadonlyArray<{ node: { isSuccess: boolean } }> } | null;
 }) {
-  const unapproved =
-    check.breakingSchemaChanges?.edges.filter(
-      edge => edge.node.approval == null && !edge.node.isSafeBasedOnUsage,
-    ).length ?? 0;
+  const unapproved = check.unapprovedBreakingSchemaChangeCount;
   const policyErrors = check.schemaPolicyErrors?.edges.length ?? 0;
   const failedContracts =
     check.contractChecks?.edges.filter(edge => !edge.node.isSuccess).length ?? 0;

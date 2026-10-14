@@ -3,9 +3,12 @@ import {
   activeSchemaCheck,
   BREAKING_PERIOD,
   breakingSchemaCheck,
+  breakingChangesPage,
   CHECKS,
   checksFixtures,
+  manyChangesSchemaCheck,
   policyFailedSchemaCheck,
+  safeChangesPage,
   SERVICES,
 } from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
@@ -13,7 +16,7 @@ import { renderAtUrl } from '@/lib/testing/router';
 import { createTestClient } from '@/lib/testing/urql';
 import { createAppRouter } from '@/router';
 import { createMemoryHistory } from '@tanstack/react-router';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 
 // The tree imports every page; these stand in for what cannot load under jsdom.
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
@@ -450,4 +453,111 @@ describe('failed check status', () => {
       expect(screen.getByLabelText('Schema policy errors.')).toBeTruthy();
     },
   );
+});
+
+describe('paged changes', () => {
+  function pagedClient() {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        manyChangesSchemaCheck(variables as { schemaCheckId: string }),
+    );
+    testClient.fixtures.set('CheckBreakingChangesPageQuery', (variables: Record<string, unknown>) =>
+      breakingChangesPage(variables as { schemaCheckId: string; offset: number }),
+    );
+    testClient.fixtures.set('CheckSafeChangesPageQuery', (variables: Record<string, unknown>) =>
+      safeChangesPage(variables as { schemaCheckId: string; kind: string; offset: number }),
+    );
+    return testClient;
+  }
+
+  const change = (name: string) => screen.queryByRole('button', { name: new RegExp(`${name}$`) });
+
+  async function next(nav: HTMLElement) {
+    await act(async () => {
+      fireEvent.click(within(nav).getByRole('button', { name: 'Next page' }));
+    });
+  }
+
+  it(
+    'pages breaking changes and takes the unapproved count from the API',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = pagedClient();
+      renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+      await screen.findByText('120 unapproved breaking changes', {}, { timeout: 10_000 });
+      const [breakingNav] = screen.getAllByRole('navigation', { name: 'Pagination' });
+      expect(within(breakingNav).getByText('1 / 3')).toBeTruthy();
+      expect(change('StressType_0')).toBeTruthy();
+
+      await next(breakingNav);
+
+      await waitFor(() => expect(change('StressType_50')).toBeTruthy());
+      expect(change('StressType_0')).toBeNull();
+      expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(1);
+      expect(testClient.requests('CheckBreakingChangesPageQuery')[0].variables).toMatchObject({
+        offset: 50,
+      });
+
+      // A page already seen comes from memory.
+      await act(async () => {
+        fireEvent.click(within(breakingNav).getByRole('button', { name: 'Previous page' }));
+      });
+      await waitFor(() => expect(change('StressType_0')).toBeTruthy());
+      expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(1);
+    },
+  );
+
+  it('collapses an expanded change when the page moves on', { timeout: 30_000 }, async () => {
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: pagedClient() });
+    const first = await screen.findByRole(
+      'button',
+      { name: /StressType_0$/ },
+      { timeout: 10_000 },
+    );
+    await act(async () => {
+      fireEvent.click(first);
+    });
+    expect(first.getAttribute('aria-expanded')).toBe('true');
+
+    await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
+
+    // The change now first on the page is another one, so it starts closed.
+    const firstOfNextPage = await screen.findByRole('button', { name: /StressType_50$/ });
+    expect(firstOfNextPage.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('groups safe changes by kind and pages a long group', { timeout: 30_000 }, async () => {
+    const testClient = pagedClient();
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+    await screen.findByText('Safe Changes', {}, { timeout: 10_000 });
+    const groupTrigger = (label: string) => screen.getByRole('button', { name: new RegExp(label) });
+    expect(groupTrigger('Type added').textContent).toContain('2');
+    expect(groupTrigger('Type description changed').textContent).toContain('120');
+
+    // A group of fewer than 50 has no pagination; only the breaking list's bar is up.
+    await act(async () => {
+      fireEvent.click(groupTrigger('Type added'));
+    });
+    expect(screen.getAllByRole('navigation', { name: 'Pagination' })).toHaveLength(1);
+
+    await act(async () => {
+      fireEvent.click(groupTrigger('Type description changed'));
+    });
+    const groupNav = (await screen.findAllByRole('navigation', { name: 'Pagination' }))[1];
+    expect(within(groupNav).getByText('1 / 3')).toBeTruthy();
+
+    await next(groupNav);
+
+    await waitFor(() =>
+      expect(testClient.requests('CheckSafeChangesPageQuery')[0]?.variables).toMatchObject({
+        kind: 'TYPE_DESCRIPTION_CHANGED',
+        offset: 50,
+      }),
+    );
+    await waitFor(() => expect(within(groupNav).getByText('2 / 3')).toBeTruthy());
+  });
 });

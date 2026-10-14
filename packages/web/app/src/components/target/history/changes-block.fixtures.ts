@@ -105,6 +105,7 @@ export function buildChanges(args: {
     return makeFragmentData(
       {
         __typename: 'SchemaChange' as const,
+        id: `removed-${change.type}`,
         path: [change.type],
         message: `Type '${change.type}' was removed`,
         severityLevel: SeverityLevelType.Breaking,

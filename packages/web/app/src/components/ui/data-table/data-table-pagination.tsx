@@ -19,7 +19,7 @@ const wordClass =
 
 /**
  * First, previous, next and last with the page position between them and a field to jump to a
- * page, for data the client holds in full.
+ * page, for data the client holds in full or an API that serves any page by offset.
  */
 export function DataTablePagination({
   pageIndex,
