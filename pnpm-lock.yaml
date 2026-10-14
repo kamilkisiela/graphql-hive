@@ -2360,6 +2360,9 @@ importers:
       date-fns-tz:
         specifier: 3.2.0
         version: 3.2.0(date-fns@4.4.0)
+      diff:
+        specifier: 9.0.0
+        version: 9.0.0
       dompurify:
         specifier: 'catalog:'
         version: 3.4.16
