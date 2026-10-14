@@ -17,10 +17,10 @@ const DIFF_TIMEOUT_MS = 3000;
 
 type CacheEntry = { before: string; after: string; sorted: boolean; result: SdlDiffResult };
 
-// The last two results: a check's public schema and supergraph. A large FileDiffMetadata holds
-// both sides' lines, so the cache stays small.
+// One result per diff tab of a check (service, public schema, supergraph), so moving between
+// them never recomputes. A large FileDiffMetadata holds both sides' lines, so it goes no further.
 const cache: CacheEntry[] = [];
-const CACHE_SIZE = 2;
+const CACHE_SIZE = 3;
 
 export function getCachedSdlDiff(before: string, after: string, sorted: boolean) {
   return cache.find(

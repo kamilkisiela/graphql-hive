@@ -53,4 +53,15 @@ describe('computeSdlDiff', () => {
     expect(computeSdlDiff(before, after, { sorted: true })).toBe(first);
     expect(getCachedSdlDiff(before, after, false)).toBeUndefined();
   });
+
+  it('keeps one result per diff tab of a check', () => {
+    const tabs = ['K', 'L', 'M'].map(name => ({
+      before: `type ${name} { id: ID }\n`,
+      after: `type ${name} { id: ID name: String }\n`,
+    }));
+    const results = tabs.map(tab => computeSdlDiff(tab.before, tab.after, { sorted: false }));
+
+    // Back to the first tab after visiting the other two still hits the cache.
+    expect(getCachedSdlDiff(tabs[0].before, tabs[0].after, false)).toBe(results[0]);
+  });
 });
