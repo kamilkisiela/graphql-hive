@@ -39,6 +39,7 @@ export function useCurrentOperation(props: {
       id: operationIdFromSearch!,
     },
     pause: !operationIdFromSearch,
+    requestPolicy: 'network-only',
   });
   // if operationId is undefined `data` could contain previous state
   return operationIdFromSearch ? data?.target?.documentCollectionOperation : null;
