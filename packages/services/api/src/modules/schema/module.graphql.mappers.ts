@@ -13,7 +13,17 @@ import type {
 import type { SchemaCheckWarning } from './providers/models/shared';
 import type { SchemaVersion } from './providers/schema-version-store';
 
-export type SchemaChangeConnectionMapper = ReadonlyArray<SchemaChangeMapper>;
+/** A plain array is the whole list; a page is a slice of a longer one. */
+export type SchemaChangeConnectionMapper = ReadonlyArray<SchemaChangeMapper> | SchemaChangePage;
+export type SchemaChangePage = Readonly<{
+  page: ReadonlyArray<SchemaChangeMapper>;
+  offset: number;
+  totalCount: number;
+}>;
+export type SchemaChangeGroupMapper = Readonly<{
+  kind: string;
+  changes: ReadonlyArray<SchemaChangeMapper>;
+}>;
 export type SchemaChangeMapper = SchemaChangeType;
 export type SchemaChangeApprovalMapper = SchemaCheckApprovalMetadata;
 export type SchemaErrorConnectionMapper = readonly SchemaError[];

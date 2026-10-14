@@ -541,6 +541,10 @@ export default gql`
   Describes a schema change for either a schema version ('SchemaVersion') or schema check ('SchemaCheck').
   """
   type SchemaChange {
+    """
+    Stable within a schema check, derived from the change itself.
+    """
+    id: ID!
     criticality: CriticalityLevel!
       @deprecated(
         reason: "Use 'SchemaChange.severityLevel' instead. This field will be removed once it is no longer in use by a client."
@@ -833,6 +837,19 @@ export default gql`
     total: Int! @deprecated(reason: "This field will be removed in the future.")
     edges: [SchemaChangeEdge!]! @tag(name: "public")
     pageInfo: PageInfo! @tag(name: "public")
+    """
+    The number of changes in the whole list, not only this page.
+    """
+    totalCount: Int!
+  }
+
+  """
+  Schema changes of one kind (an Inspector change type such as TYPE_DESCRIPTION_CHANGED).
+  """
+  type SchemaChangeGroup {
+    kind: String!
+    totalCount: Int!
+    changes(first: Int, offset: Int): SchemaChangeConnection!
   }
 
   type SchemaChangeEdge {
@@ -1616,14 +1633,26 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: String): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
     """
     Results of the contracts
     """
     contractChecks: ContractCheckConnection @tag(name: "public")
+    """
+    One contract's result, by the contract check's id.
+    """
+    contractCheck(id: ID!): ContractCheck
     """
     Conditional breaking change metadata.
     """
@@ -1673,8 +1702,16 @@ export default gql`
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
 
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: String): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
 
     compositeSchemaSDL: String @tag(name: "public")
     supergraphSDL: String @tag(name: "public")
@@ -1842,8 +1879,16 @@ export default gql`
     """
     Breaking changes can exist in an successful schema check if the check was manually approved.
     """
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: String): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     """
     Schema policy errors can exist in an successful schema check if the check was manually approved.
@@ -1856,6 +1901,10 @@ export default gql`
     Results of the contracts
     """
     contractChecks: ContractCheckConnection @tag(name: "public")
+    """
+    One contract's result, by the contract check's id.
+    """
+    contractCheck(id: ID!): ContractCheck
     """
     Conditional breaking change metadata.
     """
@@ -1948,8 +1997,16 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: String): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
 
@@ -1959,6 +2016,10 @@ export default gql`
     Results of the contracts
     """
     contractChecks: ContractCheckConnection @tag(name: "public")
+    """
+    One contract's result, by the contract check's id.
+    """
+    contractCheck(id: ID!): ContractCheck
     """
     Conditional breaking change metadata.
     """
