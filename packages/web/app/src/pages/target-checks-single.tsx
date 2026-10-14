@@ -776,7 +776,7 @@ function useDefaultSchemaView(props: {
     content:
       schemaCheck.baseline?.publicSdl === schemaCheck.compositeSchemaSDL ? (
         <SDLSingleView
-          sdl={schemaCheck.schemaSDL}
+          sdl={schemaCheck.compositeSchemaSDL ?? ''}
           downloadFileName="schema.graphqls"
           title={
             schemaCheck.serviceName ? (
@@ -1021,7 +1021,7 @@ function useContractCheckView(props: {
         contractCheck?.baseline?.publicSdl === contractCheck.compositeSchemaSDL ? (
           <SDLSingleView
             sdl={contractCheck.compositeSchemaSDL ?? ''}
-            downloadFileName="service.graphqls"
+            downloadFileName="schema.graphqls"
             title={
               schemaCheck.serviceName ? (
                 <span className="flex items-center gap-1">
