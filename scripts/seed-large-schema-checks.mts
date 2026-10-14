@@ -75,7 +75,8 @@ ${fields.map((field, index) => `  """\n  Field ${index} of stress type ${id}.\n 
 const ids = Array.from({ length: typeCount }, (_, index) => index + 1);
 const newTypeIds = [1, 2, 3, 4, 5];
 
-const zetaSdl = link + 'type Query {\n  health: String\n}\n' + ids.map(id => stressType(id)).join('');
+const zetaSdl =
+  link + 'type Query {\n  health: String\n}\n' + ids.map(id => stressType(id)).join('');
 const zetaRevisedSdl =
   link + 'type Query {\n  health: String\n}\n' + ids.map(id => stressType(id, true)).join('');
 const alphaSdl =
@@ -185,7 +186,9 @@ try {
     ).then(r => r.expectNoGraphQLErrors());
     const outcome = result.schemaPublish;
     if (outcome.__typename !== 'SchemaPublishSuccess') {
-      throw new Error(`Publish ${service} returned ${outcome.__typename}: ${JSON.stringify(outcome)}`);
+      throw new Error(
+        `Publish ${service} returned ${outcome.__typename}: ${JSON.stringify(outcome)}`,
+      );
     }
     console.log(`  publish ${service}: ${outcome.__typename}`);
     return outcome.linkToWebsite;

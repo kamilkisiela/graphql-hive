@@ -46,7 +46,9 @@ describe('sortSdl', () => {
       }
     `);
 
-    expect(sorted).toContain('type Query implements Entity & Node {\n  alpha: Int\n  zed(a: Int, b: Int): Int\n}');
+    expect(sorted).toContain(
+      'type Query implements Entity & Node {\n  alpha: Int\n  zed(a: Int, b: Int): Int\n}',
+    );
     expect(sorted).toContain('union Result = Error | Query');
     expect(sorted).toContain('enum Size {\n  LARGE\n  SMALL\n}');
     expect(sorted).toContain('input Filter {\n  from: Int\n  to: Int\n}');

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createTwoFilesPatch, type CreatePatchOptionsAbortable } from 'diff';
-import { processFile, type FileDiffMetadata } from '@pierre/diffs';
 import { sortSdl } from '@/lib/sort-sdl';
+import { processFile, type FileDiffMetadata } from '@pierre/diffs';
 
 export type SdlDiffResult =
   | { kind: 'diff'; fileDiff: FileDiffMetadata }
