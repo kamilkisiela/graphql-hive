@@ -1,4 +1,4 @@
-import { got } from 'got';
+import got from 'got';
 import { z } from 'zod';
 
 const MigrationsTableModel = z.object({
@@ -76,6 +76,8 @@ export async function migrateClickHouse(
     username: clickhouse.username,
     password: clickhouse.password,
     retry: {
+      // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
+      enforceRetryRules: false,
       calculateDelay({ attemptCount, error }) {
         console.log('Error:', error);
         console.log('ClickHouse is not ready, retrying', attemptCount);
