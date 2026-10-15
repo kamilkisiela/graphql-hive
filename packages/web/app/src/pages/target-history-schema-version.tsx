@@ -29,6 +29,7 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import { useQuery } from 'urql';
+import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import {
@@ -36,7 +37,6 @@ import {
   CompositionErrorsSection_SchemaErrorConnection,
 } from '@/components/target/history/errors-and-changes';
 import { CodeScrollArea, File, FileDiff } from '@/components/ui/diffs';
-import { FailureCard, formatCount } from '@/components/ui/failure-card/failure-card';
 import { Link } from '@/components/ui/link';
 import { NotFound } from '@/components/ui/not-found/not-found';
 import { Button } from '@/components/ui/primitives/button/button';
@@ -55,7 +55,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { SeverityLevelType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
-import { cn } from '@/lib/utils';
+import { cn, formatCount } from '@/lib/utils';
 
 /** A status icon inside a tab, explained on hover. */
 function StatusTooltip(props: { icon: React.ReactNode; label: string }) {
@@ -400,7 +400,7 @@ function SchemaVersionView(props: SchemaVersionViewProps) {
         <div className="mt-3 flex flex-col gap-3">
           {failures.length ? (
             <div className="mb-3">
-              <FailureCard
+              <ContractFailuresTable
                 title={`${failures.length} of ${contractVersions.length} contracts failed`}
                 aside={`${contractVersions.length - failures.length} passed`}
                 items={failures}
@@ -1390,7 +1390,7 @@ const CompositionErrors = (props: {
           </p>
         </div>
 
-        <span className="ml-auto inline-flex items-center rounded-full border border-critical-line bg-critical-tint px-2.5 py-0.5 text-2xs font-semibold text-critical transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none">
+        <span className="ml-auto inline-flex items-center rounded-full border border-critical-line bg-critical-tint px-2.5 py-0.5 text-2xs font-semibold text-critical-text transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none">
           <span className="mr-1 h-1.5 w-1.5 rounded-full bg-critical" />
           {compositionErrors.edges.length} error
           {compositionErrors.edges.length === 1 ? '' : 's'}

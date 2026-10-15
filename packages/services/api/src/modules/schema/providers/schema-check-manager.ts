@@ -5,6 +5,7 @@ import type {
 import { Injectable, Scope } from 'graphql-modules';
 import type * as GraphQLSchema from '../../../__generated__/types';
 import { formatNumber } from '../lib/number-formatting';
+import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import { SchemaManager } from './schema-manager';
 import { SchemaVersionStore } from './schema-version-store';
 
@@ -18,22 +19,33 @@ export class SchemaCheckManager {
   constructor(
     private schemaManager: SchemaManager,
     private schemaVersions: SchemaVersionStore,
+    private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
   ) {}
+
+  // Usage reads names and totals from the check's metadata.
+  private withUsageMetadata(schemaCheck: SchemaCheck) {
+    const metadata = schemaCheck.conditionalBreakingChangeMetadata;
+    if (metadata) {
+      for (const change of schemaCheck.breakingSchemaChanges ?? []) {
+        this.breakingSchemaChangeUsageHelper.registerMetadataForBreakingSchemaChange(
+          change,
+          metadata,
+        );
+      }
+    }
+    return schemaCheck.breakingSchemaChanges;
+  }
 
   getHasSchemaCompositionErrors(schemaCheck: SchemaCheck) {
     return schemaCheck.schemaCompositionErrors !== null;
   }
 
   getHasUnapprovedBreakingChanges(schemaCheck: SchemaCheck) {
-    return (
-      schemaCheck.breakingSchemaChanges?.some(
-        change => change.approvalMetadata === null && !change.isSafeBasedOnUsage,
-      ) ?? false
-    );
+    return schemaCheck.hasUnapprovedBreakingChanges;
   }
 
   getHasSchemaChanges(schemaCheck: SchemaCheck) {
-    return !!(schemaCheck.breakingSchemaChanges?.length || schemaCheck.safeSchemaChanges?.length);
+    return schemaCheck.hasSchemaChanges;
   }
 
   getSafeSchemaChanges(schemaCheck: SchemaCheck) {
@@ -49,7 +61,10 @@ export class SchemaCheckManager {
       return null;
     }
 
-    return [...(schemaCheck.breakingSchemaChanges ?? []), ...(schemaCheck.safeSchemaChanges ?? [])];
+    return [
+      ...(this.withUsageMetadata(schemaCheck) ?? []),
+      ...(schemaCheck.safeSchemaChanges ?? []),
+    ];
   }
 
   getBreakingSchemaChanges(schemaCheck: SchemaCheck) {
@@ -57,7 +72,7 @@ export class SchemaCheckManager {
       return null;
     }
 
-    return schemaCheck.breakingSchemaChanges;
+    return this.withUsageMetadata(schemaCheck);
   }
 
   getSchemaVersion(schemaCheck: SchemaCheck) {
@@ -104,6 +119,11 @@ export class SchemaCheckManager {
         retentionInDays: schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays,
         excludedClientNames:
           schemaCheck.conditionalBreakingChangeMetadata.settings.excludedClientNames,
+        excludedAppDeploymentNames:
+          schemaCheck.conditionalBreakingChangeMetadata.settings.excludedAppDeploymentNames,
+        breakingChangeFormula:
+          schemaCheck.conditionalBreakingChangeMetadata.settings.breakingChangeFormula,
+        requestCount: schemaCheck.conditionalBreakingChangeMetadata.settings.requestCount,
         targets: schemaCheck.conditionalBreakingChangeMetadata.settings.targets,
       },
       usage: {

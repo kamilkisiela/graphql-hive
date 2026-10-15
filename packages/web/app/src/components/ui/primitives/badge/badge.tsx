@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority';
+import type { LucideIcon } from 'lucide-react';
 
 const badgeVariants = cva(
-  'inline-flex w-fit shrink-0 cursor-default items-center justify-center overflow-hidden whitespace-nowrap rounded-md border font-medium',
+  'inline-flex w-fit shrink-0 cursor-default items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border font-medium',
   {
     variants: {
       variant: {
@@ -10,10 +11,10 @@ const badgeVariants = cva(
         outline: 'border-line font-normal text-fg-default',
         // The semantic states, tinted: a 10% fill of the token under its full-strength text, so
         // a pill never needs its own red or green.
-        success: 'border-transparent bg-success-tint text-success',
-        warning: 'border-transparent bg-warning-tint text-warning',
-        critical: 'border-transparent bg-critical-tint text-critical',
-        info: 'border-transparent bg-info-tint text-info',
+        success: 'border-transparent bg-success-tint text-success-text',
+        warning: 'border-transparent bg-warning-tint text-warning-text',
+        critical: 'border-transparent bg-critical-tint text-critical-text',
+        info: 'border-transparent bg-info-tint text-info-text',
       },
       size: {
         default: 'text-xs',
@@ -47,9 +48,18 @@ const badgeVariants = cva(
 
 type BadgeProps = {
   content: string;
+  /** Leads the text, in the text's colour. */
+  icon?: LucideIcon;
   variants?: VariantProps<typeof badgeVariants>;
 };
 
-export function Badge({ content, variants }: BadgeProps) {
-  return <span className={badgeVariants({ ...variants })}>{content}</span>;
+export function Badge({ content, icon: Icon, variants }: BadgeProps) {
+  return (
+    <span className={badgeVariants({ ...variants })}>
+      {Icon ? (
+        <Icon aria-hidden className={variants?.size === 'sm' ? 'size-3' : 'size-3.5'} />
+      ) : null}
+      {content}
+    </span>
+  );
 }

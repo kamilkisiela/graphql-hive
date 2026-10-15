@@ -567,7 +567,10 @@ export default gql`
       """
       withSafeBasedOnUsageNote: Boolean = true
     ): String! @tag(name: "public")
-    path: [String!]
+    """
+    The schema coordinate the change applies to, split into its parts.
+    """
+    path: [String!] @tag(name: "public")
     """
     Approval metadata for this schema change.
     This field is populated in case the breaking change was manually approved.
@@ -614,6 +617,45 @@ export default gql`
     List of top clients that are affected by this schema change.
     """
     topAffectedClients: [SchemaChangeUsageStatisticsAffectedClient!]! @tag(name: "public")
+    """
+    Targets the change's usage came from during the period, most requests first. With excluded
+    clients the counts can differ from the total that made the change breaking.
+    Null when the counts are not available, as for checks recorded before they were kept.
+    """
+    affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
+    """
+    The coordinate the per-target counts were taken on, to look the usage up in Insights.
+    It can differ from the change's path. Null when the counts are not available.
+    """
+    schemaCoordinate: String @tag(name: "public")
+  }
+
+  type SchemaChangeUsageStatisticsAffectedTarget {
+    """
+    The target, as the conditional breaking change settings recorded it.
+    """
+    target: BreakingChangeMetadataTarget! @tag(name: "public")
+    """
+    Requests to this target in the period.
+    """
+    count: Float! @tag(name: "public")
+    """
+    Distinct operations that sent those requests. Null on an operation's own targets and for an
+    argument made required.
+    """
+    operationCount: Int @tag(name: "public")
+    """
+    Human readable count value.
+    """
+    countFormatted: String!
+    """
+    The share of the total traffic, in percent.
+    """
+    percentage: Float! @tag(name: "public")
+    """
+    Human readable percentage value.
+    """
+    percentageFormatted: String!
   }
 
   type SchemaChangeUsageStatisticsAffectedOperation {
@@ -641,6 +683,11 @@ export default gql`
     Human readable percentage value.
     """
     percentageFormatted: String!
+    """
+    Targets the operation was reported to during the period, most requests first.
+    Null when the counts are not available.
+    """
+    affectedTargets: [SchemaChangeUsageStatisticsAffectedTarget!] @tag(name: "public")
   }
 
   type SchemaChangeUsageStatisticsAffectedClient {
@@ -821,6 +868,11 @@ export default gql`
     percentage: Float! @tag(name: "public")
     excludedClientNames: [String!] @tag(name: "public")
     excludedAppDeploymentNames: [String!] @tag(name: "public")
+    """
+    Whether 'percentage' or 'requestCount' decided which changes were breaking.
+    """
+    breakingChangeFormula: BreakingChangeFormulaType! @tag(name: "public")
+    requestCount: Int! @tag(name: "public")
     targets: [BreakingChangeMetadataTarget!]! @tag(name: "public")
   }
 
@@ -837,7 +889,7 @@ export default gql`
 
   type SchemaCheckConditionalBreakingChangeMetadata {
     period: DateRange! @tag(name: "public")
-    settings: SchemaCheckConditionalBreakingChangeMetadataSettings!
+    settings: SchemaCheckConditionalBreakingChangeMetadataSettings! @tag(name: "public")
     usage: SchemaCheckConditionalBreakingChangeMetadataUsage! @tag(name: "public")
   }
 

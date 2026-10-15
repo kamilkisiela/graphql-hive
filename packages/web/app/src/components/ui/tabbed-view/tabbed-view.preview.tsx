@@ -11,7 +11,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
-import { FailureCard } from '../failure-card/failure-card';
+import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { Badge } from '../primitives/badge/badge';
 import { Button } from '../primitives/button/button';
 import { Select } from '../primitives/floating/select/select';
@@ -142,7 +142,7 @@ export const Default = createPreview(() => (
   <TabbedView items={checkViews('Default Graph')} defaultValue="details" />
 ));
 
-/** The FailureCard lists contracts only: the default graph's failure is the view the page opens on. */
+/** The contract failures table lists contracts only: the default graph's failure is the view the page opens on. */
 export const ChecksPage = createPreview(() => {
   const [contract, setContract] = useState('default');
   const failed = CONTRACTS.filter(entry => entry.value !== 'default' && entry.status === 'failed');
@@ -167,7 +167,7 @@ export const ChecksPage = createPreview(() => {
       </div>
       <div className="flex flex-col gap-3">
         <div className="mb-3">
-          <FailureCard
+          <ContractFailuresTable
             title={`${failed.length} of ${CONTRACTS.length - 1} contracts failed`}
             aside={`${CONTRACTS.length - 1 - failed.length} passed`}
             items={failed.map(entry => ({

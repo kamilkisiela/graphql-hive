@@ -1,5 +1,13 @@
 // @vitest-environment jsdom
-import { activeSchemaCheck, CHECKS, checksFixtures, SERVICES } from '@/lib/testing/fixtures/checks';
+import {
+  activeSchemaCheck,
+  BREAKING_PERIOD,
+  breakingSchemaCheck,
+  CHECKS,
+  checksFixtures,
+  policyFailedSchemaCheck,
+  SERVICES,
+} from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
 import { renderAtUrl } from '@/lib/testing/router';
 import { createTestClient } from '@/lib/testing/urql';
@@ -290,4 +298,156 @@ describe('checks route loaders', () => {
       { ...SLUGS, schemaCheckId: 'check-2' },
     ]);
   });
+});
+
+describe('breaking change usage', () => {
+  it('opens Insights on the window the check counted usage in', { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        breakingSchemaCheck(variables as { schemaCheckId: string }, { withTargets: false }),
+    );
+    const { router } = renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+    await screen.findByText(CHECKS.first[0]);
+    const change = await screen.findByRole(
+      'button',
+      { name: /was removed from object type/ },
+      { timeout: 10_000 },
+    );
+    await act(async () => {
+      fireEvent.click(change);
+    });
+
+    const coordinateLink = await screen.findByRole('link', { name: 'staging' });
+    const search = (link: HTMLElement) =>
+      new URL(link.getAttribute('href')!, 'http://x').searchParams;
+    expect(coordinateLink.getAttribute('href')).toContain(
+      '/insights/schema-coordinate/Query.products',
+    );
+    expect(search(coordinateLink).get('from')).toContain(BREAKING_PERIOD.from);
+    expect(search(coordinateLink).get('to')).toContain(BREAKING_PERIOD.to);
+
+    // The operation's menu navigates on click rather than through an href.
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'View live usage in Insights' }));
+    });
+    const operationItem = await screen.findByRole('menuitem', { name: 'production' });
+    await act(async () => {
+      fireEvent.click(operationItem);
+    });
+    await waitFor(() =>
+      expect(router.state.location.pathname).toContain('/insights/abcd_Products/abcd1234'),
+    );
+    expect(router.state.location.search).toMatchObject({
+      from: BREAKING_PERIOD.from,
+      to: BREAKING_PERIOD.to,
+    });
+  });
+
+  it(
+    'lists the targets the change was used in, each to verify, and the rest in a menu',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          breakingSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+      await screen.findByText(CHECKS.first[0]);
+      const change = await screen.findByRole(
+        'button',
+        { name: /was removed from object type/ },
+        { timeout: 10_000 },
+      );
+      expect(change.textContent).toContain('1 operation by 1 client affected');
+      await act(async () => {
+        fireEvent.click(change);
+      });
+
+      await screen.findByText('Used in 1 of 2 targets during the check window');
+      const verify = screen.getByRole('link', { name: /Verify in Insights/ });
+      const href = verify.getAttribute('href')!;
+      expect(href).toContain('/production/insights/schema-coordinate/Query.products');
+      expect(new URL(href, 'http://x').searchParams.get('from')).toContain(BREAKING_PERIOD.from);
+      expect(screen.getAllByRole('link', { name: /Verify in Insights/ })).toHaveLength(1);
+      expect(screen.getByText('2 requests')).toBeTruthy();
+      expect(screen.getByText('from 1 operation')).toBeTruthy();
+      expect(screen.getByRole('button', { name: '1 without usage' })).toBeTruthy();
+      // The targets carry the links, so the operation row only says where it was seen.
+      expect(screen.queryByRole('button', { name: 'View live usage in Insights' })).toBeNull();
+      expect(screen.getByText('Seen in')).toBeTruthy();
+    },
+  );
+
+  it(
+    'shows no targets table on a change that is safe based on usage',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          breakingSchemaCheck(variables as { schemaCheckId: string }, { safe: true }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+      await screen.findByText(CHECKS.first[0]);
+      const change = await screen.findByRole(
+        'button',
+        { name: /was removed from object type/ },
+        { timeout: 10_000 },
+      );
+      expect(change.textContent).toContain('Safe based on usage data');
+      await act(async () => {
+        fireEvent.click(change);
+      });
+      expect(screen.queryByText(/during the check window/)).toBeNull();
+      expect(screen.queryByRole('link', { name: /Verify in Insights/ })).toBeNull();
+    },
+  );
+
+  it('keeps the older layout when no target had usage', { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        breakingSchemaCheck(variables as { schemaCheckId: string }, { noTargetUsage: true }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-breaking`, { client: testClient });
+    await screen.findByText(CHECKS.first[0]);
+    const change = await screen.findByRole(
+      'button',
+      { name: /was removed from object type/ },
+      { timeout: 10_000 },
+    );
+    await act(async () => {
+      fireEvent.click(change);
+    });
+    expect(screen.queryByText(/during the check window/)).toBeNull();
+    await screen.findByText(/target insights for live usage data/);
+  });
+});
+
+describe('failed check status', () => {
+  it(
+    'says a check failed on its policy errors, in the header and the graph picker',
+    {
+      timeout: 30_000,
+    },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          policyFailedSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-policy`, { client: testClient });
+
+      await screen.findByText('2 schema policy errors', {}, { timeout: 10_000 });
+      expect(screen.getByText('Failed')).toBeTruthy();
+      expect(screen.getByLabelText('Schema policy errors.')).toBeTruthy();
+    },
+  );
 });

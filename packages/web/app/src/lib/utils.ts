@@ -136,6 +136,11 @@ export function useChartStyles() {
 }
 
 // Strings
+/** "2 errors", "1 breaking change"; `label` replaces the number, for "10+ operations". */
+export function formatCount(count: number, noun: string, label = String(count)) {
+  return `${label} ${pluralize(count, noun, `${noun}s`)}`;
+}
+
 export function pluralize(count: number, singular: string, plural: string): string {
   if (count === 1) {
     return singular;

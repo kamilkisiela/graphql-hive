@@ -18,13 +18,13 @@ const termVariants = cva('text-fg-secondary mb-1 inline-flex items-center gap-1'
   },
 });
 
-const rowVariants = cva('grid gap-4', {
+const rowVariants = cva('', {
   variants: {
     columns: {
       /** One column per item in the row. */
-      fixed: '',
-      /** As many columns as fit, so a row wraps on a narrow window. */
-      auto: 'grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]',
+      fixed: 'grid gap-4',
+      /** Each item as wide as its value, an even gap between, wrapping on a narrow window. */
+      auto: 'flex flex-wrap gap-x-12 gap-y-3',
     },
   },
   defaultVariants: {
@@ -122,7 +122,11 @@ export function DescriptionList({ rows, variants }: DescriptionListProps) {
           )}
         >
           {row.items.map((item, itemIndex) => (
-            <div key={itemIndex} className="min-w-0">
+            <div
+              key={itemIndex}
+              // A long value (a commit, an email) truncates or wraps instead of pushing the row.
+              className={cn('min-w-0', variants?.columns === 'auto' && 'max-w-80')}
+            >
               <DescriptionListItem {...item} termStyle={variants?.termStyle} />
             </div>
           ))}

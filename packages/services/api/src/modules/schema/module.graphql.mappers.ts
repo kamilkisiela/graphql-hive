@@ -311,6 +311,15 @@ export type SchemaChangeUsageStatisticsAffectedOperationMapper = {
   count: number;
   percentage: number;
   targetIds: Array<string>;
+  affectedTargets: Array<SchemaChangeUsageStatisticsAffectedTargetMapper> | null;
+};
+
+export type SchemaChangeUsageStatisticsAffectedTargetMapper = {
+  id: string;
+  name: string;
+  count: number;
+  operationCount: number | null;
+  percentage: number;
 };
 
 export type SchemaChangeAffectedAppDeploymentMapper = {

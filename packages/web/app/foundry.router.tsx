@@ -33,18 +33,25 @@ function SlotOutlet() {
 
 const rootRoute = createRootRoute({ component: SlotOutlet });
 
-/**
- * Enough shape for `buildLocation` to interpolate params into an href. Nothing navigates, so the
- * routes need no components. These three cover the great majority of links in the app; the splat
- * catches the rest.
- */
+// `useSlugs` reads the app's route ids, so the slugs nest under layouts with the same ids.
+const authenticatedRoute = createRoute({ getParentRoute: () => rootRoute, id: 'authenticated' });
+const withHeaderRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  id: 'with-header',
+});
+const organizationRoute = createRoute({
+  getParentRoute: () => withHeaderRoute,
+  path: '$organizationSlug',
+});
+const projectRoute = createRoute({ getParentRoute: () => organizationRoute, path: '$projectSlug' });
+const targetRoute = createRoute({ getParentRoute: () => projectRoute, path: '$targetSlug' });
+
 const routeTree = rootRoute.addChildren([
-  createRoute({ getParentRoute: () => rootRoute, path: '$organizationSlug' }),
-  createRoute({ getParentRoute: () => rootRoute, path: '$organizationSlug/$projectSlug' }),
-  createRoute({
-    getParentRoute: () => rootRoute,
-    path: '$organizationSlug/$projectSlug/$targetSlug',
-  }),
+  authenticatedRoute.addChildren([
+    withHeaderRoute.addChildren([
+      organizationRoute.addChildren([projectRoute.addChildren([targetRoute])]),
+    ]),
+  ]),
   createRoute({ getParentRoute: () => rootRoute, path: '$' }),
 ]);
 

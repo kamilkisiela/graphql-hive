@@ -62,7 +62,7 @@ const itemVariants = cva('', {
   variants: {
     variant: {
       list: 'border-line border-b',
-      boxed: 'border-line rounded-md border',
+      boxed: 'border-line overflow-hidden rounded-md border',
       plain: '',
     },
   },
@@ -72,7 +72,7 @@ const headerRowVariants = cva('flex items-center', {
   variants: {
     variant: {
       list: '',
-      boxed: 'px-4',
+      boxed: 'px-4 transition-colors [&:not(:has(>h3>[data-disabled])):hover]:bg-surface-hover',
       plain: '',
     },
   },
@@ -127,7 +127,8 @@ const panelInnerVariants = cva('', {
   variants: {
     variant: {
       list: '',
-      boxed: 'px-4',
+      // The header's hover fill ends at the panel, so the content needs room below it.
+      boxed: 'px-4 pt-3',
       plain: '',
     },
     size: {

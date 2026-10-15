@@ -1,5 +1,6 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from '../badge/badge';
+import { Button } from '../button/button';
 import { DescriptionList } from './description-list';
 
 export const nav: NavPath = 'Primitives/DescriptionList';
@@ -150,24 +151,39 @@ export const TermTooltips = createPreview(() => (
 
 /**
  * `termStyle: 'title'` swaps the small caps for 12px sentence-case terms, and `columns: 'auto'`
- * fits as many columns as the width allows. Together they make the meta card at the top of the
- * schema check and schema version pages; the wrapper is the page's.
+ * sizes each item to its value with an even gap. Together they make the meta card at the top of
+ * the schema check and schema version pages. The wrapper and the Approve button are the check
+ * page's (`pages/target-checks-single.tsx:1516`): the list takes the free width, the action stays
+ * right.
  */
 export const PageCard = createPreview(() => (
-  <div className="w-[48rem] rounded-md border bg-neutral-2 px-5 py-4 dark:bg-neutral-3">
-    <DescriptionList
-      variants={{ termStyle: 'title', columns: 'auto' }}
-      rows={[
-        {
-          items: [
-            { term: 'Status', description: <span className="text-critical">Failed</span> },
-            { term: 'Service', description: 'products' },
-            { term: 'Triggered', description: '3 days ago by Ada Lovelace' },
-            { term: 'Commit', description: 'bf0e040f', mono: true },
-          ],
-        },
-      ]}
-    />
+  <div className="flex w-[64rem] items-center gap-4 rounded-md border bg-surface-card px-5 py-4">
+    <div className="min-w-0 flex-1">
+      <DescriptionList
+        variants={{ termStyle: 'title', columns: 'auto' }}
+        rows={[
+          {
+            items: [
+              { term: 'Status', description: <span className="text-critical">Failed</span> },
+              { term: 'Service', description: 'users' },
+              {
+                term: 'Triggered',
+                description: '1h ago by User <user@the-guild.dev>',
+              },
+              {
+                term: 'Commit',
+                description: (
+                  <span className="block truncate" title="82c6adaa916c765b76fe9a1043ed4b0c9e1a7f22">
+                    82c6adaa916c765b76fe9a1043ed4b0c9e1a7f22
+                  </span>
+                ),
+              },
+            ],
+          },
+        ]}
+      />
+    </div>
+    <Button variant="destructive">Approve</Button>
   </div>
 ));
 
