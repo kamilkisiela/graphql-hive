@@ -1386,7 +1386,7 @@ function checkStatus(check: CheckStatusFlags, changedLabel: string) {
   return {
     icon: <CheckIcon className="size-3.5 text-success" />,
     label: 'Composition succeeded.',
-    state: 'Passed',
+    state: 'No changes',
   };
 }
 

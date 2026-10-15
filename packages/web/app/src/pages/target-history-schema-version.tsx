@@ -466,7 +466,7 @@ function versionStatus(version: VersionStatusFlags, labels: VersionStatusLabels)
     return {
       icon: <CheckIcon className="size-3.5 text-success" />,
       label: labels.succeeded,
-      state: 'Passed',
+      state: 'No changes',
     };
   }
   return {

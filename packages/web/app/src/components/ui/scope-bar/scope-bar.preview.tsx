@@ -24,7 +24,7 @@ function StatusGlyph({ status }: { status: Status }) {
 const STATUS_STATE: Record<Status, string> = {
   failed: 'Failed',
   changed: 'Schema changed',
-  ok: 'Passed',
+  ok: 'No changes',
 };
 
 function statusTooltip(status: Status) {

@@ -33,7 +33,7 @@ const CONTRACTS: Array<{ value: string; label: string; status: ContractStatus }>
 const STATUS_STATE: Record<ContractStatus, string> = {
   failed: 'Failed',
   changed: 'Schema changed',
-  ok: 'Passed',
+  ok: 'No changes',
 };
 
 const STATUS_LABEL: Record<ContractStatus, string> = {
