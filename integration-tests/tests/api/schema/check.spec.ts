@@ -3149,7 +3149,7 @@ const SchemaCheckChangePagesQuery = graphql(/* GraphQL */ `
           totalCount
           edges {
             node {
-              id
+              message
             }
           }
         }
@@ -3161,7 +3161,7 @@ const SchemaCheckChangePagesQuery = graphql(/* GraphQL */ `
           }
           edges {
             node {
-              id
+              message
             }
           }
         }
@@ -3238,7 +3238,7 @@ test.concurrent(
         .then(r => r.target!.schemaCheck!);
 
     const lastPage = await read({ first: 50, offset: 50 });
-    const allIds = lastPage.allBreaking!.edges.map(edge => edge.node.id);
+    const allIds = lastPage.allBreaking!.edges.map(edge => edge.node.message);
 
     expect(lastPage.__typename).toBe('FailedSchemaCheck');
     expect(lastPage.unapprovedBreakingSchemaChangeCount).toBe(60);
@@ -3249,14 +3249,16 @@ test.concurrent(
       totalCount: 60,
       pageInfo: { hasNextPage: false, hasPreviousPage: true },
     });
-    expect(lastPage.breakingPage!.edges.map(edge => edge.node.id)).toEqual(allIds.slice(50));
+    expect(lastPage.breakingPage!.edges.map(edge => edge.node.message)).toEqual(allIds.slice(50));
 
     const firstPage = await read({ first: 50, offset: 0 });
     expect(firstPage.breakingPage!.pageInfo).toEqual({
       hasNextPage: true,
       hasPreviousPage: false,
     });
-    expect(firstPage.breakingPage!.edges.map(edge => edge.node.id)).toEqual(allIds.slice(0, 50));
+    expect(firstPage.breakingPage!.edges.map(edge => edge.node.message)).toEqual(
+      allIds.slice(0, 50),
+    );
 
     const pastTheEnd = await read({ first: 50, offset: 100 });
     expect(pastTheEnd.breakingPage!.edges).toEqual([]);

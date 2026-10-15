@@ -24,7 +24,6 @@ export const SchemaChange: Pick<
   | 'approval'
   | 'criticality'
   | 'criticalityReason'
-  | 'id'
   | 'isSafeBasedOnUsage'
   | 'message'
   | 'path'
@@ -46,7 +45,6 @@ export const SchemaChange: Pick<
     injector.get(BreakingSchemaChangeUsageHelper).getUsageDataForBreakingSchemaChange(change),
   severityLevel: change => severityMap[change.criticality],
   severityReason: change => change.reason,
-  id: change => change.id,
   affectedAppDeployments: (change, args) => {
     if (change.affectedAppDeployments === null) {
       return null;
