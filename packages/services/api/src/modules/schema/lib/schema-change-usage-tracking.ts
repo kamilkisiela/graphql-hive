@@ -1,5 +1,5 @@
-import { ChangeType } from '@graphql-inspector/core';
 import type { SchemaChangeMapper } from '../module.graphql.mappers';
+import { ChangeType } from '@graphql-inspector/core';
 
 export type SchemaChangeUsageTracking = 'TRACKED' | 'ON_REFERENCING_FIELDS' | 'NOT_TRACKED';
 
