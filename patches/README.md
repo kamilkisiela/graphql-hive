@@ -33,8 +33,8 @@ bundles the service with esbuild. Three independent changes:
 
 1. `no-unreachable-types` also visits `extensionASTNodes`, so schemas with `extend type` are not
    flagged (#7978, #8059).
-2. `relay-edge-types` no longer caches edge types across schemas; the cache leaked one customer's
-   types into the next lint run (#7936).
+2. `relay-edge-types` and `no-unreachable-types` no longer cache across schemas; both module-level
+   caches kept the first schema's types and applied them to every later customer's lint run (#7936).
 3. Removes `createRequire`, graphql-config loading and the testkit export so esbuild can bundle it.
 
 Retire with the eslint 9/10 migration of the policy service. Upstream 4.x still lacks 1 and 2;

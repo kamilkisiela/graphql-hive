@@ -150,6 +150,7 @@ export default class AppCreate extends Command<typeof AppCreate> {
       if (buffer.length >= 100 || (force && buffer.length > 0)) {
         const result = await this.registryApi(endpoint, accessToken).request({
           operation: AddDocumentsToAppDeploymentMutation,
+          timeout: 55_000,
           variables: {
             input: {
               target,
