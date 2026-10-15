@@ -1,4 +1,4 @@
-import { got, type Method, type OptionsInit } from 'got';
+import got, { type Method, type OptionsInit } from 'got';
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { withErrorSource } from '@hive/service-common';
 
