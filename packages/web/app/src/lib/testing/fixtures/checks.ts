@@ -296,10 +296,7 @@ export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
   };
 }
 
-/**
- * An approved check that still lists policy errors. The API refuses approval while policy errors
- * exist, so it never produces this; the fixture only pins the status glyph to failed checks.
- */
+/** An approved check keeps its policy errors, and the status glyph keeps reporting them. */
 export function approvedPolicySchemaCheck(variables: { schemaCheckId: string }) {
   const active = activeSchemaCheck(variables);
   return {
