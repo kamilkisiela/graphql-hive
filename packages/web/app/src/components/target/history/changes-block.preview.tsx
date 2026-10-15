@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckIcon, FileDiffIcon, GitCompareIcon, ListIcon, TriangleAlertIcon } from 'lucide-react';
+import { FileDiffIcon, GitCompareIcon, ListIcon, TriangleAlertIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -218,12 +218,6 @@ const statusIcon = (failed: boolean) =>
     <GitCompareIcon className="size-3.5" />
   );
 
-const CONTRACT_STATUS_LEGEND = [
-  { icon: <TriangleAlertIcon className="size-3.5 text-critical" />, label: 'Failed' },
-  { icon: <GitCompareIcon className="size-3.5" />, label: 'Schema changed' },
-  { icon: <CheckIcon className="size-3.5 text-success" />, label: 'Passed' },
-];
-
 function CheckPageView(props: { usedTargets: number; unusedTargets: number; operations: number }) {
   const [graph, setGraph] = useState('default');
   const [tab, setTab] = useState('details');
@@ -290,7 +284,6 @@ function CheckPageView(props: { usedTargets: number; unusedTargets: number; oper
                 width="auto"
               />
             }
-            legend={CONTRACT_STATUS_LEGEND}
           />
           <TabbedView
             value={tab}
