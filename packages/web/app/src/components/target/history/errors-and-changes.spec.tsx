@@ -32,5 +32,9 @@ describe('CompositionErrorsList', () => {
     );
     getByText('Composition Errors');
     expect(container.querySelector('pre')?.textContent).toBe(query);
+    // The same section heading as the change lists, with its explainer beside it.
+    const heading = container.querySelector('h2')!;
+    expect(heading.className).toContain('text-base');
+    expect(heading.querySelector('button[aria-label="About composition errors"]')).toBeTruthy();
   });
 });

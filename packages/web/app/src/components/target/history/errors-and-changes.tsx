@@ -820,11 +820,11 @@ export function CompositionErrorsList(props: {
   description?: string;
 }) {
   return (
-    <div className="mb-2 px-2">
-      <div className="mb-3 flex items-center gap-1.5">
-        <h2 className="font-bold text-fg-default">{props.title}</h2>
+    <div className="mb-2">
+      <ChangesTitle>
+        {props.title}
         <CompositionErrorsPopover />
-      </div>
+      </ChangesTitle>
       {props.description ? (
         <p className="mb-2 text-sm text-fg-default">{props.description}</p>
       ) : null}
