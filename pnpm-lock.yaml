@@ -145,8 +145,8 @@ catalogs:
       specifier: 5.12.5
       version: 5.12.5
     got:
-      specifier: 16.0.0
-      version: 16.0.0
+      specifier: 16.1.0
+      version: 16.1.0
     graphql:
       specifier: 16.14.2
       version: 16.14.2
@@ -328,9 +328,9 @@ patchedDependencies:
   eslint@8.57.1:
     hash: 08d9d41d21638cb74d0f9f34877a8839601a4e5a8263066ff23e7032addbcba0
     path: patches/eslint@8.57.1.patch
-  got@16.0.0:
-    hash: f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee
-    path: patches/got@16.0.0.patch
+  got@16.1.0:
+    hash: 2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df
+    path: patches/got@16.1.0.patch
   graphiql@4.0.0-alpha.5:
     hash: 87dedd0023d07eef741569477f4a97265c634e9c37040d4b435268abbd435b6d
     path: patches/graphiql@4.0.0-alpha.5.patch
@@ -1255,7 +1255,7 @@ importers:
         version: 16.4.7
       got:
         specifier: 'catalog:'
-        version: 16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee)
+        version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -1412,7 +1412,7 @@ importers:
         version: 2.1.0
       got:
         specifier: 'catalog:'
-        version: 16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee)
+        version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
       graphile-worker:
         specifier: 0.16.6
         version: 0.16.6(typescript@5.7.3)
@@ -1737,7 +1737,7 @@ importers:
         version: 1.19.1
       got:
         specifier: 'catalog:'
-        version: 16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee)
+        version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -1851,7 +1851,7 @@ importers:
         version: 5.12.5
       got:
         specifier: 'catalog:'
-        version: 16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee)
+        version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -2116,7 +2116,7 @@ importers:
         version: 16.4.7
       got:
         specifier: 'catalog:'
-        version: 16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee)
+        version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -2188,7 +2188,7 @@ importers:
         version: 16.4.7
       got:
         specifier: 'catalog:'
-        version: 16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee)
+        version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
       graphile-worker:
         specifier: 0.16.6
         version: 0.16.6(typescript@5.7.3)
@@ -12347,8 +12347,8 @@ packages:
     resolution: {integrity: sha512-XfBk1CxOOScDcMr9O1yKkNaQyy865NbYs+F7dr4H0LZMVgCj2Le59k6PqbNHoL5ToeaEQUYh6c6yMfVcc6SJxA==}
     engines: {node: '>=16'}
 
-  got@16.0.0:
-    resolution: {integrity: sha512-UtzSUebtRHHAUaNB/X37X1LQgHvdSrgXUIWGUBDhLu05CYtUr9svjeN6wmG333nzdJASFUjXMOuRBjZLf8oF1w==}
+  got@16.1.0:
+    resolution: {integrity: sha512-LOvohAoc/3O8+Gi3E5RRvamkyXmJq9ewj/cimmqQYn+Me5OKCVHKQI9ygF0O882l573lrpLbKZpsydYRttpDEg==}
     engines: {node: '>=22'}
 
   graceful-fs@4.2.10:
@@ -30490,7 +30490,7 @@ snapshots:
       p-cancelable: 3.0.0
       responselike: 3.0.0
 
-  got@16.0.0(patch_hash=f6cf158961170abadffad36709c46e6b8586b837c5c2c994db5e7e4fb3ecbcee):
+  got@16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df):
     dependencies:
       '@sindresorhus/is': 8.1.0
       byte-counter: 0.1.0
