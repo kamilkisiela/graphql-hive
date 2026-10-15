@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { got, HTTPError } from 'got';
+import got, { HTTPError } from 'got';
 import { z } from 'zod';
 import { createConnectionStringProvider, createPostgresDatabasePool, psql } from '@hive/postgres';
 import { generateRdsIamAuthToken } from '@hive/service-common';

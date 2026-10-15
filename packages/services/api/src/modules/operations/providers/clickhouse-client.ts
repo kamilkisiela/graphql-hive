@@ -129,6 +129,8 @@ export class ClickHouse {
             request: this.config.requestTimeout ?? timeout,
           },
           retry: {
+            // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
+            enforceRetryRules: false,
             calculateDelay: info => {
               if (
                 info.error.response?.body &&
@@ -307,6 +309,8 @@ export class ClickHouse {
             request: this.config.requestTimeout ?? args.timeout,
           },
           retry: {
+            // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
+            enforceRetryRules: false,
             calculateDelay: info => {
               span.setAttribute('retry.count', info.attemptCount);
 
@@ -456,6 +460,8 @@ export class ClickHouse {
             'Content-Encoding': 'gzip',
           },
           retry: {
+            // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
+            enforceRetryRules: false,
             calculateDelay: info => {
               if (info.attemptCount >= maxRetry) {
                 this.logger.warn(
