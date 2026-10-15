@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import {
   activeSchemaCheck,
-  approvedPolicySchemaCheck,
   BREAKING_PERIOD,
   breakingSchemaCheck,
   CHECKS,
