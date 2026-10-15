@@ -1,5 +1,22 @@
 # hive
 
+## 14.0.1
+
+### Patch Changes
+
+- [#8711](https://github.com/graphql-hive/console/pull/8711)
+  [`b5839de`](https://github.com/graphql-hive/console/commit/b5839dec170ce82afc839cb5d81c55cf6f2a6606)
+  Thanks [@jdolle](https://github.com/jdolle)! - Give the persisted-document worker 50 seconds
+  instead of 20 to finish an `addDocumentsToAppDeployment` batch, so the server answers before the
+  CLI's 55 second upload timeout instead of the CLI aborting a batch the server is still processing.
+
+- [#8685](https://github.com/graphql-hive/console/pull/8685)
+  [`a0241ef`](https://github.com/graphql-hive/console/commit/a0241effe46144d2777339a3a175f26c662474ce)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Fix the `no-unreachable-types`
+  schema policy rule reusing the reachable types of the first schema it linted, which reported
+  reachable types as unreachable (and the reverse) for every later check until the policy service
+  restarted.
+
 ## 14.0.0
 
 ### Major Changes
