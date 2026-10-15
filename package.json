@@ -54,6 +54,7 @@
     "seed:breaking-change-usage": "tsx scripts/seed-breaking-change-usage.mts",
     "seed:history": "tsx scripts/seed-history/seed-history.mts",
     "seed:insights-and-alerts": "tsx scripts/seed-insights-and-alerts/seed-insights-and-alerts.mts",
+    "seed:large-schema-checks": "tsx scripts/seed-large-schema-checks.mts",
     "seed:org": "tsx scripts/seed-organization.mts",
     "seed:schemas": "tsx scripts/seed-schemas.ts",
     "seed:scim-users-groups": "tsx scripts/seed-scim-users-groups/seed-scim-users-groups.mts",

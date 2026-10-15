@@ -149,6 +149,7 @@ function SDLSingleDiffToggleView(props: {
   before: string | null;
   after: string | null;
   downloadFileName?: string;
+  sorted?: boolean;
 }): ReactElement {
   const [showDiff, setShowDiff] = useState<boolean>(true);
   const title = props?.title ?? 'Diff View';
@@ -173,7 +174,12 @@ function SDLSingleDiffToggleView(props: {
         </div>
       </div>
       {showDiff ? (
-        <SDLDiffView before={props.before ?? ''} after={props.after ?? ''} />
+        <SDLDiffView
+          before={props.before ?? ''}
+          after={props.after ?? ''}
+          sorted={props.sorted}
+          tooLargeHint="Turn off Toggle Diff to see the full schema, or download it."
+        />
       ) : (
         <SDLView sdl={props.after ?? ''} />
       )}
@@ -783,7 +789,7 @@ function useDefaultSchemaView(props: {
     content:
       schemaCheck.baseline?.publicSdl === schemaCheck.compositeSchemaSDL ? (
         <SDLSingleView
-          sdl={schemaCheck.schemaSDL}
+          sdl={schemaCheck.compositeSchemaSDL ?? ''}
           downloadFileName="schema.graphqls"
           title={
             schemaCheck.serviceName ? (
@@ -811,6 +817,7 @@ function useDefaultSchemaView(props: {
           before={schemaCheck.baseline?.publicSdl ?? null}
           after={schemaCheck.compositeSchemaSDL ?? null}
           downloadFileName="schema.graphqls"
+          sorted
         />
       ),
   });
@@ -856,6 +863,7 @@ function useDefaultSchemaView(props: {
             before={schemaCheck?.baseline?.supergraphSdl ?? null}
             after={schemaCheck?.supergraphSDL ?? null}
             downloadFileName="supergraph.graphqls"
+            sorted
           />
         ),
     });
@@ -1050,7 +1058,7 @@ function useContractCheckView(props: {
         contractCheck?.baseline?.publicSdl === contractCheck.compositeSchemaSDL ? (
           <SDLSingleView
             sdl={contractCheck.compositeSchemaSDL ?? ''}
-            downloadFileName="service.graphqls"
+            downloadFileName="schema.graphqls"
             title={
               schemaCheck.serviceName ? (
                 <span className="flex items-center gap-1">
@@ -1077,6 +1085,7 @@ function useContractCheckView(props: {
             before={contractCheck?.baseline?.publicSdl ?? null}
             after={contractCheck.compositeSchemaSDL ?? null}
             downloadFileName="schema.graphqls"
+            sorted
           />
         ),
     },
@@ -1122,6 +1131,7 @@ function useContractCheckView(props: {
             before={contractCheck?.baseline?.supergraphSdl ?? null}
             after={contractCheck?.supergraphSDL ?? null}
             downloadFileName="supergraph.graphqls"
+            sorted
           />
         ),
     });

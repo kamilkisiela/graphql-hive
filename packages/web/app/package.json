@@ -59,6 +59,7 @@
     "crypto-js": "catalog:",
     "date-fns": "catalog:",
     "date-fns-tz": "3.2.0",
+    "diff": "9.0.0",
     "dompurify": "catalog:",
     "dotenv": "catalog:",
     "echarts": "6.1.0",
