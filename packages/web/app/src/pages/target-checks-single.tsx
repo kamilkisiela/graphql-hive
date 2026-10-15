@@ -179,7 +179,7 @@ function SDLSingleDiffToggleView(props: {
           before={props.before ?? ''}
           after={props.after ?? ''}
           sorted={props.sorted}
-          tooLargeHint="Turn off Toggle Diff to see the full schema, or download it."
+          tooLargeMessage="Every change is listed in the Details tab. To browse the full schema, switch off the diff, or download it."
         />
       ) : (
         <SDLView sdl={props.after ?? ''} />
