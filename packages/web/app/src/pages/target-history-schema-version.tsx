@@ -18,6 +18,7 @@ import {
   GitCompare,
   GitCompareArrows,
   GitCompareIcon,
+  InfoIcon,
   Layers,
   ListIcon,
   ListTree,
@@ -34,7 +35,7 @@ import {
   ChangesBlock,
   CompositionErrorsSection_SchemaErrorConnection,
 } from '@/components/target/history/errors-and-changes';
-import { CodeScrollArea, File, MultiFileDiff } from '@/components/ui/diffs';
+import { CodeScrollArea, File, FileDiff } from '@/components/ui/diffs';
 import { FailureCard, formatCount } from '@/components/ui/failure-card/failure-card';
 import { Link } from '@/components/ui/link';
 import { NotFound } from '@/components/ui/not-found/not-found';
@@ -47,6 +48,7 @@ import { Spinner } from '@/components/ui/primitives/spinner/spinner';
 import { StatusDot } from '@/components/ui/primitives/status-dot/status-dot';
 import { QueryError } from '@/components/ui/query-error';
 import { ScopeBar } from '@/components/ui/scope-bar/scope-bar';
+import { useSdlDiff } from '@/components/ui/sdl-diff';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -541,7 +543,12 @@ function GraphQLSchemaView(props: {
               <NoGraphChanges />
             </div>
           ) : (
-            <SDLDiffView before={props.previousSdl ?? ''} after={props.currentSdl} />
+            <SDLDiffView
+              before={props.previousSdl ?? ''}
+              after={props.currentSdl}
+              sorted
+              tooLargeHint="Switch to View to see the full schema."
+            />
           )}
         </GenericGraphCard>
       )}
@@ -936,24 +943,80 @@ function GraphVersionSubgraphChangesView(props: {
   );
 }
 
-export function SDLDiffView(props: { before: string; after: string }) {
+export function SDLDiffView(props: {
+  before: string;
+  after: string;
+  /** Compare sorted copies, for composed schemas whose definition order carries no meaning. */
+  sorted?: boolean;
+  /** Where to see the full schema when the diff is too large to show. */
+  tooLargeHint?: ReactNode;
+}) {
+  const result = useSdlDiff(props.before, props.after, props.sorted ?? false);
+
+  if (result === null) {
+    return (
+      <div className="flex items-center gap-2 px-5 py-3 text-xs text-fg-secondary">
+        <Spinner variants={{ size: 'sm' }} label="Preparing diff" />
+        Preparing diff…
+      </div>
+    );
+  }
+
+  switch (result.kind) {
+    case 'unchanged':
+      return <SDLView sdl={props.after} />;
+    case 'order-only':
+      return (
+        <>
+          <SDLDiffNotice
+            icon={<CircleCheckIcon className="size-4 text-success" />}
+            title="No changes apart from order"
+          >
+            Both schemas have the same definitions. Only their order or formatting differs.
+          </SDLDiffNotice>
+          <SDLView sdl={props.after} />
+        </>
+      );
+    case 'too-large':
+      return (
+        <SDLDiffNotice
+          icon={<InfoIcon className="size-4 text-fg-muted" />}
+          title="Diff too large to display"
+        >
+          The schemas differ in too many lines to compare here. {props.tooLargeHint}
+        </SDLDiffNotice>
+      );
+    case 'diff':
+      return (
+        <>
+          {props.sorted && (
+            <div className="border-b border-line-subtle px-5 py-2 text-xs text-fg-muted">
+              Sorted by kind and name
+            </div>
+          )}
+          <CodeScrollArea>
+            <FileDiff
+              fileDiff={result.fileDiff}
+              options={{
+                disableFileHeader: true,
+                diffStyle: 'unified',
+              }}
+            />
+          </CodeScrollArea>
+        </>
+      );
+  }
+}
+
+function SDLDiffNotice(props: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <CodeScrollArea>
-      <MultiFileDiff
-        options={{
-          disableFileHeader: true,
-          diffStyle: 'unified',
-        }}
-        oldFile={{
-          name: 'schema.graphql',
-          contents: props.before,
-        }}
-        newFile={{
-          name: 'schema.graphql',
-          contents: props.after,
-        }}
-      />
-    </CodeScrollArea>
+    <div className="cursor-default border-b border-line-subtle px-5 py-3">
+      <div className="mb-1 flex items-center gap-3">
+        {props.icon}
+        <h2 className="text-sm font-medium text-fg">{props.title}</h2>
+      </div>
+      <p className="text-xs text-fg-secondary">{props.children}</p>
+    </div>
   );
 }
 
