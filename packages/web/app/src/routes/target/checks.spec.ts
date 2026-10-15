@@ -2,8 +2,8 @@
 import {
   activeSchemaCheck,
   BREAKING_PERIOD,
-  breakingSchemaCheck,
   breakingChangesPage,
+  breakingSchemaCheck,
   CHECKS,
   checkSdl,
   checksFixtures,
@@ -513,11 +513,7 @@ describe('paged changes', () => {
 
   it('collapses an expanded change when the page moves on', { timeout: 30_000 }, async () => {
     renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: pagedClient() });
-    const first = await screen.findByRole(
-      'button',
-      { name: /StressType_0$/ },
-      { timeout: 10_000 },
-    );
+    const first = await screen.findByRole('button', { name: /StressType_0$/ }, { timeout: 10_000 });
     await act(async () => {
       fireEvent.click(first);
     });

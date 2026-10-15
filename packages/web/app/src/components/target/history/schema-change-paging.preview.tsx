@@ -180,7 +180,10 @@ function GroupedView(props: { breaking: number; descriptions: number }) {
                   __typename: 'SchemaChangeConnection' as const,
                   edges: range(0, Math.min(CHANGES_PAGE_SIZE, group.totalCount), index => ({
                     __typename: 'SchemaChangeEdge' as const,
-                    node: { __typename: 'SchemaChange' as const, ...safeChangeAt(group.kind, index) },
+                    node: {
+                      __typename: 'SchemaChange' as const,
+                      ...safeChangeAt(group.kind, index),
+                    },
                   })),
                 },
               },

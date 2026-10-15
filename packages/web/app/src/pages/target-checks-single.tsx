@@ -16,15 +16,6 @@ import {
   TriangleAlertIcon,
 } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
-import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
-import { ServiceFilterButton } from '@/components/target/checks/service-filter-button';
-import {
-  CompositionErrorsList,
-  CompositionErrorsSection,
-  labelize,
-  NoGraphChanges,
-} from '@/components/target/history/errors-and-changes';
-import { PagedBreakingChanges, SafeChangeGroups } from '@/components/target/history/paged-changes';
 import { useChangePageLoaders } from '@/components/target/checks/change-pages';
 import {
   SDL_TABS,
@@ -34,6 +25,15 @@ import {
   withContractCheckSdl,
   withSdlState,
 } from '@/components/target/checks/check-sdl';
+import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
+import { ServiceFilterButton } from '@/components/target/checks/service-filter-button';
+import {
+  CompositionErrorsList,
+  CompositionErrorsSection,
+  labelize,
+  NoGraphChanges,
+} from '@/components/target/history/errors-and-changes';
+import { PagedBreakingChanges, SafeChangeGroups } from '@/components/target/history/paged-changes';
 import { CopyText } from '@/components/ui/copy-text';
 import { DownloadButton } from '@/components/ui/diff-editor';
 import { CodeScrollArea, File } from '@/components/ui/diffs';
@@ -962,7 +962,10 @@ function useContractCheckView(props: {
   schemaCheck: FragmentType<typeof ContractCheckView_SchemaCheckFragment>;
   projectType: ProjectType;
 }): CheckView | null {
-  const contractFragment = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
+  const contractFragment = useFragment(
+    ContractCheckView_ContractCheckFragment,
+    props.contractCheck,
+  );
   const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
   const changePages = useChangePageLoaders({
     schemaCheckId: schemaCheck.id,

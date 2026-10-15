@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, renderHook } from '@testing-library/react';
-import { CHANGES_PAGE_SIZE, changeKindLabel, usePagedChanges } from './paged-changes';
+import { changeKindLabel, CHANGES_PAGE_SIZE, usePagedChanges } from './paged-changes';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;

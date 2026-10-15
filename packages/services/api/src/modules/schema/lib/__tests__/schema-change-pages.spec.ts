@@ -14,7 +14,9 @@ function change(
   return {
     id: `${type}-${index}`,
     type,
-    approvalMetadata: overrides.approved ? { schemaCheckId: 'check', date: '', userId: null } : null,
+    approvalMetadata: overrides.approved
+      ? { schemaCheckId: 'check', date: '', userId: null }
+      : null,
     isSafeBasedOnUsage: overrides.safeBasedOnUsage ?? false,
   } as unknown as SchemaChangeMapper;
 }

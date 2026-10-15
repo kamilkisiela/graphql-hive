@@ -10,7 +10,11 @@ import {
 export const PATH = '/the-guild/graphql-hive/staging';
 const PERIOD = { from: '2026-10-01T10:00:00.000Z', to: '2026-10-08T10:00:00.000Z' };
 
-export type PreviewTarget = { id: string; slug: string; target: { id: string; slug: string } | null };
+export type PreviewTarget = {
+  id: string;
+  slug: string;
+  target: { id: string; slug: string } | null;
+};
 
 const TARGET_SLUGS = [
   'production-eu',

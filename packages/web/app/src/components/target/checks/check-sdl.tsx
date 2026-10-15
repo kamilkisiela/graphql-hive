@@ -104,9 +104,10 @@ type CheckSdl = NonNullable<ReturnType<typeof useCheckSdl>['data']>;
 type ContractCheckSdl = NonNullable<ReturnType<typeof useContractCheckSdl>['data']>;
 
 /** The check with its SDLs filled in, empty until they arrive. */
-export function withCheckSdl<
-  T extends { baseline: Record<string, unknown> | null | undefined },
->(check: T, sdl: CheckSdl | null) {
+export function withCheckSdl<T extends { baseline: Record<string, unknown> | null | undefined }>(
+  check: T,
+  sdl: CheckSdl | null,
+) {
   return {
     ...check,
     schemaSDL: sdl?.schemaSDL ?? '',

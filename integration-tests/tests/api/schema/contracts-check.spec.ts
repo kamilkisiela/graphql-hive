@@ -1695,7 +1695,6 @@ test.concurrent(
       }
     `;
 
-
     const createContractResult = await execute({
       document: CreateContractMutation,
       variables: {
