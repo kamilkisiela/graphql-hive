@@ -541,10 +541,6 @@ export default gql`
   Describes a schema change for either a schema version ('SchemaVersion') or schema check ('SchemaCheck').
   """
   type SchemaChange {
-    """
-    Stable within a schema check, derived from the change itself.
-    """
-    id: ID!
     criticality: CriticalityLevel!
       @deprecated(
         reason: "Use 'SchemaChange.severityLevel' instead. This field will be removed once it is no longer in use by a client."

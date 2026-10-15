@@ -43,7 +43,6 @@ function safeChangeAt(kind: SafeKind, index: number) {
   return makeFragmentData(
     {
       __typename: 'SchemaChange' as const,
-      id: `${kind}-${index}`,
       path: kind === 'FIELD_ADDED' ? [type, 'value8'] : [type],
       message,
       severityLevel: SeverityLevelType.Safe,
@@ -60,7 +59,6 @@ function breakingChangeAt(index: number) {
   return makeFragmentData(
     {
       __typename: 'SchemaChange' as const,
-      id: `removed-field-${index}`,
       path: [`StressType_${index + 1}`, 'value7'],
       message: `Field 'value7' was removed from object type 'StressType_${index + 1}'`,
       severityLevel: SeverityLevelType.Breaking,

@@ -198,7 +198,6 @@ export function breakingSchemaCheck(
                 __typename: 'SchemaChangeEdge' as const,
                 node: {
                   __typename: 'SchemaChange' as const,
-                  id: 'removed-query-products',
                   path: ['Query', 'products'],
                   message: "Field 'products' was removed from object type 'Query'",
                   severityLevel: 'BREAKING',
@@ -303,7 +302,6 @@ const PAGE_SIZE = 50;
 function removedFieldAt(index: number) {
   return {
     __typename: 'SchemaChange' as const,
-    id: `removed-${index}`,
     path: [`StressType_${index}`, 'value7'],
     message: `Field 'value7' was removed from object type 'StressType_${index}'`,
     severityLevel: 'BREAKING',
@@ -319,7 +317,6 @@ function removedFieldAt(index: number) {
 function safeChangeAt(kind: string, index: number) {
   return {
     __typename: 'SchemaChange' as const,
-    id: `${kind}-${index}`,
     path: [`StressType_${index}`],
     message:
       kind === 'TYPE_ADDED'

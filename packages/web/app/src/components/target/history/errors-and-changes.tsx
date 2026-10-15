@@ -73,7 +73,6 @@ const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
 
 export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
   fragment ChangesBlock_SchemaChangeWithUsageFragment on SchemaChange {
-    id
     path
     message(withSafeBasedOnUsageNote: false)
     severityLevel
@@ -143,7 +142,6 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
 
 export const ChangesBlock_SchemaChangeFragment = graphql(`
   fragment ChangesBlock_SchemaChangeFragment on SchemaChange {
-    id
     path
     message(withSafeBasedOnUsageNote: false)
     severityLevel
@@ -186,7 +184,9 @@ export function ChangesBlock(
 ): ReactElement | null {
   const withUsage = useFragment(ChangesBlock_SchemaChangeWithUsageFragment, props.changesWithUsage);
   const plain = useFragment(ChangesBlock_SchemaChangeFragment, props.changes);
-  const keys = rowKeys((withUsage ?? plain ?? []).map(change => change.id));
+  const keys = rowKeys(
+    (withUsage ?? plain ?? []).map(change => `${change.path?.join('.') ?? ''}:${change.message}`),
+  );
   return (
     <div>
       {props.title && <ChangesTitle>{props.title}</ChangesTitle>}
@@ -225,8 +225,8 @@ export function ChangesTitle(props: { children: ReactNode }) {
 
 /**
  * Keys rows by change, not position: each row's accordion owns its open state, so a positional key
- * would leave "row 3 open" on whatever change a new page or filter puts third. The id hashes only
- * the change's meta, so a repeat falls back to its position rather than colliding.
+ * would leave "row 3 open" on whatever change a new page or filter puts third. A change is its
+ * coordinate and message; an exact repeat falls back to its position rather than colliding.
  */
 function rowKeys(ids: ReadonlyArray<string | null | undefined>) {
   const seen = new Set<string>();
