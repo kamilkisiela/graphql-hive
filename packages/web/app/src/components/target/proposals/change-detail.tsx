@@ -23,7 +23,7 @@ export function ProposalChangeDetail(props: {
               <div className="min-w-fit grow pr-2 md:flex-none">{props.icon}</div>
             </div>
           ),
-          content: props.error?.message ?? 'No details available for this change.',
+          content: props.error?.message,
         },
       ]}
     />

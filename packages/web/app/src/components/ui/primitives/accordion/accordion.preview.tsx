@@ -249,7 +249,7 @@ export const Disabled = createPreview(() => (
 
 // The call sites that will have rows with nothing to open: errors-and-changes.tsx ChangeItem and
 // proposals/change-detail.tsx. Each renders one Accordion per change, stacked. The labels here are
-// plain text; the ChangesBlock preview shows the real ChangeItem with its chips.
+// plain text; Components → ChangesBlock → UsageLabels shows the real ChangeItem with its chips.
 type Row = { value: string; label: string; badge?: ReactNode; body?: string };
 
 function OnePerChange(props: { variant: 'boxed' | 'list'; rows: Row[]; gap: string }) {
