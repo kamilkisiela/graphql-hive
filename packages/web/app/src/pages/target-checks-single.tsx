@@ -1358,6 +1358,7 @@ function contractFailure(check: {
 }
 
 type CheckStatusFlags = {
+  __typename: string;
   hasSchemaCompositionErrors: boolean;
   hasUnapprovedBreakingChanges: boolean;
   hasSchemaChanges: boolean;
@@ -1381,7 +1382,7 @@ function checkStatus(check: CheckStatusFlags, changedLabel: string) {
       label: 'Unapproved breaking changes!',
     };
   }
-  if (check.schemaPolicyErrors?.edges.length) {
+  if (check.__typename === 'FailedSchemaCheck' && check.schemaPolicyErrors?.edges.length) {
     return {
       icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
       label: 'Schema policy errors.',

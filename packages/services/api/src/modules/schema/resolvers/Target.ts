@@ -78,14 +78,9 @@ export const Target: Pick<
     const isSchemaChangesSelected = isFieldRequestedDeep(
       info,
       ['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
-        [
-          'schemaChanges',
-          'safeSchemaChanges',
-          'breakingSchemaChanges',
-          'hasSchemaChanges',
-          'hasUnapprovedBreakingChanges',
-          'cliApprovalMetadata',
-        ].map(fieldName => [typeName, fieldName] as const),
+        ['schemaChanges', 'safeSchemaChanges', 'breakingSchemaChanges', 'cliApprovalMetadata'].map(
+          fieldName => [typeName, fieldName] as const,
+        ),
       ),
     );
 

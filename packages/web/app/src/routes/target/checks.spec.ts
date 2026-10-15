@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import {
   activeSchemaCheck,
+  approvedPolicySchemaCheck,
   BREAKING_PERIOD,
   breakingSchemaCheck,
   CHECKS,
@@ -448,6 +449,24 @@ describe('failed check status', () => {
       await screen.findByText('2 schema policy errors', {}, { timeout: 10_000 });
       expect(screen.getByText('Failed')).toBeTruthy();
       expect(screen.getByLabelText('Schema policy errors.')).toBeTruthy();
+    },
+  );
+
+  it(
+    'keeps the policy glyph off a successful check that still lists policy errors',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          approvedPolicySchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-approved-policy`, { client: testClient });
+
+      await screen.findByText('Success', {}, { timeout: 10_000 });
+      expect(screen.queryByLabelText('Schema policy errors.')).toBeNull();
+      expect(screen.getByLabelText('Schema changed')).toBeTruthy();
     },
   );
 });

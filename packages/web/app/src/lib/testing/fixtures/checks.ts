@@ -257,19 +257,25 @@ export function breakingSchemaCheck(
   };
 }
 
+const policyError = (message: string) => ({
+  __typename: 'SchemaPolicyWarningEdge' as const,
+  node: {
+    __typename: 'SchemaPolicyWarning' as const,
+    message,
+    ruleId: 'require-deprecation-reason',
+    start: { __typename: 'CodePosition' as const, line: 1, column: 1 },
+    end: { __typename: 'CodePosition' as const, line: 1, column: 10 },
+  },
+});
+
+const policyErrors = {
+  __typename: 'SchemaPolicyWarningConnection' as const,
+  edges: [policyError('Deprecation reason is required'), policyError('Object type is unreachable')],
+};
+
 /** A check that failed only on schema policy errors. */
 export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
   const active = activeSchemaCheck(variables);
-  const policyError = (message: string) => ({
-    __typename: 'SchemaPolicyWarningEdge' as const,
-    node: {
-      __typename: 'SchemaPolicyWarning' as const,
-      message,
-      ruleId: 'require-deprecation-reason',
-      start: { __typename: 'CodePosition' as const, line: 1, column: 1 },
-      end: { __typename: 'CodePosition' as const, line: 1, column: 10 },
-    },
-  });
   return {
     ...active,
     project: {
@@ -283,13 +289,30 @@ export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
           canBeApprovedByViewer: true,
           hasSchemaChanges: true,
           compositionErrors: null,
-          schemaPolicyErrors: {
-            __typename: 'SchemaPolicyWarningConnection' as const,
-            edges: [
-              policyError('Deprecation reason is required'),
-              policyError('Object type is unreachable'),
-            ],
-          },
+          schemaPolicyErrors: policyErrors,
+        },
+      },
+    },
+  };
+}
+
+/**
+ * An approved check that still lists policy errors. The API refuses approval while policy errors
+ * exist, so it never produces this; the fixture only pins the status glyph to failed checks.
+ */
+export function approvedPolicySchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          isApproved: true,
+          hasSchemaChanges: true,
+          schemaPolicyErrors: policyErrors,
         },
       },
     },
