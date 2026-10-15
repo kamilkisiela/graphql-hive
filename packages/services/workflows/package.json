@@ -31,6 +31,7 @@
     "@types/sendmail": "1.4.7",
     "bentocache": "catalog:",
     "dotenv": "catalog:",
+    "got": "catalog:",
     "graphile-worker": "0.16.6",
     "graphql": "catalog:",
     "graphql-yoga": "catalog:",

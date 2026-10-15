@@ -1,5 +1,5 @@
 import Agent from 'agentkeepalive';
-import { got, Response as GotResponse } from 'got';
+import got, { Response as GotResponse } from 'got';
 import type { ClickHouseConfig as BaseClickhouseConfig, ServiceLogger } from '@hive/service-common';
 import { compressGzip } from '@hive/usage-common';
 import * as Sentry from '@sentry/node';
@@ -190,6 +190,8 @@ async function writeCsv(
         'Content-Encoding': 'gzip',
       },
       retry: {
+        // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
+        enforceRetryRules: false,
         calculateDelay(info) {
           if (info.attemptCount >= maxRetry) {
             logger.warn(

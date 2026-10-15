@@ -1,5 +1,5 @@
 import type { OptionsOfJSONResponseBody } from 'got';
-import { got, HTTPError, TimeoutError } from 'got';
+import got, { HTTPError, TimeoutError } from 'got';
 import { Injectable } from 'graphql-modules';
 import { scrubBasicAuth, SpanKind, trace, type Span } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
