@@ -3512,6 +3512,7 @@ const schemaCheckSQLFields = (include?: { sdl?: boolean; changes?: boolean }) =>
       `
   }
   , c."service_name" as "serviceName"
+  , c."baseline_schema_sdl_store_id" IS NOT NULL as "hasBaselineSchemaSDL"
   , c."baseline_schema_hash" as "baselineSchemaHash"
   , c."baseline_schema_composition_errors" as "baselineCompositionErrors"
   , c."service_url" as "serviceUrl"

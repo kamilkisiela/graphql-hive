@@ -554,6 +554,7 @@ function ConditionalBreakingChangesMetadataSection(props: {
 
 const DefaultSchemaView_SchemaCheckFragment = graphql(`
   fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
+    __typename
     id
     serviceName
     hasSchemaCompositionErrors
@@ -673,7 +674,7 @@ function useDefaultSchemaView(props: {
                 firstPage={schemaCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
                 totalCount={schemaCheck.breakingSchemaChanges.totalCount}
                 loadPage={changePages.loadBreakingPage}
-                resetKey={schemaCheck.id}
+                resetKey={`${schemaCheck.id}:${schemaCheck.__typename}`}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
@@ -684,7 +685,7 @@ function useDefaultSchemaView(props: {
                 schemaCheckId={schemaCheck.id}
                 groups={schemaCheck.safeSchemaChangeGroups}
                 loadPage={changePages.loadSafePage}
-                resetKey={schemaCheck.id}
+                resetKey={`${schemaCheck.id}:${schemaCheck.__typename}`}
               />
             </div>
           ) : null}
@@ -947,6 +948,7 @@ const ContractCheckView_ContractCheckFragment = graphql(`
 
 const ContractCheckView_SchemaCheckFragment = graphql(`
   fragment ContractCheckView_SchemaCheckFragment on SchemaCheck {
+    __typename
     id
     serviceName
     meta {
@@ -1021,7 +1023,7 @@ function useContractCheckView(props: {
                 firstPage={contractCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
                 totalCount={contractCheck.breakingSchemaChanges.totalCount}
                 loadPage={changePages.loadBreakingPage}
-                resetKey={contractCheck.id}
+                resetKey={`${contractCheck.id}:${schemaCheck.__typename}`}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
@@ -1032,7 +1034,7 @@ function useContractCheckView(props: {
                 schemaCheckId={schemaCheck.id}
                 groups={contractCheck.safeSchemaChangeGroups}
                 loadPage={changePages.loadSafePage}
-                resetKey={contractCheck.id}
+                resetKey={`${contractCheck.id}:${schemaCheck.__typename}`}
               />
             </div>
           ) : null}

@@ -1,7 +1,7 @@
 import { parseDateRangeInput } from '../../../shared/helpers';
 import { GraphStore } from '../../graph/providers/graph-store';
 import { OperationsManager } from '../../operations/providers/operations-manager';
-import { isFieldRequestedDeep } from '../lib/is-field-requested';
+import { isFieldRequestedDeep, isSchemaCheckSDLRequested } from '../lib/is-field-requested';
 import { ContractsManager } from '../providers/contracts-manager';
 import { SchemaManager } from '../providers/schema-manager';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from '../to-graphql-schema-check';
@@ -50,7 +50,7 @@ export const Target: Pick<
   schemaCheck: async (target, args, { injector }, info) => {
     const schemaCheck = await injector
       .get(SchemaManager)
-      .findSchemaCheckForTarget(target, args.id, { withSDL: isSDLRequested(info) });
+      .findSchemaCheckForTarget(target, args.id, { withSDL: isSchemaCheckSDLRequested(info) });
 
     if (schemaCheck == null) {
       return null;
@@ -65,7 +65,7 @@ export const Target: Pick<
     );
   },
   schemaChecks: async (target, args, { injector }, info) => {
-    const operationSelectsSDL = isSDLRequested(info);
+    const operationSelectsSDL = isSchemaCheckSDLRequested(info);
 
     const isSchemaChangesSelected = isFieldRequestedDeep(
       info,
@@ -126,21 +126,3 @@ export const Target: Pick<
     });
   },
 };
-
-/** Whether the operation reads a check's SDLs, directly or through `baseline`, which falls back to them. */
-function isSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
-  return isFieldRequestedDeep(info, [
-    ['SchemaCheck', 'baseline'],
-    ['SuccessfulSchemaCheck', 'baseline'],
-    ['FailedSchemaCheck', 'baseline'],
-    ['SchemaCheck', 'schemaSDL'],
-    ['SuccessfulSchemaCheck', 'schemaSDL'],
-    ['SuccessfulSchemaCheck', 'compositeSchemaSDL'],
-    ['SuccessfulSchemaCheck', 'supergraphSDL'],
-    ['FailedSchemaCheck', 'compositeSchemaSDL'],
-    ['FailedSchemaCheck', 'supergraphSDL'],
-    ['FailedSchemaCheck', 'schemaSDL'],
-    ['SuccessfulSchemaCheck', 'previousSchemaSDL'],
-    ['FailedSchemaCheck', 'previousSchemaSDL'],
-  ]);
-}

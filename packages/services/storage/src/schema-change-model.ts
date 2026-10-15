@@ -1490,6 +1490,8 @@ const SchemaCheckCommonFields = {
 
 const SchemaCheckSharedOutputFields = {
   ...SchemaCheckCommonFields,
+  /** A baseline was stored with the check; its SDLs are only loaded when asked for. */
+  hasBaselineSchemaSDL: z.boolean(),
   baselineSchemaSDL: z.string().nullable(),
   baselineSchemaHash: z.string().nullable(),
   baselinePublicSDL: z.string().nullable(),

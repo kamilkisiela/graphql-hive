@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { useRef, type ReactElement, type ReactNode } from 'react';
 import { DataTablePagination } from '@/components/ui/data-table/data-table-pagination';
 import { Accordion } from '@/components/ui/primitives/accordion/accordion';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -45,8 +45,8 @@ export function usePagedChanges<T>(args: {
 }) {
   const [pages, setPages] = useResetState(() => new Map<number, T[]>(), [args.resetKey]);
   const [pageIndex, setPageIndex] = useResetState(() => 0, [args.resetKey]);
-  const [loading, setLoading] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useResetState(() => false, [args.resetKey]);
+  const [failed, setFailed] = useResetState(() => false, [args.resetKey]);
   // Only the newest request may switch the page, and only within the list it was made for.
   const latest = useRef<{ key: string; index: number } | null>(null);
   const currentKey = useRef(args.resetKey);
@@ -74,7 +74,7 @@ export function usePagedChanges<T>(args: {
         }
       },
       () => {
-        if (latest.current === request) {
+        if (currentKey.current === request.key && latest.current === request) {
           setLoading(false);
           setFailed(true);
         }

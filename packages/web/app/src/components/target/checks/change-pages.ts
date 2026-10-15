@@ -106,6 +106,10 @@ const ContractSafeChangesPageQuery = graphql(`
   }
 `);
 
+// A page is asked for on a click and may follow an approval that changed its rows, so it is
+// always fetched rather than read back from the cache.
+const POLICY = { requestPolicy: 'network-only' } as const;
+
 function rowsOf<T>(connection: { edges: ReadonlyArray<{ node: T }> } | null | undefined) {
   return connection?.edges.map(edge => edge.node) ?? [];
 }
@@ -127,14 +131,16 @@ export function useChangePageLoaders(args: { schemaCheckId: string; contractChec
   async function loadBreakingPage(offset: number) {
     if (contractCheckId) {
       const result = await client
-        .query(ContractBreakingChangesPageQuery, { ...base, contractCheckId, offset })
+        .query(ContractBreakingChangesPageQuery, { ...base, contractCheckId, offset }, POLICY)
         .toPromise();
       if (result.error) {
         throw result.error;
       }
       return rowsOf(result.data?.target?.schemaCheck?.contractCheck?.breakingSchemaChanges);
     }
-    const result = await client.query(BreakingChangesPageQuery, { ...base, offset }).toPromise();
+    const result = await client
+      .query(BreakingChangesPageQuery, { ...base, offset }, POLICY)
+      .toPromise();
     if (result.error) {
       throw result.error;
     }
@@ -144,7 +150,7 @@ export function useChangePageLoaders(args: { schemaCheckId: string; contractChec
   async function loadSafePage(kind: string, offset: number) {
     if (contractCheckId) {
       const result = await client
-        .query(ContractSafeChangesPageQuery, { ...base, contractCheckId, kind, offset })
+        .query(ContractSafeChangesPageQuery, { ...base, contractCheckId, kind, offset }, POLICY)
         .toPromise();
       if (result.error) {
         throw result.error;
@@ -153,7 +159,9 @@ export function useChangePageLoaders(args: { schemaCheckId: string; contractChec
         result.data?.target?.schemaCheck?.contractCheck?.safeSchemaChangeGroups[0]?.changes,
       );
     }
-    const result = await client.query(SafeChangesPageQuery, { ...base, kind, offset }).toPromise();
+    const result = await client
+      .query(SafeChangesPageQuery, { ...base, kind, offset }, POLICY)
+      .toPromise();
     if (result.error) {
       throw result.error;
     }
