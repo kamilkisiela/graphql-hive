@@ -12,6 +12,7 @@ import {
   InfoIcon,
   ListIcon,
   Loader2,
+  ScaleIcon,
   ShieldAlertIcon,
   TriangleAlertIcon,
 } from 'lucide-react';
@@ -859,7 +860,7 @@ function useDefaultSchemaView(props: {
   items.push({
     value: 'policy',
     label: 'Policy',
-    icon: TriangleAlertIcon,
+    icon: ScaleIcon,
     attrs: { 'data-testid': 'policy-view-btn' },
     disabled:
       !schemaCheck.schemaPolicyWarnings &&
@@ -1246,12 +1247,12 @@ function SchemaChecksView(props: {
         {
           value: 'default',
           label: 'Default Graph',
-          trailing: checkStatusIcon(schemaCheck, 'Schema changed'),
+          trailing: checkStatusTrailing(schemaCheck, 'Schema changed'),
         },
         ...contractChecks.map(edge => ({
           value: edge.node.id,
           label: edge.node.contractName,
-          trailing: checkStatusIcon(edge.node, 'Contract schema changed'),
+          trailing: checkStatusTrailing(edge.node, 'Contract schema changed'),
         })),
       ]}
       size="compact"
@@ -1295,10 +1296,7 @@ function SchemaChecksView(props: {
           />
         </div>
       ) : null}
-      <ScopeBar
-        picker={contractPicker}
-        legend={contractChecks.length ? CONTRACT_STATUS_LEGEND : undefined}
-      />
+      <ScopeBar picker={contractPicker} />
       <TabbedView
         items={active.items}
         value={active.value}
@@ -1308,12 +1306,6 @@ function SchemaChecksView(props: {
     </div>
   );
 }
-
-const CONTRACT_STATUS_LEGEND = [
-  { icon: <TriangleAlertIcon className="size-3.5 text-critical" />, label: 'Failed' },
-  { icon: <GitCompareIcon className="size-3.5" />, label: 'Schema changed' },
-  { icon: <CheckIcon className="size-3.5 text-success" />, label: 'Passed' },
-];
 
 /**
  * Why a contract check failed, in the CLI's words, with how much it found. A contract fails to
@@ -1367,32 +1359,56 @@ function checkStatus(check: CheckStatusFlags, changedLabel: string) {
     return {
       icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
       label: 'Composition failed.',
+      state: 'Failed',
     };
   }
   if (check.hasUnapprovedBreakingChanges) {
     return {
       icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
       label: 'Unapproved breaking changes!',
+      state: 'Failed',
     };
   }
   if (check.baseline?.compositionErrors?.length) {
     return {
       icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
       label: 'Baseline composition failed.',
+      state: 'Failed',
     };
   }
   if (check.hasSchemaChanges) {
-    return { icon: <GitCompareIcon className="size-3.5" />, label: changedLabel };
+    return {
+      icon: <GitCompareIcon className="size-3.5" />,
+      label: changedLabel,
+      state: 'Schema changed',
+    };
   }
   return {
     icon: <CheckIcon className="size-3.5 text-success" />,
     label: 'Composition succeeded.',
+    state: 'No changes',
   };
 }
 
 function checkStatusIcon(check: CheckStatusFlags, changedLabel: string) {
   const status = checkStatus(check, changedLabel);
   return <StatusTooltip icon={status.icon} label={status.label} />;
+}
+
+/** A picker row's status: glyph and state in words, the reason on hover. */
+function checkStatusTrailing(check: CheckStatusFlags, changedLabel: string) {
+  const status = checkStatus(check, changedLabel);
+  return (
+    <StatusTooltip
+      icon={
+        <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+          {status.icon}
+          {status.state}
+        </span>
+      }
+      label={status.label}
+    />
+  );
 }
 
 const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
@@ -1536,7 +1552,7 @@ const ActiveSchemaCheck = (props: { schemaCheckId: string | null }): React.React
                         schemaCheck.__typename === 'FailedSchemaCheck' ? (
                           <span className="text-critical">Failed</span>
                         ) : (
-                          'Success'
+                          'Passed'
                         ),
                     },
                     ...(schemaCheck.serviceName
