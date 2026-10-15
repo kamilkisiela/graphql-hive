@@ -41,7 +41,10 @@ import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { Contracts } from './contracts';
 import { CompositionOrchestrator } from './orchestrator/composition-orchestrator';
 import { ensureCompositeSchemas, removeDescriptions, SchemaHelper } from './schema-helper';
-import { SchemaVersionStore } from './schema-version-store';
+import {
+  SchemaVersionStore,
+  type SchemaVersion as StoredSchemaVersion,
+} from './schema-version-store';
 
 const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   endpoint: z.string().url().nonempty(),
@@ -66,6 +69,7 @@ const externalSchemaCompositionTestDocument = parse(externalSchemaCompositionTes
 export class SchemaManager {
   private logger: Logger;
   private latestSchemaVersionLoader: DataLoader<TargetSelector, SchemaVersion>;
+  private latestValidVersionByGraphLoader: DataLoader<Graph, StoredSchemaVersion | null, string>;
 
   constructor(
     logger: Logger,
@@ -106,6 +110,13 @@ export class SchemaManager {
           return selector.targetId;
         },
       },
+    );
+    this.latestValidVersionByGraphLoader = new DataLoader(
+      graphs =>
+        Promise.all(
+          graphs.map(graph => this.schemaVersions.getMaybeLatestValidSchemaVersionForGraph(graph)),
+        ),
+      { cacheKeyFn: graph => graph.id },
     );
   }
 
@@ -290,7 +301,7 @@ export class SchemaManager {
   async getMaybeLatestValidVersionForGraph(graph: Graph) {
     this.logger.debug('Fetching maybe latest valid version (graphId=%s)', graph.id);
 
-    const version = await this.schemaVersions.getMaybeLatestValidSchemaVersionForGraph(graph);
+    const version = await this.latestValidVersionByGraphLoader.load(graph);
 
     if (!version) {
       return null;
