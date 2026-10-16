@@ -294,12 +294,12 @@ function SchemaVersionView(props: SchemaVersionViewProps) {
         {
           value: 'default',
           label: 'Default Graph',
-          trailing: versionStatusIcon(schemaVersion, DEFAULT_GRAPH_LABELS),
+          trailing: versionStatusTrailing(schemaVersion, DEFAULT_GRAPH_LABELS),
         },
         ...contractVersions.map(edge => ({
           value: edge.node.id,
           label: `${edge.node.contractName}@${edge.node.id.substring(0, 8)}`,
-          trailing: versionStatusIcon(edge.node, CONTRACT_LABELS),
+          trailing: versionStatusTrailing(edge.node, CONTRACT_LABELS),
         })),
       ]}
       size="compact"
@@ -408,12 +408,7 @@ function SchemaVersionView(props: SchemaVersionViewProps) {
               />
             </div>
           ) : null}
-          {contractPicker ? (
-            <ScopeBar
-              picker={contractPicker}
-              legend={contractVersions.length ? CONTRACT_STATUS_LEGEND : undefined}
-            />
-          ) : null}
+          {contractPicker ? <ScopeBar picker={contractPicker} /> : null}
           <TabbedView
             value={selectedView}
             onValueChange={setSelectedView}
@@ -462,20 +457,45 @@ type VersionStatusLabels = { changed: string; succeeded: string; failed: string 
 /** The glyph and the words for a version's outcome; the trigger takes the glyph, the list both. */
 function versionStatus(version: VersionStatusFlags, labels: VersionStatusLabels) {
   if (version.hasSchemaChanges) {
-    return { icon: <GitCompareIcon className="size-3.5" />, label: labels.changed };
+    return {
+      icon: <GitCompareIcon className="size-3.5" />,
+      label: labels.changed,
+      state: 'Schema changed',
+    };
   }
   if (version.isComposable) {
-    return { icon: <CheckIcon className="size-3.5 text-success" />, label: labels.succeeded };
+    return {
+      icon: <CheckIcon className="size-3.5 text-success" />,
+      label: labels.succeeded,
+      state: 'No changes',
+    };
   }
   return {
     icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
     label: labels.failed,
+    state: 'Failed',
   };
 }
 
 function versionStatusIcon(version: VersionStatusFlags, labels: VersionStatusLabels) {
   const status = versionStatus(version, labels);
   return <StatusTooltip icon={status.icon} label={status.label} />;
+}
+
+/** A picker row's status: glyph and state in words, the reason on hover. */
+function versionStatusTrailing(version: VersionStatusFlags, labels: VersionStatusLabels) {
+  const status = versionStatus(version, labels);
+  return (
+    <StatusTooltip
+      icon={
+        <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+          {status.icon}
+          {status.state}
+        </span>
+      }
+      label={status.label}
+    />
+  );
 }
 
 const DEFAULT_GRAPH_LABELS: VersionStatusLabels = {
@@ -489,12 +509,6 @@ const CONTRACT_LABELS: VersionStatusLabels = {
   succeeded: 'Contract composition succeeded.',
   failed: 'Contract composition failed.',
 };
-
-const CONTRACT_STATUS_LEGEND = [
-  { icon: <TriangleAlertIcon className="size-3.5 text-critical" />, label: 'Failed' },
-  { icon: <GitCompareIcon className="size-3.5" />, label: 'Schema changed' },
-  { icon: <CheckIcon className="size-3.5 text-success" />, label: 'Passed' },
-];
 
 function GraphQLSchemaView(props: {
   title: string;
