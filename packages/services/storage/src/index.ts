@@ -3521,6 +3521,21 @@ const schemaCheckSQLFields = (include?: { sdl?: boolean; changes?: boolean }) =>
   , c."schema_version_id" as "schemaVersionId"
   , c."is_success" as "isSuccess"
   , c."schema_composition_errors" as "schemaCompositionErrors"
+  , (
+      CASE WHEN jsonb_typeof(c."breaking_schema_changes") = 'array'
+           THEN jsonb_array_length(c."breaking_schema_changes") ELSE 0 END > 0
+      OR CASE WHEN jsonb_typeof(c."safe_schema_changes") = 'array'
+           THEN jsonb_array_length(c."safe_schema_changes") ELSE 0 END > 0
+    ) as "hasSchemaChanges"
+  , EXISTS (
+      SELECT 1
+      FROM jsonb_array_elements(
+        CASE WHEN jsonb_typeof(c."breaking_schema_changes") = 'array'
+             THEN c."breaking_schema_changes" ELSE '[]'::jsonb END
+      ) AS "change"
+      WHERE coalesce(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+        AND coalesce("change"->>'isSafeBasedOnUsage', 'false') = 'false'
+    ) as "hasUnapprovedBreakingChanges"
   ${
     (include?.changes ?? true)
       ? psql`

@@ -46,15 +46,11 @@ export class SchemaCheckManager {
   }
 
   getHasUnapprovedBreakingChanges(schemaCheck: SchemaCheck) {
-    return (
-      schemaCheck.breakingSchemaChanges?.some(
-        change => change.approvalMetadata === null && !change.isSafeBasedOnUsage,
-      ) ?? false
-    );
+    return schemaCheck.hasUnapprovedBreakingChanges;
   }
 
   getHasSchemaChanges(schemaCheck: SchemaCheck) {
-    return !!(schemaCheck.breakingSchemaChanges?.length || schemaCheck.safeSchemaChanges?.length);
+    return schemaCheck.hasSchemaChanges;
   }
 
   getSafeSchemaChanges(schemaCheck: SchemaCheck) {

@@ -3278,3 +3278,72 @@ test.concurrent(
     expect(firstPage.typeAdded).toEqual([{ kind: 'TYPE_ADDED' }]);
   },
 );
+
+const SchemaCheckFlagsQuery = graphql(/* GraphQL */ `
+  query SchemaCheckFlagsOnTargetQuery($selector: TargetSelectorInput!) {
+    target(reference: { bySelector: $selector }) {
+      schemaChecks(first: 10) {
+        edges {
+          node {
+            __typename
+            hasSchemaChanges
+            hasUnapprovedBreakingChanges
+          }
+        }
+      }
+    }
+  }
+`);
+
+test.concurrent(
+  'schema checks list whether they changed the schema and have unapproved breaking changes',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createTargetAccessToken, project, target } = await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({});
+
+    await token
+      .publishSchema({ sdl: 'type Query { ping: String }', author: 'User', commit: 'initial' })
+      .then(r => r.expectNoGraphQLErrors());
+    for (const sdl of [
+      'type Query { ping: Float }',
+      'type Query { ping: String pong: String }',
+      'type Query { ping: String }',
+    ]) {
+      await token.checkSchema(sdl).then(r => r.expectNoGraphQLErrors());
+    }
+
+    const flags = execute({
+      document: SchemaCheckFlagsQuery,
+      variables: {
+        selector: {
+          organizationSlug: organization.slug,
+          projectSlug: project.slug,
+          targetSlug: target.slug,
+        },
+      },
+      authToken: ownerToken,
+    })
+      .then(r => r.expectNoGraphQLErrors())
+      .then(r => r.target?.schemaChecks.edges.map(edge => edge.node));
+
+    await expect(flags).resolves.toEqual([
+      {
+        __typename: 'SuccessfulSchemaCheck',
+        hasSchemaChanges: false,
+        hasUnapprovedBreakingChanges: false,
+      },
+      {
+        __typename: 'SuccessfulSchemaCheck',
+        hasSchemaChanges: true,
+        hasUnapprovedBreakingChanges: false,
+      },
+      {
+        __typename: 'FailedSchemaCheck',
+        hasSchemaChanges: true,
+        hasUnapprovedBreakingChanges: true,
+      },
+    ]);
+  },
+);
