@@ -562,6 +562,12 @@ function ConditionalBreakingChangesMetadataSection(props: {
   );
 }
 
+// Approving a check turns it from Failed into Successful. Keying on the typename starts the
+// visited pages over, so they are read again with their approvals.
+function changePagesKey(listId: string, schemaCheck: { __typename?: string }) {
+  return `${listId}:${schemaCheck.__typename}`;
+}
+
 const DefaultSchemaView_SchemaCheckFragment = graphql(`
   fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
     __typename
@@ -684,7 +690,7 @@ function useDefaultSchemaView(props: {
                 firstPage={schemaCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
                 totalCount={schemaCheck.breakingSchemaChanges.totalCount}
                 loadPage={changePages.loadBreakingPage}
-                resetKey={`${schemaCheck.id}:${schemaCheck.__typename}`}
+                resetKey={changePagesKey(schemaCheck.id, schemaCheck)}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
@@ -695,7 +701,7 @@ function useDefaultSchemaView(props: {
                 schemaCheckId={schemaCheck.id}
                 groups={schemaCheck.safeSchemaChangeGroups}
                 loadPage={changePages.loadSafePage}
-                resetKey={`${schemaCheck.id}:${schemaCheck.__typename}`}
+                resetKey={changePagesKey(schemaCheck.id, schemaCheck)}
               />
             </div>
           ) : null}
@@ -1033,7 +1039,7 @@ function useContractCheckView(props: {
                 firstPage={contractCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
                 totalCount={contractCheck.breakingSchemaChanges.totalCount}
                 loadPage={changePages.loadBreakingPage}
-                resetKey={`${contractCheck.id}:${schemaCheck.__typename}`}
+                resetKey={changePagesKey(contractCheck.id, schemaCheck)}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
@@ -1044,7 +1050,7 @@ function useContractCheckView(props: {
                 schemaCheckId={schemaCheck.id}
                 groups={contractCheck.safeSchemaChangeGroups}
                 loadPage={changePages.loadSafePage}
-                resetKey={`${contractCheck.id}:${schemaCheck.__typename}`}
+                resetKey={changePagesKey(contractCheck.id, schemaCheck)}
               />
             </div>
           ) : null}
