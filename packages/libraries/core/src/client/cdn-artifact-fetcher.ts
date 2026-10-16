@@ -54,7 +54,7 @@ type CDNFetchResult = {
   /** SHA-256 Hash */
   hash: string;
   /** Schema Version ID as on Hive Console (optional)
-   * @deprecated Please us `graphVersionId` instead.
+   * @deprecated Please use `graphVersionId` instead.
    */
   schemaVersionId: null | string;
   /** The graph id of the artifact. */
