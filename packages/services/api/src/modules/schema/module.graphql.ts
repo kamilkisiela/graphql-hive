@@ -845,7 +845,16 @@ export default gql`
   type SchemaChangeGroup {
     kind: String!
     totalCount: Int!
-    changes(first: Int, offset: Int): SchemaChangeConnection!
+    changes(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection!
   }
 
   type SchemaChangeEdge {
@@ -1629,7 +1638,16 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
-    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     """
     Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
@@ -1698,7 +1716,16 @@ export default gql`
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
 
-    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     """
     Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
@@ -1875,7 +1902,16 @@ export default gql`
     """
     Breaking changes can exist in an successful schema check if the check was manually approved.
     """
-    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     """
     Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
@@ -1993,7 +2029,16 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
-    breakingSchemaChanges(first: Int, offset: Int): SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     """
     Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
