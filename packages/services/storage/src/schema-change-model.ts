@@ -1450,6 +1450,12 @@ const SchemaCheckSharedChangesFields = {
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
 };
 
+/** Computed by `schemaCheckSQLFields`, so a list selecting only these loads no change JSON. */
+const SchemaCheckFlagsFields = {
+  hasSchemaChanges: z.boolean(),
+  hasUnapprovedBreakingChanges: z.boolean(),
+};
+
 const ManuallyApprovedSchemaCheckFields = {
   isManuallyApproved: z.literal(true),
   manualApprovalUserId: z.string().nullable(),
@@ -1624,6 +1630,7 @@ export const SchemaCheckModel = z.union([
       isSuccess: z.literal(false),
       ...SchemaCheckSharedPolicyFields,
       ...SchemaCheckSharedChangesFields,
+      ...SchemaCheckFlagsFields,
       ...PersistedSchemaCheckFields,
       ...NotManuallyApprovedSchemaCheckFields,
       ...SchemaCheckSharedOutputFields,
@@ -1639,6 +1646,7 @@ export const SchemaCheckModel = z.union([
       isSuccess: z.literal(true),
       ...SchemaCheckSharedPolicyFields,
       ...SchemaCheckSharedChangesFields,
+      ...SchemaCheckFlagsFields,
       ...SuccessfulSchemaCompositionOutputFields,
       ...PersistedSchemaCheckFields,
       ...SchemaCheckSharedOutputFields,
