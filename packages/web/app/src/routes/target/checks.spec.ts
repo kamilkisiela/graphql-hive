@@ -7,6 +7,7 @@ import {
   CHECKS,
   checkSdl,
   checksFixtures,
+  MANY_CHANGES,
   manyChangesSchemaCheck,
   policyFailedSchemaCheck,
   safeChangesPage,
@@ -18,6 +19,8 @@ import { createTestClient } from '@/lib/testing/urql';
 import { createAppRouter } from '@/router';
 import { createMemoryHistory } from '@tanstack/react-router';
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+
+const PAGE = vi.hoisted(() => 50);
 
 // The tree imports every page; these stand in for what cannot load under jsdom.
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
@@ -31,6 +34,8 @@ vi.mock('@/components/schema-editor', async importOriginal => ({
   SchemaEditor: () => null,
 }));
 vi.mock('supertokens-auth-react', () => import('@/lib/testing/mocks/supertokens'));
+// Real pages hold 300 changes; mounting that many rows makes jsdom slow, and paging works the same.
+vi.mock('@/components/target/history/change-page-size', () => ({ CHANGES_PAGE_SIZE: PAGE }));
 vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/mocks/session'));
 
 const CHECKS_PAGE = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}/checks`;
@@ -488,18 +493,22 @@ describe('paged changes', () => {
       const testClient = pagedClient();
       renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
 
-      await screen.findByText('120 unapproved breaking changes', {}, { timeout: 10_000 });
+      await screen.findByText(
+        `${MANY_CHANGES.breaking} unapproved breaking changes`,
+        {},
+        { timeout: 10_000 },
+      );
       const [breakingNav] = screen.getAllByRole('navigation', { name: 'Pagination' });
       expect(within(breakingNav).getByText('1 / 3')).toBeTruthy();
       expect(change('StressType_0')).toBeTruthy();
 
       await next(breakingNav);
 
-      await waitFor(() => expect(change('StressType_50')).toBeTruthy());
+      await waitFor(() => expect(change(`StressType_${PAGE}`)).toBeTruthy());
       expect(change('StressType_0')).toBeNull();
       expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(1);
       expect(testClient.requests('CheckBreakingChangesPageQuery')[0].variables).toMatchObject({
-        offset: 50,
+        offset: PAGE,
       });
 
       // A page already seen comes from memory.
@@ -522,7 +531,9 @@ describe('paged changes', () => {
     await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
 
     // The change now first on the page is another one, so it starts closed.
-    const firstOfNextPage = await screen.findByRole('button', { name: /StressType_50$/ });
+    const firstOfNextPage = await screen.findByRole('button', {
+      name: new RegExp(`StressType_${PAGE}$`),
+    });
     expect(firstOfNextPage.getAttribute('aria-expanded')).toBe('false');
   });
 
@@ -533,9 +544,11 @@ describe('paged changes', () => {
     await screen.findByText('Safe Changes', {}, { timeout: 10_000 });
     const groupTrigger = (label: string) => screen.getByRole('button', { name: new RegExp(label) });
     expect(groupTrigger('Type added').textContent).toContain('2');
-    expect(groupTrigger('Type description changed').textContent).toContain('120');
+    expect(groupTrigger('Type description changed').textContent).toContain(
+      String(MANY_CHANGES.descriptions),
+    );
 
-    // A group of fewer than 50 has no pagination; only the breaking list's bar is up.
+    // A group smaller than a page has no pagination; only the breaking list's bar is up.
     await act(async () => {
       fireEvent.click(groupTrigger('Type added'));
     });
@@ -552,7 +565,7 @@ describe('paged changes', () => {
     await waitFor(() =>
       expect(testClient.requests('CheckSafeChangesPageQuery')[0]?.variables).toMatchObject({
         kind: 'TYPE_DESCRIPTION_CHANGED',
-        offset: 50,
+        offset: PAGE,
       }),
     );
     await waitFor(() => expect(within(groupNav).getByText('2 / 3')).toBeTruthy());
@@ -623,9 +636,13 @@ describe('paged changes', () => {
       screen.queryByRole('button', { name: new RegExp(`${name}(?!\\d)`) });
     renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
 
-    await screen.findByText('120 unapproved breaking changes', {}, { timeout: 10_000 });
+    await screen.findByText(
+      `${MANY_CHANGES.breaking} unapproved breaking changes`,
+      {},
+      { timeout: 10_000 },
+    );
     await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
-    await waitFor(() => expect(row('StressType_50')).toBeTruthy());
+    await waitFor(() => expect(row(`StressType_${PAGE}`)).toBeTruthy());
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /^Approve/ }));
@@ -639,7 +656,9 @@ describe('paged changes', () => {
     await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
 
     // The page seen before approving is read again rather than shown from memory.
-    await waitFor(() => expect(row('StressType_50')?.textContent).toContain('Approved by User'));
+    await waitFor(() =>
+      expect(row(`StressType_${PAGE}`)?.textContent).toContain('Approved by User'),
+    );
     expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(2);
   });
 });

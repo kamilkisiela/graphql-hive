@@ -5,6 +5,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import type { SchemaChangeKind } from '@/gql/graphql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
+import { CHANGES_PAGE_SIZE } from './change-page-size';
 import {
   ChangesBlock,
   ChangesBlock_SchemaChangeFragment,
@@ -13,14 +14,13 @@ import {
   ChangesTitle,
 } from './errors-and-changes';
 
-/** The API serves the first page with the check; the fragments below ask for this many. */
-export const CHANGES_PAGE_SIZE = 50;
+export { CHANGES_PAGE_SIZE };
 
 export const PagedChanges_SafeChangeGroupFragment = graphql(`
   fragment PagedChanges_SafeChangeGroupFragment on SchemaChangeGroup {
     kind
     totalCount
-    changes(first: 50) {
+    changes(first: 300) {
       edges {
         node {
           ...ChangesBlock_SchemaChangeFragment

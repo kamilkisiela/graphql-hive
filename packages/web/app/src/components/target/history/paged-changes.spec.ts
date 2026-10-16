@@ -13,13 +13,15 @@ function deferred<T>() {
 }
 
 const firstPage = ['a'];
+// Three pages: two full and a partial one.
+const totalCount = CHANGES_PAGE_SIZE * 2 + 20;
 
 describe('usePagedChanges', () => {
   it('keeps the current page while the next loads, then switches to it', async () => {
     const page = deferred<string[]>();
     const loadPage = vi.fn(() => page.promise);
     const { result } = renderHook(() =>
-      usePagedChanges({ firstPage, totalCount: 120, loadPage, resetKey: 'check-1' }),
+      usePagedChanges({ firstPage, totalCount, loadPage, resetKey: 'check-1' }),
     );
     expect(result.current.pageCount).toBe(3);
 
@@ -39,7 +41,7 @@ describe('usePagedChanges', () => {
       .mockReturnValueOnce(slow.promise)
       .mockReturnValueOnce(fast.promise);
     const { result } = renderHook(() =>
-      usePagedChanges({ firstPage, totalCount: 150, loadPage, resetKey: 'check-1' }),
+      usePagedChanges({ firstPage, totalCount, loadPage, resetKey: 'check-1' }),
     );
 
     act(() => result.current.goTo(1));
@@ -55,7 +57,7 @@ describe('usePagedChanges', () => {
     const { result } = renderHook(() =>
       usePagedChanges({
         firstPage,
-        totalCount: 120,
+        totalCount,
         loadPage: () => page.promise,
         resetKey: 'check-1',
       }),
@@ -77,7 +79,7 @@ describe('usePagedChanges', () => {
       (props: { resetKey: string; firstPage: string[] }) =>
         usePagedChanges({
           ...props,
-          totalCount: 120,
+          totalCount,
           loadPage: async () => ['b'],
         }),
       { initialProps: { resetKey: 'check-1', firstPage } },
@@ -94,7 +96,7 @@ describe('usePagedChanges', () => {
     const page = deferred<string[]>();
     const { result, rerender } = renderHook(
       (props: { resetKey: string }) =>
-        usePagedChanges({ ...props, firstPage, totalCount: 120, loadPage: () => page.promise }),
+        usePagedChanges({ ...props, firstPage, totalCount, loadPage: () => page.promise }),
       { initialProps: { resetKey: 'contract-1' } },
     );
 

@@ -591,7 +591,7 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
       }
     }
     hasSchemaChanges
-    breakingSchemaChanges(first: 50) {
+    breakingSchemaChanges(first: 300) {
       totalCount
       edges {
         node {
@@ -942,7 +942,7 @@ const ContractCheckView_ContractCheckFragment = graphql(`
       ...CompositionErrorsSection_SchemaErrorConnection
     }
     hasSchemaChanges
-    breakingSchemaChanges(first: 50) {
+    breakingSchemaChanges(first: 300) {
       totalCount
       edges {
         node {

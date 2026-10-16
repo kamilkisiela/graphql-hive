@@ -13,7 +13,7 @@ const BreakingChangesPageQuery = graphql(`
       id
       schemaCheck(id: $schemaCheckId) {
         id
-        breakingSchemaChanges(first: 50, offset: $offset) {
+        breakingSchemaChanges(first: 300, offset: $offset) {
           edges {
             node {
               ...ChangesBlock_SchemaChangeWithUsageFragment
@@ -38,7 +38,7 @@ const ContractBreakingChangesPageQuery = graphql(`
         id
         contractCheck(id: $contractCheckId) {
           id
-          breakingSchemaChanges(first: 50, offset: $offset) {
+          breakingSchemaChanges(first: 300, offset: $offset) {
             edges {
               node {
                 ...ChangesBlock_SchemaChangeWithUsageFragment
@@ -64,7 +64,7 @@ const SafeChangesPageQuery = graphql(`
         id
         safeSchemaChangeGroups(kind: $kind) {
           kind
-          changes(first: 50, offset: $offset) {
+          changes(first: 300, offset: $offset) {
             edges {
               node {
                 ...ChangesBlock_SchemaChangeFragment
@@ -93,7 +93,7 @@ const ContractSafeChangesPageQuery = graphql(`
           id
           safeSchemaChangeGroups(kind: $kind) {
             kind
-            changes(first: 50, offset: $offset) {
+            changes(first: 300, offset: $offset) {
               edges {
                 node {
                   ...ChangesBlock_SchemaChangeFragment
