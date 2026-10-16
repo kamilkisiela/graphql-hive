@@ -17,10 +17,9 @@ import { useHive } from '@graphql-hive/yoga';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { SuperTokensCookieBasedSession } from '@hive/api/modules/auth/lib/supertokens-strategy';
-import { type TracingInstance } from '@hive/service-common';
+import { requestIdStorage, type TracingInstance } from '@hive/service-common';
 import { captureException, runWithAsyncContext, withScope } from '@sentry/node';
 import { AuthN, Session } from '../../api/src/modules/auth/lib/authz';
-import { asyncStorage } from './async-storage';
 import type { HivePersistedDocumentsConfig, HiveUsageConfig } from './environment';
 import { useArmor } from './use-armor';
 
@@ -280,7 +279,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   return async (req, reply) => {
     const requestId = req.id;
 
-    await asyncStorage.run(
+    await requestIdStorage.run(
       {
         requestId,
       },

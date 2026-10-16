@@ -1,3 +1,4 @@
+import { Logger, MemoryLogWriter } from '@graphql-hive/logger';
 import { createServer } from './fastify';
 
 async function createTestServer() {
@@ -72,6 +73,57 @@ describe('createServer x-request-id response header', () => {
     expect(ok.headers['x-request-id']).toBe('abc');
     expect(failed.statusCode).toBe(500);
     expect(failed.headers['x-request-id']).toBe('def');
+    await server.close();
+  });
+});
+
+describe('createServer missing x-request-id warning', () => {
+  async function createWarningServer(warnOnMissingRequestId?: boolean) {
+    const logs = new MemoryLogWriter();
+    const server = await createServer({
+      name: 'test',
+      sentryErrorHandler: false,
+      log: new Logger({ level: 'warn', writers: [logs] }),
+      warnOnMissingRequestId,
+    });
+    server.get('/id', req => ({ id: req.id }));
+    server.get('/_health', () => 'ok');
+    server.get('/_readiness', () => 'ok');
+    return { server, warnings: () => logs.logs.filter(log => log.level === 'warn') };
+  }
+
+  test('warns once for a request without x-request-id, naming the request and its id', async () => {
+    const { server, warnings } = await createWarningServer(true);
+    const response = await server.inject({ method: 'GET', url: '/id' });
+
+    expect(warnings()).toHaveLength(1);
+    expect(warnings()[0].msg).toContain('GET /id');
+    expect(warnings()[0].msg).toContain(response.json().id);
+    await server.close();
+  });
+
+  test('does not warn when x-request-id is sent', async () => {
+    const { server, warnings } = await createWarningServer(true);
+    await server.inject({ method: 'GET', url: '/id', headers: { 'x-request-id': 'abc' } });
+
+    expect(warnings()).toHaveLength(0);
+    await server.close();
+  });
+
+  test('does not warn for health and readiness checks', async () => {
+    const { server, warnings } = await createWarningServer(true);
+    await server.inject({ method: 'GET', url: '/_health' });
+    await server.inject({ method: 'GET', url: '/_readiness' });
+
+    expect(warnings()).toHaveLength(0);
+    await server.close();
+  });
+
+  test('does not warn when the option is off', async () => {
+    const { server, warnings } = await createWarningServer();
+    await server.inject({ method: 'GET', url: '/id' });
+
+    expect(warnings()).toHaveLength(0);
     await server.close();
   });
 });

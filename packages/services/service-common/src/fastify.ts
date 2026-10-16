@@ -55,6 +55,11 @@ export async function createServer(options: {
   cors?: boolean;
   bodyLimit?: number;
   keepAliveTimeout?: number;
+  /**
+   * Log a warning for every request that arrives without an `x-request-id` header.
+   * Enable it on services whose callers always send one (e.g. internal backend services).
+   */
+  warnOnMissingRequestId?: boolean;
 }) {
   const server = fastify({
     disableRequestLogging: true,
@@ -90,6 +95,20 @@ export async function createServer(options: {
     void reply.header('x-request-id', request.id);
     done(null, payload);
   });
+
+  if (options.warnOnMissingRequestId) {
+    server.addHook('onRequest', async request => {
+      if (request.url === '/_health' || request.url === '/_readiness') {
+        return;
+      }
+
+      if (!cleanRequestId(request.headers['x-request-id'])) {
+        server.log.warn(
+          `Missing x-request-id header: ${request.method} ${request.url} (reqId=${request.id})`,
+        );
+      }
+    });
+  }
 
   server.addHook('onReady', async () => {
     server.log.info(`Service "${options.name}" is ready`);

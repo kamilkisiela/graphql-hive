@@ -4,9 +4,8 @@ import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useHive } from '@graphql-hive/yoga';
 import { type Registry } from '@hive/api';
 import { type AuthN } from '@hive/api/modules/auth/lib/authz';
-import { TracingInstance } from '@hive/service-common';
+import { requestIdStorage, TracingInstance } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
-import { asyncStorage } from './async-storage';
 import { type HiveUsageConfig } from './environment';
 import { useHiveErrorHandler, useHiveTracing, type Context } from './graphql-handler';
 import { createPublicGraphQLSchema } from './public-graphql-schema';
@@ -70,7 +69,7 @@ export const createPublicGraphQLHandler = (
   return async (req, reply) => {
     const requestId = req.id;
 
-    await asyncStorage.run(
+    await requestIdStorage.run(
       {
         requestId,
       },
