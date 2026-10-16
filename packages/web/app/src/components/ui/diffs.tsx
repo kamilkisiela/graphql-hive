@@ -10,6 +10,7 @@ import {
   type FileProps,
 } from '@pierre/diffs/react';
 import WorkerUrl from '@pierre/diffs/worker/worker.js?worker&url';
+import { captureException } from '@sentry/react';
 import { useTheme, type ResolvedTheme } from '../theme/theme-provider';
 
 function pierreTheme(resolvedTheme: ResolvedTheme) {
@@ -40,7 +41,10 @@ function WorkerPoolTheme() {
   const workerPool = useWorkerPool();
   const { resolvedTheme } = useTheme();
   useLayoutEffect(() => {
-    void workerPool?.setRenderOptions({ theme: pierreTheme(resolvedTheme) });
+    // Rejects when the workers fail to start; diffs then highlight on the main thread instead.
+    workerPool
+      ?.setRenderOptions({ theme: pierreTheme(resolvedTheme) })
+      .catch(error => captureException(error, { level: 'warning' }));
   }, [workerPool, resolvedTheme]);
   return null;
 }
