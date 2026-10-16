@@ -188,13 +188,22 @@ function SDLSingleDiffToggleView(props: {
   );
 }
 
-const ApproveFailedSchemaCheckMutation = graphql(`
+export const ApproveFailedSchemaCheckMutation = graphql(`
   mutation ApproveFailedSchemaCheckModal_ApproveFailedSchemaCheckMutation(
     $input: ApproveFailedSchemaCheckInput!
   ) {
     approveFailedSchemaCheck(input: $input) {
       ok {
         schemaCheck {
+          __typename
+          id
+          contractChecks {
+            edges {
+              node {
+                id
+              }
+            }
+          }
           ...ActiveSchemaCheck_SchemaCheckFragment
         }
       }
@@ -553,8 +562,15 @@ function ConditionalBreakingChangesMetadataSection(props: {
   );
 }
 
+// Approving a check turns it from Failed into Successful. Keying on the typename starts the
+// visited pages over, so they are read again with their approvals.
+function changePagesKey(listId: string, schemaCheck: { __typename?: string }) {
+  return `${listId}:${schemaCheck.__typename}`;
+}
+
 const DefaultSchemaView_SchemaCheckFragment = graphql(`
   fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
+    __typename
     id
     serviceName
     hasSchemaCompositionErrors
@@ -575,7 +591,7 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
       }
     }
     hasSchemaChanges
-    breakingSchemaChanges(first: 50) {
+    breakingSchemaChanges(first: 300) {
       totalCount
       edges {
         node {
@@ -674,7 +690,7 @@ function useDefaultSchemaView(props: {
                 firstPage={schemaCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
                 totalCount={schemaCheck.breakingSchemaChanges.totalCount}
                 loadPage={changePages.loadBreakingPage}
-                resetKey={schemaCheck.id}
+                resetKey={changePagesKey(schemaCheck.id, schemaCheck)}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
@@ -685,7 +701,7 @@ function useDefaultSchemaView(props: {
                 schemaCheckId={schemaCheck.id}
                 groups={schemaCheck.safeSchemaChangeGroups}
                 loadPage={changePages.loadSafePage}
-                resetKey={schemaCheck.id}
+                resetKey={changePagesKey(schemaCheck.id, schemaCheck)}
               />
             </div>
           ) : null}
@@ -926,7 +942,7 @@ const ContractCheckView_ContractCheckFragment = graphql(`
       ...CompositionErrorsSection_SchemaErrorConnection
     }
     hasSchemaChanges
-    breakingSchemaChanges(first: 50) {
+    breakingSchemaChanges(first: 300) {
       totalCount
       edges {
         node {
@@ -948,6 +964,7 @@ const ContractCheckView_ContractCheckFragment = graphql(`
 
 const ContractCheckView_SchemaCheckFragment = graphql(`
   fragment ContractCheckView_SchemaCheckFragment on SchemaCheck {
+    __typename
     id
     serviceName
     meta {
@@ -1022,7 +1039,7 @@ function useContractCheckView(props: {
                 firstPage={contractCheck.breakingSchemaChanges.edges.map(edge => edge.node)}
                 totalCount={contractCheck.breakingSchemaChanges.totalCount}
                 loadPage={changePages.loadBreakingPage}
-                resetKey={contractCheck.id}
+                resetKey={changePagesKey(contractCheck.id, schemaCheck)}
                 conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
               />
             </div>
@@ -1033,7 +1050,7 @@ function useContractCheckView(props: {
                 schemaCheckId={schemaCheck.id}
                 groups={contractCheck.safeSchemaChangeGroups}
                 loadPage={changePages.loadSafePage}
-                resetKey={contractCheck.id}
+                resetKey={changePagesKey(contractCheck.id, schemaCheck)}
               />
             </div>
           ) : null}

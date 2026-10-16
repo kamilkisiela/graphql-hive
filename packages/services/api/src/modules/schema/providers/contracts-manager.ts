@@ -198,6 +198,7 @@ export class ContractsManager {
     });
   }
 
+  @cache<SchemaCheck>(schemaCheck => schemaCheck.id)
   public async getContractsChecksForSchemaCheck(schemaCheck: SchemaCheck) {
     const contractChecks = await this.contracts.getPaginatedContractChecksBySchemaCheckId({
       schemaCheckId: schemaCheck.id,

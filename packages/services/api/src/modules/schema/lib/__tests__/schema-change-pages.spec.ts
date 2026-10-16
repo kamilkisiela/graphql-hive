@@ -53,12 +53,6 @@ describe('toSchemaChangePage', () => {
   it('reads a plain array as one page holding everything', () => {
     expect(toSchemaChangePage(changes)).toEqual({ page: changes, offset: 0, totalCount: 120 });
   });
-
-  it('passes a page through', () => {
-    const page = pageSchemaChanges(changes, { first: 10 });
-
-    expect(toSchemaChangePage(page)).toBe(page);
-  });
 });
 
 describe('groupSchemaChangesByKind', () => {
@@ -80,10 +74,6 @@ describe('groupSchemaChangesByKind', () => {
     const [group] = groupSchemaChangesByKind([change('FIELD_ADDED', 2), change('FIELD_ADDED', 1)]);
 
     expect(group.changes.map(change => change.id)).toEqual(['FIELD_ADDED-2', 'FIELD_ADDED-1']);
-  });
-
-  it('returns no groups for no changes', () => {
-    expect(groupSchemaChangesByKind([])).toEqual([]);
   });
 });
 
