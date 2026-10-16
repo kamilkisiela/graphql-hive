@@ -1,6 +1,6 @@
 import { buildSchema, execute, parse, type GraphQLResolveInfo } from 'graphql';
 import { describe, expect, test } from 'vitest';
-import { isSchemaCheckSDLRequested } from './is-field-requested';
+import { isSDLRequested } from './Target';
 
 // The part of the Hive schema the gate looks at: the interface declares schemaSDL,
 // previousSchemaSDL and baseline; the composite SDLs live on the concrete types only.
@@ -69,34 +69,34 @@ async function schemaCheckInfo(operation: string) {
   return info;
 }
 
-describe('isSchemaCheckSDLRequested', () => {
+describe('isSDLRequested', () => {
   test('a field with no SDL does not request it', async () => {
     const info = await schemaCheckInfo('{ target { schemaCheck(id: "c") { id } } }');
-    expect(isSchemaCheckSDLRequested(info)).toBe(false);
+    expect(isSDLRequested(info)).toBe(false);
   });
 
   test('previousSchemaSDL selected on the interface requests it', async () => {
     const info = await schemaCheckInfo('{ target { schemaCheck(id: "c") { previousSchemaSDL } } }');
-    expect(isSchemaCheckSDLRequested(info)).toBe(true);
+    expect(isSDLRequested(info)).toBe(true);
   });
 
   test('baseline metadata without its SDLs does not request them', async () => {
     const info = await schemaCheckInfo(
       '{ target { schemaCheck(id: "c") { baseline { compositionErrors { message } meta { commit } } } } }',
     );
-    expect(isSchemaCheckSDLRequested(info)).toBe(false);
+    expect(isSDLRequested(info)).toBe(false);
   });
 
   test('a baseline SDL requests it', async () => {
     const info = await schemaCheckInfo('{ target { schemaCheck(id: "c") { baseline { sdl } } } }');
-    expect(isSchemaCheckSDLRequested(info)).toBe(true);
+    expect(isSDLRequested(info)).toBe(true);
   });
 
   test('a composite SDL under an inline fragment requests it', async () => {
     const info = await schemaCheckInfo(
       '{ target { schemaCheck(id: "c") { ... on SuccessfulSchemaCheck { compositeSchemaSDL } } } }',
     );
-    expect(isSchemaCheckSDLRequested(info)).toBe(true);
+    expect(isSDLRequested(info)).toBe(true);
   });
 
   test('a supergraph SDL under a named fragment requests it', async () => {
@@ -104,6 +104,6 @@ describe('isSchemaCheckSDLRequested', () => {
       { target { schemaCheck(id: "c") { ...Failed } } }
       fragment Failed on FailedSchemaCheck { supergraphSDL }
     `);
-    expect(isSchemaCheckSDLRequested(info)).toBe(true);
+    expect(isSDLRequested(info)).toBe(true);
   });
 });

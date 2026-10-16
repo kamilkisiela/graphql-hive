@@ -90,17 +90,3 @@ export function isFieldRequestedDeep(
 
   return found;
 }
-
-/** Whether the operation reads a check's SDLs, its own or its baseline's. */
-export function isSchemaCheckSDLRequested(info: GraphQLResolveInfo) {
-  return isFieldRequestedDeep(info, [
-    ...['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
-      ['schemaSDL', 'previousSchemaSDL', 'compositeSchemaSDL', 'supergraphSDL'].map(
-        fieldName => [typeName, fieldName] as const,
-      ),
-    ),
-    ...['sdl', 'publicSdl', 'supergraphSdl'].map(
-      fieldName => ['SchemaCheckBaseline', fieldName] as const,
-    ),
-  ]);
-}

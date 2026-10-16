@@ -1,7 +1,7 @@
 import { parseDateRangeInput } from '../../../shared/helpers';
 import { GraphStore } from '../../graph/providers/graph-store';
 import { OperationsManager } from '../../operations/providers/operations-manager';
-import { isFieldRequestedDeep, isSchemaCheckSDLRequested } from '../lib/is-field-requested';
+import { isFieldRequestedDeep } from '../lib/is-field-requested';
 import { ContractsManager } from '../providers/contracts-manager';
 import { SchemaManager } from '../providers/schema-manager';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from '../to-graphql-schema-check';
@@ -50,7 +50,7 @@ export const Target: Pick<
   schemaCheck: async (target, args, { injector }, info) => {
     const schemaCheck = await injector
       .get(SchemaManager)
-      .findSchemaCheckForTarget(target, args.id, { withSDL: isSchemaCheckSDLRequested(info) });
+      .findSchemaCheckForTarget(target, args.id, { withSDL: isSDLRequested(info) });
 
     if (schemaCheck == null) {
       return null;
@@ -65,7 +65,7 @@ export const Target: Pick<
     );
   },
   schemaChecks: async (target, args, { injector }, info) => {
-    const operationSelectsSDL = isSchemaCheckSDLRequested(info);
+    const operationSelectsSDL = isSDLRequested(info);
 
     const isSchemaChangesSelected = isFieldRequestedDeep(
       info,
@@ -126,3 +126,17 @@ export const Target: Pick<
     });
   },
 };
+
+/** Whether the operation reads a check's SDLs, its own or its baseline's. */
+export function isSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
+  return isFieldRequestedDeep(info, [
+    ...['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
+      ['schemaSDL', 'previousSchemaSDL', 'compositeSchemaSDL', 'supergraphSDL'].map(
+        fieldName => [typeName, fieldName] as const,
+      ),
+    ),
+    ...['sdl', 'publicSdl', 'supergraphSdl'].map(
+      fieldName => ['SchemaCheckBaseline', fieldName] as const,
+    ),
+  ]);
+}
