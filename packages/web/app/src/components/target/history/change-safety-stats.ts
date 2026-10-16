@@ -7,21 +7,18 @@ type Change = {
 };
 
 /**
- * Breaking changes split three ways. "Safe based on usage" only holds where usage is recorded: a
- * change to something never recorded found no usage because none was looked for, so it is neither
- * safe nor not safe.
+ * "Safe based on usage" only holds where usage is recorded: a change to something never recorded
+ * found no usage because none was looked for, so it counts as not safe.
  */
 export function changeSafetyStats(changes: ReadonlyArray<Change>) {
-  const stats = { totalChanges: changes.length, breakingChanges: 0, notSafe: 0, unchecked: 0 };
+  const stats = { totalChanges: changes.length, breakingChanges: 0, notSafe: 0 };
   for (const change of changes) {
     if (change.severityLevel !== SeverityLevelType.Breaking) {
       continue;
     }
     stats.breakingChanges++;
-    if (!change.isSafeBasedOnUsage) {
+    if (!change.isSafeBasedOnUsage || change.usageTracking !== SchemaChangeUsageTracking.Tracked) {
       stats.notSafe++;
-    } else if (change.usageTracking !== SchemaChangeUsageTracking.Tracked) {
-      stats.unchecked++;
     }
   }
   return stats;
