@@ -71,7 +71,7 @@ function breakingChangeAt(index: number) {
         'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
       isSafeBasedOnUsage: false,
       usageTracking: SchemaChangeUsageTracking.Tracked,
-      kind: 'FIELD_REMOVED',
+      kind: SchemaChangeKind.FieldRemoved,
       approval: null,
       usageStatistics: null,
       affectedAppDeployments: null,

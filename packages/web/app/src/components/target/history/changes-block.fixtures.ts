@@ -1,5 +1,5 @@
 import { makeFragmentData } from '@/gql';
-import { SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
+import { SchemaChangeKind, SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
 import {
   ChangesBlock_SchemaChangeWithUsageFragment,
   ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment,
@@ -116,7 +116,7 @@ export function buildChanges(args: {
           'Removing a type is a breaking change. It is preferable to deprecate and remove all references to this type first.',
         isSafeBasedOnUsage: false,
         usageTracking: SchemaChangeUsageTracking.OnReferencingFields,
-        kind: 'TYPE_REMOVED',
+        kind: SchemaChangeKind.TypeRemoved,
         approval: null,
         usageStatistics: {
           __typename: 'SchemaChangeUsageStatistics' as const,

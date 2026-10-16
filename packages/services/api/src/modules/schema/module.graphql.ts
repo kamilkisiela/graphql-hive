@@ -601,9 +601,9 @@ export default gql`
     """
     usageTracking: SchemaChangeUsageTracking!
     """
-    The Inspector change type, such as FIELD_REMOVED (the same value as 'SchemaChangeGroup.kind').
+    The type of this change, such as FIELD_REMOVED (the same value as 'SchemaChangeGroup.kind').
     """
-    kind: String!
+    kind: SchemaChangeKind!
     """
     Usage statistics about the schema change if it is not safe based on usage.
     The statistics are determined based on the breaking change configuration.
