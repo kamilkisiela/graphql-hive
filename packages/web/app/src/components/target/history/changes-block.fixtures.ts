@@ -116,6 +116,7 @@ export function buildChanges(args: {
           'Removing a type is a breaking change. It is preferable to deprecate and remove all references to this type first.',
         isSafeBasedOnUsage: false,
         usageTracking: SchemaChangeUsageTracking.OnReferencingFields,
+        kind: 'TYPE_REMOVED',
         approval: null,
         usageStatistics: {
           __typename: 'SchemaChangeUsageStatistics' as const,

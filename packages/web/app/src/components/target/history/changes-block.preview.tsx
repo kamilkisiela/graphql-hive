@@ -11,7 +11,11 @@ import { makeFragmentData } from '@/gql';
 import { SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
 import { RouterAt } from '../../../../foundry.router';
 import { buildChanges, metadata, PATH } from './changes-block.fixtures';
-import { ChangesBlock, ChangesBlock_SchemaChangeWithUsageFragment } from './errors-and-changes';
+import {
+  ChangesBlock,
+  ChangesBlock_SchemaChangeFragment,
+  ChangesBlock_SchemaChangeWithUsageFragment,
+} from './errors-and-changes';
 
 export const nav: NavPath = 'Components/ChangesBlock';
 
@@ -183,6 +187,7 @@ const USAGE_LABEL_CHANGES = [
     message: "Type 'Currency' was removed",
     severityReason: null,
     usageTracking: SchemaChangeUsageTracking.OnReferencingFields,
+    kind: 'TYPE_REMOVED',
   },
   {
     // Reached only through an interface, so no field change on the check points at it.
@@ -190,6 +195,7 @@ const USAGE_LABEL_CHANGES = [
     message: "Type 'Dog' was removed",
     severityReason: null,
     usageTracking: SchemaChangeUsageTracking.OnReferencingFields,
+    kind: 'TYPE_REMOVED',
   },
   {
     path: ['SearchResult'],
@@ -197,6 +203,7 @@ const USAGE_LABEL_CHANGES = [
     severityReason:
       'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
     usageTracking: SchemaChangeUsageTracking.NotTracked,
+    kind: 'UNION_MEMBER_REMOVED',
   },
   {
     path: ['Status'],
@@ -204,12 +211,14 @@ const USAGE_LABEL_CHANGES = [
     severityReason:
       'Changing the kind of a type is a breaking change because it can cause existing queries to error. For example, turning an object type to a scalar type would break queries that define a selection set for this type.',
     usageTracking: SchemaChangeUsageTracking.NotTracked,
+    kind: 'TYPE_KIND_CHANGED',
   },
   {
     path: ['Query', 'products', 'region'],
     message: "Argument 'region: String!' added to field 'Query.products'",
     severityReason: null,
     usageTracking: SchemaChangeUsageTracking.NotTracked,
+    kind: 'FIELD_ARGUMENT_ADDED',
   },
   {
     // Usage is recorded for fields, so "safe based on usage" holds here.
@@ -218,6 +227,7 @@ const USAGE_LABEL_CHANGES = [
     severityReason:
       'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
     usageTracking: SchemaChangeUsageTracking.Tracked,
+    kind: 'FIELD_REMOVED',
   },
 ].map(change =>
   makeFragmentData(
@@ -243,6 +253,93 @@ export const UsageLabels = createPreview(() => (
         title="Breaking Changes"
         changesWithUsage={USAGE_LABEL_CHANGES}
         conditionBreakingChangeMetadata={null}
+      />
+    </div>
+  </RouterAt>
+));
+
+// Inspector's messages, verbatim, as a safe-change group and a version list render them.
+function plainChange(change: {
+  path: string[];
+  message: string;
+  kind: string;
+  breaking?: boolean;
+}) {
+  return makeFragmentData(
+    {
+      __typename: 'SchemaChange' as const,
+      path: change.path,
+      message: change.message,
+      kind: change.kind,
+      severityLevel: change.breaking ? SeverityLevelType.Breaking : SeverityLevelType.Safe,
+      severityReason: null,
+      approval: null,
+      isSafeBasedOnUsage: false,
+      usageTracking: SchemaChangeUsageTracking.NotTracked,
+    },
+    ChangesBlock_SchemaChangeFragment,
+  );
+}
+
+const CHECK_SAFE_CHANGES = [
+  plainChange({ path: ['NewThing'], message: "Type 'NewThing' was added", kind: 'TYPE_ADDED' }),
+  plainChange({
+    path: ['User', 'email'],
+    message: "Field 'email' was added to object type 'User'",
+    kind: 'FIELD_ADDED',
+  }),
+  plainChange({
+    path: ['User'],
+    message: "Description 'old' on type 'User' has changed to 'new'",
+    kind: 'TYPE_DESCRIPTION_CHANGED',
+  }),
+];
+
+const VERSION_CHANGES = [
+  plainChange({
+    path: ['User', 'email'],
+    message: "Field 'email' was added to object type 'User'",
+    kind: 'FIELD_ADDED',
+  }),
+  plainChange({
+    path: ['User', 'legacyId'],
+    message: "Field 'legacyId' was removed from object type 'User'",
+    kind: 'FIELD_REMOVED',
+    breaking: true,
+  }),
+  plainChange({
+    path: ['Status'],
+    message: "'Status' kind changed from 'EnumTypeDefinition' to 'ScalarTypeDefinition'",
+    kind: 'TYPE_KIND_CHANGED',
+    breaking: true,
+  }),
+  plainChange({
+    path: ['@cacheControl'],
+    message: "Directive 'cacheControl' was removed",
+    kind: 'DIRECTIVE_REMOVED',
+    breaking: true,
+  }),
+];
+
+/**
+ * An Explorer link beside each change whose coordinate the latest version has. A check hides its
+ * additions; a version hides its removals; directives never link.
+ */
+export const ExplorerLinks = createPreview(() => (
+  <RouterAt path={PATH}>
+    <div className="w-[72rem] space-y-8">
+      <ChangesBlock
+        schemaCheckId="check-1"
+        title="Breaking Changes"
+        explorerLinks="check"
+        changesWithUsage={USAGE_LABEL_CHANGES}
+        conditionBreakingChangeMetadata={null}
+      />
+      <ChangesBlock schemaCheckId="check-1" explorerLinks="check" changes={CHECK_SAFE_CHANGES} />
+      <ChangesBlock
+        title="Changes in this version"
+        explorerLinks="version"
+        changes={VERSION_CHANGES}
       />
     </div>
   </RouterAt>
