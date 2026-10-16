@@ -229,8 +229,12 @@ export function ChangesBlock(
   );
 }
 
-export function ChangesTitle(props: { children: ReactNode }) {
-  return <h2 className="mb-3 text-base font-bold text-fg">{props.children}</h2>;
+export function ChangesTitle(props: { children: ReactNode; 'data-cy'?: string }) {
+  return (
+    <h2 className="mb-3 text-base font-bold text-fg" data-cy={props['data-cy']}>
+      {props.children}
+    </h2>
+  );
 }
 
 /**
@@ -821,7 +825,7 @@ export function CompositionErrorsList(props: {
 }) {
   return (
     <div className="mb-2">
-      <ChangesTitle>
+      <ChangesTitle data-cy="composition-errors-title">
         {props.title}
         <CompositionErrorsPopover />
       </ChangesTitle>

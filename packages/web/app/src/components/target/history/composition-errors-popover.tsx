@@ -6,7 +6,12 @@ export function CompositionErrorsPopover() {
   return (
     <Popover
       trigger={
-        <Button variant="ghost" size="icon-sm" aria-label="About composition errors">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="About composition errors"
+          data-cy="composition-errors-info"
+        >
           <InfoIcon className="size-3" />
         </Button>
       }
