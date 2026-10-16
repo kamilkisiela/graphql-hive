@@ -26,6 +26,7 @@ export const SchemaChange: Pick<
   | 'criticality'
   | 'criticalityReason'
   | 'isSafeBasedOnUsage'
+  | 'kind'
   | 'message'
   | 'path'
   | 'severityLevel'
@@ -39,6 +40,7 @@ export const SchemaChange: Pick<
       : change.message;
   },
   path: change => change.path?.split('.') ?? null,
+  kind: change => change.type,
   criticality: change => criticalityMap[change.criticality],
   criticalityReason: change => change.reason,
   approval: change => change.approvalMetadata,
