@@ -86,6 +86,11 @@ export async function createServer(options: {
     keepAliveTimeout: options.keepAliveTimeout ?? 910_000,
   });
 
+  server.addHook('onSend', (request, reply, payload, done) => {
+    void reply.header('x-request-id', request.id);
+    done(null, payload);
+  });
+
   server.addHook('onReady', async () => {
     server.log.info(`Service "${options.name}" is ready`);
   });

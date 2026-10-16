@@ -164,3 +164,24 @@ test('HTTP error for an unaccepted status code exposes the status', async () => 
   expect(error).toBeInstanceOf(HTTPResponseError);
   expect(error).toMatchObject({ status: 403, statusText: 'Forbidden' });
 });
+
+test('HTTP error carries the request id returned by the server', async () => {
+  const error = await makeFetchCall('https://ap.localhost.noop', {
+    method: 'POST',
+    retry: false,
+    headers: {},
+    logger: createHiveTestingLogger(),
+    fetchImplementation: async () =>
+      new Response('too large', {
+        status: 413,
+        statusText: 'Payload Too Large',
+        headers: { 'x-request-id': 'server-request-id' },
+      }),
+  }).then(
+    () => null,
+    (error: unknown) => error,
+  );
+
+  expect(error).toBeInstanceOf(HTTPResponseError);
+  expect((error as HTTPResponseError).requestId).toBe('server-request-id');
+});

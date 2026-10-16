@@ -88,10 +88,6 @@ export const createPublicGraphQLHandler = (
           void reply.header(key, value);
         });
 
-        if (!reply.hasHeader('x-request-id')) {
-          void reply.header('x-request-id', requestId);
-        }
-
         const accept = req.headers.accept;
 
         if (!accept || accept === '*/*') {

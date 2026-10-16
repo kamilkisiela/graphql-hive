@@ -50,3 +50,28 @@ describe('createServer request id', () => {
     await Promise.all([a.close(), b.close()]);
   });
 });
+
+describe('createServer x-request-id response header', () => {
+  test('every response carries the request id, including error responses', async () => {
+    const server = await createTestServer();
+    server.get('/boom', () => {
+      throw new Error('boom');
+    });
+
+    const ok = await server.inject({
+      method: 'GET',
+      url: '/id',
+      headers: { 'x-request-id': 'abc' },
+    });
+    const failed = await server.inject({
+      method: 'GET',
+      url: '/boom',
+      headers: { 'x-request-id': 'def' },
+    });
+
+    expect(ok.headers['x-request-id']).toBe('abc');
+    expect(failed.statusCode).toBe(500);
+    expect(failed.headers['x-request-id']).toBe('def');
+    await server.close();
+  });
+});
