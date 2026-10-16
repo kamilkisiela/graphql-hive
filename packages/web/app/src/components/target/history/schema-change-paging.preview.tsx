@@ -3,7 +3,7 @@ import { FileDiffIcon, ListIcon, TriangleAlertIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
 import { makeFragmentData } from '@/gql';
-import { SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
+import { SchemaChangeKind, SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
 import { RouterAt } from '../../../../foundry.router';
 import { buildChanges, metadata, PATH } from './changes-block.fixtures';
 import {
@@ -29,21 +29,24 @@ export const nav: NavPath = 'Components/SchemaChangePaging';
 
 const LOAD_DELAY_MS = 400;
 
-type SafeKind = 'TYPE_DESCRIPTION_CHANGED' | 'FIELD_ADDED' | 'TYPE_ADDED';
+type SafeKind =
+  | SchemaChangeKind.TypeDescriptionChanged
+  | SchemaChangeKind.FieldAdded
+  | SchemaChangeKind.TypeAdded;
 
 // Inspector's message templates, which is what the API serves as `message`.
 function safeChangeAt(kind: SafeKind, index: number) {
   const type = `StressType_${index + 1}`;
   const message =
-    kind === 'TYPE_DESCRIPTION_CHANGED'
+    kind === SchemaChangeKind.TypeDescriptionChanged
       ? `Description 'Stress type ${index + 1}, used to test large schemas.' on type '${type}' has changed to 'Stress type ${index + 1}, used to test large schemas (revised).'`
-      : kind === 'FIELD_ADDED'
+      : kind === SchemaChangeKind.FieldAdded
         ? `Field 'value8' was added to object type '${type}'`
         : `Type 'NewThing${index + 1}' was added`;
   return makeFragmentData(
     {
       __typename: 'SchemaChange' as const,
-      path: kind === 'FIELD_ADDED' ? [type, 'value8'] : [type],
+      path: kind === SchemaChangeKind.FieldAdded ? [type, 'value8'] : [type],
       message,
       severityLevel: SeverityLevelType.Safe,
       severityReason: null,
@@ -114,7 +117,10 @@ const usage = buildChanges({ usedTargets: 2, unusedTargets: 9, operations: 2, le
 
 function TodayView(props: { rendered: number }) {
   const changes = useMemo(
-    () => range(0, props.rendered, index => safeChangeAt('TYPE_DESCRIPTION_CHANGED', index)),
+    () =>
+      range(0, props.rendered, index =>
+        safeChangeAt(SchemaChangeKind.TypeDescriptionChanged, index),
+      ),
     [props.rendered],
   );
   return (
@@ -147,9 +153,9 @@ function GroupedView(props: { breaking: number; descriptions: number }) {
   const breakingAt = (index: number) =>
     index < usage.changes.length ? usage.changes[index] : breakingChangeAt(index);
   const groups: { kind: SafeKind; totalCount: number }[] = [
-    { kind: 'FIELD_ADDED', totalCount: 5 },
-    { kind: 'TYPE_ADDED', totalCount: 5 },
-    { kind: 'TYPE_DESCRIPTION_CHANGED', totalCount: props.descriptions },
+    { kind: SchemaChangeKind.FieldAdded, totalCount: 5 },
+    { kind: SchemaChangeKind.TypeAdded, totalCount: 5 },
+    { kind: SchemaChangeKind.TypeDescriptionChanged, totalCount: props.descriptions },
   ];
   return (
     <DetailsTab>

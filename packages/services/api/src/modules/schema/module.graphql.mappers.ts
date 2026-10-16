@@ -1,5 +1,10 @@
 import type { DocumentNode, GraphQLSchema, Kind } from 'graphql';
-import type { SchemaChangeType, SchemaCheck, SchemaCheckApprovalMetadata } from '@hive/storage';
+import type {
+  Change,
+  SchemaChangeType,
+  SchemaCheck,
+  SchemaCheckApprovalMetadata,
+} from '@hive/storage';
 import type { SchemaError } from '../../__generated__/types';
 import type { DateRange, PushedCompositeSchema, SingleSchema } from '../../shared/entities';
 import type { PromiseOrValue } from '../../shared/helpers';
@@ -21,7 +26,7 @@ export type SchemaChangePage = Readonly<{
   totalCount: number;
 }>;
 export type SchemaChangeGroupMapper = Readonly<{
-  kind: string;
+  kind: Change['type'];
   changes: ReadonlyArray<SchemaChangeMapper>;
 }>;
 export type SchemaChangeMapper = SchemaChangeType;

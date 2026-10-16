@@ -1,9 +1,11 @@
-import { useRef, useState, type ReactElement, type ReactNode } from 'react';
+import { useRef, type ReactElement, type ReactNode } from 'react';
 import { DataTablePagination } from '@/components/ui/data-table/data-table-pagination';
 import { Accordion } from '@/components/ui/primitives/accordion/accordion';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import type { SchemaChangeKind } from '@/gql/graphql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
+import { CHANGES_PAGE_SIZE } from './change-page-size';
 import {
   ChangesBlock,
   ChangesBlock_SchemaChangeFragment,
@@ -12,14 +14,13 @@ import {
   ChangesTitle,
 } from './errors-and-changes';
 
-/** The API serves the first page with the check; the fragments below ask for this many. */
-export const CHANGES_PAGE_SIZE = 50;
+export { CHANGES_PAGE_SIZE };
 
 export const PagedChanges_SafeChangeGroupFragment = graphql(`
   fragment PagedChanges_SafeChangeGroupFragment on SchemaChangeGroup {
     kind
     totalCount
-    changes(first: 50) {
+    changes(first: 300) {
       edges {
         node {
           ...ChangesBlock_SchemaChangeFragment
@@ -45,8 +46,8 @@ export function usePagedChanges<T>(args: {
 }) {
   const [pages, setPages] = useResetState(() => new Map<number, T[]>(), [args.resetKey]);
   const [pageIndex, setPageIndex] = useResetState(() => 0, [args.resetKey]);
-  const [loading, setLoading] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useResetState(() => false, [args.resetKey]);
+  const [failed, setFailed] = useResetState(() => false, [args.resetKey]);
   // Only the newest request may switch the page, and only within the list it was made for.
   const latest = useRef<{ key: string; index: number } | null>(null);
   const currentKey = useRef(args.resetKey);
@@ -74,7 +75,7 @@ export function usePagedChanges<T>(args: {
         }
       },
       () => {
-        if (latest.current === request) {
+        if (currentKey.current === request.key && latest.current === request) {
           setLoading(false);
           setFailed(true);
         }
@@ -160,10 +161,10 @@ export function changeKindLabel(kind: string) {
 }
 
 function SafeChangeGroupPage(props: {
-  kind: string;
+  kind: SchemaChangeKind;
   firstPage: SafeChange[];
   totalCount: number;
-  loadPage: (kind: string, offset: number) => Promise<SafeChange[]>;
+  loadPage: (kind: SchemaChangeKind, offset: number) => Promise<SafeChange[]>;
   resetKey: string;
   schemaCheckId: string;
 }) {
@@ -187,7 +188,7 @@ function SafeChangeGroupPage(props: {
 /** Safe changes by kind, smallest group first, each group paged on its own. */
 export function SafeChangeGroups(props: {
   groups: FragmentType<typeof PagedChanges_SafeChangeGroupFragment>[];
-  loadPage: (kind: string, offset: number) => Promise<SafeChange[]>;
+  loadPage: (kind: SchemaChangeKind, offset: number) => Promise<SafeChange[]>;
   resetKey: string;
   schemaCheckId: string;
 }) {

@@ -1,3 +1,5 @@
+import { CHANGES_PAGE_SIZE } from '@/components/target/history/change-page-size';
+
 const TARGET_ID = 'target-1';
 
 type Variables = {
@@ -298,7 +300,7 @@ export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
   };
 }
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = CHANGES_PAGE_SIZE;
 
 // Inspector's reason for removing a field that was not deprecated.
 const FIELD_REMOVED_REASON =
@@ -350,7 +352,9 @@ function pageOf<T>(offset: number, total: number, at: (index: number) => T) {
 }
 
 /** Group sizes and the breaking total of `manyChangesSchemaCheck`. */
-export const MANY_CHANGES = { breaking: 120, typeAdded: 2, descriptions: 120 };
+// Two full pages and a partial third, whatever the page size.
+const THREE_PAGES = CHANGES_PAGE_SIZE * 2 + 20;
+export const MANY_CHANGES = { breaking: THREE_PAGES, typeAdded: 2, descriptions: THREE_PAGES };
 
 const groupTotals: Record<string, number> = {
   TYPE_ADDED: MANY_CHANGES.typeAdded,

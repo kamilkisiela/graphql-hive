@@ -3182,7 +3182,7 @@ const SchemaCheckChangePagesQuery = graphql(/* GraphQL */ `
             }
           }
         }
-        typeAdded: safeSchemaChangeGroups(kind: "TYPE_ADDED") {
+        typeAdded: safeSchemaChangeGroups(kind: TYPE_ADDED) {
           kind
         }
       }

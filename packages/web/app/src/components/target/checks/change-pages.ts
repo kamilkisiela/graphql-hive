@@ -1,5 +1,6 @@
 import { useClient } from 'urql';
 import { graphql } from '@/gql';
+import type { SchemaChangeKind } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 
 const BreakingChangesPageQuery = graphql(`
@@ -12,7 +13,7 @@ const BreakingChangesPageQuery = graphql(`
       id
       schemaCheck(id: $schemaCheckId) {
         id
-        breakingSchemaChanges(first: 50, offset: $offset) {
+        breakingSchemaChanges(first: 300, offset: $offset) {
           edges {
             node {
               ...ChangesBlock_SchemaChangeWithUsageFragment
@@ -37,7 +38,7 @@ const ContractBreakingChangesPageQuery = graphql(`
         id
         contractCheck(id: $contractCheckId) {
           id
-          breakingSchemaChanges(first: 50, offset: $offset) {
+          breakingSchemaChanges(first: 300, offset: $offset) {
             edges {
               node {
                 ...ChangesBlock_SchemaChangeWithUsageFragment
@@ -54,7 +55,7 @@ const SafeChangesPageQuery = graphql(`
   query CheckSafeChangesPageQuery(
     $selector: TargetSelectorInput!
     $schemaCheckId: ID!
-    $kind: String!
+    $kind: SchemaChangeKind!
     $offset: Int!
   ) {
     target(reference: { bySelector: $selector }) {
@@ -63,7 +64,7 @@ const SafeChangesPageQuery = graphql(`
         id
         safeSchemaChangeGroups(kind: $kind) {
           kind
-          changes(first: 50, offset: $offset) {
+          changes(first: 300, offset: $offset) {
             edges {
               node {
                 ...ChangesBlock_SchemaChangeFragment
@@ -81,7 +82,7 @@ const ContractSafeChangesPageQuery = graphql(`
     $selector: TargetSelectorInput!
     $schemaCheckId: ID!
     $contractCheckId: ID!
-    $kind: String!
+    $kind: SchemaChangeKind!
     $offset: Int!
   ) {
     target(reference: { bySelector: $selector }) {
@@ -92,7 +93,7 @@ const ContractSafeChangesPageQuery = graphql(`
           id
           safeSchemaChangeGroups(kind: $kind) {
             kind
-            changes(first: 50, offset: $offset) {
+            changes(first: 300, offset: $offset) {
               edges {
                 node {
                   ...ChangesBlock_SchemaChangeFragment
@@ -141,7 +142,7 @@ export function useChangePageLoaders(args: { schemaCheckId: string; contractChec
     return rowsOf(result.data?.target?.schemaCheck?.breakingSchemaChanges);
   }
 
-  async function loadSafePage(kind: string, offset: number) {
+  async function loadSafePage(kind: SchemaChangeKind, offset: number) {
     if (contractCheckId) {
       const result = await client
         .query(ContractSafeChangesPageQuery, { ...base, contractCheckId, kind, offset })

@@ -14,11 +14,14 @@ export const SchemaChangeConnection: SchemaChangeConnectionResolvers = {
   },
   pageInfo: connection => {
     const { page, offset, totalCount } = toSchemaChangePage(connection);
+    const hasPreviousPage = offset > 0;
+    const hasNextPage = offset + page.length < totalCount;
+    // An empty cursor means there is nothing further in that direction.
     return {
-      startCursor: page.length ? encodeSchemaChangeCursor(offset) : '',
-      endCursor: page.length ? encodeSchemaChangeCursor(offset + page.length - 1) : '',
-      hasNextPage: offset + page.length < totalCount,
-      hasPreviousPage: offset > 0,
+      startCursor: hasPreviousPage ? encodeSchemaChangeCursor(offset) : '',
+      endCursor: hasNextPage ? encodeSchemaChangeCursor(offset + page.length - 1) : '',
+      hasNextPage,
+      hasPreviousPage,
     };
   },
 };
