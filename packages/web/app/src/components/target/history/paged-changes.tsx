@@ -2,6 +2,7 @@ import { useRef, type ReactElement, type ReactNode } from 'react';
 import { DataTablePagination } from '@/components/ui/data-table/data-table-pagination';
 import { Accordion } from '@/components/ui/primitives/accordion/accordion';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import type { SchemaChangeKind } from '@/gql/graphql';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { cn } from '@/lib/utils';
 import {
@@ -159,10 +160,10 @@ export function changeKindLabel(kind: string) {
 }
 
 function SafeChangeGroupPage(props: {
-  kind: string;
+  kind: SchemaChangeKind;
   firstPage: SafeChange[];
   totalCount: number;
-  loadPage: (kind: string, offset: number) => Promise<SafeChange[]>;
+  loadPage: (kind: SchemaChangeKind, offset: number) => Promise<SafeChange[]>;
   resetKey: string;
   schemaCheckId: string;
 }) {
@@ -182,7 +183,7 @@ function SafeChangeGroupPage(props: {
 /** Safe changes by kind, smallest group first, each group paged on its own. */
 export function SafeChangeGroups(props: {
   groups: FragmentType<typeof PagedChanges_SafeChangeGroupFragment>[];
-  loadPage: (kind: string, offset: number) => Promise<SafeChange[]>;
+  loadPage: (kind: SchemaChangeKind, offset: number) => Promise<SafeChange[]>;
   resetKey: string;
   schemaCheckId: string;
 }) {

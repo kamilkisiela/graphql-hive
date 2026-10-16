@@ -1,5 +1,6 @@
 import { useClient } from 'urql';
 import { graphql } from '@/gql';
+import type { SchemaChangeKind } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 
 const BreakingChangesPageQuery = graphql(`
@@ -54,7 +55,7 @@ const SafeChangesPageQuery = graphql(`
   query CheckSafeChangesPageQuery(
     $selector: TargetSelectorInput!
     $schemaCheckId: ID!
-    $kind: String!
+    $kind: SchemaChangeKind!
     $offset: Int!
   ) {
     target(reference: { bySelector: $selector }) {
@@ -81,7 +82,7 @@ const ContractSafeChangesPageQuery = graphql(`
     $selector: TargetSelectorInput!
     $schemaCheckId: ID!
     $contractCheckId: ID!
-    $kind: String!
+    $kind: SchemaChangeKind!
     $offset: Int!
   ) {
     target(reference: { bySelector: $selector }) {
@@ -141,7 +142,7 @@ export function useChangePageLoaders(args: { schemaCheckId: string; contractChec
     return rowsOf(result.data?.target?.schemaCheck?.breakingSchemaChanges);
   }
 
-  async function loadSafePage(kind: string, offset: number) {
+  async function loadSafePage(kind: SchemaChangeKind, offset: number) {
     if (contractCheckId) {
       const result = await client
         .query(ContractSafeChangesPageQuery, { ...base, contractCheckId, kind, offset })

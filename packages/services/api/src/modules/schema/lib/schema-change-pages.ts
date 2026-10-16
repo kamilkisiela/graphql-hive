@@ -4,6 +4,7 @@ import type {
   SchemaChangeMapper,
   SchemaChangePage,
 } from '../module.graphql.mappers';
+import type { Change } from '@hive/storage';
 
 /**
  * A slice of a check's changes. Without `first` it is everything from `offset`, so callers that
@@ -28,13 +29,15 @@ export function toSchemaChangePage(connection: SchemaChangeConnectionMapper): Sc
 export function groupSchemaChangesByKind(
   changes: ReadonlyArray<SchemaChangeMapper>,
 ): SchemaChangeGroupMapper[] {
-  const groups = new Map<string, SchemaChangeMapper[]>();
+  const groups = new Map<Change['type'], SchemaChangeMapper[]>();
   for (const change of changes) {
-    const group = groups.get(change.type);
+    // Read through SchemaChangeModel, so the type is one of its kinds; the transform widens it.
+    const kind = change.type as Change['type'];
+    const group = groups.get(kind);
     if (group) {
       group.push(change);
     } else {
-      groups.set(change.type, [change]);
+      groups.set(kind, [change]);
     }
   }
   return Array.from(groups, ([kind, kindChanges]) => ({ kind, changes: kindChanges })).sort(
