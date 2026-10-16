@@ -13,7 +13,10 @@ vi.mock('@/components/theme/theme-provider', () => ({ useTheme: () => theme }));
 vi.mock('@pierre/diffs/worker', () => ({
   WorkerPoolManager: vi.fn(
     class {
-      constructor(_: unknown, private renderOptions: { theme: string }) {}
+      constructor(
+        _: unknown,
+        private renderOptions: { theme: string },
+      ) {}
       getDiffRenderOptions = () => this.renderOptions;
       initialize = vi.fn(() => Promise.resolve());
       setRenderOptions = vi.fn((options: { theme: string }) => {
