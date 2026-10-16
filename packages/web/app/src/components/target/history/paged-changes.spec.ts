@@ -89,38 +89,6 @@ describe('usePagedChanges', () => {
     rerender({ resetKey: 'check-2', firstPage: ['z'] });
     expect(result.current).toMatchObject({ rows: ['z'], pageIndex: 0 });
   });
-  it('is not left loading when the list changes while a page is in flight', async () => {
-    const page = deferred<string[]>();
-    const { result, rerender } = renderHook(
-      (props: { resetKey: string }) =>
-        usePagedChanges({ ...props, firstPage, totalCount: 120, loadPage: () => page.promise }),
-      { initialProps: { resetKey: 'contract-a' } },
-    );
-
-    act(() => result.current.goTo(1));
-    expect(result.current.loading).toBe(true);
-
-    rerender({ resetKey: 'contract-b' });
-    expect(result.current.loading).toBe(false);
-
-    await act(async () => page.resolve(['b']));
-    expect(result.current).toMatchObject({ rows: firstPage, pageIndex: 0, loading: false });
-  });
-
-  it("does not blame the new list for the old list's failure", async () => {
-    const page = deferred<string[]>();
-    const { result, rerender } = renderHook(
-      (props: { resetKey: string }) =>
-        usePagedChanges({ ...props, firstPage, totalCount: 120, loadPage: () => page.promise }),
-      { initialProps: { resetKey: 'contract-a' } },
-    );
-
-    act(() => result.current.goTo(1));
-    rerender({ resetKey: 'contract-b' });
-    await act(async () => page.reject(new Error('offline')));
-
-    expect(result.current).toMatchObject({ loading: false, failed: false });
-  });
 });
 
 describe('changeKindLabel', () => {

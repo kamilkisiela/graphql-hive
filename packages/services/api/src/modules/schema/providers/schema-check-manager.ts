@@ -167,6 +167,8 @@ export class SchemaCheckManager {
   async getGraphQLSchemaCheckBaseline(
     schemaCheck: SchemaCheck,
   ): Promise<GraphQLSchema.SchemaCheckBaseline | null> {
+    const schemaVersion = await this.getSchemaVersion(schemaCheck);
+
     if (schemaCheck.hasBaselineSchemaSDL) {
       return {
         __typename: 'SchemaCheckBaseline',
@@ -180,7 +182,6 @@ export class SchemaCheckManager {
       };
     }
 
-    const schemaVersion = await this.getSchemaVersion(schemaCheck);
     const service =
       schemaCheck.serviceName && schemaVersion
         ? await this.schemaVersions.getSchemaForSchemaVersionIdAndName(

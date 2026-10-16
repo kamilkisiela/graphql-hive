@@ -187,13 +187,22 @@ function SDLSingleDiffToggleView(props: {
   );
 }
 
-const ApproveFailedSchemaCheckMutation = graphql(`
+export const ApproveFailedSchemaCheckMutation = graphql(`
   mutation ApproveFailedSchemaCheckModal_ApproveFailedSchemaCheckMutation(
     $input: ApproveFailedSchemaCheckInput!
   ) {
     approveFailedSchemaCheck(input: $input) {
       ok {
         schemaCheck {
+          __typename
+          id
+          contractChecks {
+            edges {
+              node {
+                id
+              }
+            }
+          }
           ...ActiveSchemaCheck_SchemaCheckFragment
         }
       }
