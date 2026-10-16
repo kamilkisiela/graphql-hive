@@ -4670,6 +4670,7 @@ test.concurrent(
       serviceChanges: null,
       supergraphChanges: null,
       graph,
+      async writeCDNArtifacts() {},
     });
     await storage.destroy();
 

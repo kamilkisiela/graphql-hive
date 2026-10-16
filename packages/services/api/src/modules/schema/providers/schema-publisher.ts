@@ -3295,40 +3295,39 @@ export class SchemaPublisher {
     // NOTE: We re-use the values (sdl; errors; etc) from the existing origin values were possible to ensure a promotion results in the !!exact state!!
     // e.g. if we would compose from scratch but the external composition has changed a promotion would be unpredictable
     // the only exception is contracts, as the contract definitions might have changed and we might not have a contract version in the origin schema version
-    const { schemaVersion, contractSchemaVersions } =
-      await this.schemaVersions.createPromotionSchemaVersion({
-        target: {
-          target,
-          graph,
-          latestVersion: targetLatestSchemaVersion,
-          latestValidVersion: targetLatestValidSchemaVersion,
-        },
-        origin: {
-          target: originTarget,
-          graph: originGraph,
-          version: originSchemaVersion,
-          publicSchemaSdl: originPublicSchemaSdl,
-          supergraphSdl: originSupergraphSdl,
-        },
-        meta,
-        schemaLogs: schemaLogDiffs,
-        publicSchemaChanges,
-        supergraphSchemaChanges,
-        contracts,
-        conditionalBreakingChangeMetadata,
-        writeCDNArtifacts: ({ schemaVersion, contractSchemaVersions }) => {
-          return this.publishToCDN({
-            project,
-            schemaVersion,
-            contractSchemaVersions,
-            schemas: ensureCompositeSchemas(
-              originLogEdges
-                .map(edge => edge.node)
-                .filter((node): node is Schema => node.action === 'PUSH'),
-            ).map(toCompositeSchemaInput),
-          });
-        },
-      });
+    const { schemaVersion } = await this.schemaVersions.createPromotionSchemaVersion({
+      target: {
+        target,
+        graph,
+        latestVersion: targetLatestSchemaVersion,
+        latestValidVersion: targetLatestValidSchemaVersion,
+      },
+      origin: {
+        target: originTarget,
+        graph: originGraph,
+        version: originSchemaVersion,
+        publicSchemaSdl: originPublicSchemaSdl,
+        supergraphSdl: originSupergraphSdl,
+      },
+      meta,
+      schemaLogs: schemaLogDiffs,
+      publicSchemaChanges,
+      supergraphSchemaChanges,
+      contracts,
+      conditionalBreakingChangeMetadata,
+      writeCDNArtifacts: ({ schemaVersion, contractSchemaVersions }) => {
+        return this.publishToCDN({
+          project,
+          schemaVersion,
+          contractSchemaVersions,
+          schemas: ensureCompositeSchemas(
+            originLogEdges
+              .map(edge => edge.node)
+              .filter((node): node is Schema => node.action === 'PUSH'),
+          ).map(toCompositeSchemaInput),
+        });
+      },
+    });
 
     this.logger.debug(
       'successfully promoted schema version. (targetId=%s, schemaVersionId)',

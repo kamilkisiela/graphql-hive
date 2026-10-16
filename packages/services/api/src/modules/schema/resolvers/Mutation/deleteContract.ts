@@ -1,4 +1,3 @@
-import { ContractsManager } from '../../providers/contracts-manager';
 import { SchemaPublisher } from '../../providers/schema-publisher';
 import type { MutationResolvers } from './../../../../__generated__/types';
 

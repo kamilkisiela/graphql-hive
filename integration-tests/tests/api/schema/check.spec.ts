@@ -2631,6 +2631,7 @@ test.concurrent(
       schemaMetadata: null,
       metadataAttributes: null,
       graph,
+      async writeCDNArtifacts() {},
     });
     await storage.destroy();
 
