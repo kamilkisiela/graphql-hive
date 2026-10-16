@@ -73,7 +73,7 @@ export async function createServer(options: {
       maxParamLength: 5000,
     },
     requestIdHeader: false,
-    genReqId: req => cleanRequestId(req.headers['x-request-id']) ?? randomUUID(),
+    genReqId: req => cleanRequestId(req.headers['x-request-id']) || randomUUID(),
     trustProxy: true,
     // If a connection is idle for "keepAliveTimeout" milliseconds or more, the connection times out.
     // The default for fastify is 72_000, but this is meant for more dynamic clients.
