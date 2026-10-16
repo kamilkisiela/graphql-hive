@@ -3727,11 +3727,13 @@ export class SchemaPublisher {
           }),
         );
       }
-
-      await this.publishGraphManifest({ schemaVersion, contractSchemaVersions, referenceDate });
     }
 
     await Promise.all(actions);
+
+    if (project.type === ProjectType.FEDERATION) {
+      await this.publishGraphManifest({ schemaVersion, contractSchemaVersions, referenceDate });
+    }
   }
 
   private async createGithubCheckRunForSchemaPublish(args: {
