@@ -89,6 +89,24 @@ describe('usePagedChanges', () => {
     rerender({ resetKey: 'check-2', firstPage: ['z'] });
     expect(result.current).toMatchObject({ rows: ['z'], pageIndex: 0 });
   });
+
+  it('does not carry a pending or failed page into another list', async () => {
+    const page = deferred<string[]>();
+    const { result, rerender } = renderHook(
+      (props: { resetKey: string }) =>
+        usePagedChanges({ ...props, firstPage, totalCount: 120, loadPage: () => page.promise }),
+      { initialProps: { resetKey: 'contract-1' } },
+    );
+
+    act(() => result.current.goTo(1));
+    expect(result.current.loading).toBe(true);
+
+    rerender({ resetKey: 'contract-2' });
+    expect(result.current).toMatchObject({ pageIndex: 0, loading: false, failed: false });
+
+    await act(async () => page.reject(new Error('offline')));
+    expect(result.current).toMatchObject({ pageIndex: 0, loading: false, failed: false });
+  });
 });
 
 describe('changeKindLabel', () => {

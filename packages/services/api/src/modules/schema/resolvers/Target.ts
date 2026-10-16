@@ -122,20 +122,16 @@ export const Target: Pick<
   },
 };
 
-/** Whether the operation reads a check's SDLs, directly or through `baseline`, which falls back to them. */
-function isSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
+/** Whether the operation reads a check's SDLs, its own or its baseline's. */
+export function isSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
   return isFieldRequestedDeep(info, [
-    ['SchemaCheck', 'baseline'],
-    ['SuccessfulSchemaCheck', 'baseline'],
-    ['FailedSchemaCheck', 'baseline'],
-    ['SchemaCheck', 'schemaSDL'],
-    ['SuccessfulSchemaCheck', 'schemaSDL'],
-    ['SuccessfulSchemaCheck', 'compositeSchemaSDL'],
-    ['SuccessfulSchemaCheck', 'supergraphSDL'],
-    ['FailedSchemaCheck', 'compositeSchemaSDL'],
-    ['FailedSchemaCheck', 'supergraphSDL'],
-    ['FailedSchemaCheck', 'schemaSDL'],
-    ['SuccessfulSchemaCheck', 'previousSchemaSDL'],
-    ['FailedSchemaCheck', 'previousSchemaSDL'],
+    ...['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
+      ['schemaSDL', 'previousSchemaSDL', 'compositeSchemaSDL', 'supergraphSDL'].map(
+        fieldName => [typeName, fieldName] as const,
+      ),
+    ),
+    ...['sdl', 'publicSdl', 'supergraphSdl'].map(
+      fieldName => ['SchemaCheckBaseline', fieldName] as const,
+    ),
   ]);
 }
