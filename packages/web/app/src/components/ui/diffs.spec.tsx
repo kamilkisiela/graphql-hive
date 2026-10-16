@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { useContext } from 'react';
-import { WorkerPoolContext } from '@pierre/diffs/react';
 import { WorkerPoolManager } from '@pierre/diffs/worker';
 import { captureException } from '@sentry/react';
 import { render, screen, waitFor } from '@testing-library/react';

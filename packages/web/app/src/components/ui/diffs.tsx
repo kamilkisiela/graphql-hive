@@ -5,7 +5,6 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
   type ReactNode,
 } from 'react';
 import { cn } from '@/lib/utils';
@@ -84,11 +83,10 @@ export function DiffsWorkerPoolProvider({ children }: { children: ReactNode }) {
   return <GetWorkerPoolContext.Provider value={getPool}>{children}</GetWorkerPoolContext.Provider>;
 }
 
-// The library reads the pool once, when a diff mounts, so it has to exist by then.
+// The library reads the pool once, when a diff mounts, so it has to exist by then. Later calls
+// return the same pool, so the theme only matters to the first diff.
 function useWorkerPool(theme: PierreTheme) {
-  const getPool = useContext(GetWorkerPoolContext);
-  const [pool] = useState(() => getPool?.(theme));
-  return pool;
+  return useContext(GetWorkerPoolContext)?.(theme);
 }
 
 // Has a height because the virtualizer only renders lines inside its own scroll region.
