@@ -12,7 +12,7 @@ const safe = {
 };
 
 describe('changeSafetyStats', () => {
-  it('counts a breaking change with no recorded usage as unchecked, not safe', () => {
+  it('counts a breaking change with no recorded usage as not safe', () => {
     // The Currency rename: the type removal is untracked, the field change is tracked and safe.
     expect(
       changeSafetyStats([
@@ -20,16 +20,16 @@ describe('changeSafetyStats', () => {
         breaking(true, SchemaChangeUsageTracking.Tracked),
         safe,
       ]),
-    ).toEqual({ totalChanges: 3, breakingChanges: 2, notSafe: 0, unchecked: 1 });
+    ).toEqual({ totalChanges: 3, breakingChanges: 2, notSafe: 1 });
   });
 
-  it('counts a change as not safe whatever its tracking, as app deployments can mark untracked ones', () => {
+  it('counts a change found unsafe as not safe, whatever its tracking', () => {
     expect(
       changeSafetyStats([
         breaking(false, SchemaChangeUsageTracking.Tracked),
         breaking(false, SchemaChangeUsageTracking.NotTracked),
       ]),
-    ).toEqual({ totalChanges: 2, breakingChanges: 2, notSafe: 2, unchecked: 0 });
+    ).toEqual({ totalChanges: 2, breakingChanges: 2, notSafe: 2 });
   });
 
   it('calls everything safe only when every breaking change is tracked and safe', () => {
@@ -37,7 +37,6 @@ describe('changeSafetyStats', () => {
       totalChanges: 2,
       breakingChanges: 1,
       notSafe: 0,
-      unchecked: 0,
     });
   });
 });

@@ -6,8 +6,9 @@ export type SchemaChangeUsageTracking = 'TRACKED' | 'ON_REFERENCING_FIELDS' | 'N
 type InspectorChangeType = (typeof ChangeType)[keyof typeof ChangeType];
 
 /**
- * Changes whose coordinate the usage collector records: a field, an argument, an input field or
- * an enum value (packages/libraries/core/src/client/collect-schema-coordinates.ts).
+ * Changes whose coordinate is one the usage collector reports usage for: a field, an argument, an
+ * input field or an enum value (packages/libraries/core/src/client/collect-schema-coordinates.ts).
+ * Every change has a coordinate; for the others, usage is never recorded under it.
  */
 const TRACKED = new Set<InspectorChangeType>([
   ChangeType.FieldRemoved,

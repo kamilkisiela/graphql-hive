@@ -1559,30 +1559,16 @@ export const SchemaVersionSummary = (props: {
           value={publicChangeStats.breakingChanges}
           additionalValue={
             publicChangeStats.breakingChanges && schemaVersion.isComposable ? (
-              publicChangeStats.notSafe || publicChangeStats.unchecked ? (
-                <span className="flex items-center gap-2">
-                  {publicChangeStats.notSafe ? (
-                    <Tooltip
-                      trigger={
-                        <span className="ml-2 flex items-center gap-0.5 text-xs text-critical lg:text-sm">
-                          <ShieldAlertIcon size="14" className="inline" />
-                          {publicChangeStats.notSafe} not safe
-                        </span>
-                      }
-                      content="Some changes are not safe based on usage data."
-                    />
-                  ) : null}
-                  {publicChangeStats.unchecked ? (
-                    <Tooltip
-                      trigger={
-                        <span className="ml-2 text-xs text-fg-secondary lg:text-sm">
-                          {publicChangeStats.unchecked} not checked against usage
-                        </span>
-                      }
-                      content="Usage isn't recorded for what these changes touch, so they can't be judged safe or unsafe."
-                    />
-                  ) : null}
-                </span>
+              publicChangeStats.notSafe ? (
+                <Tooltip
+                  trigger={
+                    <span className="ml-2 flex items-center gap-0.5 text-xs text-critical lg:text-sm">
+                      <ShieldAlertIcon size="14" className="inline" />
+                      {publicChangeStats.notSafe} not safe
+                    </span>
+                  }
+                  content="Some changes are in use, or usage isn't recorded for what they touch."
+                />
               ) : (
                 <Tooltip
                   trigger={
