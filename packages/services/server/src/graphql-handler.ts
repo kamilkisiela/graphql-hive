@@ -8,7 +8,6 @@ import {
   useExecutionCancellation,
   useExtendContext,
 } from 'graphql-yoga';
-import hyperid from 'hyperid';
 import { isGraphQLError } from '@envelop/core';
 import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useGraphQLModules } from '@envelop/graphql-modules';
@@ -18,14 +17,12 @@ import { useHive } from '@graphql-hive/yoga';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { SuperTokensCookieBasedSession } from '@hive/api/modules/auth/lib/supertokens-strategy';
-import { cleanRequestId, type TracingInstance } from '@hive/service-common';
+import { type TracingInstance } from '@hive/service-common';
 import { captureException, runWithAsyncContext, withScope } from '@sentry/node';
 import { AuthN, Session } from '../../api/src/modules/auth/lib/authz';
 import { asyncStorage } from './async-storage';
 import type { HivePersistedDocumentsConfig, HiveUsageConfig } from './environment';
 import { useArmor } from './use-armor';
-
-export const reqIdGenerate = hyperid({ fixedLength: true });
 
 function hashSessionId(sessionId: string): string {
   return createHash('sha256').update(sessionId).digest('hex');
@@ -281,8 +278,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   });
 
   return async (req, reply) => {
-    const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
-    const requestId = cleanRequestId(requestIdHeader);
+    const requestId = req.id;
 
     await asyncStorage.run(
       {
@@ -303,7 +299,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         });
 
         if (!reply.hasHeader('x-request-id')) {
-          void reply.header('x-request-id', requestId || '');
+          void reply.header('x-request-id', requestId);
         }
 
         const accept = req.headers.accept;

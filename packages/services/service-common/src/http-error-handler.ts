@@ -1,7 +1,7 @@
 import { type FastifyError, type FastifyInstance, type FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import * as Sentry from '@sentry/node';
-import { cleanRequestId, maskToken } from './helpers';
+import { maskToken } from './helpers';
 
 const plugin: FastifyPluginAsync<{ isSentryEnabled: boolean }> = async (server, opts) => {
   if (opts.isSentryEnabled) {
@@ -34,13 +34,10 @@ const plugin: FastifyPluginAsync<{ isSentryEnabled: boolean }> = async (server, 
 
     Sentry.withScope(scope => {
       scope.setUser({ ip_address: req.ip });
-      const requestId = cleanRequestId(req.headers['x-request-id']);
       const tokenHeader =
         req.headers['x-api-token'] || req.headers.authorization?.replace('Bearer ', '');
       const maskedToken = typeof tokenHeader === 'string' ? maskToken(tokenHeader) : null;
-      if (requestId) {
-        scope.setTag('request_id', requestId);
-      }
+      scope.setTag('request_id', req.id);
       const { referer } = req.headers;
       if (referer) {
         scope.setTag('referer', referer);

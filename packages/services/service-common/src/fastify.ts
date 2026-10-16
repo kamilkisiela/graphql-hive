@@ -1,7 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import { fastify, type FastifyBaseLogger } from 'fastify';
 import cors from '@fastify/cors';
 import { Logger } from '@graphql-hive/logger';
 import * as Sentry from '@sentry/node';
+import { cleanRequestId } from './helpers';
 import { useHTTPErrorHandler } from './http-error-handler';
 import { useRequestLogging } from './request-logs';
 
@@ -70,7 +72,8 @@ export async function createServer(options: {
     routerOptions: {
       maxParamLength: 5000,
     },
-    requestIdHeader: 'x-request-id',
+    requestIdHeader: false,
+    genReqId: req => cleanRequestId(req.headers['x-request-id']) ?? randomUUID(),
     trustProxy: true,
     // If a connection is idle for "keepAliveTimeout" milliseconds or more, the connection times out.
     // The default for fastify is 72_000, but this is meant for more dynamic clients.
