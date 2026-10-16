@@ -82,28 +82,6 @@ export class ContractsManager {
     });
   }
 
-  public async deleteContract(args: { contractId: string }) {
-    const graph = await this.graphStore.findContractGraphById(args.contractId);
-    if (graph === null) {
-      return {
-        type: 'error' as const,
-        message: 'Contract not found.',
-      };
-    }
-
-    await this.session.assertPerformAction({
-      action: 'target:modifySettings',
-      organizationId: graph.organizationId,
-      params: {
-        organizationId: graph.organizationId,
-        projectId: graph.projectId,
-        targetId: graph.targetId,
-      },
-    });
-
-    return await this.contracts.deleteContractGraph(graph);
-  }
-
   async getViewerCanDeleteContractForContractGraph(graph: ContractGraph): Promise<boolean> {
     return await this.session.canPerformAction({
       action: 'target:modifySettings',

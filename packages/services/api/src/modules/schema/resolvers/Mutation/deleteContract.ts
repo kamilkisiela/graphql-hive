@@ -1,4 +1,5 @@
 import { ContractsManager } from '../../providers/contracts-manager';
+import { SchemaPublisher } from '../../providers/schema-publisher';
 import type { MutationResolvers } from './../../../../__generated__/types';
 
 export const deleteContract: NonNullable<MutationResolvers['deleteContract']> = async (
@@ -6,9 +7,12 @@ export const deleteContract: NonNullable<MutationResolvers['deleteContract']> = 
   args,
   context,
 ) => {
-  const result = await context.injector.get(ContractsManager).deleteContract({
-    contractId: args.input.contract.byId,
-  });
+  const result = await context.injector.get(SchemaPublisher).deleteContract(
+    {
+      contractId: args.input.contract.byId,
+    },
+    context.request.signal,
+  );
 
   if (result.type === 'success') {
     return {

@@ -45,6 +45,11 @@ type GithubMeta = null | {
   repository: string;
 };
 
+type CreateSchemaVersionResult = {
+  schemaVersion: SchemaVersion;
+  contractSchemaVersions: Array<SchemaVersion> | null;
+};
+
 @Injectable({
   scope: Scope.Operation,
   global: true,
@@ -302,6 +307,7 @@ export class SchemaVersionStore {
   })
   async createPublishSchemaVersion(
     args: {
+      writeCDNArtifacts(payload: CreateSchemaVersionResult): Promise<void>;
       schema: string;
       author: string;
       service: {
@@ -354,10 +360,7 @@ export class SchemaVersionStore {
           metadataAttributes: null | Record<string, string[]>;
         }
     ),
-  ): Promise<{
-    schemaVersion: SchemaVersion;
-    contractSchemaVersions: Array<SchemaVersion> | null;
-  }> {
+  ): Promise<CreateSchemaVersionResult> {
     this.logger.info(
       'Creating a new version (input=%o)',
       lodash.pick(args, [
@@ -500,16 +503,19 @@ export class SchemaVersionStore {
           )
         : null;
 
-      return {
+      const payload = {
         schemaVersion,
         contractSchemaVersions,
       };
+      await args.writeCDNArtifacts(payload);
+      return payload;
     });
   }
 
   async deleteSubgraphFromGraph(
     graph: Graph,
     args: {
+      writeCDNArtifacts(payload: CreateSchemaVersionResult): Promise<void>;
       service: {
         name: string;
         versionId: string;
@@ -542,10 +548,7 @@ export class SchemaVersionStore {
           metadataAttributes: null | Record<string, string[]>;
         }
     ),
-  ): Promise<{
-    schemaVersion: SchemaVersion;
-    contractSchemaVersions: Array<SchemaVersion> | null;
-  }> {
+  ): Promise<CreateSchemaVersionResult> {
     return this.pg.transaction('deleteSubgraphFromGraph', async trx => {
       // fetch the latest version
       const latestVersion = await trx
@@ -701,10 +704,12 @@ export class SchemaVersionStore {
           )
         : null;
 
-      return {
+      const payload = {
         schemaVersion,
         contractSchemaVersions,
       };
+      await args.writeCDNArtifacts(payload);
+      return payload;
     });
   }
 
@@ -1558,10 +1563,8 @@ export class SchemaVersionStore {
     supergraphSchemaChanges: Array<SchemaChangeType> | null;
     contracts: null | Array<CreateContractVersionInput>;
     conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
-  }): Promise<{
-    schemaVersion: SchemaVersion;
-    contractSchemaVersions: null | Array<SchemaVersion>;
-  }> {
+    writeCDNArtifacts(payload: CreateSchemaVersionResult): Promise<void>;
+  }): Promise<CreateSchemaVersionResult> {
     return await this.pg.transaction('createPromotionSchemaVersion', async trx => {
       const origin: SchemaVersionOriginPromotion = {
         type: 'promotion',
@@ -1719,7 +1722,9 @@ export class SchemaVersionStore {
           )
         : null;
 
-      return { schemaVersion, contractSchemaVersions };
+      const payload = { schemaVersion, contractSchemaVersions };
+      await args.writeCDNArtifacts(payload);
+      return payload;
     });
   }
 }

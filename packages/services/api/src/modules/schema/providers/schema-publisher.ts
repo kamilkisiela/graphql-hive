@@ -1745,62 +1745,54 @@ export class SchemaPublisher {
           if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
             this.logger.debug('Delete accepted');
             if (input.dryRun !== true) {
-              const { schemaVersion, contractSchemaVersions } =
-                await this.schemaVersions.deleteSubgraphFromGraph(graph, {
-                  service: {
-                    name: affectedService.service_name,
-                    versionId: affectedService.id,
-                  },
-                  composable: deleteResult.state.composable,
-                  diffSchemaVersionId: latestComposableVersion?.version.id ?? null,
-                  changes: deleteResult.state.changes,
-                  contracts:
-                    deleteResult.state.contracts?.map(contractResult => {
-                      const contract = contracts?.get(contractResult.contractId);
-                      invariant(contract, 'Contract should exist.');
-                      return this.toCreateContractVersionInput(contract, contractResult);
-                    }) ?? null,
-                  ...(deleteResult.state.fullSchemaSdl
-                    ? {
-                        compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
-                        supergraphSDL: deleteResult.state.supergraph,
-                        supergraphChanges: deleteResult.state.supergraphChanges,
-                        schemaCompositionErrors: null,
-                        tags: deleteResult.state.tags,
-                        schemaMetadata: deleteResult.state.schemaMetadata,
-                        metadataAttributes: deleteResult.state.metadataAttributes,
-                      }
-                    : {
-                        compositeSchemaSDL: null,
-                        supergraphSDL: null,
-                        supergraphChanges: null,
-                        schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
-                        tags: null,
-                        schemaMetadata: null,
-                        metadataAttributes: null,
-                      }),
-                  conditionalBreakingChangeMetadata:
-                    await this.getConditionalBreakingChangeMetadata({
-                      conditionalBreakingChangeConfiguration,
-                      organizationId: selector.organizationId,
-                      projectId: selector.projectId,
-                      targetId: selector.targetId,
+              const { schemaVersion } = await this.schemaVersions.deleteSubgraphFromGraph(graph, {
+                service: {
+                  name: affectedService.service_name,
+                  versionId: affectedService.id,
+                },
+                composable: deleteResult.state.composable,
+                diffSchemaVersionId: latestComposableVersion?.version.id ?? null,
+                changes: deleteResult.state.changes,
+                contracts:
+                  deleteResult.state.contracts?.map(contractResult => {
+                    const contract = contracts?.get(contractResult.contractId);
+                    invariant(contract, 'Contract should exist.');
+                    return this.toCreateContractVersionInput(contract, contractResult);
+                  }) ?? null,
+                ...(deleteResult.state.fullSchemaSdl
+                  ? {
+                      compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
+                      supergraphSDL: deleteResult.state.supergraph,
+                      supergraphChanges: deleteResult.state.supergraphChanges,
+                      schemaCompositionErrors: null,
+                      tags: deleteResult.state.tags,
+                      schemaMetadata: deleteResult.state.schemaMetadata,
+                      metadataAttributes: deleteResult.state.metadataAttributes,
+                    }
+                  : {
+                      compositeSchemaSDL: null,
+                      supergraphSDL: null,
+                      supergraphChanges: null,
+                      schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
+                      tags: null,
+                      schemaMetadata: null,
+                      metadataAttributes: null,
                     }),
-                });
-
-              if (deleteResult.state.composable) {
-                await this.publishToCDN({
-                  project,
-                  supergraph: deleteResult.state.supergraph,
-                  fullSchemaSdl: deleteResult.state.fullSchemaSdl,
-                  // pass all schemas except the one we are deleting
-                  schemas: deleteResult.state.schemas,
-                  schemaVersion,
-                  contractSchemaVersions: contractSchemaVersions,
-                  versionId: schemaVersion.id,
-                  graphId: graph.id,
-                });
-              }
+                conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
+                  conditionalBreakingChangeConfiguration,
+                  organizationId: selector.organizationId,
+                  projectId: selector.projectId,
+                  targetId: selector.targetId,
+                }),
+                writeCDNArtifacts: ({ schemaVersion, contractSchemaVersions }) => {
+                  return this.publishToCDN({
+                    project,
+                    schemas: deleteResult.state.schemas,
+                    schemaVersion,
+                    contractSchemaVersions,
+                  });
+                },
+              });
 
               const changes = deleteResult.state.changes ?? [];
               const errors = [
@@ -2411,25 +2403,20 @@ export class SchemaPublisher {
               schemaMetadata: null,
               metadataAttributes: null,
             }),
+        writeCDNArtifacts: ({ schemaVersion, contractSchemaVersions }) => {
+          return this.publishToCDN({
+            project,
+            schemas,
+            schemaVersion,
+            contractSchemaVersions,
+          });
+        },
       });
     } catch (error: unknown) {
       if (error instanceof SchemaRevisionUnavailableError && input.revision != null) {
         return revisionNotFoundResult(input.revision);
       }
       throw error;
-    }
-
-    if (composable && fullSchemaSdl) {
-      await this.publishToCDN({
-        project,
-        supergraph,
-        fullSchemaSdl,
-        schemas,
-        schemaVersion: result.schemaVersion,
-        contractSchemaVersions: result.contractSchemaVersions,
-        versionId: result.schemaVersion.id,
-        graphId: graph.id,
-      });
     }
 
     if (changes.length > 0 || errors.length > 0) {
@@ -3329,31 +3316,19 @@ export class SchemaPublisher {
         supergraphSchemaChanges,
         contracts,
         conditionalBreakingChangeMetadata,
+        writeCDNArtifacts: ({ schemaVersion, contractSchemaVersions }) => {
+          return this.publishToCDN({
+            project,
+            schemaVersion,
+            contractSchemaVersions,
+            schemas: ensureCompositeSchemas(
+              originLogEdges
+                .map(edge => edge.node)
+                .filter((node): node is Schema => node.action === 'PUSH'),
+            ).map(toCompositeSchemaInput),
+          });
+        },
       });
-
-    if (schemaVersion.schemaCompositionErrors === null) {
-      invariant(
-        !!schemaVersion.compositeSchemaSDL,
-        'A newly created schema version should always have a public schema SDL if there is no composition errors.',
-      );
-
-      this.logger.debug('update CDN state for target. (targetId=%s)', target.id);
-
-      await this.publishToCDN({
-        project,
-        schemaVersion,
-        contractSchemaVersions,
-        schemas: ensureCompositeSchemas(
-          originLogEdges
-            .map(edge => edge.node)
-            .filter((node): node is Schema => node.action === 'PUSH'),
-        ).map(toCompositeSchemaInput),
-        fullSchemaSdl: schemaVersion.compositeSchemaSDL,
-        supergraph: schemaVersion.supergraphSDL,
-        versionId: schemaVersion.id,
-        graphId: graph.id,
-      });
-    }
 
     this.logger.debug(
       'successfully promoted schema version. (targetId=%s, schemaVersionId)',
@@ -3386,6 +3361,89 @@ export class SchemaPublisher {
       },
       linkToWebsite,
     };
+  }
+
+  async deleteContract(args: { contractId: string }, signal: AbortSignal) {
+    const graph = await this.graphStore.findContractGraphById(args.contractId);
+    if (graph === null) {
+      return {
+        type: 'error' as const,
+        message: 'Contract not found.',
+      };
+    }
+    await this.session.assertPerformAction({
+      action: 'target:modifySettings',
+      organizationId: graph.organizationId,
+      params: {
+        organizationId: graph.organizationId,
+        projectId: graph.projectId,
+        targetId: graph.targetId,
+      },
+    });
+
+    return this.mutex
+      .perform(
+        registryLockId(graph.targetId),
+        {
+          /**
+           * The global request timeout is 60 seconds.
+           * We don't want to try acquiring the lock longer than 30 seconds.
+           * If it succeeds after 30 seconds,
+           * we have 30 seconds for actually running the business logic.
+           *
+           * If we would wait longer we risk the user facing 504 errors.
+           */
+          retries: 30,
+          retryDelay: 1_000,
+          signal,
+        },
+        async () => {
+          const graph = await this.graphStore.findContractGraphById(args.contractId);
+          if (graph === null) {
+            return {
+              type: 'error' as const,
+              message: 'Contract not found.',
+            };
+          }
+
+          const defaultGraph = await this.graphStore.getDefaultGraphForTargetId(graph.targetId);
+          const schemaVersion =
+            await this.schemaVersions.getMaybeLatestValidSchemaVersionForGraph(defaultGraph);
+
+          const contractSchemaVersions = await Promise.all(
+            (await this.graphStore.findContractGraphsForGraph(defaultGraph))
+              .values()
+              .toArray()
+              .map(graph => this.schemaVersions.getMaybeLatestValidSchemaVersionForGraph(graph)),
+          );
+
+          return await this.contracts.deleteContractGraph({
+            graph,
+            writeGraphManifest: async () => {
+              if (!schemaVersion) {
+                return;
+              }
+
+              await this.publishGraphManifest({
+                referenceDate: new Date(),
+                contractSchemaVersions: contractSchemaVersions.filter(
+                  <TValue>(value: TValue | null): value is TValue => !!value,
+                ),
+                schemaVersion,
+              });
+            },
+          });
+        },
+      )
+      .catch((error: unknown) => {
+        if (error instanceof MutexResourceLockedError) {
+          return {
+            type: 'error' as const,
+            message: 'Please try again later.',
+          };
+        }
+        throw error;
+      });
   }
 
   /**
@@ -3589,22 +3647,25 @@ export class SchemaPublisher {
     schemaVersion,
     contractSchemaVersions,
     project,
-    supergraph,
-    fullSchemaSdl,
     schemas,
-    versionId,
-    graphId,
   }: {
     schemaVersion: SchemaVersion;
     contractSchemaVersions: null | Array<SchemaVersion>;
     project: Project;
-    supergraph: string | null;
-    fullSchemaSdl: string;
     schemas: readonly SchemaInput[];
-    versionId: string;
-    graphId: string;
   }) {
+    if (schemaVersion.schemaCompositionErrors !== null) {
+      return;
+    }
+
+    this.logger.debug('update CDN state for target. (targetId=%s)', schemaVersion.targetId);
+
     const referenceDate = new Date();
+
+    invariant(
+      !!schemaVersion.compositeSchemaSDL,
+      'A newly created schema version should always have a public schema SDL if there is no composition errors.',
+    );
 
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
@@ -3622,8 +3683,8 @@ export class SchemaPublisher {
           artifact: project.type === ProjectType.SINGLE ? metadata[0] : metadata,
           artifactType: 'metadata',
           contractName: null,
-          versionId,
-          graphId,
+          versionId: schemaVersion.id,
+          graphId: schemaVersion.graphId,
           referenceDate,
         });
       }
@@ -3640,17 +3701,17 @@ export class SchemaPublisher {
             url: s.serviceUrl,
           })),
           contractName: null,
-          versionId,
-          graphId,
+          versionId: schemaVersion.id,
+          graphId: schemaVersion.graphId,
           referenceDate,
         }),
         this.artifactStorageWriter.writeArtifact({
           targetId: schemaVersion.targetId,
           artifactType: 'sdl',
-          artifact: fullSchemaSdl,
+          artifact: schemaVersion.compositeSchemaSDL,
           contractName: null,
-          versionId,
-          graphId,
+          versionId: schemaVersion.id,
+          graphId: schemaVersion.graphId,
           referenceDate,
         }),
       ]);
@@ -3660,10 +3721,10 @@ export class SchemaPublisher {
       await this.artifactStorageWriter.writeArtifact({
         targetId: schemaVersion.targetId,
         artifactType: 'sdl',
-        artifact: fullSchemaSdl,
+        artifact: schemaVersion.compositeSchemaSDL,
         contractName: null,
-        versionId,
-        graphId,
+        versionId: schemaVersion.id,
+        graphId: schemaVersion.graphId,
         referenceDate,
       });
     };
@@ -3674,17 +3735,17 @@ export class SchemaPublisher {
     ];
 
     if (project.type === ProjectType.FEDERATION) {
-      if (supergraph) {
+      if (schemaVersion.supergraphSDL) {
         this.logger.debug('Publishing supergraph to CDN');
 
         actions.push(
           this.artifactStorageWriter.writeArtifact({
             targetId: schemaVersion.targetId,
             artifactType: 'supergraph',
-            artifact: supergraph,
+            artifact: schemaVersion.supergraphSDL,
             contractName: null,
-            versionId,
-            graphId,
+            versionId: schemaVersion.id,
+            graphId: schemaVersion.graphId,
             referenceDate,
           }),
         );
