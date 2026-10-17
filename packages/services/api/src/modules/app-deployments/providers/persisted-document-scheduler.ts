@@ -2,7 +2,14 @@ import path from 'node:path';
 import { Worker } from 'node:worker_threads';
 import { fileURLToPath } from 'url';
 import { Injectable, Scope } from 'graphql-modules';
-import { getErrorSource, setErrorSource, traceFn } from '@hive/service-common';
+import {
+  getErrorSource,
+  getRequestId,
+  injectActiveTraceContext,
+  setErrorSource,
+  trace,
+  traceFn,
+} from '@hive/service-common';
 import { Logger, registerWorkerLogging } from '../../shared/providers/logger';
 import {
   observeR2ErrorTrace,
@@ -163,11 +170,15 @@ export class PersistedDocumentScheduler {
       tasks.set(id, task);
       const time = process.hrtime();
 
+      trace.getActiveSpan()?.setAttribute('hive.worker.index', index);
       worker.postMessage({
         event: 'PROCESS',
         id,
         data,
-      });
+        traceContext: injectActiveTraceContext(),
+        requestId: getRequestId(),
+        enqueuedAt: Date.now(),
+      } satisfies BatchProcessEvent);
 
       const result = await d.promise.finally(() => {
         const endTime = process.hrtime(time);

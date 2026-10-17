@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { parentPort } from 'node:worker_threads';
+import { configureTracing } from '@hive/service-common';
 import { createWorker } from '../../api/src/modules/app-deployments/worker/persisted-documents-worker';
 import type { AwsCredentials } from '../../api/src/modules/cdn/providers/aws';
 import { createDefaultCredentialProvider } from '../../api/src/modules/cdn/providers/aws';
@@ -8,6 +9,16 @@ import { env } from './environment';
 
 if (!parentPort) {
   throw new Error('This script must be run as a worker.');
+}
+
+// The OpenTelemetry registry is per thread, so the worker needs its own provider to export spans.
+// Only the collector exporter: the Hive tracing processor drops spans whose root it did not see.
+if (env.tracing.collectorEndpoint) {
+  configureTracing({
+    collectorEndpoint: env.tracing.collectorEndpoint,
+    serviceName: 'graphql-api',
+    enableConsoleExporter: env.tracing.enableConsoleExporter,
+  }).setup();
 }
 
 const logger = createMessagePortLogger(parentPort);

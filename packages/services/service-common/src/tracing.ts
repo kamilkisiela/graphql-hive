@@ -14,6 +14,7 @@ import {
   diag,
   DiagConsoleLogger,
   DiagLogLevel,
+  propagation,
   SpanKind,
   SpanStatusCode,
   trace,
@@ -455,6 +456,18 @@ export const traceInline = <TArgs extends any[], TResult>(
     });
   };
 };
+
+/** The active trace context as a W3C `traceparent`/`tracestate` carrier. */
+export function injectActiveTraceContext(): Record<string, string> {
+  const carrier: Record<string, string> = {};
+  propagation.inject(context.active(), carrier);
+  return carrier;
+}
+
+/** Runs `fn` with the trace context of a carrier from `injectActiveTraceContext` active. */
+export function withTraceContext<T>(carrier: Record<string, string> | undefined, fn: () => T): T {
+  return context.with(propagation.extract(context.active(), carrier ?? {}), fn);
+}
 
 type FunctionTraceOptions<TArgs extends any[], TResult> = {
   initAttributes?: Attributes | ((...args: TArgs) => Attributes);

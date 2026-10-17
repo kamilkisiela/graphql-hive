@@ -1,6 +1,7 @@
 import type { MessagePort, Worker } from 'node:worker_threads';
 import type { LogLevel } from 'fastify';
 import { Injectable } from 'graphql-modules';
+import { requestIdStorage } from '@hive/service-common';
 
 export type LogFn = (msg: string, ...args: unknown[]) => void;
 
@@ -75,16 +76,27 @@ export function createMessagePortLogger(
 
 /**
  * Register a logger from the message port to log to this threads logger.
+ * A `requestId` binding is restored as the active request id, which the main-thread logger reads.
  */
 export function registerWorkerLogging(logger: Logger, worker: Worker, workerId: string) {
   worker.on('message', (data: MessagePortLog) => {
-    if ('event' in data && data.event === 'log') {
+    if (!('event' in data && data.event === 'log')) {
+      return;
+    }
+
+    const emit = () =>
       logger
         .child({
           ...data.bindings,
           workerId,
         })
         [data.level](...data.args);
+
+    const requestId = data.bindings.requestId;
+    if (typeof requestId === 'string') {
+      requestIdStorage.run({ requestId }, emit);
+    } else {
+      emit();
     }
   });
 }

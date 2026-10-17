@@ -1,4 +1,5 @@
-import { type MessagePort } from 'node:worker_threads';
+import { threadId, threadName, type MessagePort } from 'node:worker_threads';
+import { traceInline, withTraceContext } from '@hive/service-common';
 import { AwsClient } from '../../cdn/providers/aws';
 import type { S3CredentialProvider } from '../../cdn/providers/aws';
 import { ClickHouse } from '../../operations/providers/clickhouse-client';
@@ -85,22 +86,52 @@ export function createWorker(
     process.exit(1);
   });
 
-  port.on('message', async (message: BatchProcessEvent) => {
-    logger.debug('processing message', message.id, message.event);
+  const processBatch = traceInline<
+    [BatchProcessEvent, PersistedDocumentIngester],
+    Promise<BatchProcessedEvent['data']>
+  >(
+    'PersistedDocumentsWorker.processBatch',
+    {
+      initAttributes: message => ({
+        'request.id': message.requestId ?? '',
+        'hive.worker.message.id': message.id,
+        'thread.id': threadId,
+        'thread.name': threadName ?? '',
+        'hive.worker.queue_delay_ms': Date.now() - message.enqueuedAt,
+        'hive.target.id': message.data.targetId,
+        'hive.appDeployment.id': message.data.appDeployment.id,
+        'hive.appDeployment.version': message.data.appDeployment.version,
+        'hive.appDeployment.documentCount': message.data.documents.length,
+      }),
+      resultAttributes: result =>
+        result.type === 'error'
+          ? {
+              'hive.batch.result': 'error',
+              'hive.batch.failed_index': result.error.details.index,
+              'hive.batch.error': result.error.message,
+            }
+          : { 'hive.batch.result': 'success' },
+    },
+    (message, ingester) => ingester.processBatch(message.data),
+  );
+
+  async function processMessage(message: BatchProcessEvent) {
+    const messageLogger = logger.child({ requestId: message.requestId, messageId: message.id });
+    messageLogger.debug('processing message', message.id, message.event);
     const s3WriteMetrics: Array<S3WriteMetric> = [];
     const r2ErrorTraces: Array<R2ErrorTrace> = [];
-    const persistedOperationsProcessor = new PersistedDocumentIngester(
+    const ingester = new PersistedDocumentIngester(
       clickhouse,
       new S3Writer(
         s3Config,
         metric => s3WriteMetrics.push(metric),
         errors => r2ErrorTraces.push(...errors),
       ),
-      logger as any,
+      messageLogger as any,
     );
     try {
-      const result = await persistedOperationsProcessor.processBatch(message.data);
-      logger.debug('send message result', message.id, message.event);
+      const result = await processBatch(message, ingester);
+      messageLogger.debug('send message result', message.id, message.event);
       port.postMessage({
         event: 'processedBatch',
         id: message.id,
@@ -109,11 +140,11 @@ export function createWorker(
         r2ErrorTraceSummary: summarizeR2ErrorTraces(r2ErrorTraces),
       } satisfies BatchProcessedEvent);
     } catch (err: unknown) {
-      logger.error(
+      messageLogger.error(
         'unexpected error while processing message in worker (messageId=%s)',
         message.id,
       );
-      logger.error(String(err));
+      messageLogger.error(String(err));
       port.postMessage({
         event: 'error',
         id: message.id,
@@ -122,6 +153,10 @@ export function createWorker(
         r2ErrorTraceSummary: summarizeR2ErrorTraces(r2ErrorTraces),
       } satisfies BatchProcessingErrorEvent);
     }
+  }
+
+  port.on('message', (message: BatchProcessEvent) => {
+    withTraceContext(message.traceContext, () => void processMessage(message));
   });
 
   process.on('exit', function (code) {
