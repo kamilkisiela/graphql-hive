@@ -218,10 +218,7 @@ export const ChecksPageQuery = graphql(`
         id
         type
       }
-      latestValidSchemaVersion {
-        id
-        serviceNames
-      }
+      schemaCheckServiceNames
       # Whether any check exists; the list itself says whether the current filters match one.
       schemaChecks(first: 1) {
         edges {
@@ -266,11 +263,8 @@ function ChecksPageContent() {
   const target = query.data?.target;
   const hasSchemaChecks = !!target?.schemaChecks.edges.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
-  // Null (single-schema, no service names) hides the filter. A composite target with no valid
-  // version yet still gets the control, so a name set from a check stays visible.
-  const serviceNames =
-    target?.latestValidSchemaVersion?.serviceNames ??
-    (target && target.project.type !== ProjectType.Single ? [] : null);
+  // Null (single-schema, no service names) hides the filter.
+  const serviceNames = target?.schemaCheckServiceNames ?? null;
 
   if (query.error) {
     return (

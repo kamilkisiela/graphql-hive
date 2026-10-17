@@ -163,16 +163,12 @@ describe('service filter', () => {
     });
   });
 
-  it(
-    'shows a service from the URL that the latest version does not know',
-    { timeout: 30_000 },
-    async () => {
-      renderAtUrl(`${CHECKS_PAGE}?filter_service=ghost`, { client: client() });
-      await screen.findByText(CHECKS.serviceOnly);
+  it('shows a service from the URL that no check lists', { timeout: 30_000 }, async () => {
+    renderAtUrl(`${CHECKS_PAGE}?filter_service=ghost`, { client: client() });
+    await screen.findByText(CHECKS.serviceOnly);
 
-      expect(screen.getByRole('combobox', { name: 'Service' }).textContent).toContain('ghost');
-    },
-  );
+    expect(screen.getByRole('combobox', { name: 'Service' }).textContent).toContain('ghost');
+  });
 
   it("filters to a service from a check row's service name", { timeout: 30_000 }, async () => {
     const testClient = client();

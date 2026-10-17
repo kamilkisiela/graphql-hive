@@ -22,9 +22,6 @@ export const SchemaVersion: SchemaVersionResolvers = {
   schemas: (version, _, { injector }) => {
     return injector.get(SchemaManager).getMaybeSchemasOfVersion(version);
   },
-  serviceNames: (version, _, { injector }) => {
-    return injector.get(SchemaManager).getServiceNamesOfVersion(version);
-  },
   schemaCompositionErrors: async (version, _, { injector }) => {
     return injector.get(SchemaVersionHelper).getSchemaCompositionErrors(version);
   },
