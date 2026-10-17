@@ -160,7 +160,12 @@ export class AppDeploymentsManager {
         return result;
       },
       error => {
-        if (error instanceof HiveError) {
+        if (signal.aborted) {
+          registryOperationOutcomeCount.inc({
+            operation: 'persisted_document_upload',
+            conclusion: 'aborted',
+          });
+        } else if (error instanceof HiveError) {
           registryOperationOutcomeCount.inc({
             operation: 'persisted_document_upload',
             conclusion: 'success',

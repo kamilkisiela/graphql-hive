@@ -125,11 +125,19 @@ export function createWorker(
         r2ErrorTraceSummary: summarizeR2ErrorTraces(r2ErrorTraces),
       } satisfies BatchProcessedEvent);
     } catch (err: unknown) {
-      logger.error(
-        'unexpected error while processing message in worker (messageId=%s)',
-        message.id,
-      );
-      logger.error(String(err));
+      if (controller.signal.aborted) {
+        logger.info(
+          'batch cancelled by the scheduler (messageId=%s, reason=%s)',
+          message.id,
+          String(controller.signal.reason),
+        );
+      } else {
+        logger.error(
+          'unexpected error while processing message in worker (messageId=%s)',
+          message.id,
+        );
+        logger.error(String(err));
+      }
       port.postMessage({
         event: 'error',
         id: message.id,
