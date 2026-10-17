@@ -1,5 +1,16 @@
 # @graphql-hive/cli
 
+## 0.67.1
+
+### Patch Changes
+
+- [#8711](https://github.com/graphql-hive/console/pull/8711)
+  [`b5839de`](https://github.com/graphql-hive/console/commit/b5839dec170ce82afc839cb5d81c55cf6f2a6606)
+  Thanks [@jdolle](https://github.com/jdolle)! - `hive app:create` now waits up to 55 seconds for
+  each document upload request (previously 20 seconds), the same as the schema commands. Slow
+  uploads completed on the server but the CLI gave up, retried the whole batch, and finally failed
+  with a network error.
+
 ## 0.67.0
 
 ### Minor Changes

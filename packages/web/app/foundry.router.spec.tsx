@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { Link, RouterProvider } from '@tanstack/react-router';
 import { render as renderDom, screen } from '@testing-library/react';
 import { previewRouter, PreviewSlotProvider, RouterAt } from './foundry.router';
+import { useSlugs } from './src/lib/hooks/use-slugs';
 
 /**
  * Guards the preview router. `Link` throws without router context, so if this breaks, every preview
@@ -68,5 +69,20 @@ describe('preview router', () => {
     expect(project.getAttribute('aria-current')).toBe('page');
     // A prefix of the URL counts as current too, which is what `exact` exists for on root items.
     expect(screen.getByRole('link', { name: 'org' }).getAttribute('aria-current')).toBe('page');
+  });
+
+  it("carries the app's layout route ids, so a page component can read its slugs", async () => {
+    function Slugs() {
+      const slugs = useSlugs('target');
+      return <span>{[slugs.organizationSlug, slugs.projectSlug, slugs.targetSlug].join('/')}</span>;
+    }
+
+    renderDom(
+      <RouterAt path="/the-guild/graphql-hive/production">
+        <Slugs />
+      </RouterAt>,
+    );
+
+    await screen.findByText('the-guild/graphql-hive/production');
   });
 });

@@ -76,12 +76,14 @@ export const Target: Pick<
       ['FailedSchemaCheck', 'schemaSDL'],
     ]);
 
-    const isSchemaChangesSelected = isFieldRequestedDeep(info, [
-      ['SuccessfulSchemaCheck', 'safeSchemaChanges'],
-      ['SuccessfulSchemaCheck', 'breakingSchemaChanges'],
-      ['FailedSchemaCheck', 'safeSchemaChanges'],
-      ['FailedSchemaCheck', 'breakingSchemaChanges'],
-    ]);
+    const isSchemaChangesSelected = isFieldRequestedDeep(
+      info,
+      ['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
+        ['schemaChanges', 'safeSchemaChanges', 'breakingSchemaChanges', 'cliApprovalMetadata'].map(
+          fieldName => [typeName, fieldName] as const,
+        ),
+      ),
+    );
 
     const result = await injector.get(SchemaManager).getPaginatedSchemaChecksForTarget(target, {
       first: args.first ?? null,

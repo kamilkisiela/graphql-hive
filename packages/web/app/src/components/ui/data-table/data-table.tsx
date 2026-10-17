@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
-import { ArrowDown, ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { ArrowDown, ChevronDown, ChevronRight, Info, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   flexRender,
@@ -27,8 +27,10 @@ import {
   DataTableHead,
   DataTableHeader,
   DataTableRow,
+  DataTableTitleBar,
   wrapperClass,
   type DataTableColumnLayout,
+  type DataTableTone,
 } from './data-table-components';
 import {
   DataTableCursorPagination,
@@ -67,7 +69,10 @@ export type DataTableProps<TData> = {
     /** Alternate rows take a tint one step off the surface. On by default. */
     striped?: boolean;
     bordered?: boolean;
+    /** Needs `bordered`. */
+    tone?: DataTableTone;
   };
+  title?: { label: ReactNode; icon?: LucideIcon; aside?: ReactNode };
   /**
    * `client` pages rows the table already holds; `cursor` hands paging to the caller for a
    * connection the API pages with `first` and `after`. Client with 20 rows a page by default.
@@ -177,6 +182,7 @@ export function DataTable<TData>({
   sorting,
   initialSorting,
   footer,
+  title,
   rowState,
   selectedRowId,
   renderSubComponent,
@@ -186,6 +192,7 @@ export function DataTable<TData>({
   const onSurface = variants?.onSurface ?? 'base';
   const striped = variants?.striped ?? true;
   const bordered = variants?.bordered ?? true;
+  const tone = bordered ? (variants?.tone ?? 'default') : 'default';
   const hasTrailingColumn = !hideRowIndicator && (!!renderSubComponent || !!onRowClick);
   const hasHeader = columns.some(column => column.header !== undefined);
   const [ownSorting, setOwnSorting] = useState<SortingState>(initialSorting ?? []);
@@ -227,20 +234,28 @@ export function DataTable<TData>({
   const busy = !loading && (refreshing || !!sorting?.loading);
 
   return (
-    <div className={wrapperClass(onSurface, bordered)}>
+    <div className={wrapperClass(onSurface, bordered, tone)}>
+      {title ? (
+        <DataTableTitleBar label={title.label} icon={title.icon} aside={title.aside} tone={tone} />
+      ) : null}
       <div className="relative w-full overflow-auto">
         <table className="w-full text-sm" aria-busy={busy || undefined}>
           {hasHeader ? (
             <DataTableHeader>
               {table.getHeaderGroups().map(headerGroup => (
-                <DataTableRow key={headerGroup.id} onSurface={onSurface}>
+                <DataTableRow key={headerGroup.id} onSurface={onSurface} tone={tone}>
                   {headerGroup.headers.map(header => {
                     const meta = header.column.columnDef.meta;
                     const label = header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext());
                     return (
-                      <DataTableHead key={header.id} layout={meta} onSurface={onSurface}>
+                      <DataTableHead
+                        key={header.id}
+                        layout={meta}
+                        onSurface={onSurface}
+                        tone={tone}
+                      >
                         <span className="inline-flex items-center gap-1">
                           {meta?.sortable ? (
                             <SortHeader header={header} label={label} loading={sorting?.loading} />
@@ -261,7 +276,9 @@ export function DataTable<TData>({
                       </DataTableHead>
                     );
                   })}
-                  {hasTrailingColumn ? <DataTableHead compact onSurface={onSurface} /> : null}
+                  {hasTrailingColumn ? (
+                    <DataTableHead compact onSurface={onSurface} tone={tone} />
+                  ) : null}
                 </DataTableRow>
               ))}
             </DataTableHeader>
@@ -272,6 +289,7 @@ export function DataTable<TData>({
                 <DataTableRow
                   key={index}
                   onSurface={onSurface}
+                  tone={tone}
                   striped={striped && index % 2 === 1}
                 >
                   {table.getVisibleLeafColumns().map((column, columnIndex) => (
@@ -297,7 +315,7 @@ export function DataTable<TData>({
                 </DataTableRow>
               ))
             ) : rows.length === 0 ? (
-              <DataTableRow onSurface={onSurface}>
+              <DataTableRow onSurface={onSurface} tone={tone}>
                 <DataTableCellSlot colSpan={totalColumnCount} variant="empty">
                   {emptyMessage}
                 </DataTableCellSlot>
@@ -314,6 +332,7 @@ export function DataTable<TData>({
                   <Fragment key={row.id}>
                     <DataTableRow
                       onSurface={onSurface}
+                      tone={tone}
                       // Counted over data rows, so an expanded panel does not shift the stripes.
                       striped={striped && index % 2 === 1}
                       expanded={row.getIsExpanded()}
@@ -344,7 +363,7 @@ export function DataTable<TData>({
                       ) : null}
                     </DataTableRow>
                     {renderSubComponent && row.getIsExpanded() ? (
-                      <DataTableExpandedRow colSpan={totalColumnCount}>
+                      <DataTableExpandedRow colSpan={totalColumnCount} tone={tone}>
                         {renderSubComponent(row)}
                       </DataTableExpandedRow>
                     ) : null}
@@ -358,6 +377,7 @@ export function DataTable<TData>({
               label={footer.label}
               value={footer.value}
               columnCount={totalColumnCount}
+              tone={tone}
             />
           ) : null}
         </table>

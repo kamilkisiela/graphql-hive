@@ -390,6 +390,61 @@ describe('DataTable', () => {
     expect(screen.queryByRole('navigation')).toBeNull();
   });
 
+  it('renders a title bar above the column headers, with its far end', () => {
+    const { container } = render(
+      <DataTable
+        data={ROWS}
+        columns={COLUMNS}
+        getRowId={row => row.id}
+        title={{ label: 'Used in 2 targets', aside: <button type="button">9 more</button> }}
+      />,
+    );
+    const wrapper = container.firstElementChild as HTMLElement;
+    const bar = wrapper.firstElementChild as HTMLElement;
+    expect(bar.textContent).toContain('Used in 2 targets');
+    expect(screen.getByRole('button', { name: '9 more' })).toBeTruthy();
+    expect(bar.compareDocumentPosition(container.querySelector('table')!)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it('tints the chrome by tone, and only when bordered', () => {
+    const { container, rerender } = render(
+      <DataTable
+        data={ROWS}
+        columns={COLUMNS}
+        getRowId={row => row.id}
+        variants={{ tone: 'critical' }}
+      />,
+    );
+    const wrapper = () => container.firstElementChild as HTMLElement;
+    expect(wrapper().className).toContain('border-critical-line');
+    expect(container.querySelector('th')?.className).toContain('bg-critical-tint');
+    expect(container.querySelector('tbody tr')?.className).toContain('border-critical-line-subtle');
+
+    rerender(
+      <DataTable
+        data={ROWS}
+        columns={COLUMNS}
+        getRowId={row => row.id}
+        variants={{ tone: 'critical', bordered: false }}
+      />,
+    );
+    expect(wrapper().className).not.toContain('critical');
+    expect(container.querySelector('th')?.className).not.toContain('critical');
+
+    rerender(
+      <DataTable
+        data={ROWS}
+        columns={COLUMNS}
+        getRowId={row => row.id}
+        variants={{ tone: 'critical' }}
+        footer={{ label: 'Total', value: 6 }}
+      />,
+    );
+    expect(container.querySelector('tfoot tr')?.className).toContain('border-critical-line');
+  });
+
   it('renders the footer, the loading row and the empty message', () => {
     const { container, rerender } = render(
       <DataTable

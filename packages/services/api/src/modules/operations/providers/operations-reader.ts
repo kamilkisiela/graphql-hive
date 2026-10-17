@@ -435,6 +435,168 @@ export class OperationsReader {
     return stats;
   }
 
+  /** `countCoordinate` split by target, with the distinct operations behind each. */
+  countCoordinatePerTarget = batchBy<
+    {
+      schemaCoordinate: string;
+      targetIds: readonly string[];
+      period: DateRange;
+      excludedClients?: readonly string[] | null;
+    },
+    Array<{ id: string; count: number; operationCount: number }>
+  >(
+    item =>
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
+    async items => {
+      const counts = await this.countCoordinatesPerTarget({
+        targetIds: items[0].targetIds,
+        excludedClients: items[0].excludedClients,
+        period: items[0].period,
+        schemaCoordinates: items.map(item => item.schemaCoordinate),
+      });
+      return items.map(item => counts.get(item.schemaCoordinate) ?? []);
+    },
+  );
+
+  private async countCoordinatesPerTarget(args: {
+    schemaCoordinates: readonly string[];
+    targetIds: readonly string[];
+    period: DateRange;
+    excludedClients?: readonly string[] | null;
+  }) {
+    const conditions = [sql`(coordinate IN (${sql.array(args.schemaCoordinates, 'String')}))`];
+
+    if (Array.isArray(args.excludedClients) && args.excludedClients.length > 0) {
+      // Per target, so a target only excluded clients used does not count as used.
+      conditions.push(sql`
+        (hash, target) NOT IN (
+          SELECT hash, target FROM (
+            SELECT
+              hash,
+              target,
+              countIf(client_name NOT IN (${sql.array(
+                args.excludedClients,
+                'String',
+              )})) as non_excluded_clients_total
+            FROM clients_daily ${this.createFilter({
+              target: args.targetIds,
+              period: args.period,
+            })}
+            GROUP BY hash, target
+          ) WHERE non_excluded_clients_total = 0
+        )
+      `);
+    }
+
+    const query = this.pickAggregationByPeriod({
+      period: args.period,
+      query: aggregationTableName => sql`
+            SELECT
+              coordinate,
+              target,
+              sum(total) as total,
+              uniqExact(hash) as operations
+            FROM ${aggregationTableName('coordinates')}
+            ${this.createFilter({
+              target: args.targetIds,
+              period: args.period,
+              extra: conditions,
+            })}
+            GROUP BY coordinate, target
+          `,
+      queryId: aggregation => `count_coordinates_per_target_${aggregation}`,
+      timeout: 30_000,
+    });
+
+    const res = await this.clickHouse.query<{
+      total: string;
+      operations: string;
+      coordinate: string;
+      target: string;
+    }>(query);
+
+    return groupByKey(
+      res.data.map(row => ({
+        key: row.coordinate,
+        id: row.target,
+        count: ensureNumber(row.total),
+        operationCount: ensureNumber(row.operations),
+      })),
+    );
+  }
+
+  getOperationCountsPerTarget = batchBy<
+    {
+      hash: string;
+      targetIds: readonly string[];
+      period: DateRange;
+      excludedClients?: readonly string[] | null;
+    },
+    Array<{ id: string; count: number }>
+  >(
+    item =>
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
+    async items => {
+      const counts = await this._getOperationCountsPerTarget({
+        targetIds: items[0].targetIds,
+        excludedClients: items[0].excludedClients ?? null,
+        period: items[0].period,
+        hashes: Array.from(new Set(items.map(item => item.hash))),
+      });
+      return items.map(item => counts.get(item.hash) ?? []);
+    },
+  );
+
+  private async _getOperationCountsPerTarget(args: {
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+    hashes: string[];
+  }) {
+    const filter = (table: string) => sql`
+      PREWHERE
+        ${sql.raw(`"${table}"`)}."target" IN (${sql.array(args.targetIds, 'String')})
+        AND ${sql.raw(`"${table}"`)}."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+        AND ${sql.raw(`"${table}"`)}."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+        AND ${sql.raw(`"${table}"`)}."hash" IN (${sql.longArray(args.hashes, 'String')})
+        ${args.excludedClients ? sql`AND ${sql.raw(`"${table}"`)}."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+    `;
+
+    const rows = await this.clickHouse
+      .postQuery({
+        queryId: '_getOperationCountsPerTarget',
+        query: sql`
+          SELECT "hash", "target", SUM("total") AS "count"
+          FROM (
+            SELECT "operations_daily"."hash" AS "hash", "operations_daily"."target" AS "target", "operations_daily"."total" AS "total"
+            FROM "operations_daily"
+            ${filter('operations_daily')}
+
+            UNION ALL
+
+            SELECT "subscription_operations_daily"."hash" AS "hash", "subscription_operations_daily"."target" AS "target", "subscription_operations_daily"."total" AS "total"
+            FROM "subscription_operations_daily"
+            ${filter('subscription_operations_daily')}
+          )
+          GROUP BY "hash", "target"
+        `,
+        timeout: 10_000,
+      })
+      .then(result =>
+        z
+          .array(
+            z.object({
+              hash: z.string(),
+              target: z.string(),
+              count: z.string().transform(ensureNumber),
+            }),
+          )
+          .parse(result.data),
+      );
+
+    return groupByKey(rows.map(row => ({ key: row.hash, id: row.target, count: row.count })));
+  }
+
   countCoordinateFailure = batchBy<
     {
       schemaCoordinate: string;
@@ -3136,4 +3298,21 @@ export class OperationsReader {
   }): string {
     return [type, field, argument].filter(Boolean).join('.');
   }
+}
+
+/** Drops empty rows; most requests first. */
+function groupByKey<T extends { key: string; count: number }>(rows: T[]) {
+  const groups = new Map<string, Array<Omit<T, 'key'>>>();
+  for (const { key, ...row } of rows) {
+    if (row.count <= 0) {
+      continue;
+    }
+    const group = groups.get(key) ?? [];
+    group.push(row);
+    groups.set(key, group);
+  }
+  for (const group of groups.values()) {
+    group.sort((a, b) => b.count - a.count);
+  }
+  return groups;
 }
