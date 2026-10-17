@@ -2,7 +2,7 @@
   "__comments": [
     "App Deployments: the persisted document upload path (hive app:create -> addDocumentsToAppDeployment -> PersistedDocumentScheduler -> persisted-documents-worker threads -> ClickHouse + S3).",
     "Datasource uids PROM_DATASOURCE_UID and TEMPO_DATASOURCE_UID are substituted at deploy time (Pulumi) and by docker/docker-compose.dev.yml for local Grafana. Loki uses the literal grafanacloud-logs uid and is unavailable locally.",
-    "Prometheus counters are written with the _total suffix that the Grafana Cloud OTLP pipeline adds; a local Prometheus scrape keeps the code names, so counter panels are empty in local dev.",
+    "The registry_* counters are matched as {__name__=~\"...(_total)?\"} because the Grafana Cloud OTLP pipeline appends _total while a local Prometheus scrape keeps the code names; api_s3_writes_total carries the suffix in code already.",
     "Prometheus series on this path have no target label (cardinality). Per-target panels are TraceQL metrics over the span attribute hive.target.id, set on the scheduler, worker and ingester spans; Prometheus panels are fleet-wide and say so in their description.",
     "The scheduler drops a worker's S3 metrics when the batch already timed out (50 s), so api_s3_writes_total under-counts the slowest batches; Tempo spans include them.",
     "Target ID is a Tempo label-values variable over hive.target.id and is applied as a regex (${targetId:regex}); All resolves to .*."
@@ -365,7 +365,7 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum(increase(registry_operation_unexpected_error_count_total{operation=\"persisted_document_upload\", source=\"persisted-documents-worker\"}[$__range])) or vector(0)",
+          "expr": "sum(increase({__name__=~\"registry_operation_unexpected_error_count(_total)?\", operation=\"persisted_document_upload\", source=\"persisted-documents-worker\"}[$__range])) or vector(0)",
           "legendFormat": "Worker timeouts and crashes",
           "refId": "A",
           "instant": true,
@@ -433,7 +433,7 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum(increase(registry_operation_unexpected_error_count_total{operation=\"persisted_document_upload\"}[$__range])) or vector(0)",
+          "expr": "sum(increase({__name__=~\"registry_operation_unexpected_error_count(_total)?\", operation=\"persisted_document_upload\"}[$__range])) or vector(0)",
           "legendFormat": "Unexpected upload errors",
           "refId": "A",
           "instant": true,
@@ -852,7 +852,7 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum by (conclusion) (increase(registry_operation_outcome_count_total{operation=\"persisted_document_upload\"}[$__rate_interval]))",
+          "expr": "sum by (conclusion) (increase({__name__=~\"registry_operation_outcome_count(_total)?\", operation=\"persisted_document_upload\"}[$__rate_interval]))",
           "legendFormat": "{{conclusion}}",
           "refId": "A",
           "range": true
@@ -934,7 +934,7 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum by (source) (rate(registry_operation_unexpected_error_count_total{operation=\"persisted_document_upload\"}[$__rate_interval])) * $__interval_s",
+          "expr": "sum by (source) (rate({__name__=~\"registry_operation_unexpected_error_count(_total)?\", operation=\"persisted_document_upload\"}[$__rate_interval])) * $__interval_s",
           "legendFormat": "{{source}}",
           "refId": "A",
           "range": true
