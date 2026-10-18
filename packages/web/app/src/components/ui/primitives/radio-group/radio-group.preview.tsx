@@ -1,6 +1,8 @@
-import { useState, type ReactNode } from 'react';
-import { Check } from 'lucide-react';
+import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { Plan, planCollection } from '@/components/organization/billing/BillingPlanPicker';
+import { BillingPlanType } from '@/gql/graphql';
+import { StatusDot } from '../status-dot/status-dot';
 import { RadioGroup } from './radio-group';
 
 export const nav: NavPath = 'Primitives/FormControls/RadioGroup';
@@ -38,7 +40,7 @@ export const WithIndicators = createPreview(() => {
           value: 'breaking',
           content: (
             <>
-              <span className="size-2 rounded-full bg-critical" />
+              <StatusDot color="critical" />
               Breaking
             </>
           ),
@@ -47,7 +49,7 @@ export const WithIndicators = createPreview(() => {
           value: 'dangerous',
           content: (
             <>
-              <span className="size-2 rounded-full bg-warning" />
+              <StatusDot color="warning" />
               Dangerous
             </>
           ),
@@ -56,7 +58,7 @@ export const WithIndicators = createPreview(() => {
           value: 'safe',
           content: (
             <>
-              <span className="size-2 rounded-full bg-success" />
+              <StatusDot color="success" />
               Safe
             </>
           ),
@@ -194,46 +196,6 @@ export const Playground = createPreview({
   },
 });
 
-function PlanBody(props: {
-  name: string;
-  price: string;
-  description: string;
-  features: string[];
-  isCurrent?: boolean;
-  footer?: ReactNode;
-}) {
-  return (
-    <div className="flex w-full flex-col justify-between gap-6 self-stretch">
-      <div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-fg">{props.name}</span>
-          {props.isCurrent ? (
-            <span className="rounded-xs bg-accent-tint px-2 py-1 text-[11px] font-medium tracking-wide text-accent">
-              CURRENT PLAN
-            </span>
-          ) : null}
-        </div>
-        <div className="text-3xl font-bold text-fg">{props.price}</div>
-        <div className="text-control text-fg-secondary">{props.description}</div>
-        <div className="mt-6 flex flex-col gap-2">
-          {props.features.map(feature => (
-            <div key={feature} className="flex items-start gap-2 text-control text-fg-default">
-              <Check className="mt-0.5 size-4 shrink-0 text-fg-secondary" />
-              {feature}
-            </div>
-          ))}
-        </div>
-      </div>
-      {props.footer ? (
-        <div>
-          <div className="mx-auto mb-4 w-9/12 border-b border-line" />
-          <div className="text-xs text-fg-default">{props.footer}</div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 /**
  * `content` carrying a whole card body, which is what the billing plan picker needs: no radio dot,
  * selection shown by the card border alone. Three cards in a row also exercise equal-height stretch.
@@ -252,54 +214,23 @@ export const PlanCards = createPreview(() => {
           {
             value: 'hobby',
             content: (
-              <PlanBody
-                isCurrent
-                name="Hobby"
-                price="Free"
-                description="For personal or small projects"
-                features={[
-                  'Unlimited seats, projects and organizations',
-                  'Unlimited schema pushes & checks',
-                  'Full access to all features (including SSO)',
-                  'Limit of 1M operations per month',
-                  '7 days of usage data retention',
-                ]}
-              />
+              <Plan isActive name="Hobby" price="Free" {...planCollection[BillingPlanType.Hobby]} />
             ),
           },
           {
             value: 'pro',
             content: (
-              <PlanBody
-                name="Pro"
-                price="$10"
-                description="For scaling APIs and teams"
-                features={[
-                  '+ $10 per 1M operations',
-                  'Change your plan at any time',
-                  'Everything in Hobby plan, and:',
-                  '90 days of usage data retention',
-                ]}
-                footer={<span className="font-bold">Free 30 days trial period</span>}
-              />
+              <Plan isActive={false} name="Pro" price={10} {...planCollection[BillingPlanType.Pro]} />
             ),
           },
           {
             value: 'enterprise',
             content: (
-              <PlanBody
+              <Plan
+                isActive={false}
                 name="Enterprise"
                 price="Contact Us"
-                description="Custom plan for large companies"
-                features={[
-                  'Unlimited seats',
-                  'Unlimited operations',
-                  'Unlimited schema pushes',
-                  'Change your plan at any time',
-                  'Improved pricing as you scale',
-                  '12 months of usage data retention',
-                ]}
-                footer="Shape a custom plan for your business"
+                {...planCollection[BillingPlanType.Enterprise]}
               />
             ),
           },
