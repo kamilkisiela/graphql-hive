@@ -1,4 +1,5 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { SingleSignOnLoadingSkeleton } from '@/components/organization/settings/single-sign-on/single-sign-on-loading-skeleton';
 import { Skeleton } from './skeleton';
 
 export const nav: NavPath = 'Primitives/Skeleton';
@@ -44,83 +45,9 @@ export const LineWidths = createPreview(() => (
   </div>
 ));
 
-// The SSO settings loading state (single-sign-on-subpage.tsx), transcribed: fixed-width spans
-// around full-width lines, as the page sizes them.
 export const SettingsSections = createPreview(() => (
-  <div className="flex w-[48rem] flex-col gap-12">
-    <section className="space-y-8">
-      <span className="flex w-24">
-        <Skeleton variants={{ size: 'xl', width: 'full' }} />
-      </span>
-      <span className="flex w-72">
-        <Skeleton variants={{ width: 'full' }} />
-      </span>
-      <div className="space-y-3">
-        {[0, 1, 2].map(i => (
-          <div key={i} className="flex gap-8">
-            <span className="flex w-36">
-              <Skeleton variants={{ width: 'full' }} />
-            </span>
-            <span className="flex w-80">
-              <Skeleton variants={{ width: 'full' }} />
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-    <section className="space-y-8">
-      <span className="flex w-40">
-        <Skeleton variants={{ size: 'xl', width: 'full' }} />
-      </span>
-      <div className="space-y-3">
-        {[0, 1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="flex gap-8">
-            <span className="flex w-36">
-              <Skeleton variants={{ width: 'full' }} />
-            </span>
-            <span className="flex w-72">
-              <Skeleton variants={{ width: 'full' }} />
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-    <section className="space-y-8">
-      <span className="flex w-44">
-        <Skeleton variants={{ size: 'xl', width: 'full' }} />
-      </span>
-      <span className="flex w-96">
-        <Skeleton variants={{ width: 'full' }} />
-      </span>
-      <div className="flex gap-8">
-        <span className="flex w-24">
-          <Skeleton variants={{ width: 'full' }} />
-        </span>
-        <span className="flex w-24">
-          <Skeleton variants={{ width: 'full' }} />
-        </span>
-      </div>
-    </section>
-    <section className="space-y-8">
-      <span className="flex w-36">
-        <Skeleton variants={{ size: 'xl', width: 'full' }} />
-      </span>
-      {[0, 1, 2, 3].map(i => (
-        <div key={i} className="flex items-start justify-between">
-          <div className="space-y-2">
-            <span className="flex w-40">
-              <Skeleton variants={{ width: 'full' }} />
-            </span>
-            <span className="flex w-72">
-              <Skeleton variants={{ size: 'sm', width: 'full' }} />
-            </span>
-          </div>
-          <span className="block h-6 w-11">
-            <Skeleton variants={{ shape: 'block' }} />
-          </span>
-        </div>
-      ))}
-    </section>
+  <div className="max-w-[800px] space-y-4">
+    <SingleSignOnLoadingSkeleton />
   </div>
 ));
 
