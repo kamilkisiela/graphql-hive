@@ -3,7 +3,7 @@ import { type ReactNode } from 'react';
 /**
  * Shared furniture for the inventory previews in this folder.
  *
- * Each preview here transcribes every real call site of a `ui/` or `v2/` component queued for
+ * Each preview here transcribes every real call site of a legacy `ui/` component queued for
  * migration to `primitives/`, rendering the **old** component as it ships today. That gives a "before"
  * to judge a replacement against, and a coverage checklist to migrate through.
  *
@@ -53,13 +53,12 @@ export function CallSiteGroup(props: { label: string; children: ReactNode }) {
 }
 
 /**
- * Which folder the call site imports from. Several components exist in both legacy folders with
- * different APIs, so the folder is part of identifying what a call site actually uses. `base` marks
- * a site that has already migrated: it is listed so the inventory stays a complete count, and so
- * the preview shows the thing that actually ships there. `raw` is a site that uses no component at
- * all, a hand-built element doing the same job, which a round has to fold in or rule out.
+ * Where the call site's component comes from. `ui` is the legacy folder still to migrate. `base`
+ * marks a site that has already migrated: it is listed so the inventory stays a complete count, and
+ * so the preview shows the thing that actually ships there. `raw` is a site that uses no component
+ * at all, a hand-built element doing the same job, which a round has to fold in or rule out.
  */
-export type Origin = 'ui' | 'v2' | 'base' | 'raw';
+export type Origin = 'ui' | 'base' | 'raw';
 
 export type InventoryEntry = {
   /** Repo-relative path and line. */
@@ -75,14 +74,13 @@ export type InventoryEntry = {
   coveredBy?: string;
 };
 
-/** Folder tag, so a v2 call site is not mistaken for a ui one when skimming the list. */
+/** Origin tag, so a migrated or hand-built site is not mistaken for a legacy one when skimming. */
 export function OriginTag(props: { origin: Origin }) {
   return (
     <span
       className={
         {
           ui: 'rounded-xs bg-surface-hover px-1 py-px font-mono text-2xs leading-none text-fg-default',
-          v2: 'rounded-xs bg-surface-selected px-1 py-px font-mono text-2xs leading-none text-fg',
           base: 'rounded-xs bg-success-muted/20 px-1 py-px font-mono text-2xs leading-none text-success-muted',
           raw: 'rounded-xs bg-warning-tint px-1 py-px font-mono text-2xs leading-none text-warning-text',
         }[props.origin]
