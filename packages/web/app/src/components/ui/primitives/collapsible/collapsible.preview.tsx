@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Eraser } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { Filter, FilterOption } from '@/pages/traces/target-traces-filter';
 import { Button } from '../button/button';
-import { Checkbox } from '../checkbox/checkbox';
 import { ScrollArea } from '../scroll-area/scroll-area';
-import { Separator } from '../separator/separator';
 import { Collapsible } from './collapsible';
 
 export const nav: NavPath = 'Primitives/Collapsible';
@@ -20,51 +19,63 @@ const ERROR_CODES = [
 ];
 
 function FilterRows(props: { rows: { label: string; count: number }[] }) {
+  const [selected, setSelected] = useState(['ok']);
   return (
-    <ul className="flex w-full min-w-0 flex-col gap-1 text-sm">
+    <div className="flex w-full min-w-0 flex-col gap-1 text-sm">
       {props.rows.map(row => (
-        <li key={row.label}>
-          <button
-            type="button"
-            className="flex h-8 w-full items-center justify-between gap-2 rounded-md p-2 text-left hover:bg-neutral-5/50"
-          >
-            <span className="flex items-center gap-2 overflow-hidden">
-              <Checkbox visual checked={row.label === 'ok'} size="sm" />
-              {row.label}
-            </span>
-            <span className="rounded-sm bg-neutral-4 px-1 font-mono text-2xs text-fg-default">
-              {row.count}
-            </span>
-          </button>
-        </li>
+        <FilterOption
+          key={row.label}
+          selected={selected.includes(row.label)}
+          count={row.count}
+          onClick={() =>
+            setSelected(prev =>
+              prev.includes(row.label) ? prev.filter(l => l !== row.label) : [...prev, row.label],
+            )
+          }
+        >
+          {row.label}
+        </FilterOption>
       ))}
-    </ul>
+    </div>
   );
 }
 
-/**
- * `section`: a heading row that toggles the list beneath it, as in the traces filter column.
- * The count at the trailing edge is an `actions` slot, outside the button.
- */
-export const Section = createPreview(() => (
-  <div className="flex w-64 flex-col text-fg-default">
-    <div className="p-2">
-      <Collapsible
-        trigger="Status"
-        defaultOpen
-        actions={<span className="rounded-sm px-2 font-mono text-2xs text-fg-secondary">1</span>}
-      >
-        <FilterRows rows={STATUS} />
-      </Collapsible>
+// `section` as the traces filter column ships it: `Filter` owns the trigger, the reset count in
+// `actions`, and the separator beneath.
+export const Section = createPreview(() => {
+  const [status, setStatus] = useState(['ok']);
+  const [codes, setCodes] = useState<string[]>([]);
+  const toggle = (set: typeof setStatus) => (label: string) =>
+    set(prev => (prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]));
+  return (
+    <div className="flex w-64 flex-col text-fg-default">
+      <Filter name="Status" changes={status.length} onReset={() => setStatus([])}>
+        {STATUS.map(row => (
+          <FilterOption
+            key={row.label}
+            selected={status.includes(row.label)}
+            count={row.count}
+            onClick={() => toggle(setStatus)(row.label)}
+          >
+            {row.label}
+          </FilterOption>
+        ))}
+      </Filter>
+      <Filter name="Error Code" changes={codes.length} onReset={() => setCodes([])}>
+        {ERROR_CODES.map(row => (
+          <FilterOption
+            key={row.label}
+            selected={codes.includes(row.label)}
+            count={row.count}
+            onClick={() => toggle(setCodes)(row.label)}
+          >
+            {row.label}
+          </FilterOption>
+        ))}
+      </Filter>
     </div>
-    <Separator />
-    <div className="p-2">
-      <Collapsible trigger="Error Code">
-        <FilterRows rows={ERROR_CODES} />
-      </Collapsible>
-    </div>
-  </div>
-));
+  );
+});
 
 const LOGS = [
   'info: 1',
@@ -77,11 +88,7 @@ const LOGS = [
   'info: done',
 ];
 
-/**
- * `panel`: the header bar of a titled panel, as in the laboratory's preflight logs. The clear
- * button is an `actions` slot and shows only while open. The panel's own content decides how
- * it scrolls: here a `fill` ScrollArea inside a wrapper with a max height.
- */
+// `panel` as the laboratory's preflight logs use it: the clear button shows only while open.
 export const Panel = createPreview(() => {
   const [open, setOpen] = useState(true);
   return (
@@ -129,12 +136,10 @@ export const Playground = createPreview({
     trigger: { type: 'text', default: 'Status' },
     actions: {
       type: 'radio',
-      options: ['none', 'count', 'clear'],
-      default: 'count',
+      options: ['none', 'clear'],
+      default: 'none',
       derive: kind =>
-        kind === 'count' ? (
-          <span className="rounded-sm px-2 font-mono text-2xs text-fg-secondary">1</span>
-        ) : kind === 'clear' ? (
+        kind === 'clear' ? (
           <Button layout="iconOnly" icon={Eraser} aria-label="Clear" variant="ghost" />
         ) : undefined,
     },
