@@ -35,7 +35,7 @@ export type ContractFormValues = z.infer<typeof ContractFormSchema>;
  * check on the ones already picked. Rows toggle without closing, and the popover keeps focus in
  * the field, so the list is a picker beside typing rather than a replacement for it.
  */
-function TagSuggestions(props: {
+export function TagSuggestions(props: {
   tags: readonly string[];
   selected: readonly string[];
   onToggle: (tag: string) => void;
