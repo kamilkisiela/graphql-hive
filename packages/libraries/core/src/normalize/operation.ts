@@ -15,7 +15,6 @@ import {
 } from 'graphql';
 import { md5 } from 'js-md5';
 import sortBy from 'lodash.sortby';
-import { collectSchemaCoordinates } from '../client/collect-schema-coordinates.js';
 
 /**
  * Normalize a operation document.
@@ -147,6 +146,13 @@ function findOperationDefinition(doc: DocumentNode) {
   return doc.definitions.find(isOperationDef);
 }
 
+export function hashOperationIdentity(operation: {
+  body: string;
+  operationName: string | null;
+}): string {
+  return md5.create().update(operation.body).update(operation.operationName ?? '').hex();
+}
+
 /** normalize a graphql operation into a stable hash as used internally within our ClickHouse Database. */
 export function preprocessOperation(operation: {
   document: DocumentNode;
@@ -158,11 +164,6 @@ export function preprocessOperation(operation: {
     hideLiterals: true,
     removeAliases: true,
   });
-
-  // Two operations with the same hash has to be equal:
-  // 1. body is the same
-  // 2. name is the same
-  // 3. used schema coordinates are equal - this is important to assign schema coordinate to an operation
 
   const uniqueCoordinatesSet = new Set<string>();
   for (const field of operation.schemaCoordinates) {
@@ -185,12 +186,7 @@ export function preprocessOperation(operation: {
 
   const operationName = operation.operationName ?? operationDefinition.name?.value;
 
-  const hash = md5
-    .create()
-    .update(body)
-    .update(operationName ?? '')
-    .update(sortedCoordinates.join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
-    .hex();
+  const hash = hashOperationIdentity({ body, operationName: operationName ?? null });
 
   return {
     type: operationDefinition.operation,
@@ -216,17 +212,9 @@ export function hashOperation(args: {
   schema: GraphQLSchema;
   typeInfo?: TypeInfo;
 }) {
-  const schemaCoordinates = collectSchemaCoordinates({
-    documentNode: args.documentNode,
-    processVariables: args.variables !== null,
-    variables: args.variables ?? {},
-    schema: args.schema,
-    typeInfo: args.typeInfo ?? new TypeInfo(args.schema),
-  });
-
   const result = preprocessOperation({
     document: args.documentNode,
-    schemaCoordinates: schemaCoordinates,
+    schemaCoordinates: [],
     operationName: args.operationName,
   });
 
