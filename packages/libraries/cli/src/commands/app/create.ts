@@ -1,3 +1,14 @@
+import {
+  buildSchema,
+  GraphQLError,
+  Kind,
+  parse,
+  specifiedRules,
+  TypeInfo,
+  validate,
+} from 'graphql';
+import type { DocumentNode, ValidationContext } from 'graphql';
+import { collectSchemaCoordinates, preprocessOperation } from '@graphql-hive/core';
 import { Args, Flags } from '@oclif/core';
 import Command from '../../base-command';
 import { graphql } from '../../gql';
@@ -11,9 +22,18 @@ import {
   MissingArgumentsError,
   MissingEndpointError,
   MissingRegistryTokenError,
+  SchemaNotFoundError,
 } from '../../helpers/errors';
 import * as TargetInput from '../../helpers/target-input';
 import { ActivateAppDeploymentMutation } from './publish';
+
+const FetchLatestVersionSDLQuery = graphql(/* GraphQL */ `
+  query CLI_App_Create_FetchLatestVersionSDLQuery($target: TargetReferenceInput) {
+    latestValidVersion(target: $target) {
+      sdl
+    }
+  }
+`);
 
 export default class AppCreate extends Command<typeof AppCreate> {
   static description = 'create an app deployment';
@@ -94,7 +114,9 @@ export default class AppCreate extends Command<typeof AppCreate> {
       this.log(`No version provided, using generated version: ${version}`);
     }
 
-    const { manifest, generatedFrom, warnings } = await loadAppOperations(args.operations);
+    const { manifest, operations, generatedFrom, warnings } = await loadAppOperations(
+      args.operations,
+    );
     for (const warning of warnings) {
       this.warn(warning);
     }
@@ -104,6 +126,60 @@ export default class AppCreate extends Command<typeof AppCreate> {
       );
       this.log(JSON.stringify(manifest, null, 2));
     }
+
+    const schemaResult = await this.registryApi(endpoint, accessToken).request({
+      operation: FetchLatestVersionSDLQuery,
+      variables: { target },
+    });
+
+    if (!schemaResult.latestValidVersion?.sdl) {
+      throw new SchemaNotFoundError();
+    }
+
+    const schema = buildSchema(schemaResult.latestValidVersion.sdl, {
+      assumeValidSDL: true,
+      assumeValid: true,
+    });
+    const typeInfo = new TypeInfo(schema);
+    const preprocessedDocuments = operations.map((operation, index) => {
+      let document: DocumentNode;
+      try {
+        document = parse(operation.content);
+      } catch (error) {
+        throw new APIError(
+          `Failed to parse document at index ${index}: ${
+            error instanceof GraphQLError ? error.message : String(error)
+          }`,
+        );
+      }
+
+      const errors = validate(schema, document, [...specifiedRules, SingleOperationDefinitionRule]);
+      if (errors.length > 0) {
+        throw new APIError(`Invalid document at index ${index}: ${errors[0].message}`);
+      }
+
+      const operationName = getOperationName(document);
+      const schemaCoordinates = collectSchemaCoordinates({
+        documentNode: document,
+        processVariables: false,
+        variables: null,
+        schema,
+        typeInfo,
+      });
+      const processed = preprocessOperation({ document, operationName, schemaCoordinates });
+
+      if (!processed) {
+        throw new APIError(`Document at index ${index} has no executable operation definition.`);
+      }
+
+      return {
+        hash: operation.operationHash,
+        body: operation.content,
+        operationName,
+        schemaCoordinates: Array.from(schemaCoordinates),
+        insightsHash: processed.hash,
+      };
+    });
 
     const result = await this.registryApi(endpoint, accessToken).request({
       operation: CreateAppDeploymentMutation,
@@ -142,7 +218,7 @@ export default class AppCreate extends Command<typeof AppCreate> {
       `App deployment "${flags['name']}@${version}" is created pending document upload. Uploading documents...`,
     );
 
-    let buffer: Array<{ hash: string; body: string }> = [];
+    let buffer: typeof preprocessedDocuments = [];
 
     let counter = 0;
 
@@ -161,10 +237,10 @@ export default class AppCreate extends Command<typeof AppCreate> {
           },
         });
 
-        if (result.addDocumentsToAppDeployment.error) {
-          if (result.addDocumentsToAppDeployment.error.details) {
+        if (result.addPreprocessedDocumentsToAppDeployment.error) {
+          if (result.addPreprocessedDocumentsToAppDeployment.error.details) {
             const affectedOperation =
-              buffer[result.addDocumentsToAppDeployment.error.details.index];
+              buffer[result.addPreprocessedDocumentsToAppDeployment.error.details.index];
 
             const maxCharacters = 40;
 
@@ -175,13 +251,13 @@ export default class AppCreate extends Command<typeof AppCreate> {
                   : affectedOperation.body
               ).replace(/\n/g, '\\n');
               this.logWarning(
-                `Failed uploading document: ${result.addDocumentsToAppDeployment.error.details.message}` +
+                `Failed uploading document: ${result.addPreprocessedDocumentsToAppDeployment.error.details.message}` +
                   `\nOperation hash: ${affectedOperation?.hash}` +
                   `\nOperation body: ${truncatedBody}`,
               );
             }
           }
-          throw new APIError(result.addDocumentsToAppDeployment.error.message);
+          throw new APIError(result.addPreprocessedDocumentsToAppDeployment.error.message);
         }
         buffer = [];
 
@@ -194,8 +270,8 @@ export default class AppCreate extends Command<typeof AppCreate> {
       }
     };
 
-    for (const [hash, body] of Object.entries(manifest)) {
-      buffer.push({ hash, body });
+    for (const document of preprocessedDocuments) {
+      buffer.push(document);
       counter++;
       await flush();
     }
@@ -258,8 +334,8 @@ const CreateAppDeploymentMutation = graphql(/* GraphQL */ `
 `);
 
 const AddDocumentsToAppDeploymentMutation = graphql(/* GraphQL */ `
-  mutation AddDocumentsToAppDeployment($input: AddDocumentsToAppDeploymentInput!) {
-    addDocumentsToAppDeployment(input: $input) {
+  mutation AddDocumentsToAppDeployment($input: AddPreprocessedDocumentsToAppDeploymentInput!) {
+    addPreprocessedDocumentsToAppDeployment(input: $input) {
       ok {
         appDeployment {
           id
@@ -279,3 +355,30 @@ const AddDocumentsToAppDeploymentMutation = graphql(/* GraphQL */ `
     }
   }
 `);
+
+function SingleOperationDefinitionRule(context: ValidationContext) {
+  return {
+    Document(node: DocumentNode) {
+      const operations = node.definitions.filter(
+        definition => definition.kind === Kind.OPERATION_DEFINITION,
+      );
+      if (operations.length > 1) {
+        context.reportError(
+          new GraphQLError(
+            'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
+            { nodes: operations },
+          ),
+        );
+      }
+    },
+  };
+}
+
+function getOperationName(document: DocumentNode): string | null {
+  for (const definition of document.definitions) {
+    if (definition.kind === Kind.OPERATION_DEFINITION) {
+      return definition.name?.value ?? null;
+    }
+  }
+  return null;
+}

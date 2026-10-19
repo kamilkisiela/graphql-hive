@@ -107,9 +107,9 @@ const CLI_UpdateTargetAppDeploymentProtectionConfiguration = graphql(`
 
 test('app:create --version is optional and auto-generates a version', async () => {
   const { createOrg } = await initSeed().createOwner();
-  const { createProject, setFeatureFlag, organization } = await createOrg();
+  const { createProject, setFeatureFlag } = await createOrg();
   await setFeatureFlag('appDeployments', true);
-  const { createTargetAccessToken, project, target } = await createProject();
+  const { createTargetAccessToken } = await createProject();
   const token = await createTargetAccessToken({});
 
   await token.publishSchema({

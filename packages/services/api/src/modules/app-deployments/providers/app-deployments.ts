@@ -30,6 +30,10 @@ import { Storage } from '../../shared/providers/storage';
 import { TargetStore } from '../../target/providers/target-store';
 import { APP_DEPLOYMENTS_ENABLED } from './app-deployments-enabled-token';
 import { PersistedDocumentScheduler } from './persisted-document-scheduler';
+import {
+  PersistedDocumentIngester,
+  type PreprocessedDocument,
+} from './persisted-document-ingester';
 
 export const AppDeploymentNameModel = z
   .string()
@@ -63,6 +67,7 @@ export class AppDeployments {
     private targetStore: TargetStore,
     private schemaVersionHelper: SchemaVersionHelper,
     private persistedDocumentScheduler: PersistedDocumentScheduler,
+    private persistedDocumentIngester: PersistedDocumentIngester,
     private schemaVersions: SchemaVersionStore,
     @Inject(APP_DEPLOYMENTS_ENABLED) private appDeploymentsEnabled: boolean,
   ) {
@@ -377,6 +382,72 @@ export class AppDeployments {
       type: 'success' as const,
       appDeployment,
     };
+  }
+
+  async addPreprocessedDocumentsToAppDeployment(
+    args: {
+      graph: Graph;
+      appDeployment: {
+        name: string;
+        version: string;
+      };
+      documents: ReadonlyArray<PreprocessedDocument>;
+    },
+    signal: AbortSignal,
+  ) {
+    if (this.appDeploymentsEnabled === false) {
+      const organization = await this.storage.getOrganization({
+        organizationId: args.graph.organizationId,
+      });
+      if (organization.featureFlags.appDeployments === false) {
+        return {
+          type: 'error' as const,
+          error: { message: noAccessToAppDeploymentsMessage, details: null },
+        };
+      }
+    }
+
+    const appDeployment = await this.findAppDeployment({
+      targetId: args.graph.targetId,
+      name: args.appDeployment.name,
+      version: args.appDeployment.version,
+    });
+
+    if (appDeployment === null) {
+      return {
+        type: 'error' as const,
+        error: { message: 'App deployment not found', details: null },
+      };
+    }
+
+    if (appDeployment.activatedAt !== null) {
+      return {
+        type: 'error' as const,
+        error: {
+          message: 'App deployment has already been activated and is locked for modifications',
+          details: null,
+        },
+      };
+    }
+
+    const result = await this.persistedDocumentIngester.processPreprocessedBatch(
+      {
+        targetId: args.graph.targetId,
+        appDeployment: {
+          id: appDeployment.id,
+          name: args.appDeployment.name,
+          version: args.appDeployment.version,
+        },
+        documents: args.documents,
+      },
+      signal,
+    );
+
+    if (result.type === 'error') {
+      return result;
+    }
+
+    return { type: 'success' as const, appDeployment };
   }
 
   private async _getAllDocumentHashesForAppDeployment(

@@ -146,7 +146,7 @@ export function createWorker(
         metric => s3WriteMetrics.push(metric),
         errors => r2ErrorTraces.push(...errors),
       ),
-      messageLogger as any,
+      messageLogger,
     );
     try {
       const result = await processBatch(message, ingester, controller.signal);

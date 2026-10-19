@@ -11,12 +11,15 @@ import {
   TypeInfo,
   validate,
 } from 'graphql';
+import { Injectable } from 'graphql-modules';
 import PromiseQueue from 'p-queue';
 import { z } from 'zod';
 import { collectSchemaCoordinates, preprocessOperation } from '@graphql-hive/core';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
 import { ServiceLogger, setErrorSource, traceFn, traceInlineSync } from '@hive/service-common';
+import { setErrorSource } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';
+import { Logger } from '../../shared/providers/logger';
 import { S3Writer } from '../../shared/providers/s3-writer';
 import type { R2ErrorTraceSummary, S3WriteMetric } from '../../shared/providers/s3-writer';
 import type { SerializedWorkerError } from './persisted-document-scheduler';
@@ -30,6 +33,14 @@ type DocumentRecord = {
   body: string;
   operationName: string | null;
   schemaCoordinates: Array<string>;
+};
+
+export type PreprocessedDocument = {
+  hash: string;
+  body: string;
+  operationName: string | null;
+  schemaCoordinates: ReadonlyArray<string>;
+  insightsHash: string;
 };
 
 const AppDeploymentOperationHashModel = z
@@ -160,14 +171,15 @@ type DocumentValidationResult =
   | Extract<BatchProcessedEvent['data'], { type: 'error' }>
   | { type: 'ok'; documents: Array<DocumentRecord> };
 
+@Injectable()
 export class PersistedDocumentIngester {
   private promiseQueue = new PromiseQueue({ concurrency: 30 });
-  private logger: ServiceLogger;
+  private logger: Logger;
 
   constructor(
     private clickhouse: ClickHouse,
     private s3: S3Writer,
-    logger: ServiceLogger,
+    logger: Logger,
   ) {
     this.logger = logger.child({ source: 'PersistedDocumentIngester' });
   }
@@ -373,6 +385,63 @@ export class PersistedDocumentIngester {
       return { type: 'ok', documents };
     },
   );
+
+  async processPreprocessedBatch(
+    data: {
+      targetId: string;
+      appDeployment: {
+        id: string;
+        name: string;
+        version: string;
+      };
+      documents: ReadonlyArray<PreprocessedDocument>;
+    },
+    signal: AbortSignal,
+  ) {
+    const documents: Array<DocumentRecord> = [];
+
+    for (const [index, document] of data.documents.entries()) {
+      const hashValidation = AppDeploymentOperationHashModel.safeParse(document.hash);
+      const bodyValidation = AppDeploymentOperationBodyModel.safeParse(document.body);
+
+      if (hashValidation.success === false || bodyValidation.success === false) {
+        return {
+          type: 'error' as const,
+          error: {
+            message: 'Invalid input, please check the operations.',
+            details: {
+              index,
+              message:
+                hashValidation.error?.issues[0].message ??
+                bodyValidation.error?.issues[0].message ??
+                'Invalid hash or body provided',
+            },
+          },
+        };
+      }
+
+      documents.push({
+        appDeploymentId: data.appDeployment.id,
+        hash: document.hash,
+        internalHash: document.insightsHash,
+        body: document.body,
+        operationName: document.operationName,
+        schemaCoordinates: Array.from(document.schemaCoordinates),
+      });
+    }
+
+    if (documents.length) {
+      await this.insertDocuments({
+        targetId: data.targetId,
+        appDeployment: data.appDeployment,
+        documents,
+        signal,
+      });
+    }
+
+    return { type: 'success' as const };
+  }
+
 
   @traceFn('PersistedDocumentIngester.insertClickHouseDocuments', {
     initAttributes: args => ({
