@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { FolderIcon, FolderOpenIcon, MoreHorizontal, Plus } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from '../badge/badge';
+import { Button } from '../button/button';
 import { Menu } from '../floating/menu/menu';
 import { Accordion } from './accordion';
 
@@ -193,14 +194,9 @@ export const WithAction = createPreview(() => {
           action: (
             <Menu
               align="end"
+              // The laboratory styles this trigger with GraphiQL's toolbar class, which foundry does not load.
               trigger={
-                <button
-                  type="button"
-                  aria-label="More"
-                  className="rounded-sm p-1 hover:bg-neutral-4"
-                >
-                  <MoreHorizontal className="size-4" />
-                </button>
+                <Button layout="iconOnly" icon={MoreHorizontal} variant="ghost" aria-label="More" />
               }
               sections={[
                 [{ label: 'Add operation', trailingIcon: Plus, onClick: () => {} }],

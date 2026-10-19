@@ -64,9 +64,7 @@ export const MaxWidths = createPreview(() => {
 export const Paragraph = createPreview(() => (
   <Tooltip
     trigger={
-      <button type="button" className="text-warning">
-        <CircleHelp className="size-4" />
-      </button>
+      <Button layout="iconOnly" icon={CircleHelp} variant="ghost" aria-label="Why inactive" />
     }
     content={
       <p>

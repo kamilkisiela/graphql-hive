@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertTriangle, Check, GitCompare } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
+import { StatusDot } from '../../status-dot/status-dot';
 import { Select, type SelectOption } from './select';
 
 export const nav: NavPath = 'Primitives/Floating/Select';
@@ -25,8 +26,6 @@ const CLIENTS: SelectOption[] = [
   'grafbase-cli',
   'envelop-plugin',
 ].map(name => ({ value: name, label: name }));
-
-const STATUS_DOT = 'size-2 rounded-full';
 
 export const Default = createPreview(() => {
   const [value, setValue] = useState('TRAFFIC');
@@ -54,14 +53,14 @@ export const WithIcons = createPreview(() => {
         {
           value: 'healthy',
           label: 'Healthy',
-          icon: <span className={`bg-success ${STATUS_DOT}`} />,
+          icon: <StatusDot color="success" />,
         },
         {
           value: 'degraded',
           label: 'Degraded',
-          icon: <span className={`bg-warning ${STATUS_DOT}`} />,
+          icon: <StatusDot color="warning" />,
         },
-        { value: 'down', label: 'Down', icon: <span className={`bg-critical ${STATUS_DOT}`} /> },
+        { value: 'down', label: 'Down', icon: <StatusDot color="critical" /> },
       ]}
       value={value}
       onValueChange={setValue}
