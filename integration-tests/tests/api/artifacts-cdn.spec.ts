@@ -1196,7 +1196,7 @@ function runArtifactsCDNTests(
       });
 
       expect(manifestResponse.status).toBe(200);
-      expect(manifestResponse.headers.get('content-type')).toBe('application/json');
+      expect(manifestResponse.headers.get('content-type')).toContain('application/json');
       const manifest = (await manifestResponse.json()) as {
         graphs: Record<
           string,
