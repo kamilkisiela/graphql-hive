@@ -1,4 +1,3 @@
-import { expect, test, vi } from 'vitest';
 import { createBrokerFetch } from '../src/oauth-fetch';
 
 test('sends OAuth requests through the request broker', async () => {
