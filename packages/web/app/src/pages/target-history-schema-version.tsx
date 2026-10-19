@@ -30,10 +30,7 @@ import {
 import { useQuery } from 'urql';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { CompositionErrorsCard } from '@/components/target/history/composition-errors-card';
-import {
-  ChangesBlock,
-  CompositionErrorsSection_SchemaErrorConnection,
-} from '@/components/target/history/errors-and-changes';
+import { ChangesBlock } from '@/components/target/history/errors-and-changes';
 import { CodeScrollArea, File, FileDiff } from '@/components/ui/diffs';
 import { Link } from '@/components/ui/link';
 import { NotFound } from '@/components/ui/not-found/not-found';
