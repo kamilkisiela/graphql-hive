@@ -3787,3 +3787,151 @@ describe('exclude filters', () => {
     },
   );
 });
+
+test('removing a used scalar or union is not safe based on usage', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { project, target, createTargetAccessToken, toggleTargetValidation } =
+    await createProject(ProjectType.Single);
+  const token = await createTargetAccessToken({});
+
+  const sdl = /* GraphQL */ `
+    type Query {
+      rate: ConversionRate
+      search: [SearchResult!]!
+    }
+
+    type ConversionRate {
+      fromCurrency: Currency!
+    }
+
+    scalar Currency
+
+    union SearchResult = Movie | Book
+
+    type Movie {
+      title: String
+    }
+
+    type Book {
+      title: String
+    }
+  `;
+  const schema = buildASTSchema(parse(sdl));
+
+  const schemaPublishResult = await token
+    .publishSchema({ sdl, author: 'Kamil', commit: 'initial' })
+    .then(res => res.expectNoGraphQLErrors());
+  expect(schemaPublishResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+  await toggleTargetValidation(true);
+
+  const usageAddress = await getServiceHost('usage', 8081);
+  const client = createHive({
+    enabled: true,
+    token: token.secret,
+    usage: true,
+    debug: false,
+    agent: {
+      logger: createLogger('debug'),
+      maxSize: 1,
+    },
+    selfHosting: {
+      usageEndpoint: 'http://' + usageAddress,
+      graphqlEndpoint: 'http://noop/',
+      applicationUrl: 'http://noop/',
+    },
+  });
+
+  const request = new Request('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: {
+      'x-graphql-client-name': 'integration-tests',
+      'x-graphql-client-version': '6.6.6',
+    },
+  });
+
+  client.collectUsage().finish(
+    {
+      document: parse(/* GraphQL */ `
+        query rates {
+          rate {
+            fromCurrency
+          }
+          search {
+            ... on Movie {
+              title
+            }
+          }
+        }
+      `),
+      schema,
+      contextValue: { request },
+    },
+    {},
+  );
+
+  await waitForExpectations(async () => {
+    const coordinates = await clickHouseQuery<{ coordinate: string }>(`
+      SELECT coordinate FROM coordinates_daily WHERE target = '${target.id}' GROUP BY coordinate
+    `);
+    expect(coordinates.data.map(row => row.coordinate)).toEqual(
+      expect.arrayContaining(['Currency', 'SearchResult', 'Movie']),
+    );
+  });
+
+  const checkResult = await token
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        rate: ConversionRate
+        search: [Movie!]!
+      }
+
+      type ConversionRate {
+        fromCurrency: Money!
+      }
+
+      scalar Money
+
+      type Movie {
+        title: String
+      }
+
+      type Book {
+        title: String
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  if (checkResult.schemaCheck.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${checkResult.schemaCheck.__typename}`);
+  }
+
+  const schemaCheck = await execute({
+    document: SubscriptionSchemaCheckQuery,
+    variables: {
+      id: checkResult.schemaCheck.schemaCheck!.id,
+      selector: {
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
+      },
+    },
+    authToken: token.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  const changes = schemaCheck.target?.schemaCheck?.breakingSchemaChanges?.nodes ?? [];
+  for (const path of ['Currency', 'SearchResult']) {
+    const change = changes.find(node => node.path?.join('.') === path);
+    expect(change?.message).toEqual(`Type '${path}' was removed`);
+    expect(change?.isSafeBasedOnUsage).toEqual(false);
+    expect(change?.usageStatistics?.topAffectedOperations).toEqual([
+      expect.objectContaining({
+        name: 'rates',
+        operation: expect.objectContaining({
+          body: 'query rates{rate{fromCurrency}search{...on Movie{title}}}',
+        }),
+      }),
+    ]);
+  }
+});
