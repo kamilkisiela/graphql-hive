@@ -6,7 +6,7 @@ import { env } from '@/env/frontend';
 import { urqlClient } from '@/lib/urql';
 import { init } from '@sentry/react';
 import { RouterProvider } from '@tanstack/react-router';
-import './index.css';
+import './styles';
 import { clearChunkReloadFlag, isChunkLoadError, reloadOnChunkError } from './lib/chunk-error';
 import { createAppRouter } from './router';
 

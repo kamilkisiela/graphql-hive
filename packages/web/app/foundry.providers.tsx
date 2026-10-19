@@ -5,7 +5,7 @@ import { previewRouter, PreviewSlotProvider } from './foundry.router';
 import { ThemeProvider, useTheme } from './src/components/theme/theme-provider';
 import { TooltipProvider } from './src/components/ui/primitives/floating/tooltip/tooltip';
 import { ToastProvider } from './src/components/ui/primitives/toast/toast';
-import './src/index.css';
+import './src/styles';
 
 /**
  * Foundry's toolbar owns the light/dark/system choice and hands down an already-resolved
