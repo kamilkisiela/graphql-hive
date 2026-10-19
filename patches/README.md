@@ -26,20 +26,6 @@ the `onModifyHeaders` hook in the same patches is unused.
 
 Retire together with the old laboratory.
 
-## `@graphql-eslint__eslint-plugin@3.20.1.patch`
-
-The policy service lints customer schemas with this plugin at runtime, and `scripts/runify.ts`
-bundles the service with esbuild. Three independent changes:
-
-1. `no-unreachable-types` also visits `extensionASTNodes`, so schemas with `extend type` are not
-   flagged (#7978, #8059).
-2. `relay-edge-types` and `no-unreachable-types` no longer cache across schemas; both module-level
-   caches kept the first schema's types and applied them to every later customer's lint run (#7936).
-3. Removes `createRequire`, graphql-config loading and the testkit export so esbuild can bundle it.
-
-Retire with the eslint 9/10 migration of the policy service. Upstream 4.x still lacks 1 and 2;
-upstream them to `graphql-hive/graphql-eslint` first so only the bundling hunk needs re-cutting.
-
 ## `@slonik__pg-driver@48.19.0.patch`
 
 Returns the last result instead of throwing when one query string holds several statements. Roughly
@@ -49,13 +35,6 @@ Returns the last result instead of throwing when one query string holds several 
 Kept on purpose. The hunk is one line and has needed one re-cut since the slonik 46 upgrade (#7897).
 The only way to retire it is rewriting those 60 migrations, which costs more than the patch ever
 will.
-
-## `eslint@8.57.1.patch`
-
-Same bundling reason as the graphql-eslint patch: `require("esquery").default` interop and no
-`require.resolve("espree")` inside the policy service bundle. The root lint run does not need it.
-
-Retire with the eslint 9/10 migration; re-test the policy service bundle at that point.
 
 ## `got@14.4.7.patch`
 

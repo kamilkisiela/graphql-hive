@@ -5260,7 +5260,7 @@
   "refresh": "30s",
   "revision": 1,
   "schemaVersion": 38,
-  "tags": ["hive", "schema-registry", "schema-check", "schema-publish"],
+  "tags": ["hive", "schema-registry", "schema-check", "schema-publish", "latest"],
   "templating": {
     "list": [
       {

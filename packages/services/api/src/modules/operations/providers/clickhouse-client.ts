@@ -104,6 +104,7 @@ export class ClickHouse {
       .post<QueryResponse<T>>(
         this.endpoint,
         {
+          context: { logger: this.logger },
           body: query.sql,
           headers: {
             'Accept-Encoding': 'gzip',
@@ -285,6 +286,7 @@ export class ClickHouse {
       .post<QueryResponse<unknown>>(
         this.endpoint,
         {
+          context: { logger: this.logger },
           body: formData,
           headers: {
             'Accept-Encoding': 'gzip',
@@ -419,6 +421,7 @@ export class ClickHouse {
     queryId: string;
     data: unknown[][];
     timeout: number;
+    signal?: AbortSignal;
   }): Promise<void> {
     const startedAt = Date.now();
     const executionId = args.queryId + '-' + Math.random().toString(16).substring(2);
@@ -443,6 +446,7 @@ export class ClickHouse {
       .post(
         this.endpoint,
         {
+          context: { logger: this.logger },
           body: await compressGzip(
             args.data.map(row => row.map(value => castValue(value)).join(',')).join('\n'),
           ),
@@ -484,6 +488,7 @@ export class ClickHouse {
             secureConnect: 2000,
             request: 30_000,
           },
+          signal: args.signal,
           agent: {
             http: httpAgent,
             https: httpsAgent,

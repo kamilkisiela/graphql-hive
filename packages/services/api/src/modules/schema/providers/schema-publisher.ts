@@ -1315,7 +1315,9 @@ export class SchemaPublisher {
         return result;
       },
       error => {
-        if (error instanceof HiveError) {
+        if (signal.aborted) {
+          registryOperationOutcomeCount.inc({ operation: 'publish', conclusion: 'aborted' });
+        } else if (error instanceof HiveError) {
           registryOperationOutcomeCount.inc({ operation: 'publish', conclusion: 'success' });
         } else {
           registryOperationOutcomeCount.inc({ operation: 'publish', conclusion: 'failure' });
@@ -1552,7 +1554,9 @@ export class SchemaPublisher {
         return result;
       },
       error => {
-        if (error instanceof HiveError) {
+        if (signal.aborted) {
+          registryOperationOutcomeCount.inc({ operation: 'delete', conclusion: 'aborted' });
+        } else if (error instanceof HiveError) {
           registryOperationOutcomeCount.inc({
             operation: 'delete',
             conclusion: 'success',
@@ -2533,7 +2537,9 @@ export class SchemaPublisher {
         return result;
       },
       error => {
-        if (error instanceof HiveError) {
+        if (signal.aborted) {
+          registryOperationOutcomeCount.inc({ operation: 'promotion', conclusion: 'aborted' });
+        } else if (error instanceof HiveError) {
           registryOperationOutcomeCount.inc({ operation: 'promotion', conclusion: 'success' });
         } else {
           registryOperationOutcomeCount.inc({ operation: 'promotion', conclusion: 'failure' });

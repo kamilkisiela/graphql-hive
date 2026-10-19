@@ -1,0 +1,2930 @@
+{
+  "__comments": [
+    "App Deployments: the persisted document upload path (hive app:create -> addDocumentsToAppDeployment -> PersistedDocumentScheduler -> persisted-documents-worker threads -> ClickHouse + S3).",
+    "Datasource uids PROM_DATASOURCE_UID and TEMPO_DATASOURCE_UID are substituted at deploy time (Pulumi) and by docker/docker-compose.dev.yml for local Grafana. Loki uses the literal grafanacloud-logs uid and is unavailable locally.",
+    "The registry_* counters are matched as {__name__=~\"...(_total)?\"} because the Grafana Cloud OTLP pipeline appends _total while a local Prometheus scrape keeps the code names; api_s3_writes_total carries the suffix in code already.",
+    "Prometheus series on this path have no target label (cardinality). Per-target panels are TraceQL metrics over the span attribute hive.target.id, set on the scheduler, worker and ingester spans; Prometheus panels are fleet-wide and say so in their description.",
+    "The scheduler drops a worker's S3 metrics when the batch already timed out (50 s), so api_s3_writes_total under-counts the slowest batches; Tempo spans include them.",
+    "Target ID is a Tempo label-values variable over hive.target.id and is applied as a regex (${targetId:regex}); All resolves to .*."
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Persisted document uploads for app deployments (hive app:create): batch volume, duration and failures incl. the 50 s worker timeout, the per-step breakdown inside the persisted-documents worker threads (schema build, validation, ClickHouse insert, S3 writes, queue delay), S3 and ClickHouse health, and per-target comparisons. Trace-derived panels honour the Target ID filter; Prometheus panels are fleet-wide.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "panels": [],
+      "title": "Overview",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Number of addDocumentsToAppDeployment batches handled by the GraphQL API in the time range, counted from the PersistedDocumentScheduler.processBatch span (one span per CLI request of up to 100 documents). Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | count_over_time()",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Batches processed",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Sum of hive.appDeployment.documentCount over the processed batches, i.e. how many persisted documents were sent. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | sum_over_time(span.hive.appDeployment.documentCount)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Documents uploaded",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Highest p99 of the PersistedDocumentScheduler.processBatch span over the range, i.e. the server-side time per batch as the CLI sees it (excluding GraphQL transport). The scheduler fails a batch at 50 s. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["max"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .99)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Batch p99 duration (worst step)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Batches whose PersistedDocumentScheduler.processBatch span ended with an error status: the 50 s scheduler timeout, a worker crash (\"Worker stopped.\") or an unexpected worker error. Rejected documents (parse/validation errors) are not errors here. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && status=error && span.hive.target.id =~ \"${targetId:regex}\"} | count_over_time()",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed batches",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Unexpected persisted_document_upload errors attributed to the persisted-documents worker: the 50 s timeout (\"Timeout, worker did not respond within time.\") and worker exits (\"Worker stopped.\"). Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase({__name__=~\"registry_operation_unexpected_error_count(_total)?\", operation=\"persisted_document_upload\", source=\"persisted-documents-worker\"}[$__range])) or vector(0)",
+          "legendFormat": "Worker timeouts and crashes",
+          "refId": "A",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "title": "Worker timeouts and crashes",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "All unexpected (non-HiveError) persisted_document_upload errors, any source. Invalid documents and authorization failures are HiveErrors and count as handled. Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase({__name__=~\"registry_operation_unexpected_error_count(_total)?\", operation=\"persisted_document_upload\"}[$__range])) or vector(0)",
+          "legendFormat": "Unexpected upload errors",
+          "refId": "A",
+          "instant": true,
+          "range": false
+        }
+      ],
+      "title": "Unexpected upload errors",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 8,
+      "panels": [],
+      "title": "Batches",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "PersistedDocumentScheduler.processBatch spans per second: all batches and batches that ended with an error status (timeouts, worker errors). Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "all batches"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "failed batches"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | rate()",
+          "queryType": "traceql",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && status=error && span.hive.target.id =~ \"${targetId:regex}\"} | rate()",
+          "queryType": "traceql",
+          "refId": "B"
+        }
+      ],
+      "title": "Batch rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Server-side time per batch from the PersistedDocumentScheduler.processBatch span: handing the batch to a worker, validating, writing ClickHouse and S3, and getting the answer back. The red line is the 50 s scheduler timeout; the CLI gives up at 55 s. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .5, .95, .99)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Batch duration (p50/p95/p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "hive.appDeployment.documentCount per batch. The CLI flushes every 100 documents, so values below 100 are the last batch of a deployment. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "avg"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "max"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | avg_over_time(span.hive.appDeployment.documentCount)",
+          "queryType": "traceql",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | max_over_time(span.hive.appDeployment.documentCount)",
+          "queryType": "traceql",
+          "refId": "B"
+        }
+      ],
+      "title": "Documents per batch (avg / max)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "persisted_document_upload operations per interval by conclusion. success includes gracefully rejected uploads (invalid documents, authorization); failure is an unexpected error, including worker timeouts. Same series as the API Operations dashboard. Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (conclusion) (increase({__name__=~\"registry_operation_outcome_count(_total)?\", operation=\"persisted_document_upload\"}[$__rate_interval]))",
+          "legendFormat": "{{conclusion}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "Upload outcomes over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Where unexpected persisted_document_upload errors came from: persisted-documents-worker (timeout, crash), clickhouse, s3 <origin> or unknown. Same series as the API Operations dashboard. Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (source) (rate({__name__=~\"registry_operation_unexpected_error_count(_total)?\", operation=\"persisted_document_upload\"}[$__rate_interval])) * $__interval_s",
+          "legendFormat": "{{source}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "Unexpected errors by source",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Traces whose PersistedDocumentScheduler.processBatch span took longer than the Batch Threshold variable (0ms lists every batch). Open a trace to see the worker span below the scheduler span: PersistedDocumentsWorker.processBatch with its queue delay, then buildSchema, validateDocuments, insertClickHouseDocuments (with the ClickHouse insert) and insertS3Documents (one S3 PUT span per object and destination). Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Duration"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "filters": [
+            {
+              "id": "filter-14",
+              "operator": "=",
+              "scope": "span"
+            }
+          ],
+          "limit": 100,
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && duration>$batchThreshold && span.hive.target.id =~ \"${targetId:regex}\"}",
+          "queryType": "traceql",
+          "refId": "A",
+          "spss": 20,
+          "tableType": "traces"
+        }
+      ],
+      "title": "Slow batch traces (duration > $batchThreshold)",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "PersistedDocumentScheduler.processBatch spans that ended with an error status, newest slowest first. Rows at about 50 s are scheduler timeouts (the span ends when the timer rejects; a success after 50 s cannot happen); shorter rows are worker errors or crashes. hive.worker.index is the worker thread the batch was assigned to. Each row links to the trace, where the worker span shows how long the batch really took and in which step. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "id": 15,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Duration"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "filters": [
+            {
+              "id": "filter-15",
+              "operator": "=",
+              "scope": "span"
+            }
+          ],
+          "limit": 100,
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && status=error && span.hive.target.id =~ \"${targetId:regex}\"} | select(span.hive.target.id, span.hive.appDeployment.id, span.hive.appDeployment.version, span.hive.appDeployment.documentCount, span.hive.worker.index)",
+          "queryType": "traceql",
+          "refId": "A",
+          "spss": 20,
+          "tableType": "spans"
+        }
+      ],
+      "title": "Failed and timed-out batches",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 16,
+      "panels": [],
+      "title": "Worker breakdown",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "p95 duration of each step inside the worker: building the GraphQL schema from the target's SDL (per batch, CPU-bound), validating and normalizing every document (CPU-bound), the ClickHouse insert and the S3 writes (the last two run in parallel, so the batch takes about the slower of them plus the CPU steps). Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "build schema"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "validate documents"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "ClickHouse insert"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "S3 writes"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 47
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.buildSchema\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .95)",
+          "queryType": "traceql",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.validateDocuments\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .95)",
+          "queryType": "traceql",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.insertClickHouseDocuments\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .95)",
+          "queryType": "traceql",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.insertS3Documents\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .95)",
+          "queryType": "traceql",
+          "refId": "D"
+        }
+      ],
+      "title": "Time per step (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "hive.worker.queue_delay_ms: time between the scheduler posting a batch and the worker thread starting it. The scheduler picks one of four workers at random and a worker runs one JavaScript task at a time, so a high value means the chosen worker was still busy with another batch's schema build or validation. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "p95"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "max"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 47
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentsWorker.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(span.hive.worker.queue_delay_ms, .95)",
+          "queryType": "traceql",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentsWorker.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | max_over_time(span.hive.worker.queue_delay_ms)",
+          "queryType": "traceql",
+          "refId": "B"
+        }
+      ],
+      "title": "Worker queue delay (p95 / max)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Batches per second handled by each worker thread (thread.name). The spread shows how uneven the random assignment is; compare with the queue delay. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 55
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentsWorker.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | rate() by (span.thread.name)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Batches per worker thread",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Batches rejected before any write, by the message returned to the CLI: invalid hash or body, a document that fails to parse, a document that is not valid against the latest schema version, or more than one operation per document. These are handled errors, not failures. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No rejected batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 55
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.validateDocuments\" && span.hive.validation.result=\"error\" && span.hive.target.id =~ \"${targetId:regex}\"} | rate() by (span.hive.validation.error)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Validation failures by reason",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "id": 21,
+      "panels": [],
+      "title": "ClickHouse insert",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Duration of the worker's insertClickHouseDocuments step: the async INSERT into app_deployment_documents (wait_for_async_insert=1) including the client's retries. The got request timeout is 30 s with up to 5 attempts. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No inserts",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.insertClickHouseDocuments\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .5, .95, .99)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Insert duration (p50/p95/p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "ClickHouse Insert: insert_app_deployment_documents spans that recorded an error.type (deadline_exceeded for a got timeout, internal_error otherwise) after all retries. There is no Prometheus metric for this insert; this is trace-derived and fleet-wide (the ClickHouse client span has no target attribute).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No errors",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"ClickHouse Insert: insert_app_deployment_documents\" && span.error.type != nil} | rate() by (span.error.type)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Insert errors by type",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "id": 24,
+      "panels": [],
+      "title": "S3 writes (persisted documents)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Persisted-document object writes per second per destination (primary S3/R2 bucket and mirror) and HTTP status; status none means the request threw (timeout, connection error) after got's retries. Metrics of batches that already timed out are dropped by the scheduler, so Tempo spans see more writes than this. Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 73
+      },
+      "id": 25,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (destination, status_code) (rate(api_s3_writes_total{operation=\"persisted_document\"}[$__rate_interval]))",
+          "legendFormat": "{{destination}} {{status_code}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "PUT rate by destination and status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "api_s3_write_duration_seconds for persisted_document writes, per destination. Each PUT has a 10 s got request timeout and up to 2 retries, so values near 10 s are timeouts; the top bucket is 10 s. Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 73
+      },
+      "id": 26,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by (le, destination) (rate(api_s3_write_duration_seconds_bucket{operation=\"persisted_document\"}[$__rate_interval])))",
+          "legendFormat": "p50 {{destination}}",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, destination) (rate(api_s3_write_duration_seconds_bucket{operation=\"persisted_document\"}[$__rate_interval])))",
+          "legendFormat": "p95 {{destination}}",
+          "refId": "B",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.99, sum by (le, destination) (rate(api_s3_write_duration_seconds_bucket{operation=\"persisted_document\"}[$__rate_interval])))",
+          "legendFormat": "p99 {{destination}}",
+          "refId": "C",
+          "range": true
+        }
+      ],
+      "title": "PUT latency by destination (p50/p95/p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "description": "Share of persisted_document writes per destination that did not return 2xx (including status none, i.e. a thrown request). Fleet-wide: Prometheus series on this path carry no target label, so the Target ID filter does not apply.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 81
+      },
+      "id": 27,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (destination) (rate(api_s3_writes_total{operation=\"persisted_document\", status_code!~\"2..\"}[$__rate_interval])) / clamp_min(sum by (destination) (rate(api_s3_writes_total{operation=\"persisted_document\"}[$__rate_interval])), 1e-9)",
+          "legendFormat": "{{destination}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "title": "PUT error ratio by destination",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "S3 PUT persisted_document spans whose http.request.resend_count is above 0, i.e. got retried the request (408/429/5xx or a connection error) before the recorded response, per destination host. Trace-derived, fleet-wide (the PUT span has no target attribute).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No retries",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 81
+      },
+      "id": 28,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"S3 PUT persisted_document\" && span.http.request.resend_count > 0} | rate() by (span.server.address)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "PUT retries by destination",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Duration of the worker's insertS3Documents step: all PUTs of the batch (primary then mirror per object, 30 objects in flight). One slow or retried PUT holds the whole batch, so compare this with the per-PUT latency on the left. Honours the Target ID filter.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 89
+      },
+      "id": 29,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentIngester.insertS3Documents\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .5, .95, .99)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "S3 phase duration per batch (p50/p95/p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Individual S3 PUT persisted_document spans slower than 2 s with destination host, HTTP status, got retry count and the Cloudflare ray id (R2 only). Open the trace to see which batch and target the PUT belonged to.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Service"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 97
+      },
+      "id": 30,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": ["sum"],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Duration"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "filters": [
+            {
+              "id": "filter-30",
+              "operator": "=",
+              "scope": "span"
+            }
+          ],
+          "limit": 100,
+          "query": "{name=\"S3 PUT persisted_document\" && duration > 2s} | select(span.server.address, span.http.response.status_code, span.http.request.resend_count, span.cloudflare.ray.id)",
+          "queryType": "traceql",
+          "refId": "A",
+          "spss": 20,
+          "tableType": "spans"
+        }
+      ],
+      "title": "Slowest PUTs (> 2s)",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 105
+      },
+      "id": 31,
+      "panels": [],
+      "title": "By target",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Batches per second per target (top 10). Narrow with the Target ID filter to compare a few targets.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 106
+      },
+      "id": 32,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | rate() by (span.hive.target.id) | topk(10)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Batch rate by target",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "p95 of the PersistedDocumentScheduler.processBatch span per target (top 10). A single slow target points at its schema size or document count rather than at shared infrastructure.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 106
+      },
+      "id": 33,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(duration, .95) by (span.hive.target.id) | topk(10)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Batch p95 duration by target",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Documents sent per interval per target (top 10), from hive.appDeployment.documentCount.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 114
+      },
+      "id": 34,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | sum_over_time(span.hive.appDeployment.documentCount) by (span.hive.target.id) | topk(10)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Documents uploaded by target",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "Error-status batches per second per target (top 10): timeouts, worker errors and crashes.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No failures",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 114
+      },
+      "id": 35,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentScheduler.processBatch\" && status=error && span.hive.target.id =~ \"${targetId:regex}\"} | rate() by (span.hive.target.id) | topk(10)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed batches by target",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "TEMPO_DATASOURCE_UID"
+      },
+      "description": "p95 of hive.worker.queue_delay_ms per target (top 10). High values for every target mean the worker pool is saturated; for one target it means its batches land behind each other.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "No batches",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 122
+      },
+      "id": 36,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "min", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "TEMPO_DATASOURCE_UID"
+          },
+          "query": "{name=\"PersistedDocumentsWorker.processBatch\" && span.hive.target.id =~ \"${targetId:regex}\"} | quantile_over_time(span.hive.worker.queue_delay_ms, .95) by (span.hive.target.id) | topk(10)",
+          "queryType": "traceql",
+          "refId": "A"
+        }
+      ],
+      "title": "Worker queue delay p95 by target",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 130
+      },
+      "id": 39,
+      "panels": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "graphql-api log lines about app deployment batches (debug level in the ingester and scheduler, forwarded from the worker threads), narrowed to the Target ID filter. Lines end with (requestId=...), which the Explore Request dashboard accepts. No Loki in local dev.",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 131
+          },
+          "id": 37,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "{container_name=\"graphql-api\"} |= \"appDeployment\" |~ `targetId=(${targetId:regex})`",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Batch processing logs",
+          "type": "logs"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "description": "Scheduler and worker error lines: worker exits and recreation, worker errors and the 50 s timeout. Not target-specific. No Loki in local dev.",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 141
+          },
+          "id": 38,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "grafanacloud-logs"
+              },
+              "editorMode": "code",
+              "expr": "{container_name=\"graphql-api\"} |~ `Worker (stopped|error)|Timeout, worker did not respond|persisted-documents-worker`",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "Worker lifecycle and timeouts",
+          "type": "logs"
+        }
+      ],
+      "title": "Logs",
+      "type": "row"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": ["hive", "app-deployments", "latest"],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": ["All"],
+          "value": ["$__all"]
+        },
+        "datasource": {
+          "type": "tempo",
+          "uid": "TEMPO_DATASOURCE_UID"
+        },
+        "definition": "hive.target.id",
+        "description": "Target ids seen on app deployment spans in the time range (span attribute hive.target.id). Filters every trace-derived panel; Prometheus panels have no target label and stay fleet-wide. Multi-select supported; All is .*.",
+        "includeAll": true,
+        "label": "Target ID",
+        "multi": true,
+        "name": "targetId",
+        "options": [],
+        "query": {
+          "label": "hive.target.id",
+          "refId": "TempoDatasourceVariableQueryEditor-VariableQuery",
+          "type": 1
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allowCustomValue": true,
+        "current": {
+          "text": "No threshold (0ms)",
+          "value": "0ms"
+        },
+        "description": "Only filters the \"Slow batch traces\" table; charts and stats are unaffected. 0ms lists every batch. 50000ms lists only batches that hit the scheduler timeout: the span starts before the 50 s timer is armed and ends when the timer rejects, so a duration above 50 s means a timeout (a success after 50 s cannot happen, the late worker message is ignored).",
+        "label": "Batch Threshold",
+        "name": "batchThreshold",
+        "options": [
+          {
+            "selected": true,
+            "text": "No threshold (0ms)",
+            "value": "0ms"
+          },
+          {
+            "selected": false,
+            "text": "1000ms",
+            "value": "1000ms"
+          },
+          {
+            "selected": false,
+            "text": "5000ms",
+            "value": "5000ms"
+          },
+          {
+            "selected": false,
+            "text": "10000ms",
+            "value": "10000ms"
+          },
+          {
+            "selected": false,
+            "text": "20000ms",
+            "value": "20000ms"
+          },
+          {
+            "selected": false,
+            "text": "Timeouts only (50000ms)",
+            "value": "50000ms"
+          }
+        ],
+        "query": "0ms,1000ms,5000ms,10000ms,20000ms,50000ms",
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "App Deployments",
+  "uid": "hive-app-deployments",
+  "version": 1,
+  "weekStart": ""
+}

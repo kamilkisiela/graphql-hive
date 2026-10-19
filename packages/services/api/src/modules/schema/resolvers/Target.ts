@@ -17,6 +17,7 @@ export const Target: Pick<
   | 'latestSchemaVersion'
   | 'latestValidSchemaVersion'
   | 'schemaCheck'
+  | 'schemaCheckServiceNames'
   | 'schemaChecks'
   | 'schemaVersion'
   | 'schemaVersions'
@@ -119,6 +120,9 @@ export const Target: Pick<
       organizationId: target.orgId,
       targetId: target.id,
     });
+  },
+  schemaCheckServiceNames: (target, _, { injector }) => {
+    return injector.get(SchemaManager).getSchemaCheckServiceNamesForTarget(target);
   },
 };
 

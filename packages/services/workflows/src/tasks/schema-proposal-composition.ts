@@ -64,6 +64,7 @@ export const task = implementTask(SchemaProposalCompositionTask, async args => {
         /** Proposals currently ignore contracts. */
         contracts: null,
       },
+      { requestId: args.requestId },
     );
 
     const payload: { timestamp: string; status: 'ERROR' | 'SUCCESS'; reason: string | null } = {

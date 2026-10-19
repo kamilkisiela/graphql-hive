@@ -14,6 +14,7 @@ import {
   diag,
   DiagConsoleLogger,
   DiagLogLevel,
+  propagation,
   SpanKind,
   SpanStatusCode,
   trace,
@@ -111,9 +112,14 @@ export class TracingInstance {
   }
 
   async shutdown() {
-    const tracerProvider = trace.getTracerProvider();
-    if ('shutdown' in tracerProvider && typeof tracerProvider.shutdown === 'function') {
-      await tracerProvider.shutdown();
+    // The registered global is the API's proxy provider, which cannot shut down; the SDK provider is its delegate.
+    const provider = trace.getTracerProvider();
+    const delegate =
+      'getDelegate' in provider && typeof provider.getDelegate === 'function'
+        ? provider.getDelegate()
+        : provider;
+    if ('shutdown' in delegate && typeof delegate.shutdown === 'function') {
+      await delegate.shutdown();
     }
   }
 
@@ -184,7 +190,7 @@ export class TracingInstance {
             }
 
             return {
-              'request.id': request.headers['x-request-id'] || request.id,
+              'request.id': request.id,
               'cloudflare.ray.id': request.headers['cf-ray'],
               [SEMATTRS_HTTP_METHOD]: request.method,
               [SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH]: request.headers['content-length'],
@@ -455,6 +461,18 @@ export const traceInline = <TArgs extends any[], TResult>(
     });
   };
 };
+
+/** The active trace context as a W3C `traceparent`/`tracestate` carrier. */
+export function injectActiveTraceContext(): Record<string, string> {
+  const carrier: Record<string, string> = {};
+  propagation.inject(context.active(), carrier);
+  return carrier;
+}
+
+/** Runs `fn` with the trace context of a carrier from `injectActiveTraceContext` active. */
+export function withTraceContext<T>(carrier: Record<string, string> | undefined, fn: () => T): T {
+  return context.with(propagation.extract(context.active(), carrier ?? {}), fn);
+}
 
 type FunctionTraceOptions<TArgs extends any[], TResult> = {
   initAttributes?: Attributes | ((...args: TArgs) => Attributes);

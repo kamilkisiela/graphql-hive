@@ -551,6 +551,10 @@ export interface Storage {
     }>
   >;
   /**
+   * Distinct, sorted service names of the schema checks of a target.
+   */
+  getSchemaCheckServiceNamesForTarget(_: { targetId: string }): Promise<ReadonlyArray<string>>;
+  /**
    * Overwrite and approve a schema check.
    */
   approveFailedSchemaCheck(input: {

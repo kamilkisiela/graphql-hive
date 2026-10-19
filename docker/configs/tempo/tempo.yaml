@@ -41,6 +41,10 @@ metrics_generator:
   processor:
     local_blocks:
       flush_to_storage: true
+      # Tempo keeps only server and root spans for TraceQL metrics by default. The dashboards'
+      # trace-derived panels aggregate internal spans (SchemaPublisher.*, PersistedDocument*),
+      # so every span kind has to be kept.
+      filter_server_spans: false
   storage:
     path: /var/tempo/generator/wal
   # The local-blocks processor buffers the raw spans it ingests in its own

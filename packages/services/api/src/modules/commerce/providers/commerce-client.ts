@@ -1,6 +1,6 @@
 import { FactoryProvider, InjectionToken, Scope, ValueProvider } from 'graphql-modules';
 import type { CommerceRouter } from '@hive/commerce';
-import { errorSourceLink } from '@hive/service-common';
+import { errorSourceLink, requestIdHeaders } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink, type CreateTRPCProxyClient } from '@trpc/client';
 import type { inferRouterInputs } from '@trpc/server';
 
@@ -35,7 +35,7 @@ export function provideCommerceClient(): FactoryProvider<CommerceTrpcClient> {
       return createTRPCProxyClient<CommerceRouter>({
         links: [
           errorSourceLink('commerce-service'),
-          httpLink({ url: `${config.endpoint}/trpc`, fetch }),
+          httpLink({ url: `${config.endpoint}/trpc`, fetch, headers: requestIdHeaders }),
         ],
       });
     },

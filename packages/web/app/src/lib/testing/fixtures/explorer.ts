@@ -23,3 +23,30 @@ export function explorerFixtures(usageRetentionInDays = 30) {
     ['TargetExplorerUnusedSchemaPageQuery', explorerGate(usageRetentionInDays)],
   ]);
 }
+
+/** `TargetExplorerTypenamePageQuery` for a type the latest version lacks, or a target with no version. */
+export function explorerTypeMissing(options: { hasVersion: boolean }) {
+  return {
+    __typename: 'Query' as const,
+    organization,
+    target: {
+      __typename: 'Target' as const,
+      id: 'target-1',
+      slug: SLUGS.targetSlug,
+      latestSchemaVersion: options.hasVersion
+        ? {
+            __typename: 'SchemaVersion' as const,
+            id: 'version-42',
+            explorer: {
+              __typename: 'SchemaExplorer' as const,
+              subgraphNames: [],
+              metadataAttributes: [],
+              type: null,
+            },
+          }
+        : null,
+      project: { __typename: 'Project' as const, id: 'project-1', type: 'FEDERATION' },
+      operationsStats: { __typename: 'OperationsStats' as const, totalRequests: 0 },
+    },
+  };
+}
