@@ -49,6 +49,8 @@ services:
     command: ['node', 'broker.js']
     networks:
       - 'stack'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     healthcheck:
       test:
         [
