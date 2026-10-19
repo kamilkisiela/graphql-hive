@@ -561,7 +561,7 @@ function GraphQLSchemaView(props: {
               before={props.previousSdl ?? ''}
               after={props.currentSdl}
               sorted
-              tooLargeHint="Switch to View to see the full schema."
+              tooLargeMessage="Every change is listed under Changes. To browse the full schema, switch to View."
             />
           )}
         </GenericGraphCard>
@@ -962,8 +962,8 @@ export function SDLDiffView(props: {
   after: string;
   /** Compare sorted copies, for composed schemas whose definition order carries no meaning. */
   sorted?: boolean;
-  /** Where to see the full schema when the diff is too large to show. */
-  tooLargeHint?: ReactNode;
+  /** What to read instead when the diff is too large to show: where the changes and the schema are. */
+  tooLargeMessage?: ReactNode;
 }) {
   const result = useSdlDiff(props.before, props.after, props.sorted ?? false);
 
@@ -997,7 +997,7 @@ export function SDLDiffView(props: {
           icon={<InfoIcon className="size-4 text-fg-muted" />}
           title="Diff too large to display"
         >
-          The schemas differ in too many lines to compare here. {props.tooLargeHint}
+          {props.tooLargeMessage ?? 'The schemas differ in too many lines to compare here.'}
         </SDLDiffNotice>
       );
     case 'diff':
