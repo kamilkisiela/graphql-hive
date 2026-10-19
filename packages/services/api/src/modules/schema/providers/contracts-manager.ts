@@ -6,6 +6,11 @@ import { Session } from '../../auth/lib/authz';
 import { ContractGraph, Graph, GraphStore } from '../../graph/providers/graph-store';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
+import {
+  countUnapprovedBreakingChanges,
+  groupSchemaChangesByKind,
+  pageSchemaChanges,
+} from '../lib/schema-change-pages';
 import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import {
   Contracts,
@@ -193,6 +198,7 @@ export class ContractsManager {
     });
   }
 
+  @cache<SchemaCheck>(schemaCheck => schemaCheck.id)
   public async getContractsChecksForSchemaCheck(schemaCheck: SchemaCheck) {
     const contractChecks = await this.contracts.getPaginatedContractChecksBySchemaCheckId({
       schemaCheckId: schemaCheck.id,
@@ -220,6 +226,34 @@ export class ContractsManager {
 
   public async getHasSchemaCompositionErrorsForContractCheck(contractCheck: ContractCheck) {
     return contractCheck.schemaCompositionErrors !== null;
+  }
+
+  public async getContractCheckForSchemaCheck(schemaCheck: SchemaCheck, contractCheckId: string) {
+    const contractChecks = await this.getContractsChecksForSchemaCheck(schemaCheck);
+    return contractChecks?.edges.find(edge => edge.node.id === contractCheckId)?.node ?? null;
+  }
+
+  public getBreakingSchemaChangesPageForContractCheck(
+    contractCheck: ContractCheck,
+    args: { first?: number | null; offset?: number | null },
+  ) {
+    const changes = contractCheck.breakingSchemaChanges;
+    if (changes == null || (args.first == null && args.offset == null)) {
+      return changes;
+    }
+    return pageSchemaChanges(changes, args);
+  }
+
+  public getSafeSchemaChangeGroupsForContractCheck(
+    contractCheck: ContractCheck,
+    kind: string | null | undefined,
+  ) {
+    const groups = groupSchemaChangesByKind(contractCheck.safeSchemaChanges ?? []);
+    return kind == null ? groups : groups.filter(group => group.kind === kind);
+  }
+
+  public getUnapprovedBreakingSchemaChangeCountForContractCheck(contractCheck: ContractCheck) {
+    return countUnapprovedBreakingChanges(contractCheck.breakingSchemaChanges);
   }
 
   public async getHasUnapprovedBreakingChangesForContractCheck(contractCheck: ContractCheck) {

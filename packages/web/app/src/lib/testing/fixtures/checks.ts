@@ -1,3 +1,5 @@
+import { CHANGES_PAGE_SIZE } from '@/components/target/history/change-page-size';
+
 const TARGET_ID = 'target-1';
 
 type Variables = {
@@ -126,12 +128,10 @@ export function activeSchemaCheck(variables: { schemaCheckId: string }) {
           hasSchemaCompositionErrors: false,
           hasSchemaChanges: false,
           hasUnapprovedBreakingChanges: false,
-          schemaSDL: 'type Query { products: [String!]! }',
           baseline: null,
-          compositeSchemaSDL: null,
-          supergraphSDL: null,
+          unapprovedBreakingSchemaChangeCount: 0,
           breakingSchemaChanges: null,
-          safeSchemaChanges: null,
+          safeSchemaChangeGroups: [],
           schemaPolicyWarnings: null,
           schemaPolicyErrors: null,
           conditionalBreakingChangeMetadata: null,
@@ -187,8 +187,10 @@ export function breakingSchemaCheck(
           ...active.project.target.schemaCheck,
           hasSchemaChanges: true,
           hasUnapprovedBreakingChanges: true,
+          unapprovedBreakingSchemaChangeCount: options.safe ? 0 : 1,
           breakingSchemaChanges: {
             __typename: 'SchemaChangeConnection' as const,
+            totalCount: 1,
             edges: [
               {
                 __typename: 'SchemaChangeEdge' as const,
@@ -287,6 +289,169 @@ export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
             ],
           },
         },
+      },
+    },
+  };
+}
+
+const PAGE_SIZE = CHANGES_PAGE_SIZE;
+
+/** A breaking removal of `StressType_<n>.value7`, without usage data. */
+function removedFieldAt(index: number) {
+  return {
+    __typename: 'SchemaChange' as const,
+    path: [`StressType_${index}`, 'value7'],
+    message: `Field 'value7' was removed from object type 'StressType_${index}'`,
+    severityLevel: 'BREAKING',
+    severityReason: null,
+    approval: null,
+    isSafeBasedOnUsage: false,
+    usageStatistics: null,
+    affectedAppDeployments: null,
+  };
+}
+
+/** A safe change of `kind` on `StressType_<n>`. */
+function safeChangeAt(kind: string, index: number) {
+  return {
+    __typename: 'SchemaChange' as const,
+    path: [`StressType_${index}`],
+    message:
+      kind === 'TYPE_ADDED'
+        ? `Type 'StressType_${index}' was added`
+        : `Description 'old' on type 'StressType_${index}' has changed to 'new'`,
+    severityLevel: 'SAFE',
+    severityReason: null,
+    approval: null,
+    isSafeBasedOnUsage: false,
+  };
+}
+
+function edgesOf<T>(nodes: T[]) {
+  return nodes.map(node => ({ __typename: 'SchemaChangeEdge' as const, node }));
+}
+
+function pageOf<T>(offset: number, total: number, at: (index: number) => T) {
+  return Array.from({ length: Math.max(0, Math.min(PAGE_SIZE, total - offset)) }, (_, index) =>
+    at(offset + index),
+  );
+}
+
+/** Group sizes and the breaking total of `manyChangesSchemaCheck`. */
+// Two full pages and a partial third, whatever the page size.
+const THREE_PAGES = CHANGES_PAGE_SIZE * 2 + 20;
+export const MANY_CHANGES = { breaking: THREE_PAGES, typeAdded: 2, descriptions: THREE_PAGES };
+
+const groupTotals: Record<string, number> = {
+  TYPE_ADDED: MANY_CHANGES.typeAdded,
+  TYPE_DESCRIPTION_CHANGED: MANY_CHANGES.descriptions,
+};
+
+/** A failed check with 120 breaking changes and two safe groups, one long enough to page. */
+export function manyChangesSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          __typename: 'FailedSchemaCheck' as const,
+          canBeApproved: true,
+          canBeApprovedByViewer: true,
+          compositionErrors: null,
+          hasSchemaChanges: true,
+          hasUnapprovedBreakingChanges: true,
+          unapprovedBreakingSchemaChangeCount: MANY_CHANGES.breaking,
+          breakingSchemaChanges: {
+            __typename: 'SchemaChangeConnection' as const,
+            totalCount: MANY_CHANGES.breaking,
+            edges: edgesOf(pageOf(0, MANY_CHANGES.breaking, removedFieldAt)),
+          },
+          safeSchemaChangeGroups: Object.entries(groupTotals).map(([kind, totalCount]) => ({
+            __typename: 'SchemaChangeGroup' as const,
+            kind,
+            totalCount,
+            changes: {
+              __typename: 'SchemaChangeConnection' as const,
+              edges: edgesOf(pageOf(0, totalCount, index => safeChangeAt(kind, index))),
+            },
+          })),
+        },
+      },
+    },
+  };
+}
+
+/** `CheckBreakingChangesPageQuery` for `manyChangesSchemaCheck`. */
+export function breakingChangesPage(variables: { schemaCheckId: string; offset: number }) {
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'FailedSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        breakingSchemaChanges: {
+          __typename: 'SchemaChangeConnection' as const,
+          edges: edgesOf(pageOf(variables.offset, MANY_CHANGES.breaking, removedFieldAt)),
+        },
+      },
+    },
+  };
+}
+
+/** `CheckSafeChangesPageQuery` for `manyChangesSchemaCheck`. */
+export function safeChangesPage(variables: {
+  schemaCheckId: string;
+  kind: string;
+  offset: number;
+}) {
+  const total = groupTotals[variables.kind] ?? 0;
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'FailedSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        safeSchemaChangeGroups: [
+          {
+            __typename: 'SchemaChangeGroup' as const,
+            kind: variables.kind,
+            changes: {
+              __typename: 'SchemaChangeConnection' as const,
+              edges: edgesOf(
+                pageOf(variables.offset, total, index => safeChangeAt(variables.kind, index)),
+              ),
+            },
+          },
+        ],
+      },
+    },
+  };
+}
+
+const PRODUCTS_SDL = 'type Query { products: [String!]! }';
+
+/** `CheckSdlQuery`: the SDLs a schema tab loads when it first opens. */
+export function checkSdl(variables: { schemaCheckId: string }) {
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'SuccessfulSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        schemaSDL: PRODUCTS_SDL,
+        baseline: null,
+        compositeSchemaSDL: PRODUCTS_SDL,
+        supergraphSDL: PRODUCTS_SDL,
       },
     },
   };

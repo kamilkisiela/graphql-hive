@@ -1,5 +1,10 @@
 import type { DocumentNode, GraphQLSchema, Kind } from 'graphql';
-import type { SchemaChangeType, SchemaCheck, SchemaCheckApprovalMetadata } from '@hive/storage';
+import type {
+  Change,
+  SchemaChangeType,
+  SchemaCheck,
+  SchemaCheckApprovalMetadata,
+} from '@hive/storage';
 import type { SchemaError } from '../../__generated__/types';
 import type { DateRange, PushedCompositeSchema, SingleSchema } from '../../shared/entities';
 import type { PromiseOrValue } from '../../shared/helpers';
@@ -13,7 +18,17 @@ import type {
 import type { SchemaCheckWarning } from './providers/models/shared';
 import type { SchemaVersion } from './providers/schema-version-store';
 
-export type SchemaChangeConnectionMapper = ReadonlyArray<SchemaChangeMapper>;
+/** A plain array is the whole list; a page is a slice of a longer one. */
+export type SchemaChangeConnectionMapper = ReadonlyArray<SchemaChangeMapper> | SchemaChangePage;
+export type SchemaChangePage = Readonly<{
+  page: ReadonlyArray<SchemaChangeMapper>;
+  offset: number;
+  totalCount: number;
+}>;
+export type SchemaChangeGroupMapper = Readonly<{
+  kind: Change['type'];
+  changes: ReadonlyArray<SchemaChangeMapper>;
+}>;
 export type SchemaChangeMapper = SchemaChangeType;
 export type SchemaChangeApprovalMapper = SchemaCheckApprovalMetadata;
 export type SchemaErrorConnectionMapper = readonly SchemaError[];

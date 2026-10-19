@@ -1632,3 +1632,154 @@ test.concurrent(
     });
   },
 );
+
+const ContractCheckChangePagesQuery = graphql(/* GraphQL */ `
+  query ContractCheckChangePagesQuery(
+    $selector: TargetSelectorInput!
+    $id: ID!
+    $contractCheckId: ID!
+  ) {
+    target(reference: { bySelector: $selector }) {
+      schemaCheck(id: $id) {
+        contractChecks {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+        contractCheck(id: $contractCheckId) {
+          id
+          contractName
+          unapprovedBreakingSchemaChangeCount
+          breakingSchemaChanges(first: 2, offset: 2) {
+            totalCount
+            pageInfo {
+              hasNextPage
+              hasPreviousPage
+            }
+            edges {
+              node {
+                message
+              }
+            }
+          }
+          safeSchemaChangeGroups {
+            kind
+            totalCount
+          }
+        }
+      }
+    }
+  }
+`);
+
+test.concurrent(
+  'a contract check is read by id, with paged breaking changes and grouped safe changes',
+  async ({ expect }) => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createTargetAccessToken, project, target } = await createProject(
+      ProjectType.Federation,
+    );
+    const token = await createTargetAccessToken({});
+    const service = 'products';
+    const contractName = 'public-products';
+    const header = /* GraphQL */ `
+      extend schema
+        @link(url: "https://specs.apollo.dev/link/v1.0")
+        @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@tag"])
+
+      type Query {
+        product: Product @tag(name: "public")
+      }
+    `;
+
+    const createContractResult = await execute({
+      document: CreateContractMutation,
+      variables: {
+        input: {
+          target: { byId: target.id },
+          contractName,
+          removeUnreachableTypesFromPublicApiSchema: true,
+          includeTags: ['public'],
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+    expect(createContractResult.createContract.error).toBeNull();
+
+    // Published after the contract exists, so the contract has a version to diff against.
+    await token
+      .publishSchema({
+        service,
+        url: 'http://products.local',
+        sdl: /* GraphQL */ `
+          ${header}
+          type Product @key(fields: "id") @tag(name: "public") {
+            id: ID!
+            a: String @tag(name: "public")
+            b: String @tag(name: "public")
+            c: String @tag(name: "public")
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    const checkResult = await checkSchema(
+      {
+        service,
+        sdl: /* GraphQL */ `
+          ${header}
+          type Product @key(fields: "id") @tag(name: "public") {
+            id: ID!
+            d: String @tag(name: "public")
+          }
+        `,
+      },
+      token.secret,
+    ).then(r => r.expectNoGraphQLErrors());
+    if (checkResult.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${checkResult.schemaCheck.__typename}`);
+    }
+    const schemaCheckId = checkResult.schemaCheck.schemaCheck?.id;
+    if (!schemaCheckId) {
+      throw new Error('Missing schema check id.');
+    }
+
+    const read = (contractCheckId: string) =>
+      execute({
+        document: ContractCheckChangePagesQuery,
+        variables: {
+          selector: {
+            organizationSlug: organization.slug,
+            projectSlug: project.slug,
+            targetSlug: target.slug,
+          },
+          id: schemaCheckId,
+          contractCheckId,
+        },
+        authToken: ownerToken,
+      })
+        .then(r => r.expectNoGraphQLErrors())
+        .then(r => r.target!.schemaCheck!);
+
+    const unknown = await read('00000000-0000-0000-0000-000000000000');
+    expect(unknown.contractCheck).toBeNull();
+
+    const contractCheckId = unknown.contractChecks!.edges[0].node.id;
+    const { contractCheck } = await read(contractCheckId);
+
+    expect(contractCheck).toMatchObject({
+      id: contractCheckId,
+      contractName,
+      unapprovedBreakingSchemaChangeCount: 3,
+      breakingSchemaChanges: {
+        totalCount: 3,
+        pageInfo: { hasNextPage: false, hasPreviousPage: true },
+        edges: [{ node: { message: expect.stringContaining('was removed') } }],
+      },
+      safeSchemaChangeGroups: [{ kind: 'FIELD_ADDED', totalCount: 1 }],
+    });
+  },
+);

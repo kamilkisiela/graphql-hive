@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon } from 'lucide-react';
@@ -182,28 +182,33 @@ export function ChangesBlock(
       }
   ),
 ): ReactElement | null {
+  const withUsage = useFragment(ChangesBlock_SchemaChangeWithUsageFragment, props.changesWithUsage);
+  const plain = useFragment(ChangesBlock_SchemaChangeFragment, props.changes);
+  const keys = rowKeys(
+    (withUsage ?? plain ?? []).map(change => `${change.path?.join('.') ?? ''}:${change.message}`),
+  );
   return (
     <div>
-      {props.title && <h2 className="mb-3 font-bold text-fg-default">{props.title}</h2>}
+      {props.title && <ChangesTitle>{props.title}</ChangesTitle>}
       <div
         className={clsx(
           'text-sm/relaxed',
           props.changesWithUsage ? 'flex flex-col gap-4' : 'list-inside list-disc space-y-2',
         )}
       >
-        {props.changesWithUsage?.map((change, key) => (
+        {props.changesWithUsage?.map((change, index) => (
           <ChangeItem
             schemaCheckId={props.schemaCheckId}
-            key={key}
+            key={keys[index]}
             change={null}
             changeWithUsage={change}
             conditionBreakingChangeMetadata={props.conditionBreakingChangeMetadata ?? null}
           />
         ))}
-        {props.changes?.map((change, key) => (
+        {props.changes?.map((change, index) => (
           <ChangeItem
             schemaCheckId={props.schemaCheckId}
-            key={key}
+            key={keys[index]}
             change={change}
             changeWithUsage={null}
             conditionBreakingChangeMetadata={props.conditionBreakingChangeMetadata ?? null}
@@ -212,6 +217,26 @@ export function ChangesBlock(
       </div>
     </div>
   );
+}
+
+export function ChangesTitle(props: { children: ReactNode }) {
+  return <h2 className="mb-3 text-base font-bold text-fg">{props.children}</h2>;
+}
+
+/**
+ * Keys rows by change, not position: each row's accordion owns its open state, so a positional key
+ * would leave "row 3 open" on whatever change a new page or filter puts third. A change is its
+ * coordinate and message; an exact repeat falls back to its position rather than colliding.
+ */
+function rowKeys(ids: ReadonlyArray<string | null | undefined>) {
+  const seen = new Set<string>();
+  return ids.map((id, index) => {
+    if (!id || seen.has(id)) {
+      return `${id ?? 'change'}:${index}`;
+    }
+    seen.add(id);
+    return id;
+  });
 }
 
 function ChangeItem(
