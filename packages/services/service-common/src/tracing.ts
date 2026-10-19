@@ -112,9 +112,14 @@ export class TracingInstance {
   }
 
   async shutdown() {
-    const tracerProvider = trace.getTracerProvider();
-    if ('shutdown' in tracerProvider && typeof tracerProvider.shutdown === 'function') {
-      await tracerProvider.shutdown();
+    // The registered global is the API's proxy provider, which cannot shut down; the SDK provider is its delegate.
+    const provider = trace.getTracerProvider();
+    const delegate =
+      'getDelegate' in provider && typeof provider.getDelegate === 'function'
+        ? provider.getDelegate()
+        : provider;
+    if ('shutdown' in delegate && typeof delegate.shutdown === 'function') {
+      await delegate.shutdown();
     }
   }
 

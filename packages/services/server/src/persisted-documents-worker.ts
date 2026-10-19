@@ -13,13 +13,13 @@ if (!parentPort) {
 
 // The OpenTelemetry registry is per thread, so the worker needs its own provider to export spans.
 // Only the collector exporter: the Hive tracing processor drops spans whose root it did not see.
-if (env.tracing.collectorEndpoint) {
-  configureTracing({
-    collectorEndpoint: env.tracing.collectorEndpoint,
-    serviceName: 'graphql-api',
-    enableConsoleExporter: env.tracing.enableConsoleExporter,
-  }).setup();
-}
+const tracing = env.tracing.collectorEndpoint
+  ? configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'graphql-api',
+      enableConsoleExporter: env.tracing.enableConsoleExporter,
+    }).setup()
+  : undefined;
 
 const logger = createMessagePortLogger(parentPort);
 
@@ -51,8 +51,13 @@ function buildS3Config(
   };
 }
 
-createWorker(parentPort, logger, {
-  clickhouse: env.clickhouse,
-  s3: buildS3Config('worker-s3', env.s3),
-  s3Mirror: env.s3Mirror ? buildS3Config('worker-s3mirror', env.s3Mirror) : null,
-});
+createWorker(
+  parentPort,
+  logger,
+  {
+    clickhouse: env.clickhouse,
+    s3: buildS3Config('worker-s3', env.s3),
+    s3Mirror: env.s3Mirror ? buildS3Config('worker-s3mirror', env.s3Mirror) : null,
+  },
+  { beforeExit: () => tracing?.shutdown() ?? Promise.resolve() },
+);

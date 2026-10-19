@@ -1,5 +1,10 @@
 import { threadId, threadName, type MessagePort } from 'node:worker_threads';
-import { setErrorSource, traceInline, withTraceContext } from '@hive/service-common';
+import {
+  requestIdStorage,
+  setErrorSource,
+  traceInline,
+  withTraceContext,
+} from '@hive/service-common';
 import { AwsClient } from '../../cdn/providers/aws';
 import type { S3CredentialProvider } from '../../cdn/providers/aws';
 import { ClickHouse } from '../../operations/providers/clickhouse-client';
@@ -38,6 +43,7 @@ export function createWorker(
     } | null;
     clickhouse: ClickHouseConfig;
   },
+  hooks: { beforeExit?: () => Promise<void> } = {},
 ) {
   const s3Config = new S3Config([
     {
@@ -68,6 +74,14 @@ export function createWorker(
 
   const clickhouse = new ClickHouse(env.clickhouse, new HttpClient(), logger);
 
+  async function exit(code: number) {
+    await Promise.race([
+      hooks.beforeExit?.(),
+      new Promise(resolve => setTimeout(resolve, 2_000)),
+    ]).catch(() => {});
+    process.exit(code);
+  }
+
   process.on('unhandledRejection', function (err) {
     console.error('unhandledRejection', err);
     console.error(err);
@@ -75,7 +89,7 @@ export function createWorker(
       code: 'ERROR',
       err,
     });
-    process.exit(1);
+    void exit(1);
   });
 
   process.on('uncaughtException', function (err) {
@@ -84,7 +98,7 @@ export function createWorker(
       code: 'ERROR',
       err,
     });
-    process.exit(1);
+    void exit(1);
   });
 
   const processBatch = traceInline<
@@ -119,7 +133,7 @@ export function createWorker(
   const controllers = new Map<string, AbortController>();
 
   async function processMessage(message: BatchProcessEvent) {
-    const messageLogger = logger.child({ requestId: message.requestId, messageId: message.id });
+    const messageLogger = logger.child({ messageId: message.id });
     messageLogger.debug('processing message', message.id, message.event);
     const controller = new AbortController();
     controllers.set(message.id, controller);
@@ -178,7 +192,10 @@ export function createWorker(
       return;
     }
 
-    withTraceContext(message.traceContext, () => void processMessage(message));
+    const run = () => void processMessage(message);
+    withTraceContext(message.traceContext, () =>
+      message.requestId ? requestIdStorage.run({ requestId: message.requestId }, run) : run(),
+    );
   });
 
   process.on('exit', function (code) {
