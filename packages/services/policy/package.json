@@ -9,17 +9,14 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@graphql-eslint/eslint-plugin": "catalog:",
     "@graphql-tools/utils": "catalog:",
     "@hive/service-common": "workspace:*",
     "@sentry/node": "catalog:",
     "@trpc/server": "catalog:",
-    "@types/eslint": "8.56.12",
     "@types/esquery": "1.5.4",
     "@types/lodash.lowercase": "4.3.7",
     "ajv": "catalog:",
     "dotenv": "catalog:",
-    "eslint": "8.57.1",
     "esquery": "1.5.0",
     "fastify": "catalog:",
     "graphql": "catalog:",

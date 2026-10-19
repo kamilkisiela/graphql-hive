@@ -1,0 +1,1511 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`policy checks > should return a known list of rules 1`] = `
+[
+  {
+    description: Enforce arrange in alphabetical order for type fields, enum values, input object fields, operation selections and more.,
+    name: alphabetize,
+    recommended: false,
+    schema: {
+      items: {
+        additionalProperties: false,
+        minProperties: 1,
+        properties: {
+          arguments: {
+            description: Arguments of fields and directives.,
+            items: {
+              enum: [
+                FieldDefinition,
+                Field,
+                DirectiveDefinition,
+                Directive,
+              ],
+            },
+            minItems: 1,
+            type: array,
+            uniqueItems: true,
+          },
+          definitions: {
+            default: false,
+            description: Definitions – \`type\`, \`interface\`, \`enum\`, \`scalar\`, \`input\`, \`union\` and \`directive\`.,
+            type: boolean,
+          },
+          fields: {
+            description: Fields of \`type\`, \`interface\`, and \`input\`.,
+            items: {
+              enum: [
+                ObjectTypeDefinition,
+                InterfaceTypeDefinition,
+                InputObjectTypeDefinition,
+              ],
+            },
+            minItems: 1,
+            type: array,
+            uniqueItems: true,
+          },
+          groups: {
+            description: Custom order group. Example: \`['id', '*', 'createdAt', 'updatedAt']\` where \`*\` says for everything else.,
+            items: {
+              type: string,
+            },
+            minItems: 2,
+            type: array,
+            uniqueItems: true,
+          },
+          values: {
+            description: Values of \`enum\`.,
+            items: {
+              enum: [
+                EnumTypeDefinition,
+              ],
+            },
+            minItems: 1,
+            type: array,
+            uniqueItems: true,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      minItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/alphabetize,
+  },
+  {
+    description: Require all comments to follow the same style (either block or inline).,
+    name: description-style,
+    recommended: true,
+    schema: {
+      items: {
+        additionalProperties: false,
+        minProperties: 1,
+        properties: {
+          style: {
+            default: block,
+            enum: [
+              block,
+              inline,
+            ],
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/description-style,
+  },
+  {
+    description: Require mutation argument to be always called "input" and input type to be called Mutation name + "Input".
+Using the same name for all input parameters will make your schemas easier to consume and more predictable. Using the same name as mutation for InputType will make it easier to find mutations that InputType belongs to.,
+    name: input-name,
+    recommended: false,
+    schema: {
+      items: {
+        additionalProperties: false,
+        properties: {
+          caseSensitiveInputType: {
+            default: true,
+            description: Allow for case discrepancies in the input type name,
+            type: boolean,
+          },
+          checkInputType: {
+            default: false,
+            description: Check that the input type name follows the convention \\<mutationName>Input,
+            type: boolean,
+          },
+          checkMutations: {
+            default: true,
+            description: Apply the rule to Mutations,
+            type: boolean,
+          },
+          checkQueries: {
+            default: false,
+            description: Apply the rule to Queries,
+            type: boolean,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/input-name,
+  },
+  {
+    description: Require names to follow specified conventions.,
+    name: naming-convention,
+    recommended: true,
+    schema: {
+      items: {
+        additionalProperties: false,
+        description: > It's possible to use a [\`selector\`](https://eslint.org/docs/developer-guide/selectors) that starts with allowed \`ASTNode\` names which are described below.
+>
+> Paste or drop code into the editor in [ASTExplorer](https://astexplorer.net) and inspect the generated AST to compose your selector.
+>
+> Example: pattern property \`FieldDefinition[parent.name.value=Query]\` will match only fields for type \`Query\`.,
+        patternProperties: {
+          ^(Argument|DirectiveDefinition|EnumTypeDefinition|EnumValueDefinition|FieldDefinition|InputObjectTypeDefinition|InputValueDefinition|InterfaceTypeDefinition|ObjectTypeDefinition|ScalarTypeDefinition|UnionTypeDefinition)(.+)?$: {
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+        },
+        properties: {
+          Argument: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#Argument).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          DirectiveDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#DirectiveDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          EnumTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#EnumTypeDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          EnumValueDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#EnumValueDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          FieldDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#FieldDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          FragmentDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#FragmentDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          InputObjectTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#InputObjectTypeDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          InputValueDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#InputValueDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          InterfaceTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#InterfaceTypeDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          ObjectTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#ObjectTypeDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          ScalarTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#ScalarTypeDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          UnionTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#UnionTypeDefinition).,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+          allowLeadingUnderscore: {
+            default: false,
+            type: boolean,
+          },
+          allowTrailingUnderscore: {
+            default: false,
+            type: boolean,
+          },
+          types: {
+            description: Includes:
+- \`ObjectTypeDefinition\`
+- \`InterfaceTypeDefinition\`
+- \`EnumTypeDefinition\`
+- \`ScalarTypeDefinition\`
+- \`InputObjectTypeDefinition\`
+- \`UnionTypeDefinition\`,
+            oneOf: [
+              {
+                additionalProperties: false,
+                properties: {
+                  forbiddenPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  forbiddenSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  ignorePattern: {
+                    description: Option to skip validation of some words, e.g. acronyms,
+                    type: string,
+                  },
+                  prefix: {
+                    type: string,
+                  },
+                  requiredPrefixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  requiredSuffixes: {
+                    items: {
+                      type: string,
+                    },
+                    minItems: 1,
+                    type: array,
+                    uniqueItems: true,
+                  },
+                  style: {
+                    enum: [
+                      camelCase,
+                      PascalCase,
+                      snake_case,
+                      UPPER_CASE,
+                    ],
+                  },
+                  suffix: {
+                    type: string,
+                  },
+                },
+                type: object,
+              },
+              {
+                description: One of: \`camelCase\`, \`PascalCase\`, \`snake_case\`, \`UPPER_CASE\`,
+                enum: [
+                  camelCase,
+                  PascalCase,
+                  snake_case,
+                  UPPER_CASE,
+                ],
+              },
+            ],
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/naming-convention,
+  },
+  {
+    description: Disallow case-insensitive enum values duplicates.,
+    name: no-case-insensitive-enum-values-duplicates,
+    recommended: true,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/no-case-insensitive-enum-values-duplicates,
+  },
+  {
+    description: Requires to use \`"""\` or \`"\` for adding a GraphQL description instead of \`#\`.
+Allows to use hashtag for comments, as long as it's not attached to an AST definition.,
+    name: no-hashtag-description,
+    recommended: true,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/no-hashtag-description,
+  },
+  {
+    description: Disallow using root types \`mutation\` and/or \`subscription\`.,
+    name: no-root-type,
+    recommended: false,
+    schema: {
+      items: {
+        additionalProperties: false,
+        properties: {
+          disallow: {
+            items: {
+              enum: [
+                mutation,
+                subscription,
+              ],
+            },
+            minItems: 1,
+            type: array,
+            uniqueItems: true,
+          },
+        },
+        required: [
+          disallow,
+        ],
+        type: object,
+      },
+      maxItems: 1,
+      minItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/no-root-type,
+  },
+  {
+    description: Avoid scalar result type on mutation type to make sure to return a valid state.,
+    name: no-scalar-result-type-on-mutation,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/no-scalar-result-type-on-mutation,
+  },
+  {
+    description: Enforces users to avoid using the type name in a field name while defining your schema.,
+    name: no-typename-prefix,
+    recommended: true,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/no-typename-prefix,
+  },
+  {
+    description: Requires all types to be reachable at some level by root level fields.,
+    name: no-unreachable-types,
+    recommended: true,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/no-unreachable-types,
+  },
+  {
+    description: Set of rules to follow Relay specification for Arguments.
+
+- A field that returns a Connection type must include forward pagination arguments (\`first\` and \`after\`), backward pagination arguments (\`last\` and \`before\`), or both
+
+Forward pagination arguments
+
+- \`first\` takes a non-negative integer
+- \`after\` takes the Cursor type
+
+Backward pagination arguments
+
+- \`last\` takes a non-negative integer
+- \`before\` takes the Cursor type,
+    name: relay-arguments,
+    recommended: false,
+    schema: {
+      items: {
+        additionalProperties: false,
+        minProperties: 1,
+        properties: {
+          includeBoth: {
+            default: true,
+            description: Enforce including both forward and backward pagination arguments,
+            type: boolean,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/relay-arguments,
+  },
+  {
+    description: Set of rules to follow Relay specification for Connection types.
+
+- Any type whose name ends in "Connection" is considered by spec to be a \`Connection type\`
+- Connection type must be an Object type
+- Connection type must contain a field \`edges\` that return a list type that wraps an edge type
+- Connection type must contain a field \`pageInfo\` that return a non-null \`PageInfo\` Object type,
+    name: relay-connection-types,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/relay-connection-types,
+  },
+  {
+    description: Set of rules to follow Relay specification for Edge types.
+
+- A type that is returned in list form by a connection type's \`edges\` field is considered by this spec to be an Edge type
+- Edge type must be an Object type
+- Edge type must contain a field \`node\` that return either Scalar, Enum, Object, Interface, Union, or a non-null wrapper around one of those types. Notably, this field cannot return a list
+- Edge type must contain a field \`cursor\` that return either String, Scalar, or a non-null wrapper around one of those types
+- Edge type name must end in "Edge" _(optional)_
+- Edge type's field \`node\` must implement \`Node\` interface _(optional)_
+- A list type should only wrap an edge type _(optional)_,
+    name: relay-edge-types,
+    recommended: false,
+    schema: {
+      items: {
+        additionalProperties: false,
+        minProperties: 1,
+        properties: {
+          listTypeCanWrapOnlyEdgeType: {
+            default: true,
+            description: A list type should only wrap an edge type.,
+            type: boolean,
+          },
+          shouldImplementNode: {
+            default: true,
+            description: Edge type's field \`node\` must implement \`Node\` interface.,
+            type: boolean,
+          },
+          withEdgeSuffix: {
+            default: true,
+            description: Edge type name must end in "Edge".,
+            type: boolean,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/relay-edge-types,
+  },
+  {
+    description: Set of rules to follow Relay specification for \`PageInfo\` object.
+
+- \`PageInfo\` must be an Object type
+- \`PageInfo\` must contain fields \`hasPreviousPage\` and \`hasNextPage\`, that return non-null Boolean
+- \`PageInfo\` must contain fields \`startCursor\` and \`endCursor\`, that return either String or Scalar, which can be null if there are no results,
+    name: relay-page-info,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/relay-page-info,
+  },
+  {
+    description: Require deletion date on \`@deprecated\` directive. Suggest removing deprecated things after deprecated date.,
+    name: require-deprecation-date,
+    recommended: false,
+    schema: {
+      items: {
+        additionalProperties: false,
+        properties: {
+          argumentName: {
+            type: string,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/require-deprecation-date,
+  },
+  {
+    description: Require all deprecation directives to specify a reason.,
+    name: require-deprecation-reason,
+    recommended: true,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/require-deprecation-reason,
+  },
+  {
+    description: Enforce descriptions in type definitions and operations.,
+    name: require-description,
+    recommended: true,
+    schema: {
+      items: {
+        additionalProperties: false,
+        minProperties: 1,
+        properties: {
+          DirectiveDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#DirectiveDefinition).,
+            type: boolean,
+          },
+          EnumTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#EnumTypeDefinition).,
+            type: boolean,
+          },
+          EnumValueDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#EnumValueDefinition).,
+            type: boolean,
+          },
+          FieldDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#FieldDefinition).,
+            type: boolean,
+          },
+          InputObjectTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#InputObjectTypeDefinition).,
+            type: boolean,
+          },
+          InputValueDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#InputValueDefinition).,
+            type: boolean,
+          },
+          InterfaceTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#InterfaceTypeDefinition).,
+            type: boolean,
+          },
+          ObjectTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#ObjectTypeDefinition).,
+            type: boolean,
+          },
+          OperationDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#OperationDefinition).
+> You must use only comment syntax \`#\` and not description syntax \`"""\` or \`"\`.,
+            type: boolean,
+          },
+          ScalarTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#ScalarTypeDefinition).,
+            type: boolean,
+          },
+          UnionTypeDefinition: {
+            description: Read more about this kind on [spec.graphql.org](https://spec.graphql.org/October2021/#UnionTypeDefinition).,
+            type: boolean,
+          },
+          rootField: {
+            description: Definitions within \`Query\`, \`Mutation\`, and \`Subscription\` root types.,
+            type: boolean,
+          },
+          types: {
+            description: Includes:
+- \`ObjectTypeDefinition\`
+- \`InterfaceTypeDefinition\`
+- \`EnumTypeDefinition\`
+- \`ScalarTypeDefinition\`
+- \`InputObjectTypeDefinition\`
+- \`UnionTypeDefinition\`,
+            type: boolean,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      minItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/require-description,
+  },
+  {
+    description: Allow the client in one round-trip not only to call mutation but also to get a wagon of data to update their application.
+> Currently, no errors are reported for result type \`union\`, \`interface\` and \`scalar\`.,
+    name: require-field-of-type-query-in-mutation-result,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/require-field-of-type-query-in-mutation-result,
+  },
+  {
+    description: Require \`input\` or \`type\` fields to be non-nullable with \`@oneOf\` directive.,
+    name: require-nullable-fields-with-oneof,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/require-nullable-fields-with-oneof,
+  },
+  {
+    description: Require nullable fields in root types.,
+    name: require-nullable-result-in-root,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/require-nullable-result-in-root,
+  },
+  {
+    description: Enforce types with \`@oneOf\` directive have \`error\` and \`ok\` fields.,
+    name: require-type-pattern-with-oneof,
+    recommended: false,
+    schema: null,
+    url: https://the-guild.dev/graphql/eslint/rules/require-type-pattern-with-oneof,
+  },
+  {
+    description: Requires output types to have one unique identifier unless they do not have a logical one. Exceptions can be used to ignore output types that do not have unique identifiers.,
+    name: strict-id-in-types,
+    recommended: true,
+    schema: {
+      items: {
+        additionalProperties: false,
+        properties: {
+          acceptedIdNames: {
+            default: [
+              id,
+            ],
+            items: {
+              type: string,
+            },
+            minItems: 1,
+            type: array,
+            uniqueItems: true,
+          },
+          acceptedIdTypes: {
+            default: [
+              ID,
+            ],
+            items: {
+              type: string,
+            },
+            minItems: 1,
+            type: array,
+            uniqueItems: true,
+          },
+          exceptions: {
+            additionalProperties: false,
+            properties: {
+              suffixes: {
+                description: This is used to exclude types with names with suffixes that match one of the specified values.,
+                items: {
+                  type: string,
+                },
+                minItems: 1,
+                type: array,
+                uniqueItems: true,
+              },
+              types: {
+                description: This is used to exclude types with names that match one of the specified values.,
+                items: {
+                  type: string,
+                },
+                minItems: 1,
+                type: array,
+                uniqueItems: true,
+              },
+            },
+            type: object,
+          },
+        },
+        type: object,
+      },
+      maxItems: 1,
+      type: array,
+    },
+    url: https://the-guild.dev/graphql/eslint/rules/strict-id-in-types,
+  },
+]
+`;
