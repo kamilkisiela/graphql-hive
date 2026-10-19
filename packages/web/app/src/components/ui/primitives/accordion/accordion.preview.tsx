@@ -3,6 +3,7 @@ import { FolderIcon, FolderOpenIcon, MoreHorizontal, Plus } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from '../badge/badge';
 import { Button } from '../button/button';
+import { Card } from '../card/card';
 import { Menu } from '../floating/menu/menu';
 import { Accordion } from './accordion';
 
@@ -144,20 +145,22 @@ export const Boxed = createPreview(() => (
  * small, the chevron at the start, and the accent tone to call it out.
  */
 export const SmallAccentDisclosure = createPreview(() => (
-  <div className="w-[28rem] rounded-md border border-line bg-neutral-2 p-4 dark:bg-neutral-3">
-    <Accordion
-      variant="plain"
-      size="sm"
-      chevron="start"
-      tone="accent"
-      items={[
-        {
-          value: 'advanced',
-          label: 'Advanced settings',
-          content: <Copy>On filter, hold minutes.</Copy>,
-        },
-      ]}
-    />
+  <div className="w-[28rem]">
+    <Card variants={{ onSurface: 'raised' }}>
+      <Accordion
+        variant="plain"
+        size="sm"
+        chevron="start"
+        tone="accent"
+        items={[
+          {
+            value: 'advanced',
+            label: 'Advanced settings',
+            content: <Copy>On filter, hold minutes.</Copy>,
+          },
+        ]}
+      />
+    </Card>
   </div>
 ));
 

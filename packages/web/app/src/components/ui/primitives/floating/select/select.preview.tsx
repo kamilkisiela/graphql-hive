@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { AlertTriangle, Check, GitCompare } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { cn } from '@/lib/utils';
+import { Card } from '../../card/card';
+import { floatingVariants } from '../shared-styles';
 import { Button } from '../../button/button';
 import { StatusDot } from '../../status-dot/status-dot';
 import { Select, type SelectOption } from './select';
@@ -303,11 +306,15 @@ export const OnSurface = createPreview(() => {
   );
   return (
     <div className="flex flex-wrap gap-6">
-      <div className="flex w-[20rem] flex-col gap-3 rounded-md border border-line-subtle bg-neutral-2 p-4 dark:bg-neutral-3">
-        <span className="text-xs text-fg-default">A card</span>
-        {pair}
+      <div className="w-[20rem]">
+        <Card variants={{ onSurface: 'raised' }}>
+          <div className="flex flex-col gap-3">
+            <span className="text-xs text-fg-default">A card</span>
+            {pair}
+          </div>
+        </Card>
       </div>
-      <div className="flex w-[20rem] flex-col gap-3 rounded-md border border-line bg-neutral-2 p-4 shadow-md dark:bg-neutral-4">
+      <div className={cn(floatingVariants({ padding: 'md' }), 'flex w-[20rem] flex-col gap-3 p-4')}>
         <span className="text-xs text-fg-default">A floating panel</span>
         {pair}
       </div>

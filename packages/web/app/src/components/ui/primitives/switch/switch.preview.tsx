@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { Card } from '../card/card';
 import { Button } from '../button/button';
 import { Menu } from '../floating/menu/menu';
 import { Switch } from './switch';
@@ -38,14 +39,18 @@ export const InSettingsRow = createPreview(() => {
   const [enabled, setEnabled] = useState(true);
 
   return (
-    <div className="flex w-96 items-center justify-between rounded-lg border border-line p-4">
-      <div>
-        <div className="text-sm font-medium text-fg">Alert enabled</div>
-        <div className="text-control text-fg-secondary">
-          {enabled ? 'Evaluating every 5 minutes.' : 'Paused, no notifications will be sent.'}
+    <div className="w-96">
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm font-medium text-fg">Alert enabled</div>
+            <div className="text-control text-fg-secondary">
+              {enabled ? 'Evaluating every 5 minutes.' : 'Paused, no notifications will be sent.'}
+            </div>
+          </div>
+          <Switch checked={enabled} onCheckedChange={setEnabled} />
         </div>
-      </div>
-      <Switch checked={enabled} onCheckedChange={setEnabled} />
+      </Card>
     </div>
   );
 });

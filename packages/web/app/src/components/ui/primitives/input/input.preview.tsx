@@ -40,7 +40,7 @@ export const OnSurface = createPreview(() => (
       <Input defaultValue="P99 Latency Spike" />
       <Input placeholder="slug" prefixText="app.graphql-hive.com/" />
     </div>
-    <div className="flex w-80 flex-col gap-3 rounded-md border border-line bg-neutral-3 p-6">
+    <div className="flex w-80 flex-col gap-3 rounded-md border border-line bg-surface-overlay p-6">
       <Input placeholder="raised, in a sheet" onSurface="raised" />
       <Input defaultValue="P99 Latency Spike" onSurface="raised" />
       <Input placeholder="slug" prefixText="app.graphql-hive.com/" onSurface="raised" />

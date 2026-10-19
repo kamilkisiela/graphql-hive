@@ -157,7 +157,7 @@ export const AsCardFloating = createPreview(() => {
   const [value, setValue] = useState('high');
 
   return (
-    <div className="w-[533px] rounded-md bg-neutral-3 p-5">
+    <div className="w-[533px] rounded-md border border-line bg-surface-overlay p-5">
       <RadioGroup
         variant="as-card"
         onSurface="raised"
@@ -180,7 +180,11 @@ export const Playground = createPreview({
     const [value, setValue] = useState('normal');
     return (
       <div
-        className={v.onSurface === 'raised' ? 'w-[46rem] rounded-md bg-neutral-3 p-5' : 'w-[46rem]'}
+        className={
+          v.onSurface === 'raised'
+            ? 'w-[46rem] rounded-md border border-line bg-surface-overlay p-5'
+            : 'w-[46rem]'
+        }
       >
         <RadioGroup
           variant={v.variant}

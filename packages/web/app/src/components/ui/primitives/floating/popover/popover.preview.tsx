@@ -2,8 +2,10 @@ import { useRef, useState } from 'react';
 import { Info } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { TagSuggestions } from '@/components/target/settings/contract-form';
+import { cn } from '@/lib/utils';
 import { Button } from '../../button/button';
 import { Input } from '../../input/input';
+import { floatingVariants } from '../shared-styles';
 import { Popover } from './popover';
 
 export const nav: NavPath = 'Primitives/Floating/Popover';
@@ -157,7 +159,7 @@ export const AnchoredToSibling = createPreview(() => {
   return (
     <div
       ref={panel}
-      className="flex w-72 flex-col gap-3 rounded-md border border-line bg-neutral-2 p-4 dark:bg-neutral-3"
+      className={cn(floatingVariants({ padding: 'md' }), 'flex w-72 flex-col gap-3 p-4')}
     >
       <span className="text-xs text-fg-default">A panel with a field in it</span>
       <div className="flex items-center gap-2">

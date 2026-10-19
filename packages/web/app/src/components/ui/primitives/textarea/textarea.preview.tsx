@@ -25,7 +25,7 @@ export const OnSurface = createPreview(() => (
     <div className="w-80 rounded-md bg-neutral-1 p-6">
       <Textarea placeholder="base, on the page" />
     </div>
-    <div className="w-80 rounded-md border border-line bg-neutral-3 p-6">
+    <div className="w-80 rounded-md border border-line bg-surface-overlay p-6">
       <Textarea placeholder="raised, in a sheet" onSurface="raised" />
     </div>
   </div>

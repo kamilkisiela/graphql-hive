@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
+import { Card } from '@/components/ui/primitives/card/card';
 import { useForm } from 'react-hook-form';
 import {
   NewPasswordForm,
@@ -362,8 +363,17 @@ const panelWidth = {
 
 /** The raised panel a dialog, sheet or card puts the form on, at that overlay's width. */
 function Raised(props: { children: ReactNode; width: keyof typeof panelWidth }) {
+  if (props.width === 'card') {
+    return (
+      <div className={panelWidth.card}>
+        <Card variants={{ onSurface: 'raised' }}>{props.children}</Card>
+      </div>
+    );
+  }
   return (
-    <div className={`rounded-md border border-line bg-neutral-3 p-6 ${panelWidth[props.width]}`}>
+    <div
+      className={`rounded-md border border-line bg-surface-overlay p-6 ${panelWidth[props.width]}`}
+    >
       {props.children}
     </div>
   );
