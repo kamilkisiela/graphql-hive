@@ -6,10 +6,17 @@
  *    (such as `* { border-color }`) still come later in source order and win their ties, exactly
  *    as they did when Tailwind shipped the reset itself.
  * 3. `index.css` is Tailwind, still active while the migration to Vanilla Extract runs.
- * 4. `theme.css` is the Vanilla Extract side of the theme layer. Until Tailwind is removed it
- *    repeats what Tailwind emits, with identical values.
+ * 4. `theme.css`, `animations.css` and `global.css` are the Vanilla Extract side of the theme,
+ *    base and components layers. Until Tailwind is removed they repeat what it emits, with
+ *    identical values, and come after it so ties resolve the same way.
+ * 5. `utilities.css` and `patterns.css` export classes for call sites to adopt; importing them
+ *    here only fixes their position in the bundle.
  */
 import './layers.css';
 import './preflight.css';
 import '../index.css';
 import './theme.css';
+import './animations.css';
+import './global.css';
+import './utilities.css';
+import './patterns.css';

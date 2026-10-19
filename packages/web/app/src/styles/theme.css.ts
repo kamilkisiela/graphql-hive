@@ -291,7 +291,12 @@ export const vars = createGlobalThemeContract({
     fontFamily: 'default-font-family',
     monoFontFamily: 'default-mono-font-family',
   },
+  // Tailwind defaults the global rules lean on; the rest of Tailwind's default scale arrives
+  // with the codemod, generated from what the app actually uses.
+  spacing: 'spacing',
   text: {
+    sm: 'text-sm',
+    smLineHeight: 'text-sm--line-height',
     '2xs': 'text-2xs',
     '2xsLineHeight': 'text-2xs--line-height',
     control: 'text-control',
@@ -402,7 +407,10 @@ globalStyle(':root, :host', {
         },
         // Two steps Tailwind lacks and the app kept typing by hand: micro text (badges, chips, tick
         // labels) below xs, and UI control text (buttons, inputs, menus) between xs and sm.
+        spacing: '0.25rem',
         text: {
+          sm: '0.875rem',
+          smLineHeight: 'calc(1.25 / 0.875)',
           '2xs': '0.625rem',
           '2xsLineHeight': 'calc(0.875 / 0.625)',
           control: '0.8125rem',
