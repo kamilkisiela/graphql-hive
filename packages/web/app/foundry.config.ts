@@ -2,6 +2,7 @@ import { defineConfig } from 'react-foundry';
 import type { Plugin } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
 /**
  * `@/env/frontend` validates `window.__ENV` at import time and throws when it is missing, so
@@ -144,6 +145,11 @@ export default defineConfig({
     // Foundry's vite root is inside node_modules and this config is bundled to a cache
     // dir before it runs, so neither location can anchor tsconfig discovery. cwd is the
     // app directory, which is where `foundry dev` is invoked from.
-    plugins: [tsconfigPaths({ root: process.cwd() }), tailwindcss(), previewEnv],
+    plugins: [
+      tsconfigPaths({ root: process.cwd() }),
+      tailwindcss(),
+      vanillaExtractPlugin(),
+      previewEnv,
+    ],
   },
 });

@@ -1,8 +1,10 @@
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defaultExclude, defineConfig } from 'vitest/config';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  // Lets specs import the app's `*.css.ts` files.
+  plugins: [tsconfigPaths(), vanillaExtractPlugin()],
   test: {
     alias: {
       '@graphql-hive/core': new URL('./packages/libraries/core/src/index.ts', import.meta.url)

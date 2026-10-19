@@ -5,6 +5,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import viteFastify from '@fastify/vite/plugin';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 
 const __dirname = new URL('.', import.meta.url).pathname;
@@ -30,7 +31,9 @@ export default {
     tsconfigPaths(),
     viteFastify({ spa: true }),
     react(),
+    // Both styling systems run side by side during the Tailwind → Vanilla Extract migration.
     tailwindcss(),
+    vanillaExtractPlugin(),
     reactScanPlugin,
     sentryVitePlugin({
       org: process.env.SENTRY_ORG,
