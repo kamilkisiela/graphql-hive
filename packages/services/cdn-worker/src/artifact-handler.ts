@@ -255,7 +255,9 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
           status: 200,
           headers: {
             'Content-Type':
-              params.artifactType === 'metadata' || params.artifactType === 'services'
+              params.artifactType === 'metadata' ||
+              params.artifactType === 'services' ||
+              params.artifactType === 'manifest.json'
                 ? 'application/json'
                 : 'text/plain',
             ...sharedHeaders,
