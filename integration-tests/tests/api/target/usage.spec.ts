@@ -1475,7 +1475,7 @@ test.concurrent(
 );
 
 test.concurrent(
-  'same operation but with different schema coordinates should result in different hash',
+  'same operation with different schema coordinates shares one hash',
   async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
@@ -1517,21 +1517,21 @@ test.concurrent(
   `);
 
     expect(coordinatesResult.rows).toEqual(4);
+    expect(new Set(coordinatesResult.data.map(row => row.hash)).size).toEqual(1);
 
     const operationCollectionResult = await clickHouseQuery<{
       hash: string;
     }>(`SELECT hash FROM operation_collection WHERE target = '${target.id}' GROUP BY hash`);
 
-    expect(operationCollectionResult.rows).toEqual(2);
+    expect(operationCollectionResult.rows).toEqual(1);
 
     const operationsResult = await clickHouseQuery<{
-      target: string;
-      client_name: string | null;
       hash: string;
-      total: number;
-    }>(`SELECT hash FROM operation_collection WHERE target = '${target.id}' GROUP BY hash`);
+      total: string;
+    }>(`SELECT hash, count() AS total FROM operations WHERE target = '${target.id}' GROUP BY hash`);
 
-    expect(operationsResult.rows).toEqual(2);
+    expect(operationsResult.rows).toEqual(1);
+    expect(ensureNumber(operationsResult.data[0].total)).toEqual(2);
   },
 );
 
@@ -3004,13 +3004,13 @@ test('subscription operation is used for conditional breaking change detection',
     expect(node.usageStatistics?.topAffectedOperations).toEqual([
       {
         countFormatted: '1',
-        hash: '8bc74b99fdc4d7d2470258a845947af7',
+        hash: '0904ba53d51eb37dac769c4321b2a7d2',
         name: 'anonymous',
         percentage: 100,
         percentageFormatted: '100.00%',
         operation: {
           body: 'subscription{a}',
-          hash: '8bc74b99fdc4d7d2470258a845947af7',
+          hash: '0904ba53d51eb37dac769c4321b2a7d2',
           name: 'anonymous',
           type: 'SUBSCRIPTION',
         },
@@ -3364,10 +3364,10 @@ test.concurrent('(legacy) collect an operation from "unknown" client', async ({ 
                 p95: 200,
                 p99: 200,
               },
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
+              id: bf4c7df3e7823aa13d72933f913b5149,
               kind: query,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
               percentage: 100,
             },
           },
@@ -3391,9 +3391,9 @@ test.concurrent('(legacy) collect an operation from "unknown" client', async ({ 
           {
             node: {
               count: 1,
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              id: bf4c7df3e7823aa13d72933f913b5149,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
             },
           },
         ],
@@ -3488,10 +3488,10 @@ test.concurrent('collect an operation from "unknown" client', async ({ expect })
                 p95: 200,
                 p99: 200,
               },
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
+              id: bf4c7df3e7823aa13d72933f913b5149,
               kind: query,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
               percentage: 100,
             },
           },
@@ -3515,9 +3515,9 @@ test.concurrent('collect an operation from "unknown" client', async ({ expect })
           {
             node: {
               count: 1,
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              id: bf4c7df3e7823aa13d72933f913b5149,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
             },
           },
         ],
@@ -3612,10 +3612,10 @@ test.concurrent('collect an operation from undefined client', async ({ expect })
                 p95: 200,
                 p99: 200,
               },
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
+              id: bf4c7df3e7823aa13d72933f913b5149,
               kind: query,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
               percentage: 100,
             },
           },
@@ -3639,9 +3639,9 @@ test.concurrent('collect an operation from undefined client', async ({ expect })
           {
             node: {
               count: 1,
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              id: bf4c7df3e7823aa13d72933f913b5149,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
             },
           },
         ],
