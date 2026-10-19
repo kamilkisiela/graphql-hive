@@ -1,5 +1,5 @@
 import { threadId, threadName, type MessagePort } from 'node:worker_threads';
-import { traceInline, withTraceContext } from '@hive/service-common';
+import { setErrorSource, traceInline, withTraceContext } from '@hive/service-common';
 import { AwsClient } from '../../cdn/providers/aws';
 import type { S3CredentialProvider } from '../../cdn/providers/aws';
 import { ClickHouse } from '../../operations/providers/clickhouse-client';
@@ -11,6 +11,7 @@ import { S3Writer, summarizeR2ErrorTraces } from '../../shared/providers/s3-writ
 import type { R2ErrorTrace, S3WriteMetric } from '../../shared/providers/s3-writer';
 import {
   PersistedDocumentIngester,
+  type BatchCancelEvent,
   type BatchProcessedEvent,
   type BatchProcessEvent,
   type BatchProcessingErrorEvent,
@@ -87,7 +88,7 @@ export function createWorker(
   });
 
   const processBatch = traceInline<
-    [BatchProcessEvent, PersistedDocumentIngester],
+    [BatchProcessEvent, PersistedDocumentIngester, AbortSignal],
     Promise<BatchProcessedEvent['data']>
   >(
     'PersistedDocumentsWorker.processBatch',
@@ -112,12 +113,16 @@ export function createWorker(
             }
           : { 'hive.batch.result': 'success' },
     },
-    (message, ingester) => ingester.processBatch(message.data),
+    (message, ingester, signal) => ingester.processBatch(message.data, signal),
   );
+
+  const controllers = new Map<string, AbortController>();
 
   async function processMessage(message: BatchProcessEvent) {
     const messageLogger = logger.child({ requestId: message.requestId, messageId: message.id });
     messageLogger.debug('processing message', message.id, message.event);
+    const controller = new AbortController();
+    controllers.set(message.id, controller);
     const s3WriteMetrics: Array<S3WriteMetric> = [];
     const r2ErrorTraces: Array<R2ErrorTrace> = [];
     const ingester = new PersistedDocumentIngester(
@@ -130,7 +135,7 @@ export function createWorker(
       messageLogger as any,
     );
     try {
-      const result = await processBatch(message, ingester);
+      const result = await processBatch(message, ingester, controller.signal);
       messageLogger.debug('send message result', message.id, message.event);
       port.postMessage({
         event: 'processedBatch',
@@ -140,11 +145,19 @@ export function createWorker(
         r2ErrorTraceSummary: summarizeR2ErrorTraces(r2ErrorTraces),
       } satisfies BatchProcessedEvent);
     } catch (err: unknown) {
-      messageLogger.error(
-        'unexpected error while processing message in worker (messageId=%s)',
-        message.id,
-      );
-      messageLogger.error(String(err));
+      if (controller.signal.aborted) {
+        messageLogger.info(
+          'batch cancelled by the scheduler (messageId=%s, reason=%s)',
+          message.id,
+          String(controller.signal.reason),
+        );
+      } else {
+        messageLogger.error(
+          'unexpected error while processing message in worker (messageId=%s)',
+          message.id,
+        );
+        messageLogger.error(String(err));
+      }
       port.postMessage({
         event: 'error',
         id: message.id,
@@ -152,10 +165,19 @@ export function createWorker(
         s3WriteMetrics,
         r2ErrorTraceSummary: summarizeR2ErrorTraces(r2ErrorTraces),
       } satisfies BatchProcessingErrorEvent);
+    } finally {
+      controllers.delete(message.id);
     }
   }
 
-  port.on('message', (message: BatchProcessEvent) => {
+  port.on('message', (message: BatchProcessEvent | BatchCancelEvent) => {
+    if (message.event === 'CANCEL') {
+      controllers
+        .get(message.id)
+        ?.abort(setErrorSource(new Error(message.reason), 'persisted-documents-worker'));
+      return;
+    }
+
     withTraceContext(message.traceContext, () => void processMessage(message));
   });
 

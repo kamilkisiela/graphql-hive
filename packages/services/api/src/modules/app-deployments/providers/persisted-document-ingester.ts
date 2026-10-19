@@ -149,6 +149,13 @@ export type BatchProcessingErrorEvent = {
   r2ErrorTraceSummary: R2ErrorTraceSummary;
 };
 
+/** Sent by the scheduler when the request was aborted or timed out; the worker stops that batch. */
+export type BatchCancelEvent = {
+  event: 'CANCEL';
+  id: string;
+  reason: string;
+};
+
 type DocumentValidationResult =
   | Extract<BatchProcessedEvent['data'], { type: 'error' }>
   | { type: 'ok'; documents: Array<DocumentRecord> };
@@ -165,7 +172,7 @@ export class PersistedDocumentIngester {
     this.logger = logger.child({ source: 'PersistedDocumentIngester' });
   }
 
-  async processBatch(data: BatchProcessEvent['data']) {
+  async processBatch(data: BatchProcessEvent['data'], signal: AbortSignal) {
     this.logger.debug(
       'Processing batch. (targetId=%s, appDeploymentId=%s, operationCount=%d)',
       data.targetId,
@@ -192,6 +199,7 @@ export class PersistedDocumentIngester {
         targetId: data.targetId,
         appDeployment: data.appDeployment,
         documents: validation.documents,
+        signal,
       });
     }
 
@@ -379,6 +387,7 @@ export class PersistedDocumentIngester {
       id: string;
     };
     documents: Array<DocumentRecord>;
+    signal: AbortSignal;
   }) {
     // 1. Insert into ClickHouse
     this.logger.debug(
@@ -411,6 +420,7 @@ export class PersistedDocumentIngester {
       ]),
       timeout: 10_000,
       queryId: 'insert_app_deployment_documents',
+      signal: args.signal,
     });
 
     this.logger.debug(
@@ -436,6 +446,7 @@ export class PersistedDocumentIngester {
       version: string;
     };
     documents: Array<DocumentRecord>;
+    controller: AbortController;
   }) {
     this.logger.debug(
       'Inserting documents into S3. (targetId=%s, appDeployment=%s, documentCount=%d)',
@@ -456,25 +467,36 @@ export class PersistedDocumentIngester {
       );
 
       tasks.push(
-        this.promiseQueue.add(async () => {
-          const responses = await this.s3.write(s3Key, 'persisted_document', {
-            headers: {
-              'content-type': 'text/plain',
-            },
-            body: document.body,
-          });
+        this.promiseQueue.add(
+          async () => {
+            try {
+              const responses = await this.s3.writeConcurrently(s3Key, 'persisted_document', {
+                headers: {
+                  'content-type': 'text/plain',
+                },
+                body: document.body,
+                signal: args.controller.signal,
+              });
 
-          for (const response of responses) {
-            if (response.statusCode !== 200) {
-              throw setErrorSource(
-                new Error(
-                  `Failed to upload operation to S3 object storage (${response.url}): [${response.statusCode}] ${response.statusMessage}`,
-                ),
-                `s3 ${new URL(response.url).origin}`,
-              );
+              for (const response of responses) {
+                if (response.statusCode !== 200) {
+                  throw setErrorSource(
+                    new Error(
+                      `Failed to upload operation to S3 object storage (${response.url}): [${response.statusCode}] ${response.statusMessage}`,
+                    ),
+                    `s3 ${new URL(response.url).origin}`,
+                  );
+                }
+              }
+            } catch (error) {
+              // Abort here, not in the caller: p-queue starts the next queued upload as soon as
+              // this task settles, which would be before the caller's catch runs.
+              args.controller.abort(error);
+              throw error;
             }
-          }
-        }),
+          },
+          { signal: args.controller.signal },
+        ),
       );
     }
 
@@ -488,7 +510,11 @@ export class PersistedDocumentIngester {
     );
   }
 
-  /** inserts operations of an app deployment into clickhouse and s3 */
+  /**
+   * Inserts operations of an app deployment into clickhouse and s3.
+   * Every request of the batch shares one signal: it aborts when the caller's signal aborts
+   * or when the first request fails, so nothing keeps running or retrying after that.
+   */
   private async insertDocuments(args: {
     targetId: string;
     appDeployment: {
@@ -497,12 +523,26 @@ export class PersistedDocumentIngester {
       version: string;
     };
     documents: Array<DocumentRecord>;
+    signal: AbortSignal;
   }) {
-    await Promise.all([
-      // prettier-ignore
-      this.insertClickHouseDocuments(args),
-      this.insertS3Documents(args),
-    ]);
+    const { signal, ...batch } = args;
+    signal.throwIfAborted();
+
+    const controller = new AbortController();
+    const onAbort = () => controller.abort(signal.reason);
+    signal.addEventListener('abort', onAbort, { once: true });
+
+    try {
+      await Promise.all([
+        this.insertClickHouseDocuments({ ...batch, signal: controller.signal }),
+        this.insertS3Documents({ ...batch, controller }),
+      ]);
+    } catch (error) {
+      controller.abort(error);
+      throw signal.aborted ? signal.reason : error;
+    } finally {
+      signal.removeEventListener('abort', onAbort);
+    }
   }
 }
 
