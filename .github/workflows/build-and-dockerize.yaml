@@ -230,7 +230,7 @@ jobs:
         timeout-minutes: 60
         id: docker-bake
         if: ${{ inputs.dockerize }}
-        uses: docker/bake-action@5ca506d06f70338a4968df87fd8bfee5cbfb84c7 # v6.0.0
+        uses: docker/bake-action@d3418bd7d0e9324001bca92fa8ba175ea7e6dc9b # v7.3.0
         env:
           DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
           COMMIT_SHA: ${{ inputs.imageTag }}
