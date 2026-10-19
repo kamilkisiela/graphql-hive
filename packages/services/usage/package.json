@@ -6,7 +6,6 @@
   "scripts": {
     "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
-    "generate:json-schema": "tsx scripts/generate-usage-report-v2-json-schema.ts && prettier --write usage-report-v2.schema.json",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
