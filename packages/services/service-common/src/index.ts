@@ -8,6 +8,7 @@ export * from './tracing';
 export { resolveServerListenOptions } from './listen-options';
 export { registerShutdown } from './graceful-shutdown';
 export { cleanRequestId, maskToken } from './helpers';
+export { getRequestId, requestIdHeaders, requestIdStorage } from './request-id-storage';
 export { sentryInit } from './sentry';
 export { scrubBasicAuth } from './scrub';
 export { createMskIamTokenProvider } from './iam-msk';

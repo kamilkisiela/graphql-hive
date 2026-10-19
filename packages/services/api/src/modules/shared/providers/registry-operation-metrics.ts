@@ -3,7 +3,7 @@ import { getErrorSource } from '@hive/service-common';
 
 export const registryOperationOutcomeCount = new promClient.Counter({
   name: 'registry_operation_outcome_count',
-  help: 'Number of completed registry operations by outcome. Only unexpected errors are treated as failures.',
+  help: 'Number of completed registry operations by outcome. Only unexpected errors are treated as failures; requests aborted by the client are counted as aborted.',
   labelNames: ['operation', 'conclusion'],
 });
 
