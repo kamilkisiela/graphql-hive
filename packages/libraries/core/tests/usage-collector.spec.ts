@@ -101,17 +101,21 @@ test('collect fields', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Mutation.deleteProject,
+      DeleteProjectPayload,
       Mutation.deleteProject.selector,
       DeleteProjectPayload.selector,
+      ProjectSelector,
       ProjectSelector.organization,
       ID,
       ProjectSelector.project,
       DeleteProjectPayload.deletedProject,
+      Project,
       Project.id,
       Project.cleanId,
       Project.name,
       String,
       Project.type,
+      ProjectType,
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
@@ -132,17 +136,21 @@ test('collect input object types', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Mutation.deleteProject,
+      DeleteProjectPayload,
       Mutation.deleteProject.selector,
       DeleteProjectPayload.selector,
+      ProjectSelector,
       ProjectSelector.organization,
       ID,
       ProjectSelector.project,
       DeleteProjectPayload.deletedProject,
+      Project,
       Project.id,
       Project.cleanId,
       Project.name,
       String,
       Project.type,
+      ProjectType,
       ProjectType.FEDERATION,
       ProjectType.STITCHING,
       ProjectType.SINGLE,
@@ -172,6 +180,7 @@ test('collect enums and scalars as inputs', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -208,6 +217,7 @@ test('collect scalars as hard-coded inputs', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -241,6 +251,7 @@ test('collect enum values from object fields', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -277,6 +288,7 @@ test('collect enum values from arguments', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByType,
+      Project,
       Query.projectsByType.type!,
       Query.projectsByType.type,
       Project.id,
@@ -306,6 +318,7 @@ test('collect arguments', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -351,6 +364,7 @@ test('skips argument directives', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -390,6 +404,7 @@ test('collect used-only input fields', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -426,6 +441,7 @@ test('collect all input fields when `processVariables` has not been passed and i
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -462,6 +478,7 @@ test('collect entire input object type used as variable', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter,
       Project.name,
       String,
@@ -504,6 +521,7 @@ test('collect entire input object type used as variable (list)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.and,
       Project.name,
       String,
@@ -546,6 +564,7 @@ test('collect used input fields (list)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.and!,
       Query.projects.and,
       Project.name,
@@ -581,6 +600,7 @@ test('enum values as list', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByTypes,
+      Project,
       Query.projectsByTypes.types!,
       Query.projectsByTypes.types,
       Project.name,
@@ -611,6 +631,7 @@ test('custom scalar as argument (inlined)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByMetadata,
+      Project,
       Query.projectsByMetadata.metadata!,
       Query.projectsByMetadata.metadata,
       Project.name,
@@ -640,6 +661,7 @@ test('custom scalar as argument (variable)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByMetadata,
+      Project,
       Query.projectsByMetadata.metadata,
       Project.name,
       String,
@@ -669,6 +691,7 @@ test('custom scalar as an argument (variable with default value)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByMetadata,
+      Project,
       Query.projectsByMetadata.metadata,
       Project.name,
       String,
@@ -697,6 +720,7 @@ test('custom scalar in input object field (inlined)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.name,
@@ -728,6 +752,7 @@ test('custom scalar in input object field (variable)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.name,
@@ -758,6 +783,7 @@ test('custom scalar in input object field (variable)', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.name,
@@ -865,6 +891,7 @@ test('(processVariables: true) collect used-only input fields', async () => {
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -907,6 +934,7 @@ test('(processVariables: true) should collect input object without fields when c
     [
       PaginationInput,
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -957,6 +985,7 @@ test('(processVariables: true) collect used-only input type fields from an array
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.id,
@@ -1006,6 +1035,7 @@ test('(processVariables: true) custom scalar as argument (variable)', async () =
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByMetadata,
+      Project,
       Query.projectsByMetadata.metadata!,
       Query.projectsByMetadata.metadata,
       Project.name,
@@ -1041,6 +1071,7 @@ test('(processVariables: true) custom scalar as an argument (variable with defau
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projectsByMetadata,
+      Project,
       Query.projectsByMetadata.metadata!,
       Query.projectsByMetadata.metadata,
       Project.name,
@@ -1077,6 +1108,7 @@ test('(processVariables: true) custom scalar in input object field (variable)', 
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.name,
@@ -1113,6 +1145,7 @@ test('(processVariables: true) custom scalar in input object field (variable)', 
   expect(info.fields).toMatchInlineSnapshot(`
     [
       Query.projects,
+      Project,
       Query.projects.filter!,
       Query.projects.filter,
       Project.name,
