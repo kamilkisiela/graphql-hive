@@ -26,31 +26,31 @@ jobs:
         run: pnpm oclif:pack
 
       - name: upload darwin arm64
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: hive-cli-darwin-arm64
           path: ./packages/libraries/cli/dist/*-darwin-arm64.tar.gz
 
       - name: upload darwin x64
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: hive-cli-darwin-x64
           path: ./packages/libraries/cli/dist/*-darwin-x64.tar.gz
 
       - name: upload win x64
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: hive-cli-win-x64
           path: ./packages/libraries/cli/dist/*-win32-x64.tar.gz
 
       - name: upload linux arm64
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: hive-cli-linux-arm64
           path: ./packages/libraries/cli/dist/*-linux-arm64.tar.gz
 
       - name: upload linux x64
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: hive-cli-linux-x64
           path: ./packages/libraries/cli/dist/*-linux-x64.tar.gz
