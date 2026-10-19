@@ -112,6 +112,8 @@ export function schemaProvider(providerConfig: SchemaProviderConfig) {
       httpLink({
         url: `${providerConfig.schemaServiceUrl}/trpc`,
         fetch,
+        headers: ({ op }) =>
+          typeof op.context.requestId === 'string' ? { 'x-request-id': op.context.requestId } : {},
       }),
     ],
   });
@@ -134,6 +136,7 @@ export function schemaProvider(providerConfig: SchemaProviderConfig) {
         /** Specified contracts (only Federation) */
         contracts: ContractsInputType | null;
       },
+      opts?: { requestId?: string },
     ) {
       const compositionType = convertProjectType(projectType);
       providerConfig.logger.debug(
@@ -176,6 +179,7 @@ export function schemaProvider(providerConfig: SchemaProviderConfig) {
           {
             // Limit the maximum time allowed for composition requests to 60 seconds to avoid a dead-lock
             signal: timeoutAbortSignal,
+            context: { requestId: opts?.requestId },
           },
         );
         return result;

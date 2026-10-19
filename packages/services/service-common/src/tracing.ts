@@ -184,7 +184,7 @@ export class TracingInstance {
             }
 
             return {
-              'request.id': request.headers['x-request-id'] || request.id,
+              'request.id': request.id,
               'cloudflare.ray.id': request.headers['cf-ray'],
               [SEMATTRS_HTTP_METHOD]: request.method,
               [SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH]: request.headers['content-length'],

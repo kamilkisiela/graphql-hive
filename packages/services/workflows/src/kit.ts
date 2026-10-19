@@ -14,6 +14,7 @@ export type TaskDefinition<TName extends string, TModel> = {
 
 type TaskImplementationArgs<TPayload> = {
   input: TPayload;
+  requestId?: string;
   context: Context;
   logger: Logger;
   helpers: JobHelpers;
@@ -51,6 +52,7 @@ export function implementTask<TPayload>(
         const payload = schema.parse(unsafePayload);
         return implementation({
           input: payload.input,
+          requestId: payload.requestId,
           context,
           helpers,
           logger: context.logger.child({
