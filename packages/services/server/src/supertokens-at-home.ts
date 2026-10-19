@@ -27,10 +27,13 @@ import { Encryptor } from '@hive/service-common';
 import { TaskScheduler } from '@hive/workflows/kit';
 import { PasswordResetTask } from '@hive/workflows/tasks/password-reset';
 import { env } from './environment';
+import { createBrokerFetch } from './oauth-fetch';
 import { createNewSession, createOIDCState, validatePassword } from './supertokens-at-home/shared';
 import type { WorkloadIdentityFederationProvider } from './workload-identity-federation';
 
 type BroadcastOIDCIntegrationLog = (oidcOrganizationId: string, message: string) => void;
+
+const oauthFetch = createBrokerFetch(fetch, env.requestBroker);
 
 /**
  * Registers the routes of the Supertokens at Home implementation to a fastify instance.
@@ -980,7 +983,7 @@ export async function registerSupertokensAtHome(
           scope: z.string(),
         });
 
-        const accessTokenResponse = await fetch(accessTokenUrl.toString(), {
+        const accessTokenResponse = await oauthFetch(accessTokenUrl.toString(), {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
@@ -1011,7 +1014,7 @@ export async function registerSupertokensAtHome(
           id: z.number(),
         });
 
-        const userInfoResponse = await fetch('https://api.github.com/user', {
+        const userInfoResponse = await oauthFetch('https://api.github.com/user', {
           method: 'GET',
           headers: {
             accept: 'application/vnd.github+json',
@@ -1045,7 +1048,7 @@ export async function registerSupertokensAtHome(
           thirdPartyUserId: String(userInfoBody.id),
         });
 
-        const emailsResponse = await fetch('https://api.github.com/user/emails', {
+        const emailsResponse = await oauthFetch('https://api.github.com/user/emails', {
           method: 'GET',
           headers: {
             accept: 'application/vnd.github+json',
@@ -1134,7 +1137,7 @@ export async function registerSupertokensAtHome(
           scope: z.string(),
         });
 
-        const accessTokenResponse = await fetch(accessTokenUrl.toString(), {
+        const accessTokenResponse = await oauthFetch(accessTokenUrl.toString(), {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
@@ -1170,7 +1173,7 @@ export async function registerSupertokensAtHome(
           email: z.string(),
         });
 
-        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        const userInfoResponse = await oauthFetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           method: 'GET',
           headers: {
             accept: 'application/json',
@@ -1253,7 +1256,7 @@ export async function registerSupertokensAtHome(
           access_token: z.string(),
         });
 
-        const grantResponse = await fetch(env.auth.okta.endpoint + '/oauth2/v1/token', {
+        const grantResponse = await oauthFetch(env.auth.okta.endpoint + '/oauth2/v1/token', {
           method: 'POST',
           headers: {
             'content-type': 'application/x-www-form-urlencoded',
@@ -1304,7 +1307,7 @@ export async function registerSupertokensAtHome(
 
         const accessToken = grantBodyResult.data.access_token;
 
-        const response = await fetch(`${env.auth.okta.endpoint}/api/v1/users/me`, {
+        const response = await oauthFetch(`${env.auth.okta.endpoint}/api/v1/users/me`, {
           method: 'GET',
           headers: {
             'content-type': 'application/json',
@@ -1450,7 +1453,7 @@ export async function registerSupertokensAtHome(
           grantParams['client_secret'] = crypto.decrypt(oidcIntegration.encryptedClientSecret);
         }
 
-        const grantResponse = await fetch(oidcIntegration.tokenEndpoint, {
+        const grantResponse = await oauthFetch(oidcIntegration.tokenEndpoint, {
           method: 'POST',
           headers: {
             'content-type': 'application/x-www-form-urlencoded',
@@ -1508,7 +1511,7 @@ export async function registerSupertokensAtHome(
         req.log.debug('successfully exchanged code for access token ');
         req.log.debug('attempt fetching user info');
 
-        const userInfoResponse = await fetch(oidcIntegration.userinfoEndpoint, {
+        const userInfoResponse = await oauthFetch(oidcIntegration.userinfoEndpoint, {
           method: 'GET',
           headers: {
             authorization: `Bearer ${codeGrantAccessToken}`,

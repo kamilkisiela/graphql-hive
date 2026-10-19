@@ -2,6 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
+import type { Broker } from './cf-broker';
 import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
 import { CommerceService } from './commerce';
@@ -46,6 +47,7 @@ export function deployGraphQL({
   githubApp,
   sentry,
   observability,
+  broker,
 }: {
   observability: Observability;
   githubApp: GitHubApp;
@@ -66,6 +68,7 @@ export function deployGraphQL({
   zendesk: Zendesk;
   docker: Docker;
   sentry: Sentry;
+  broker: Broker;
 }) {
   const apiConfig = new pulumi.Config('api');
   const supertokensConfig = new pulumi.Config('supertokens');
@@ -125,6 +128,7 @@ export function deployGraphQL({
           LOG_LEVEL: 'info',
           SENTRY: sentry.enabled ? '1' : '0',
           REQUEST_LOGGING: '1',
+          REQUEST_BROKER: '1',
           COMMERCE_ENDPOINT: serviceLocalEndpoint(commerce.service),
           SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
           SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),
@@ -214,6 +218,8 @@ export function deployGraphQL({
       .withSecret('AUTH_GITHUB_CLIENT_SECRET', githubOAuthSecret, 'clientSecret')
       .withSecret('AUTH_GOOGLE_CLIENT_ID', googleOAuthSecret, 'clientId')
       .withSecret('AUTH_GOOGLE_CLIENT_SECRET', googleOAuthSecret, 'clientSecret')
+      .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
+      .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
       // Hive Usage Reporting
       .withSecret('HIVE_ACCESS_TOKEN', hiveUsageSecret, 'usageAccessToken')
       // Persisted Documents
