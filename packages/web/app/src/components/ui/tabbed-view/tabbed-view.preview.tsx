@@ -1,19 +1,13 @@
 import { useState } from 'react';
-import {
-  AlertTriangle,
-  BookOpen,
-  Check,
-  ChevronDown,
-  ExternalLink,
-  GitCompare,
-  Info,
-  List,
-  Scale,
-} from 'lucide-react';
+import { AlertTriangle, Check, GitCompare, List, Scale } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
-import { Badge } from '../primitives/badge/badge';
+import { buildChanges, metadata, PATH } from '@/components/target/history/changes-block.fixtures';
+import { ChangesBlock } from '@/components/target/history/errors-and-changes';
+import { Subtitle, Title } from '@/components/ui/page';
+import { RouterAt } from '../../../../foundry.router';
 import { Button } from '../primitives/button/button';
+import { DescriptionList } from '../primitives/description-list/description-list';
 import { Select } from '../primitives/floating/select/select';
 import { Tooltip } from '../primitives/floating/tooltip/tooltip';
 import { ScopeBar } from '../scope-bar/scope-bar';
@@ -76,36 +70,18 @@ function ContractSelect(props: { value: string; onValueChange: (value: string) =
   );
 }
 
-function DetailsView({ contract }: { contract: string }) {
+const FIXTURE = buildChanges({ usedTargets: 2, unusedTargets: 3, operations: 2, legacy: false });
+
+function DetailsView() {
   return (
-    <div className="flex flex-col gap-6 text-sm">
-      <div>
-        <div className="mb-3 flex items-center gap-2 font-medium text-fg">
-          Breaking Changes
-          <Info className="size-3.5 text-fg-secondary" />
-        </div>
-        <div className="flex items-center justify-between border-b border-line py-2">
-          <span className="text-fg-default">
-            Field <Badge content="Node.id" variants={{ variant: 'secondary', mono: true }} />{' '}
-            changed type from{' '}
-            <Badge content="ID!" variants={{ variant: 'secondary', mono: true }} /> to{' '}
-            <Badge content="ID" variants={{ variant: 'secondary', mono: true }} /> in {contract}
-          </span>
-          <ChevronDown className="size-4 text-fg-secondary" />
-        </div>
-      </div>
-      <div className="flex flex-col gap-2 text-fg-default">
-        <p>
-          Get more out of schema checks by enabling conditional breaking changes based on usage
-          data.
-        </p>
-        <a href="#" className="inline-flex items-center gap-2 hover:text-fg">
-          <BookOpen className="size-4" />
-          Learn more about conditional breaking changes.
-          <ExternalLink className="size-3" />
-        </a>
-      </div>
-    </div>
+    <RouterAt path={PATH}>
+      <ChangesBlock
+        schemaCheckId="check-1"
+        title="Breaking Changes"
+        changesWithUsage={FIXTURE.changes}
+        conditionBreakingChangeMetadata={metadata(FIXTURE.targets)}
+      />
+    </RouterAt>
   );
 }
 
@@ -117,13 +93,13 @@ function SchemaView() {
   );
 }
 
-function checkViews(contract: string): TabbedViewItem[] {
+function checkViews(): TabbedViewItem[] {
   return [
     {
       value: 'details',
       label: 'Details',
       icon: List,
-      content: <DetailsView contract={contract} />,
+      content: <DetailsView />,
     },
     { value: 'schema', label: 'Public Schema', icon: GitCompare, content: <SchemaView /> },
     {
@@ -139,7 +115,9 @@ function checkViews(contract: string): TabbedViewItem[] {
 }
 
 export const Default = createPreview(() => (
-  <TabbedView items={checkViews('Default Graph')} defaultValue="details" />
+  <div className="w-[72rem]">
+    <TabbedView items={checkViews()} defaultValue="details" />
+  </div>
 ));
 
 /** The contract failures table lists contracts only: the default graph's failure is the view the page opens on. */
@@ -147,25 +125,28 @@ export const ChecksPage = createPreview(() => {
   const [contract, setContract] = useState('default');
   const failed = CONTRACTS.filter(entry => entry.value !== 'default' && entry.status === 'failed');
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-xl font-medium text-fg">Check 5843350d-f323-4ff3-8dcf-a30bd48f451f</h2>
-        <p className="text-sm text-fg-secondary">Detailed view of the schema check</p>
+    <div className="flex w-[72rem] flex-col">
+      <div className="py-6">
+        <Title>Check 5843350d-f323-4ff3-8dcf-a30bd48f451f</Title>
+        <Subtitle>Detailed view of the schema check</Subtitle>
       </div>
-      <div className="flex items-center justify-between rounded-md border border-line bg-neutral-2 px-5 py-4 dark:bg-neutral-3">
-        <div className="flex gap-24">
-          <div>
-            <div className="text-xs text-fg-secondary">Status</div>
-            <div className="text-sm font-medium text-critical">Failed</div>
-          </div>
-          <div>
-            <div className="text-xs text-fg-secondary">Triggered 3d ago</div>
-            <div className="text-sm text-fg">by User</div>
-          </div>
+      <div className="mb-3 flex items-center gap-4 rounded-md border bg-surface-card px-5 py-4">
+        <div className="min-w-0 flex-1">
+          <DescriptionList
+            variants={{ termStyle: 'title', columns: 'auto' }}
+            rows={[
+              {
+                items: [
+                  { term: 'Status', description: <span className="text-critical">Failed</span> },
+                  { term: 'Triggered', description: '3d ago by User' },
+                ],
+              },
+            ]}
+          />
         </div>
         <Button variant="destructive">Approve</Button>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="mt-3 flex flex-col gap-3">
         <div className="mb-3">
           <ContractFailuresTable
             title={`${failed.length} of ${CONTRACTS.length - 1} contracts failed`}
@@ -180,7 +161,7 @@ export const ChecksPage = createPreview(() => {
           />
         </div>
         <ScopeBar picker={<ContractSelect value={contract} onValueChange={setContract} />} />
-        <TabbedView items={checkViews(contract)} defaultValue="details" />
+        <TabbedView items={checkViews()} defaultValue="details" />
       </div>
     </div>
   );
