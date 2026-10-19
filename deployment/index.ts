@@ -9,6 +9,7 @@ import { deployCommerce } from './services/commerce';
 import { deployDatabaseCleanupJob } from './services/database-cleanup';
 import { deployDbMigrations } from './services/db-migrations';
 import { configureDocker } from './services/docker';
+import { deployEgressPolicy } from './services/egress-policy';
 import { prepareEnvironment } from './services/environment';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
@@ -60,6 +61,7 @@ if (!hiveAppPersistedDocumentsAbsolutePath) {
 }
 
 optimizeAzureCluster();
+deployEgressPolicy();
 
 const docker = configureDocker();
 const envName = pulumi.getStack();
