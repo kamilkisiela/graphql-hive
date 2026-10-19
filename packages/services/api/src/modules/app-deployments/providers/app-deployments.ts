@@ -29,11 +29,11 @@ import { S3Writer } from '../../shared/providers/s3-writer';
 import { Storage } from '../../shared/providers/storage';
 import { TargetStore } from '../../target/providers/target-store';
 import { APP_DEPLOYMENTS_ENABLED } from './app-deployments-enabled-token';
-import { PersistedDocumentScheduler } from './persisted-document-scheduler';
 import {
   PersistedDocumentIngester,
   type PreprocessedDocument,
 } from './persisted-document-ingester';
+import { PersistedDocumentScheduler } from './persisted-document-scheduler';
 
 export const AppDeploymentNameModel = z
   .string()
