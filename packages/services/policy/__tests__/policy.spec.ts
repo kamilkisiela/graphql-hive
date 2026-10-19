@@ -7,6 +7,8 @@ describe('policy checks', () => {
       .availableRules();
 
     expect(Object.keys(result).length).toBe(22);
+    // The settings UI and config validation are built from these option schemas.
+    expect(result).toMatchSnapshot();
   });
 
   it('should return empty result where there are not lint rules', async () => {
