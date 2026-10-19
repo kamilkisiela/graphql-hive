@@ -1,4 +1,5 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { DataTableCursorPagination } from '@/components/ui/data-table/data-table-pagination';
 import { Button } from '../button/button';
 import { Spinner } from './spinner';
 
@@ -26,13 +27,14 @@ export const InContext = createPreview(() => (
     <div className="flex h-24 items-center justify-center rounded-md border border-line text-center">
       <Spinner />
     </div>
-    <div className="flex h-9 items-center justify-between rounded-md border border-line-subtle bg-neutral-2 px-4 text-xs dark:bg-neutral-3">
-      <span className="text-fg-secondary">Page 2</span>
-      <span className="inline-flex items-center gap-2">
-        <Spinner variants={{ size: 'sm' }} />
-        <span className="text-fg-secondary">‹ ›</span>
-      </span>
-    </div>
+    <DataTableCursorPagination
+      loading
+      summary="Showing 20 of 143 deployments"
+      hasPreviousPage
+      hasNextPage
+      onPrevious={() => {}}
+      onNext={() => {}}
+    />
     <div className="flex flex-col items-center">
       <Spinner />
       <div className="mt-2 text-xs">Loading app deployments</div>

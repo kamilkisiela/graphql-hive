@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { Button } from '../button/button';
+import { Menu } from '../floating/menu/menu';
 import { Switch } from './switch';
 
 export const nav: NavPath = 'Primitives/FormControls/Switch';
@@ -49,16 +51,22 @@ export const InSettingsRow = createPreview(() => {
 });
 
 /**
- * `decorative` is for a switch that shows state but is not itself the control: the menu row or
- * card around it owns the click. Not focusable, hidden from assistive tech, and the cursor is the
- * row's. Tab through this and the switch is skipped; hover it and the cursor does not change.
+ * `decorative` is for a switch that shows state but is not itself the control: the menu row
+ * around it owns the click. Not focusable, hidden from assistive tech, and the cursor is the
+ * row's. Menu's `toggle` row is the one shipped user; open it and tab: the switch is skipped.
  */
-export const Decorative = createPreview(() => (
-  <div className="flex w-64 cursor-pointer items-center justify-between rounded-md px-3 py-2 text-control hover:bg-neutral-3">
-    <span>Show deprecated fields</span>
-    <Switch size="small" checked decorative />
-  </div>
-));
+export const Decorative = createPreview(() => {
+  const [checked, setChecked] = useState(true);
+  return (
+    <Menu
+      trigger={<Button label="View options" />}
+      minWidth="md"
+      sections={[
+        [{ kind: 'toggle', label: 'Show deprecated fields', checked, onCheckedChange: setChecked }],
+      ]}
+    />
+  );
+});
 
 export const Playground = createPreview({
   controls: controlsFor(Switch, {
