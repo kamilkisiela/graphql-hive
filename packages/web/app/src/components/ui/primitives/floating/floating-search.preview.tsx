@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
 import { cn } from '@/lib/utils';
-import { floatingVariants, itemVariants } from './shared-styles';
 import { FloatingSearch } from './floating-search';
+import { floatingVariants, itemVariants } from './shared-styles';
 
 export const nav: NavPath = 'Primitives/Floating/Search';
 

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { render } from '@testing-library/react';
 import { makeFragmentData } from '@/gql';
+import { render } from '@testing-library/react';
 import { CompositionErrorsCard } from './composition-errors-card';
 import { CompositionErrorsSection_SchemaErrorConnection } from './errors-and-changes';
 
@@ -27,7 +27,9 @@ describe('CompositionErrorsCard', () => {
 
   it('counts several errors in the plural and numbers each row', () => {
     const { getByText, container } = render(
-      <CompositionErrorsCard compositionErrors={errors('Unknown type "Foo".', 'Unknown type "Bar".')} />,
+      <CompositionErrorsCard
+        compositionErrors={errors('Unknown type "Foo".', 'Unknown type "Bar".')}
+      />,
     );
     getByText('2 errors');
     const rows = [...container.querySelectorAll('li')];

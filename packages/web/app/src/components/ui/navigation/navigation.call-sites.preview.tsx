@@ -201,16 +201,16 @@ export const Bars = createPreview({
       >
         <RouterAt path="/the-guild/view/members?page=roles">
           <SecondaryNavigation
-              links={ORGANIZATION_LINKS}
-              actions={
-                <Button variant="link">
-                  <span className="flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
-                    New project
-                  </span>
-                </Button>
-              }
-            />
+            links={ORGANIZATION_LINKS}
+            actions={
+              <Button variant="link">
+                <span className="flex items-center">
+                  <PlusIcon size={16} className="mr-2" />
+                  New project
+                </span>
+              </Button>
+            }
+          />
         </RouterAt>
       </CallSite>
       <CallSite
@@ -220,16 +220,16 @@ export const Bars = createPreview({
       >
         <RouterAt path="/the-guild/gateway?search=prod">
           <SecondaryNavigation
-              links={PROJECT_LINKS}
-              actions={
-                <Button variant="link">
-                  <span className="flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
-                    New target
-                  </span>
-                </Button>
-              }
-            />
+            links={PROJECT_LINKS}
+            actions={
+              <Button variant="link">
+                <span className="flex items-center">
+                  <PlusIcon size={16} className="mr-2" />
+                  New target
+                </span>
+              </Button>
+            }
+          />
         </RouterAt>
       </CallSite>
       <CallSite
@@ -239,18 +239,18 @@ export const Bars = createPreview({
       >
         <RouterAt path={`${TARGET_PATH}/checks/abc123`}>
           <SecondaryNavigation
-              links={TARGET_LINKS}
-              actions={
-                <div className="hidden md:block">
-                  <Button variant="link">
-                    <span className="flex items-center whitespace-nowrap">
-                      <LinkIcon size={16} className="mr-2" />
-                      Connect to CDN
-                    </span>
-                  </Button>
-                </div>
-              }
-            />
+            links={TARGET_LINKS}
+            actions={
+              <div className="hidden md:block">
+                <Button variant="link">
+                  <span className="flex items-center whitespace-nowrap">
+                    <LinkIcon size={16} className="mr-2" />
+                    Connect to CDN
+                  </span>
+                </Button>
+              </div>
+            }
+          />
         </RouterAt>
       </CallSite>
       <CallSite

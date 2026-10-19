@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
-import { Card } from '../card/card';
 import { Button } from '../button/button';
+import { Card } from '../card/card';
 import { Menu } from '../floating/menu/menu';
 import { Switch } from './switch';
 

@@ -224,7 +224,12 @@ export const PlanCards = createPreview(() => {
           {
             value: 'pro',
             content: (
-              <Plan isActive={false} name="Pro" price={10} {...planCollection[BillingPlanType.Pro]} />
+              <Plan
+                isActive={false}
+                name="Pro"
+                price={10}
+                {...planCollection[BillingPlanType.Pro]}
+              />
             ),
           },
           {

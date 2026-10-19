@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { createPreview, type NavPath } from 'react-foundry';
-import { Card } from './card/card';
 import { Button } from './button/button';
+import { Card } from './card/card';
 import { Checkbox } from './checkbox/checkbox';
 import { Select } from './floating/select/select';
 import { Input } from './input/input';

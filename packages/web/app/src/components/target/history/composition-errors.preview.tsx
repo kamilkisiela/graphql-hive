@@ -341,10 +341,16 @@ function BothContainers(props: { fixtures: readonly Fixture[] }) {
   return (
     <div className="flex w-[56rem] flex-col gap-8">
       <Legend fixtures={props.fixtures} />
-      <CallSite source="pages/target-history-schema-version.tsx (CompositionErrorsCard)" origin="base">
+      <CallSite
+        source="pages/target-history-schema-version.tsx (CompositionErrorsCard)"
+        origin="base"
+      >
         <CompositionErrorsCard compositionErrors={connection} />
       </CallSite>
-      <CallSite source="components/target/history/errors-and-changes.tsx (CompositionErrorsList)" origin="ui">
+      <CallSite
+        source="components/target/history/errors-and-changes.tsx (CompositionErrorsList)"
+        origin="ui"
+      >
         <CompositionErrorsList title="Composition Errors" errors={errors} />
       </CallSite>
     </div>

@@ -82,9 +82,9 @@ export const Inventory = createPreview({
           <br />
           <strong>Two live bugs.</strong> <code>Text</code> declares an <code>arrangement</code>{' '}
           variant that the component never passes to <code>textVariants()</code>, so the sign-in
-          call site asks for <code>block</code> and gets an inline span. <code>Heading</code> renders{' '}
-          <code>h1</code> only for <code>2xl</code>, which no call site uses — so all 24 headings in
-          the app are <code>h3</code>, whatever their visual size.
+          call site asks for <code>block</code> and gets an inline span. <code>Heading</code>{' '}
+          renders <code>h1</code> only for <code>2xl</code>, which no call site uses — so all 24
+          headings in the app are <code>h3</code>, whatever their visual size.
         </>
       }
       entries={ENTRIES}

@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
-import { Card } from '@/components/ui/primitives/card/card';
 import { useForm } from 'react-hook-form';
 import {
   NewPasswordForm,
@@ -142,6 +141,7 @@ import {
   type RegistryTokenFormValues,
 } from '@/components/target/settings/registry-token-form';
 import { Button } from '@/components/ui/primitives/button/button';
+import { Card } from '@/components/ui/primitives/card/card';
 import { Form } from '@/components/ui/primitives/form/form';
 import {
   UserSettingsForm,
@@ -1138,12 +1138,7 @@ function DangerousChangesExample() {
       note="A changed row gets a pending dot until it is saved. The status beside the button is the page's own saved / just saved / unsaved label."
     >
       <div className="w-[36rem]">
-        <DangerousChangesForm
-          form={form}
-          onSubmit={setSubmitted}
-          enabled
-          status={<SavedLabel />}
-        />
+        <DangerousChangesForm form={form} onSubmit={setSubmitted} enabled status={<SavedLabel />} />
         <Submitted values={submitted} />
       </div>
     </CallSite>

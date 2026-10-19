@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { AlertTriangle, Check, GitCompare } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { cn } from '@/lib/utils';
-import { Card } from '../../card/card';
-import { floatingVariants } from '../shared-styles';
 import { Button } from '../../button/button';
+import { Card } from '../../card/card';
 import { StatusDot } from '../../status-dot/status-dot';
+import { floatingVariants } from '../shared-styles';
 import { Select, type SelectOption } from './select';
 
 export const nav: NavPath = 'Primitives/Floating/Select';
