@@ -36,6 +36,7 @@ import {
   createServer,
   Encryptor,
   generateRdsIamAuthToken,
+  getRequestId,
   registerShutdown,
   registerTRPC,
   reportReadiness,
@@ -55,7 +56,6 @@ import { OrganizationAccessTokenValidationCache } from '../../api/src/modules/au
 import { OrganizationAccessTokensCache } from '../../api/src/modules/organization/providers/organization-access-tokens-cache';
 import { TargetTokenCache } from '../../api/src/modules/token/providers/target-token-cache';
 import { internalApiRouter } from './api';
-import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
@@ -252,12 +252,6 @@ export async function main() {
         });
       }
     };
-  }
-
-  function getRequestId() {
-    const store = asyncStorage.getStore();
-
-    return store?.requestId;
   }
 
   function wrapLogFn(fn: LogFn): LogFn {

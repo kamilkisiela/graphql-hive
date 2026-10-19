@@ -21,11 +21,11 @@ function StatusGlyph({ status }: { status: Status }) {
   return <Check className="size-3.5 shrink-0 text-success" />;
 }
 
-const LEGEND = [
-  { icon: <StatusGlyph status="failed" />, label: 'Failed' },
-  { icon: <StatusGlyph status="changed" />, label: 'Schema changed' },
-  { icon: <StatusGlyph status="ok" />, label: 'Passed' },
-];
+const STATUS_STATE: Record<Status, string> = {
+  failed: 'Failed',
+  changed: 'Schema changed',
+  ok: 'No changes',
+};
 
 function statusTooltip(status: Status) {
   return (
@@ -33,6 +33,21 @@ function statusTooltip(status: Status) {
       trigger={
         <span className="inline-flex">
           <StatusGlyph status={status} />
+        </span>
+      }
+      content={STATUS_LABEL[status]}
+    />
+  );
+}
+
+/** A picker row's status as the pages build it: glyph and state in words, the reason on hover. */
+function statusTrailing(status: Status) {
+  return (
+    <Tooltip
+      trigger={
+        <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+          <StatusGlyph status={status} />
+          {STATUS_STATE[status]}
         </span>
       }
       content={STATUS_LABEL[status]}
@@ -51,14 +66,13 @@ export const Default = createPreview(() => {
   const [value, setValue] = useState('default');
   return (
     <ScopeBar
-      legend={LEGEND}
       picker={
         <Select
           aria-label="Contract"
           options={CHECK_CONTRACTS.map(entry => ({
             value: entry.value,
             label: entry.label,
-            trailing: statusTooltip(entry.status),
+            trailing: statusTrailing(entry.status),
           }))}
           value={value}
           onValueChange={setValue}
@@ -83,7 +97,6 @@ export const VersionPage = createPreview(() => {
   const picked = VERSION_CONTRACTS.find(entry => entry.value === value) ?? VERSION_CONTRACTS[0];
   return (
     <ScopeBar
-      legend={LEGEND}
       picker={
         <Select
           aria-label="Contract version"
@@ -98,7 +111,7 @@ export const VersionPage = createPreview(() => {
           options={VERSION_CONTRACTS.map(entry => ({
             value: entry.value,
             label: entry.label,
-            trailing: statusTooltip(entry.status),
+            trailing: statusTrailing(entry.status),
           }))}
           size="compact"
           width="auto"
@@ -120,24 +133,6 @@ export const NoContracts = createPreview(() => (
   />
 ));
 
-/** The legend wraps under the picker. */
-export const Narrow = createPreview(() => (
-  <div className="w-[24rem]">
-    <ScopeBar
-      legend={LEGEND}
-      picker={
-        <Select
-          aria-label="Contract"
-          options={[{ value: 'default', label: 'Default Graph' }]}
-          value="default"
-          size="compact"
-          width="auto"
-        />
-      }
-    />
-  </div>
-));
-
 export const Playground = createPreview({
   controls: controlsFor(ScopeBar, {
     label: { type: 'text', default: 'Viewing' },
@@ -145,7 +140,6 @@ export const Playground = createPreview({
   render: v => (
     <ScopeBar
       label={v.label}
-      legend={LEGEND}
       picker={
         <Select
           aria-label="Contract"

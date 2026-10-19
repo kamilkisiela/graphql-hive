@@ -37,12 +37,14 @@ import {
 } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { TargetStore } from '../../target/providers/target-store';
-import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { Contracts } from './contracts';
 import { CompositionOrchestrator } from './orchestrator/composition-orchestrator';
 import { ensureCompositeSchemas, removeDescriptions, SchemaHelper } from './schema-helper';
-import { SchemaVersionStore } from './schema-version-store';
+import {
+  SchemaVersionStore,
+  type SchemaVersion as StoredSchemaVersion,
+} from './schema-version-store';
 
 const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   endpoint: z.string().url().nonempty(),
@@ -67,6 +69,7 @@ const externalSchemaCompositionTestDocument = parse(externalSchemaCompositionTes
 export class SchemaManager {
   private logger: Logger;
   private latestSchemaVersionLoader: DataLoader<TargetSelector, SchemaVersion>;
+  private latestValidVersionByGraphLoader: DataLoader<Graph, StoredSchemaVersion | null, string>;
 
   constructor(
     logger: Logger,
@@ -81,7 +84,6 @@ export class SchemaManager {
     private targetManager: TargetManager,
     private schemaHelper: SchemaHelper,
     private contracts: Contracts,
-    private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
     private idTranslator: IdTranslator,
     private schemaVersions: SchemaVersionStore,
     private graphs: GraphStore,
@@ -108,6 +110,13 @@ export class SchemaManager {
           return selector.targetId;
         },
       },
+    );
+    this.latestValidVersionByGraphLoader = new DataLoader(
+      graphs =>
+        Promise.all(
+          graphs.map(graph => this.schemaVersions.getMaybeLatestValidSchemaVersionForGraph(graph)),
+        ),
+      { cacheKeyFn: graph => graph.id },
     );
   }
 
@@ -274,16 +283,6 @@ export class SchemaManager {
     return this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id);
   }
 
-  async getServiceNamesOfVersion(schemaVersion: SchemaVersion) {
-    const project = await this.projectManager.getProjectById(schemaVersion.projectId);
-    // Single-schema pushes carry no service name, so there is nothing to list.
-    if (project.type === ProjectType.SINGLE) {
-      return null;
-    }
-    this.logger.debug('Fetching service names (schemaVersionId=%s)', schemaVersion.id);
-    return this.schemaVersions.getServiceNamesBySchemaVersionId(schemaVersion.id);
-  }
-
   async getMatchingServiceSchemaOfVersions(versions: { before: string | null; after: string }) {
     this.logger.debug('Fetching service schema of versions (selector=%o)', versions);
     return this.schemaVersions.getMatchingServiceSchemaOfVersions(versions);
@@ -292,7 +291,7 @@ export class SchemaManager {
   async getMaybeLatestValidVersionForGraph(graph: Graph) {
     this.logger.debug('Fetching maybe latest valid version (graphId=%s)', graph.id);
 
-    const version = await this.schemaVersions.getMaybeLatestValidSchemaVersionForGraph(graph);
+    const version = await this.latestValidVersionByGraphLoader.load(graph);
 
     if (!version) {
       return null;
@@ -734,6 +733,16 @@ export class SchemaManager {
     return paginatedResult;
   }
 
+  async getSchemaCheckServiceNamesForTarget(target: Target) {
+    const project = await this.projectManager.getProjectById(target.projectId);
+    // Single-schema checks carry no service name, so there is nothing to list.
+    if (project.type === ProjectType.SINGLE) {
+      return null;
+    }
+    this.logger.debug('Fetching schema check service names (targetId=%s)', target.id);
+    return this.storage.getSchemaCheckServiceNamesForTarget({ targetId: target.id });
+  }
+
   async findSchemaCheckForTarget(target: Target, schemaCheckId: string) {
     this.logger.debug(
       'Find schema check (targetId=%s, schemaCheckId=%s)',
@@ -763,15 +772,6 @@ export class SchemaManager {
         schemaCheckId,
       );
       return null;
-    }
-
-    if (schemaCheck.breakingSchemaChanges && schemaCheck.conditionalBreakingChangeMetadata) {
-      for (const change of schemaCheck.breakingSchemaChanges) {
-        this.breakingSchemaChangeUsageHelper.registerMetadataForBreakingSchemaChange(
-          change,
-          schemaCheck.conditionalBreakingChangeMetadata,
-        );
-      }
     }
 
     return schemaCheck;

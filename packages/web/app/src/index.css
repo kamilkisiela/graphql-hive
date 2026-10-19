@@ -42,6 +42,11 @@
   --color-warning: hsl(var(--warning));
   --color-critical: hsl(var(--critical));
 
+  --color-success-text: hsl(var(--success-text));
+  --color-info-text: hsl(var(--info-text));
+  --color-warning-text: hsl(var(--warning-text));
+  --color-critical-text: hsl(var(--critical-text));
+
   --color-accent-tint: hsl(var(--accent) / 0.1);
   --color-accent-tint-subtle: hsl(var(--accent) / 0.08);
   --color-accent-tint-strong: hsl(var(--accent) / 0.3);
@@ -154,7 +159,7 @@
   }
 
   :root {
-    color-scheme: light dark;
+    color-scheme: light;
 
     @apply font-sans subpixel-antialiased;
 
@@ -181,6 +186,12 @@
     --info: 206 96% 35%;
     --warning: 40 88% 41%;
     --critical: 0 69% 46%;
+
+    /* Text on its own tint needs 4.5:1, even over a toned table; the hues above are too light. */
+    --success-text: 130 50% 30%;
+    --info-text: 206 96% 32%;
+    --warning-text: 40 88% 28%;
+    --critical-text: 0 69% 42%;
 
     --chart-1: 45 93% 47%;
     --chart-2: 0 86% 60%;
@@ -231,6 +242,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --neutral-1: 210 21% 5%;
     --neutral-2: 210 16% 7%;
     --neutral-3: 214 14% 10%;
@@ -250,6 +262,11 @@
     --info: 203 100% 87%;
     --warning: 40 96% 61%;
     --critical: 0 69% 68%;
+
+    --success-text: var(--success);
+    --info-text: var(--info);
+    --warning-text: var(--warning);
+    --critical-text: var(--critical);
 
     --chart-1: 45 93% 52%;
     --chart-2: 0 86% 65%;

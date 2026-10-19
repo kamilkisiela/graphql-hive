@@ -35,7 +35,7 @@ export const buttonVariants = cva(
         outline: 'border-line bg-transparent text-fg-default hover:bg-neutral-4 hover:text-fg',
         ghost: 'border-transparent bg-transparent text-fg-secondary hover:text-fg',
         destructive: [
-          'bg-critical-tint-subtle border-critical-line text-critical-muted hover:bg-critical-tint hover:border-critical hover:text-critical',
+          'bg-critical-tint-subtle border-critical-line text-critical-text hover:bg-critical-tint hover:border-critical',
         ],
         // Text that acts: accent, underlined on hover, no box. Sits inline with the copy around it.
         link: 'text-accent underline-offset-4 hover:underline',

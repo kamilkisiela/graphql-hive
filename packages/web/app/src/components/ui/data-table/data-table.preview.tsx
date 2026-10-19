@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Check, CircleAlert, Trash2 } from 'lucide-react';
 import { createPreview, type NavPath } from 'react-foundry';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import { Button } from '../primitives/button/button';
 import { DataTable } from './data-table';
 import { DataTableCell } from './data-table-cell';
 
@@ -356,6 +357,64 @@ function CursorPaginatedTable() {
     </div>
   );
 }
+
+export const TitleBar = createPreview(() => (
+  <div className="flex w-[52rem] flex-col gap-6">
+    <DataTable
+      data={CHECKS.slice(0, 3)}
+      columns={COLUMNS}
+      getRowId={row => row.id}
+      pagination={{ kind: 'none' }}
+      title={{ label: 'Recent checks', icon: Check, aside: '3 of 47' }}
+    />
+    <DataTable
+      data={CHECKS.slice(0, 3)}
+      columns={COLUMNS}
+      getRowId={row => row.id}
+      pagination={{ kind: 'none' }}
+      title={{
+        label: 'Recent checks',
+        icon: Check,
+        aside: (
+          <Button variant="ghost" size="compact">
+            44 more
+          </Button>
+        ),
+      }}
+    />
+  </div>
+));
+
+export const Toned = createPreview(() => (
+  <div className="flex w-[52rem] flex-col gap-6">
+    {(['critical', 'warning'] as const).map(tone => (
+      <DataTable
+        key={tone}
+        data={CHECKS.slice(0, 4)}
+        columns={COLUMNS}
+        getRowId={row => row.id}
+        pagination={{ kind: 'none' }}
+        variants={{ tone }}
+        title={{
+          label: `Used in 4 of 11 targets (${tone})`,
+          icon: CircleAlert,
+          aside: (
+            <Button variant="ghost" size="compact">
+              7 without usage
+            </Button>
+          ),
+        }}
+      />
+    ))}
+    <DataTable
+      data={CHECKS.slice(0, 4)}
+      columns={COLUMNS}
+      getRowId={row => row.id}
+      pagination={{ kind: 'none' }}
+      variants={{ tone: 'critical' }}
+    />
+  </div>
+));
 
 /** A closing row for a total. */
 export const Footer = createPreview(() => (

@@ -1,7 +1,6 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import { z } from 'zod';
-import { cleanRequestId } from './helpers';
 
 const GraphQLPayloadSchema = z.object({
   operationName: z.string().optional(),
@@ -51,7 +50,7 @@ const plugin: FastifyPluginAsync = async server => {
       return;
     }
 
-    const requestId = cleanRequestId(request.headers['x-request-id']);
+    const requestId = request.id;
     const operationIdentifier = graphqlOperationIdentifier(request);
     const identifier =
       operationIdentifier?.kind === 'raw-query'
@@ -65,7 +64,7 @@ const plugin: FastifyPluginAsync = async server => {
       request.method,
       request.url,
       identifier,
-      requestId ? `(reqId=${requestId})` : null,
+      `(reqId=${requestId})`,
     ]
       .filter(s => s)
       .join(' ');

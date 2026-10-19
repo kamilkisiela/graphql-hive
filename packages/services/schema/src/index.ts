@@ -43,6 +43,7 @@ async function main() {
   const server = await createServer({
     name: 'schema',
     sentryErrorHandler: true,
+    warnOnMissingRequestId: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,

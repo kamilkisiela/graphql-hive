@@ -1,7 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import { fastify, type FastifyBaseLogger } from 'fastify';
 import cors from '@fastify/cors';
 import { Logger } from '@graphql-hive/logger';
 import * as Sentry from '@sentry/node';
+import { cleanRequestId } from './helpers';
 import { useHTTPErrorHandler } from './http-error-handler';
 import { useRequestLogging } from './request-logs';
 
@@ -53,6 +55,11 @@ export async function createServer(options: {
   cors?: boolean;
   bodyLimit?: number;
   keepAliveTimeout?: number;
+  /**
+   * Log a warning for every request that arrives without an `x-request-id` header.
+   * Enable it on services whose callers always send one (e.g. internal backend services).
+   */
+  warnOnMissingRequestId?: boolean;
 }) {
   const server = fastify({
     disableRequestLogging: true,
@@ -70,7 +77,8 @@ export async function createServer(options: {
     routerOptions: {
       maxParamLength: 5000,
     },
-    requestIdHeader: 'x-request-id',
+    requestIdHeader: false,
+    genReqId: req => cleanRequestId(req.headers['x-request-id']) || randomUUID(),
     trustProxy: true,
     // If a connection is idle for "keepAliveTimeout" milliseconds or more, the connection times out.
     // The default for fastify is 72_000, but this is meant for more dynamic clients.
@@ -82,6 +90,25 @@ export async function createServer(options: {
     // This is configurable so self hosters can adjust based on their own infrastructure.
     keepAliveTimeout: options.keepAliveTimeout ?? 910_000,
   });
+
+  server.addHook('onSend', (request, reply, payload, done) => {
+    void reply.header('x-request-id', request.id);
+    done(null, payload);
+  });
+
+  if (options.warnOnMissingRequestId) {
+    server.addHook('onRequest', async request => {
+      if (request.url === '/_health' || request.url === '/_readiness') {
+        return;
+      }
+
+      if (!cleanRequestId(request.headers['x-request-id'])) {
+        server.log.warn(
+          `Missing x-request-id header: ${request.method} ${request.url} (reqId=${request.id})`,
+        );
+      }
+    });
+  }
 
   server.addHook('onReady', async () => {
     server.log.info(`Service "${options.name}" is ready`);

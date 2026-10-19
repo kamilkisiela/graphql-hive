@@ -1,13 +1,13 @@
 import { useLayoutEffect, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import {
+  FileDiff as FileDiffImpl,
   File as FileImpl,
-  MultiFileDiff as MultiFileDiffImpl,
   useWorkerPool,
   Virtualizer,
   WorkerPoolContextProvider,
+  type FileDiffProps,
   type FileProps,
-  type MultiFileDiffProps,
 } from '@pierre/diffs/react';
 import WorkerUrl from '@pierre/diffs/worker/worker.js?worker&url';
 import { useTheme, type ResolvedTheme } from '../theme/theme-provider';
@@ -63,21 +63,23 @@ export function File<LAnnotation = undefined, Caret = undefined>(
       {...props}
       options={{
         theme: pierreTheme(resolvedTheme),
+        themeType: resolvedTheme,
         ...props.options,
       }}
     />
   );
 }
 
-export function MultiFileDiff<LAnnotation = undefined, Caret = undefined>(
-  props: MultiFileDiffProps<LAnnotation, Caret>,
+export function FileDiff<LAnnotation = undefined, Caret = undefined>(
+  props: FileDiffProps<LAnnotation, Caret>,
 ) {
   const { resolvedTheme } = useTheme();
   return (
-    <MultiFileDiffImpl
+    <FileDiffImpl
       {...props}
       options={{
         theme: pierreTheme(resolvedTheme),
+        themeType: resolvedTheme,
         ...props.options,
       }}
     />

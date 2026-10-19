@@ -257,17 +257,20 @@ export class AppDeployments {
     }
   }
 
-  async addDocumentsToAppDeployment(args: {
-    graph: Graph;
-    appDeployment: {
-      name: string;
-      version: string;
-    };
-    operations: ReadonlyArray<{
-      hash: string;
-      body: string;
-    }>;
-  }) {
+  async addDocumentsToAppDeployment(
+    args: {
+      graph: Graph;
+      appDeployment: {
+        name: string;
+        version: string;
+      };
+      operations: ReadonlyArray<{
+        hash: string;
+        body: string;
+      }>;
+    },
+    signal: AbortSignal,
+  ) {
     if (this.appDeploymentsEnabled === false) {
       const organization = await this.storage.getOrganization({
         organizationId: args.graph.organizationId,
@@ -348,16 +351,19 @@ export class AppDeployments {
         };
       }
 
-      const result = await this.persistedDocumentScheduler.processBatch({
-        schemaSdl: compositeSchemaSdl,
-        targetId: args.graph.targetId,
-        appDeployment: {
-          id: appDeployment.id,
-          name: args.appDeployment.name,
-          version: args.appDeployment.version,
+      const result = await this.persistedDocumentScheduler.processBatch(
+        {
+          schemaSdl: compositeSchemaSdl,
+          targetId: args.graph.targetId,
+          appDeployment: {
+            id: appDeployment.id,
+            name: args.appDeployment.name,
+            version: args.appDeployment.version,
+          },
+          documents: args.operations,
         },
-        documents: args.operations,
-      });
+        signal,
+      );
 
       if (result.type === 'error') {
         return {

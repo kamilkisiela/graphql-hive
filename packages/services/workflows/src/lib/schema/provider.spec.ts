@@ -1,6 +1,6 @@
 import { Logger } from '@graphql-hive/logger';
 import type { PostgresDatabasePool } from '@hive/postgres';
-import { schemaProvider } from './provider.js';
+import { createSchemaObject, schemaProvider } from './provider.js';
 
 function createSchemaProvider() {
   return schemaProvider({
@@ -23,5 +23,42 @@ describe('latestComposableSchemas', () => {
       createSchemaProvider().latestComposableSchemas({ targetId, pool }),
     ).resolves.toEqual([]);
     expect(any).not.toHaveBeenCalled();
+  });
+});
+
+describe('composeAndValidate', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  test('sends the request id of the task to the schema service', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          result: {
+            data: {
+              errors: [],
+              sdl: null,
+              supergraph: null,
+              contracts: null,
+              tags: null,
+              schemaMetadata: null,
+              metadataAttributes: null,
+            },
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
+    );
+
+    await createSchemaProvider().composeAndValidate(
+      'SINGLE',
+      [createSchemaObject({ sdl: 'type Query { a: String }' })],
+      { external: { enabled: false }, native: false, contracts: null },
+      { requestId: 'abc' },
+    );
+
+    const [, init] = fetchSpy.mock.calls[0];
+    expect(new Headers(init?.headers).get('x-request-id')).toBe('abc');
   });
 });

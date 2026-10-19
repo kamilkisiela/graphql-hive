@@ -56,6 +56,9 @@ test.describe('checks', () => {
     await expect(page.getByTestId('schema-title-before')).toHaveText('schema@xyz');
     await expect(page.getByTestId('schema-title')).toHaveText('schema@unknown');
     await expect(page.getByTestId('schema-title-changed')).toHaveText('(unchanged)');
+    // The composed public schema, not the service SDL, which opens with `extend schema @link`.
+    await expect(page.getByText('# Product Entity').first()).toBeVisible();
+    await expect(page.getByText('extend schema')).toHaveCount(0);
 
     await page.getByTestId('supergraph-view-btn').click(); // move to supergraph tab
     await expect(page.getByTestId('schema-title-before')).toHaveText('supergraph@xyz');

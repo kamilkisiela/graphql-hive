@@ -68,7 +68,7 @@ describe('DescriptionList', () => {
     expect(term.className).not.toContain('uppercase');
     expect(term.className).toContain('text-xs');
     const row = screen.getByText('Failed').parentElement!.parentElement!;
-    expect(row.className).toContain('auto-fit');
+    expect(row.className).toContain('flex-wrap');
     expect(row.className).not.toContain('grid-cols-2');
   });
 });

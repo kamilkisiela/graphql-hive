@@ -259,10 +259,11 @@ export class HTTPError extends HiveCLIError {
   static readonly title = 'HTTP error response';
   static readonly fix =
     'A 4xx status usually means a wrong endpoint or a rejected request: check the endpoint URL and credentials. A 5xx status means the server failed: retry later.';
-  constructor(endpoint: string, status: number, message: string) {
+  constructor(endpoint: string, status: number, message: string, requestId?: string) {
     const is400 = status >= 400 && status < 500;
     super(
-      `A ${is400 ? 'client' : 'server'} error occurred while performing the action. A call to "${endpoint}" failed with Status: ${status}, Text: ${message}`,
+      `A ${is400 ? 'client' : 'server'} error occurred while performing the action. A call to "${endpoint}" failed with Status: ${status}, Text: ${message}` +
+        (requestId ? `  (Request ID: "${requestId}")` : ''),
     );
   }
 }

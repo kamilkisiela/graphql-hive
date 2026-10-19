@@ -18,6 +18,7 @@ import {
   GitCompare,
   GitCompareArrows,
   GitCompareIcon,
+  InfoIcon,
   Layers,
   ListIcon,
   ListTree,
@@ -28,14 +29,14 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import { useQuery } from 'urql';
+import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import {
   ChangesBlock,
   CompositionErrorsSection_SchemaErrorConnection,
 } from '@/components/target/history/errors-and-changes';
-import { CodeScrollArea, File, MultiFileDiff } from '@/components/ui/diffs';
-import { FailureCard, formatCount } from '@/components/ui/failure-card/failure-card';
+import { CodeScrollArea, File, FileDiff } from '@/components/ui/diffs';
 import { Link } from '@/components/ui/link';
 import { NotFound } from '@/components/ui/not-found/not-found';
 import { Button } from '@/components/ui/primitives/button/button';
@@ -47,13 +48,14 @@ import { Spinner } from '@/components/ui/primitives/spinner/spinner';
 import { StatusDot } from '@/components/ui/primitives/status-dot/status-dot';
 import { QueryError } from '@/components/ui/query-error';
 import { ScopeBar } from '@/components/ui/scope-bar/scope-bar';
+import { useSdlDiff } from '@/components/ui/sdl-diff';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
 import { TimeAgo } from '@/components/ui/time-ago';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { SeverityLevelType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 import { useResetState } from '@/lib/hooks/use-reset-state';
-import { cn } from '@/lib/utils';
+import { cn, formatCount } from '@/lib/utils';
 
 /** A status icon inside a tab, explained on hover. */
 function StatusTooltip(props: { icon: React.ReactNode; label: string }) {
@@ -291,12 +293,12 @@ function SchemaVersionView(props: SchemaVersionViewProps) {
         {
           value: 'default',
           label: 'Default Graph',
-          trailing: versionStatusIcon(schemaVersion, DEFAULT_GRAPH_LABELS),
+          trailing: versionStatusTrailing(schemaVersion, DEFAULT_GRAPH_LABELS),
         },
         ...contractVersions.map(edge => ({
           value: edge.node.id,
           label: `${edge.node.contractName}@${edge.node.id.substring(0, 8)}`,
-          trailing: versionStatusIcon(edge.node, CONTRACT_LABELS),
+          trailing: versionStatusTrailing(edge.node, CONTRACT_LABELS),
         })),
       ]}
       size="compact"
@@ -398,19 +400,14 @@ function SchemaVersionView(props: SchemaVersionViewProps) {
         <div className="mt-3 flex flex-col gap-3">
           {failures.length ? (
             <div className="mb-3">
-              <FailureCard
+              <ContractFailuresTable
                 title={`${failures.length} of ${contractVersions.length} contracts failed`}
                 aside={`${contractVersions.length - failures.length} passed`}
                 items={failures}
               />
             </div>
           ) : null}
-          {contractPicker ? (
-            <ScopeBar
-              picker={contractPicker}
-              legend={contractVersions.length ? CONTRACT_STATUS_LEGEND : undefined}
-            />
-          ) : null}
+          {contractPicker ? <ScopeBar picker={contractPicker} /> : null}
           <TabbedView
             value={selectedView}
             onValueChange={setSelectedView}
@@ -459,20 +456,45 @@ type VersionStatusLabels = { changed: string; succeeded: string; failed: string 
 /** The glyph and the words for a version's outcome; the trigger takes the glyph, the list both. */
 function versionStatus(version: VersionStatusFlags, labels: VersionStatusLabels) {
   if (version.hasSchemaChanges) {
-    return { icon: <GitCompareIcon className="size-3.5" />, label: labels.changed };
+    return {
+      icon: <GitCompareIcon className="size-3.5" />,
+      label: labels.changed,
+      state: 'Schema changed',
+    };
   }
   if (version.isComposable) {
-    return { icon: <CheckIcon className="size-3.5 text-success" />, label: labels.succeeded };
+    return {
+      icon: <CheckIcon className="size-3.5 text-success" />,
+      label: labels.succeeded,
+      state: 'No changes',
+    };
   }
   return {
     icon: <TriangleAlertIcon className="size-3.5 text-critical" />,
     label: labels.failed,
+    state: 'Failed',
   };
 }
 
 function versionStatusIcon(version: VersionStatusFlags, labels: VersionStatusLabels) {
   const status = versionStatus(version, labels);
   return <StatusTooltip icon={status.icon} label={status.label} />;
+}
+
+/** A picker row's status: glyph and state in words, the reason on hover. */
+function versionStatusTrailing(version: VersionStatusFlags, labels: VersionStatusLabels) {
+  const status = versionStatus(version, labels);
+  return (
+    <StatusTooltip
+      icon={
+        <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+          {status.icon}
+          {status.state}
+        </span>
+      }
+      label={status.label}
+    />
+  );
 }
 
 const DEFAULT_GRAPH_LABELS: VersionStatusLabels = {
@@ -486,12 +508,6 @@ const CONTRACT_LABELS: VersionStatusLabels = {
   succeeded: 'Contract composition succeeded.',
   failed: 'Contract composition failed.',
 };
-
-const CONTRACT_STATUS_LEGEND = [
-  { icon: <TriangleAlertIcon className="size-3.5 text-critical" />, label: 'Failed' },
-  { icon: <GitCompareIcon className="size-3.5" />, label: 'Schema changed' },
-  { icon: <CheckIcon className="size-3.5 text-success" />, label: 'Passed' },
-];
 
 function GraphQLSchemaView(props: {
   title: string;
@@ -541,7 +557,12 @@ function GraphQLSchemaView(props: {
               <NoGraphChanges />
             </div>
           ) : (
-            <SDLDiffView before={props.previousSdl ?? ''} after={props.currentSdl} />
+            <SDLDiffView
+              before={props.previousSdl ?? ''}
+              after={props.currentSdl}
+              sorted
+              tooLargeHint="Switch to View to see the full schema."
+            />
           )}
         </GenericGraphCard>
       )}
@@ -936,24 +957,80 @@ function GraphVersionSubgraphChangesView(props: {
   );
 }
 
-export function SDLDiffView(props: { before: string; after: string }) {
+export function SDLDiffView(props: {
+  before: string;
+  after: string;
+  /** Compare sorted copies, for composed schemas whose definition order carries no meaning. */
+  sorted?: boolean;
+  /** Where to see the full schema when the diff is too large to show. */
+  tooLargeHint?: ReactNode;
+}) {
+  const result = useSdlDiff(props.before, props.after, props.sorted ?? false);
+
+  if (result === null) {
+    return (
+      <div className="flex items-center gap-2 px-5 py-3 text-xs text-fg-secondary">
+        <Spinner variants={{ size: 'sm' }} label="Preparing diff" />
+        Preparing diff…
+      </div>
+    );
+  }
+
+  switch (result.kind) {
+    case 'unchanged':
+      return <SDLView sdl={props.after} />;
+    case 'order-only':
+      return (
+        <>
+          <SDLDiffNotice
+            icon={<CircleCheckIcon className="size-4 text-success" />}
+            title="No changes apart from order"
+          >
+            Both schemas have the same definitions. Only their order or formatting differs.
+          </SDLDiffNotice>
+          <SDLView sdl={props.after} />
+        </>
+      );
+    case 'too-large':
+      return (
+        <SDLDiffNotice
+          icon={<InfoIcon className="size-4 text-fg-muted" />}
+          title="Diff too large to display"
+        >
+          The schemas differ in too many lines to compare here. {props.tooLargeHint}
+        </SDLDiffNotice>
+      );
+    case 'diff':
+      return (
+        <>
+          {props.sorted && (
+            <div className="border-b border-line-subtle px-5 py-2 text-xs text-fg-muted">
+              Sorted by kind and name
+            </div>
+          )}
+          <CodeScrollArea>
+            <FileDiff
+              fileDiff={result.fileDiff}
+              options={{
+                disableFileHeader: true,
+                diffStyle: 'unified',
+              }}
+            />
+          </CodeScrollArea>
+        </>
+      );
+  }
+}
+
+function SDLDiffNotice(props: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
-    <CodeScrollArea>
-      <MultiFileDiff
-        options={{
-          disableFileHeader: true,
-          diffStyle: 'unified',
-        }}
-        oldFile={{
-          name: 'schema.graphql',
-          contents: props.before,
-        }}
-        newFile={{
-          name: 'schema.graphql',
-          contents: props.after,
-        }}
-      />
-    </CodeScrollArea>
+    <div className="cursor-default border-b border-line-subtle px-5 py-3">
+      <div className="mb-1 flex items-center gap-3">
+        {props.icon}
+        <h2 className="text-sm font-medium text-fg">{props.title}</h2>
+      </div>
+      <p className="text-xs text-fg-secondary">{props.children}</p>
+    </div>
   );
 }
 
@@ -1313,7 +1390,7 @@ const CompositionErrors = (props: {
           </p>
         </div>
 
-        <span className="ml-auto inline-flex items-center rounded-full border border-critical-line bg-critical-tint px-2.5 py-0.5 text-2xs font-semibold text-critical transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none">
+        <span className="ml-auto inline-flex items-center rounded-full border border-critical-line bg-critical-tint px-2.5 py-0.5 text-2xs font-semibold text-critical-text transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none">
           <span className="mr-1 h-1.5 w-1.5 rounded-full bg-critical" />
           {compositionErrors.edges.length} error
           {compositionErrors.edges.length === 1 ? '' : 's'}

@@ -84,7 +84,7 @@ export function OriginTag(props: { origin: Origin }) {
           ui: 'rounded-xs bg-surface-hover px-1 py-px font-mono text-2xs leading-none text-fg-default',
           v2: 'rounded-xs bg-surface-selected px-1 py-px font-mono text-2xs leading-none text-fg',
           base: 'rounded-xs bg-success-muted/20 px-1 py-px font-mono text-2xs leading-none text-success-muted',
-          raw: 'rounded-xs bg-warning-tint px-1 py-px font-mono text-2xs leading-none text-warning',
+          raw: 'rounded-xs bg-warning-tint px-1 py-px font-mono text-2xs leading-none text-warning-text',
         }[props.origin]
       }
     >

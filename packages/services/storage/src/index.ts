@@ -2771,6 +2771,37 @@ export async function createStorage(
       }
       return approvedSchemaChanges;
     },
+    async getSchemaCheckServiceNamesForTarget(args) {
+      // Postgres has no skip scan for DISTINCT, so a plain DISTINCT reads every check of the
+      // target. The recursive form seeks schema_checks_connection_pagination_by_service once
+      // per service instead.
+      return pool
+        .anyFirst(
+          psql`/* getSchemaCheckServiceNamesForTarget */
+            WITH RECURSIVE "services" AS (
+              (
+                SELECT "service_name"
+                FROM "schema_checks"
+                WHERE "target_id" = ${args.targetId} AND "service_name" IS NOT NULL
+                ORDER BY "service_name" ASC
+                LIMIT 1
+              )
+              UNION ALL
+              SELECT (
+                SELECT c."service_name"
+                FROM "schema_checks" AS c
+                WHERE c."target_id" = ${args.targetId} AND c."service_name" > s."service_name"
+                ORDER BY c."service_name" ASC
+                LIMIT 1
+              )
+              FROM "services" AS s
+              WHERE s."service_name" IS NOT NULL
+            )
+            SELECT "service_name" FROM "services" WHERE "service_name" IS NOT NULL
+          `,
+        )
+        .then(z.array(z.string()).parse);
+    },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {
         createdAt: string;
@@ -3459,11 +3490,14 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
       name: string;
       hash: string;
       count: number;
+      affectedTargets?: Array<{ id: string; count: number }>;
     }>;
     topAffectedClients: Array<{
       name: string;
       count: number;
     }>;
+    affectedTargets?: Array<{ id: string; count: number; operationCount?: number }>;
+    schemaCoordinate?: string;
   };
   affectedAppDeployments: null | AffectedAppDeployments;
 } {
@@ -3510,6 +3544,21 @@ const schemaCheckSQLFields = (include?: { sdl?: boolean; changes?: boolean }) =>
   , c."schema_version_id" as "schemaVersionId"
   , c."is_success" as "isSuccess"
   , c."schema_composition_errors" as "schemaCompositionErrors"
+  , (
+      CASE WHEN jsonb_typeof(c."breaking_schema_changes") = 'array'
+           THEN jsonb_array_length(c."breaking_schema_changes") ELSE 0 END > 0
+      OR CASE WHEN jsonb_typeof(c."safe_schema_changes") = 'array'
+           THEN jsonb_array_length(c."safe_schema_changes") ELSE 0 END > 0
+    ) as "hasSchemaChanges"
+  , EXISTS (
+      SELECT 1
+      FROM jsonb_array_elements(
+        CASE WHEN jsonb_typeof(c."breaking_schema_changes") = 'array'
+             THEN c."breaking_schema_changes" ELSE '[]'::jsonb END
+      ) AS "change"
+      WHERE coalesce(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+        AND coalesce("change"->>'isSafeBasedOnUsage', 'false') = 'false'
+    ) as "hasUnapprovedBreakingChanges"
   ${
     (include?.changes ?? true)
       ? psql`

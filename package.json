@@ -51,8 +51,10 @@
     "seed:alerts-live:cleanup": "tsx scripts/seed-alerts-live/cleanup.mts",
     "seed:app-deployment-checks": "tsx scripts/seed-app-deployment-checks.mts",
     "seed:app-deployments": "tsx scripts/seed-app-deployments.mts",
+    "seed:breaking-change-usage": "tsx scripts/seed-breaking-change-usage.mts",
     "seed:history": "tsx scripts/seed-history/seed-history.mts",
     "seed:insights-and-alerts": "tsx scripts/seed-insights-and-alerts/seed-insights-and-alerts.mts",
+    "seed:large-schema-checks": "tsx scripts/seed-large-schema-checks.mts",
     "seed:org": "tsx scripts/seed-organization.mts",
     "seed:schemas": "tsx scripts/seed-schemas.ts",
     "seed:scim-users-groups": "tsx scripts/seed-scim-users-groups/seed-scim-users-groups.mts",
@@ -191,16 +193,16 @@
       "@graphql-hive/gateway-plugin-console-sdk": "workspace:",
       "@graphql-hive/yoga": "workspace:",
       "@graphql-hive/core": "workspace:",
+      "@graphql-tools/url-loader@7.x.x>@graphql-tools/executor-legacy-ws": "-",
       "graphql@16.x.x": "catalog:"
     },
     "patchedDependencies": {
       "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
-      "got@14.4.7": "patches/got@14.4.7.patch",
+      "got@16.1.0": "patches/got@16.1.0.patch",
       "oclif@4.22.65": "patches/oclif@4.22.65.patch",
       "graphiql@4.0.0-alpha.5": "patches/graphiql@4.0.0-alpha.5.patch",
       "@graphiql/react@1.0.0-alpha.4": "patches/@graphiql__react@1.0.0-alpha.4.patch",
-      "p-cancelable@4.0.1": "patches/p-cancelable@4.0.1.patch",
       "@slonik/pg-driver@48.19.0": "patches/@slonik__pg-driver@48.19.0.patch"
     },
     "onlyBuiltDependencies": [
