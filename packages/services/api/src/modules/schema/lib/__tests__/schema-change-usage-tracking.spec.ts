@@ -1,11 +1,11 @@
 import { ChangeType } from '@graphql-inspector/core';
-import { getSchemaChangeUsageTracking } from '../schema-change-usage-tracking.js';
+import { isSchemaChangeUsageTracked } from '../schema-change-usage-tracking.js';
 
 function change(type: string, path: string | null, breakingChangeSchemaCoordinate = path) {
   return { type, path, breakingChangeSchemaCoordinate };
 }
 
-describe('getSchemaChangeUsageTracking', () => {
+describe('isSchemaChangeUsageTracked', () => {
   it.each([
     [ChangeType.FieldRemoved, 'Query.products'],
     [ChangeType.FieldTypeChanged, 'ConversionRate.fromCurrency'],
@@ -15,16 +15,12 @@ describe('getSchemaChangeUsageTracking', () => {
     [ChangeType.InputFieldTypeChanged, 'ProductFilter.name'],
     [ChangeType.EnumValueRemoved, 'Status.PENDING'],
   ])('tracks %s, whose coordinate the collector records', (type, path) => {
-    expect(getSchemaChangeUsageTracking(change(type, path))).toBe('TRACKED');
-  });
-
-  it('points a removed type at the fields that use it', () => {
-    expect(getSchemaChangeUsageTracking(change(ChangeType.TypeRemoved, 'Currency'))).toBe(
-      'ON_REFERENCING_FIELDS',
-    );
+    expect(isSchemaChangeUsageTracked(change(type, path))).toBe(true);
   });
 
   it.each([
+    // Usage lands on the fields that use a type, never on the type itself.
+    [ChangeType.TypeRemoved, 'Currency', 'Currency'],
     // The name stays, so no field change carries its usage.
     [ChangeType.TypeKindChanged, 'Status', 'Status'],
     // An argument or input field that did not exist yet cannot have been sent.
@@ -37,20 +33,10 @@ describe('getSchemaChangeUsageTracking', () => {
     [ChangeType.DirectiveRemoved, '@cacheControl', '@cacheControl'],
     [ChangeType.DirectiveUsageInputObjectAdded, 'ProductFilter.@oneOf', 'ProductFilter.@oneOf'],
   ])('does not track %s', (type, path, coordinate) => {
-    expect(getSchemaChangeUsageTracking(change(type, path, coordinate))).toBe('NOT_TRACKED');
+    expect(isSchemaChangeUsageTracked(change(type, path, coordinate))).toBe(false);
   });
 
   it('does not track a change without a coordinate, like a new query root type', () => {
-    expect(getSchemaChangeUsageTracking(change(ChangeType.SchemaQueryTypeChanged, null))).toBe(
-      'NOT_TRACKED',
-    );
-  });
-
-  it('gives every Inspector change type a value', () => {
-    for (const type of Object.values(ChangeType)) {
-      expect(['TRACKED', 'ON_REFERENCING_FIELDS', 'NOT_TRACKED']).toContain(
-        getSchemaChangeUsageTracking(change(type, 'Some.coordinate')),
-      );
-    }
+    expect(isSchemaChangeUsageTracked(change(ChangeType.SchemaQueryTypeChanged, null))).toBe(false);
   });
 });

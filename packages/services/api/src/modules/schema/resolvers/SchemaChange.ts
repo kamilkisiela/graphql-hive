@@ -1,5 +1,5 @@
 import { CriticalityLevel as CriticalityLevelEnum } from '@graphql-inspector/core';
-import { getSchemaChangeUsageTracking } from '../lib/schema-change-usage-tracking';
+import { isSchemaChangeUsageTracked } from '../lib/schema-change-usage-tracking';
 import { BreakingSchemaChangeUsageHelper } from '../providers/breaking-schema-changes-helper';
 import type {
   CriticalityLevel,
@@ -26,12 +26,12 @@ export const SchemaChange: Pick<
   | 'criticality'
   | 'criticalityReason'
   | 'isSafeBasedOnUsage'
+  | 'isUsageTracked'
   | 'message'
   | 'path'
   | 'severityLevel'
   | 'severityReason'
   | 'usageStatistics'
-  | 'usageTracking'
 > = {
   message: (change, args) => {
     return args.withSafeBasedOnUsageNote && change.isSafeBasedOnUsage === true
@@ -47,7 +47,7 @@ export const SchemaChange: Pick<
     injector.get(BreakingSchemaChangeUsageHelper).getUsageDataForBreakingSchemaChange(change),
   severityLevel: change => severityMap[change.criticality],
   severityReason: change => change.reason,
-  usageTracking: change => getSchemaChangeUsageTracking(change),
+  isUsageTracked: change => isSchemaChangeUsageTracked(change),
   affectedAppDeployments: (change, args) => {
     if (change.affectedAppDeployments === null) {
       return null;

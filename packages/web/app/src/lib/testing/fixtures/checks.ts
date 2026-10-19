@@ -206,7 +206,7 @@ export function breakingSchemaCheck(
                   severityReason: null,
                   approval: null,
                   isSafeBasedOnUsage: options.safe ?? false,
-                  usageTracking: 'TRACKED',
+                  isUsageTracked: true,
                   usageStatistics: {
                     __typename: 'SchemaChangeUsageStatistics' as const,
                     topAffectedOperations: [
@@ -315,7 +315,7 @@ function removedFieldAt(index: number) {
     severityReason: FIELD_REMOVED_REASON,
     approval: null,
     isSafeBasedOnUsage: false,
-    usageTracking: 'TRACKED',
+    isUsageTracked: true,
     usageStatistics: null,
     affectedAppDeployments: null,
   };
@@ -334,7 +334,7 @@ function safeChangeAt(kind: string, index: number) {
     severityReason: null,
     approval: null,
     isSafeBasedOnUsage: false,
-    usageTracking: 'NOT_TRACKED',
+    isUsageTracked: false,
   };
 }
 
@@ -473,7 +473,7 @@ function breakingChange(change: {
   message: string;
   severityReason: string | null;
   isSafeBasedOnUsage: boolean;
-  usageTracking: string;
+  isUsageTracked: boolean;
 }) {
   return {
     __typename: 'SchemaChangeEdge' as const,
@@ -509,7 +509,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                 message: "Type 'Currency' was removed",
                 severityReason: null,
                 isSafeBasedOnUsage: true,
-                usageTracking: 'ON_REFERENCING_FIELDS',
+                isUsageTracked: false,
               }),
               breakingChange({
                 path: ['SearchResult'],
@@ -517,7 +517,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                 severityReason:
                   'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
                 isSafeBasedOnUsage: true,
-                usageTracking: 'NOT_TRACKED',
+                isUsageTracked: false,
               }),
               // Tracked, but with no reason and no usage to show.
               breakingChange({
@@ -526,7 +526,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                   "Field 'ConversionRate.fromCurrency' changed type from 'Currency!' to 'ForexCurrency!'",
                 severityReason: null,
                 isSafeBasedOnUsage: true,
-                usageTracking: 'TRACKED',
+                isUsageTracked: true,
               }),
             ],
           },

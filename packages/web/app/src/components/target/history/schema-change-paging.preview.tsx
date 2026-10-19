@@ -3,7 +3,7 @@ import { FileDiffIcon, ListIcon, TriangleAlertIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
 import { makeFragmentData } from '@/gql';
-import { SchemaChangeKind, SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
+import { SchemaChangeKind, SeverityLevelType } from '@/gql/graphql';
 import { RouterAt } from '../../../../foundry.router';
 import { buildChanges, metadata, PATH } from './changes-block.fixtures';
 import {
@@ -52,7 +52,7 @@ function safeChangeAt(kind: SafeKind, index: number) {
       severityReason: null,
       approval: null,
       isSafeBasedOnUsage: false,
-      usageTracking: SchemaChangeUsageTracking.NotTracked,
+      isUsageTracked: false,
     },
     ChangesBlock_SchemaChangeFragment,
   );
@@ -69,7 +69,7 @@ function breakingChangeAt(index: number) {
       severityReason:
         'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
       isSafeBasedOnUsage: false,
-      usageTracking: SchemaChangeUsageTracking.Tracked,
+      isUsageTracked: true,
       approval: null,
       usageStatistics: null,
       affectedAppDeployments: null,

@@ -1,8 +1,6 @@
 import type { SchemaChangeMapper } from '../module.graphql.mappers';
 import { ChangeType } from '@graphql-inspector/core';
 
-export type SchemaChangeUsageTracking = 'TRACKED' | 'ON_REFERENCING_FIELDS' | 'NOT_TRACKED';
-
 type InspectorChangeType = (typeof ChangeType)[keyof typeof ChangeType];
 
 /**
@@ -21,22 +19,15 @@ const TRACKED = new Set<InspectorChangeType>([
 ]);
 
 /**
- * Whether a breaking change's "safe based on usage" can be trusted. Everything else defaults to
- * NOT_TRACKED: types, union members, interfaces and directives are never recorded, and an argument
- * or input field that did not exist yet cannot have been sent. Only meaningful for breaking changes.
+ * Whether a breaking change's "safe based on usage" can be trusted. Types, union members,
+ * interfaces and directives are never recorded, and an argument or input field that did not exist
+ * yet cannot have been sent. Only meaningful for breaking changes.
  */
-export function getSchemaChangeUsageTracking(
+export function isSchemaChangeUsageTracked(
   change: Pick<SchemaChangeMapper, 'type' | 'path' | 'breakingChangeSchemaCoordinate'>,
-): SchemaChangeUsageTracking {
+): boolean {
   if ((change.breakingChangeSchemaCoordinate ?? change.path) == null) {
-    return 'NOT_TRACKED';
+    return false;
   }
-  if (TRACKED.has(change.type as InspectorChangeType)) {
-    return 'TRACKED';
-  }
-  // Usage lands on the fields that return or take the type, never on the type itself.
-  if (change.type === ChangeType.TypeRemoved) {
-    return 'ON_REFERENCING_FIELDS';
-  }
-  return 'NOT_TRACKED';
+  return TRACKED.has(change.type as InspectorChangeType);
 }
