@@ -1,3 +1,4 @@
+import { getDocumentInsightsHash } from '../lib/insights-hash';
 import type { GraphQlDocumentResolvers } from './../../../__generated__/types';
 
 /*
@@ -11,7 +12,5 @@ import type { GraphQlDocumentResolvers } from './../../../__generated__/types';
  */
 export const GraphQLDocument: GraphQlDocumentResolvers = {
   /* Implement GraphQLDocument resolver logic here */
-  insightsHash: document => {
-    return document.internalHash;
-  },
+  insightsHash: document => getDocumentInsightsHash(document),
 };
