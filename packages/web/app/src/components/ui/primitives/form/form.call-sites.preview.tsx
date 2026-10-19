@@ -127,6 +127,7 @@ import {
 import {
   DangerousChangesForm,
   DangerousChangesFormSchema,
+  SavedLabel,
   type DangerousChangesFormValues,
 } from '@/components/target/settings/dangerous-changes-form';
 import {
@@ -1131,7 +1132,7 @@ function DangerousChangesExample() {
           form={form}
           onSubmit={setSubmitted}
           enabled
-          status={<span className="text-sm text-fg-secondary">Saved</span>}
+          status={<SavedLabel />}
         />
         <Submitted values={submitted} />
       </div>

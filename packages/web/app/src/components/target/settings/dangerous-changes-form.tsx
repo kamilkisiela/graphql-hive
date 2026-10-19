@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from 'react';
-import { XIcon } from 'lucide-react';
+import { Check, XIcon } from 'lucide-react';
 import { useWatch, type UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/primitives/button/button';
@@ -77,6 +77,33 @@ const dangerousChangeList = (
 /** The dot beside a value that differs from what is saved. */
 export function PendingIndicator() {
   return <span className="inline-block size-2 rounded-full bg-accent" />;
+}
+
+export function JustSavedLabel() {
+  return (
+    <div className="inline-flex flex-row items-center gap-1 text-success italic subpixel-antialiased">
+      <Check className="size-5 text-success" />
+      <span>Saved just now</span>
+    </div>
+  );
+}
+
+export function SavedLabel() {
+  return (
+    <div className="inline-flex flex-row items-center gap-1 text-fg-secondary italic subpixel-antialiased">
+      <Check className="size-5 text-fg-secondary" />
+      <span>All changes saved</span>
+    </div>
+  );
+}
+
+export function UnsavedChangesLabel() {
+  return (
+    <div className="inline-flex flex-row items-center gap-2 text-accent italic subpixel-antialiased">
+      <PendingIndicator />
+      <span>Unsaved changes</span>
+    </div>
+  );
 }
 
 function includesAll(selected: readonly DangerousChangeType[], types: DangerousChangeType[]) {
