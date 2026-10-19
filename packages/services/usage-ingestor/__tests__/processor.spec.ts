@@ -42,7 +42,9 @@ function buildReport(): RawReport {
 }
 
 test('operations with the same body and name share one hash regardless of their fields', async () => {
-  const processor = createProcessor({ logger: { error: vi.fn(), debug: vi.fn(), info: vi.fn() } as any });
+  const processor = createProcessor({
+    logger: { error: vi.fn(), debug: vi.fn(), info: vi.fn() } as any,
+  });
 
   const result = await processor.processReports([buildReport()]);
 

@@ -1,6 +1,10 @@
 import { buildSchema, parse } from 'graphql';
 import { md5 } from 'js-md5';
-import { hashOperation, hashOperationIdentity, preprocessOperation } from '../src/normalize/operation';
+import {
+  hashOperation,
+  hashOperationIdentity,
+  preprocessOperation,
+} from '../src/normalize/operation';
 
 const document = parse(/* GraphQL */ `
   query GetUser($id: ID!) {
@@ -37,8 +41,16 @@ describe('preprocessOperation', () => {
   });
 
   test('hash changes with the operation name', () => {
-    const named = preprocessOperation({ document, schemaCoordinates: [], operationName: 'GetUser' });
-    const renamed = preprocessOperation({ document, schemaCoordinates: [], operationName: 'Other' });
+    const named = preprocessOperation({
+      document,
+      schemaCoordinates: [],
+      operationName: 'GetUser',
+    });
+    const renamed = preprocessOperation({
+      document,
+      schemaCoordinates: [],
+      operationName: 'Other',
+    });
 
     expect(named?.hash).not.toBe(renamed?.hash);
   });
@@ -52,13 +64,21 @@ describe('preprocessOperation', () => {
       }
     `);
     const a = preprocessOperation({ document, schemaCoordinates: [], operationName: 'GetUser' });
-    const b = preprocessOperation({ document: other, schemaCoordinates: [], operationName: 'GetUser' });
+    const b = preprocessOperation({
+      document: other,
+      schemaCoordinates: [],
+      operationName: 'GetUser',
+    });
 
     expect(a?.hash).not.toBe(b?.hash);
   });
 
   test('falls back to the name in the document', () => {
-    const explicit = preprocessOperation({ document, schemaCoordinates: [], operationName: 'GetUser' });
+    const explicit = preprocessOperation({
+      document,
+      schemaCoordinates: [],
+      operationName: 'GetUser',
+    });
     const implicit = preprocessOperation({ document, schemaCoordinates: [], operationName: null });
 
     expect(implicit?.name).toBe('GetUser');
@@ -101,7 +121,9 @@ describe('hashOperation', () => {
   `);
 
   test('matches the identity of the normalized body and name', () => {
-    expect(hashOperation({ documentNode: document, variables: null, operationName: 'GetUser', schema })).toBe(
+    expect(
+      hashOperation({ documentNode: document, variables: null, operationName: 'GetUser', schema }),
+    ).toBe(
       hashOperationIdentity({
         body: 'query GetUser($id:ID!){user(id:$id){id name}}',
         operationName: 'GetUser',

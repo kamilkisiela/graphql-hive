@@ -3791,8 +3791,9 @@ describe('exclude filters', () => {
 test('removing a used scalar or union is not safe based on usage', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
-  const { project, target, createTargetAccessToken, toggleTargetValidation } =
-    await createProject(ProjectType.Single);
+  const { project, target, createTargetAccessToken, toggleTargetValidation } = await createProject(
+    ProjectType.Single,
+  );
   const token = await createTargetAccessToken({});
 
   const sdl = /* GraphQL */ `

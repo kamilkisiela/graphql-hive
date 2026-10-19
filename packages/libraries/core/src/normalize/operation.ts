@@ -150,7 +150,11 @@ export function hashOperationIdentity(operation: {
   body: string;
   operationName: string | null;
 }): string {
-  return md5.create().update(operation.body).update(operation.operationName ?? '').hex();
+  return md5
+    .create()
+    .update(operation.body)
+    .update(operation.operationName ?? '')
+    .hex();
 }
 
 /** normalize a graphql operation into a stable hash as used internally within our ClickHouse Database. */
