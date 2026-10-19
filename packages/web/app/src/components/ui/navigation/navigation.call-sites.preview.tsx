@@ -7,6 +7,7 @@ import { PageLayout, PageLayoutContent } from '@/components/ui/page-content-layo
 import { Button } from '@/components/ui/primitives/button/button';
 import { RouterAt } from '../../../../foundry.router';
 import { Navigation, type NavigationItem } from './navigation';
+import * as styles from './navigation.call-sites.preview.css';
 
 export const nav: NavPath = 'Components/Navigation/Component Examples';
 
@@ -94,8 +95,8 @@ const TARGET_PATH = '/the-guild/gateway/production';
 /** The chrome from components/navigation/secondary-navigation.tsx, which mounts the base nav. */
 function ChromeBar(props: { children: ReactNode }) {
   return (
-    <div className="relative h-(--tabs-navbar-height) border-b border-line bg-neutral-2 dark:bg-neutral-3">
-      <div className="container">{props.children}</div>
+    <div className={styles.chromeBarDiv}>
+      <div className={styles.chromeBarDiv2}>{props.children}</div>
     </div>
   );
 }
@@ -203,7 +204,7 @@ const TARGET_LINKS: NavigationItem[] = [
 export const Bars = createPreview({
   label: 'Bars',
   render: () => (
-    <div className="-mx-6 flex flex-col gap-8">
+    <div className={styles.div}>
       <CallSite
         source="components/layouts/organization.tsx:115"
         origin="base"
@@ -215,8 +216,8 @@ export const Bars = createPreview({
               items={ORGANIZATION_LINKS}
               actions={
                 <Button variant="link">
-                  <span className="flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
+                  <span className={styles.span}>
+                    <PlusIcon size={16} className={styles.plusIcon} />
                     New project
                   </span>
                 </Button>
@@ -236,8 +237,8 @@ export const Bars = createPreview({
               items={PROJECT_LINKS}
               actions={
                 <Button variant="link">
-                  <span className="flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
+                  <span className={styles.span2}>
+                    <PlusIcon size={16} className={styles.plusIcon2} />
                     New target
                   </span>
                 </Button>
@@ -256,10 +257,10 @@ export const Bars = createPreview({
             <Navigation
               items={TARGET_LINKS}
               actions={
-                <div className="hidden md:block">
+                <div className={styles.div2}>
                   <Button variant="link">
-                    <span className="flex items-center whitespace-nowrap">
-                      <LinkIcon size={16} className="mr-2" />
+                    <span className={styles.span3}>
+                      <LinkIcon size={16} className={styles.linkIcon} />
                       Connect to CDN
                     </span>
                   </Button>
@@ -366,15 +367,15 @@ const PROPOSAL_SECTIONS: NavigationItem[] = [
 export const ProposalSections = createPreview({
   label: 'Proposal sections',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div3}>
       <CallSite
         source="pages/target-proposal.tsx:564"
         origin="base"
         note="On /proposals/pr-7?version=v3: the default section has no page param, so Details links to page: undefined and is current only while the URL has none. Supergraph Preview only on a distributed graph. The page draws the 1px row line under it."
       >
         <RouterAt path={`${TARGET_PATH}/proposals/pr-7?version=v3`}>
-          <div className="w-full">
-            <div className="border-b border-line">
+          <div className={styles.div4}>
+            <div className={styles.div5}>
               <Navigation aria-label="Proposal" items={PROPOSAL_SECTIONS} size="sm" />
             </div>
           </div>
@@ -382,8 +383,8 @@ export const ProposalSections = createPreview({
       </CallSite>
       <CallSite source="the same" origin="base" note="On ?page=checks&version=v3.">
         <RouterAt path={`${TARGET_PATH}/proposals/pr-7?page=checks&version=v3`}>
-          <div className="w-full">
-            <div className="border-b border-line">
+          <div className={styles.div6}>
+            <div className={styles.div7}>
               <Navigation aria-label="Proposal" items={PROPOSAL_SECTIONS} size="sm" />
             </div>
           </div>
@@ -399,7 +400,7 @@ function SectionsPage(props: { path: string; items: NavigationItem[]; label: str
       <PageLayout>
         <Navigation aria-label={props.label} variant="list" items={props.items} />
         <PageLayoutContent>
-          <div className="h-40 rounded-md bg-neutral-3" />
+          <div className={styles.sectionsPageDiv} />
         </PageLayoutContent>
       </PageLayout>
     </RouterAt>
@@ -536,7 +537,7 @@ const PROJECT_SETTINGS: NavigationItem[] = [
 export const SettingsSections = createPreview({
   label: 'Settings sections',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div8}>
       <CallSiteGroup label="Sections become child routes; the bare settings URL is General, so General is exact.">
         <CallSite
           source="pages/target-settings.tsx:1418"

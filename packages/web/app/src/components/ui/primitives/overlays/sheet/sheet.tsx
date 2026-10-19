@@ -12,19 +12,20 @@ import {
   OverlayPortalMount,
   popupSurfaceClass,
 } from '../overlay-parts';
+import * as styles from './sheet.css';
 
 const widthClass = {
-  md: 'sm:max-w-[700px]',
-  lg: 'sm:max-w-[800px]',
-  half: 'sm:max-w-[50vw]',
+  md: styles.widthClassMd,
+  lg: styles.widthClassLg,
+  half: styles.widthClassHalf,
 } as const;
 
 const popupClass = cn(
   popupSurfaceClass,
-  'fixed inset-y-0 right-0 h-dvh w-full border-l',
-  'ease-authentic transition-[translate,opacity] duration-300',
-  'data-[starting-style]:translate-x-full data-[starting-style]:opacity-0',
-  'data-[ending-style]:translate-x-full data-[ending-style]:opacity-0',
+  styles.class2,
+  styles.class3,
+  styles.class4,
+  styles.class5,
 );
 
 export type SheetProps = {

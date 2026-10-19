@@ -5,6 +5,7 @@ import { Select } from '../floating/select/select';
 import { Input } from '../input/input';
 import { Switch } from '../switch/switch';
 import { Label } from './label';
+import * as styles from './label.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/Label';
 
@@ -18,7 +19,7 @@ export const nav: NavPath = 'Primitives/FormControls/Label';
 export const OverAControl = createPreview(() => {
   const [graph, setGraph] = useState('DEFAULT_GRAPH');
   return (
-    <div className="flex gap-3">
+    <div className={styles.div}>
       <div>
         <Label htmlFor="cdn-graph" label="Graph Variant" />
         <Select
@@ -49,12 +50,12 @@ export const Inline = createPreview(() => {
   const [changed, setChanged] = useState(true);
   const [failed, setFailed] = useState(false);
   return (
-    <div className="flex w-72 flex-col">
-      <div className="flex h-9 flex-row items-center justify-between">
+    <div className={styles.div2}>
+      <div className={styles.div3}>
         <Label htmlFor="filter-changed" label="Show only changed schemas" variant="inline" />
         <Switch id="filter-changed" checked={changed} onCheckedChange={setChanged} />
       </div>
-      <div className="flex h-9 flex-row items-center justify-between">
+      <div className={styles.div4}>
         <Label htmlFor="filter-failed" label="Show only failed checks" variant="inline" />
         <Switch id="filter-failed" checked={failed} onCheckedChange={setFailed} />
       </div>

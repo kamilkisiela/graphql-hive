@@ -162,10 +162,20 @@ async function main() {
       cwd: repoRoot,
       stdio: 'inherit',
     });
-    execFileSync('pnpm', ['exec', 'eslint', '--fix', ...written.filter(f => !f.endsWith('.css'))], {
-      cwd: repoRoot,
-      stdio: 'inherit',
-    });
+    try {
+      execFileSync(
+        'pnpm',
+        ['exec', 'eslint', '--fix', ...written.filter(f => !f.endsWith('.css'))],
+        {
+          cwd: repoRoot,
+          stdio: 'inherit',
+        },
+      );
+    } catch {
+      console.error(
+        'ESLint reported problems in the rewritten files (see above); the report follows.',
+      );
+    }
   }
 
   // Report ------------------------------------------------------------------------------------

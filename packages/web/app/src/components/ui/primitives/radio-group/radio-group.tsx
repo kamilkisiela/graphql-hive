@@ -1,82 +1,14 @@
 import { type ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
+import * as styles from './radio-group.css';
 
-const radioItemVariants = cva(
-  'group flex cursor-pointer items-center border transition-colors disabled:pointer-events-none disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        'as-button': 'gap-1.5 rounded-xs px-3 py-1.5 text-control font-medium',
-        'as-card': 'gap-4 rounded-md p-4 text-left text-sm',
-      },
-      onSurface: { base: '', raised: '' },
-      orientation: { horizontal: '', vertical: '' },
-    },
-    compoundVariants: [
-      { variant: 'as-card', orientation: 'vertical', class: 'w-full' },
-      { variant: 'as-card', orientation: 'horizontal', class: 'flex-1 basis-0' },
-      {
-        variant: 'as-button',
-        onSurface: 'base',
-        class: [
-          'bg-neutral-2 border-line text-fg-default',
-          'hover:bg-neutral-3 hover:border-line-subtle hover:text-fg',
-          'data-[checked]:bg-neutral-4 data-[checked]:border-line data-[checked]:text-fg',
-        ],
-      },
-      {
-        variant: 'as-card',
-        onSurface: 'base',
-        class: [
-          'border-line-subtle bg-transparent',
-          'hover:bg-neutral-3',
-          'data-[checked]:bg-neutral-3 data-[checked]:border-accent-line',
-        ],
-      },
-      {
-        variant: 'as-button',
-        onSurface: 'raised',
-        class: [
-          'bg-neutral-3 border-line text-fg-default',
-          'hover:bg-neutral-4 hover:text-fg',
-          'data-[checked]:bg-neutral-5 data-[checked]:border-line-strong data-[checked]:text-fg',
-        ],
-      },
-      {
-        variant: 'as-card',
-        onSurface: 'raised',
-        class: [
-          'bg-neutral-4 border-line',
-          'hover:bg-neutral-5',
-          'data-[checked]:bg-neutral-5 data-[checked]:border-accent-line',
-        ],
-      },
-    ],
-    defaultVariants: { variant: 'as-button', onSurface: 'base', orientation: 'horizontal' },
-  },
-);
+const radioItemVariants = lenient(styles.radioItemVariants);
 
-const radioGroupVariants = cva('flex', {
-  variants: {
-    orientation: {
-      horizontal: 'flex-row',
-      vertical: 'flex-col',
-    },
-    variant: {
-      'as-card': 'items-stretch gap-2',
-      'as-button': 'gap-1',
-    },
-  },
-  compoundVariants: [
-    { variant: 'as-button', orientation: 'horizontal', class: 'items-center' },
-    { variant: 'as-button', orientation: 'vertical', class: 'items-start' },
-  ],
-  defaultVariants: { orientation: 'horizontal', variant: 'as-button' },
-});
+const radioGroupVariants = lenient(styles.radioGroupVariants);
 
-type RadioVariants = VariantProps<typeof radioItemVariants>;
+type RadioVariants = NonNullable<Parameters<typeof radioItemVariants>[0]>;
 
 export type RadioItemProps = {
   value: string;
@@ -116,8 +48,8 @@ function RadioItem({
   const isCard = variant === 'as-card';
 
   const indicator = isCard ? (
-    <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-line-strong group-data-[checked]:border-accent">
-      <BaseRadio.Indicator className="size-2.5 rounded-full bg-accent" />
+    <span className={styles.radioItemSpan}>
+      <BaseRadio.Indicator className={styles.radioItemIndicator} />
     </span>
   ) : null;
 
@@ -135,10 +67,10 @@ function RadioItem({
       ) : (
         <>
           {indicator}
-          <span className={isCard ? 'flex flex-col gap-2' : undefined}>
-            <span className={isCard ? 'font-medium text-fg' : undefined}>{item.label}</span>
+          <span className={isCard ? styles.radioItemSpan2 : undefined}>
+            <span className={isCard ? styles.radioItemSpan3 : undefined}>{item.label}</span>
             {isCard && item.description ? (
-              <span className="leading-[1.4] text-fg-default">{item.description}</span>
+              <span className={styles.radioItemSpan4}>{item.description}</span>
             ) : null}
           </span>
         </>

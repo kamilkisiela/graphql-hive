@@ -3,19 +3,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DayPicker, type DayButtonProps } from 'react-day-picker';
 import { focusRing } from '@/components/ui/primitives/shared-styles';
 import { cn } from '@/lib/utils';
+import * as styles from './calendar.css';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
-const navButton = cn(
-  'border-line inline-flex size-7 items-center justify-center rounded-sm border bg-transparent opacity-50 transition-opacity hover:opacity-100',
-  focusRing,
-);
+const navButton = cn(styles.class2, focusRing);
 
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn('p-3', className)}
+      className={cn(styles.calendarDayPicker, className)}
       classNames={{
         months: 'relative flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
         month: 'space-y-4',
@@ -31,10 +29,8 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
         week: 'flex w-full mt-2',
         // The cell carries aria-selected and the modifiers; the button inside is styled below.
         day: cn(
-          'relative p-0 text-center text-sm focus-within:relative focus-within:z-20 aria-selected:bg-surface-selected',
-          props.mode === 'range'
-            ? 'first:aria-selected:rounded-l-md last:aria-selected:rounded-r-md'
-            : 'aria-selected:rounded-md',
+          styles.calendarDayPicker2,
+          props.mode === 'range' ? styles.calendarDayPicker3 : styles.calendarDayPicker4,
         ),
         range_start: 'rounded-l-md',
         range_end: 'rounded-r-md',
@@ -47,9 +43,9 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       components={{
         Chevron: ({ orientation, className }) =>
           orientation === 'left' ? (
-            <ChevronLeft className={cn('size-4', className)} />
+            <ChevronLeft className={cn(styles.calendarChevronLeft, className)} />
           ) : (
-            <ChevronRight className={cn('size-4', className)} />
+            <ChevronRight className={cn(styles.calendarChevronRight, className)} />
           ),
         DayButton: CalendarDayButton,
       }}
@@ -65,12 +61,11 @@ function CalendarDayButton({ day: _day, modifiers, className, ...props }: DayBut
   return (
     <button
       className={cn(
-        'inline-flex size-8 items-center justify-center rounded-sm text-sm font-normal text-fg-default transition-colors hover:text-fg',
+        styles.calendarDayButtonButton,
         focusRing,
-        modifiers.today && 'bg-surface-hover text-fg',
-        modifiers.selected &&
-          'bg-surface-inverse text-fg-inverse hover:bg-surface-inverse hover:text-fg-inverse focus:bg-surface-inverse focus:text-fg-inverse',
-        modifiers.range_middle && 'bg-surface-selected text-fg',
+        modifiers.today && styles.calendarDayButtonButton2,
+        modifiers.selected && styles.calendarDayButtonButton3,
+        modifiers.range_middle && styles.calendarDayButtonButton4,
         className,
       )}
       {...props}

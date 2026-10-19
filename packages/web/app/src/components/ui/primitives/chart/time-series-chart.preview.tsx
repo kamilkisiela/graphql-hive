@@ -7,6 +7,7 @@ import { formatRpm } from '@/lib/hooks/use-formatted-throughput';
 import { useChartTheme } from './chart-theme';
 import { mapValues, week } from './preview-data';
 import { TimeSeriesChart } from './time-series-chart';
+import * as styles from './time-series-chart.preview.css';
 
 export const nav: NavPath = 'Primitives/Charts/TimeSeriesChart';
 
@@ -43,7 +44,7 @@ export const Area = createPreview(() => {
     );
   }
   return (
-    <div className="w-[48rem]">
+    <div className={styles.div}>
       <ChartCard
         title="Operations over time"
         description="Timeline of GraphQL requests and failures"
@@ -73,7 +74,7 @@ export const Lines = createPreview(() => {
     );
   }
   return (
-    <div className="w-[48rem]">
+    <div className={styles.div2}>
       <ChartCard title="Latency over time" description="Timeline of latency of GraphQL requests">
         <Latency />
       </ChartCard>
@@ -83,7 +84,7 @@ export const Lines = createPreview(() => {
 
 /** RPM over time: one bar per bucket, no legend since there is only one series. */
 export const Bars = createPreview(() => (
-  <div className="w-[48rem]">
+  <div className={styles.div3}>
     <ChartCard title="RPM over time" description="Requests per minute">
       <TimeSeriesChart
         kind="bar"
@@ -121,7 +122,7 @@ export const StackedBars = createPreview(() => {
     );
   }
   return (
-    <div className="w-[48rem]">
+    <div className={styles.div4}>
       <Traces />
     </div>
   );
@@ -129,7 +130,7 @@ export const StackedBars = createPreview(() => {
 
 /** One series, no legend: the Activity charts on the coordinate and client insights pages. */
 export const SingleArea = createPreview(() => (
-  <div className="w-[48rem]">
+  <div className={styles.div5}>
     <ChartCard title="Activity" description="GraphQL requests with Query.user over time">
       <TimeSeriesChart
         kind="area"

@@ -3,11 +3,12 @@ import { createPreview, type NavPath } from 'react-foundry';
 import { Select } from '../floating/select/select';
 import { Input } from '../input/input';
 import { Separator } from './separator';
+import * as styles from './separator.preview.css';
 
 export const nav: NavPath = 'Primitives/Separator';
 
 export const Horizontal = createPreview(() => (
-  <div className="flex w-80 flex-col gap-3 text-sm text-fg-default">
+  <div className={styles.div}>
     <p>Schema checks run on the composed API schema.</p>
     <Separator />
     <p>Each check compares against the latest valid version.</p>
@@ -22,7 +23,7 @@ export const Horizontal = createPreview(() => (
 export const InToolbar = createPreview(() => {
   const [sortBy, setSortBy] = useState('requests');
   return (
-    <div className="flex flex-row items-center gap-x-2">
+    <div className={styles.div2}>
       <Input type="search" placeholder="Search..." />
       <Separator orientation="vertical" />
       <Select
@@ -48,8 +49,8 @@ export const InToolbar = createPreview(() => {
 
 /** `stretch` fills the row instead, for a divider between things taller than a control. */
 export const Stretch = createPreview(() => (
-  <div className="flex items-center gap-4 text-sm text-fg-default">
-    <div className="h-16 w-40 rounded-md border border-line p-3">A tall neighbour</div>
+  <div className={styles.div3}>
+    <div className={styles.div4}>A tall neighbour</div>
     <Separator orientation="vertical" />
     <span>control height</span>
     <Separator orientation="vertical" stretch />

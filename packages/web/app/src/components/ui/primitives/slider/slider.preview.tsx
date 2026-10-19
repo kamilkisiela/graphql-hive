@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
 import { Slider } from './slider';
+import * as styles from './slider.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/Slider';
 
@@ -8,9 +9,9 @@ export const nav: NavPath = 'Primitives/FormControls/Slider';
 export const Controlled = createPreview(() => {
   const [value, setValue] = useState(12);
   return (
-    <div className="flex w-[28rem] flex-col gap-2">
+    <div className={styles.div}>
       <Slider min={1} max={300} value={value} onValueChange={setValue} aria-label="Operations" />
-      <span className="text-sm text-fg-default">{value}M operations per month</span>
+      <span className={styles.span}>{value}M operations per month</span>
     </div>
   );
 });
@@ -19,7 +20,7 @@ export const Controlled = createPreview(() => {
 export const Stepped = createPreview(() => {
   const [value, setValue] = useState(50);
   return (
-    <div className="flex w-[28rem] flex-col gap-2">
+    <div className={styles.div2}>
       <Slider
         min={0}
         max={100}
@@ -28,7 +29,7 @@ export const Stepped = createPreview(() => {
         onValueChange={setValue}
         aria-label="Share"
       />
-      <span className="text-sm text-fg-default">{value}%</span>
+      <span className={styles.span2}>{value}%</span>
     </div>
   );
 });
@@ -37,9 +38,9 @@ export const Stepped = createPreview(() => {
 export const Range = createPreview(() => {
   const [range, setRange] = useState<[number, number]>([2000, 60_000]);
   return (
-    <div className="flex w-[28rem] flex-col gap-2">
+    <div className={styles.div3}>
       <Slider min={0} max={100_000} value={range} onValueChange={setRange} aria-label="Duration" />
-      <span className="font-mono text-xs text-fg-default">
+      <span className={styles.span3}>
         {range[0]} ms to {range[1]} ms
       </span>
     </div>
@@ -47,7 +48,7 @@ export const Range = createPreview(() => {
 });
 
 export const Disabled = createPreview(() => (
-  <div className="w-[28rem]">
+  <div className={styles.div4}>
     <Slider
       min={1}
       max={300}
@@ -61,7 +62,7 @@ export const Disabled = createPreview(() => (
 
 /** At the ends of the range the thumb stays inside the track rather than overhanging it. */
 export const Extremes = createPreview(() => (
-  <div className="flex w-[28rem] flex-col gap-4">
+  <div className={styles.div5}>
     <Slider min={0} max={10} value={0} onValueChange={() => {}} aria-label="Minimum" />
     <Slider min={0} max={10} value={10} onValueChange={() => {}} aria-label="Maximum" />
   </div>
@@ -89,7 +90,7 @@ function SliderPlayground(props: {
   const [single, setSingle] = useState(props.min);
   const [range, setRange] = useState<[number, number]>([props.min, props.max]);
   return (
-    <div className="flex w-[28rem] flex-col gap-2">
+    <div className={styles.sliderPlaygroundDiv}>
       {props.range ? (
         <Slider
           value={range}
@@ -111,7 +112,7 @@ function SliderPlayground(props: {
           aria-label="Value"
         />
       )}
-      <span className="font-mono text-xs text-fg-default">
+      <span className={styles.sliderPlaygroundSpan}>
         {props.range ? `${range[0]} to ${range[1]}` : single}
       </span>
     </div>

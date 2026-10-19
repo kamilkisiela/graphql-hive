@@ -4,6 +4,7 @@ import { FloatingSearch } from '../../primitives/floating/floating-search';
 import { floatingEmptyState, menuPanelInset } from '../../primitives/floating/shared-styles';
 import { ItemRow, ListScrollContext } from './item-row';
 import type { FilterItem, FilterSelection } from './types';
+import * as styles from './filter-content.css';
 
 const ITEM_HEIGHT = 28; // h-7
 const MAX_LIST_HEIGHT = 256; // max-h-64
@@ -129,24 +130,24 @@ export function FilterContent({
   return (
     // Modest min-width so the popover doesn't collapse to a single 1–2 char
     // item, but still sizes naturally to fit the content of small lists.
-    <div role="group" className={`min-w-[120px] ${menuPanelInset}`}>
+    <div role="group" className={`${styles.filterContentDiv} ${menuPanelInset}`}>
       {/*
         Only the rows in view are in the DOM, so left to itself the popup would size to whichever
         happen to be rendered. This zero-height row carries every name, one per line, so the popup
         is as wide as its widest item (up to the popup's max-width) from the start and stays put
         through scrolling and search. Laid out like an ItemRow: checkbox, gap, name, chevron.
       */}
-      <div aria-hidden className="invisible flex h-0 gap-2.5 overflow-hidden px-2">
-        <span className="size-3.5 shrink-0" />
-        <span className="whitespace-pre">{allNames}</span>
-        {hasSubmenus ? <span className="ml-auto size-3.5 shrink-0" /> : null}
+      <div aria-hidden className={styles.filterContentDiv2}>
+        <span className={styles.filterContentSpan} />
+        <span className={styles.filterContentSpan2}>{allNames}</span>
+        {hasSubmenus ? <span className={styles.filterContentSpan3} /> : null}
       </div>
       {showSearch && <FloatingSearch label={label} onSearch={setSearch} value={search} />}
       {/* Note about unavailable items */}
       {items.some(item => item.unavailable) && (
-        <div className="mt-2 px-4 py-1 text-xs text-fg-default">
-          <span className="line-through">Struck-through</span> items are not found in the selected
-          date range.
+        <div className={styles.filterContentDiv3}>
+          <span className={styles.filterContentSpan4}>Struck-through</span> items are not found in
+          the selected date range.
         </div>
       )}
 
@@ -154,7 +155,7 @@ export function FilterContent({
       {filteredItems.length > 0 ? (
         <div
           ref={scrollRef}
-          className="[&>div>div>div>*]:mt-0!"
+          className={styles.filterContentDiv4}
           style={{
             height: listHeight,
             overflow: 'auto',

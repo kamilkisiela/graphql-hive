@@ -1,37 +1,38 @@
 import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Checkbox } from './checkbox';
+import * as styles from './checkbox.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/Checkbox';
 
 const TARGETS = ['production', 'staging', 'development'];
 
 export const Sizes = createPreview(() => (
-  <div className="flex items-center gap-4">
+  <div className={styles.div}>
     <Checkbox size="sm" defaultChecked />
     <Checkbox size="md" defaultChecked />
   </div>
 ));
 
 export const States = createPreview(() => (
-  <div className="flex flex-col gap-3 text-control">
-    <label className="flex items-center gap-2">
+  <div className={styles.div2}>
+    <label className={styles.label}>
       <Checkbox />
       Unchecked
     </label>
-    <label className="flex items-center gap-2">
+    <label className={styles.label2}>
       <Checkbox defaultChecked />
       Checked
     </label>
-    <label className="flex items-center gap-2">
+    <label className={styles.label3}>
       <Checkbox indeterminate />
       Indeterminate
     </label>
-    <label className="flex items-center gap-2 opacity-100">
+    <label className={styles.label4}>
       <Checkbox disabled />
       Disabled
     </label>
-    <label className="flex items-center gap-2">
+    <label className={styles.label5}>
       <Checkbox disabled defaultChecked />
       Disabled, checked
     </label>
@@ -40,7 +41,7 @@ export const States = createPreview(() => (
 
 /** `visual` renders a non-interactive indicator: tabIndex -1, aria-hidden, default cursor. */
 export const Visual = createPreview(() => (
-  <div className="flex items-center gap-4">
+  <div className={styles.div3}>
     <Checkbox visual defaultChecked />
     <Checkbox visual />
   </div>
@@ -51,8 +52,8 @@ export const SelectAll = createPreview(() => {
   const allChecked = selected.length === TARGETS.length;
 
   return (
-    <div className="flex w-64 flex-col gap-3 text-control">
-      <label className="flex items-center gap-2 border-b border-line pb-3 font-medium">
+    <div className={styles.div4}>
+      <label className={styles.label6}>
         <Checkbox
           checked={allChecked}
           indeterminate={selected.length > 0 && !allChecked}
@@ -61,7 +62,7 @@ export const SelectAll = createPreview(() => {
         All targets
       </label>
       {TARGETS.map(target => (
-        <label key={target} className="flex items-center gap-2">
+        <label key={target} className={styles.label7}>
           <Checkbox
             checked={selected.includes(target)}
             onCheckedChange={checked =>

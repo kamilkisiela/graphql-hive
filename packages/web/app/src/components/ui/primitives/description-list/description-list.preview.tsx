@@ -2,11 +2,12 @@ import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from '../badge/badge';
 import { Button } from '../button/button';
 import { DescriptionList } from './description-list';
+import * as styles from './description-list.preview.css';
 
 export const nav: NavPath = 'Primitives/DescriptionList';
 
 export const Default = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div}>
     <DescriptionList
       rows={[
         {
@@ -28,7 +29,7 @@ export const Default = createPreview(() => (
 
 /** Column count is derived per row from `items.length`, so rows can differ. */
 export const MixedColumns = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div2}>
     <DescriptionList
       rows={[
         { items: [{ term: 'Name', description: 'P99 latency spike' }] },
@@ -52,12 +53,12 @@ export const MixedColumns = createPreview(() => (
 
 /** `description` takes a ReactNode, so cells can hold components rather than text. */
 export const RichDescriptions = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div3}>
     <DescriptionList
       rows={[
         {
           items: [
-            { term: 'Target', description: <code className="text-control">production</code> },
+            { term: 'Target', description: <code className={styles.code}>production</code> },
             {
               term: 'Status',
               description: <Badge content="Active" variants={{ variant: 'secondary' }} />,
@@ -69,7 +70,7 @@ export const RichDescriptions = createPreview(() => (
             {
               term: 'Channels',
               description: (
-                <div className="flex flex-wrap gap-1.5">
+                <div className={styles.div4}>
                   <Badge content="Slack" variants={{ variant: 'outline' }} />
                   <Badge content="Webhook" variants={{ variant: 'outline' }} />
                   <Badge content="Email" variants={{ variant: 'outline' }} />
@@ -88,7 +89,7 @@ export const RichDescriptions = createPreview(() => (
  * the value element for a test hook.
  */
 export const CopyableValues = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div5}>
     <DescriptionList
       rows={[
         {
@@ -126,7 +127,7 @@ export const CopyableValues = createPreview(() => (
 
 /** A term that needs explaining carries it on an info icon. */
 export const TermTooltips = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div6}>
     <DescriptionList
       rows={[
         {
@@ -140,7 +141,7 @@ export const TermTooltips = createPreview(() => (
             {
               term: 'Additional Scopes',
               tooltip: 'Additional scopes that are requested from the OIDC provider.',
-              description: <span className="text-fg-subtle">none</span>,
+              description: <span className={styles.span}>none</span>,
             },
           ],
         },
@@ -157,14 +158,14 @@ export const TermTooltips = createPreview(() => (
  * right.
  */
 export const PageCard = createPreview(() => (
-  <div className="flex w-[64rem] items-center gap-4 rounded-md border bg-surface-card px-5 py-4">
-    <div className="min-w-0 flex-1">
+  <div className={styles.div7}>
+    <div className={styles.div8}>
       <DescriptionList
         variants={{ termStyle: 'title', columns: 'auto' }}
         rows={[
           {
             items: [
-              { term: 'Status', description: <span className="text-critical">Failed</span> },
+              { term: 'Status', description: <span className={styles.span2}>Failed</span> },
               { term: 'Service', description: 'users' },
               {
                 term: 'Triggered',
@@ -173,7 +174,7 @@ export const PageCard = createPreview(() => (
               {
                 term: 'Commit',
                 description: (
-                  <span className="block truncate" title="82c6adaa916c765b76fe9a1043ed4b0c9e1a7f22">
+                  <span className={styles.span3} title="82c6adaa916c765b76fe9a1043ed4b0c9e1a7f22">
                     82c6adaa916c765b76fe9a1043ed4b0c9e1a7f22
                   </span>
                 ),
@@ -188,7 +189,7 @@ export const PageCard = createPreview(() => (
 ));
 
 export const SingleColumn = createPreview(() => (
-  <div className="w-80">
+  <div className={styles.div9}>
     <DescriptionList
       rows={[
         { items: [{ term: 'Organization', description: 'the-guild' }] },
@@ -209,7 +210,7 @@ export const Playground = createPreview({
   // The rows stay fixed: a list of lists is more than a control can draw. Resize the frame to
   // see `columns: 'auto'` wrap where `fixed` squeezes.
   render: v => (
-    <div className="max-w-[48rem]">
+    <div className={styles.div10}>
       <DescriptionList
         variants={v.variants}
         rows={[

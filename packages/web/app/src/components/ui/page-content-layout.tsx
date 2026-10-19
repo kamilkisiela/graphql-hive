@@ -1,10 +1,11 @@
 import { forwardRef, HTMLAttributes, ReactNode } from 'react';
 import { DocsLink, DocsLinkProps } from '@/components/ui/docs-note';
 import { cn } from '@/lib/utils';
+import * as styles from './page-content-layout.css';
 
 const PageLayout = ({ children }: { children: ReactNode }) => (
-  <div className="flex flex-col gap-y-4">
-    <div className="flex flex-row gap-x-6 py-6">{children}</div>
+  <div className={styles.pageLayoutDiv}>
+    <div className={styles.pageLayoutDiv2}>{children}</div>
   </div>
 );
 PageLayout.displayName = 'PageLayout';
@@ -16,11 +17,11 @@ type PageLayoutContentProps = {
 
 const PageLayoutContent = forwardRef<HTMLDivElement, PageLayoutContentProps>(
   ({ children, mainTitlePage, ...props }, ref) => (
-    <div ref={ref} className={cn('grow', props.className)} {...props}>
+    <div ref={ref} className={cn(styles.div, props.className)} {...props}>
       {mainTitlePage ? (
         <>
-          <h1 className="mb-2 text-2xl font-semibold">{mainTitlePage}</h1>
-          <div className="mb-3 h-[1px] w-full bg-line-subtle" />
+          <h1 className={styles.h1}>{mainTitlePage}</h1>
+          <div className={styles.div2} />
         </>
       ) : null}
       {children}
@@ -36,7 +37,7 @@ const SubPageLayout = ({
   children: ReactNode;
   'data-cy'?: string;
 }) => (
-  <div className="space-y-2" data-cy={dataCy}>
+  <div className={styles.subPageLayoutDiv} data-cy={dataCy}>
     {children}
   </div>
 );
@@ -56,18 +57,18 @@ const SubPageLayoutHeader = ({
   subPageTitle,
 }: SubPageLayoutHeaderProps) => {
   const header = (
-    <div className="max-w-[600px] space-y-2">
-      <h3 className="text-lg font-medium text-fg">{subPageTitle}</h3>
+    <div className={styles.subPageLayoutHeaderDiv}>
+      <h3 className={styles.subPageLayoutHeaderH3}>{subPageTitle}</h3>
       {typeof description === 'string' ? <p>{description}</p> : description}
       {docsLink && <DocsLink {...docsLink} />}
     </div>
   );
   return (
-    <div className="mb-6">
+    <div className={styles.subPageLayoutHeaderDiv2}>
       {sideContent ? (
-        <div className="flex w-full justify-between">
+        <div className={styles.subPageLayoutHeaderDiv3}>
           {header}
-          <div className="flex gap-4">{sideContent}</div>
+          <div className={styles.subPageLayoutHeaderDiv4}>{sideContent}</div>
         </div>
       ) : (
         header

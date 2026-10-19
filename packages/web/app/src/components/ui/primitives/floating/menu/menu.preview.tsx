@@ -14,6 +14,7 @@ import {
 import { createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
 import { Menu, type MenuSection } from './menu';
+import * as styles from './menu.preview.css';
 
 export const nav: NavPath = 'Primitives/Floating/Menu';
 
@@ -110,7 +111,7 @@ export const Anatomy = createPreview(() => {
           label: 'Regions',
           icon: Globe,
           content: (
-            <div className="px-2 py-3 text-xs text-fg-secondary">
+            <div className={styles.previewDiv}>
               Any panel can go here. This one is not a list of rows.
             </div>
           ),
@@ -304,11 +305,7 @@ export const SubmenuWithPanel = createPreview(() => (
           kind: 'submenu',
           label: 'Clients',
           maxWidth: 'lg',
-          content: (
-            <div className="px-2 py-3 text-xs text-fg-secondary">
-              A search field, a virtualized list, anything.
-            </div>
-          ),
+          content: <div className={styles.div}>A search field, a virtualized list, anything.</div>,
         },
       ],
     ]}
@@ -320,7 +317,7 @@ export const SubmenuWithPanel = createPreview(() => (
  * tables' row-action menus want. `minWidth`/`maxWidth` are the usual choice.
  */
 export const Widths = createPreview(() => (
-  <div className="flex gap-4">
+  <div className={styles.div2}>
     <Menu
       trigger={<Button label="width=sm (160px)" />}
       width="sm"

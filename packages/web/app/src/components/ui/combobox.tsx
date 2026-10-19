@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { ChevronDown, CircleX } from 'lucide-react';
 import Select, { components } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
+import * as styles from './combobox.css';
 
 interface Option {
   value: string;
@@ -34,35 +35,34 @@ export function Combobox(
       components={{
         ClearIndicator: compProps => (
           <components.ClearIndicator {...compProps}>
-            <CircleX className="size-4" />
+            <CircleX className={styles.comboboxCircleX} />
           </components.ClearIndicator>
         ),
         DropdownIndicator: compProps => (
           <components.DropdownIndicator {...compProps}>
-            <ChevronDown className="size-4" />
+            <ChevronDown className={styles.comboboxChevronDown} />
           </components.DropdownIndicator>
         ),
         NoOptionsMessage: compProps => (
           <components.NoOptionsMessage {...compProps}>
-            <div className="text-xs text-fg-secondary">
+            <div className={styles.comboboxDiv}>
               {props.creatable ? 'Start typing to add values' : 'No options'}
             </div>
           </components.NoOptionsMessage>
         ),
       }}
       classNames={{
-        control: () => clsx('bg-surface-selected! border-line! hover:border-accent! shadow-none!'),
-        valueContainer: () => clsx('bg-surface-selected! rounded-xl!'),
-        indicatorsContainer: () => clsx('bg-surface-selected! rounded-xl!'),
-        container: () => clsx('bg-surface-selected! rounded-xl! shadow-lg! text-sm!'),
-        menu: () => clsx('bg-surface-selected! rounded-xl! shadow-lg! text-xs!'),
-        menuList: () => clsx('bg-surface-selected! rounded-lg! text-xs!'),
-        option: () => clsx('bg-surface-selected! hover:bg-surface-hover! text-xs! cursor-pointer!'),
-        placeholder: () => clsx('text-fg-secondary! text-xs!'),
-        input: () => clsx('text-fg-secondary! text-xs!'),
-        multiValue: () => clsx('text-fg-secondary! text-xs! bg-fg-secondary! font-bold!'),
-        multiValueRemove: () =>
-          clsx('text-fg-subtle text-xs! hover:bg-surface-inverse! hover:text-fg-inverse!'),
+        control: () => clsx(styles.comboboxClass),
+        valueContainer: () => clsx(styles.comboboxClass2),
+        indicatorsContainer: () => clsx(styles.comboboxClass3),
+        container: () => clsx(styles.comboboxClass4),
+        menu: () => clsx(styles.comboboxClass5),
+        menuList: () => clsx(styles.comboboxClass6),
+        option: () => clsx(styles.comboboxClass7),
+        placeholder: () => clsx(styles.comboboxClass8),
+        input: () => clsx(styles.comboboxClass9),
+        multiValue: () => clsx(styles.comboboxClass10),
+        multiValueRemove: () => clsx(styles.comboboxClass11),
       }}
       closeMenuOnSelect={false}
       value={props.value}

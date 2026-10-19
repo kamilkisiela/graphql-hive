@@ -10,13 +10,14 @@ import {
   OverlayHeader,
   popupSurfaceClass,
 } from '../overlay-parts';
+import * as styles from './alert-dialog.css';
 
 const popupClass = cn(
   popupSurfaceClass,
-  'fixed left-1/2 top-1/2 max-h-[calc(100dvh-4rem)] w-[calc(100vw-2rem)] max-w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-lg',
-  'ease-authentic transition-[opacity,scale] duration-200',
-  'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
-  'data-[ending-style]:scale-95 data-[ending-style]:opacity-0',
+  styles.class2,
+  styles.class3,
+  styles.class4,
+  styles.class5,
 );
 
 export type AlertDialogProps = {

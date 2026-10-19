@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/primitives/label/label';
 import { Spinner } from '@/components/ui/primitives/spinner/spinner';
 import { Switch } from '@/components/ui/primitives/switch/switch';
 import type { Monaco, MonacoDiffEditor as OriginalMonacoDiffEditor } from '@monaco-editor/react';
+import * as styles from './diff-editor.css';
 
 export const DiffEditor = (props: {
   title?: ReactElement;
@@ -72,16 +73,16 @@ export const DiffEditor = (props: {
   const title = props?.title ?? 'Diff View';
 
   return (
-    <div className="w-full">
-      <div className="mb-2 flex items-center justify-between border-b border-line-subtle px-2 py-1">
-        <div className="px-2 font-bold">{title}</div>
-        <div className="ml-auto flex h-[36px] items-center px-2">
+    <div className={styles.diffEditorDiv}>
+      <div className={styles.diffEditorDiv2}>
+        <div className={styles.diffEditorDiv3}>{title}</div>
+        <div className={styles.diffEditorDiv4}>
           {props.after && props.downloadFileName && (
             <DownloadButton fileName={props.downloadFileName} contents={props.after} />
           )}
           {showDiff && (
             <>
-              <div className="mr-2 text-xs font-normal">Navigate changes </div>
+              <div className={styles.diffEditorDiv5}>Navigate changes </div>
               <Tooltip
                 trigger={
                   <Button
@@ -89,7 +90,7 @@ export const DiffEditor = (props: {
                     size="icon-sm"
                     onClick={() => editorRef.current?.goToDiff('previous')}
                   >
-                    <ArrowUp className="size-4" />
+                    <ArrowUp className={styles.diffEditorArrowUp} />
                   </Button>
                 }
                 content="Previous change"
@@ -101,7 +102,7 @@ export const DiffEditor = (props: {
                     size="icon-sm"
                     onClick={() => editorRef.current?.goToDiff('next')}
                   >
-                    <ArrowDown className="size-4" />
+                    <ArrowDown className={styles.diffEditorArrowDown} />
                   </Button>
                 }
                 content="Next change"
@@ -109,7 +110,7 @@ export const DiffEditor = (props: {
             </>
           )}
           {props.editable ? null : (
-            <div className="ml-2 flex items-center space-x-2">
+            <div className={styles.diffEditorDiv6}>
               <Label variant="inline" htmlFor="toggle-diff-mode" label="Toggle Diff" />
               <Switch
                 id="toggle-diff-mode"
@@ -185,7 +186,7 @@ export function DownloadButton(props: { contents: string; fileName: string }) {
             document.body.removeChild(element);
           }}
         >
-          <Download className="mr-2 size-4" /> Download
+          <Download className={styles.downloadButtonDownload} /> Download
         </Button>
       }
       content={`Download ${props.fileName}`}

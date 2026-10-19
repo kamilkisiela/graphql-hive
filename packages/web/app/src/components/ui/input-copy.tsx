@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/primitives/input/input';
 import type { OnSurface } from '@/components/ui/primitives/shared-styles';
 import { Textarea } from '@/components/ui/primitives/textarea/textarea';
 import { useClipboard } from '@/lib/hooks';
+import * as styles from './input-copy.css';
 
 export function InputCopy(props: {
   value: string;
@@ -33,7 +34,7 @@ export function InputCopy(props: {
   }, [copyToClipboard, props.value]);
 
   return (
-    <div className="flex w-full max-w-2xl items-center space-x-2">
+    <div className={styles.inputCopyDiv}>
       {props.multiline ? (
         <Textarea
           value={props.value}
@@ -44,7 +45,7 @@ export function InputCopy(props: {
           onFocus={ev => ev.target.select()}
         />
       ) : (
-        <div className="grow">
+        <div className={styles.inputCopyDiv2}>
           <Input
             type="text"
             value={props.value}
@@ -56,7 +57,7 @@ export function InputCopy(props: {
           />
         </div>
       )}
-      <div className="shrink-0 self-baseline">
+      <div className={styles.inputCopyDiv3}>
         <Button
           type="button"
           onClick={handleClick}

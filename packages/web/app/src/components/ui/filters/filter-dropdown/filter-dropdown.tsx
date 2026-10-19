@@ -10,6 +10,7 @@ import { pluralize } from '@/lib/utils';
 import { Menu } from '../../primitives/floating/menu/menu';
 import { FilterContent } from './filter-content';
 import type { FilterItem, FilterSelection } from './types';
+import * as styles from './filter-dropdown.css';
 
 export type FilterDropdownProps = {
   /** Singular label shown on the trigger button. */
@@ -46,8 +47,7 @@ export type FilterDropdownProps = {
 export const chipClass = buttonVariants({ variant: 'default', size: 'compact', layout: 'label' });
 
 /** The chip's trailing remove button. */
-export const chipRemoveButtonClass =
-  'text-fg-subtle hover:text-fg flex cursor-pointer items-center px-2 py-1.5 transition-colors';
+export const chipRemoveButtonClass = styles.chipRemoveButtonClass;
 
 export function FilterDropdown({
   label,
@@ -78,7 +78,7 @@ export function FilterDropdown({
       style={disabled ? disabledStyle : undefined}
     >
       {/* Label — static */}
-      <span className="px-2.5 py-1.5 text-control">{label}</span>
+      <span className={styles.filterDropdownSpan}>{label}</span>
 
       {/* Operator — dropdown for "is" / "is not" */}
       {onExcludeModeChange && (
@@ -148,7 +148,7 @@ export function FilterDropdown({
         aria-label={`Remove ${label} filter`}
         onClick={onRemove}
       >
-        <X className="size-3.5" />
+        <X className={styles.filterDropdownX} />
       </button>
     </div>
   );

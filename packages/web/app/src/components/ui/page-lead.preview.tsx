@@ -2,11 +2,12 @@ import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { PageLead } from './page-lead';
 import { Badge } from './primitives/badge/badge';
 import { Button } from './primitives/button/button';
+import * as styles from './page-lead.preview.css';
 
 export const nav: NavPath = 'Components/PageLead';
 
 export const Default = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div}>
     <PageLead
       title="Alerts"
       description="Get notified when your GraphQL API's traffic, errors, or latency cross a threshold."
@@ -16,7 +17,7 @@ export const Default = createPreview(() => (
 
 /** `titleAccessory` flows inline with the title rather than onto its own row. */
 export const WithBadge = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div2}>
     <PageLead
       title="Schema checks"
       description="Every check run against this target, newest first."
@@ -26,7 +27,7 @@ export const WithBadge = createPreview(() => (
 ));
 
 export const WithAction = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div3}>
     <PageLead
       title="Access tokens"
       description="Tokens let CI and the CLI publish schemas on your behalf."
@@ -36,7 +37,7 @@ export const WithAction = createPreview(() => (
 ));
 
 export const WithDocsLink = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div4}>
     <PageLead
       title="App Deployments"
       description="Group your GraphQL operations by app version for app version statistics and persisted operations."
@@ -49,7 +50,7 @@ export const WithDocsLink = createPreview(() => (
 ));
 
 export const LongDescription = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div5}>
     <PageLead
       title="Usage reporting"
       description="Hive aggregates every operation your gateway reports, so you can see which fields are actually used before you deprecate them. Reporting is sampled at the client and flushed in batches."
@@ -77,7 +78,7 @@ export const Playground = createPreview({
     },
   }),
   render: v => (
-    <div className="w-[36rem]">
+    <div className={styles.div6}>
       <PageLead title={v.title} description={v.description} titleAccessory={v.titleAccessory} />
     </div>
   ),

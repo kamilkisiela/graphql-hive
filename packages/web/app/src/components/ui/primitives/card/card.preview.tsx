@@ -1,11 +1,12 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Card } from './card';
+import * as styles from './card.preview.css';
 
 export const nav: NavPath = 'Primitives/Card';
 
 export const Default = createPreview(() => (
   <Card title="Alert rule" description="Notify the team when p99 latency crosses the threshold.">
-    <p className="text-sm text-fg-default">Evaluated every 5 minutes against the last hour.</p>
+    <p className={styles.p}>Evaluated every 5 minutes against the last hour.</p>
   </Card>
 ));
 
@@ -21,7 +22,7 @@ export const RichDescription = createPreview(() => (
     description={
       <>
         Select the target destination for this alert. Configure destinations{' '}
-        <a href="#" className="text-accent underline">
+        <a href="#" className={styles.a}>
           here
         </a>
         .
@@ -33,7 +34,7 @@ export const RichDescription = createPreview(() => (
 /** Title with no description, the shape the SSO settings cards use. */
 export const TitleOnly = createPreview(() => (
   <Card title="SCIM Provision Defaults">
-    <p className="text-sm text-fg-default">Applied to every user provisioned via SCIM.</p>
+    <p className={styles.p2}>Applied to every user provisioned via SCIM.</p>
   </Card>
 ));
 
@@ -43,7 +44,7 @@ export const TitleOnly = createPreview(() => (
  */
 export const ContentOnly = createPreview(() => (
   <Card>
-    <p className="text-sm text-fg-default">
+    <p className={styles.p3}>
       Padding is even on all four sides here, since there is no heading block above to supply it.
     </p>
   </Card>
@@ -56,7 +57,7 @@ export const ContentOnly = createPreview(() => (
  * them and `base` does not.
  */
 export const OnSurface = createPreview(() => (
-  <div className="flex gap-4">
+  <div className={styles.div}>
     <Card variants={{ onSurface: 'base' }} title="Base" description="Border only, no fill." />
     <Card
       variants={{ onSurface: 'raised' }}
@@ -72,7 +73,7 @@ export const OnSurface = createPreview(() => (
  * as a lift on `raised` and does not look like a fill appearing from nowhere on `base`.
  */
 export const Interactive = createPreview(() => (
-  <div className="flex gap-4">
+  <div className={styles.div2}>
     <Card
       variants={{ onSurface: 'base', interactive: true }}
       title="Base"
@@ -92,16 +93,12 @@ export const Interactive = createPreview(() => (
  * supplies the vertical inset itself, since dropping the padding drops all four sides.
  */
 export const BodyPadding = createPreview(() => (
-  <div className="grid w-[36rem] grid-cols-2 gap-4">
+  <div className={styles.div3}>
     <Card variants={{ onSurface: 'raised' }} title="Default">
-      <div className="rounded-sm bg-accent-tint-strong p-4 text-center text-xs text-fg-default">
-        Inset by the card's p-5
-      </div>
+      <div className={styles.div4}>Inset by the card's p-5</div>
     </Card>
     <Card variants={{ onSurface: 'raised', bodyPadding: 'none' }} title="None">
-      <div className="bg-accent-tint-strong p-4 text-center text-xs text-fg-default">
-        Runs to the edge
-      </div>
+      <div className={styles.div5}>Runs to the edge</div>
     </Card>
   </div>
 ));
@@ -112,7 +109,7 @@ export const BodyPadding = createPreview(() => (
  * that it still reads as secondary at `xlarge` rather than looking orphaned under it.
  */
 export const TitleSize = createPreview(() => (
-  <div className="flex flex-col gap-4">
+  <div className={styles.div6}>
     <Card
       variants={{ titleSize: 'default' }}
       title="Default"
@@ -146,10 +143,7 @@ export const Playground = createPreview({
       label: 'Body',
       default: true,
       // Tinted so `bodyPadding` is visible; off, the card is just its heading block.
-      derive: on =>
-        on ? (
-          <div className="bg-accent-tint-strong p-4 text-center text-xs text-fg-default">Body</div>
-        ) : undefined,
+      derive: on => (on ? <div className={styles.div7}>Body</div> : undefined),
     },
   }),
   render: v => (

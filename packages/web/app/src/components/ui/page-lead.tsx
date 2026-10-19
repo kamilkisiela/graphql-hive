@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { DocsLink, type DocsLinkProps } from '@/components/ui/docs-note';
+import * as styles from './page-lead.css';
 
 export function PageLead({
   description,
@@ -18,14 +19,14 @@ export function PageLead({
   titleAccessory?: ReactNode;
 }) {
   return (
-    <div className="mb-4 flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
-        <h1 className="m-0 text-lg font-medium text-fg">{title}</h1>
+    <div className={styles.pageLeadDiv}>
+      <div className={styles.pageLeadDiv2}>
+        <h1 className={styles.pageLeadH1}>{title}</h1>
         {titleAccessory}
       </div>
-      <p className="m-0 text-sm text-fg-default">{description}</p>
+      <p className={styles.pageLeadP}>{description}</p>
       {docsLink && (
-        <div className="text-control">
+        <div className={styles.pageLeadDiv3}>
           <DocsLink {...docsLink} />
         </div>
       )}

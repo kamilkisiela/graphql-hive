@@ -1,6 +1,7 @@
 import { ActivityIcon, CheckIcon, TriangleAlertIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from './badge';
+import * as styles from './badge.preview.css';
 
 export const nav: NavPath = 'Primitives/Badge';
 
@@ -9,7 +10,7 @@ export const nav: NavPath = 'Primitives/Badge';
  * token under its text.
  */
 export const Variants = createPreview(() => (
-  <div className="flex flex-wrap items-center gap-3">
+  <div className={styles.div}>
     <Badge content="Default" />
     <Badge content="Secondary" variants={{ variant: 'secondary' }} />
     <Badge content="Outline" variants={{ variant: 'outline' }} />
@@ -22,12 +23,12 @@ export const Variants = createPreview(() => (
 
 /** `sm` is the count pill: beside a tab label, or at the end of a filter row. */
 export const Sizes = createPreview(() => (
-  <div className="flex items-center gap-6 text-sm">
-    <span className="inline-flex items-center gap-2">
+  <div className={styles.div2}>
+    <span className={styles.span}>
       Attributes
       <Badge content="12" variants={{ variant: 'secondary', size: 'sm' }} />
     </span>
-    <span className="inline-flex items-center gap-2">
+    <span className={styles.span2}>
       Attributes
       <Badge content="12" variants={{ variant: 'secondary' }} />
     </span>
@@ -36,7 +37,7 @@ export const Sizes = createPreview(() => (
 
 /** `mono` for an identifier rather than a word: a permission key, a resource id. */
 export const Mono = createPreview(() => (
-  <div className="flex flex-wrap items-center gap-2">
+  <div className={styles.div3}>
     <Badge content="organization:describe" variants={{ variant: 'outline', mono: true }} />
     <Badge content="project:describe" variants={{ variant: 'outline', mono: true }} />
     <Badge content="No targets selected." variants={{ variant: 'critical', mono: true }} />
@@ -45,17 +46,17 @@ export const Mono = createPreview(() => (
 ));
 
 export const InContext = createPreview(() => (
-  <div className="flex flex-col gap-3 text-sm">
-    <div className="flex items-center gap-2">
-      <span className="text-fg-default">production</span>
+  <div className={styles.div4}>
+    <div className={styles.div5}>
+      <span className={styles.span3}>production</span>
       <Badge content="3 subgraphs" variants={{ variant: 'secondary' }} />
     </div>
-    <div className="flex items-center gap-2">
-      <span className="text-fg-default">checkout-service</span>
+    <div className={styles.div6}>
+      <span className={styles.span4}>checkout-service</span>
       <Badge content="breaking" variants={{ variant: 'critical' }} />
     </div>
-    <div className="flex items-center gap-2">
-      <span className="text-fg-default">v2.4.0</span>
+    <div className={styles.div7}>
+      <span className={styles.span5}>v2.4.0</span>
       <Badge content="latest" variants={{ variant: 'outline' }} />
     </div>
   </div>
@@ -66,7 +67,7 @@ export const InContext = createPreview(() => (
  * sites ("3 mappings", "+2 more") were reaching for with a `font-normal` class of their own.
  */
 export const Weights = createPreview(() => (
-  <div className="flex items-center gap-3">
+  <div className={styles.div8}>
     <Badge content="font-medium" />
     <Badge content="font-normal" variants={{ variant: 'outline' }} />
   </div>
@@ -77,8 +78,8 @@ function CompositionErrorText(props: { padding: 'default' | 'tight' }) {
     <Badge content={content} variants={{ variant: 'warning', padding: props.padding }} />
   );
   return (
-    <ul className="w-80 text-sm">
-      <li className="mb-1 ml-[1.25em] list-[square] pl-0 marker:pl-1">
+    <ul className={styles.compositionErrorTextUl}>
+      <li className={styles.compositionErrorTextLi}>
         [orders] Field {badge('Product.sku')} is marked {badge('@external')} but is not used in any
         federation directive ({badge('@key,')} {badge('@provides,')} {badge('@requires)')} or to
         satisfy an interface; the field declaration has no use and should be removed (or the field
@@ -94,8 +95,8 @@ function CompositionErrorText(props: { padding: 'default' | 'tight' }) {
  */
 /** A leading icon takes the badge's text colour, at a size matched to the badge's. */
 export const WithIcon = createPreview(() => (
-  <div className="flex flex-col gap-3">
-    <div className="flex items-center gap-2">
+  <div className={styles.div9}>
+    <div className={styles.div10}>
       <Badge
         icon={ActivityIcon}
         content="10+ operations by 2 clients affected"
@@ -105,7 +106,7 @@ export const WithIcon = createPreview(() => (
       <Badge icon={CheckIcon} content="Approved" variants={{ variant: 'success' }} />
       <Badge icon={ActivityIcon} content="Outline" variants={{ variant: 'outline' }} />
     </div>
-    <div className="flex items-center gap-2">
+    <div className={styles.div11}>
       <Badge
         icon={ActivityIcon}
         content="3 operations by 1 client affected"
@@ -117,20 +118,20 @@ export const WithIcon = createPreview(() => (
 ));
 
 export const Padding = createPreview(() => (
-  <div className="flex gap-8">
-    <div className="flex flex-col gap-2">
-      <span className="text-xs text-fg-secondary">default</span>
+  <div className={styles.div12}>
+    <div className={styles.div13}>
+      <span className={styles.span6}>default</span>
       <CompositionErrorText padding="default" />
     </div>
-    <div className="flex flex-col gap-2">
-      <span className="text-xs text-fg-secondary">tight</span>
+    <div className={styles.div14}>
+      <span className={styles.span7}>tight</span>
       <CompositionErrorText padding="tight" />
     </div>
   </div>
 ));
 
 export const Truncation = createPreview(() => (
-  <div className="w-48">
+  <div className={styles.div15}>
     <Badge content="a-very-long-badge-label-that-overflows" variants={{ variant: 'secondary' }} />
   </div>
 ));

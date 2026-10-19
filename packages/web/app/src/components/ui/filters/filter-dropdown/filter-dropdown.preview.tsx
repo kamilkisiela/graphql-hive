@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
 import { FilterDropdown } from './filter-dropdown';
 import type { FilterItem, FilterSelection } from './types';
+import * as styles from './filter-dropdown.preview.css';
 
 export const nav: NavPath = 'Components/Filters/FilterDropdown';
 
@@ -27,19 +28,19 @@ const SEVERITIES: FilterItem[] = [
 
 function SelectionReadout({ selected }: { selected: FilterSelection[] }) {
   if (selected.length === 0) {
-    return <div className="text-sm text-fg-subtle">No filters active</div>;
+    return <div className={styles.selectionReadoutDiv}>No filters active</div>;
   }
 
   return (
-    <ul className="space-y-1 text-sm">
+    <ul className={styles.selectionReadoutUl}>
       {selected.map(selection => (
-        <li key={selection.name} className="text-fg-default">
-          <span className="font-medium text-fg">{selection.name}</span>
+        <li key={selection.name} className={styles.selectionReadoutLi}>
+          <span className={styles.selectionReadoutSpan}>{selection.name}</span>
           {': '}
           {selection.values === null ? (
-            <span className="text-fg-subtle italic">all</span>
+            <span className={styles.selectionReadoutSpan2}>all</span>
           ) : (
-            <span className="text-fg-muted">{selection.values.join(', ')}</span>
+            <span className={styles.selectionReadoutSpan3}>{selection.values.join(', ')}</span>
           )}
         </li>
       ))}
@@ -74,7 +75,7 @@ function FilterHarness({
   return (
     // items-start: the chip is inline-flex, and a stretch-aligned column would
     // pull it to the full width of the harness.
-    <div className="flex w-80 flex-col items-start gap-6">
+    <div className={styles.filterHarnessDiv}>
       <FilterDropdown
         items={items}
         label={label}
@@ -90,9 +91,7 @@ function FilterHarness({
         alwaysShowSearch={alwaysShowSearch}
       />
       <div>
-        <div className="mb-2 text-xs font-medium tracking-wider text-fg-subtle uppercase">
-          Selection
-        </div>
+        <div className={styles.filterHarnessDiv2}>Selection</div>
         <SelectionReadout selected={selected} />
       </div>
     </div>

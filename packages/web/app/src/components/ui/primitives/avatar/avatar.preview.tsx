@@ -1,5 +1,6 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Avatar } from './avatar';
+import * as styles from './avatar.preview.css';
 
 export const nav: NavPath = 'Primitives/Avatar';
 
@@ -14,18 +15,18 @@ const PHOTO = `data:image/svg+xml,${encodeURIComponent(
  * as in the header while the viewer is still loading, it falls back to a person icon.
  */
 export const Sizes = createPreview(() => (
-  <div className="flex items-center gap-4">
+  <div className={styles.div}>
     <Avatar size="xs" alt="User" />
     <Avatar size="md" alt="User" />
   </div>
 ));
 
 export const Initials = createPreview(() => (
-  <div className="flex flex-col gap-3 text-xs text-fg-default">
+  <div className={styles.div2}>
     {['User', 'Ada Lovelace', 'Jean-Luc Picard', 'user@the-guild.dev', ''].map(name => (
-      <div key={name} className="flex items-center gap-3">
+      <div key={name} className={styles.div3}>
         <Avatar alt={name} />
-        <code className="font-mono">{name === '' ? '(no alt)' : name}</code>
+        <code className={styles.code}>{name === '' ? '(no alt)' : name}</code>
       </div>
     ))}
   </div>
@@ -33,7 +34,7 @@ export const Initials = createPreview(() => (
 
 /** `outlined` is the header's accent ring, previously a className at that one call site. */
 export const Outlined = createPreview(() => (
-  <div className="flex items-center gap-4">
+  <div className={styles.div4}>
     <Avatar variant="outlined" alt="User" />
     <Avatar variant="outlined" />
   </div>
@@ -41,7 +42,7 @@ export const Outlined = createPreview(() => (
 
 /** No call site passes `src` today; this shows the image path is wired should one appear. */
 export const WithImage = createPreview(() => (
-  <div className="flex items-center gap-4">
+  <div className={styles.div5}>
     <Avatar size="xs" src={PHOTO} alt="User" />
     <Avatar size="md" src={PHOTO} alt="User" />
     <Avatar size="md" variant="outlined" src={PHOTO} alt="User" />
@@ -50,12 +51,12 @@ export const WithImage = createPreview(() => (
 
 /** The alerts tables: an `xs` avatar and the name it stands for, in a `text-xs` row. */
 export const BesideName = createPreview(() => (
-  <div className="flex flex-col gap-2">
-    <span className="inline-flex items-center gap-2 text-xs text-fg">
+  <div className={styles.div6}>
+    <span className={styles.span}>
       <Avatar size="xs" alt="User" />
       User
     </span>
-    <span className="inline-flex items-center gap-2 text-xs text-fg">
+    <span className={styles.span2}>
       <Avatar size="xs" alt="Ada Lovelace" />
       Ada Lovelace
     </span>

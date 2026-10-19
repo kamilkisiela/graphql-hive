@@ -1,25 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
+import * as styles from './status-dot.css';
 
-const statusDotVariants = cva('inline-block shrink-0 rounded-full', {
-  variants: {
-    color: {
-      success: 'bg-success',
-      warning: 'bg-warning',
-      critical: 'bg-critical',
-      info: 'bg-info',
-      neutral: 'bg-neutral-9',
-    },
-    size: {
-      default: 'size-2',
-    },
-  },
-  defaultVariants: {
-    color: 'neutral',
-    size: 'default',
-  },
-});
+const statusDotVariants = lenient(styles.statusDotVariants);
 
-type StatusDotProps = VariantProps<typeof statusDotVariants> & {
+type StatusDotProps = NonNullable<Parameters<typeof statusDotVariants>[0]> & {
   /**
    * What the colour means, for assistive tech. Leave it out when the text beside the dot already
    * says so, and the dot is decoration.

@@ -3,6 +3,7 @@ import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
 import { Input } from '../../input/input';
 import { Dialog } from './dialog';
+import * as styles from './dialog.preview.css';
 
 export const nav: NavPath = 'Primitives/Overlays/Dialog';
 
@@ -16,12 +17,12 @@ export const nav: NavPath = 'Primitives/Overlays/Dialog';
 
 function CollectionFields() {
   return (
-    <div className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5 text-sm">
+    <div className={styles.collectionFieldsDiv}>
+      <label className={styles.collectionFieldsLabel}>
         Name
         <Input onSurface="raised" placeholder="Checkout" />
       </label>
-      <label className="flex flex-col gap-1.5 text-sm">
+      <label className={styles.collectionFieldsLabel2}>
         Description
         <Input onSurface="raised" placeholder="Operations the checkout flow runs" />
       </label>
@@ -56,7 +57,7 @@ export const Default = createPreview(() => {
 
 /** The four widths. `md` is the default. */
 export const Widths = createPreview(() => (
-  <div className="flex flex-wrap gap-3">
+  <div className={styles.div}>
     {(['sm', 'md', 'lg', 'xl'] as const).map(width => (
       <Dialog
         key={width}
@@ -66,7 +67,7 @@ export const Widths = createPreview(() => (
         description="The dialog is full width below this width's max-width and never wider than it."
         footer={<Button variant="primary">Done</Button>}
       >
-        <p className="text-sm text-fg-default">
+        <p className={styles.p}>
           Contracts, delete confirmations and most forms sit at md. Role editors and the OIDC debug
           view need xl.
         </p>
@@ -96,9 +97,9 @@ export const LongContent = createPreview(() => (
       </>
     }
   >
-    <div className="flex flex-col gap-3 text-sm">
+    <div className={styles.div2}>
       {Array.from({ length: 24 }, (_, i) => (
-        <p key={i} className="text-fg-default">
+        <p key={i} className={styles.p2}>
           Line {i + 1}: lab.environment.set('token', await fetch('/auth').then(r =&gt; r.text()))
         </p>
       ))}

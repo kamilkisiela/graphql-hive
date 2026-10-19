@@ -12,20 +12,21 @@ import {
   OverlayPortalMount,
   popupSurfaceClass,
 } from '../overlay-parts';
+import * as styles from './dialog.css';
 
 const widthClass = {
-  sm: 'max-w-[425px]',
-  md: 'max-w-[520px]',
-  lg: 'max-w-[640px]',
-  xl: 'max-w-[960px]',
+  sm: styles.widthClassSm,
+  md: styles.widthClassMd,
+  lg: styles.widthClassLg,
+  xl: styles.widthClassXl,
 } as const;
 
 const popupClass = cn(
   popupSurfaceClass,
-  'fixed left-1/2 top-1/2 max-h-[calc(100dvh-4rem)] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg',
-  'ease-authentic transition-[opacity,scale] duration-200',
-  'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
-  'data-[ending-style]:scale-95 data-[ending-style]:opacity-0',
+  styles.class2,
+  styles.class3,
+  styles.class4,
+  styles.class5,
 );
 
 /** Why the dialog is opening or closing, with `cancel()` to keep it where it is. */

@@ -3,6 +3,7 @@ import { CircleAlert, CircleCheck, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Toast as BaseToast } from '@base-ui/react/toast';
 import { Button } from '../button/button';
+import * as styles from './toast.css';
 
 export type ToastVariant = 'default' | 'destructive' | 'success';
 
@@ -46,41 +47,34 @@ export function useToast() {
 }
 
 const iconByVariant: Record<ToastVariant, ReactNode> = {
-  default: <Info aria-hidden className="size-4 shrink-0 text-info" />,
-  success: <CircleCheck aria-hidden className="size-4 shrink-0 text-success" />,
-  destructive: <CircleAlert aria-hidden className="size-4 shrink-0 text-critical" />,
+  default: <Info aria-hidden className={styles.info} />,
+  success: <CircleCheck aria-hidden className={styles.circleCheck} />,
+  destructive: <CircleAlert aria-hidden className={styles.circleAlert} />,
 };
 
-const viewportClass = cn(
-  'fixed z-[100] [--gap:0.75rem]',
-  'inset-x-4 top-4 [--dir:1]',
-  'sm:inset-x-auto sm:bottom-6 sm:right-6 sm:top-auto sm:w-[380px] sm:[--dir:-1]',
-);
+const viewportClass = cn(styles.class2, styles.class3, styles.class4);
 
 const rootClass = cn(
-  'bg-neutral-3 border-line text-fg absolute right-0 w-full select-none rounded-lg border shadow-lg',
-  'top-0 origin-top sm:bottom-0 sm:top-auto sm:origin-bottom',
-  'z-[calc(1000-var(--toast-index))]',
-  'h-[var(--toast-frontmost-height,var(--toast-height))] data-[expanded]:h-[var(--toast-height)]',
-  'ease-authentic transition-[transform,opacity,height] duration-300',
+  styles.class5,
+  styles.class6,
+  styles.class7,
+  styles.class8,
+  styles.class9,
   // Bridges the gap to the next toast so the pointer can travel the stack without collapsing it.
-  "after:absolute after:left-0 after:h-[calc(var(--gap)+1px)] after:w-full after:content-['']",
-  'after:top-full sm:after:bottom-full sm:after:top-auto',
-  '[transform:scale(calc(max(0,1-var(--toast-index)*0.1)))_translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)+var(--toast-index)*20%*var(--dir)))]',
-  'data-[expanded]:[transform:translateX(var(--toast-swipe-movement-x))_translateY(calc((var(--toast-offset-y)+var(--toast-index)*var(--gap))*var(--dir)+var(--toast-swipe-movement-y)))]',
-  'data-[starting-style]:[transform:translateY(calc(-150%*var(--dir)))] data-[starting-style]:opacity-0',
-  'data-[ending-style]:opacity-0 data-[limited]:opacity-0',
-  '[&[data-ending-style]:not([data-limited])]:[transform:translateY(calc(-150%*var(--dir)))]',
-  '[&[data-ending-style][data-swipe-direction=down]]:[transform:translateY(calc(var(--toast-swipe-movement-y)+150%))]',
-  '[&[data-ending-style][data-swipe-direction=up]]:[transform:translateY(calc(var(--toast-swipe-movement-y)-150%))]',
-  '[&[data-ending-style][data-swipe-direction=right]]:[transform:translateX(calc(var(--toast-swipe-movement-x)+150%))]',
-  '[&[data-ending-style][data-swipe-direction=left]]:[transform:translateX(calc(var(--toast-swipe-movement-x)-150%))]',
+  styles.class10,
+  styles.class11,
+  styles.class12,
+  styles.class13,
+  styles.class14,
+  styles.class15,
+  styles.class16,
+  styles.class17,
+  styles.class18,
+  styles.class19,
+  styles.class20,
 );
 
-const contentClass = cn(
-  'flex items-start gap-3 p-4 pr-11 transition-opacity duration-200',
-  'data-[behind]:opacity-0 data-[expanded]:opacity-100',
-);
+const contentClass = cn(styles.class21, styles.class22);
 
 function ToastList() {
   const { toasts } = BaseToast.useToastManager();
@@ -89,12 +83,12 @@ function ToastList() {
     <BaseToast.Root key={toast.id} toast={toast} className={rootClass}>
       <BaseToast.Content className={contentClass}>
         {iconByVariant[(toast.type as ToastVariant | undefined) ?? 'default']}
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <BaseToast.Title className="text-sm font-medium text-fg select-text" />
-          <BaseToast.Description className="text-sm text-fg-default select-text" />
+        <div className={styles.toastListDiv}>
+          <BaseToast.Title className={styles.toastListTitle} />
+          <BaseToast.Description className={styles.toastListDescription} />
         </div>
       </BaseToast.Content>
-      <span className="absolute top-2 right-2">
+      <span className={styles.toastListSpan}>
         <BaseToast.Close
           render={
             <Button layout="iconOnly" icon={X} aria-label="Close" variant="ghost" size="icon-sm" />

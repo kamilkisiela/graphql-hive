@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Code } from './code';
 import { DocsLink } from './docs-note';
 import { Heading } from './heading';
+import * as styles from './empty-list.css';
 
 export const EmptyList = ({
   title,
@@ -21,9 +22,9 @@ export const EmptyList = ({
   className?: string;
 }): ReactElement => {
   return (
-    <div className={cn('grid max-h-screen min-h-[400px] grow', className)}>
+    <div className={cn(styles.emptyListDiv, className)}>
       <Card variants={{ onSurface: 'raised', bodyPadding: 'none' }}>
-        <div className="flex cursor-default flex-col items-center gap-y-2 p-4">
+        <div className={styles.emptyListDiv2}>
           <img
             src={magnifier}
             alt="Magnifier illustration"
@@ -31,11 +32,11 @@ export const EmptyList = ({
             height="200"
             className="drag-none"
           />
-          <Heading className="text-center">{title}</Heading>
-          <span className="text-center text-sm font-medium text-fg-secondary">{description}</span>
-          <div className="py-4">{children}</div>
+          <Heading className={styles.emptyListHeading}>{title}</Heading>
+          <span className={styles.emptyListSpan}>{description}</span>
+          <div className={styles.emptyListDiv3}>{children}</div>
           {docsUrl && (
-            <div className="pb-4">
+            <div className={styles.emptyListDiv4}>
               <DocsLink href={docsUrl} text="Read more in the documentation" />
             </div>
           )}
@@ -68,11 +69,11 @@ export const NoSchemaVersion = ({
     if (recommendedAction === 'check') {
       children = (
         <>
-          <div className="flex w-full justify-center py-2 text-xs text-fg-secondary">
+          <div className={styles.noSchemaVersionDiv}>
             It's recommended to check that the schema is valid and compatible with the state of the
             registry before publishing.
           </div>
-          <div className="flex w-full justify-center">
+          <div className={styles.noSchemaVersionDiv2}>
             <Code>
               {`hive schema:check ${isDistributed ? '--service <service-name> --url <url> ' : ''} --target "<org>/<project>/<target>" <path/schema.graphql>`}
             </Code>
@@ -83,12 +84,12 @@ export const NoSchemaVersion = ({
       children = (
         <>
           {isDistributed && (
-            <div className="flex w-full justify-center py-2 text-xs text-fg-secondary">
+            <div className={styles.noSchemaVersionDiv3}>
               For distributed systems, it's recommended to publish the schema after the service is
               deployed.
             </div>
           )}
-          <div className="flex w-full justify-center">
+          <div className={styles.noSchemaVersionDiv4}>
             <Code>
               {`hive schema:publish ${isDistributed ? '--service <service-name> --url <url> ' : ''} --target "<org>/<project>/<target>" <path/schema.graphql>`}
             </Code>

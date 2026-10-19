@@ -1,58 +1,21 @@
 import { type ReactElement, type ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
+import * as styles from './card.css';
 
-export const cardVariants = cva('rounded-md border', {
-  variants: {
-    onSurface: {
-      base: 'border-line',
-      raised: 'bg-surface-card border-line-subtle',
-    },
-    // For a card that is itself a link or button. The hover fill moves one step in the same
-    // direction the surface already inverts, so it reads as "lifted" in both themes.
-    interactive: {
-      true: 'hover:bg-surface-card-hover hover:border-line',
-    },
-  },
-  defaultVariants: {
-    onSurface: 'base',
-  },
-});
+export const cardVariants = lenient(styles.cardVariants);
 
-const cardBodyVariants = cva('', {
-  variants: {
-    // `none` is for content that runs edge to edge (a chart, a table, a full-bleed image) and
-    // supplies its own insets where it needs them.
-    bodyPadding: {
-      default: 'p-5',
-      none: '',
-    },
-  },
-  defaultVariants: {
-    bodyPadding: 'default',
-  },
-});
+const cardBodyVariants = lenient(styles.cardBodyVariants);
 
-const cardTitleVariants = cva('text-fg font-medium leading-none', {
-  variants: {
-    titleSize: {
-      default: 'text-sm',
-      large: 'text-lg',
-      xlarge: 'text-2xl',
-    },
-  },
-  defaultVariants: {
-    titleSize: 'default',
-  },
-});
+const cardTitleVariants = lenient(styles.cardTitleVariants);
 
 type CardProps = {
   title?: string;
   description?: ReactElement | string;
   children?: ReactNode;
-  variants?: VariantProps<typeof cardVariants> &
-    VariantProps<typeof cardTitleVariants> &
-    VariantProps<typeof cardBodyVariants>;
+  variants?: NonNullable<Parameters<typeof cardVariants>[0]> &
+    NonNullable<Parameters<typeof cardTitleVariants>[0]> &
+    NonNullable<Parameters<typeof cardBodyVariants>[0]>;
 };
 
 export function Card({ children, title, description, variants }: CardProps) {
@@ -61,13 +24,15 @@ export function Card({ children, title, description, variants }: CardProps) {
   return (
     <div className={cardVariants({ ...variants })}>
       {hasHeader ? (
-        <div className="flex flex-col space-y-1.5 p-5">
+        <div className={styles.cardDiv}>
           {title ? <h3 className={cardTitleVariants({ ...variants })}>{title}</h3> : null}
-          {description ? <p className="text-control text-fg-secondary">{description}</p> : null}
+          {description ? <p className={styles.cardP}>{description}</p> : null}
         </div>
       ) : null}
       {children ? (
-        <div className={cn(cardBodyVariants({ ...variants }), hasHeader && 'pt-0')}>{children}</div>
+        <div className={cn(cardBodyVariants({ ...variants }), hasHeader && styles.cardDiv2)}>
+          {children}
+        </div>
       ) : null}
     </div>
   );

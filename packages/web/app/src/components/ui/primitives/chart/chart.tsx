@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import type { EChartsOption } from 'echarts';
+import * as styles from './chart.css';
 
 export type ChartEvents = Record<string, (params: any) => void>;
 
@@ -74,8 +75,8 @@ export function Chart({ option, height, onEvents }: ChartProps) {
   // ECharts writes a fixed pixel width onto its mount. Out of normal flow, that width cannot become
   // the min-content width of the flex column a chart sits in, which would stop the page shrinking.
   return (
-    <div className="relative w-full" style={{ height }}>
-      <div ref={elementRef} className="absolute inset-0" />
+    <div className={styles.chartDiv} style={{ height }}>
+      <div ref={elementRef} className={styles.chartDiv2} />
     </div>
   );
 }

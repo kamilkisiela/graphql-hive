@@ -4,6 +4,7 @@ import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Select } from '../primitives/floating/select/select';
 import { Tooltip } from '../primitives/floating/tooltip/tooltip';
 import { ScopeBar } from './scope-bar';
+import * as styles from './scope-bar.preview.css';
 
 export const nav: NavPath = 'Components/ScopeBar';
 
@@ -16,9 +17,9 @@ const STATUS_LABEL: Record<Status, string> = {
 };
 
 function StatusGlyph({ status }: { status: Status }) {
-  if (status === 'failed') return <AlertTriangle className="size-3.5 shrink-0 text-critical" />;
-  if (status === 'changed') return <GitCompare className="size-3.5 shrink-0" />;
-  return <Check className="size-3.5 shrink-0 text-success" />;
+  if (status === 'failed') return <AlertTriangle className={styles.statusGlyphAlertTriangle} />;
+  if (status === 'changed') return <GitCompare className={styles.statusGlyphGitCompare} />;
+  return <Check className={styles.statusGlyphCheck} />;
 }
 
 const STATUS_STATE: Record<Status, string> = {
@@ -31,7 +32,7 @@ function statusTooltip(status: Status) {
   return (
     <Tooltip
       trigger={
-        <span className="inline-flex">
+        <span className={styles.statusTooltipSpan}>
           <StatusGlyph status={status} />
         </span>
       }
@@ -45,7 +46,7 @@ function statusTrailing(status: Status) {
   return (
     <Tooltip
       trigger={
-        <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+        <span className={styles.statusTrailingSpan}>
           <StatusGlyph status={status} />
           {STATUS_STATE[status]}
         </span>
@@ -103,7 +104,7 @@ export const VersionPage = createPreview(() => {
           value={value}
           onValueChange={setValue}
           label={
-            <span className="inline-flex items-center gap-1.5">
+            <span className={styles.span}>
               <StatusGlyph status={picked.status} />
               {picked.label}
             </span>
@@ -125,7 +126,7 @@ export const VersionPage = createPreview(() => {
 export const NoContracts = createPreview(() => (
   <ScopeBar
     picker={
-      <span className="inline-flex items-center gap-1.5 px-2 text-xs text-fg-default">
+      <span className={styles.span2}>
         {statusTooltip('ok')}
         Default Graph
       </span>

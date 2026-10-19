@@ -3,6 +3,7 @@ import { AlertTriangle, Check, GitCompare } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
 import { Select, type SelectOption } from './select';
+import * as styles from './select.preview.css';
 
 export const nav: NavPath = 'Primitives/Floating/Select';
 
@@ -54,14 +55,18 @@ export const WithIcons = createPreview(() => {
         {
           value: 'healthy',
           label: 'Healthy',
-          icon: <span className={`bg-success ${STATUS_DOT}`} />,
+          icon: <span className={`${styles.span} ${STATUS_DOT}`} />,
         },
         {
           value: 'degraded',
           label: 'Degraded',
-          icon: <span className={`bg-warning ${STATUS_DOT}`} />,
+          icon: <span className={`${styles.span2} ${STATUS_DOT}`} />,
         },
-        { value: 'down', label: 'Down', icon: <span className={`bg-critical ${STATUS_DOT}`} /> },
+        {
+          value: 'down',
+          label: 'Down',
+          icon: <span className={`${styles.span3} ${STATUS_DOT}`} />,
+        },
       ]}
       value={value}
       onValueChange={setValue}
@@ -97,7 +102,7 @@ export const WithLabel = createPreview(() => {
   const [added, setAdded] = useState<string[]>([]);
   const remaining = ['products', 'reviews', 'inventory'].filter(s => !added.includes(s));
   return (
-    <div className="flex items-center gap-6">
+    <div className={styles.div}>
       <Select
         options={[
           { value: 'requests', label: 'Requests' },
@@ -108,7 +113,7 @@ export const WithLabel = createPreview(() => {
         onValueChange={setValue}
         label={`Sort by ${value}`}
       />
-      <div className="flex items-center gap-3">
+      <div className={styles.div2}>
         <Select
           options={remaining.map(s => ({ value: s, label: s }))}
           value=""
@@ -116,7 +121,7 @@ export const WithLabel = createPreview(() => {
           label="Select a service…"
           disabled={remaining.length === 0}
         />
-        <span className="text-xs text-fg-default">
+        <span className={styles.span4}>
           {added.length ? `Added: ${added.join(', ')}` : 'Nothing added yet'}
         </span>
       </div>
@@ -219,13 +224,17 @@ export const WithTrailing = createPreview(() => {
         {
           value: 'default',
           label: 'Default Graph',
-          trailing: <AlertTriangle className="size-3.5 text-warning" />,
+          trailing: <AlertTriangle className={styles.alertTriangle} />,
         },
-        { value: 'public-api', label: 'public-api', trailing: <GitCompare className="size-3.5" /> },
+        {
+          value: 'public-api',
+          label: 'public-api',
+          trailing: <GitCompare className={styles.gitCompare} />,
+        },
         {
           value: 'partner-api',
           label: 'partner-api',
-          trailing: <Check className="size-3.5 text-success" />,
+          trailing: <Check className={styles.check} />,
         },
       ]}
       value={value}
@@ -236,14 +245,14 @@ export const WithTrailing = createPreview(() => {
 });
 
 export const Sizes = createPreview(() => (
-  <div className="flex flex-col gap-4">
-    <div className="flex items-center gap-4">
-      <span className="w-16 text-xs text-fg-muted">default</span>
+  <div className={styles.div3}>
+    <div className={styles.div4}>
+      <span className={styles.span5}>default</span>
       <Select options={METRICS} value="TRAFFIC" />
       <Button variant="primary">Save</Button>
     </div>
-    <div className="flex items-center gap-4">
-      <span className="w-16 text-xs text-fg-muted">compact</span>
+    <div className={styles.div5}>
+      <span className={styles.span6}>compact</span>
       <Select options={METRICS} value="TRAFFIC" size="compact" />
       <Button label="Filter" size="compact" />
     </div>
@@ -251,7 +260,7 @@ export const Sizes = createPreview(() => (
 ));
 
 export const Widths = createPreview(() => (
-  <div className="flex w-[28rem] flex-col items-start gap-3">
+  <div className={styles.div6}>
     <Select options={METRICS} value="TRAFFIC" />
     <Select options={METRICS} value="TRAFFIC" width="sm" />
     <Select options={METRICS} value="TRAFFIC" width="md" />
@@ -271,7 +280,7 @@ export const MatchTriggerWidth = createPreview(() => {
     { value: 'c2', label: 'Regression', description: 'Operations replayed before every release' },
   ];
   return (
-    <div className="flex items-start gap-6">
+    <div className={styles.div7}>
       <Select options={collections} value={value} onValueChange={setValue} width="sm" />
       <Select
         options={collections}
@@ -303,13 +312,13 @@ export const OnSurface = createPreview(() => {
     </>
   );
   return (
-    <div className="flex flex-wrap gap-6">
-      <div className="flex w-[20rem] flex-col gap-3 rounded-md border border-line-subtle bg-neutral-2 p-4 dark:bg-neutral-3">
-        <span className="text-xs text-fg-default">A card</span>
+    <div className={styles.div8}>
+      <div className={styles.div9}>
+        <span className={styles.span7}>A card</span>
         {pair}
       </div>
-      <div className="flex w-[20rem] flex-col gap-3 rounded-md border border-line bg-neutral-2 p-4 shadow-md dark:bg-neutral-4">
-        <span className="text-xs text-fg-default">A floating panel</span>
+      <div className={styles.div10}>
+        <span className={styles.span8}>A floating panel</span>
         {pair}
       </div>
     </div>
@@ -357,7 +366,7 @@ export const Playground = createPreview({
   render: v => {
     const [value, setValue] = useState<string | undefined>(undefined);
     return (
-      <div className="w-[28rem]">
+      <div className={styles.div11}>
         <Select
           options={v.options}
           value={value}

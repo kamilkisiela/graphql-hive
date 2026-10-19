@@ -1,31 +1,32 @@
 import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Switch } from './switch';
+import * as styles from './switch.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/Switch';
 
 export const Sizes = createPreview(() => (
-  <div className="flex items-center gap-6">
+  <div className={styles.div}>
     <Switch size="standard" defaultChecked />
     <Switch size="small" defaultChecked />
   </div>
 ));
 
 export const States = createPreview(() => (
-  <div className="flex flex-col gap-4 text-control">
-    <label className="flex items-center gap-3">
+  <div className={styles.div2}>
+    <label className={styles.label}>
       <Switch />
       Off
     </label>
-    <label className="flex items-center gap-3">
+    <label className={styles.label2}>
       <Switch defaultChecked />
       On
     </label>
-    <label className="flex items-center gap-3">
+    <label className={styles.label3}>
       <Switch disabled />
       Disabled, off
     </label>
-    <label className="flex items-center gap-3">
+    <label className={styles.label4}>
       <Switch disabled defaultChecked />
       Disabled, on
     </label>
@@ -36,10 +37,10 @@ export const InSettingsRow = createPreview(() => {
   const [enabled, setEnabled] = useState(true);
 
   return (
-    <div className="flex w-96 items-center justify-between rounded-lg border border-line p-4">
+    <div className={styles.div3}>
       <div>
-        <div className="text-sm font-medium text-fg">Alert enabled</div>
-        <div className="text-control text-fg-secondary">
+        <div className={styles.div4}>Alert enabled</div>
+        <div className={styles.div5}>
           {enabled ? 'Evaluating every 5 minutes.' : 'Paused, no notifications will be sent.'}
         </div>
       </div>
@@ -54,7 +55,7 @@ export const InSettingsRow = createPreview(() => {
  * row's. Tab through this and the switch is skipped; hover it and the cursor does not change.
  */
 export const Decorative = createPreview(() => (
-  <div className="flex w-64 cursor-pointer items-center justify-between rounded-md px-3 py-2 text-control hover:bg-neutral-3">
+  <div className={styles.div6}>
     <span>Show deprecated fields</span>
     <Switch size="small" checked decorative />
   </div>

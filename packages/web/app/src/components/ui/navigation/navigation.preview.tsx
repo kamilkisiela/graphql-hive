@@ -3,6 +3,7 @@ import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { RouterAt } from '../../../../foundry.router';
 import { Button } from '../primitives/button/button';
 import { Navigation, type NavigationItem } from './navigation';
+import * as styles from './navigation.preview.css';
 
 export const nav: NavPath = 'Components/Navigation';
 
@@ -173,7 +174,7 @@ export const List = createPreview(() => (
 
 /** While the page that owns the links still loads, placeholders hold the space. */
 export const Loading = createPreview(() => (
-  <div className="flex flex-col gap-8">
+  <div className={styles.div}>
     <Navigation items={TARGET_ITEMS} loading />
     <Navigation variant="list" items={ALERTS_ITEMS} loading />
   </div>

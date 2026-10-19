@@ -1,12 +1,11 @@
 import { createPreview, type NavPath } from 'react-foundry';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './resizable';
+import * as styles from './resizable.preview.css';
 
 export const nav: NavPath = 'Components/Resizable';
 
 function Pane({ label }: { label: string }) {
-  return (
-    <div className="flex h-full items-center justify-center text-xs text-fg-secondary">{label}</div>
-  );
+  return <div className={styles.paneDiv}>{label}</div>;
 }
 
 /**
@@ -15,7 +14,7 @@ function Pane({ label }: { label: string }) {
  * focus. The box has the fixed height a vertical group needs for its percentages to mean anything.
  */
 export const TraceSplit = createPreview(() => (
-  <div className="h-[28rem] w-[48rem] rounded-md border border-dashed border-line">
+  <div className={styles.div}>
     <ResizablePanelGroup orientation="vertical">
       <ResizablePanel defaultSize="70%" minSize="20%" maxSize="80%">
         <Pane label="Span waterfall (defaultSize 70%, minSize 20%, maxSize 80%)" />
@@ -30,7 +29,7 @@ export const TraceSplit = createPreview(() => (
 
 /** The default orientation, side by side, with the bare divider and no grip. */
 export const Horizontal = createPreview(() => (
-  <div className="h-[16rem] w-[48rem] rounded-md border border-dashed border-line">
+  <div className={styles.div2}>
     <ResizablePanelGroup>
       <ResizablePanel defaultSize="50%" minSize="10%">
         <Pane label="Left" />

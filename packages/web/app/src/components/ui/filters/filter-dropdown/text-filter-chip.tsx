@@ -3,6 +3,7 @@ import { segmentButton, segmentSeparator } from '@/components/ui/primitives/shar
 import { FloatingSearch } from '../../primitives/floating/floating-search';
 import { Menu } from '../../primitives/floating/menu/menu';
 import { chipClass, chipRemoveButtonClass } from './filter-dropdown';
+import * as styles from './text-filter-chip.css';
 
 export type TextFilterChipProps = {
   /** Singular label shown on the leading segment. */
@@ -28,12 +29,16 @@ export function TextFilterChip({
 }: TextFilterChipProps) {
   return (
     <div role="group" aria-label={`${label} filter`} className={chipClass}>
-      <span className="px-2.5 py-1.5 text-control">{label}</span>
+      <span className={styles.textFilterChipSpan}>{label}</span>
 
       <span className={segmentSeparator}>
         <Menu
           trigger={
-            <button type="button" className={`${segmentButton} max-w-40 truncate`} title={value}>
+            <button
+              type="button"
+              className={`${segmentButton} ${styles.textFilterChipButton}`}
+              title={value}
+            >
               {value}
             </button>
           }
@@ -59,7 +64,7 @@ export function TextFilterChip({
         aria-label={`Remove ${label} filter`}
         onClick={onRemove}
       >
-        <X className="size-3.5" />
+        <X className={styles.textFilterChipX} />
       </button>
     </div>
   );

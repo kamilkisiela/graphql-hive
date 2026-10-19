@@ -1,35 +1,9 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import { Check, Minus } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
-import { focusRing } from '../shared-styles';
+import * as styles from './checkbox.css';
 
-const checkboxVariants = cva(
-  [
-    'inline-flex shrink-0 items-center justify-center rounded-sm border transition-colors data-[disabled]:cursor-not-allowed data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-    focusRing,
-  ],
-  {
-    variants: {
-      size: {
-        sm: 'size-3.5',
-        md: 'size-4.5',
-      },
-      variant: {
-        default: [
-          'border-line-strong',
-          'data-[checked]:bg-accent-tint-strong data-[checked]:border-accent-line data-[checked]:text-accent',
-          'not-[[data-disabled]]:hover:bg-neutral-6 not-[[data-disabled]]:hover:border-accent-line',
-          'not-[[data-disabled]]:data-[checked]:hover:bg-accent-tint',
-          'data-[indeterminate]:bg-accent-tint-strong data-[indeterminate]:border-accent-line data-[indeterminate]:text-accent',
-        ],
-      },
-    },
-    defaultVariants: {
-      size: 'md',
-      variant: 'default',
-    },
-  },
-);
+const checkboxVariants = lenient(styles.checkboxVariants);
 
 const iconSizeMap = {
   sm: 'size-2.5',
@@ -42,7 +16,7 @@ export function Checkbox({
   visual,
   ...props
 }: Omit<BaseCheckbox.Root.Props, 'children' | 'className'> &
-  VariantProps<typeof checkboxVariants> & {
+  NonNullable<Parameters<typeof checkboxVariants>[0]> & {
     /** When true, the checkbox is a non-interactive visual indicator (preserves hover styles, sets tabIndex: -1, aria-hidden) */
     visual?: boolean;
   }) {
@@ -60,7 +34,7 @@ export function Checkbox({
         : {})}
       {...props}
     >
-      <BaseCheckbox.Indicator className="flex items-center justify-center text-current">
+      <BaseCheckbox.Indicator className={styles.checkboxIndicator}>
         {props.indeterminate ? (
           <Minus className={iconClass} strokeWidth={3} />
         ) : (

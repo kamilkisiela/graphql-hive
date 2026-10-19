@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { StatCard } from './stat-card';
+import * as styles from './stat-card.preview.css';
 
 export const nav: NavPath = 'Components/StatCard';
 
@@ -32,7 +33,7 @@ export const Default = createPreview(() => (
  * themes: emerald-500 and red-500 are fixed colours, so they do not shift with the surface.
  */
 export const Tones = createPreview(() => (
-  <div className="grid w-[46rem] grid-cols-2 gap-4">
+  <div className={styles.div}>
     <StatCard
       title="Requests (default)"
       icon={GlobeIcon}
@@ -76,7 +77,7 @@ export const NodeValue = createPreview(() => (
     value={
       <>
         1,204,880
-        <span className="ml-2 text-sm font-normal text-critical">(3,120 errors)</span>
+        <span className={styles.span}>(3,120 errors)</span>
       </>
     }
     caption="Resolved in last 7 days"
@@ -93,7 +94,7 @@ export const WithHint = createPreview(() => (
     icon={GlobeIcon}
     hint={
       <>
-        <p className="mb-2">
+        <p className={styles.p}>
           Resolution Count is the total number of times this specific field (schema coordinate) was
           executed and returned.
         </p>
@@ -113,7 +114,7 @@ export const WithHint = createPreview(() => (
  * "Relative Request Frequency" wraps to two lines here, which is the case the icon has to survive.
  */
 export const LongTitle = createPreview(() => (
-  <div className="w-[15rem]">
+  <div className={styles.div2}>
     <StatCard
       title="Relative Request Frequency"
       icon={PercentIcon}
@@ -128,7 +129,7 @@ export const LongTitle = createPreview(() => (
  * the value sits at the same height in every card regardless of whether the title wrapped.
  */
 export const InsightsRow = createPreview(() => (
-  <div className="grid w-[62rem] grid-cols-4 gap-4">
+  <div className={styles.div3}>
     <StatCard title="Requests" icon={GlobeIcon} value="482,100" caption="Total requests served" />
     <StatCard
       title="Requests per minute"

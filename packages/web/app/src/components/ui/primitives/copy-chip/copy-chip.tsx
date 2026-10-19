@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { clsx } from 'clsx';
 import { Check, Copy } from 'lucide-react';
+import * as styles from './copy-chip.css';
 
 export function CopyChip(props: {
   value: string;
@@ -26,15 +28,15 @@ export function CopyChip(props: {
         cleanPendingTimer();
         timeoutRef.current = setTimeout(() => setCopied(false), 1200);
       }}
-      className="group inline-flex max-w-full items-center gap-1.5 rounded-md"
+      className={clsx(styles.copyChipButton, 'group')}
     >
-      <span className="min-w-0 truncate" {...props.attrs}>
+      <span className={styles.copyChipSpan} {...props.attrs}>
         {props.label ?? props.value}
       </span>
       {copied ? (
-        <Check className="h-3 w-3" />
+        <Check className={styles.copyChipCheck} />
       ) : (
-        <Copy className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
+        <Copy className={styles.copyChipCopy} />
       )}
     </button>
   );

@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '../primitives/input/input';
 import { Spinner } from '../primitives/spinner/spinner';
+import * as styles from './data-table-pagination.css';
 
 export type DataTablePaginationProps = {
   pageIndex: number;
@@ -9,13 +10,11 @@ export type DataTablePaginationProps = {
   onPageChange: (page: number) => void;
 };
 
-const barClass = 'border-line-subtle bg-surface-card flex h-9 w-full items-center border-t text-sm';
+const barClass = styles.barClass;
 
-const arrowClass =
-  'text-fg-secondary hover:text-fg disabled:hover:text-fg-secondary inline-flex size-8 items-center justify-center rounded-md transition-colors disabled:opacity-40';
+const arrowClass = styles.arrowClass;
 
-const wordClass =
-  'text-fg-secondary hover:text-fg disabled:hover:text-fg-secondary inline-flex h-8 items-center rounded-md px-2 text-xs transition-colors disabled:opacity-40';
+const wordClass = styles.wordClass;
 
 /**
  * First, previous, next and last with the page position between them and a field to jump to a
@@ -46,7 +45,11 @@ export function DataTablePagination({
   };
 
   return (
-    <nav role="navigation" aria-label="Pagination" className={`${barClass} justify-center gap-1`}>
+    <nav
+      role="navigation"
+      aria-label="Pagination"
+      className={`${barClass} ${styles.dataTablePaginationNav}`}
+    >
       <button
         type="button"
         disabled={!canPrev}
@@ -62,9 +65,9 @@ export function DataTablePagination({
         onClick={() => onPageChange(pageIndex - 1)}
         className={arrowClass}
       >
-        <ChevronLeft className="size-4" />
+        <ChevronLeft className={styles.dataTablePaginationChevronLeft} />
       </button>
-      <span className="px-2 font-mono text-xs text-fg tabular-nums" aria-live="polite">
+      <span className={styles.dataTablePaginationSpan} aria-live="polite">
         {pageIndex + 1} / {pageCount}
       </span>
       <button
@@ -74,7 +77,7 @@ export function DataTablePagination({
         onClick={() => onPageChange(pageIndex + 1)}
         className={arrowClass}
       >
-        <ChevronRight className="size-4" />
+        <ChevronRight className={styles.dataTablePaginationChevronRight} />
       </button>
       <button
         type="button"
@@ -84,7 +87,7 @@ export function DataTablePagination({
       >
         Last
       </button>
-      <label className="ml-4 inline-flex items-center gap-2 text-xs text-fg-secondary">
+      <label className={styles.dataTablePaginationLabel}>
         Go to
         <Input
           size="compact"
@@ -132,9 +135,13 @@ export function DataTableCursorPagination({
   loading = false,
 }: DataTableCursorPaginationProps) {
   return (
-    <nav role="navigation" aria-label="Pagination" className={`${barClass} justify-between px-2`}>
-      <span className="px-2 text-xs text-fg-secondary">{summary}</span>
-      <span className="inline-flex items-center gap-1">
+    <nav
+      role="navigation"
+      aria-label="Pagination"
+      className={`${barClass} ${styles.dataTableCursorPaginationNav}`}
+    >
+      <span className={styles.dataTableCursorPaginationSpan}>{summary}</span>
+      <span className={styles.dataTableCursorPaginationSpan2}>
         {loading ? <Spinner variants={{ size: 'sm' }} /> : null}
         <button
           type="button"
@@ -143,7 +150,7 @@ export function DataTableCursorPagination({
           onClick={onPrevious}
           className={arrowClass}
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className={styles.dataTableCursorPaginationChevronLeft} />
         </button>
         <button
           type="button"
@@ -152,7 +159,7 @@ export function DataTableCursorPagination({
           onClick={onNext}
           className={arrowClass}
         >
-          <ChevronRight className="size-4" />
+          <ChevronRight className={styles.dataTableCursorPaginationChevronRight} />
         </button>
       </span>
     </nav>

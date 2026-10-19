@@ -1,9 +1,11 @@
 import { type ReactNode } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { Toggle } from '@base-ui/react/toggle';
 import { ToggleGroup as BaseToggleGroup } from '@base-ui/react/toggle-group';
 import { Tooltip } from '../floating/tooltip/tooltip';
-import { controlSize, controlSurface, focusRing } from '../shared-styles';
+import { controlSize, controlSurface } from '../shared-styles';
+import * as styles from './toggle-group.css';
 
 const groupVariants = cva('inline-flex rounded-sm border', {
   variants: {
@@ -16,30 +18,7 @@ const groupVariants = cva('inline-flex rounded-sm border', {
   },
 });
 
-const itemVariants = cva(
-  [
-    'relative flex cursor-pointer items-center justify-center self-stretch font-medium transition-colors',
-    'text-fg-muted dark:text-fg-default hover:bg-neutral-4/50 hover:text-fg',
-    'data-[pressed]:bg-neutral-3 dark:data-[pressed]:bg-neutral-5 data-[pressed]:text-fg',
-    'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-    // The group draws the outer border; items only separate themselves from the one before.
-    'first:rounded-l-[inherit] last:rounded-r-[inherit] not-first:border-l not-first:[border-left-color:inherit]',
-    // A later sibling's fill would otherwise paint over the outline where it overlaps.
-    'focus-visible:z-10',
-    focusRing,
-  ],
-  {
-    variants: {
-      size: {
-        compact: 'px-3',
-        default: 'px-4',
-      },
-    },
-    defaultVariants: {
-      size: 'compact',
-    },
-  },
-);
+const itemVariants = lenient(styles.itemVariants);
 
 export type ToggleGroupOption = {
   value: string;

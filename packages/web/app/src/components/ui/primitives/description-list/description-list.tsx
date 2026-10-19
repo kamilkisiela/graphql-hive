@@ -1,38 +1,16 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import { Info } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
 import { CopyChip } from '../copy-chip/copy-chip';
 import { Tooltip } from '../floating/tooltip/tooltip';
+import * as styles from './description-list.css';
 
-const termVariants = cva('text-fg-secondary mb-1 inline-flex items-center gap-1', {
-  variants: {
-    termStyle: {
-      /** Small caps, for a details panel beside or under a table. */
-      label: 'text-[9px] font-medium uppercase tracking-[0.75px]',
-      /** Sentence case at 12px, for a card at the top of a page. */
-      title: 'text-xs font-medium',
-    },
-  },
-  defaultVariants: {
-    termStyle: 'label',
-  },
-});
+const termVariants = lenient(styles.termVariants);
 
-const rowVariants = cva('', {
-  variants: {
-    columns: {
-      /** One column per item in the row. */
-      fixed: 'grid gap-4',
-      /** Each item as wide as its value, an even gap between, wrapping on a narrow window. */
-      auto: 'flex flex-wrap gap-x-12 gap-y-3',
-    },
-  },
-  defaultVariants: {
-    columns: 'fixed',
-  },
-});
+const rowVariants = lenient(styles.rowVariants);
 
-type DescriptionListVariants = VariantProps<typeof termVariants> & VariantProps<typeof rowVariants>;
+type DescriptionListVariants = NonNullable<Parameters<typeof termVariants>[0]> &
+  NonNullable<Parameters<typeof rowVariants>[0]>;
 
 type DescriptionListItemProps = {
   term: string;
@@ -58,12 +36,12 @@ type DescriptionListProps = {
 
 // Tailwind needs full class strings to detect them — explicit map by column count.
 const COLS_CLASS: Record<number, string> = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-2',
-  3: 'grid-cols-3',
-  4: 'grid-cols-4',
-  5: 'grid-cols-5',
-  6: 'grid-cols-6',
+  1: styles.colsClass1,
+  2: styles.colsClass2,
+  3: styles.colsClass3,
+  4: styles.colsClass4,
+  5: styles.colsClass5,
+  6: styles.colsClass6,
 };
 
 function DescriptionListItem({
@@ -74,7 +52,7 @@ function DescriptionListItem({
   copyable,
   attrs,
   termStyle,
-}: DescriptionListItemProps & VariantProps<typeof termVariants>) {
+}: DescriptionListItemProps & NonNullable<Parameters<typeof termVariants>[0]>) {
   const value =
     copyable && typeof description === 'string' ? (
       <CopyChip value={description} attrs={attrs} />
@@ -90,8 +68,8 @@ function DescriptionListItem({
         {tooltip ? (
           <Tooltip
             trigger={
-              <span className="inline-flex text-fg-muted">
-                <Info className="size-3" />
+              <span className={styles.descriptionListItemSpan}>
+                <Info className={styles.descriptionListItemInfo} />
               </span>
             }
             content={tooltip}
@@ -100,7 +78,7 @@ function DescriptionListItem({
       </div>
       {/* An identifier has no spaces to wrap at, so it breaks anywhere rather than overflowing. */}
       <div
-        className={cn('text-control text-fg', mono && 'font-mono break-all')}
+        className={cn(styles.descriptionListItemDiv, mono && styles.descriptionListItemDiv2)}
         // A value that gets clipped by a narrow column can still be read on hover.
         title={typeof description === 'string' ? description : undefined}
       >
@@ -112,20 +90,24 @@ function DescriptionListItem({
 
 export function DescriptionList({ rows, variants }: DescriptionListProps) {
   return (
-    <div className="space-y-3.5">
+    <div className={styles.descriptionListDiv}>
       {rows.map((row, rowIndex) => (
         <div
           key={rowIndex}
           className={cn(
             rowVariants({ columns: variants?.columns }),
-            variants?.columns !== 'auto' && (COLS_CLASS[row.items.length] ?? 'grid-cols-1'),
+            variants?.columns !== 'auto' &&
+              (COLS_CLASS[row.items.length] ?? styles.descriptionListDiv2),
           )}
         >
           {row.items.map((item, itemIndex) => (
             <div
               key={itemIndex}
               // A long value (a commit, an email) truncates or wraps instead of pushing the row.
-              className={cn('min-w-0', variants?.columns === 'auto' && 'max-w-80')}
+              className={cn(
+                styles.descriptionListDiv3,
+                variants?.columns === 'auto' && styles.descriptionListDiv4,
+              )}
             >
               <DescriptionListItem {...item} termStyle={variants?.termStyle} />
             </div>

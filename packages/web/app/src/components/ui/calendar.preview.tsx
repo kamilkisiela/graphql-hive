@@ -3,6 +3,7 @@ import { endOfToday, subMonths } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 import { createPreview, type NavPath } from 'react-foundry';
 import { Calendar } from './calendar';
+import * as styles from './calendar.preview.css';
 
 export const nav: NavPath = 'Components/Calendar';
 
@@ -31,14 +32,14 @@ function SingleCalendar() {
 }
 
 export const DateRangePickerCalendar = createPreview(() => (
-  <div className="inline-block rounded-md border border-line bg-surface-floating">
+  <div className={styles.div}>
     <RangeCalendar />
   </div>
 ));
 
 /** One month, single selection: the shape without the range band, for the cell and today styles. */
 export const Single = createPreview(() => (
-  <div className="inline-block rounded-md border border-line bg-surface-floating">
+  <div className={styles.div2}>
     <SingleCalendar />
   </div>
 ));

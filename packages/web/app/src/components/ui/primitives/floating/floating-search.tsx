@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import * as styles from './floating-search.css';
 
 type FloatingSearchProps = {
   label: string;
@@ -21,7 +22,7 @@ export function FloatingSearch({
   standalone = false,
 }: FloatingSearchProps) {
   return (
-    <div className={cn('relative', !standalone && '-mx-2')}>
+    <div className={cn(styles.floatingSearchDiv, !standalone && styles.floatingSearchDiv2)}>
       <input
         type="text"
         role="searchbox"
@@ -35,8 +36,8 @@ export function FloatingSearch({
           }
         }}
         className={cn(
-          'w-full py-2 pr-2 pl-4 text-fg-default outline-none placeholder:text-fg-subtle',
-          standalone ? 'rounded-md' : 'rounded-t-md border-b border-line',
+          styles.floatingSearchInput,
+          standalone ? styles.floatingSearchInput2 : styles.floatingSearchInput3,
         )}
       />
     </div>

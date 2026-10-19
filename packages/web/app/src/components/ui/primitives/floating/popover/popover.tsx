@@ -4,15 +4,16 @@ import { cn } from '@/lib/utils';
 import { Popover as BasePopover } from '@base-ui/react/popover';
 import { useFloatingPortalContainer } from '../floating-portal-container';
 import { floatingVariants, type FloatingProps } from '../shared-styles';
+import * as styles from './popover.css';
 
 // One scale for both modes. `sm` is what the legacy popover defaulted to; `lg` and `xl` round
 // the two widest raw panels in the app (450 and 550px) to the rem grid.
 const widthClass = {
   auto: '',
-  sm: 'w-72',
-  md: 'w-80',
-  lg: 'w-[28rem]',
-  xl: 'w-[34rem]',
+  sm: styles.widthClassSm,
+  md: styles.widthClassMd,
+  lg: styles.widthClassLg,
+  xl: styles.widthClassXl,
 } as const;
 
 type PopoverCommonProps = Omit<FloatingProps, 'trigger'> & {
@@ -101,25 +102,27 @@ export function Popover(props: PopoverProps) {
 
   if (isStructured(props)) {
     inner = (
-      <div className={cn(widthClass[width ?? 'md'], 'p-4')}>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm text-fg">{props.title}</span>
+      <div className={cn(widthClass[width ?? 'md'], styles.popoverDiv)}>
+        <div className={styles.popoverDiv2}>
+          <span className={styles.popoverSpan}>{props.title}</span>
           {!props.hideCloseButton && (
-            <BasePopover.Close
-              className="rounded-sm p-0.5 text-fg-secondary hover:text-fg"
-              aria-label="Close"
-            >
-              <X className="size-4" />
+            <BasePopover.Close className={styles.popoverClose} aria-label="Close">
+              <X className={styles.popoverX} />
             </BasePopover.Close>
           )}
         </div>
-        {props.description && <p className="mb-3 text-sm text-fg-default">{props.description}</p>}
+        {props.description && <p className={styles.popoverP}>{props.description}</p>}
         {props.content}
       </div>
     );
   } else {
     inner = (
-      <div className={cn(widthClass[width ?? 'sm'], props.padding === 'none' ? '' : 'p-4')}>
+      <div
+        className={cn(
+          widthClass[width ?? 'sm'],
+          props.padding === 'none' ? '' : styles.popoverDiv3,
+        )}
+      >
         {props.content}
       </div>
     );
@@ -137,7 +140,7 @@ export function Popover(props: PopoverProps) {
           align={align}
           sideOffset={sideOffset}
           collisionPadding={collisionPadding}
-          className="z-50 outline-none"
+          className={styles.popoverPositioner}
         >
           <BasePopover.Popup
             className={floatingVariants({ padding: 'none' })}
@@ -157,10 +160,10 @@ function PopoverArrow() {
     <BasePopover.Arrow
       className={cn(
         'group',
-        'data-[side=bottom]:bottom-[calc(100%-2px)]',
-        'data-[side=top]:top-[calc(100%-2px)]',
-        'data-[side=left]:left-[calc(100%-8px)]',
-        'data-[side=right]:right-[calc(100%-8px)]',
+        styles.popoverArrowArrow,
+        styles.popoverArrowArrow2,
+        styles.popoverArrowArrow3,
+        styles.popoverArrowArrow4,
       )}
     >
       <svg
@@ -170,18 +173,18 @@ function PopoverArrow() {
         fill="none"
         viewBox="0 0 20 8"
         className={cn(
-          'block',
-          'group-data-[side=top]:rotate-180',
-          'group-data-[side=left]:rotate-90',
-          'group-data-[side=right]:-rotate-90',
+          styles.popoverArrowSvg,
+          styles.popoverArrowSvg2,
+          styles.popoverArrowSvg3,
+          styles.popoverArrowSvg4,
         )}
       >
         <path
-          className="fill-surface-floating"
+          className={styles.popoverArrowPath}
           d="M9.664.602 4.808 4.973A4 4 0 0 1 2.132 6H0v2h20V6h-1.465a4 4 0 0 1-2.676-1.027L11.002.603a1 1 0 0 0-1.338 0"
         />
         <path
-          className="fill-line"
+          className={styles.popoverArrowPath2}
           d="M10.333 1.345 5.477 5.716A5 5 0 0 1 2.132 7H0V6h2.132a4 4 0 0 0 2.676-1.027L9.664.603a1 1 0 0 1 1.338 0l4.857 4.37A4 4 0 0 0 18.535 6H20v1h-1.465a5 5 0 0 1-3.345-1.284z"
         />
       </svg>

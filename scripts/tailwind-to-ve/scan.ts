@@ -110,6 +110,15 @@ function classContext(
       if (calleeName(parent) === 'cva') return null; // cva is handled structurally
       return { kind: 'call', directArg: parent.arguments.includes(node as ts.Expression) };
     }
+    // `{ className: '…' }`: a props object, or a class passed through a variants function.
+    if (
+      ts.isPropertyAssignment(parent) &&
+      parent.initializer === node &&
+      ts.isIdentifier(parent.name) &&
+      (parent.name.text === 'className' || parent.name.text === 'class')
+    ) {
+      return { kind: 'call', directArg: false };
+    }
     if (ts.isVariableDeclaration(parent)) {
       return isStyleConstant(parent, fileName) ? { kind: 'constant', directArg: false } : null;
     }
@@ -190,7 +199,9 @@ export function toCamel(parts: string[]): string {
   const words = parts
     .flatMap(p => p.split(/[^A-Za-z0-9]+/))
     .filter(Boolean)
-    .map(w => w[0].toUpperCase() + w.slice(1));
+    .map(w =>
+      w === w.toUpperCase() ? w[0] + w.slice(1).toLowerCase() : w[0].toUpperCase() + w.slice(1),
+    );
   if (!words.length) return 'style';
   const joined = words.join('');
   return joined[0].toLowerCase() + joined.slice(1);
@@ -203,7 +214,8 @@ function nameHintFor(literal: ts.Node, kind: SiteKind): string {
   const fn = enclosingName(literal);
   const tag = enclosingTag(literal);
   const prop = propertyKeyHint(literal);
-  return toCamel([fn, tag || 'class', prop]);
+  const role = prop && prop !== 'className' && prop !== 'class' ? prop : tag || 'class';
+  return toCamel([fn, role]);
 }
 
 function isReference(node: ts.Expression): boolean {

@@ -1,9 +1,11 @@
 import { type ReactNode } from 'react';
 import connection from '../../../../public/images/figures/connection.svg?url';
 import ghost from '../../../../public/images/figures/ghost.svg?url';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { clsx } from 'clsx';
 import { Button } from '@/components/ui/primitives/button/button';
+import { lenient } from '@/lib/recipe';
 import { useRouter } from '@tanstack/react-router';
+import * as styles from './not-found.css';
 
 const illustrations = {
   ghost,
@@ -19,22 +21,7 @@ export const resourceAccessDescription = (
 
 // `px-6` on the root rather than on `horizontal` alone: the centred layout needs it too once the
 // viewport is narrow enough for a long title to reach the edges.
-export const notFoundVariants = cva('flex items-center justify-center px-6', {
-  variants: {
-    layout: {
-      centered: 'flex-col gap-2.5',
-      horizontal: '',
-    },
-    fullScreen: {
-      true: 'h-screen',
-      false: 'h-full flex-1 py-6',
-    },
-  },
-  defaultVariants: {
-    layout: 'centered',
-    fullScreen: false,
-  },
-});
+export const notFoundVariants = lenient(styles.notFoundVariants);
 
 type NotFoundProps = {
   /**
@@ -46,7 +33,9 @@ type NotFoundProps = {
   description?: ReactNode;
   /** Browser history back, so it is a no-op when the page was opened as a first-load deep link. */
   showBackButton?: boolean;
-  variants?: VariantProps<typeof notFoundVariants> & { illustration?: keyof typeof illustrations };
+  variants?: NonNullable<Parameters<typeof notFoundVariants>[0]> & {
+    illustration?: keyof typeof illustrations;
+  };
 };
 
 export function NotFound({
@@ -64,17 +53,17 @@ export function NotFound({
       alt=""
       width={200}
       height={200}
-      className="drag-none block size-[200px]"
+      className={clsx(styles.notFoundImg, 'drag-none')}
     />
   );
 
-  const heading = bigHeading ? <p className="mb-3 text-4xl font-medium">{bigHeading}</p> : null;
-  const titleEl = <h2 className="text-xl font-medium">{title}</h2>;
+  const heading = bigHeading ? <p className={styles.notFoundP}>{bigHeading}</p> : null;
+  const titleEl = <h2 className={styles.notFoundH2}>{title}</h2>;
   const descriptionEl = description ? (
-    <div className="text-sm text-fg-secondary">{description}</div>
+    <div className={styles.notFoundDiv}>{description}</div>
   ) : null;
   const backButton = showBackButton ? (
-    <div className="mt-2">
+    <div className={styles.notFoundDiv2}>
       <Button variant="outline" onClick={() => router.history.back()}>
         Go back
       </Button>
@@ -84,12 +73,12 @@ export function NotFound({
   if (variants?.layout === 'horizontal') {
     return (
       <div className={notFoundVariants({ ...variants })}>
-        <div className="flex max-w-[960px] flex-col items-center gap-x-6 sm:flex-row">
+        <div className={styles.notFoundDiv3}>
           {image}
-          <div className="grow text-center sm:text-left">
+          <div className={styles.notFoundDiv4}>
             {heading}
             {titleEl}
-            {descriptionEl ? <div className="mt-2">{descriptionEl}</div> : null}
+            {descriptionEl ? <div className={styles.notFoundDiv5}>{descriptionEl}</div> : null}
             {backButton}
           </div>
         </div>

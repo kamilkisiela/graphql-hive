@@ -9,6 +9,7 @@ import { Input } from './input/input';
 import { Dialog } from './overlays/dialog/dialog';
 import { StatusDot } from './status-dot/status-dot';
 import { ToggleGroup } from './toggle-group/toggle-group';
+import * as styles from './semantic-colors.preview.css';
 
 export const nav: NavPath = 'Primitives/Foundations/SemanticColors';
 
@@ -66,26 +67,24 @@ const STATES = [
 const STEP_LABELS = ['', 'muted', 'tint-strong', 'tint', 'tint-subtle'];
 
 export const Tokens = createPreview(() => (
-  <div className="flex flex-col gap-5">
+  <div className={styles.div}>
     {STATES.map(state => (
-      <div key={state.name} className="grid grid-cols-[6rem_1fr] items-center gap-4">
-        <div className="font-mono text-2xs text-fg-muted">{state.name}</div>
-        <div className="flex items-center gap-4">
-          <div className="flex gap-1">
+      <div key={state.name} className={styles.div2}>
+        <div className={styles.div3}>{state.name}</div>
+        <div className={styles.div4}>
+          <div className={styles.div5}>
             {[state.solid, ...state.steps].map((cls, index) => (
-              <div key={cls} className="flex flex-col items-center gap-1">
-                <div className={`size-9 rounded-sm border border-line ${cls}`} />
-                <span className="font-mono text-2xs text-fg-muted">
-                  {STEP_LABELS[index] || 'solid'}
-                </span>
+              <div key={cls} className={styles.div6}>
+                <div className={`${styles.div7} ${cls}`} />
+                <span className={styles.span}>{STEP_LABELS[index] || 'solid'}</span>
               </div>
             ))}
           </div>
-          <span className={`${state.text} text-sm font-medium`}>Aa</span>
-          <span className={`${state.textOnTint} ${state.steps[2]} rounded-md px-2 py-0.5 text-xs`}>
+          <span className={`${state.text} ${styles.span2}`}>Aa</span>
+          <span className={`${state.textOnTint} ${state.steps[2]} ${styles.span3}`}>
             -text on tint
           </span>
-          <span className="text-2xs text-fg-muted">{state.use}</span>
+          <span className={styles.span4}>{state.use}</span>
         </div>
       </div>
     ))}
@@ -137,36 +136,34 @@ function useStep() {
 export const Roles = createPreview(() => {
   const { theme, step } = useStep();
   return (
-    <div className="flex w-[28rem] flex-col gap-6">
-      <div className="text-sm font-medium text-fg">{theme}</div>
-      <div className="flex flex-col gap-2">
+    <div className={styles.div8}>
+      <div className={styles.div9}>{theme}</div>
+      <div className={styles.div10}>
         {SURFACES.map(role => (
-          <div key={role.token} className="flex items-center gap-3">
-            <div className={`size-8 shrink-0 rounded-sm border border-line ${role.cls}`} />
-            <span className="font-mono text-2xs text-fg-secondary">{role.token}</span>
-            <span className="ml-auto font-mono text-2xs text-fg-subtle">{step(role)}</span>
+          <div key={role.token} className={styles.div11}>
+            <div className={`${styles.div12} ${role.cls}`} />
+            <span className={styles.span5}>{role.token}</span>
+            <span className={styles.span6}>{step(role)}</span>
           </div>
         ))}
       </div>
-      <div className="flex flex-col gap-1">
+      <div className={styles.div13}>
         {FOREGROUNDS.map(role => (
-          <div key={role.token} className="flex items-baseline gap-3">
-            <span className={`${role.cls} text-sm`}>The schema check passed</span>
-            <span className="ml-auto font-mono text-2xs text-fg-subtle">
+          <div key={role.token} className={styles.div14}>
+            <span className={`${role.cls} ${styles.span7}`}>The schema check passed</span>
+            <span className={styles.span8}>
               {role.token} n{role.step}
             </span>
           </div>
         ))}
-        <div className="mt-1 self-start rounded-sm bg-surface-inverse px-2 py-1 text-xs text-fg-inverse">
-          fg-inverse on surface-inverse
-        </div>
+        <div className={styles.div15}>fg-inverse on surface-inverse</div>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className={styles.div16}>
         {LINES.map(role => (
-          <div key={role.token} className="flex items-center gap-3">
-            <div className={`h-6 w-16 shrink-0 rounded-sm border bg-surface-card ${role.cls}`} />
-            <span className="font-mono text-2xs text-fg-secondary">{role.token}</span>
-            <span className="ml-auto font-mono text-2xs text-fg-subtle">{step(role)}</span>
+          <div key={role.token} className={styles.div17}>
+            <div className={`${styles.div18} ${role.cls}`} />
+            <span className={styles.span9}>{role.token}</span>
+            <span className={styles.span10}>{step(role)}</span>
           </div>
         ))}
       </div>
@@ -175,21 +172,17 @@ export const Roles = createPreview(() => {
 });
 
 export const SurfaceNesting = createPreview(() => (
-  <div className="flex w-[28rem] flex-col gap-4 bg-surface-page p-5 text-fg-default">
-    <div className="flex flex-col gap-3 rounded-md border border-line-subtle bg-surface-card p-4">
-      <span className="text-sm font-medium text-fg">surface-card</span>
-      <div className="rounded-sm border border-line-control bg-surface-control px-3 py-2 text-sm text-fg-subtle">
-        surface-control
-      </div>
+  <div className={styles.div19}>
+    <div className={styles.div20}>
+      <span className={styles.span11}>surface-card</span>
+      <div className={styles.div21}>surface-control</div>
     </div>
-    <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface-overlay p-4 shadow-lg">
-      <span className="text-sm font-medium text-fg">surface-overlay</span>
-      <div className="rounded-sm border border-line-control bg-surface-control-raised px-3 py-2 text-sm text-fg-subtle">
-        surface-control-raised
-      </div>
-      <div className="flex flex-col rounded-md border border-line bg-surface-floating p-1 text-sm shadow-md">
-        <span className="rounded-sm px-2 py-1">surface-floating</span>
-        <span className="rounded-sm bg-surface-selected px-2 py-1 text-fg">surface-selected</span>
+    <div className={styles.div22}>
+      <span className={styles.span12}>surface-overlay</span>
+      <div className={styles.div23}>surface-control-raised</div>
+      <div className={styles.div24}>
+        <span className={styles.span13}>surface-floating</span>
+        <span className={styles.span14}>surface-selected</span>
       </div>
     </div>
   </div>
@@ -200,10 +193,10 @@ export const RaisedControls = createPreview(() => {
   const [metric, setMetric] = useState('TRAFFIC');
   const [mode, setMode] = useState('api');
   return (
-    <div className="flex w-[28rem] flex-col gap-3 bg-surface-overlay p-5">
+    <div className={styles.div25}>
       <Input onSurface="raised" placeholder="Input" />
       <Select options={METRICS} value={metric} onValueChange={setMetric} onSurface="raised" />
-      <div className="flex items-center gap-3">
+      <div className={styles.div26}>
         <Button onSurface="raised">Button</Button>
         <ToggleGroup
           options={[
@@ -229,9 +222,9 @@ const METRICS: SelectOption[] = [
 export const OnThePage = createPreview(() => {
   const [metric, setMetric] = useState('TRAFFIC');
   return (
-    <div className="grid w-[40rem] grid-cols-2 gap-4">
+    <div className={styles.div27}>
       <Card title="This is a card on the page" description="Base card: line border, no fill.">
-        <div className="flex flex-col gap-3">
+        <div className={styles.div28}>
           <Input placeholder="Input on surface-control" />
           <Select options={METRICS} value={metric} onValueChange={setMetric} />
         </div>
@@ -241,11 +234,11 @@ export const OnThePage = createPreview(() => {
         title="This is a card on a raised surface"
         description="Raised card: surface-card fill, line-subtle border."
       >
-        <div className="flex flex-col gap-3">
+        <div className={styles.div29}>
           <Input onSurface="raised" placeholder="Input on surface-control-raised" />
           <Select options={METRICS} value={metric} onValueChange={setMetric} onSurface="raised" />
-          <p className="text-sm text-fg-muted">
-            fg-muted body with <code className="rounded-sm bg-surface-code px-1">surface-code</code>
+          <p className={styles.p}>
+            fg-muted body with <code className={styles.code}>surface-code</code>
           </p>
         </div>
       </Card>
@@ -263,7 +256,7 @@ export const InAnOverlay = createPreview(() => {
       description="Every control in here takes onSurface raised."
       footer={<Button onSurface="raised">Cancel</Button>}
     >
-      <div className="flex flex-col gap-3">
+      <div className={styles.div30}>
         <Input onSurface="raised" placeholder="Input on surface-control-raised" />
         <Select options={METRICS} value={metric} onValueChange={setMetric} onSurface="raised" />
       </div>
@@ -273,10 +266,10 @@ export const InAnOverlay = createPreview(() => {
 
 /** The same four states as the components that carry them. */
 export const InComponents = createPreview(() => (
-  <div className="flex flex-col gap-3">
+  <div className={styles.div31}>
     {STATES.map(state => (
-      <div key={state.name} className="flex items-center gap-4 text-sm">
-        <span className="w-16 font-mono text-2xs text-fg-muted">{state.name}</span>
+      <div key={state.name} className={styles.div32}>
+        <span className={styles.span15}>{state.name}</span>
         <StatusDot color={state.name} />
         <Badge content={state.name} variants={{ variant: state.name }} />
         <Badge content={state.name} variants={{ variant: state.name, size: 'sm', mono: true }} />

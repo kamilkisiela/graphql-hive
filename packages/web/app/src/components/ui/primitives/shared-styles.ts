@@ -1,3 +1,5 @@
+import * as styles from './shared-styles.css';
+
 /**
  * Shared style tokens for base components (button segments, disabled state, etc.)
  *
@@ -6,11 +8,10 @@
  */
 
 /** Separator between segments in a segmented trigger (label | icon, label | count | ×). */
-export const segmentSeparator = 'border-l [border-left-color:inherit]';
+export const segmentSeparator = styles.segmentSeparator;
 
 /** Interactive segment within a segmented trigger (clickable text area). */
-export const segmentButton =
-  'px-2.5 py-1.5 text-control transition-colors cursor-pointer hover:bg-neutral-4/50 hover:text-fg';
+export const segmentButton = styles.segmentButton;
 
 export const disabledStyle = { opacity: 0.5, pointerEvents: 'none' } as const;
 
@@ -19,16 +20,14 @@ export const disabledStyle = { opacity: 0.5, pointerEvents: 'none' } as const;
  * only. An outline rather than a box-shadow ring because it needs no offset colour, so it reads
  * the same on the page, on a card and inside a popover.
  */
-export const focusRing =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+export const focusRing = styles.focusRing;
 
 /**
  * The quiet ring for text on the page rather than a control with an edge: tabs and navigation
  * links. 1px dotted. The outline follows the element's own radius, which stays with the element:
  * a radius here would also round a border the element draws, like a nav link's underline.
  */
-export const focusRingQuiet =
-  'focus-visible:outline-1 focus-visible:outline-dotted focus-visible:outline-accent';
+export const focusRingQuiet = styles.focusRingQuiet;
 
 /**
  * Vertical scroll container with a thin, muted scrollbar. Use anywhere content can overflow
@@ -36,7 +35,7 @@ export const focusRingQuiet =
  * arbitrary Tailwind properties, because older Chromium and Safari need `::-webkit-scrollbar`
  * pseudo-elements that a class string cannot express.
  */
-export const scrollArea = 'overflow-y-auto thin-scrollbar';
+export const scrollArea = styles.scrollArea;
 
 /**
  * The surface a control sits on. `base` is the page background; `raised` is a card or a floating
@@ -61,8 +60,8 @@ export type OnSurface = 'base' | 'raised';
 // `controlSurface` is the resting half on its own, for a control whose hover belongs to the
 // segments inside it (a toggle group) rather than to the whole.
 export const controlSurface = {
-  base: 'bg-surface-control border-line-control',
-  raised: 'bg-surface-control-raised border-line dark:border-line-strong',
+  base: styles.controlSurfaceBase,
+  raised: styles.controlSurfaceRaised,
 } as const satisfies Record<OnSurface, string>;
 
 export const controlOnSurface = {
@@ -88,6 +87,6 @@ export const controlOnSurface = {
 export type ControlSize = 'compact' | 'default';
 
 export const controlSize = {
-  compact: 'h-7.5 text-control',
-  default: 'h-9 text-sm',
+  compact: styles.controlSizeCompact,
+  default: styles.controlSizeDefault,
 } as const satisfies Record<ControlSize, string>;

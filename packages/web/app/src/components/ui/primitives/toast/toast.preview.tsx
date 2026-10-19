@@ -1,6 +1,7 @@
 import { createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../button/button';
 import { useToast, type ToastVariant } from './toast';
+import * as styles from './toast.preview.css';
 
 export const nav: NavPath = 'Primitives/Feedback/Toast';
 
@@ -16,7 +17,7 @@ export const nav: NavPath = 'Primitives/Feedback/Toast';
 export const Variants = createPreview(() => {
   const { toast } = useToast();
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className={styles.div}>
       <Button
         variant="outline"
         onClick={() =>
@@ -102,7 +103,7 @@ export const LongError = createPreview(() => {
 export const Duration = createPreview(() => {
   const { toast } = useToast();
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className={styles.div2}>
       <Button
         variant="outline"
         onClick={() =>

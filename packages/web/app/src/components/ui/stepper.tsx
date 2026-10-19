@@ -2,10 +2,11 @@
  * @source https://github.com/shadcn-ui/ui/pull/318
  */
 import React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { focusRing } from '@/components/ui/primitives/shared-styles';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
 import * as Stepperize from '@stepperize/react/headless';
+import * as styles from './stepper.css';
 
 //#region Types
 type StepperVariant = 'horizontal' | 'vertical' | 'circle';
@@ -146,14 +147,9 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
 
       if (variant === 'circle') {
         return (
-          <li
-            className={cn(
-              'flex shrink-0 items-center gap-4 rounded-md transition-colors',
-              className,
-            )}
-          >
+          <li className={cn(styles.defineStepperLi, className)}>
             <CircleStepIndicator currentStep={stepIndex + 1} totalSteps={steps.length} />
-            <div className="flex flex-col items-start gap-1">
+            <div className={styles.defineStepperDiv}>
               {title}
               {description}
             </div>
@@ -165,11 +161,12 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
         <>
           <li
             className={cn([
-              'group peer relative flex items-center gap-2',
-              'data-[variant=vertical]:flex-row',
-              'data-[label-orientation=vertical]:w-full',
-              'data-[label-orientation=vertical]:flex-col',
-              'data-[label-orientation=vertical]:justify-center',
+              styles.defineStepperLi2,
+              'group peer',
+              styles.defineStepperLi3,
+              styles.defineStepperLi4,
+              styles.defineStepperLi5,
+              styles.defineStepperLi6,
             ])}
             data-variant={variant}
             data-label-orientation={labelOrientation}
@@ -182,12 +179,12 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
               role="tab"
               tabIndex={dataState !== 'inactive' ? 0 : -1}
               className={cn(
-                'inline-flex size-9 items-center justify-center rounded-full text-sm font-medium transition-colors',
+                styles.defineStepperButton,
                 focusRing,
                 dataState !== 'inactive'
-                  ? 'bg-surface-selected text-fg'
-                  : 'bg-surface-card text-fg-default',
-                clickable === false && 'cursor-default',
+                  ? styles.defineStepperButton2
+                  : styles.defineStepperButton3,
+                clickable === false && styles.defineStepperButton4,
               )}
               aria-controls={`step-panel-${props.of}`}
               aria-current={isActive ? 'step' : undefined}
@@ -208,7 +205,7 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
                 disabled={props.disabled}
               />
             )}
-            <div className="flex flex-col items-start">
+            <div className={styles.defineStepperDiv2}>
               {title}
               {description}
             </div>
@@ -226,7 +223,7 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
           {variant === 'vertical' && (
             <div>
               {!isLast && (
-                <div className="flex justify-center ps-5">
+                <div className={styles.defineStepperDiv3}>
                   <StepperSeparator
                     orientation="vertical"
                     isLast={isLast}
@@ -235,7 +232,7 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
                   />
                 </div>
               )}
-              <div className="my-3 flex-1 ps-4">{panel}</div>
+              <div className={styles.defineStepperDiv4}>{panel}</div>
             </div>
           )}
         </>
@@ -254,7 +251,7 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
     },
     StepperControls: ({ children, className, ...props }) => {
       return (
-        <div className={cn('flex justify-end gap-4', className)} {...props}>
+        <div className={cn(styles.defineStepperDiv5, className)} {...props}>
           {children}
         </div>
       );
@@ -268,7 +265,7 @@ const defineStepper = <const Steps extends readonly Stepperize.Step[]>(
 
 const StepperTitle = ({ children, className, ...props }: React.ComponentProps<'h4'>) => {
   return (
-    <h4 className={cn('text-base font-medium', className)} {...props}>
+    <h4 className={cn(styles.stepperTitleH4, className)} {...props}>
       {children}
     </h4>
   );
@@ -280,7 +277,7 @@ const StepperTitle = ({ children, className, ...props }: React.ComponentProps<'h
 
 const StepperDescription = ({ children, className, ...props }: React.ComponentProps<'p'>) => {
   return (
-    <p className={cn('text-sm text-fg-secondary', className)} {...props}>
+    <p className={cn(styles.stepperDescriptionP, className)} {...props}>
       {children}
     </p>
   );
@@ -300,7 +297,7 @@ const StepperSeparator = ({
   isLast: boolean;
   state: string;
   disabled?: boolean;
-} & VariantProps<typeof classForSeparator>) => {
+} & NonNullable<Parameters<typeof classForSeparator>[0]>) => {
   if (isLast) {
     return null;
   }
@@ -337,7 +334,7 @@ const CircleStepIndicator = ({
       aria-valuemin={1}
       aria-valuemax={totalSteps}
       tabIndex={-1}
-      className="relative inline-flex items-center justify-center"
+      className={styles.circleStepIndicatorDiv}
     >
       <svg width={size} height={size}>
         <title>Step Indicator</title>
@@ -348,7 +345,7 @@ const CircleStepIndicator = ({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-fg-secondary"
+          className={styles.circleStepIndicatorCircle}
         />
         <circle
           cx={size / 2}
@@ -359,12 +356,12 @@ const CircleStepIndicator = ({
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
-          className="text-fg-default transition-all duration-300 ease-in-out"
+          className={styles.circleStepIndicatorCircle2}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-medium" aria-live="polite">
+      <div className={styles.circleStepIndicatorDiv2}>
+        <span className={styles.circleStepIndicatorSpan} aria-live="polite">
           {currentStep} of {totalSteps}
         </span>
       </div>
@@ -376,34 +373,9 @@ const CircleStepIndicator = ({
 
 //#region Styles
 
-const listVariants = cva('flex gap-2', {
-  variants: {
-    variant: {
-      horizontal: 'flex-row items-center justify-between flex-wrap',
-      vertical: 'flex-col',
-      circle: 'flex-row items-center justify-between',
-    },
-  },
-});
+const listVariants = lenient(styles.listVariants);
 
-const classForSeparator = cva(
-  [
-    'bg-line-subtle',
-    'data-[state=completed]:bg-fg-default data-disabled:opacity-50',
-    'transition-all duration-300 ease-in-out',
-  ],
-  {
-    variants: {
-      orientation: {
-        horizontal: 'h-0.5 flex-1',
-        vertical: 'h-full w-0.5',
-      },
-      labelOrientation: {
-        vertical: 'absolute left-[calc(50%+30px)] right-[calc(-50%+20px)] top-5 block shrink-0',
-      },
-    },
-  },
-);
+const classForSeparator = lenient(styles.classForSeparator);
 
 //#endregion Styles
 

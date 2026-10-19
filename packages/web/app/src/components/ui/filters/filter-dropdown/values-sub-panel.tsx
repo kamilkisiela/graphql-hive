@@ -8,6 +8,7 @@ import {
   menuPanelInset,
 } from '../../primitives/floating/shared-styles';
 import { SEARCH_VISIBILITY_THRESHOLD } from './filter-content';
+import * as styles from './values-sub-panel.css';
 
 type ValuesSubPanelProps = {
   itemName: string;
@@ -73,7 +74,7 @@ export function ValuesSubPanel({
       )}
 
       {/* Values list */}
-      <div className={`max-h-64 ${floatingScrollArea}`}>
+      <div className={`${styles.valuesSubPanelDiv} ${floatingScrollArea}`}>
         {/* All values toggle */}
         <MenuItem closeOnClick={false} onClick={toggleAllValues}>
           <Checkbox checked={allSelected} size="sm" visual />
@@ -86,7 +87,7 @@ export function ValuesSubPanel({
           return (
             <MenuItem key={val} closeOnClick={false} onClick={() => toggleValue(val)}>
               <Checkbox checked={checked} size="sm" visual />
-              <span className="truncate">{val}</span>
+              <span className={styles.valuesSubPanelSpan}>{val}</span>
             </MenuItem>
           );
         })}

@@ -8,6 +8,7 @@ import { Button } from '../button/button';
 import { Input } from '../input/input';
 import { RadioGroup } from '../radio-group/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './form';
+import * as styles from './form.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/Form';
 
@@ -39,7 +40,7 @@ function AlertForm({
   }, [submitOnMount]);
 
   return (
-    <div className="w-80">
+    <div className={styles.alertFormDiv}>
       <Form form={form} onSubmit={() => {}}>
         <FormField
           control={form.control}

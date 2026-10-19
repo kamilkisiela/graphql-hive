@@ -1,20 +1,21 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../button/button';
 import { Spinner } from './spinner';
+import * as styles from './spinner.preview.css';
 
 export const nav: NavPath = 'Primitives/Spinner';
 
 export const Sizes = createPreview(() => (
-  <div className="flex items-end gap-8 text-xs text-fg-secondary">
-    <span className="flex flex-col items-center gap-2">
+  <div className={styles.div}>
+    <span className={styles.span}>
       <Spinner variants={{ size: 'sm' }} />
       sm
     </span>
-    <span className="flex flex-col items-center gap-2">
+    <span className={styles.span2}>
       <Spinner />
       default
     </span>
-    <span className="flex flex-col items-center gap-2">
+    <span className={styles.span3}>
       <Spinner variants={{ size: 'lg' }} />
       lg
     </span>
@@ -22,26 +23,26 @@ export const Sizes = createPreview(() => (
 ));
 
 export const InContext = createPreview(() => (
-  <div className="flex flex-col gap-6 text-sm">
-    <div className="flex h-24 items-center justify-center rounded-md border border-line text-center">
+  <div className={styles.div2}>
+    <div className={styles.div3}>
       <Spinner />
     </div>
-    <div className="flex h-9 items-center justify-between rounded-md border border-line-subtle bg-neutral-2 px-4 text-xs dark:bg-neutral-3">
-      <span className="text-fg-secondary">Page 2</span>
-      <span className="inline-flex items-center gap-2">
+    <div className={styles.div4}>
+      <span className={styles.span4}>Page 2</span>
+      <span className={styles.span5}>
         <Spinner variants={{ size: 'sm' }} />
-        <span className="text-fg-secondary">‹ ›</span>
+        <span className={styles.span6}>‹ ›</span>
       </span>
     </div>
-    <div className="flex flex-col items-center">
+    <div className={styles.div5}>
       <Spinner />
-      <div className="mt-2 text-xs">Loading app deployments</div>
+      <div className={styles.div6}>Loading app deployments</div>
     </div>
   </div>
 ));
 
 export const InButton = createPreview(() => (
-  <div className="flex items-center gap-4">
+  <div className={styles.div7}>
     <Button>
       <Spinner variants={{ size: 'sm', tone: 'current' }} />
       Creating...

@@ -7,6 +7,7 @@ import { Select } from './floating/select/select';
 import { Input } from './input/input';
 import { Switch } from './switch/switch';
 import { Tabs } from './tabs/tabs';
+import * as styles from './focus.preview.css';
 
 export const nav: NavPath = 'Primitives/Foundations/Focus';
 
@@ -26,8 +27,8 @@ export const TabThrough = createPreview(() => {
   const [on, setOn] = useState(true);
   const [value, setValue] = useState('p95');
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className={styles.div}>
+      <div className={styles.div2}>
         <Button variant="primary">Save alert</Button>
         <Button variant="outline">Cancel</Button>
         <Button variant="ghost">Skip</Button>
@@ -35,7 +36,7 @@ export const TabThrough = createPreview(() => {
         <Button label="Last 7 days" />
         <Button layout="iconOnly" icon={Copy} aria-label="Copy" />
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={styles.div3}>
         <Select
           options={[
             { value: 'p50', label: 'p50 latency' },
@@ -59,9 +60,13 @@ export const TabThrough = createPreview(() => {
 export const TextOnThePage = createPreview(() => (
   <Tabs
     items={[
-      { value: 'summary', label: 'Summary', content: <p className="text-sm">Summary</p> },
-      { value: 'schema', label: 'Schema', content: <p className="text-sm">Schema</p> },
-      { value: 'supergraph', label: 'Supergraph', content: <p className="text-sm">Supergraph</p> },
+      { value: 'summary', label: 'Summary', content: <p className={styles.p}>Summary</p> },
+      { value: 'schema', label: 'Schema', content: <p className={styles.p2}>Schema</p> },
+      {
+        value: 'supergraph',
+        label: 'Supergraph',
+        content: <p className={styles.p3}>Supergraph</p>,
+      },
     ]}
     defaultValue="summary"
   />
@@ -69,7 +74,7 @@ export const TextOnThePage = createPreview(() => (
 
 /** The same controls on a raised surface: the outline sits off the edge, so the fill does not matter. */
 export const OnRaised = createPreview(() => (
-  <div className="flex w-[26rem] flex-wrap items-center gap-3 rounded-md border border-line-subtle bg-neutral-2 p-4 dark:bg-neutral-3">
+  <div className={styles.div4}>
     <Button variant="outline">On a card</Button>
     <Button label="Raised trigger" onSurface="raised" />
     <Switch defaultChecked aria-label="Enable" />

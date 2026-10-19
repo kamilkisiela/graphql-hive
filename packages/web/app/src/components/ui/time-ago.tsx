@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
 import { format } from 'date-fns';
+import * as styles from './time-ago.css';
 
 const MINUTE = 60;
 const HOUR = MINUTE * 60;
@@ -75,7 +76,7 @@ export const TimeAgo = ({
     <time
       dateTime={formattedDate}
       title={formattedDate}
-      className={clsx('cursor-default whitespace-nowrap', className)}
+      className={clsx(styles.timeAgoTime, className)}
     >
       {formatTimeAgo(dateObj, now)}
     </time>

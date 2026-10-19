@@ -156,6 +156,7 @@ import {
 } from '@/gql/graphql';
 import type { DocumentCollectionOperation } from '@/lib/hooks/laboratory/use-collections';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as styles from './form.call-sites.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/Form/Component Examples';
 
@@ -337,14 +338,14 @@ export const Inventory = createPreview({
 
 function Submitted(props: { values: unknown }) {
   return props.values ? (
-    <pre className="mt-4 text-xs text-fg-default">{JSON.stringify(props.values, null, 2)}</pre>
+    <pre className={styles.submittedPre}>{JSON.stringify(props.values, null, 2)}</pre>
   ) : null;
 }
 
 /** A slot the page fills with a component that runs its own query. */
 function QueryBacked(props: { name: string }) {
   return (
-    <div className="rounded-sm border border-dashed border-line-strong p-3 text-xs text-fg-secondary">
+    <div className={styles.queryBackedDiv}>
       {props.name} runs its own query, so the page supplies it.
     </div>
   );
@@ -361,11 +362,7 @@ const panelWidth = {
 
 /** The raised panel a dialog, sheet or card puts the form on, at that overlay's width. */
 function Raised(props: { children: ReactNode; width: keyof typeof panelWidth }) {
-  return (
-    <div className={`rounded-md border border-line bg-neutral-3 p-6 ${panelWidth[props.width]}`}>
-      {props.children}
-    </div>
-  );
+  return <div className={`${styles.raisedDiv} ${panelWidth[props.width]}`}>{props.children}</div>;
 }
 
 const Submit = (label: string) => (
@@ -397,7 +394,7 @@ function SignInExample() {
           onSubmit={setSubmitted}
           submit={Submit('Sign in')}
           forgotPasswordLink={() => (
-            <a href="#" tabIndex={-1} className="ml-auto inline-block text-sm underline">
+            <a href="#" tabIndex={-1} className={styles.signInExampleA}>
               Forgot your password?
             </a>
           )}
@@ -444,7 +441,7 @@ function ResetPasswordExample() {
       origin="base"
       note="Two steps on the same page: the email that gets the link, then the new password once the link is followed."
     >
-      <div className="flex flex-wrap gap-8">
+      <div className={styles.resetPasswordExampleDiv}>
         <Raised width="card">
           <ResetPasswordEmailForm
             form={emailForm}
@@ -490,7 +487,7 @@ function SSOExample() {
 export const Auth = createPreview({
   label: 'Auth',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div}>
       <SignInExample />
       <SignUpExample />
       <ResetPasswordExample />
@@ -516,7 +513,7 @@ function CreateOrganizationExample() {
       origin="base"
       note="Centered on the page, on a card of its own; the form brings its container."
     >
-      <div className="w-[56rem]">
+      <div className={styles.createOrganizationExampleDiv}>
         <CreateOrganizationForm form={form} onSubmit={setSubmitted} />
         <Submitted values={submitted} />
       </div>
@@ -617,7 +614,7 @@ function OperationExample() {
 export const Create = createPreview({
   label: 'Create',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div2}>
       <CreateOrganizationExample />
       <CreateProjectExample />
       <CreateTargetExample />
@@ -645,7 +642,7 @@ function SlugExample(props: {
   });
   return (
     <CallSite source={props.source} origin="base">
-      <div className="w-[36rem]">
+      <div className={styles.slugExampleDiv}>
         <SlugForm form={form} onSubmit={setSubmitted} prefixText={props.prefixText} />
         <Submitted values={submitted} />
       </div>
@@ -656,7 +653,7 @@ function SlugExample(props: {
 export const Slugs = createPreview({
   label: 'Slugs',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div3}>
       <SlugExample
         noun="Organization"
         slug="the-guild"
@@ -696,7 +693,7 @@ function AuditLogsExample() {
   });
   return (
     <CallSite source="pages/organization-settings.tsx" origin="base">
-      <div className="w-[36rem]">
+      <div className={styles.auditLogsExampleDiv}>
         <AuditLogsForm form={form} onSubmit={setSubmitted} />
         <Submitted values={submitted} />
       </div>
@@ -753,7 +750,7 @@ function TransferOwnershipExample() {
 export const OrganizationSettings = createPreview({
   label: 'Organization settings',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div4}>
       <AuditLogsExample />
       <UserSettingsExample />
       <TransferOwnershipExample />
@@ -848,7 +845,7 @@ function RoleExample() {
 export const Members = createPreview({
   label: 'Members',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div5}>
       <InvitationExample />
       <RoleExample />
     </div>
@@ -985,7 +982,7 @@ function RegisterDomainExample() {
 export const SingleSignOn = createPreview({
   label: 'Single sign-on',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div6}>
       <MetadataUrlExample />
       <ConnectProviderExample editing={false} />
       <ConnectProviderExample editing />
@@ -1011,7 +1008,7 @@ function ExternalCompositionExample() {
       origin="base"
       note="The reachability check sits beside the endpoint until the fields are edited. The submit label follows the composition mode."
     >
-      <div className="w-[36rem]">
+      <div className={styles.externalCompositionExampleDiv}>
         <ExternalCompositionForm
           form={form}
           onSubmit={setSubmitted}
@@ -1085,7 +1082,7 @@ function AlertExample() {
 export const ProjectSettings = createPreview({
   label: 'Project settings',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div7}>
       <ExternalCompositionExample />
       <ChannelExample />
       <AlertExample />
@@ -1106,7 +1103,7 @@ function GraphqlEndpointExample() {
   });
   return (
     <CallSite source="pages/target-settings.tsx (GraphQLEndpointUrl)" origin="base">
-      <div className="w-[36rem]">
+      <div className={styles.graphqlEndpointExampleDiv}>
         <GraphqlEndpointForm form={form} onSubmit={setSubmitted} />
         <Submitted values={submitted} />
       </div>
@@ -1126,12 +1123,12 @@ function DangerousChangesExample() {
       origin="base"
       note="A changed row gets a pending dot until it is saved. The status beside the button is the page's own saved / just saved / unsaved label."
     >
-      <div className="w-[36rem]">
+      <div className={styles.dangerousChangesExampleDiv}>
         <DangerousChangesForm
           form={form}
           onSubmit={setSubmitted}
           enabled
-          status={<span className="text-sm text-fg-secondary">Saved</span>}
+          status={<span className={styles.dangerousChangesExampleSpan}>Saved</span>}
         />
         <Submitted values={submitted} />
       </div>
@@ -1158,7 +1155,7 @@ function AppDeploymentProtectionExample() {
       origin="base"
       note="Numbers inside sentences, so their messages are listed under the rules instead of under each field."
     >
-      <div className="w-[36rem]">
+      <div className={styles.appDeploymentProtectionExampleDiv}>
         <AppDeploymentProtectionForm form={form} onSubmit={setSubmitted} enabled />
         <Submitted values={submitted} />
       </div>
@@ -1192,7 +1189,7 @@ function BreakingChangesExample() {
       origin="base"
       note="The period is capped by the organization's retention, so the schema is built per page. The two exclusion pickers run their own queries."
     >
-      <div className="w-[48rem]">
+      <div className={styles.breakingChangesExampleDiv}>
         <BreakingChangesForm
           form={form}
           onSubmit={setSubmitted}
@@ -1211,7 +1208,7 @@ function BreakingChangesExample() {
 export const TargetSettings = createPreview({
   label: 'Target settings',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div8}>
       <GraphqlEndpointExample />
       <DangerousChangesExample />
       <AppDeploymentProtectionExample />
@@ -1303,7 +1300,7 @@ function RegistryTokenExample() {
 export const TargetTokensAndContracts = createPreview({
   label: 'Target tokens and contracts',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div9}>
       <ContractExample />
       <CdnTokenExample />
       <RegistryTokenExample />

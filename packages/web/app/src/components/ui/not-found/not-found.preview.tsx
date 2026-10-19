@@ -1,5 +1,6 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { NotFound } from './not-found';
+import * as styles from './not-found.preview.css';
 
 export const nav: NavPath = 'Components/NotFound';
 
@@ -9,7 +10,7 @@ export const nav: NavPath = 'Components/NotFound';
  * whole canvas.
  */
 export const Default = createPreview(() => (
-  <div className="h-[26rem] w-[48rem] rounded-md border border-dashed border-line">
+  <div className={styles.div}>
     <NotFound
       title="Schema Version not found."
       description="This schema version does not seem to exist anymore."
@@ -19,7 +20,7 @@ export const Default = createPreview(() => (
 
 /** Without the back button, the shape the organization layout uses. */
 export const WithoutBackButton = createPreview(() => (
-  <div className="h-[26rem] w-[48rem] rounded-md border border-dashed border-line">
+  <div className={styles.div2}>
     <NotFound
       title="Organization not found"
       description="Use the empty dropdown in the header to select an organization to which you have access."
@@ -33,7 +34,7 @@ export const WithoutBackButton = createPreview(() => (
  * only combination that ships: it replaces the whole page rather than a layout's content region.
  */
 export const BigHeading = createPreview(() => (
-  <div className="h-[34rem] w-[48rem] overflow-hidden rounded-md border border-dashed border-line">
+  <div className={styles.div3}>
     <NotFound bigHeading="404" title="Page Not Found" />
   </div>
 ));
@@ -44,7 +45,7 @@ export const BigHeading = createPreview(() => (
  * check that fallback.
  */
 export const Horizontal = createPreview(() => (
-  <div className="h-[26rem] w-[60rem] rounded-md border border-dashed border-line">
+  <div className={styles.div4}>
     <NotFound
       variants={{ layout: 'horizontal', illustration: 'connection' }}
       title="404 - This project does not seem to exist."
@@ -60,7 +61,7 @@ export const Horizontal = createPreview(() => (
 
 /** Horizontal at a narrow width, where it falls back to the stacked arrangement. */
 export const HorizontalNarrow = createPreview(() => (
-  <div className="h-[34rem] w-[22rem] rounded-md border border-dashed border-line">
+  <div className={styles.div5}>
     <NotFound
       variants={{ layout: 'horizontal', illustration: 'connection' }}
       title="404 - This project does not seem to exist."
@@ -76,11 +77,11 @@ export const HorizontalNarrow = createPreview(() => (
 
 /** Both illustrations side by side, since `connection` is only ever seen in horizontal today. */
 export const Illustrations = createPreview(() => (
-  <div className="grid w-[60rem] grid-cols-2 gap-4">
-    <div className="h-[24rem] rounded-md border border-dashed border-line">
+  <div className={styles.div6}>
+    <div className={styles.div7}>
       <NotFound variants={{ illustration: 'ghost' }} title="ghost" showBackButton={false} />
     </div>
-    <div className="h-[24rem] rounded-md border border-dashed border-line">
+    <div className={styles.div8}>
       <NotFound
         variants={{ illustration: 'connection' }}
         title="connection"
@@ -94,7 +95,7 @@ export const Illustrations = createPreview(() => (
 export const AllCallSites = createPreview({
   label: 'All 8 call sites',
   render: () => (
-    <div className="flex w-[60rem] flex-col gap-6">
+    <div className={styles.div9}>
       {[
         {
           site: 'router.tsx — route-level 404 (fullScreen)',
@@ -174,10 +175,8 @@ export const AllCallSites = createPreview({
         },
       ].map(({ site, node }) => (
         <div key={site}>
-          <p className="mb-2 text-xs text-fg-secondary">{site}</p>
-          <div className="h-[24rem] overflow-hidden rounded-md border border-dashed border-line">
-            {node}
-          </div>
+          <p className={styles.p}>{site}</p>
+          <div className={styles.div10}>{node}</div>
         </div>
       ))}
     </div>
@@ -210,12 +209,6 @@ export const Playground = createPreview({
     // `fullScreen` is `h-screen`, so boxing it in a fixed height is a contradiction: the component
     // would be taller than its container and centre its content below the visible area. Hand it
     // the canvas instead, which is the only honest way to show it.
-    return v.variants?.fullScreen ? (
-      notFound
-    ) : (
-      <div className="h-[30rem] w-[52rem] overflow-hidden rounded-md border border-dashed border-line">
-        {notFound}
-      </div>
-    );
+    return v.variants?.fullScreen ? notFound : <div className={styles.div11}>{notFound}</div>;
   },
 });

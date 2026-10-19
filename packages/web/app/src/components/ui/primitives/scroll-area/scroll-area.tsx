@@ -1,24 +1,25 @@
 import { forwardRef, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { ScrollArea as BaseScrollArea } from '@base-ui/react/scroll-area';
+import * as styles from './scroll-area.css';
 
 const heightClass = {
-  sm: 'h-40',
-  md: 'h-60',
-  lg: 'h-90',
+  sm: styles.heightClassSm,
+  md: styles.heightClassMd,
+  lg: styles.heightClassLg,
 } as const;
 
 const maxHeightClass = {
-  sm: 'max-h-40',
-  md: 'max-h-60',
-  lg: 'max-h-90',
-  screen: 'max-h-screen',
+  sm: styles.maxHeightClassSm,
+  md: styles.maxHeightClassMd,
+  lg: styles.maxHeightClassLg,
+  screen: styles.maxHeightClassScreen,
 } as const;
 
 const viewportOverflowClass = {
-  vertical: 'overflow-y-auto overflow-x-hidden',
-  horizontal: 'overflow-x-auto overflow-y-hidden',
-  both: 'overflow-auto',
+  vertical: styles.viewportOverflowClassVertical,
+  horizontal: styles.viewportOverflowClassHorizontal,
+  both: styles.viewportOverflowClassBoth,
 } as const;
 
 // Overlaid, and only drawn while the pointer is over the area or it is scrolling. Base UI sets
@@ -31,7 +32,7 @@ const scrollbarClass = [
   'hover:opacity-100 hover:delay-0',
 ].join(' ');
 
-const thumbClass = 'bg-neutral-7 hover:bg-neutral-8 rounded-full';
+const thumbClass = styles.thumbClass;
 
 type ScrollAreaProps = {
   children: ReactNode;
@@ -61,10 +62,11 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(function S
       // counting as the area's own: a grid or flex parent sizing its track to min-content would
       // otherwise grow to the longest unbreakable row and push past its neighbours.
       className={cn(
-        'group/scroll-area relative flex flex-col overflow-hidden contain-inline-size',
+        styles.scrollAreaRoot,
+        'group/scroll-area',
         height && heightClass[height],
         maxHeight && maxHeightClass[maxHeight],
-        fill && 'min-h-0 grow',
+        fill && styles.scrollAreaRoot2,
       )}
     >
       <BaseScrollArea.Viewport
@@ -72,8 +74,8 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(function S
         // The scrollbar is overlaid, so the viewport gives up the same gutter a native one would
         // take, but only once there is something to scroll, so short content sits flush.
         className={cn(
-          'min-h-0 flex-1 overscroll-contain',
-          'group-data-[has-overflow-x]/scroll-area:pb-2.5 group-data-[has-overflow-y]/scroll-area:pr-2.5',
+          styles.scrollAreaViewport,
+          styles.scrollAreaViewport2,
           viewportOverflowClass[axis],
         )}
       >
@@ -91,17 +93,17 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>(function S
       {axis !== 'horizontal' ? (
         <BaseScrollArea.Scrollbar
           orientation="vertical"
-          className={cn(scrollbarClass, 'inset-y-1 right-0.5 w-2 justify-center')}
+          className={cn(scrollbarClass, styles.scrollAreaScrollbar)}
         >
-          <BaseScrollArea.Thumb className={cn(thumbClass, 'w-full')} />
+          <BaseScrollArea.Thumb className={cn(thumbClass, styles.scrollAreaThumb)} />
         </BaseScrollArea.Scrollbar>
       ) : null}
       {axis !== 'vertical' ? (
         <BaseScrollArea.Scrollbar
           orientation="horizontal"
-          className={cn(scrollbarClass, 'inset-x-1 bottom-0.5 h-2 flex-col justify-center')}
+          className={cn(scrollbarClass, styles.scrollAreaScrollbar2)}
         >
-          <BaseScrollArea.Thumb className={cn(thumbClass, 'h-full')} />
+          <BaseScrollArea.Thumb className={cn(thumbClass, styles.scrollAreaThumb2)} />
         </BaseScrollArea.Scrollbar>
       ) : null}
       {axis === 'both' ? <BaseScrollArea.Corner /> : null}

@@ -4,6 +4,7 @@ import { Button } from '../../button/button';
 import { Input } from '../../input/input';
 import { ScrollArea } from '../../scroll-area/scroll-area';
 import { Sheet } from './sheet';
+import * as styles from './sheet.preview.css';
 
 export const nav: NavPath = 'Primitives/Overlays/Sheet';
 
@@ -15,17 +16,17 @@ export const nav: NavPath = 'Primitives/Overlays/Sheet';
 
 function TokenFields({ count = 3 }: { count?: number }) {
   return (
-    <div className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5 text-sm">
+    <div className={styles.tokenFieldsDiv}>
+      <label className={styles.tokenFieldsLabel}>
         Title
         <Input onSurface="raised" placeholder="CI deploy token" />
       </label>
-      <label className="flex flex-col gap-1.5 text-sm">
+      <label className={styles.tokenFieldsLabel2}>
         Description
         <Input onSurface="raised" placeholder="Publishes the gateway schema from CI" />
       </label>
       {Array.from({ length: count }, (_, i) => (
-        <label key={i} className="flex flex-col gap-1.5 text-sm">
+        <label key={i} className={styles.tokenFieldsLabel3}>
           Permission {i + 1}
           <Input onSurface="raised" placeholder="schema:publish" />
         </label>
@@ -61,7 +62,7 @@ export const Default = createPreview(() => {
 
 /** `md` is the default; `half` is the trace panels. */
 export const Widths = createPreview(() => (
-  <div className="flex flex-wrap gap-3">
+  <div className={styles.div}>
     {(['md', 'lg', 'half'] as const).map(width => (
       <Sheet
         key={width}
@@ -106,20 +107,20 @@ export const EdgeToEdge = createPreview(() => (
     title={
       <>
         Span Details
-        <span className="ml-2 font-mono font-normal text-fg-secondary">a3f9</span>
+        <span className={styles.span}>a3f9</span>
       </>
     }
     description="Span ID: a3f9c2d1e8b74f60"
   >
     <ScrollArea fill>
-      <ul className="divide-y divide-line border-t border-line text-sm">
+      <ul className={styles.ul}>
         {[
           'http.method GET',
           'http.route /graphql',
           'graphql.operation.name GetUser',
           'db.system postgres',
         ].map(row => (
-          <li key={row} className="px-6 py-3 font-mono text-fg-default">
+          <li key={row} className={styles.li}>
             {row}
           </li>
         ))}

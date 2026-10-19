@@ -1,13 +1,14 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { StatusDot } from './status-dot';
+import * as styles from './status-dot.preview.css';
 
 export const nav: NavPath = 'Primitives/StatusDot';
 
 /** One solid dot per state, on the semantic tokens. */
 export const Colors = createPreview(() => (
-  <div className="flex items-center gap-6 text-sm text-fg-default">
+  <div className={styles.div}>
     {(['success', 'warning', 'critical', 'info', 'neutral'] as const).map(color => (
-      <span key={color} className="inline-flex items-center gap-2">
+      <span key={color} className={styles.span}>
         <StatusDot color={color} />
         {color}
       </span>
@@ -16,8 +17,8 @@ export const Colors = createPreview(() => (
 ));
 
 export const Sizes = createPreview(() => (
-  <div className="flex items-center gap-6 text-sm text-fg-default">
-    <span className="inline-flex items-center gap-2">
+  <div className={styles.div2}>
+    <span className={styles.span2}>
       <StatusDot color="success" />
       default, 8px
     </span>
@@ -26,16 +27,16 @@ export const Sizes = createPreview(() => (
 
 /** Beside a label that already names the state, the dot is decoration and hidden from assistive tech. */
 export const BesideText = createPreview(() => (
-  <div className="flex flex-col gap-2 text-xs">
-    <span className="inline-flex items-center gap-1.5 text-fg">
+  <div className={styles.div3}>
+    <span className={styles.span3}>
       <StatusDot color="critical" />
       Critical
     </span>
-    <span className="inline-flex items-center gap-1.5 text-fg">
+    <span className={styles.span4}>
       <StatusDot color="warning" />
       Warning
     </span>
-    <span className="inline-flex items-center gap-1.5 text-fg">
+    <span className={styles.span5}>
       <StatusDot color="info" />
       Info
     </span>
@@ -44,7 +45,7 @@ export const BesideText = createPreview(() => (
 
 /** Alone, as in the checks list where the dot is the only sign a check failed, it carries a label. */
 export const Alone = createPreview(() => (
-  <div className="flex items-center gap-4 text-sm text-fg-default">
+  <div className={styles.div4}>
     <StatusDot color="success" label="Passed" />
     <StatusDot color="critical" label="Failed" />
   </div>

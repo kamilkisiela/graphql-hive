@@ -1,23 +1,14 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ComponentProps, PropsWithChildren } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
 import { LinkOptions, RegisteredRouter, Link as RouterLink } from '@tanstack/react-router';
+import * as styles from './link.css';
 
-const linkVariants = cva('font-medium transition-colors', {
-  variants: {
-    variant: {
-      primary: 'text-accent hover:underline',
-      secondary: 'text-fg-secondary hover:text-fg-default',
-    },
-  },
-  defaultVariants: {
-    variant: 'primary',
-  },
-});
+const linkVariants = lenient(styles.linkVariants);
 
 type LinkProps<TTo extends string> = LinkOptions<RegisteredRouter, '/', TTo> &
-  VariantProps<typeof linkVariants> &
+  NonNullable<Parameters<typeof linkVariants>[0]> &
   PropsWithChildren<Pick<ComponentProps<'a'>, 'href' | 'className' | 'target' | 'ref' | 'rel'>>;
 
 export const Link = <TTo extends string = '.'>({
@@ -32,14 +23,14 @@ export const Link = <TTo extends string = '.'>({
   // internal location and drop the origin, so it renders as a plain anchor.
   if (props.as === 'a' || (props.href && !('to' in props))) {
     return (
-      <a className={cn(linkVariants({ variant, className }))} {...props}>
+      <a className={cn(linkVariants({ variant }), className)} {...props}>
         {children}
       </a>
     );
   }
 
   return (
-    <RouterLink href="" className={cn(linkVariants({ variant, className }))} {...props}>
+    <RouterLink href="" className={cn(linkVariants({ variant }), className)} {...props}>
       {children}
     </RouterLink>
   );

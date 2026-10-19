@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import type { MenuSection } from '../../primitives/floating/menu/menu';
 import { FilterChips, FilterMenu } from './filter-menu';
 import type { FilterDimension } from './types';
+import * as styles from './filters.css';
 
 /**
  * Single composition for filter UIs across surfaces. Renders, in order:
@@ -43,7 +44,7 @@ export function Filters({
     dimensions.length > 0 || !!extraSections?.length || !!(activeLabel && onClearActive);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={styles.filtersDiv}>
       {hasMenu && (
         <FilterMenu
           dimensions={dimensions}

@@ -9,17 +9,18 @@ import {
   type ControlSize,
   type OnSurface,
 } from '../shared-styles';
+import * as styles from './input.css';
 
 /** The field itself, shared with Textarea. Fill and border come from `fieldSurface`. */
 export const fieldClass = [
-  'text-fg placeholder:text-fg-subtle',
+  styles.fieldClass,
   // appearance-none: WebKit draws type="search" as a native searchfield with its own corners.
-  'min-w-0 appearance-none rounded-sm border transition-colors focus:outline-none',
+  styles.fieldClass2,
   focusRing,
-  'disabled:cursor-not-allowed disabled:opacity-50',
+  styles.fieldClass3,
   // Error state comes from the attribute, so a FormControl and a hand-set `invalid` prop paint the
   // same border.
-  'aria-invalid:border-critical aria-invalid:hover:border-critical aria-invalid:focus:border-critical',
+  styles.fieldClass4,
 ];
 
 /**
@@ -120,9 +121,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       aria-invalid={isInvalid || undefined}
       className={cn(
         inputVariants({ size, onSurface, width, mono }),
-        LeadingIcon && 'pl-9',
-        trailing && 'pr-9',
-        prefixText && 'rounded-l-none',
+        LeadingIcon && styles.inputInput,
+        trailing && styles.inputInput2,
+        prefixText && styles.inputInput3,
       )}
       {...native}
     />
@@ -135,27 +136,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   // The width stays on the field: a fixed field keeps its size and a prefix adds its own, so a
   // long slug prefix cannot squeeze the field. A fluid field needs the wrapper to be fluid too.
   return (
-    <span
-      className={cn('relative inline-flex items-center', (width ?? 'full') === 'full' && 'w-full')}
-    >
+    <span className={cn(styles.inputSpan, (width ?? 'full') === 'full' && styles.inputSpan2)}>
       {prefixText ? (
         <span
           className={cn(
             controlSize[(size ?? 'default') as ControlSize],
             prefixSurface[onSurface ?? 'base'],
-            'inline-flex shrink-0 items-center rounded-l-sm border border-r-0 px-3 text-sm whitespace-nowrap text-fg-secondary',
+            styles.inputSpan3,
           )}
         >
           {prefixText}
         </span>
       ) : null}
-      {LeadingIcon ? (
-        <LeadingIcon className="pointer-events-none absolute left-3 size-4 text-fg-muted" />
-      ) : null}
+      {LeadingIcon ? <LeadingIcon className={styles.inputLeadingIcon} /> : null}
       {input}
-      {trailing ? (
-        <span className="absolute right-1.5 inline-flex items-center">{trailing}</span>
-      ) : null}
+      {trailing ? <span className={styles.inputSpan4}>{trailing}</span> : null}
     </span>
   );
 });

@@ -1,46 +1,11 @@
 import { type ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
+import * as styles from './text.css';
 
-const textVariants = cva('inline', {
-  variants: {
-    arrangement: {
-      inline: 'inline',
-      block: 'block',
-    },
-    color: {
-      primary: 'text-fg',
-      secondary: 'text-fg-default',
-    },
-    size: {
-      'x-small': 'text-xs',
-      small: 'text-sm',
-      medium: 'text-base',
-      large: 'text-lg',
-      'x-large': 'text-xl',
-    },
-    weight: {
-      normal: 'font-normal',
-      medium: 'font-medium',
-      semibold: 'font-semibold',
-      bold: 'font-bold',
-    },
-    align: {
-      left: 'text-left',
-      center: 'text-center',
-      right: 'text-right',
-      justify: 'text-justify',
-    },
-  },
-  defaultVariants: {
-    arrangement: 'block',
-    color: 'primary',
-    size: 'medium',
-    weight: 'normal',
-  },
-});
+const textVariants = lenient(styles.textVariants);
 
-type TextVariantProps = VariantProps<typeof textVariants>;
+type TextVariantProps = NonNullable<Parameters<typeof textVariants>[0]>;
 
 type TextElement = 'p' | 'span';
 

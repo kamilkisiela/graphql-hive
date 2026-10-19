@@ -6,6 +6,8 @@
  * to update the design system in one place.
  */
 import { cva } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
+import * as styles from './shared-styles.css';
 
 /**
  * The inset of a panel made of menu rows: sides and bottom only, because the first row brings the
@@ -13,14 +15,14 @@ import { cva } from 'class-variance-authority';
  * `sections`) gets no padding from the popup and applies this itself, so a search field can bleed
  * to the edges with `-mx-2` in either case.
  */
-export const menuPanelInset = 'px-2 pb-2';
+export const menuPanelInset = styles.menuPanelInset;
 
 /** Base classes shared by all floating panels (menu, select, popover). */
 export const floatingBaseClass =
   // No z-index here. The positioner is transformed for placement, which makes it a stacking
   // context, so a z-index on the popup would only compete inside it and lose to any page
   // element that outranks the positioner. It goes on the positioner instead.
-  'text-control rounded-md border shadow-md shadow-neutral-1/30 outline-none bg-surface-floating border-line max-h-[var(--available-height)] overflow-y-auto overflow-x-hidden thin-scrollbar';
+  styles.floatingBaseClass;
 
 export const floatingVariants = cva(floatingBaseClass, {
   variants: {
@@ -60,38 +62,7 @@ export const floatingVariants = cva(floatingBaseClass, {
   },
 });
 
-export const itemVariants = cva(
-  'flex h-7 cursor-pointer select-none items-center rounded-sm outline-none gap-2',
-  {
-    variants: {
-      variant: {
-        default: 'px-2 text-fg-default',
-        navigationLink: 'hover:text-accent text-accent-muted justify-end pr-2 hover:bg-transparent',
-        action: 'pl-2 hover:bg-accent-tint hover:text-accent text-accent-muted',
-        destructiveAction: 'pl-2 text-critical hover:bg-critical-tint',
-      },
-      highlighted: {
-        true: 'bg-surface-selected text-fg',
-        false: '',
-      },
-      selected: {
-        true: 'text-fg',
-        false: '',
-      },
-      disabled: {
-        true: 'pointer-events-none opacity-50',
-        false: '',
-      },
-    },
-    compoundVariants: [{ highlighted: true, className: 'bg-surface-selected text-fg' }],
-    defaultVariants: {
-      variant: 'default',
-      highlighted: false,
-      selected: false,
-      disabled: false,
-    },
-  },
-);
+export const itemVariants = lenient(styles.itemVariants);
 
 /** Common props shared by all floating components (popover, menu, select). */
 export type FloatingProps = {
@@ -131,4 +102,4 @@ export type FloatingProps = {
 export { scrollArea as floatingScrollArea } from '../shared-styles';
 
 /** Empty state text inside a floating panel. */
-export const floatingEmptyState = 'text-fg-subtle px-2 py-4 text-center text-sm italic';
+export const floatingEmptyState = styles.floatingEmptyState;

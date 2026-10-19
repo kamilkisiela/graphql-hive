@@ -87,9 +87,26 @@ function subjectIsSelf(selector: string): boolean {
   return selector.slice(lastCompoundStart).startsWith('&');
 }
 
+/**
+ * Vanilla Extract does not nest a query inside another of the same kind, so consecutive `@media`
+ * (or `@supports`) conditions are combined with `and`, which means the same thing.
+ */
+function foldQueries(queries: Query[]): Query[] {
+  const out: Query[] = [];
+  for (const query of queries) {
+    const last = out[out.length - 1];
+    if (last && last.kind === query.kind && query.kind !== '@container') {
+      out[out.length - 1] = { kind: last.kind, params: `${last.params} and ${query.params}` };
+    } else {
+      out.push(query);
+    }
+  }
+  return out;
+}
+
 function placeLeaf(root: StyleTree, leaf: Leaf, selectorKey: string | null) {
   let tree = root;
-  for (const query of leaf.queries) {
+  for (const query of foldQueries(leaf.queries)) {
     const key = `${query.kind} ${query.params}`;
     let branch = tree.queries.get(key);
     if (!branch) {
@@ -162,13 +179,22 @@ function key(name: string): string {
 
 const indent = (depth: number) => '  '.repeat(depth);
 
+/**
+ * Properties the repo's pinned `csstype` (3.1.2, held back for react-select) does not know. They
+ * are spread in from an untyped object so the value still reaches the stylesheet.
+ */
+const UNTYPED_PROPERTIES = new Set(['textWrap']);
+
 /** Renders a tree as the body of a style object, without the surrounding braces. */
 function renderBody(tree: StyleTree, depth: number): string[] {
   const lines: string[] = [];
   const vars: Array<[string, string]> = [];
   for (const [prop, value] of tree.decls) {
+    const name = cssPropToJs(prop);
     if (prop.startsWith('--')) vars.push([prop, value]);
-    else lines.push(`${indent(depth)}${key(cssPropToJs(prop))}: ${quote(value)},`);
+    else if (UNTYPED_PROPERTIES.has(name)) {
+      lines.push(`${indent(depth)}...({ ${name}: ${quote(value)} } as object),`);
+    } else lines.push(`${indent(depth)}${key(name)}: ${quote(value)},`);
   }
   if (vars.length) {
     lines.push(`${indent(depth)}vars: {`);

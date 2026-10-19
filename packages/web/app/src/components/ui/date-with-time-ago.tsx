@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import { TimeAgo } from '@/components/ui/time-ago';
+import * as styles from './date-with-time-ago.css';
 
 export function DateWithTimeAgo(props: {
   date: string;
@@ -10,7 +11,7 @@ export function DateWithTimeAgo(props: {
   return (
     <>
       {format(date, dateFormatStr)}{' '}
-      <span className="font-normal text-fg-secondary">
+      <span className={styles.dateWithTimeAgoSpan}>
         (<TimeAgo date={date} />)
       </span>
     </>

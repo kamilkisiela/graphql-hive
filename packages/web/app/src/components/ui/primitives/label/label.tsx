@@ -1,21 +1,10 @@
 import { type ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { Info, type LucideIcon } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
 import { Tooltip } from '../floating/tooltip/tooltip';
+import * as styles from './label.css';
 
-const labelVariants = cva('', {
-  variants: {
-    variant: {
-      /** The form label: small caps on its own line above the control, as on every field. */
-      caps: 'block text-fg-secondary text-[9px] font-medium uppercase tracking-[0.75px]',
-      /** Sentence case beside a switch or a checkbox, in a row. */
-      inline: 'inline-block text-fg-default text-xs font-normal',
-    },
-  },
-  defaultVariants: {
-    variant: 'caps',
-  },
-});
+const labelVariants = lenient(styles.labelVariants);
 
 export type LabelHintProps = {
   /** What the control is for, behind an icon beside the label. */
@@ -24,7 +13,7 @@ export type LabelHintProps = {
   icon?: LucideIcon;
 };
 
-type LabelProps = VariantProps<typeof labelVariants> &
+type LabelProps = NonNullable<Parameters<typeof labelVariants>[0]> &
   LabelHintProps & {
     /** The id of the control this names. */
     htmlFor: string;
@@ -40,12 +29,8 @@ export function LabelHint({ tooltip, icon: Icon = Info, name }: LabelHintProps &
   return (
     <Tooltip
       trigger={
-        <button
-          type="button"
-          aria-label={`About ${name}`}
-          className="inline-flex text-fg-muted hover:text-fg-default"
-        >
-          <Icon className="size-3" />
+        <button type="button" aria-label={`About ${name}`} className={styles.labelHintButton}>
+          <Icon className={styles.labelHintIcon} />
         </button>
       }
       content={tooltip}
@@ -64,12 +49,7 @@ export function Label({ htmlFor, variant, tooltip, icon, label }: LabelProps) {
     return element;
   }
   return (
-    <span
-      className={
-        variant === 'inline' ? 'inline-flex items-center gap-1' : 'flex items-center gap-1'
-      }
-      data-label
-    >
+    <span className={variant === 'inline' ? styles.labelSpan : styles.labelSpan2} data-label>
       {element}
       <LabelHint tooltip={tooltip} icon={icon} name={label} />
     </span>

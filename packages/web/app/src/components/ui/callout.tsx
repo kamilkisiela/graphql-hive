@@ -1,30 +1,19 @@
 import React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { CircleXIcon, InfoIcon, TriangleAlertIcon, ZapIcon } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
+import * as styles from './callout.css';
 
 const TypeToEmoji = {
-  default: <ZapIcon className="size-6" />,
-  error: <CircleXIcon className="size-6" />,
-  info: <InfoIcon className="size-6" />,
-  warning: <TriangleAlertIcon className="size-6" />,
+  default: <ZapIcon className={styles.zapIcon} />,
+  error: <CircleXIcon className={styles.circleXIcon} />,
+  info: <InfoIcon className={styles.infoIcon} />,
+  warning: <TriangleAlertIcon className={styles.triangleAlertIcon} />,
 };
 
 type CalloutType = keyof typeof TypeToEmoji;
 
-const calloutVariants = cva('mt-6 flex items-center gap-4 rounded-lg border px-4 py-2', {
-  variants: {
-    type: {
-      default: 'border-accent-line bg-accent-tint text-accent',
-      error: 'border-critical-line bg-critical-tint text-critical-text',
-      info: 'border-info-line bg-info-tint text-info-text',
-      warning: 'border-warning-line bg-warning-tint text-warning-text',
-    },
-  },
-  defaultVariants: {
-    type: 'default',
-  },
-});
+const calloutVariants = lenient(styles.calloutVariants);
 
 type CalloutProps = {
   type?: CalloutType;
@@ -35,12 +24,12 @@ type CalloutProps = {
 
 const Callout = React.forwardRef<
   HTMLDivElement,
-  CalloutProps & VariantProps<typeof calloutVariants>
+  CalloutProps & NonNullable<Parameters<typeof calloutVariants>[0]>
 >(({ children, type = 'default', emoji = TypeToEmoji[type], className, ...props }, ref) => {
   return (
     <div ref={ref} className={cn(calloutVariants({ type }), className)} {...props}>
       <div
-        className="text-xl select-none"
+        className={styles.div}
         style={{
           fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
         }}

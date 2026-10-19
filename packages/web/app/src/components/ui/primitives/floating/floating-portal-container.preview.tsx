@@ -9,6 +9,7 @@ import { FloatingPortalContainerProvider } from './floating-portal-container';
 import { Menu } from './menu/menu';
 import { Popover } from './popover/popover';
 import { Select } from './select/select';
+import * as styles from './floating-portal-container.preview.css';
 
 export const nav: NavPath = 'Primitives/Floating/PortalContainer';
 
@@ -38,24 +39,24 @@ function FloatingTrio() {
   const [picked, setPicked] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <span className="w-16 text-xs text-fg-default">Select</span>
+    <div className={styles.floatingTrioDiv}>
+      <div className={styles.floatingTrioDiv2}>
+        <span className={styles.floatingTrioSpan}>Select</span>
         <Select options={OPTIONS} value={metric} onValueChange={setMetric} onSurface="raised" />
       </div>
-      <div className="flex items-center gap-3">
-        <span className="w-16 text-xs text-fg-default">Popover</span>
+      <div className={styles.floatingTrioDiv3}>
+        <span className={styles.floatingTrioSpan2}>Popover</span>
         <Popover
           trigger={<Button label="Details" onSurface="raised" />}
           content={
-            <p className="p-3 text-sm text-fg-default">
+            <p className={styles.floatingTrioP}>
               If you can read this, the popover rendered inside the modal.
             </p>
           }
         />
       </div>
-      <div className="flex items-center gap-3">
-        <span className="w-16 text-xs text-fg-default">Menu</span>
+      <div className={styles.floatingTrioDiv4}>
+        <span className={styles.floatingTrioSpan3}>Menu</span>
         <Menu
           trigger={<Button label={picked ?? 'Actions'} onSurface="raised" />}
           sections={[
@@ -66,7 +67,7 @@ function FloatingTrio() {
           ]}
         />
       </div>
-      <p className="text-xs text-fg-secondary">
+      <p className={styles.floatingTrioP2}>
         Working: the Select changes, the Popover reads, the Menu label updates.
       </p>
     </div>
@@ -83,16 +84,13 @@ function BareModal(props: {
   const body = (
     <BaseDialog.Root open={props.open} onOpenChange={props.onOpenChange}>
       <BaseDialog.Portal>
-        <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-neutral-1/1 backdrop-blur-sm" />
-        <BaseDialog.Popup
-          ref={setPopup}
-          className="fixed top-1/2 left-1/2 z-50 w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-line bg-neutral-3 p-6 outline-none"
-        >
-          <BaseDialog.Title className="mb-4 text-sm font-medium text-fg">
+        <BaseDialog.Backdrop className={styles.bareModalBackdrop} />
+        <BaseDialog.Popup ref={setPopup} className={styles.bareModalPopup}>
+          <BaseDialog.Title className={styles.bareModalTitle}>
             {props.withProvider ? 'With the provider' : 'Without the provider'}
           </BaseDialog.Title>
           <FloatingTrio />
-          <div className="mt-6 flex justify-end">
+          <div className={styles.bareModalDiv}>
             <BaseDialog.Close render={<Button variant="outline">Close</Button>} />
           </div>
         </BaseDialog.Popup>

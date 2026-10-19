@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import * as styles from './virtual-log-list.css';
 
 export type LogEntry = {
   timestamp: string;
@@ -59,8 +60,8 @@ export function VirtualLogList(props: { logs: LogEntry[]; className?: string }) 
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <div className="flex px-2 pb-1 font-mono text-xs">
-                <time dateTime={logRow.timestamp} className="pr-4">
+              <div className={styles.virtualLogListDiv}>
+                <time dateTime={logRow.timestamp} className={styles.virtualLogListTime}>
                   {format(logRow.timestamp, 'HH:mm:ss')}
                 </time>
                 {logRow.message}

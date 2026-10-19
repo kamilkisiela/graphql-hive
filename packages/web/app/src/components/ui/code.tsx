@@ -3,6 +3,7 @@ import cn from 'clsx';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { useHover } from '@/lib/hooks/use-hover';
 import { useTimed } from '@/lib/hooks/use-timed';
+import * as styles from './code.css';
 
 export const Code: FC<ComponentProps<'code'>> = ({ children, className, ...props }) => {
   const [copied, startCopyTimer] = useTimed(1500);
@@ -13,7 +14,7 @@ export const Code: FC<ComponentProps<'code'>> = ({ children, className, ...props
   return (
     <span
       ref={ref}
-      className="relative flex cursor-text items-center gap-2 rounded-md border border-line-strong bg-surface-inset p-4 pr-14 font-mono text-sm break-all"
+      className={styles.codeSpan}
       // Make this element able to be focused by setting tabIndex.
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={0}
@@ -30,7 +31,7 @@ export const Code: FC<ComponentProps<'code'>> = ({ children, className, ...props
     >
       <code
         ref={codeRef}
-        className={cn('whitespace-pre-line', className)}
+        className={cn(styles.codeCode, className)}
         // always show code blocks in ltr
         dir="ltr"
         {...props}
@@ -40,7 +41,7 @@ export const Code: FC<ComponentProps<'code'>> = ({ children, className, ...props
       <button
         hidden={!navigatorClipboardSupport}
         data-hovering={hovering || copied}
-        className="absolute top-2 right-3 cursor-pointer rounded-md border border-line-strong p-2 opacity-0 hover:text-warning data-[hovering=true]:opacity-100 data-[hovering=true]:transition-opacity"
+        className={styles.codeButton}
         onClick={async ev => {
           const value = children?.valueOf().toString();
           if (value) {

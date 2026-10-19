@@ -12,6 +12,7 @@ import { formatDateToString, parse } from '@/lib/date-math';
 import { useResetState } from '@/lib/hooks/use-reset-state';
 import { UTCDate } from '@date-fns/utc';
 import { Calendar } from './calendar';
+import * as styles from './date-range-picker.css';
 
 export interface DateRangePickerProps {
   presets?: Preset[];
@@ -329,15 +330,15 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
   }, [quickRangeFilter, staticPresets]);
 
   return (
-    <div className="flex h-[380px]">
-      <div ref={calendarAnchor} className="flex flex-col py-2">
-        <div className="flex flex-col items-center justify-end gap-2 lg:flex-row lg:items-start">
-          <div className="flex flex-col gap-1 pl-3">
-            <div className="mt-1 mb-2 text-control">Absolute date range</div>
-            <div className="space-y-2">
-              <div className="grid w-full max-w-sm items-center gap-1.5">
+    <div className={styles.dateRangePickerPanelDiv}>
+      <div ref={calendarAnchor} className={styles.dateRangePickerPanelDiv2}>
+        <div className={styles.dateRangePickerPanelDiv3}>
+          <div className={styles.dateRangePickerPanelDiv4}>
+            <div className={styles.dateRangePickerPanelDiv5}>Absolute date range</div>
+            <div className={styles.dateRangePickerPanelDiv6}>
+              <div className={styles.dateRangePickerPanelDiv7}>
                 <Label htmlFor="from" label="From" />
-                <div className="flex w-full max-w-sm items-center space-x-2">
+                <div className={styles.dateRangePickerPanelDiv8}>
                   <Input
                     type="text"
                     id="from"
@@ -359,11 +360,11 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
                     }
                   />
                 </div>
-                <div className="w-0 min-w-full text-critical">{fromError}</div>
+                <div className={styles.dateRangePickerPanelDiv9}>{fromError}</div>
               </div>
-              <div className="grid w-full max-w-sm items-center gap-1.5">
+              <div className={styles.dateRangePickerPanelDiv10}>
                 <Label htmlFor="to" label="To" />
-                <div className="flex w-full max-w-sm items-center space-x-2">
+                <div className={styles.dateRangePickerPanelDiv11}>
                   <Input
                     type="text"
                     id="to"
@@ -385,7 +386,7 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
                     }
                   />
                 </div>
-                <div className="w-0 min-w-full text-critical">{toError}</div>
+                <div className={styles.dateRangePickerPanelDiv12}>{toError}</div>
               </div>
 
               <Button
@@ -427,7 +428,7 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
           </div>
         </div>
         {props.footer ? (
-          <div className="mt-auto w-0 min-w-full px-3 pb-1">{props.footer}</div>
+          <div className={styles.dateRangePickerPanelDiv13}>{props.footer}</div>
         ) : null}
       </div>
       <Popover
@@ -441,14 +442,14 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
         width="auto"
         content={
           <>
-            <div className="absolute top-1 right-2">
+            <div className={styles.dateRangePickerPanelDiv14}>
               <Button
                 variant="ghost"
                 size="icon-sm"
                 aria-label="Close calendar"
                 onClick={() => setShowCalendar(false)}
               >
-                <X className="size-3" />
+                <X className={styles.dateRangePickerPanelX} />
               </Button>
             </div>
             <Calendar
@@ -469,7 +470,7 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
           </>
         }
       />
-      <div className="ml-3 flex flex-col gap-1 border-l py-2 pr-2 pl-3">
+      <div className={styles.dateRangePickerPanelDiv15}>
         <Input
           placeholder="Filter quick ranges"
           leadingIcon={SearchIcon}
@@ -477,7 +478,7 @@ export function DateRangePickerPanel(props: DateRangePickerPanelProps) {
           onChange={ev => setQuickRangeFilter(ev.target.value)}
         />
         <ScrollArea fill>
-          <div className="flex w-full flex-col items-start gap-1 pt-1 pb-2">
+          <div className={styles.dateRangePickerPanelDiv16}>
             {dynamicPresets.length > 0
               ? dynamicPresets
                   .filter(preset =>

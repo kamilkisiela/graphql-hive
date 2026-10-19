@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import * as styles from './page.css';
 
 export function Title({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <h3 className={cn('cursor-default text-lg font-semibold tracking-tight', className)}>
-      {children}
-    </h3>
-  );
+  return <h3 className={cn(styles.titleH3, className)}>{children}</h3>;
 }
 
 export function Subtitle({ children, className }: { children: ReactNode; className?: string }) {
-  return <p className={cn('cursor-default text-sm text-fg-secondary', className)}>{children}</p>;
+  return <p className={cn(styles.subtitleP, className)}>{children}</p>;
 }

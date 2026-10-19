@@ -1,4 +1,5 @@
 import { cloneElement, useId, useState, type FocusEvent, type ReactNode } from 'react';
+import { clsx } from 'clsx';
 import { Check, ChevronDown } from 'lucide-react';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import { Button } from '../../button/button';
@@ -13,6 +14,7 @@ import {
   type FloatingProps,
 } from '../shared-styles';
 import { Tooltip } from '../tooltip/tooltip';
+import * as styles from './select.css';
 
 export type SelectOption = {
   value: string;
@@ -43,11 +45,11 @@ export type SelectOption = {
 // Select owns its trigger widths. Button only knows `auto | full`, because full-width is the
 // only width buttons ask for; the fixed steps here are what select triggers ask for.
 const widthClass = {
-  auto: 'inline-block',
-  sm: 'inline-block w-[150px]',
-  md: 'inline-block w-[200px]',
-  lg: 'inline-block w-[250px]',
-  full: 'block w-full',
+  auto: styles.widthClassAuto,
+  sm: styles.widthClassSm,
+  md: styles.widthClassMd,
+  lg: styles.widthClassLg,
+  full: styles.widthClassFull,
 } as const;
 
 type SelectProps = Partial<
@@ -150,7 +152,7 @@ export function Select({
   return (
     <div className={widthClass[width]}>
       {ariaLabel ? (
-        <span id={labelId} className="sr-only">
+        <span id={labelId} className={styles.selectSpan}>
           {ariaLabel}
         </span>
       ) : null}
@@ -198,13 +200,13 @@ export function Select({
             align={align}
             sideOffset={sideOffset}
             alignItemWithTrigger={false}
-            className="z-50 outline-none"
+            className={styles.selectPositioner}
           >
             <BaseSelect.Popup
-              className={floatingVariants({
-                padding: 'sm',
-                className: matchTriggerWidth ? 'w-[var(--anchor-width)]' : undefined,
-              })}
+              className={clsx(
+                floatingVariants({ padding: 'sm' }),
+                matchTriggerWidth ? styles.selectPopup : undefined,
+              )}
               data-cy={popupDataCy}
             >
               {searchable && (
@@ -215,7 +217,7 @@ export function Select({
                   placeholder={searchPlaceholder}
                 />
               )}
-              <div className={searchable ? `${floatingScrollArea} max-h-64` : ''}>
+              <div className={searchable ? `${floatingScrollArea} ${styles.selectDiv}` : ''}>
                 {displayedOptions.length === 0 ? (
                   <div className={floatingEmptyState}>No matches</div>
                 ) : (
@@ -227,35 +229,30 @@ export function Select({
                         disabled={option.disabled}
                         data-cy={option['data-cy']}
                         className={state =>
-                          itemVariants({
-                            highlighted: state.highlighted,
-                            selected: state.selected,
-                            disabled: state.disabled,
-                            // A row with a description grows past the fixed item height.
-                            className: option.description
-                              ? 'relative h-auto py-1.5 pl-7'
-                              : 'relative pl-7',
-                          })
+                          clsx(
+                            itemVariants({
+                              highlighted: state.highlighted,
+                              selected: state.selected,
+                              disabled: state.disabled,
+                            }),
+                            option.description ? styles.selectClass : styles.selectClass2,
+                          )
                         }
                       >
-                        <BaseSelect.ItemIndicator className="absolute top-2 left-2 inline-flex items-center">
-                          <Check className="size-3" />
+                        <BaseSelect.ItemIndicator className={styles.selectItemIndicator}>
+                          <Check className={styles.selectCheck} />
                         </BaseSelect.ItemIndicator>
                         <BaseSelect.ItemText>
-                          <span className="flex items-center gap-1.5">
+                          <span className={styles.selectSpan2}>
                             {option.icon}
                             {option.label}
                           </span>
                           {option.description ? (
-                            <span className="block truncate text-xs text-fg-muted">
-                              {option.description}
-                            </span>
+                            <span className={styles.selectSpan3}>{option.description}</span>
                           ) : null}
                         </BaseSelect.ItemText>
                         {option.trailing ? (
-                          <span className="ml-auto inline-flex shrink-0 items-center pl-2">
-                            {option.trailing}
-                          </span>
+                          <span className={styles.selectSpan4}>{option.trailing}</span>
                         ) : null}
                       </BaseSelect.Item>
                     );
@@ -264,7 +261,7 @@ export function Select({
                     return option.tooltip ? (
                       <Tooltip
                         key={option.value}
-                        trigger={<span className="block">{item}</span>}
+                        trigger={<span className={styles.selectSpan5}>{item}</span>}
                         content={option.tooltip}
                         side="right"
                       />

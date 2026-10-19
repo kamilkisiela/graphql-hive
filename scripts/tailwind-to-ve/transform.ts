@@ -115,6 +115,8 @@ class Names {
 
 class CssModule {
   readonly lines: string[] = [];
+  /** globalStyle lines waiting for the style they reference to be declared first. */
+  private pendingGlobals: string[] = [];
   readonly bindings = new Set<string>();
   usesStyle = false;
   usesGlobalStyle = false;
@@ -131,7 +133,7 @@ class CssModule {
       : renderStyleObject(converted.local, this.layerExpr);
     for (const global of converted.globals) {
       this.usesGlobalStyle = true;
-      this.lines.push(
+      this.pendingGlobals.push(
         `globalStyle(\`${global.selector.replaceAll('&', `\${${name}}`)}\`, ${renderStyleObject(global.tree, this.layerExpr)});`,
         '',
       );
@@ -140,6 +142,13 @@ class CssModule {
     if (!object && composes.length === 1) return `style([${composes[0]}])`;
     const parts = [...composes, ...(object ? [object] : [])];
     return parts.length === 1 ? `style(${parts[0]})` : `style([${parts.join(', ')}])`;
+  }
+
+  /** The globalStyle lines produced since the last flush. Call after the declaration they need. */
+  flushGlobals(): string[] {
+    const out = this.pendingGlobals;
+    this.pendingGlobals = [];
+    return out;
   }
 
   /** Like `styleExpr`, but for a recipe part, which has no class handle for globalStyle. */
@@ -153,7 +162,7 @@ class CssModule {
       const expr = refs.length
         ? own.replace(/^style\(/, `style([${refs.join(', ')}, `).replace(/\)$/, '])')
         : own;
-      hoisted.push(`const ${hoistName} = ${expr};`, '');
+      hoisted.push(`const ${hoistName} = ${expr};`, '', ...this.flushGlobals());
       return hoistName;
     }
     const object = isEmpty(converted.local)
@@ -304,7 +313,7 @@ export function transformFile(
     if (site.defaultVariants) css.lines.push(`  defaultVariants: ${site.defaultVariants},`);
     css.lines.push('});', '');
     report.recipes++;
-    edits.push({ start: site.start, end: site.end, text: `${stylesId}.${name}` });
+    edits.push({ start: site.start, end: site.end, text: `lenient(${stylesId}.${name})` });
   }
 
   // Class strings -----------------------------------------------------------------------------
@@ -317,6 +326,13 @@ export function transformFile(
         t => MAPPED[t] || options.compiled.tokens.has(t) || MARKER.test(t),
       );
       if (!known) continue;
+      // A single plain word (`outline`, `hidden`, `block`) is as likely a prop value as a class.
+      if (site.tokens.length === 1 && /^[a-z]+$/.test(site.tokens[0])) {
+        report.notes.push(
+          `constant left alone, one ambiguous word: '${site.text}' (${site.nameHint})`,
+        );
+        continue;
+      }
     }
     const resolved = resolveTokens(site.tokens, options.compiled, report);
     if (!resolved.compiled.length && !resolved.mapped.length) continue;
@@ -326,7 +342,8 @@ export function transformFile(
       );
     }
     const name = names.claim(site.nameHint);
-    css.lines.push(`export const ${name} = ${css.styleExpr(name, resolved)};`, '');
+    const expr = css.styleExpr(name, resolved);
+    css.lines.push(`export const ${name} = ${expr};`, '', ...css.flushGlobals());
     report.styles++;
     const ref = `${stylesId}.${name}`;
     const rest = [...resolved.markers, ...resolved.leftovers];
@@ -358,8 +375,55 @@ export function transformFile(
 
   if (!css.lines.length) return null;
 
+  // `variants({ ..., className })` → `cn(variants({ ... }), className)` ----------------------
+  // cva merged a `className` passed through the variants function; recipe does not accept it.
+  const visitCalls = (node: ts.Node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      // A converted recipe, or by the codebase's naming any variants function: lifting the class
+      // out of a `cva` call is equally valid, since `cn` merges it the same way.
+      (cvaNames.has(node.expression.text) || /Variants$/.test(node.expression.text)) &&
+      node.arguments.length === 1 &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      const object = node.arguments[0];
+      const passthrough = object.properties.find(
+        p =>
+          (ts.isShorthandPropertyAssignment(p) || ts.isPropertyAssignment(p)) &&
+          ts.isIdentifier(p.name) &&
+          (p.name.text === 'className' || p.name.text === 'class'),
+      );
+      if (passthrough) {
+        // The class value may itself have been rewritten already (a string literal became
+        // `styles.x`): reuse that replacement and drop the inner edit, so the two never overlap.
+        // Any other edit inside the call would be lost by re-emitting it, so leave such calls alone.
+        const inner = edits.filter(e => e.start >= node.getStart() && e.end <= node.getEnd());
+        for (const e of inner) edits.splice(edits.indexOf(e), 1);
+        const withEdits = (n: ts.Node) => applyEdits(text, n.getStart(), n.getEnd(), inner);
+        const valueNode = ts.isPropertyAssignment(passthrough)
+          ? passthrough.initializer
+          : passthrough.name;
+        const classExpr = withEdits(valueNode);
+        const rest = object.properties.filter(p => p !== passthrough).map(withEdits);
+        const call = `${node.expression.text}(${rest.length ? `{ ${rest.join(', ')} }` : ''})`;
+        const parent = node.parent;
+        const inClassCall = isDirectClassArg(node);
+        needsCombinator ||= !inClassCall;
+        edits.push({
+          start: node.getStart(),
+          end: node.getEnd(),
+          text: inClassCall ? `${call}, ${classExpr}` : `__COMBINE__(${call}, ${classExpr})`,
+        });
+        void parent;
+        return;
+      }
+    }
+    ts.forEachChild(node, visitCalls);
+  };
+  visitCalls(file);
+
   // VariantProps → RecipeVariants ------------------------------------------------------------
-  let usesRecipeVariants = false;
   const visitTypes = (node: ts.Node) => {
     if (
       ts.isTypeReferenceNode(node) &&
@@ -367,11 +431,10 @@ export function transformFile(
       node.typeArguments?.length === 1 &&
       cvaNames.has(node.typeArguments[0].getText().replace(/^typeof\s+/, ''))
     ) {
-      usesRecipeVariants = true;
       edits.push({
         start: node.getStart(),
         end: node.getEnd(),
-        text: `NonNullable<RecipeVariants<${node.typeArguments[0].getText()}>>`,
+        text: `NonNullable<Parameters<${node.typeArguments[0].getText()}>[0]>`,
       });
       return;
     }
@@ -396,15 +459,13 @@ export function transformFile(
       const keep = specifiers.filter(s => s !== 'cva' && s !== 'VariantProps');
       const replacement = [
         ...(keep.length ? [`import { ${keep.join(', ')} } from 'class-variance-authority';`] : []),
-        ...(usesRecipeVariants
-          ? [`import type { RecipeVariants } from '@vanilla-extract/recipes';`]
-          : []),
       ].join('\n');
       edits.push({ start: statement.getStart(), end: statement.getEnd(), text: replacement });
     }
   }
   const combinator = hasCn ? 'cn' : 'clsx';
   const extraImports: string[] = [];
+  if (cvaNames.size) extraImports.push(`import { lenient } from '@/lib/recipe';`);
   if (needsCombinator && !hasCn && !hasClsx) extraImports.push(`import { clsx } from 'clsx';`);
   const cssImportPath = `./${path.basename(absPath).replace(/\.tsx?$/, '')}.css`;
   extraImports.push(`import * as ${stylesId} from '${cssImportPath}';`);
@@ -421,6 +482,11 @@ export function transformFile(
     source = source.slice(0, edit.start) + edit.text + source.slice(edit.end);
   }
   source = source.replaceAll('__COMBINE__(', `${combinator}(`);
+  source = dropUnusedImports(
+    source,
+    absPath,
+    new Set([...movedBindings(neededImports), 'cva', 'VariantProps']),
+  );
 
   // css.ts header -----------------------------------------------------------------------------
   const stylesDir = path.join(options.srcDir, 'styles');
@@ -467,3 +533,83 @@ export function tokensIn(absPath: string, text: string): string[] {
 }
 
 export { splitTokens };
+
+function movedBindings(needed: Map<string, Set<string>>): string[] {
+  return [...needed.values()].flatMap(set => [...set]);
+}
+
+/**
+ * Removes named import specifiers from `candidates` that the rewritten source no longer uses:
+ * constants a recipe now composes from the `.css.ts`, and the `cva` helpers. Nothing else is
+ * touched, so an import the file used for other reasons stays.
+ */
+function dropUnusedImports(source: string, fileName: string, candidates: Set<string>): string {
+  const file = scan(fileName, source).file;
+  const used = new Map<string, number>();
+  const count = (node: ts.Node) => {
+    if (ts.isImportDeclaration(node)) return;
+    if (ts.isIdentifier(node)) used.set(node.text, (used.get(node.text) ?? 0) + 1);
+    ts.forEachChild(node, count);
+  };
+  count(file);
+
+  const edits: Array<{ start: number; end: number; text: string }> = [];
+  for (const statement of file.statements) {
+    if (!ts.isImportDeclaration(statement) || !statement.importClause) continue;
+    const clause = statement.importClause;
+    const named = clause.namedBindings;
+    if (!named || !ts.isNamedImports(named)) continue;
+    const keep = named.elements.filter(
+      el => !(candidates.has(el.name.text) && !used.get(el.name.text)),
+    );
+    if (keep.length === named.elements.length) continue;
+    if (!keep.length && !clause.name) {
+      const end = source.indexOf('\n', statement.getEnd());
+      edits.push({
+        start: statement.getStart(),
+        end: end === -1 ? statement.getEnd() : end + 1,
+        text: '',
+      });
+      continue;
+    }
+    const specifiers = keep.map(el => el.getText()).join(', ');
+    const defaultPart = clause.name ? `${clause.name.text}, ` : '';
+    const typePart = clause.isTypeOnly ? 'type ' : '';
+    edits.push({
+      start: statement.getStart(),
+      end: statement.getEnd(),
+      text: `import ${typePart}${defaultPart}{ ${specifiers} } from ${statement.moduleSpecifier.getText()};`,
+    });
+  }
+  edits.sort((a, b) => b.start - a.start);
+  let out = source;
+  for (const edit of edits) out = out.slice(0, edit.start) + edit.text + out.slice(edit.end);
+  return out;
+}
+
+/** Whether a node is itself an argument of `cn(...)`/`clsx(...)`, so it can expand to two args. */
+function isDirectClassArg(node: ts.Node): boolean {
+  const parent = node.parent;
+  return (
+    !!parent &&
+    ts.isCallExpression(parent) &&
+    ts.isIdentifier(parent.expression) &&
+    ['cn', 'clsx', 'cx', 'twMerge'].includes(parent.expression.text) &&
+    parent.arguments.includes(node as ts.Expression)
+  );
+}
+
+/** The source between `start` and `end` with the edits that fall inside it applied. */
+function applyEdits(
+  text: string,
+  start: number,
+  end: number,
+  edits: Array<{ start: number; end: number; text: string }>,
+): string {
+  const inside = edits
+    .filter(e => e.start >= start && e.end <= end)
+    .sort((a, b) => b.start - a.start);
+  let out = text.slice(start, end);
+  for (const e of inside) out = out.slice(0, e.start - start) + e.text + out.slice(e.end - start);
+  return out;
+}

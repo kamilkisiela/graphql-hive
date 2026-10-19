@@ -11,6 +11,7 @@ import {
 } from '@pierre/diffs/react';
 import WorkerUrl from '@pierre/diffs/worker/worker.js?worker&url';
 import { useTheme, type ResolvedTheme } from '../theme/theme-provider';
+import * as styles from './diffs.css';
 
 function pierreTheme(resolvedTheme: ResolvedTheme) {
   return resolvedTheme === 'dark' ? 'pierre-dark' : 'pierre-light';
@@ -48,7 +49,7 @@ function WorkerPoolTheme() {
 // Has a height because the virtualizer only renders lines inside its own scroll region.
 export function CodeScrollArea(props: { className?: string; children: ReactNode }) {
   return (
-    <Virtualizer className={cn('max-h-[70vh] overflow-auto', props.className)}>
+    <Virtualizer className={cn(styles.codeScrollAreaVirtualizer, props.className)}>
       {props.children}
     </Virtualizer>
   );

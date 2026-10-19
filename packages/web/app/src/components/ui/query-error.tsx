@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/primitives/button/button';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { cn } from '@/lib/utils';
 import { Link, useRouter } from '@tanstack/react-router';
+import * as styles from './query-error.css';
 
 export function QueryError({
   error,
@@ -35,9 +36,9 @@ export function QueryError({
   const shouldShowError = typeof showError === 'boolean' ? showError : isExpectedError;
 
   return (
-    <div className={cn('flex size-full items-center justify-center', className)}>
+    <div className={cn(styles.queryErrorDiv, className)}>
       {showLogoutButton && (
-        <div className="absolute top-6 right-6">
+        <div className={styles.queryErrorDiv2}>
           <Button
             variant="outline"
             onClick={() =>
@@ -46,19 +47,21 @@ export function QueryError({
               })
             }
           >
-            <LogOutIcon className="mr-2 size-4" /> Sign out
+            <LogOutIcon className={styles.queryErrorLogOutIcon} /> Sign out
           </Button>
         </div>
       )}
-      <div className="flex max-w-[960px] flex-col items-center gap-x-6 sm:flex-row">
-        <img src="/images/figures/connection.svg" alt="Ghost" className="block size-[200px]" />
-        <div className="grow text-center sm:text-left">
-          <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
-          <div className="mt-2">
+      <div className={styles.queryErrorDiv3}>
+        <img src="/images/figures/connection.svg" alt="Ghost" className={styles.queryErrorImg} />
+        <div className={styles.queryErrorDiv4}>
+          <h1 className={styles.queryErrorH1}>Oops, something went wrong.</h1>
+          <div className={styles.queryErrorDiv5}>
             {shouldShowError ? (
-              <div className="text-sm">{error.graphQLErrors?.[0]?.message ?? error.message}</div>
+              <div className={styles.queryErrorDiv6}>
+                {error.graphQLErrors?.[0]?.message ?? error.message}
+              </div>
             ) : (
-              <div className="text-sm">
+              <div className={styles.queryErrorDiv7}>
                 <p>{commonErrorStrings.reported}</p>
                 <p>
                   {commonErrorStrings.track}{' '}
@@ -82,10 +85,10 @@ export function QueryError({
             )}
 
             {requestId ? (
-              <div className="mt-6 text-xs">
-                <div className="inline-flex items-center text-fg-default">
-                  <div className="rounded-l-sm bg-warning-tint p-2">Error ID</div>
-                  <div className="rounded-r-sm bg-warning-tint-subtle p-2">{requestId}</div>
+              <div className={styles.queryErrorDiv8}>
+                <div className={styles.queryErrorDiv9}>
+                  <div className={styles.queryErrorDiv10}>Error ID</div>
+                  <div className={styles.queryErrorDiv11}>{requestId}</div>
                 </div>
               </div>
             ) : null}

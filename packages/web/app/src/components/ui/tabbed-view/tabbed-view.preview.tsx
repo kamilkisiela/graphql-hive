@@ -18,6 +18,7 @@ import { Select } from '../primitives/floating/select/select';
 import { Tooltip } from '../primitives/floating/tooltip/tooltip';
 import { ScopeBar } from '../scope-bar/scope-bar';
 import { TabbedView, type TabbedViewItem } from './tabbed-view';
+import * as styles from './tabbed-view.preview.css';
 
 export const nav: NavPath = 'Components/TabbedView';
 
@@ -43,9 +44,9 @@ const STATUS_LABEL: Record<ContractStatus, string> = {
 };
 
 function StatusGlyph({ status }: { status: ContractStatus }) {
-  if (status === 'failed') return <AlertTriangle className="size-3.5 shrink-0 text-critical" />;
-  if (status === 'changed') return <GitCompare className="size-3.5 shrink-0" />;
-  return <Check className="size-3.5 shrink-0 text-success" />;
+  if (status === 'failed') return <AlertTriangle className={styles.statusGlyphAlertTriangle} />;
+  if (status === 'changed') return <GitCompare className={styles.statusGlyphGitCompare} />;
+  return <Check className={styles.statusGlyphCheck} />;
 }
 
 /** The picker as the pages build it: the contract's name, its status in words at the far end, the reason on hover. */
@@ -59,7 +60,7 @@ function ContractSelect(props: { value: string; onValueChange: (value: string) =
         trailing: (
           <Tooltip
             trigger={
-              <span className="inline-flex items-center gap-1.5 text-xs text-fg-muted">
+              <span className={styles.contractSelectSpan}>
                 <StatusGlyph status={entry.status} />
                 {STATUS_STATE[entry.status]}
               </span>
@@ -78,31 +79,31 @@ function ContractSelect(props: { value: string; onValueChange: (value: string) =
 
 function DetailsView({ contract }: { contract: string }) {
   return (
-    <div className="flex flex-col gap-6 text-sm">
+    <div className={styles.detailsViewDiv}>
       <div>
-        <div className="mb-3 flex items-center gap-2 font-medium text-fg">
+        <div className={styles.detailsViewDiv2}>
           Breaking Changes
-          <Info className="size-3.5 text-fg-secondary" />
+          <Info className={styles.detailsViewInfo} />
         </div>
-        <div className="flex items-center justify-between border-b border-line py-2">
-          <span className="text-fg-default">
+        <div className={styles.detailsViewDiv3}>
+          <span className={styles.detailsViewSpan}>
             Field <Badge content="Node.id" variants={{ variant: 'secondary', mono: true }} />{' '}
             changed type from{' '}
             <Badge content="ID!" variants={{ variant: 'secondary', mono: true }} /> to{' '}
             <Badge content="ID" variants={{ variant: 'secondary', mono: true }} /> in {contract}
           </span>
-          <ChevronDown className="size-4 text-fg-secondary" />
+          <ChevronDown className={styles.detailsViewChevronDown} />
         </div>
       </div>
-      <div className="flex flex-col gap-2 text-fg-default">
+      <div className={styles.detailsViewDiv4}>
         <p>
           Get more out of schema checks by enabling conditional breaking changes based on usage
           data.
         </p>
-        <a href="#" className="inline-flex items-center gap-2 hover:text-fg">
-          <BookOpen className="size-4" />
+        <a href="#" className={styles.detailsViewA}>
+          <BookOpen className={styles.detailsViewBookOpen} />
           Learn more about conditional breaking changes.
-          <ExternalLink className="size-3" />
+          <ExternalLink className={styles.detailsViewExternalLink} />
         </a>
       </div>
     </div>
@@ -111,7 +112,7 @@ function DetailsView({ contract }: { contract: string }) {
 
 function SchemaView() {
   return (
-    <pre className="font-mono text-xs leading-relaxed text-fg-default">
+    <pre className={styles.schemaViewPre}>
       {'type Query {\n  node(id: ID!): Node\n  viewer: User\n}\n\ninterface Node {\n  id: ID\n}'}
     </pre>
   );
@@ -147,26 +148,26 @@ export const ChecksPage = createPreview(() => {
   const [contract, setContract] = useState('default');
   const failed = CONTRACTS.filter(entry => entry.value !== 'default' && entry.status === 'failed');
   return (
-    <div className="flex flex-col gap-6">
+    <div className={styles.div}>
       <div>
-        <h2 className="text-xl font-medium text-fg">Check 5843350d-f323-4ff3-8dcf-a30bd48f451f</h2>
-        <p className="text-sm text-fg-secondary">Detailed view of the schema check</p>
+        <h2 className={styles.h2}>Check 5843350d-f323-4ff3-8dcf-a30bd48f451f</h2>
+        <p className={styles.p}>Detailed view of the schema check</p>
       </div>
-      <div className="flex items-center justify-between rounded-md border border-line bg-neutral-2 px-5 py-4 dark:bg-neutral-3">
-        <div className="flex gap-24">
+      <div className={styles.div2}>
+        <div className={styles.div3}>
           <div>
-            <div className="text-xs text-fg-secondary">Status</div>
-            <div className="text-sm font-medium text-critical">Failed</div>
+            <div className={styles.div4}>Status</div>
+            <div className={styles.div5}>Failed</div>
           </div>
           <div>
-            <div className="text-xs text-fg-secondary">Triggered 3d ago</div>
-            <div className="text-sm text-fg">by User</div>
+            <div className={styles.div6}>Triggered 3d ago</div>
+            <div className={styles.div7}>by User</div>
           </div>
         </div>
         <Button variant="destructive">Approve</Button>
       </div>
-      <div className="flex flex-col gap-3">
-        <div className="mb-3">
+      <div className={styles.div8}>
+        <div className={styles.div9}>
           <ContractFailuresTable
             title={`${failed.length} of ${CONTRACTS.length - 1} contracts failed`}
             aside={`${CONTRACTS.length - 1 - failed.length} passed`}
@@ -201,14 +202,14 @@ const SERVICES = [
 export const ManyTabs = createPreview(() => {
   const [view, setView] = useState(SERVICES[0]);
   return (
-    <div className="flex w-[32rem] flex-col">
+    <div className={styles.div10}>
       <TabbedView
         value={view}
         onValueChange={setView}
         items={SERVICES.map(name => ({
           value: name,
           label: name,
-          content: <p className="text-sm text-fg-default">The {name} view.</p>,
+          content: <p className={styles.p2}>The {name} view.</p>,
         }))}
       />
     </div>
@@ -228,9 +229,9 @@ export const Playground = createPreview({
           value: 'changes',
           label: 'Changes',
           content: (
-            <div className="divide-y divide-line text-sm text-fg-default">
-              <div className="px-5 py-3">Field Node.id changed type from ID! to ID</div>
-              <div className="px-5 py-3">Field User.email was removed</div>
+            <div className={styles.div11}>
+              <div className={styles.div12}>Field Node.id changed type from ID! to ID</div>
+              <div className={styles.div13}>Field User.email was removed</div>
             </div>
           ),
         },

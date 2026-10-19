@@ -1,94 +1,12 @@
 import { forwardRef, type ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { type LucideIcon } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
 import { useRender } from '@base-ui/react/use-render';
-import {
-  controlOnSurface,
-  controlSize,
-  disabledStyle,
-  focusRing,
-  segmentSeparator,
-} from '../shared-styles';
+import { disabledStyle, segmentSeparator } from '../shared-styles';
+import * as styles from './button.css';
 
-export const buttonVariants = cva(
-  [
-    'group inline-flex items-center rounded-sm border font-medium transition-colors',
-    'disabled:pointer-events-none disabled:opacity-50',
-    'aria-disabled:pointer-events-none aria-disabled:opacity-50',
-    focusRing,
-  ],
-  {
-    variants: {
-      variant: {
-        // Segmented trigger style (for selects, menus, popovers, filters). Fill and border come
-        // from `controlOnSurface` in the compound variants below.
-        default: 'text-fg-muted hover:text-fg-default dark:text-fg-default',
-        active: ['border-line dark:border-line-strong text-fg', 'bg-neutral-3 dark:bg-neutral-5'],
-        action: [
-          'border-dashed border-accent-line text-accent-muted bg-accent-tint-subtle',
-          'hover:border-accent-muted hover:text-accent hover:bg-accent-tint',
-        ],
-        'muted-action': ['border-dashed hover:bg-neutral-3 hover:border-neutral-7 hover:text-fg'],
-        // Standard button styles (for form actions)
-        primary: 'bg-surface-inverse text-fg-inverse hover:bg-neutral-11 border-transparent',
-        outline: 'border-line bg-transparent text-fg-default hover:bg-neutral-4 hover:text-fg',
-        ghost: 'border-transparent bg-transparent text-fg-secondary hover:text-fg',
-        destructive: [
-          'bg-critical-tint-subtle border-critical-line text-critical-text hover:bg-critical-tint hover:border-critical',
-        ],
-        // Text that acts: accent, underlined on hover, no box. Sits inline with the copy around it.
-        link: 'text-accent underline-offset-4 hover:underline',
-      },
-      size: {
-        compact: controlSize.compact,
-        default: controlSize.default,
-        'icon-sm': 'size-7 justify-center',
-      },
-      // What is inside. `label` and `iconOnly` pad their own segments, so the separators between
-      // segments can run the full height; only `children` pads the button itself, by size.
-      // `iconOnly` is a square: its width is the size's height, set in the compound variants.
-      layout: {
-        children: '',
-        label: '',
-        iconOnly: 'justify-center',
-      },
-      // Only `full` exists because only full-width is a thing buttons ask for: 116 of the
-      // legacy call sites set w-full and nothing else. Fixed widths belong to the component
-      // that needs them (a Select trigger), which sizes its wrapper and passes `full` down.
-      width: {
-        auto: '',
-        full: 'w-full',
-      },
-      // Which surface the button sits on. Only `default` changes: it is the one variant with a
-      // fill of its own to drop, and it is the variant Select uses for its trigger.
-      onSurface: {
-        base: '',
-        raised: '',
-      },
-    },
-    compoundVariants: [
-      { variant: 'default', onSurface: 'base', class: controlOnSurface.base },
-      { variant: 'default', onSurface: 'raised', class: controlOnSurface.raised },
-      { layout: 'children', size: 'compact', class: 'gap-1 px-3' },
-      { layout: 'children', size: 'default', class: 'gap-1.5 px-4' },
-      { layout: 'iconOnly', size: 'compact', class: 'w-7.5' },
-      { layout: 'iconOnly', size: 'default', class: 'w-9' },
-      // A plain button centres its content when stretched; a segmented one keeps the label at the
-      // leading edge and its icon at the trailing edge (the label segment grows to push it there).
-      { layout: 'children', width: 'full', class: 'justify-center' },
-      // Last, so it wins over the size and padding above once the classes are merged.
-      { variant: 'link', class: 'h-auto rounded-none border-0 bg-transparent p-0' },
-    ],
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-      layout: 'children',
-      width: 'auto',
-      onSurface: 'base',
-    },
-  },
-);
+export const buttonVariants = lenient(styles.buttonVariants);
 
 type AnchorProps = {
   href: string;
@@ -100,7 +18,7 @@ type AnchorProps = {
 // `layout` is a cva variant so padding can key on it, but as a prop it is the discriminant of
 // the union below, so the union defines it rather than cva.
 type CommonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'style'> &
-  Omit<VariantProps<typeof buttonVariants>, 'layout'> & {
+  Omit<NonNullable<Parameters<typeof buttonVariants>[0]>, 'layout'> & {
     'data-cy'?: string;
     /**
      * Render an `<a>` instead of a `<button>`, for a button that links out: another site, a
@@ -203,15 +121,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ...domProps,
       children:
         props.layout === 'iconOnly' ? (
-          <span className="flex items-center p-1.5">
-            <props.icon className="size-4" />
+          <span className={styles.buttonSpan}>
+            <props.icon className={styles.buttonIcon} />
           </span>
         ) : props.label != null ? (
           <>
-            <span className="flex grow items-center self-stretch px-3">{props.label}</span>
+            <span className={styles.buttonSpan2}>{props.label}</span>
 
             {props.accessoryInformation != null && (
-              <span className={`${segmentSeparator} flex items-center self-stretch px-3`}>
+              <span className={`${segmentSeparator} ${styles.buttonSpan3}`}>
                 {props.accessoryInformation}
               </span>
             )}
@@ -247,9 +165,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
                       }
                     : undefined
                 }
-                className={`${props.rightIcon.withSeparator && segmentSeparator} text-fg-subtle ${props.rightIcon.action ? 'hover:text-fg-default' : 'group-hover:text-fg'} flex items-center self-stretch px-2`}
+                className={`${props.rightIcon.withSeparator && segmentSeparator} ${styles.buttonSpan4} ${props.rightIcon.action ? styles.buttonSpan6 : styles.buttonSpan7} ${styles.buttonSpan5}`}
               >
-                <props.rightIcon.icon className="size-3" />
+                <props.rightIcon.icon className={styles.buttonIcon2} />
               </span>
             )}
           </>

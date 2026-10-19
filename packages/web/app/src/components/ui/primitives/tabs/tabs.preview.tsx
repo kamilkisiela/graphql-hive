@@ -3,6 +3,7 @@ import { Box, Check, FileCode2, Layers, List } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from '../badge/badge';
 import { Tabs, type TabItem } from './tabs';
+import * as styles from './tabs.preview.css';
 
 export const nav: NavPath = 'Primitives/Tabs';
 
@@ -18,7 +19,7 @@ export const nav: NavPath = 'Primitives/Tabs';
 // ---------------------------------------------------------------------------
 
 function Copy({ children }: { children: ReactNode }) {
-  return <p className="text-sm text-fg-default">{children}</p>;
+  return <p className={styles.copyP}>{children}</p>;
 }
 
 /** project/settings/composition.tsx: the active mode carries a check. */
@@ -26,7 +27,7 @@ function compositionItems(active: string): TabItem[] {
   const mark = (value: string, label: string) => (
     <>
       {label}
-      {active === value ? <Check className="size-4" /> : null}
+      {active === value ? <Check className={styles.markCheck} /> : null}
     </>
   );
   return [
@@ -142,7 +143,7 @@ export const Underline = createPreview(() => {
   const [mode, setMode] = useState('native');
   const [view, setView] = useState('details');
   return (
-    <div className="flex flex-col gap-10">
+    <div className={styles.div}>
       <Labelled label="project/settings/composition.tsx">
         <Tabs items={compositionItems(mode)} value={mode} onValueChange={setMode} />
       </Labelled>
@@ -156,7 +157,7 @@ export const Underline = createPreview(() => {
         <Tabs items={ACCESS} defaultValue="granular" />
       </Labelled>
       <Labelled label="The schema version views, with icons; the page renders the view">
-        <div className="flex flex-col">
+        <div className={styles.div2}>
           <Tabs items={VERSION_VIEWS} value={view} onValueChange={setView} />
           <Copy>The {view} view, rendered by the page.</Copy>
         </div>
@@ -193,13 +194,11 @@ const SERVICES = [
 export const ManyTabs = createPreview(() => {
   const [service, setService] = useState(SERVICES[0]);
   return (
-    <div className="flex flex-col gap-10">
+    <div className={styles.div3}>
       <Labelled label="proposals/editor.tsx, the service strip, in a two-column layout at 40rem">
-        <div className="flex w-[40rem] rounded-md border border-line">
-          <div className="w-40 shrink-0 border-r border-line p-3 text-xs text-fg-secondary">
-            Services
-          </div>
-          <div className="flex flex-1 flex-col p-3">
+        <div className={styles.div4}>
+          <div className={styles.div5}>Services</div>
+          <div className={styles.div6}>
             <Tabs
               items={SERVICES.map(name => ({ value: name, label: name }))}
               value={service}
@@ -255,8 +254,8 @@ export const Playground = createPreview({
 
 function Labelled(props: { label: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs text-fg-secondary">{props.label}</span>
+    <div className={styles.labelledDiv}>
+      <span className={styles.labelledSpan}>{props.label}</span>
       {props.children}
     </div>
   );

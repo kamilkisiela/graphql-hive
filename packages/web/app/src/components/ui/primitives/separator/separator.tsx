@@ -1,27 +1,8 @@
-import { cva } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { Separator as BaseSeparator } from '@base-ui/react/separator';
+import * as styles from './separator.css';
 
-const separatorVariants = cva('bg-line shrink-0', {
-  variants: {
-    orientation: {
-      horizontal: 'h-px w-full',
-      vertical: 'w-px',
-    },
-    stretch: {
-      true: '',
-      false: '',
-    },
-  },
-  compoundVariants: [
-    // A control's height, so it reads as part of a toolbar row rather than a wall.
-    { orientation: 'vertical', stretch: false, class: 'h-8' },
-    { orientation: 'vertical', stretch: true, class: 'self-stretch' },
-  ],
-  defaultVariants: {
-    orientation: 'horizontal',
-    stretch: false,
-  },
-});
+const separatorVariants = lenient(styles.separatorVariants);
 
 type SeparatorProps = {
   orientation?: 'horizontal' | 'vertical';

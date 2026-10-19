@@ -22,6 +22,7 @@ import { CopyChip } from '../primitives/copy-chip/copy-chip';
 import { Menu } from '../primitives/floating/menu/menu';
 import { Tooltip } from '../primitives/floating/tooltip/tooltip';
 import { StatusDot } from '../primitives/status-dot/status-dot';
+import * as styles from './data-table-cell.css';
 
 type BadgeVariant =
   | 'default'
@@ -282,13 +283,9 @@ function LinkOutMenu<TTo extends string>({
       align="start"
       width="sm"
       trigger={
-        <button
-          type="button"
-          aria-label={tooltip}
-          className="inline-flex items-center text-fg-muted hover:text-fg"
-        >
-          <ExternalLink className="size-3.5" />
-          <ChevronDown className="size-3" />
+        <button type="button" aria-label={tooltip} className={styles.linkOutMenuButton}>
+          <ExternalLink className={styles.linkOutMenuExternalLink} />
+          <ChevronDown className={styles.linkOutMenuChevronDown} />
         </button>
       }
       sections={[
@@ -326,21 +323,21 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
         <span
           className={cn(
             tone[props.tone ?? 'default'],
-            props.weight === 'medium' && 'font-medium',
-            props.mono && 'font-mono text-xs',
-            props.truncate && 'block truncate',
+            props.weight === 'medium' && styles.dataTableCellSpan,
+            props.mono && styles.dataTableCellSpan2,
+            props.truncate && styles.dataTableCellSpan3,
           )}
           title={props.truncate && typeof props.value === 'string' ? props.value : undefined}
         >
           {props.value}
           {props.secondary != null ? (
-            <span className="text-fg-secondary"> {props.secondary}</span>
+            <span className={styles.dataTableCellSpan4}> {props.secondary}</span>
           ) : null}
         </span>
       );
       if (!props.trailing) return value;
       return (
-        <span className="inline-flex items-center gap-2">
+        <span className={styles.dataTableCellSpan5}>
           {value}
           {props.trailing}
         </span>
@@ -348,7 +345,7 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
     }
     case 'number':
       return (
-        <span className="block text-right text-fg tabular-nums">
+        <span className={styles.dataTableCellSpan6}>
           {formatCellNumber(props.value, props.format)}
         </span>
       );
@@ -364,12 +361,12 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
       return (
         <span
           className={cn(
-            'inline-flex items-center gap-1',
+            styles.dataTableCellSpan7,
             tone[props.tone ?? 'default'],
-            props.mono && 'font-mono text-xs',
+            props.mono && styles.dataTableCellSpan8,
           )}
         >
-          {props.prefix ? <span className="text-fg-secondary">{props.prefix}</span> : null}
+          {props.prefix ? <span className={styles.dataTableCellSpan9}>{props.prefix}</span> : null}
           <time
             dateTime={date.toISOString()}
             title={mode === 'absolute' ? undefined : formatAbsolute(date)}
@@ -379,8 +376,8 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
           {mode === 'relative-info' ? (
             <Tooltip
               trigger={
-                <span className="inline-flex text-fg-muted">
-                  <Info className="size-3.5" />
+                <span className={styles.dataTableCellSpan10}>
+                  <Info className={styles.dataTableCellInfo} />
                 </span>
               }
               content={formatAbsolute(date)}
@@ -395,8 +392,8 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
           destination={props}
           className={cn(
             linkTone[props.tone ?? 'default'],
-            props.mono && 'font-mono text-xs',
-            props.truncate && 'block min-w-0 truncate',
+            props.mono && styles.dataTableCellDestination,
+            props.truncate && styles.dataTableCellDestination2,
           )}
           title={props.truncate && typeof props.label === 'string' ? props.label : undefined}
         >
@@ -406,7 +403,7 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
       // `contents` keeps a truncating link laid out by the cell itself.
       return (
         <span
-          className={props.trailing ? 'flex items-center gap-2' : 'contents'}
+          className={props.trailing ? styles.dataTableCellSpan11 : styles.dataTableCellSpan12}
           onClick={stopPropagation}
         >
           {link}
@@ -416,21 +413,23 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
     }
     case 'link-out': {
       const label = (
-        <span className={cn('text-fg', props.mono && 'font-mono text-xs')}>{props.label}</span>
+        <span className={cn(styles.dataTableCellSpan13, props.mono && styles.dataTableCellSpan14)}>
+          {props.label}
+        </span>
       );
       if (props.targets.length === 0) return label;
       if (props.targets.length === 1) {
         return (
-          <span className="inline-flex items-center gap-1.5" onClick={stopPropagation}>
+          <span className={styles.dataTableCellSpan15} onClick={stopPropagation}>
             {label}
             <Tooltip
               trigger={
                 <Destination
                   destination={props.targets[0]}
                   aria-label={props.tooltip}
-                  className="inline-flex text-fg-muted hover:text-fg"
+                  className={styles.dataTableCellDestination3}
                 >
-                  <ExternalLink className="size-3.5" />
+                  <ExternalLink className={styles.dataTableCellExternalLink} />
                 </Destination>
               }
               content={props.tooltip}
@@ -439,7 +438,7 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
         );
       }
       return (
-        <span className="inline-flex items-center gap-1.5" onClick={stopPropagation}>
+        <span className={styles.dataTableCellSpan16} onClick={stopPropagation}>
           {label}
           <LinkOutMenu targets={props.targets} tooltip={props.tooltip} />
         </span>
@@ -450,14 +449,14 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
       const shown = items.slice(0, props.max ?? 3);
       const rest = items.slice(shown.length);
       return (
-        <span className="inline-flex items-center gap-1">
+        <span className={styles.dataTableCellSpan17}>
           {shown.map((item, index) => (
             <Badge key={index} content={item.content} variants={{ variant: item.variant }} />
           ))}
           {rest.length > 0 ? (
             <Tooltip
               trigger={
-                <span className="inline-flex">
+                <span className={styles.dataTableCellSpan18}>
                   <Badge content={`+${rest.length}`} variants={{ variant: 'outline' }} />
                 </span>
               }
@@ -469,14 +468,14 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
     }
     case 'boolean':
       return props.value ? (
-        <Check className="inline size-4 text-success" aria-label="Yes" />
+        <Check className={styles.dataTableCellCheck} aria-label="Yes" />
       ) : (
-        <X className="inline size-4 text-fg-muted" aria-label="No" />
+        <X className={styles.dataTableCellX} aria-label="No" />
       );
     case 'status': {
       if ('dot' in props) {
         const body = (
-          <span className="inline-flex items-center gap-1.5 text-fg">
+          <span className={styles.dataTableCellSpan19}>
             <StatusDot color={props.dot} />
             {props.label}
           </span>
@@ -486,38 +485,42 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
       if ('icon' in props) {
         const Icon = props.icon;
         const body = (
-          <span className="inline-flex items-center gap-1.5 text-fg">
+          <span className={styles.dataTableCellSpan20}>
             {props.label}
-            <Icon className={cn('size-3.5', statusIconTone[props.iconTone ?? 'neutral'])} />
+            <Icon
+              className={cn(styles.dataTableCellIcon, statusIconTone[props.iconTone ?? 'neutral'])}
+            />
           </span>
         );
         return props.tooltip ? <Tooltip trigger={body} content={props.tooltip} /> : body;
       }
       return (
-        <span className="inline-flex items-center gap-2 text-fg-default">
+        <span className={styles.dataTableCellSpan21}>
           <Badge content={props.from.content} variants={{ variant: props.from.variant }} />
-          <ArrowRight className="size-3.5 text-fg-subtle" />
+          <ArrowRight className={styles.dataTableCellArrowRight} />
           <Badge content={props.to.content} variants={{ variant: props.to.variant }} />
         </span>
       );
     }
     case 'avatar':
       return (
-        <span className="inline-flex items-center gap-2 text-fg">
+        <span className={styles.dataTableCellSpan22}>
           <Avatar size="xs" alt={props.name} src={props.src} />
-          <span className={cn(props.strikethrough && 'line-through')}>{props.name}</span>
+          <span className={cn(props.strikethrough && styles.dataTableCellSpan23)}>
+            {props.name}
+          </span>
           {props.trailing}
         </span>
       );
     case 'copy':
       return (
-        <span className="inline-flex" onClick={stopPropagation}>
+        <span className={styles.dataTableCellSpan24} onClick={stopPropagation}>
           <CopyChip value={props.value} label={props.label} />
         </span>
       );
     case 'checkbox':
       return (
-        <span className="inline-flex" onClick={stopPropagation}>
+        <span className={styles.dataTableCellSpan25} onClick={stopPropagation}>
           <Checkbox
             checked={props.checked}
             onCheckedChange={checked => props.onCheckedChange(checked === true)}
@@ -527,7 +530,7 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
       );
     case 'actions':
       return (
-        <span className="flex justify-end" onClick={stopPropagation}>
+        <span className={styles.dataTableCellSpan26} onClick={stopPropagation}>
           <Menu
             align="end"
             width="sm"
@@ -546,7 +549,7 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
       );
     case 'icon-button':
       return (
-        <span className="flex justify-end" onClick={stopPropagation}>
+        <span className={styles.dataTableCellSpan27} onClick={stopPropagation}>
           <Tooltip
             trigger={
               <Button
@@ -571,19 +574,25 @@ export function DataTableCell<TTo extends string = '.'>(props: DataTableCellProp
           : 0;
       return (
         <span
-          className="flex justify-end gap-1"
+          className={styles.dataTableCellSpan28}
           role="meter"
           aria-valuenow={props.value}
           aria-valuemin={0}
           aria-valuemax={props.max}
         >
           {Array.from({ length: segments }, (_, i) => (
-            <span key={i} className={cn('h-4 w-1', i < filled ? 'bg-success' : 'bg-neutral-6')} />
+            <span
+              key={i}
+              className={cn(
+                styles.dataTableCellSpan29,
+                i < filled ? styles.dataTableCellSpan30 : styles.dataTableCellSpan31,
+              )}
+            />
           ))}
         </span>
       );
     }
     case 'placeholder':
-      return <span className="text-fg-secondary">—</span>;
+      return <span className={styles.dataTableCellSpan32}>—</span>;
   }
 }

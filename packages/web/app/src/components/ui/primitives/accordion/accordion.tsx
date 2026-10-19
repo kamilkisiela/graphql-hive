@@ -1,9 +1,11 @@
 import { type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
 import { Accordion as BaseAccordion } from '@base-ui/react/accordion';
 import { focusRingQuiet } from '../shared-styles';
+import * as styles from './accordion.css';
 
 export type AccordionItem = {
   value: string;
@@ -48,35 +50,11 @@ type AccordionProps = {
   attrs?: Record<string, string>;
 };
 
-const rootVariants = cva('', {
-  variants: {
-    variant: {
-      list: '',
-      boxed: 'flex flex-col gap-4',
-      plain: '',
-    },
-  },
-});
+const rootVariants = lenient(styles.rootVariants);
 
-const itemVariants = cva('', {
-  variants: {
-    variant: {
-      list: 'border-line border-b',
-      boxed: 'border-line overflow-hidden rounded-md border',
-      plain: '',
-    },
-  },
-});
+const itemVariants = lenient(styles.itemVariants);
 
-const headerRowVariants = cva('flex items-center', {
-  variants: {
-    variant: {
-      list: '',
-      boxed: 'px-4 transition-colors [&:not(:has(>h3>[data-disabled])):hover]:bg-surface-hover',
-      plain: '',
-    },
-  },
-});
+const headerRowVariants = lenient(styles.headerRowVariants);
 
 const triggerVariants = cva(
   cn(
@@ -100,43 +78,12 @@ const triggerVariants = cva(
   },
 );
 
-const chevronVariants = cva('shrink-0 transition-transform duration-200', {
-  variants: {
-    size: {
-      default: 'size-4',
-      sm: 'size-3',
-    },
-    tone: {
-      default: 'text-fg-subtle',
-      accent: 'text-accent',
-    },
-    chevron: {
-      end: 'ml-auto group-data-[panel-open]:rotate-180',
-      start: '-rotate-90 group-data-[panel-open]:rotate-0',
-      none: 'hidden',
-    },
-  },
-});
+const chevronVariants = lenient(styles.chevronVariants);
 
 // Base UI measures the panel into a variable, which is what lets the height animate.
-const panelVariants = cva(
-  'h-[var(--accordion-panel-height)] overflow-hidden text-sm transition-[height] duration-200 ease-out data-[ending-style]:h-0 data-[starting-style]:h-0',
-);
+const panelVariants = lenient(styles.panelVariants);
 
-const panelInnerVariants = cva('', {
-  variants: {
-    variant: {
-      list: '',
-      // The header's hover fill ends at the panel, so the content needs room below it.
-      boxed: 'px-4 pt-3',
-      plain: '',
-    },
-    size: {
-      default: 'pb-4',
-      sm: 'pb-2',
-    },
-  },
-});
+const panelInnerVariants = lenient(styles.panelInnerVariants);
 
 export function Accordion({
   items,
@@ -171,20 +118,20 @@ export function Accordion({
           {...item.attrs}
         >
           <div className={headerRowVariants({ variant })}>
-            <BaseAccordion.Header className="flex min-w-0 grow">
+            <BaseAccordion.Header className={styles.accordionHeader}>
               <BaseAccordion.Trigger
                 className={triggerVariants({ size, tone })}
                 {...item.triggerAttrs}
               >
                 {chevron === 'start' ? chevronIcon : null}
-                <span className="min-w-0 grow">{item.label}</span>
+                <span className={styles.accordionSpan}>{item.label}</span>
                 {item.trailing != null ? (
-                  <span className="ml-auto shrink-0">{item.trailing}</span>
+                  <span className={styles.accordionSpan2}>{item.trailing}</span>
                 ) : null}
                 {chevron === 'end' ? chevronIcon : null}
               </BaseAccordion.Trigger>
             </BaseAccordion.Header>
-            {item.action != null ? <div className="shrink-0 pl-2">{item.action}</div> : null}
+            {item.action != null ? <div className={styles.accordionDiv}>{item.action}</div> : null}
           </div>
           <BaseAccordion.Panel className={panelVariants()}>
             <div className={panelInnerVariants({ variant, size })}>{item.content}</div>

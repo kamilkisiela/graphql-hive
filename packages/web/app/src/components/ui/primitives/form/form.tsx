@@ -18,6 +18,7 @@ import {
   type UseFormReturn,
 } from 'react-hook-form';
 import { Label, LabelHint, labelVariants, type LabelHintProps } from '../label/label';
+import * as styles from './form.css';
 
 // The three generics mirror useForm's, so a schema that transforms its values (defaults, coercion)
 // hands the submit handler the output type, not the input type.
@@ -46,7 +47,7 @@ export function Form<
 >({ form, onSubmit, children, attrs }: FormProps<TFieldValues, TContext, TTransformedValues>) {
   return (
     <FormProvider {...form}>
-      <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)} {...attrs}>
+      <form className={styles.formForm} onSubmit={form.handleSubmit(onSubmit)} {...attrs}>
         {children}
       </form>
     </FormProvider>
@@ -98,13 +99,13 @@ export function FormItem({ children, group = false }: { children: ReactNode; gro
   if (group) {
     return (
       <FormItemContext.Provider value={value}>
-        <fieldset className="space-y-2">{children}</fieldset>
+        <fieldset className={styles.formItemFieldset}>{children}</fieldset>
       </FormItemContext.Provider>
     );
   }
   return (
     <FormItemContext.Provider value={value}>
-      <div className="space-y-2">{children}</div>
+      <div className={styles.formItemDiv}>{children}</div>
     </FormItemContext.Provider>
   );
 }
@@ -122,7 +123,7 @@ export function FormLabel({ label, tooltip, icon }: FormLabelProps) {
   const { formItemId, group } = useFormField();
   if (group) {
     return (
-      <legend className="inline-flex items-center gap-1" data-label>
+      <legend className={styles.formLabelLegend} data-label>
         <span className={labelVariants({ variant: 'caps' })}>{label}</span>
         <LabelHint tooltip={tooltip} icon={icon} name={label} />
       </legend>
@@ -156,7 +157,7 @@ export function FormControl({ children }: { children: ReactElement }) {
 export function FormMessage() {
   const { error, formMessageId } = useFormField();
   return (
-    <p id={formMessageId} data-form-message className="min-h-[1.25rem] text-control text-critical">
+    <p id={formMessageId} data-form-message className={styles.formMessageP}>
       {error?.message ? String(error.message) : null}
     </p>
   );

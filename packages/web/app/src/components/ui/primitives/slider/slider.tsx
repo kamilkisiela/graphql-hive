@@ -1,5 +1,6 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
 import { focusRing } from '../shared-styles';
+import * as styles from './slider.css';
 
 /** One thumb for a number; two, for a bounded range such as a duration filter, for a pair. */
 type SliderValue = number | [number, number];
@@ -38,12 +39,12 @@ export function Slider<V extends SliderValue>({
       max={max}
       step={step}
       disabled={disabled}
-      className="flex w-full touch-none items-center data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+      className={styles.sliderRoot}
     >
       {/* Vertical padding widens the hit area past the 4px track. */}
-      <BaseSlider.Control className="flex w-full cursor-pointer items-center py-2">
-        <BaseSlider.Track className="relative h-1 w-full rounded-full bg-neutral-5 select-none">
-          <BaseSlider.Indicator className="rounded-full bg-accent" />
+      <BaseSlider.Control className={styles.sliderControl}>
+        <BaseSlider.Track className={styles.sliderTrack}>
+          <BaseSlider.Indicator className={styles.sliderIndicator} />
           {(isRange ? [0, 1] : [0]).map(index => (
             <BaseSlider.Thumb
               key={index}
@@ -51,7 +52,7 @@ export function Slider<V extends SliderValue>({
               aria-label={
                 isRange ? `${ariaLabel} ${index === 0 ? 'minimum' : 'maximum'}` : ariaLabel
               }
-              className={`size-4 rounded-full bg-neutral-12 shadow-[0_1px_3px_rgba(0,0,0,0.4)] ${focusRing}`}
+              className={`${styles.sliderThumb} ${focusRing}`}
             />
           ))}
         </BaseSlider.Track>

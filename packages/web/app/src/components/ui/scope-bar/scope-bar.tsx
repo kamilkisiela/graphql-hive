@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import * as styles from './scope-bar.css';
 
 type ScopeBarProps = {
   picker: ReactNode;
@@ -8,8 +9,8 @@ type ScopeBarProps = {
 /** Sits above a TabbedView: the picker that scopes every tab. */
 export function ScopeBar({ picker, label = 'Viewing' }: ScopeBarProps) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-control text-fg-secondary">{label}</span>
+    <div className={styles.scopeBarDiv}>
+      <span className={styles.scopeBarSpan}>{label}</span>
       {picker}
     </div>
   );

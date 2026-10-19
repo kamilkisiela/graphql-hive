@@ -1,5 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 import clsx from 'clsx';
+import * as styles from './heading.css';
 
 export const Heading = ({
   children,
@@ -17,7 +18,7 @@ export const Heading = ({
   return (
     <HeadingLevel
       className={clsx(
-        'cursor-default text-fg',
+        styles.headingHeadingLevel,
         {
           lg: 'text-lg font-bold',
           xl: 'text-xl font-bold',

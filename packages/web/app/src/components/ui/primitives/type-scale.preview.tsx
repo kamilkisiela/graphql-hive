@@ -1,4 +1,5 @@
 import { createPreview, type NavPath } from 'react-foundry';
+import * as styles from './type-scale.preview.css';
 
 export const nav: NavPath = 'Primitives/Foundations/TypeScale';
 
@@ -22,17 +23,17 @@ const STEPS = [
 const SAMPLE = 'Schema checks run on the composed API schema.';
 
 export const Steps = createPreview(() => (
-  <div className="flex flex-col gap-4">
+  <div className={styles.div}>
     {STEPS.map(step => (
-      <div key={step.name} className="grid grid-cols-[6rem_1fr] items-baseline gap-4">
-        <div className="font-mono text-2xs text-fg-muted">
+      <div key={step.name} className={styles.div2}>
+        <div className={styles.div3}>
           {step.name}
           <br />
           {step.px}/{step.lh}
         </div>
         <div>
-          <div className={`text-fg ${step.cls}`}>{SAMPLE}</div>
-          <div className="text-2xs text-fg-muted">{step.use}</div>
+          <div className={`${styles.div4} ${step.cls}`}>{SAMPLE}</div>
+          <div className={styles.div5}>{step.use}</div>
         </div>
       </div>
     ))}
@@ -44,11 +45,9 @@ export const Steps = createPreview(() => (
  * (control), its description (xs), and a badge (2xs).
  */
 export const SideBySide = createPreview(() => (
-  <div className="flex items-center gap-3">
-    <span className="rounded-sm border border-line bg-neutral-2 px-3 py-1.5 text-control font-medium text-fg-default dark:bg-neutral-3">
-      Filter
-    </span>
-    <span className="text-xs text-fg-default">3 dimensions selected</span>
-    <span className="rounded-sm bg-neutral-4 px-1.5 py-0.5 text-2xs text-fg uppercase">beta</span>
+  <div className={styles.div6}>
+    <span className={styles.span}>Filter</span>
+    <span className={styles.span2}>3 dimensions selected</span>
+    <span className={styles.span3}>beta</span>
   </div>
 ));

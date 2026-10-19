@@ -30,6 +30,7 @@ import { GetStartedProgress } from '../get-started/trigger';
 import { UserSettingsModal } from '../user/settings';
 import { Changelog } from './changelog/changelog';
 import { latestChangelog } from './changelog/generated-changelog';
+import * as styles from './user-menu.css';
 
 const UserMenu_OrganizationConnectionFragment = graphql(`
   fragment UserMenu_OrganizationConnectionFragment on OrganizationConnection {
@@ -120,10 +121,13 @@ export function UserMenu({ withOrganization = true }: { withOrganization?: boole
           organizationSlug={currentOrganization.slug}
         />
       ) : null}
-      <div className="flex flex-row items-center gap-8">
+      <div className={styles.userMenuDiv}>
         <Changelog changes={latestChangelog} />
         {currentOrganization ? (
-          <GetStartedProgress className="hidden md:block" tasks={currentOrganization.getStarted} />
+          <GetStartedProgress
+            className={styles.userMenuGetStartedProgress}
+            tasks={currentOrganization.getStarted}
+          />
         ) : null}
         <Menu
           align="end"
@@ -132,7 +136,10 @@ export function UserMenu({ withOrganization = true }: { withOrganization?: boole
           trigger={
             <button
               type="button"
-              className={cn('cursor-pointer', currentOrganization ? '' : 'animate-pulse')}
+              className={cn(
+                styles.userMenuButton,
+                currentOrganization ? '' : styles.userMenuButton2,
+              )}
               data-cy="user-menu-trigger"
             >
               <Avatar variant="outlined" alt={me?.displayName} />
@@ -329,8 +336,11 @@ export function LeaveOrganizationModalContent(props: {
       description={
         <>
           Are you sure you want to leave this organization? You will lose access to{' '}
-          <span className="font-semibold text-fg">{props.organizationSlug}</span>.{' '}
-          <span className="font-semibold text-fg">This action is irreversible!</span>
+          <span className={styles.leaveOrganizationModalContentSpan}>{props.organizationSlug}</span>
+          .{' '}
+          <span className={styles.leaveOrganizationModalContentSpan2}>
+            This action is irreversible!
+          </span>
         </>
       }
       confirm={{

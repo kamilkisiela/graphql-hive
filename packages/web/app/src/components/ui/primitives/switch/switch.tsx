@@ -1,55 +1,12 @@
-import { cva, type VariantProps } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
-import { focusRing } from '../shared-styles';
+import * as styles from './switch.css';
 
-const switchRootVariants = cva(
-  [
-    'group relative inline-flex shrink-0 cursor-pointer items-center rounded-full transition-colors',
-    'data-[unchecked]:bg-neutral-6 data-[checked]:bg-success',
-    'not-data-[disabled]:data-[unchecked]:hover:bg-neutral-8',
-    'not-data-[disabled]:data-[checked]:hover:bg-success-muted',
-    focusRing,
-    // Base UI renders a span, so `:disabled` never matches; the state is a data attribute.
-    'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
-  ],
-  {
-    variants: {
-      size: {
-        standard: 'h-5 w-10 p-0.5 ',
-        small: 'h-2.5 w-6',
-      },
-      decorative: {
-        true: 'cursor-[inherit]',
-      },
-    },
-    defaultVariants: {
-      size: 'standard',
-    },
-  },
-);
+const switchRootVariants = lenient(styles.switchRootVariants);
 
-const switchThumbVariants = cva(
-  [
-    'pointer-events-none block rounded-full transition-transform',
-    'bg-neutral-1 dark:bg-neutral-12 data-[unchecked]:bg-neutral-4 data-[unchecked]:dark:bg-neutral-10',
-    // A 1px dark ring plus a short drop shadow. The checked track is a bright green in dark mode,
-    // so a light thumb needs an edge of its own; the default shadow-sm is too faint to give one.
-    'shadow-[0_1px_3px_rgba(0,0,0,0.5),0_0_0_1px_rgba(0,0,0,0.25)]',
-  ],
-  {
-    variants: {
-      size: {
-        standard: 'size-4 data-[checked]:translate-x-5',
-        small: 'size-[13px] data-[checked]:translate-x-[11px]',
-      },
-    },
-    defaultVariants: {
-      size: 'standard',
-    },
-  },
-);
+const switchThumbVariants = lenient(styles.switchThumbVariants);
 
-type SwitchProps = VariantProps<typeof switchRootVariants> & {
+type SwitchProps = NonNullable<Parameters<typeof switchRootVariants>[0]> & {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;

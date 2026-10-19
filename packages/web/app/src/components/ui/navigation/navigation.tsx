@@ -1,8 +1,8 @@
 import { type ComponentType, type ReactNode } from 'react';
-import { cva } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { Link, type LinkOptions } from '@tanstack/react-router';
 import { Tooltip } from '../primitives/floating/tooltip/tooltip';
-import { focusRingQuiet } from '../primitives/shared-styles';
+import * as styles from './navigation.css';
 
 export type NavigationVariant = 'underline' | 'pill' | 'list';
 export type NavigationSize = 'default' | 'sm';
@@ -44,52 +44,20 @@ type NavigationProps = {
   attrs?: Record<string, string>;
 };
 
-const listVariants = cva('', {
-  variants: {
-    variant: {
-      underline: 'flex flex-row items-center',
-      pill: 'bg-neutral-3 inline-flex flex-row items-center gap-1 rounded-md p-1',
-      list: 'flex w-48 shrink-0 flex-col space-y-1',
-    },
-  },
-});
+const listVariants = lenient(styles.listVariants);
 
-const itemVariants = cva(
-  [
-    'inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-sm font-medium transition-colors',
-    focusRingQuiet,
-  ],
-  {
-    variants: {
-      variant: {
-        underline: 'border-b-2 focus-visible:outline-offset-2',
-        pill: 'rounded-sm focus-visible:outline-offset-2',
-        list: 'justify-start rounded-md px-4 py-2 text-left',
-      },
-      size: {
-        default: '',
-        sm: '',
-      },
-    },
-    compoundVariants: [
-      { variant: 'underline', size: 'default', class: 'px-4 py-3' },
-      { variant: 'underline', size: 'sm', class: 'px-3 py-2' },
-      { variant: 'pill', size: 'default', class: 'px-4 py-1.5' },
-      { variant: 'pill', size: 'sm', class: 'px-3 py-1' },
-    ],
-  },
-);
+const itemVariants = lenient(styles.itemVariants);
 
 const activeClasses: Record<NavigationVariant, string> = {
-  underline: 'text-fg border-accent',
-  pill: 'text-fg bg-surface-selected',
-  list: 'text-fg bg-neutral-5 hover:bg-neutral-5 dark:bg-neutral-3 dark:hover:bg-neutral-3',
+  underline: styles.activeClassesUnderline,
+  pill: styles.activeClassesPill,
+  list: styles.activeClassesList,
 };
 
 const inactiveClasses: Record<NavigationVariant, string> = {
-  underline: 'text-fg-default hover:text-fg hover:border-accent-muted border-transparent',
-  pill: 'text-fg-default hover:text-fg',
-  list: 'text-fg-default hover:text-fg hover:underline',
+  underline: styles.inactiveClassesUnderline,
+  pill: styles.inactiveClassesPill,
+  list: styles.inactiveClassesList,
 };
 
 export function Navigation({
@@ -102,15 +70,9 @@ export function Navigation({
   attrs,
 }: NavigationProps) {
   const links = loading ? (
-    <div
-      className={
-        variant === 'list'
-          ? 'flex w-48 flex-col gap-y-3 px-4 py-2'
-          : 'flex flex-row gap-x-8 border-b-2 border-b-transparent px-4 py-3'
-      }
-    >
+    <div className={variant === 'list' ? styles.navigationDiv : styles.navigationDiv2}>
       {[0, 1, 2].map(index => (
-        <div key={index} className="h-5 w-12 animate-pulse rounded-full bg-neutral-5" />
+        <div key={index} className={styles.navigationDiv3} />
       ))}
     </div>
   ) : (
@@ -143,17 +105,17 @@ export function Navigation({
                   inactiveProps={{ className: inactiveClasses[variant] }}
                   {...itemAttrs}
                 >
-                  {Icon ? <Icon className="size-4 shrink-0" /> : null}
+                  {Icon ? <Icon className={styles.navigationIcon} /> : null}
                   {label}
                 </Link>
               );
               return (
-                <li key={label} className="contents">
+                <li key={label} className={styles.navigationLi}>
                   {tooltip == null ? (
                     anchor
                   ) : (
                     <Tooltip
-                      trigger={<span className="inline-flex">{anchor}</span>}
+                      trigger={<span className={styles.navigationSpan}>{anchor}</span>}
                       content={tooltip}
                     />
                   )}
@@ -169,7 +131,7 @@ export function Navigation({
     return <div {...attrs}>{links}</div>;
   }
   return (
-    <div className="flex items-center justify-between" {...attrs}>
+    <div className={styles.navigationDiv4} {...attrs}>
       {links}
       {actions}
     </div>

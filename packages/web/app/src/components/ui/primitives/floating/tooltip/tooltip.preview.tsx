@@ -4,6 +4,7 @@ import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
 import { Popover } from '../popover/popover';
 import { Tooltip } from './tooltip';
+import * as styles from './tooltip.preview.css';
 
 export const nav: NavPath = 'Primitives/Floating/Tooltip';
 
@@ -34,7 +35,7 @@ export const IconButtonTrigger = createPreview(() => (
  * value that is truncated or abbreviated on screen.
  */
 export const StringTrigger = createPreview(() => (
-  <span className="font-mono text-xs uppercase">
+  <span className={styles.span}>
     <Tooltip trigger="Sep 10 14:22:07" content="2026-09-10T14:22:07.481Z" side="bottom" />
   </span>
 ));
@@ -47,7 +48,7 @@ export const MaxWidths = createPreview(() => {
   const long =
     'This differs from request count because a single request can resolve a field many times, or skip it entirely.';
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className={styles.div}>
       <Tooltip trigger={<Button label="default" />} content={long} />
       <Tooltip trigger={<Button label="md" />} content={long} maxWidth="md" />
       <Tooltip trigger={<Button label="lg" />} content={long} maxWidth="lg" />
@@ -64,8 +65,8 @@ export const MaxWidths = createPreview(() => {
 export const Paragraph = createPreview(() => (
   <Tooltip
     trigger={
-      <button type="button" className="text-warning">
-        <CircleHelp className="size-4" />
+      <button type="button" className={styles.button}>
+        <CircleHelp className={styles.circleHelp} />
       </button>
     }
     content={
@@ -85,7 +86,7 @@ export const RichContent = createPreview(() => (
     trigger={<Button label="Impact" />}
     content={
       <>
-        <p className="mb-1 font-medium">Impact</p>
+        <p className={styles.p}>Impact</p>
         <p>Total time spent on this operation in the selected period, in seconds.</p>
       </>
     }
@@ -94,7 +95,7 @@ export const RichContent = createPreview(() => (
 
 /** All four sides. `top` is the default. */
 export const Sides = createPreview(() => (
-  <div className="flex gap-3 p-16">
+  <div className={styles.div2}>
     {(['top', 'right', 'bottom', 'left'] as const).map(side => (
       <Tooltip
         key={side}
@@ -108,7 +109,7 @@ export const Sides = createPreview(() => (
 
 /** `arrow` points at the trigger, for when the association is not obvious from position alone. */
 export const WithArrow = createPreview(() => (
-  <div className="flex gap-3">
+  <div className={styles.div3}>
     <Tooltip trigger={<Button label="No arrow" />} content="The default." />
     <Tooltip trigger={<Button label="With arrow" />} content="Points at its trigger." arrow />
   </div>
@@ -119,7 +120,7 @@ export const WithArrow = createPreview(() => (
  * instead of waiting the delay again. Hover across all three.
  */
 export const Grouping = createPreview(() => (
-  <div className="flex gap-3">
+  <div className={styles.div4}>
     <Tooltip trigger={<Button label="First" />} content="Waits the delay." />
     <Tooltip trigger={<Button label="Second" />} content="Opens at once." />
     <Tooltip trigger={<Button label="Third" />} content="Opens at once." />
@@ -131,7 +132,7 @@ export const Grouping = createPreview(() => (
  * letting it travel into the popup. For a hint over a table row the popup would otherwise cover.
  */
 export const NotHoverable = createPreview(() => (
-  <div className="flex gap-3">
+  <div className={styles.div5}>
     <Tooltip
       trigger={<Button label="Hoverable" />}
       content="You can move the pointer into this."
@@ -150,7 +151,7 @@ export const NotHoverable = createPreview(() => (
 export const Controlled = createPreview(() => {
   const [open, setOpen] = useState(true);
   return (
-    <div className="flex items-center gap-3 pt-10">
+    <div className={styles.div6}>
       <Tooltip
         open={open}
         onOpenChange={setOpen}
@@ -174,7 +175,7 @@ export const Controlled = createPreview(() => {
  * applies in some states. The left one never opens.
  */
 export const Disabled = createPreview(() => (
-  <div className="flex gap-3">
+  <div className={styles.div7}>
     <Tooltip trigger={<Button label="Disabled" />} content="You will not see this." disabled />
     <Tooltip trigger={<Button label="Enabled" />} content="You will see this." />
   </div>
@@ -187,11 +188,11 @@ export const Disabled = createPreview(() => (
  * a disabled control is not keyboard-reachable either way.
  */
 export const DisabledControl = createPreview(() => (
-  <div className="flex gap-3">
+  <div className={styles.div8}>
     <Tooltip trigger={<Button label="Never opens" disabled />} content="You will not see this." />
     <Tooltip
       trigger={
-        <span className="inline-flex">
+        <span className={styles.span2}>
           <Button label="Opens" disabled />
         </span>
       }
@@ -202,37 +203,37 @@ export const DisabledControl = createPreview(() => (
 
 /** Info icons are a Popover with `openOnHover`, not a Tooltip, so touch and keyboard can open them. */
 export const Infotip = createPreview(() => (
-  <div className="flex items-center gap-6">
+  <div className={styles.div9}>
     <Popover
       trigger={
         <button type="button" aria-label="Why this cannot be assigned">
-          <Info className="size-4" />
+          <Info className={styles.info} />
         </button>
       }
       openOnHover
       content={
-        <p className="text-sm text-fg-default">
+        <p className={styles.p2}>
           Your membership has insufficient authority for assigning this permission.
         </p>
       }
     />
-    <div className="flex items-center">
-      <span className="text-warning">Inactive</span>
+    <div className={styles.div10}>
+      <span className={styles.span3}>Inactive</span>
       <Popover
         trigger={
           <Button variant="ghost" size="icon-sm" aria-label="Why inactive">
-            <Info className="size-4" />
+            <Info className={styles.info2} />
           </Button>
         }
         openOnHover
         width="lg"
         content={
-          <div className="text-sm font-normal text-fg-default">
+          <div className={styles.div11}>
             <p>
               This Contract is no longer active and no more contract versions or contract checks
               will be published for it.
             </p>
-            <p className="mt-1">
+            <p className={styles.p3}>
               It is not possible to enable a contract again. Please create a new contract instead.
             </p>
           </div>
@@ -267,7 +268,7 @@ export const Playground = createPreview({
     disabled: { type: 'boolean', default: false },
   }),
   render: v => (
-    <div className="p-16">
+    <div className={styles.div12}>
       <Tooltip
         trigger={v.trigger}
         content={v.content}

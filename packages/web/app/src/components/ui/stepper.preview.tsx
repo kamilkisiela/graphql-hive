@@ -1,6 +1,7 @@
 import { createPreview, type NavPath } from 'react-foundry';
 import { Button } from '@/components/ui/primitives/button/button';
 import { defineStepper } from './stepper';
+import * as styles from './stepper.preview.css';
 
 export const nav: NavPath = 'Components/Stepper';
 
@@ -16,11 +17,7 @@ const Stepper = defineStepper(
 type StepId = Parameters<typeof Stepper.get>[0];
 
 function StepBody({ label }: { label: string }) {
-  return (
-    <div className="flex h-40 items-center justify-center rounded-md border border-dashed border-line text-sm text-fg-secondary">
-      {label}
-    </div>
-  );
+  return <div className={styles.stepBodyDiv}>{label}</div>;
 }
 
 /**
@@ -31,10 +28,10 @@ function StepBody({ label }: { label: string }) {
  */
 function AccessTokenWizard(props: { defaultStep?: StepId }) {
   return (
-    <div className="w-[40rem] rounded-md bg-surface-overlay p-6">
+    <div className={styles.accessTokenWizardDiv}>
       <Stepper.StepperProvider variant="horizontal" defaultStep={props.defaultStep}>
         {({ stepper }) => (
-          <div className="flex flex-col gap-6">
+          <div className={styles.accessTokenWizardDiv2}>
             <Stepper.StepperNavigation>
               {stepper.steps.map(step => (
                 <Stepper.StepperStep key={step.id} of={step.id} clickable={false}>

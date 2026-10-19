@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/primitives/button/button';
 import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 import { useLocalStorageJson, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import * as styles from './changelog.css';
 
 export type Changelog = {
   title: string;
@@ -58,7 +59,7 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
   }
 
   return (
-    <span className="relative inline-flex">
+    <span className={styles.changelogPopoverSpan}>
       <Popover
         open={isOpen}
         onOpenChange={toggle}
@@ -69,33 +70,28 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
         arrow
         content={
           <>
-            <div className="grid">
-              <div className="space-y-2 p-4">
-                <h4 className="text-sm leading-none font-medium text-fg">
-                  What's new in Hive Console
-                </h4>
-                <p className="text-control text-fg-default">
+            <div className={styles.changelogPopoverDiv}>
+              <div className={styles.changelogPopoverDiv2}>
+                <h4 className={styles.changelogPopoverH4}>What's new in Hive Console</h4>
+                <p className={styles.changelogPopoverP}>
                   Find out about the newest features, and enhancements
                 </p>
               </div>
-              <ol className="relative m-0">
+              <ol className={styles.changelogPopoverOl}>
                 {props.changes.map((change, index) => (
                   <li
                     className={cn(
-                      'border-l-2 px-4',
+                      styles.changelogPopoverLi,
                       readChanges.includes(change.href)
-                        ? 'border-transparent'
-                        : 'border-accent-muted',
+                        ? styles.changelogPopoverLi2
+                        : styles.changelogPopoverLi3,
                     )}
                     key={index}
                   >
-                    <time
-                      className="mb-1 text-xs font-normal text-fg-secondary"
-                      dateTime={change.date}
-                    >
+                    <time className={styles.changelogPopoverTime} dateTime={change.date}>
                       {format(new Date(change.date), 'do MMMM yyyy')}
                     </time>
-                    <h3 className="mb-0.5 text-sm font-medium text-pretty text-fg hover:underline">
+                    <h3 className={styles.changelogPopoverH3}>
                       <a
                         target="_blank"
                         rel="noreferrer"
@@ -105,14 +101,12 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
                         {change.title}
                       </a>
                     </h3>
-                    <p className="mb-5 text-control font-normal text-pretty text-fg-default">
-                      {change.description}
-                    </p>
+                    <p className={styles.changelogPopoverP2}>{change.description}</p>
                   </li>
                 ))}
               </ol>
             </div>
-            <div className="flex flex-row items-center justify-center pt-2 pb-5">
+            <div className={styles.changelogPopoverDiv3}>
               <Button
                 variant="link"
                 anchor={{
@@ -127,8 +121,8 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
         }
       />
       {displayDot ? (
-        <span className="absolute top-0 right-0 -mt-1 -mr-1 flex size-2">
-          <span className="absolute inline-flex size-full animate-pulse rounded-full bg-accent" />
+        <span className={styles.changelogPopoverSpan2}>
+          <span className={styles.changelogPopoverSpan3} />
         </span>
       ) : null}
     </span>

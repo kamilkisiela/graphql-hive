@@ -5,6 +5,7 @@ import { formatNumber } from '@/lib/hooks/use-formatted-number';
 import { Chart } from './chart';
 import { useChartTheme } from './chart-theme';
 import { week } from './preview-data';
+import * as styles from './chart.preview.css';
 
 export const nav: NavPath = 'Primitives/Charts/Chart';
 
@@ -45,7 +46,7 @@ function RequestsAndFailures(props: { legend?: boolean }) {
 
 /** The shared look on a raised card, the way Insights mounts it. Hover for the overlay tooltip. */
 export const Default = createPreview(() => (
-  <div className="w-[48rem]">
+  <div className={styles.div}>
     <Card
       variants={{ onSurface: 'raised', titleSize: 'large' }}
       title="Operations over time"
@@ -61,7 +62,7 @@ export const Default = createPreview(() => (
  * It sits under the axis labels in a row the grid reserves, so the two never overlap.
  */
 export const Legend = createPreview(() => (
-  <div className="w-[48rem]">
+  <div className={styles.div2}>
     <Card
       variants={{ onSurface: 'raised', titleSize: 'large' }}
       title="Operations over time"

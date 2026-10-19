@@ -1,9 +1,11 @@
 import { useEffect, useRef, type ComponentType, type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
+import { lenient } from '@/lib/recipe';
 import { cn } from '@/lib/utils';
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { Tooltip } from '../floating/tooltip/tooltip';
 import { focusRingQuiet } from '../shared-styles';
+import * as styles from './tabs.css';
 
 export type TabsVariant = 'underline' | 'header';
 export type TabsSize = 'default' | 'sm';
@@ -35,19 +37,7 @@ type TabsProps = {
   attrs?: Record<string, string>;
 };
 
-const rootVariants = cva('', {
-  variants: {
-    variant: {
-      underline: '',
-      header: 'w-full',
-    },
-    orientation: {
-      horizontal: '',
-      // min-h-0 lets a page that fixes its height shrink the root, so the panel scrolls.
-      vertical: 'flex min-h-0 gap-8',
-    },
-  },
-});
+const rootVariants = lenient(styles.rootVariants);
 
 /**
  * A horizontal strip scrolls sideways once its tabs outgrow it, with the scrollbar hidden the way
@@ -57,34 +47,9 @@ const rootVariants = cva('', {
  * wrapper pads by the focus ring's reach (4px) plus the indicator's pixel below the border, and
  * pulls the same back with negative margins.
  */
-const scrollerVariants = cva('', {
-  variants: {
-    orientation: {
-      horizontal:
-        'no-scrollbar -mx-1 -mt-1 -mb-[5px] min-w-0 grow overflow-x-auto px-1 pt-1 pb-[5px] [contain:inline-size]',
-      vertical: '',
-    },
-  },
-});
+const scrollerVariants = lenient(styles.scrollerVariants);
 
-const listVariants = cva('relative flex', {
-  variants: {
-    variant: {
-      underline: 'border-line gap-1',
-      // The band around it draws the border and fill.
-      header: 'h-10 grow gap-1 px-2',
-    },
-    orientation: {
-      // The list is as wide as its tabs, so its border and indicator scroll with them.
-      horizontal: 'w-max min-w-full items-center',
-      vertical: 'flex-col items-stretch',
-    },
-  },
-  compoundVariants: [
-    { variant: 'underline', orientation: 'horizontal', class: 'border-b' },
-    { variant: 'underline', orientation: 'vertical', class: 'border-l' },
-  ],
-});
+const listVariants = lenient(styles.listVariants);
 
 const tabVariants = cva(
   cn(
@@ -123,44 +88,11 @@ const tabVariants = cva(
   },
 );
 
-const indicatorVariants = cva(
-  'bg-accent ease-authentic absolute transition-[left,width,top,height] duration-200',
-  {
-    variants: {
-      variant: {
-        underline: '',
-        header: '-bottom-px left-[var(--active-tab-left)] h-0.5 w-[var(--active-tab-width)]',
-      },
-      orientation: {
-        horizontal: '',
-        vertical: '',
-      },
-    },
-    compoundVariants: [
-      {
-        variant: 'underline',
-        orientation: 'horizontal',
-        class: '-bottom-px left-[var(--active-tab-left)] h-0.5 w-[var(--active-tab-width)]',
-      },
-      {
-        variant: 'underline',
-        orientation: 'vertical',
-        class: '-left-px top-[var(--active-tab-top)] h-[var(--active-tab-height)] w-0.5',
-      },
-    ],
-  },
-);
+const indicatorVariants = lenient(styles.indicatorVariants);
 
 // Base UI keeps the outgoing panel mounted until its exit transition ends, which without an
 // animation is still a frame or so of both panels stacked, so hide it the moment it starts ending.
-const panelVariants = cva('outline-none data-[ending-style]:hidden', {
-  variants: {
-    orientation: {
-      horizontal: 'pt-4',
-      vertical: 'min-w-0 flex-1 overflow-y-auto',
-    },
-  },
-});
+const panelVariants = lenient(styles.panelVariants);
 
 const iconSize = { default: 'size-4', sm: 'size-3.5' } as const;
 
@@ -203,7 +135,7 @@ export function TabStrip({
             className={tabVariants({ variant, size, orientation })}
             {...item.attrs}
           >
-            {Icon ? <Icon className={cn(icon, 'shrink-0')} /> : null}
+            {Icon ? <Icon className={cn(icon, styles.tabStripIcon)} /> : null}
             {item.label}
           </BaseTabs.Tab>
         );
@@ -214,7 +146,7 @@ export function TabStrip({
         return (
           <Tooltip
             key={item.value}
-            trigger={<span className="inline-flex">{tab}</span>}
+            trigger={<span className={styles.tabStripSpan}>{tab}</span>}
             content={item.tooltip}
           />
         );

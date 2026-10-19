@@ -2,6 +2,7 @@ import type React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { OnSurface } from '../primitives/shared-styles';
+import * as styles from './data-table-components.css';
 
 export type DataTableAlign = 'left' | 'center' | 'right';
 export type DataTableWidth = 'xs' | 'sm' | 'md' | 'lg' | 'fill';
@@ -15,24 +16,24 @@ export type DataTableColumnLayout = {
 };
 
 const alignClass: Record<DataTableAlign, string> = {
-  left: 'text-left',
-  center: 'text-center',
-  right: 'text-right',
+  left: styles.alignClassLeft,
+  center: styles.alignClassCenter,
+  right: styles.alignClassRight,
 };
 
 const widthClass: Record<DataTableWidth, string> = {
-  xs: 'w-16',
-  sm: 'w-32',
-  md: 'w-48',
-  lg: 'w-64',
+  xs: styles.widthClassXs,
+  sm: styles.widthClassSm,
+  md: styles.widthClassMd,
+  lg: styles.widthClassLg,
   // max-w-0 lets the fill column absorb the leftover width instead of widening the table to
   // fit its content, which is what allows a truncated cell to truncate at all.
-  fill: 'w-full max-w-0 overflow-hidden',
+  fill: styles.widthClassFill,
 };
 
 const hideBelowClass: Record<DataTableHideBelow, string> = {
-  sm: 'hidden sm:table-cell',
-  md: 'hidden md:table-cell',
+  sm: styles.hideBelowClassSm,
+  md: styles.hideBelowClassMd,
 };
 
 function layoutClass(layout: DataTableColumnLayout | undefined) {
@@ -91,11 +92,11 @@ export function wrapperClass(
   tone: DataTableTone = 'default',
 ) {
   return cn(
-    'overflow-hidden rounded-md',
+    styles.wrapperClassClass,
     bordered &&
       (tone === 'default'
-        ? cn('border-line border', surface[onSurface].wrapper)
-        : cn('border', toned[tone].wrapper)),
+        ? cn(styles.wrapperClassClass2, surface[onSurface].wrapper)
+        : cn(styles.wrapperClassClass3, toned[tone].wrapper)),
   );
 }
 
@@ -113,29 +114,27 @@ export function DataTableTitleBar({
   return (
     <div
       className={cn(
-        'flex items-center gap-2 border-b px-4 py-2.5',
-        tone === 'default' ? 'border-line' : toned[tone].titleLine,
+        styles.dataTableTitleBarDiv,
+        tone === 'default' ? styles.dataTableTitleBarDiv2 : toned[tone].titleLine,
       )}
     >
       {Icon ? (
         <Icon
           className={cn(
-            'size-4 shrink-0',
-            tone === 'default' ? 'text-fg-secondary' : toned[tone].icon,
+            styles.dataTableTitleBarIcon,
+            tone === 'default' ? styles.dataTableTitleBarIcon2 : toned[tone].icon,
           )}
         />
       ) : null}
-      <span className="text-sm font-medium text-fg">{label}</span>
+      <span className={styles.dataTableTitleBarSpan}>{label}</span>
       {/* Held to the title's line height so a compact button does not make the bar taller. */}
-      {aside ? (
-        <span className="ml-auto flex h-5 items-center text-xs text-fg-secondary">{aside}</span>
-      ) : null}
+      {aside ? <span className={styles.dataTableTitleBarSpan2}>{aside}</span> : null}
     </div>
   );
 }
 
 export function DataTableHeader({ children }: { children: React.ReactNode }) {
-  return <thead className="[&_tr:hover]:bg-transparent">{children}</thead>;
+  return <thead className={styles.dataTableHeaderThead}>{children}</thead>;
 }
 
 export function DataTableBody({
@@ -147,12 +146,7 @@ export function DataTableBody({
   refreshing?: boolean;
 }) {
   return (
-    <tbody
-      className={cn(
-        'transition-opacity [&>tr:last-child]:border-0',
-        refreshing && 'pointer-events-none opacity-50',
-      )}
-    >
+    <tbody className={cn(styles.dataTableBodyTbody, refreshing && styles.dataTableBodyTbody2)}>
       {children}
     </tbody>
   );
@@ -191,20 +185,20 @@ export function DataTableRow({
       data-state={expanded ? 'expanded' : selected ? 'selected' : undefined}
       onClick={onClick}
       className={cn(
-        'border-b transition-colors',
-        tone === 'default' ? 'border-line' : toned[tone].line,
+        styles.dataTableRowTr,
+        tone === 'default' ? styles.dataTableRowTr2 : toned[tone].line,
         // Hover means "this row does something": only a clickable or expandable row gets it.
         onClick && (tone === 'default' ? surface[onSurface].hover : toned[tone].hover),
         // The critical tint replaces the stripe rather than layering on it.
         striped &&
           !critical &&
           (tone === 'default' ? surface[onSurface].stripe : toned[tone].stripe),
-        critical && 'bg-critical-tint-subtle',
-        'data-[state=expanded]:border-b-0 data-[state=expanded]:bg-neutral-3',
-        'data-[state=selected]:bg-neutral-12/10 dark:data-[state=selected]:bg-neutral-12/10',
-        onClick && 'cursor-pointer',
-        muted && 'text-fg-secondary',
-        disabled && 'opacity-40',
+        critical && styles.dataTableRowTr3,
+        styles.dataTableRowTr4,
+        styles.dataTableRowTr5,
+        onClick && styles.dataTableRowTr6,
+        muted && styles.dataTableRowTr7,
+        disabled && styles.dataTableRowTr8,
       )}
     >
       {children}
@@ -227,19 +221,9 @@ export function DataTableHead({
 }) {
   const head = tone === 'default' ? surface[onSurface].head : toned[tone].head;
   if (compact) {
-    return <th className={cn('h-10 w-10', head)} aria-hidden />;
+    return <th className={cn(styles.dataTableHeadTh, head)} aria-hidden />;
   }
-  return (
-    <th
-      className={cn(
-        'h-10 px-4 text-left align-middle text-xs font-normal whitespace-nowrap text-fg-secondary',
-        head,
-        layoutClass(layout),
-      )}
-    >
-      {children}
-    </th>
-  );
+  return <th className={cn(styles.dataTableHeadTh2, head, layoutClass(layout))}>{children}</th>;
 }
 
 export function DataTableCellSlot({
@@ -255,14 +239,14 @@ export function DataTableCellSlot({
 }) {
   const className =
     variant === 'compact'
-      ? 'text-fg-secondary h-12 w-10 px-2 align-middle'
+      ? styles.className
       : variant === 'empty'
-        ? 'text-fg-secondary h-24 text-center align-middle'
+        ? styles.className2
         : variant === 'panel'
-          ? 'p-0 align-middle'
+          ? styles.className3
           : // Cells keep their content on one line; a `fill` column absorbs the width and a cell
             // that opts into `truncate` gives way, so a short value never breaks mid-phrase.
-            cn('h-12 whitespace-nowrap px-4 align-middle', layoutClass(layout));
+            cn(styles.dataTableCellSlotClass, layoutClass(layout));
   return (
     <td colSpan={colSpan} className={className}>
       {children}
@@ -282,8 +266,10 @@ export function DataTableExpandedRow({
   return (
     <tr
       className={cn(
-        'border-b',
-        tone === 'default' ? 'border-line bg-neutral-3' : cn(toned[tone].line, toned[tone].head),
+        styles.dataTableExpandedRowTr,
+        tone === 'default'
+          ? styles.dataTableExpandedRowTr2
+          : cn(toned[tone].line, toned[tone].head),
       )}
     >
       <DataTableCellSlot colSpan={colSpan} variant="panel">
@@ -306,14 +292,16 @@ export function DataTableFooterRow({
 }) {
   return (
     <tfoot>
-      <tr className={cn('border-t', tone === 'default' ? 'border-line' : toned[tone].titleLine)}>
-        <td
-          colSpan={Math.max(1, columnCount - 1)}
-          className="h-12 px-4 align-middle font-medium text-fg"
-        >
+      <tr
+        className={cn(
+          styles.dataTableFooterRowTr,
+          tone === 'default' ? styles.dataTableFooterRowTr2 : toned[tone].titleLine,
+        )}
+      >
+        <td colSpan={Math.max(1, columnCount - 1)} className={styles.dataTableFooterRowTd}>
           {label}
         </td>
-        <td className="h-12 px-4 text-right align-middle font-medium text-fg">{value}</td>
+        <td className={styles.dataTableFooterRowTd2}>{value}</td>
       </tr>
     </tfoot>
   );

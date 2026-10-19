@@ -37,6 +37,7 @@ import {
   DataTablePagination,
   type DataTableCursorPaginationProps,
 } from './data-table-pagination';
+import * as styles from './data-table.css';
 
 declare module '@tanstack/react-table' {
   // The generics are TanStack's; an augmentation has to repeat them to merge.
@@ -141,24 +142,24 @@ function SortHeader<TData>({
           // server-sorted column has no reason to carry one. Shift stacks a tiebreaker
           // the way the handler would.
           onClick={event => column.toggleSorting(undefined, event.shiftKey)}
-          className="inline-flex items-center gap-1 text-xs font-medium text-fg-secondary hover:text-fg"
+          className={styles.sortHeaderButton}
         >
           {label}
           {sorted && loading ? (
-            <span className="inline-flex text-success">
+            <span className={styles.sortHeaderSpan}>
               <Spinner label="Sorting" variants={{ size: 'xs', tone: 'current' }} />
             </span>
           ) : (
             <ArrowDown
               className={cn(
-                'size-3 transition-transform',
-                sorted ? 'text-success' : 'opacity-30',
-                sorted === 'asc' && 'rotate-180',
+                styles.sortHeaderArrowDown,
+                sorted ? styles.sortHeaderArrowDown2 : styles.sortHeaderArrowDown3,
+                sorted === 'asc' && styles.sortHeaderArrowDown4,
               )}
             />
           )}
           {sorted && sorting.length > 1 ? (
-            <span className="text-2xs text-success tabular-nums" aria-label="Sort priority">
+            <span className={styles.sortHeaderSpan2} aria-label="Sort priority">
               {column.getSortIndex() + 1}
             </span>
           ) : null}
@@ -238,8 +239,8 @@ export function DataTable<TData>({
       {title ? (
         <DataTableTitleBar label={title.label} icon={title.icon} aside={title.aside} tone={tone} />
       ) : null}
-      <div className="relative w-full overflow-auto">
-        <table className="w-full text-sm" aria-busy={busy || undefined}>
+      <div className={styles.dataTableDiv}>
+        <table className={styles.dataTableTable} aria-busy={busy || undefined}>
           {hasHeader ? (
             <DataTableHeader>
               {table.getHeaderGroups().map(headerGroup => (
@@ -256,7 +257,7 @@ export function DataTable<TData>({
                         onSurface={onSurface}
                         tone={tone}
                       >
-                        <span className="inline-flex items-center gap-1">
+                        <span className={styles.dataTableSpan}>
                           {meta?.sortable ? (
                             <SortHeader header={header} label={label} loading={sorting?.loading} />
                           ) : (
@@ -265,8 +266,8 @@ export function DataTable<TData>({
                           {meta?.tooltip ? (
                             <Tooltip
                               trigger={
-                                <span className="inline-flex text-fg-muted">
-                                  <Info className="size-3.5" />
+                                <span className={styles.dataTableSpan2}>
+                                  <Info className={styles.dataTableInfo} />
                                 </span>
                               }
                               content={meta.tooltip}
@@ -295,7 +296,7 @@ export function DataTable<TData>({
                   {table.getVisibleLeafColumns().map((column, columnIndex) => (
                     <DataTableCellSlot key={column.id} layout={column.columnDef.meta}>
                       {index === 0 && columnIndex === 0 ? (
-                        <span role="status" aria-label="Loading" className="sr-only">
+                        <span role="status" aria-label="Loading" className={styles.dataTableSpan3}>
                           Loading
                         </span>
                       ) : null}
@@ -303,8 +304,8 @@ export function DataTable<TData>({
                           column's alignment places it. */}
                       <span
                         className={cn(
-                          'inline-flex w-full',
-                          columnIndex === 0 ? 'max-w-48' : 'max-w-24',
+                          styles.dataTableSpan4,
+                          columnIndex === 0 ? styles.dataTableSpan5 : styles.dataTableSpan6,
                         )}
                       >
                         <Skeleton variants={{ width: 'full' }} />
@@ -352,12 +353,12 @@ export function DataTable<TData>({
                           {renderSubComponent ? (
                             <ChevronDown
                               className={cn(
-                                'size-4 transition-transform',
-                                row.getIsExpanded() && 'rotate-180',
+                                styles.dataTableChevronDown,
+                                row.getIsExpanded() && styles.dataTableChevronDown2,
                               )}
                             />
                           ) : (
-                            <ChevronRight className="size-4" />
+                            <ChevronRight className={styles.dataTableChevronRight} />
                           )}
                         </DataTableCellSlot>
                       ) : null}

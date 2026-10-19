@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { RadioGroup } from './radio-group';
+import * as styles from './radio-group.preview.css';
 
 export const nav: NavPath = 'Primitives/FormControls/RadioGroup';
 
@@ -38,7 +39,7 @@ export const WithIndicators = createPreview(() => {
           value: 'breaking',
           content: (
             <>
-              <span className="size-2 rounded-full bg-critical" />
+              <span className={styles.span} />
               Breaking
             </>
           ),
@@ -47,7 +48,7 @@ export const WithIndicators = createPreview(() => {
           value: 'dangerous',
           content: (
             <>
-              <span className="size-2 rounded-full bg-warning" />
+              <span className={styles.span2} />
               Dangerous
             </>
           ),
@@ -56,7 +57,7 @@ export const WithIndicators = createPreview(() => {
           value: 'safe',
           content: (
             <>
-              <span className="size-2 rounded-full bg-success" />
+              <span className={styles.span3} />
               Safe
             </>
           ),
@@ -107,7 +108,7 @@ export const AsCard = createPreview(() => {
   const [value, setValue] = useState('normal');
 
   return (
-    <div className="w-[493px]">
+    <div className={styles.div}>
       <RadioGroup
         variant="as-card"
         onSurface="base"
@@ -125,8 +126,8 @@ export const Orientations = createPreview(() => {
   const [buttons, setButtons] = useState('7d');
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="w-[760px]">
+    <div className={styles.div2}>
+      <div className={styles.div3}>
         <RadioGroup
           variant="as-card"
           orientation="vertical"
@@ -155,7 +156,7 @@ export const AsCardFloating = createPreview(() => {
   const [value, setValue] = useState('high');
 
   return (
-    <div className="w-[533px] rounded-md bg-neutral-3 p-5">
+    <div className={styles.div4}>
       <RadioGroup
         variant="as-card"
         onSurface="raised"
@@ -177,9 +178,7 @@ export const Playground = createPreview({
   render: v => {
     const [value, setValue] = useState('normal');
     return (
-      <div
-        className={v.onSurface === 'raised' ? 'w-[46rem] rounded-md bg-neutral-3 p-5' : 'w-[46rem]'}
-      >
+      <div className={v.onSurface === 'raised' ? styles.div5 : styles.div6}>
         <RadioGroup
           variant={v.variant}
           onSurface={v.onSurface}
@@ -203,22 +202,18 @@ function PlanBody(props: {
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex w-full flex-col justify-between gap-6 self-stretch">
+    <div className={styles.planBodyDiv}>
       <div>
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-fg">{props.name}</span>
-          {props.isCurrent ? (
-            <span className="rounded-xs bg-accent-tint px-2 py-1 text-[11px] font-medium tracking-wide text-accent">
-              CURRENT PLAN
-            </span>
-          ) : null}
+        <div className={styles.planBodyDiv2}>
+          <span className={styles.planBodySpan}>{props.name}</span>
+          {props.isCurrent ? <span className={styles.planBodySpan2}>CURRENT PLAN</span> : null}
         </div>
-        <div className="text-3xl font-bold text-fg">{props.price}</div>
-        <div className="text-control text-fg-secondary">{props.description}</div>
-        <div className="mt-6 flex flex-col gap-2">
+        <div className={styles.planBodyDiv3}>{props.price}</div>
+        <div className={styles.planBodyDiv4}>{props.description}</div>
+        <div className={styles.planBodyDiv5}>
           {props.features.map(feature => (
-            <div key={feature} className="flex items-start gap-2 text-control text-fg-default">
-              <Check className="mt-0.5 size-4 shrink-0 text-fg-secondary" />
+            <div key={feature} className={styles.planBodyDiv6}>
+              <Check className={styles.planBodyCheck} />
               {feature}
             </div>
           ))}
@@ -226,8 +221,8 @@ function PlanBody(props: {
       </div>
       {props.footer ? (
         <div>
-          <div className="mx-auto mb-4 w-9/12 border-b border-line" />
-          <div className="text-xs text-fg-default">{props.footer}</div>
+          <div className={styles.planBodyDiv7} />
+          <div className={styles.planBodyDiv8}>{props.footer}</div>
         </div>
       ) : null}
     </div>
@@ -242,7 +237,7 @@ export const PlanCards = createPreview(() => {
   const [value, setValue] = useState('pro');
 
   return (
-    <div className="w-[62rem]">
+    <div className={styles.div7}>
       <RadioGroup
         variant="as-card"
         orientation="horizontal"
@@ -280,7 +275,7 @@ export const PlanCards = createPreview(() => {
                   'Everything in Hobby plan, and:',
                   '90 days of usage data retention',
                 ]}
-                footer={<span className="font-bold">Free 30 days trial period</span>}
+                footer={<span className={styles.span4}>Free 30 days trial period</span>}
               />
             ),
           },

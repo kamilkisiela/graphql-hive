@@ -2,6 +2,7 @@ import { createPreview, type NavPath } from 'react-foundry';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { Badge } from '@/components/ui/primitives/badge/badge';
 import { SubgraphName } from './subgraph-name';
+import * as styles from './subgraph-name.preview.css';
 
 export const nav: NavPath = 'Components/SubgraphName';
 
@@ -20,7 +21,7 @@ const NAMES = [
 ];
 
 export const Default = createPreview(() => (
-  <div className="flex max-w-[40rem] flex-wrap items-center gap-2 text-sm">
+  <div className={styles.div}>
     {NAMES.map(name => (
       <SubgraphName key={name} name={name} />
     ))}
@@ -29,7 +30,7 @@ export const Default = createPreview(() => (
 
 /** Beside the warning badge that marks a schema coordinate, which is the company it keeps. */
 export const InProse = createPreview(() => (
-  <p className="w-[40rem] text-sm text-fg">
+  <p className={styles.p}>
     from subgraph <SubgraphName name="billing" />: cannot move to subgraph{' '}
     <SubgraphName name="invoicing" /> using{' '}
     <Badge content='@key(fields: "id")' variants={{ variant: 'warning', padding: 'tight' }} /> of{' '}
@@ -63,9 +64,9 @@ const RULES = [
 
 /** The real composition error renderer, which finds subgraph names in both spellings the composers use. */
 export const InCompositionErrors = createPreview(() => (
-  <ul className="w-[56rem] divide-y divide-critical-line-subtle">
+  <ul className={styles.ul}>
     {[SATISFIABILITY, ...RULES].map((message, index) => (
-      <li key={index} className="py-3">
+      <li key={index} className={styles.li}>
         <CompositionErrorMessage message={message} />
       </li>
     ))}
@@ -74,7 +75,7 @@ export const InCompositionErrors = createPreview(() => (
 
 /** A long name in a narrow spot truncates with the full name on hover. */
 export const Truncation = createPreview(() => (
-  <div className="w-40 text-sm">
+  <div className={styles.div2}>
     <SubgraphName name="partner-api-for-the-european-reseller-network" />
   </div>
 ));

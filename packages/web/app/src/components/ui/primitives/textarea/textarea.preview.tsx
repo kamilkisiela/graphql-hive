@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Textarea } from './textarea';
+import * as styles from './textarea.preview.css';
 
 export const nav: NavPath = 'Primitives/Textarea';
 
 /** Same field as Input: fill, border, hover, focus and error states, at a minimum of 80px. */
 export const Default = createPreview(() => (
-  <div className="w-[28rem]">
+  <div className={styles.div}>
     <Textarea placeholder="Enter a short description of your issue" />
   </div>
 ));
 
 export const States = createPreview(() => (
-  <div className="flex w-[28rem] flex-col gap-3">
+  <div className={styles.div2}>
     <Textarea defaultValue="Alerts for the checkout service." />
     <Textarea placeholder="Disabled" disabled />
     <Textarea defaultValue="Too short." invalid />
@@ -21,11 +22,11 @@ export const States = createPreview(() => (
 
 /** Same ladder as Input: `raised` for a description field inside a sheet or dialog, and focus lifts the fill. */
 export const OnSurface = createPreview(() => (
-  <div className="flex flex-wrap gap-6">
-    <div className="w-80 rounded-md bg-neutral-1 p-6">
+  <div className={styles.div3}>
+    <div className={styles.div4}>
       <Textarea placeholder="base, on the page" />
     </div>
-    <div className="w-80 rounded-md border border-line bg-neutral-3 p-6">
+    <div className={styles.div5}>
       <Textarea placeholder="raised, in a sheet" onSurface="raised" />
     </div>
   </div>
@@ -38,7 +39,7 @@ export const OnSurface = createPreview(() => (
 export const AutoSize = createPreview(() => {
   const [value, setValue] = useState('');
   return (
-    <div className="w-[28rem]">
+    <div className={styles.div6}>
       <Textarea
         autoSize
         rows={3}
@@ -52,7 +53,7 @@ export const AutoSize = createPreview(() => {
 
 /** Read-only, mono and auto-sized: the multi-line copy field for a generated token. */
 export const ReadOnlyMono = createPreview(() => (
-  <div className="w-[36rem]">
+  <div className={styles.div7}>
     <Textarea
       readOnly
       autoSize
@@ -75,7 +76,7 @@ export const Playground = createPreview({
     disabled: { type: 'boolean', default: false },
   }),
   render: v => (
-    <div className="w-[28rem]">
+    <div className={styles.div8}>
       <Textarea
         placeholder={v.placeholder}
         onSurface={v.onSurface}

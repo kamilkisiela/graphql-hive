@@ -1,5 +1,6 @@
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { ScrollArea } from './scroll-area';
+import * as styles from './scroll-area.preview.css';
 
 export const nav: NavPath = 'Primitives/ScrollArea';
 
@@ -25,14 +26,11 @@ function Rows(props: { count?: number }) {
     (_, i) => OPERATIONS[i % OPERATIONS.length],
   );
   return (
-    <div className="flex flex-col">
+    <div className={styles.rowsDiv}>
       {rows.map((name, index) => (
-        <div
-          key={index}
-          className="flex items-center rounded-md px-2 py-1 text-sm text-fg-default hover:bg-neutral-4"
-        >
-          <span className="truncate font-medium">{name}</span>
-          <span className="ml-auto pl-4 font-light">{(index * 37) % 1000}</span>
+        <div key={index} className={styles.rowsDiv2}>
+          <span className={styles.rowsSpan}>{name}</span>
+          <span className={styles.rowsSpan2}>{(index * 37) % 1000}</span>
         </div>
       ))}
     </div>
@@ -45,9 +43,9 @@ function Rows(props: { count?: number }) {
  * arbitrary values: the three sites that were 176, 250 and 400px snap to the nearest step.
  */
 export const Heights = createPreview(() => (
-  <div className="flex items-start gap-6">
+  <div className={styles.div}>
     {(['sm', 'md', 'lg'] as const).map(height => (
-      <div key={height} className="w-72 rounded-md border border-line p-2">
+      <div key={height} className={styles.div2}>
         <ScrollArea height={height}>
           <Rows count={30} />
         </ScrollArea>
@@ -58,13 +56,13 @@ export const Heights = createPreview(() => (
 
 /** `maxHeight` only scrolls once the content is taller than the step; short content sits flush. */
 export const MaxHeight = createPreview(() => (
-  <div className="flex items-start gap-6">
-    <div className="w-72 rounded-md border border-line p-2">
+  <div className={styles.div3}>
+    <div className={styles.div4}>
       <ScrollArea maxHeight="sm">
         <Rows count={3} />
       </ScrollArea>
     </div>
-    <div className="w-72 rounded-md border border-line p-2">
+    <div className={styles.div5}>
       <ScrollArea maxHeight="sm">
         <Rows count={30} />
       </ScrollArea>
@@ -74,12 +72,10 @@ export const MaxHeight = createPreview(() => (
 
 /** `fill` takes what is left of a flex column: a header, then a list that scrolls to the bottom edge. */
 export const Fill = createPreview(() => (
-  <div className="flex h-64 w-80 flex-col rounded-md border border-line">
-    <div className="border-b border-line px-3 py-2 text-sm font-medium text-fg">
-      Span attributes
-    </div>
+  <div className={styles.div6}>
+    <div className={styles.div7}>Span attributes</div>
     <ScrollArea fill>
-      <div className="p-2">
+      <div className={styles.div8}>
         <Rows count={30} />
       </div>
     </ScrollArea>
@@ -89,9 +85,9 @@ export const Fill = createPreview(() => (
 const WIDE = OPERATIONS.join('  ');
 
 export const Horizontal = createPreview(() => (
-  <div className="w-96 rounded-md border border-line">
+  <div className={styles.div9}>
     <ScrollArea axis="horizontal">
-      <pre className="p-2 font-mono text-2xs leading-tight whitespace-pre text-fg-default">
+      <pre className={styles.pre}>
         {WIDE}
         {'\n'}
         {WIDE}
@@ -101,11 +97,9 @@ export const Horizontal = createPreview(() => (
 ));
 
 export const Both = createPreview(() => (
-  <div className="w-96 rounded-md border border-line">
+  <div className={styles.div10}>
     <ScrollArea axis="both" height="sm">
-      <pre className="p-2 font-mono text-2xs leading-tight whitespace-pre text-fg-default">
-        {Array.from({ length: 30 }, () => WIDE).join('\n')}
-      </pre>
+      <pre className={styles.pre2}>{Array.from({ length: 30 }, () => WIDE).join('\n')}</pre>
     </ScrollArea>
   </div>
 ));
@@ -135,7 +129,7 @@ export const Playground = createPreview({
     },
   }),
   render: v => (
-    <div className="w-72 rounded-md border border-line p-2">
+    <div className={styles.div11}>
       <ScrollArea height={v.height} maxHeight={v.maxHeight}>
         {v.children}
       </ScrollArea>

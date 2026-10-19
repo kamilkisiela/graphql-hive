@@ -2,6 +2,7 @@ import { createPreview, type NavPath } from 'react-foundry';
 import { Card } from '@/components/ui/primitives/card/card';
 import { week } from './preview-data';
 import { Sparkline } from './sparkline';
+import * as styles from './sparkline.preview.css';
 
 export const nav: NavPath = 'Primitives/Charts/Sparkline';
 
@@ -15,15 +16,15 @@ const HIGHEST = Math.max(...BUSY.map(([, value]) => value));
  * one instead of both filling their card.
  */
 export const SharedScale = createPreview(() => (
-  <div className="grid w-[48rem] grid-cols-2 gap-5">
+  <div className={styles.div}>
     {[
       { name: 'gateway', data: BUSY },
       { name: 'billing', data: QUIET },
     ].map(project => (
       <Card key={project.name} variants={{ onSurface: 'raised', bodyPadding: 'none' }}>
-        <div className="pt-4 pb-5">
+        <div className={styles.div2}>
           <Sparkline name="Requests" data={project.data} max={HIGHEST} />
-          <h4 className="px-4 pt-4 text-lg font-bold">{project.name}</h4>
+          <h4 className={styles.h4}>{project.name}</h4>
         </div>
       </Card>
     ))}
@@ -35,9 +36,9 @@ export const SharedScale = createPreview(() => (
  * mount, so its data is what animates in: reload Shared Scale and each line draws in once.
  */
 export const Loading = createPreview(() => (
-  <div className="w-[24rem]">
+  <div className={styles.div3}>
     <Card variants={{ onSurface: 'raised', bodyPadding: 'none' }}>
-      <div className="pt-4 pb-5">
+      <div className={styles.div4}>
         <Sparkline
           name="Requests"
           data={[

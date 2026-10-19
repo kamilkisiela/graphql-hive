@@ -1,33 +1,13 @@
-import { cva, type VariantProps } from 'class-variance-authority';
 import { LoaderCircle } from 'lucide-react';
+import { lenient } from '@/lib/recipe';
+import * as styles from './spinner.css';
 
-const spinnerVariants = cva('shrink-0 animate-spinner-spin [&>path]:animate-spinner-arc', {
-  variants: {
-    size: {
-      /** In an icon's slot, such as a sort header's arrow. */
-      xs: 'size-3',
-      /** Beside text: a paging bar, a button label. */
-      sm: 'size-4',
-      default: 'size-6',
-      /** A page or panel that has nothing else to show yet. */
-      lg: 'size-8',
-    },
-    tone: {
-      accent: 'text-accent',
-      /** Inside a button: takes the button's text color. */
-      current: '',
-    },
-  },
-  defaultVariants: {
-    size: 'default',
-    tone: 'accent',
-  },
-});
+const spinnerVariants = lenient(styles.spinnerVariants);
 
 type SpinnerProps = {
   /** What assistive tech announces; the icon itself is decorative. */
   label?: string;
-  variants?: VariantProps<typeof spinnerVariants>;
+  variants?: NonNullable<Parameters<typeof spinnerVariants>[0]>;
 };
 
 /**
@@ -36,9 +16,9 @@ type SpinnerProps = {
  */
 export function Spinner({ label = 'Loading', variants }: SpinnerProps) {
   return (
-    <span role="status" aria-label={label} className="inline-flex">
+    <span role="status" aria-label={label} className={styles.spinnerSpan}>
       <LoaderCircle aria-hidden className={spinnerVariants({ ...variants })} />
-      <span className="sr-only">{label}</span>
+      <span className={styles.spinnerSpan2}>{label}</span>
     </span>
   );
 }

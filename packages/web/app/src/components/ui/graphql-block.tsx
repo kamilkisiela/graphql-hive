@@ -3,6 +3,7 @@ import { SchemaEditor, SchemaEditorProps } from '@/components/schema-editor';
 import { Card } from '@/components/ui/primitives/card/card';
 import { usePrettify } from '@/lib/hooks';
 import { Heading } from './heading';
+import * as styles from './graphql-block.css';
 
 export function GraphQLHighlight({
   code,
@@ -47,11 +48,11 @@ export function GraphQLBlock({
   return (
     <div className={className}>
       <Card variants={{ onSurface: 'base' }}>
-        <Heading className="mb-4">
+        <Heading className={styles.graphQLBlockHeading}>
           {title ?? 'SDL'}
-          {url && <span className="ml-3 text-sm italic">{url}</span>}
+          {url && <span className={styles.graphQLBlockSpan}>{url}</span>}
         </Heading>
-        <div className="pb-2">
+        <div className={styles.graphQLBlockDiv}>
           <GraphQLHighlight {...editorProps} code={sdl} />
         </div>
       </Card>

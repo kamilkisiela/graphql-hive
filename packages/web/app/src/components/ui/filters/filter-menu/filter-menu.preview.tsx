@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPreview, type NavPath } from 'react-foundry';
 import { FilterChips, FilterMenu } from './filter-menu';
 import type { FilterDimension, FilterItem, FilterSelection } from './types';
+import * as styles from './filter-menu.preview.css';
 
 export const nav: NavPath = 'Components/Filters/FilterMenu';
 
@@ -74,7 +75,7 @@ export const WithChips = createPreview(() => {
   });
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className={styles.div}>
       <FilterMenu dimensions={dimensions} />
       <FilterChips dimensions={dimensions} />
     </div>
@@ -174,7 +175,7 @@ export const AllDimensionKinds = createPreview(() => {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className={styles.div2}>
       <FilterMenu dimensions={dimensions} />
       <FilterChips dimensions={dimensions} />
     </div>
@@ -246,7 +247,7 @@ export const InsightsDimensions = createPreview(() => {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className={styles.div3}>
       <FilterMenu dimensions={dimensions} />
       <FilterChips dimensions={dimensions} />
     </div>
@@ -279,10 +280,10 @@ export const InsightsDimensionsLoading = createPreview(() => {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className={styles.div4}>
       <FilterMenu dimensions={dimensions} />
       <FilterChips dimensions={dimensions} />
-      <span className="text-xs text-fg-subtle">{loaded ? 'items loaded' : 'loading items…'}</span>
+      <span className={styles.span}>{loaded ? 'items loaded' : 'loading items…'}</span>
     </div>
   );
 });
@@ -311,7 +312,7 @@ export const TextFilterEmpty = createPreview(() => {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className={styles.div5}>
       <FilterMenu dimensions={dimensions} />
       <FilterChips dimensions={dimensions} />
     </div>

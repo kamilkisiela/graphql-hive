@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { type VariantProps } from 'class-variance-authority';
+import { clsx } from 'clsx';
 import { ArrowRight, Check, ChevronRight } from 'lucide-react';
 import { type IconProps } from '@/components/ui/brand-icon';
 import { Switch } from '@/components/ui/primitives/switch/switch';
@@ -14,6 +15,7 @@ import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { useFloatingPortalContainer } from '../floating-portal-container';
 import { floatingVariants, itemVariants, type FloatingProps } from '../shared-styles';
 import { Tooltip } from '../tooltip/tooltip';
+import * as styles from './menu.css';
 
 type ItemVariant = VariantProps<typeof itemVariants>['variant'];
 
@@ -170,16 +172,15 @@ function menuItemClassName(
   state: { highlighted: boolean; disabled: boolean; checked?: boolean },
   { variant, selected }: { variant?: ItemVariant; selected?: boolean },
 ) {
-  return itemVariants({
-    variant,
-    highlighted: state.highlighted,
-    // A checkbox or radio row carries its own state; an action row is told by the call site.
-    selected: state.checked ?? selected ?? false,
-    // gap-2.5 overrides the shared gap-2 for menu items. Row spacing goes above each row rather
-    // than around it, so the last row adds nothing under itself and the popup's pb-2 stands alone.
-    className: 'gap-2.5 mt-0.5 first:mt-2',
-    disabled: state.disabled,
-  });
+  return clsx(
+    itemVariants({
+      variant,
+      highlighted: state.highlighted,
+      selected: state.checked ?? selected ?? false,
+      disabled: state.disabled,
+    }),
+    styles.menuItemClassNameClass,
+  );
 }
 
 function ActionRow({
@@ -200,10 +201,10 @@ function ActionRow({
       {...attrs}
       {...rest}
     >
-      {Icon ? <Icon className="size-4" /> : null}
+      {Icon ? <Icon className={styles.actionRowIcon} /> : null}
       {label}
-      {TrailingIcon ? <TrailingIcon className="ml-auto size-4" /> : null}
-      {variant === 'navigationLink' ? <ArrowRight className="ml-1 size-3.5" /> : null}
+      {TrailingIcon ? <TrailingIcon className={styles.actionRowTrailingIcon} /> : null}
+      {variant === 'navigationLink' ? <ArrowRight className={styles.actionRowArrowRight} /> : null}
     </BaseMenu.Item>
   );
 
@@ -211,7 +212,13 @@ function ActionRow({
     return row;
   }
 
-  return <Tooltip trigger={<span className="block">{row}</span>} content={tooltip} side="right" />;
+  return (
+    <Tooltip
+      trigger={<span className={styles.actionRowSpan}>{row}</span>}
+      content={tooltip}
+      side="right"
+    />
+  );
 }
 
 function CheckboxRow({
@@ -231,13 +238,13 @@ function CheckboxRow({
       disabled={disabled}
       closeOnClick={closeOnClick}
     >
-      {Icon ? <Icon className="size-4" /> : null}
-      <span className="flex-1">{label}</span>
+      {Icon ? <Icon className={styles.checkboxRowIcon} /> : null}
+      <span className={styles.checkboxRowSpan}>{label}</span>
       {indicator === 'switch' ? (
         <Switch checked={checked} size="small" decorative />
       ) : (
-        <BaseMenu.CheckboxItemIndicator className="ml-auto inline-flex items-center">
-          <Check className="size-3.5" />
+        <BaseMenu.CheckboxItemIndicator className={styles.checkboxRowCheckboxItemIndicator}>
+          <Check className={styles.checkboxRowCheck} />
         </BaseMenu.CheckboxItemIndicator>
       )}
     </BaseMenu.CheckboxItem>
@@ -268,20 +275,18 @@ function LinkRow({
         </a>
       )}
     >
-      {Icon ? <Icon className="size-4" /> : null}
+      {Icon ? <Icon className={styles.linkRowIcon} /> : null}
       {label}
-      {TrailingIcon ? <TrailingIcon className="ml-auto size-4" /> : null}
+      {TrailingIcon ? <TrailingIcon className={styles.linkRowTrailingIcon} /> : null}
     </BaseMenu.Item>
   );
 }
 
 function HeaderRow({ title, subtitle }: MenuHeader) {
   return (
-    <div className="flex flex-col gap-y-1 px-2 pt-3 pb-1">
-      <span className="truncate text-sm leading-none font-medium text-fg">{title}</span>
-      {subtitle ? (
-        <span className="truncate text-xs leading-none text-fg-secondary">{subtitle}</span>
-      ) : null}
+    <div className={styles.headerRowDiv}>
+      <span className={styles.headerRowSpan}>{title}</span>
+      {subtitle ? <span className={styles.headerRowSpan2}>{subtitle}</span> : null}
     </div>
   );
 }
@@ -302,8 +307,8 @@ function ToggleRow({
       disabled={disabled}
       closeOnClick={closeOnClick}
     >
-      {Icon ? <Icon className="size-4" /> : null}
-      <span className="flex-1">{label}</span>
+      {Icon ? <Icon className={styles.toggleRowIcon} /> : null}
+      <span className={styles.toggleRowSpan}>{label}</span>
       <Switch checked={checked} size="small" decorative />
     </BaseMenu.CheckboxItem>
   );
@@ -319,10 +324,10 @@ function RadioRows({ value, onValueChange, options }: MenuRadio) {
           disabled={option.disabled}
           className={(state: BaseMenu.RadioItem.State) => menuItemClassName(state, {})}
         >
-          {option.icon ? <option.icon className="size-4" /> : null}
+          {option.icon ? <option.icon className={styles.radioRowsIcon} /> : null}
           {option.label}
-          <BaseMenu.RadioItemIndicator className="ml-auto inline-flex items-center">
-            <Check className="size-3.5" />
+          <BaseMenu.RadioItemIndicator className={styles.radioRowsRadioItemIndicator}>
+            <Check className={styles.radioRowsCheck} />
           </BaseMenu.RadioItemIndicator>
         </BaseMenu.RadioItem>
       ))}
@@ -353,16 +358,16 @@ function SubmenuRow({
         delay={delay}
         closeDelay={closeDelay}
       >
-        {Icon ? <Icon className="size-4" /> : null}
+        {Icon ? <Icon className={styles.submenuRowIcon} /> : null}
         {label}
-        <ChevronRight className="ml-auto size-3.5" />
+        <ChevronRight className={styles.submenuRowChevronRight} />
       </BaseMenu.SubmenuTrigger>
       <BaseMenu.Portal container={portalContainer ?? undefined}>
         <BaseMenu.Positioner
           side="right"
           align="start"
           sideOffset={6}
-          className="z-50 outline-none"
+          className={styles.submenuRowPositioner}
         >
           <BaseMenu.Popup
             className={floatingVariants({
@@ -423,14 +428,14 @@ function renderSections(sections: MenuSection[]): ReactNode {
 
     if (result.length > 0) {
       result.push(
-        <div key={`sep-${result.length}`} role="separator" className="my-2 h-px bg-line" />,
+        <div key={`sep-${result.length}`} role="separator" className={styles.renderSectionsDiv} />,
       );
     }
 
     if (labelled) {
       result.push(
         <BaseMenu.Group key={`group-${result.length}`}>
-          <BaseMenu.GroupLabel className="px-2 pt-2 pb-1 text-xs font-normal text-fg-muted">
+          <BaseMenu.GroupLabel className={styles.renderSectionsGroupLabel}>
             {section.label}
           </BaseMenu.GroupLabel>
           {entries.map(renderEntry)}
@@ -531,7 +536,7 @@ function Menu(props: MenuProps) {
         side={resolvedSide}
         align={resolvedAlign}
         sideOffset={resolvedSideOffset}
-        className="z-50 outline-none"
+        className={styles.menuPositioner}
       >
         <BaseMenu.Popup
           className={floatingVariants({
@@ -588,7 +593,7 @@ function MenuItem({ variant, selected, children, ...props }: MenuItemProps) {
       {...(props as Omit<BaseMenu.Item.Props, 'className'>)}
     >
       {children}
-      {variant === 'navigationLink' ? <ArrowRight className="ml-1 size-3.5" /> : null}
+      {variant === 'navigationLink' ? <ArrowRight className={styles.menuItemArrowRight} /> : null}
     </BaseMenu.Item>
   );
 }
