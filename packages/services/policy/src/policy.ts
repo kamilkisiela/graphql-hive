@@ -1,7 +1,8 @@
 import Ajv from 'ajv';
-import { Linter } from 'eslint';
 import { z, ZodType } from 'zod';
-import { GraphQLESLintRule, parseForESLint, rules } from '@graphql-eslint/eslint-plugin';
+import { lint } from './engine/linter';
+import { rules } from './engine/rules';
+import type { GraphQLESLintRule } from './engine/types';
 import { RELEVANT_RULES } from './rules';
 
 const ajv = new Ajv({
@@ -11,12 +12,6 @@ const ajv = new Ajv({
   verbose: true,
   allowMatchingProperties: true,
 });
-const linter = new Linter();
-linter.defineParser('@graphql-eslint/eslint-plugin', { parseForESLint });
-
-for (const [ruleId, rule] of Object.entries(rules)) {
-  linter.defineRule(ruleId, rule as any);
-}
 
 const RULE_LEVEL = z.union([z.number().min(0).max(2), z.enum(['off', 'warn', 'error'])]);
 
@@ -26,7 +21,7 @@ type RulemapValidationType = {
 
 export function normalizeAjvSchema(
   schema: GraphQLESLintRule['meta']['schema'],
-): GraphQLESLintRule['meta']['schema'] {
+): GraphQLESLintRule['meta']['schema'] | null {
   if (Array.isArray(schema)) {
     if (schema.length === 0) {
       return null;
@@ -91,13 +86,5 @@ export async function schemaPolicyCheck(input: {
   schema: string;
   policy: PolicyConfigurationObject;
 }) {
-  return linter.verify(
-    input.source,
-    {
-      parser: '@graphql-eslint/eslint-plugin',
-      parserOptions: { schema: input.schema },
-      rules: input.policy,
-    },
-    'schema.graphql',
-  );
+  return lint({ source: input.source, schema: input.schema, rules: input.policy });
 }
