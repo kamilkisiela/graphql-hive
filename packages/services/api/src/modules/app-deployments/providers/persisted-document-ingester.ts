@@ -386,7 +386,7 @@ export class PersistedDocumentIngester {
 
       tasks.push(
         this.promiseQueue.add(async () => {
-          const responses = await this.s3.write(s3Key, 'persisted_document', {
+          const responses = await this.s3.writeConcurrently(s3Key, 'persisted_document', {
             headers: {
               'content-type': 'text/plain',
             },

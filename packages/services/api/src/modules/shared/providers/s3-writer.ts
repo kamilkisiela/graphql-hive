@@ -108,6 +108,15 @@ export class S3Writer {
     return responses;
   }
 
+  /** Like `write`, but the mirror PUT does not wait for the primary PUT to finish. */
+  writeConcurrently(key: string, operation: S3WriteOperation, init: Omit<S3RequestInit, 'method'>) {
+    return Promise.all(
+      this.s3Config.destinations.map(destination =>
+        this.writeS3Object(destination, key, operation, init),
+      ),
+    );
+  }
+
   writePrimary(key: string, operation: S3WriteOperation, init: Omit<S3RequestInit, 'method'>) {
     return this.writeS3Object(this.s3Config.destinations[0], key, operation, init);
   }
