@@ -104,6 +104,23 @@ against Chromium.
    ```
 7. Run Playwright: `pnpm test:e2e`
 
+#### Visual Regression Tests
+
+Two Playwright projects screenshot the UI in light and dark mode and compare against committed
+baselines in `e2e/__screenshots__`:
+
+- `visual-foundry` renders every Foundry preview (`packages/web/app/src/**/*.preview.tsx`). It needs
+  no backend; Playwright starts the Foundry dev server itself. Run with `pnpm test:visual`.
+- `visual-routes` seeds one organization through the testkit and visits every app route. It needs
+  the e2e stack above. Run with `pnpm test:visual:routes`.
+
+Baselines are keyed by platform and only the Linux ones are committed, since that is what CI
+renders. To regenerate them, run the `update-screenshots` workflow on your branch: it either uploads
+the new baselines as an artifact or, with `push` ticked, commits them to the branch. On a macOS
+machine `pnpm test:visual:update` writes local `-darwin` baselines (git-ignored) so you can diff
+your own before/after without the stack. Both projects use Playwright's bundled Chromium rather than
+the installed Chrome, so run `pnpm exec playwright install chromium` once.
+
 #### Docker Compose Configuration
 
 Keep in mind that integration tests are running a combination of 2 Docker Compose files:

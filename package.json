@@ -69,6 +69,10 @@
     "test:e2e:open": "playwright test --ui",
     "test:integration": "cd integration-tests && pnpm test:integration",
     "test:integration:local": "pnpm run --filter integration-tests test:local",
+    "test:visual": "playwright test --project visual-foundry",
+    "test:visual:routes": "playwright test --project visual-routes",
+    "test:visual:routes:update": "playwright test --project visual-routes --update-snapshots",
+    "test:visual:update": "playwright test --project visual-foundry --update-snapshots",
     "typecheck": "pnpm run -r --filter '!hive' typecheck",
     "workspace": "pnpm run --filter $1 $2"
   },

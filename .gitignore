@@ -143,5 +143,9 @@ resolvers.generated.ts
 docker/docker-compose.override.yml
 
 test-results/
+# Visual-regression baselines are committed for Linux only (what CI compares against). Local
+# macOS/Windows baselines are for before/after diffing on your own machine.
+e2e/__screenshots__/**/*-darwin.png
+e2e/__screenshots__/**/*-win32.png
 
 playwright-report

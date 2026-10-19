@@ -10,10 +10,20 @@ on:
       imageTag:
         required: true
         type: string
+      updateScreenshots:
+        description: Regenerate the visual-regression baselines instead of comparing against them
+        default: false
+        type: boolean
+      pushScreenshots:
+        description: With updateScreenshots, commit the regenerated baselines to the branch
+        default: false
+        type: boolean
 
 jobs:
   e2e:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
 
     env:
       DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
@@ -23,6 +33,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          # Pushing regenerated baselines needs the branch, not a detached head.
+          ref: ${{ inputs.updateScreenshots && github.ref_name || '' }}
 
       - name: setup environment
         uses: ./.github/actions/setup
@@ -52,10 +65,41 @@ jobs:
             up -d --wait
 
       - name: playwright
+        if: ${{ !inputs.updateScreenshots }}
         timeout-minutes: 20
         run: pnpm test:e2e
         env:
           CI: true
+
+      # Visual baselines are rendered on Linux, so they can only be regenerated here. The result is
+      # either pushed to the branch or uploaded for someone to commit by hand.
+      - name: regenerate visual baselines
+        if: ${{ inputs.updateScreenshots }}
+        timeout-minutes: 30
+        run: |
+          pnpm exec playwright test --project visual-foundry --project visual-routes --update-snapshots
+        env:
+          CI: true
+
+      - name: upload visual baselines
+        if: ${{ inputs.updateScreenshots && !inputs.pushScreenshots }}
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: visual-baselines
+          path: e2e/__screenshots__/**/*-linux.png
+
+      - name: push visual baselines
+        if: ${{ inputs.updateScreenshots && inputs.pushScreenshots }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add e2e/__screenshots__
+          if git diff --cached --quiet; then
+            echo 'Baselines unchanged'
+            exit 0
+          fi
+          git commit -m 'test: regenerate visual baselines'
+          git push origin HEAD:${{ github.ref_name }}
 
       - name: troubleshoot containers
         if: ${{ failure() }}

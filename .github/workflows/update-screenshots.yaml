@@ -1,0 +1,23 @@
+name: update-screenshots
+# Regenerates the visual-regression baselines (`e2e/__screenshots__/**/*-linux.png`) for a branch.
+# Baselines are rendered on Linux, so a macOS run cannot produce the files CI compares against.
+# Run it on a commit whose Docker images exist, which is any commit a PR build has gone through.
+on:
+  workflow_dispatch:
+    inputs:
+      imageTag:
+        description: Docker image tag to run the stack from (defaults to this commit's SHA)
+        required: false
+        type: string
+      push:
+        description: Commit the regenerated baselines to this branch (otherwise upload an artifact)
+        default: false
+        type: boolean
+
+jobs:
+  update:
+    uses: ./.github/workflows/tests-e2e.yaml
+    with:
+      imageTag: ${{ inputs.imageTag || github.sha }}
+      updateScreenshots: true
+      pushScreenshots: ${{ inputs.push }}
