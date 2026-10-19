@@ -19,7 +19,7 @@ import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 import { Tooltip } from '@/components/ui/primitives/floating/tooltip/tooltip';
 import { ScrollArea } from '@/components/ui/primitives/scroll-area/scroll-area';
 import { FragmentType, graphql, useFragment, type DocumentType } from '@/gql';
-import { SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
+import { SeverityLevelType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 import { formatCount } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
@@ -34,14 +34,6 @@ export function labelize(message: string) {
     <ChangeBadge key={i + match} content={match.replace(/\\'/g, "'")} />
   ));
 }
-
-// Zero usage only means "safe" where usage is recorded; elsewhere it means nothing was looked at.
-const UNTRACKED_USAGE_LABEL: Record<SchemaChangeUsageTracking, string> = {
-  [SchemaChangeUsageTracking.Tracked]: 'Safe based on usage data',
-  [SchemaChangeUsageTracking.OnReferencingFields]:
-    "Usage isn't counted for types, only for the fields that use them.",
-  [SchemaChangeUsageTracking.NotTracked]: "Usage isn't tracked for this kind of change",
-};
 
 const severityLevelMapping = {
   [SeverityLevelType.Safe]: clsx('text-success'),
@@ -93,7 +85,7 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
       ...ChangesBlock_SchemaChangeApprovalFragment
     }
     isSafeBasedOnUsage
-    usageTracking
+    isUsageTracked
     kind
     usageStatistics {
       topAffectedOperations {
@@ -164,7 +156,7 @@ export const ChangesBlock_SchemaChangeFragment = graphql(`
       ...ChangesBlock_SchemaChangeApprovalFragment
     }
     isSafeBasedOnUsage
-    usageTracking
+    isUsageTracked
     kind
   }
 `);
@@ -449,7 +441,8 @@ function ChangeItem(
             change.isSafeBasedOnUsage || usageStatistics || change.approval ? (
               <span className="flex items-center gap-2">
                 {change.isSafeBasedOnUsage ? (
-                  change.usageTracking === SchemaChangeUsageTracking.Tracked ? (
+                  // Zero usage only means "safe" where usage is recorded.
+                  change.isUsageTracked ? (
                     <Badge
                       icon={CheckIcon}
                       content="Safe based on usage data"
@@ -457,7 +450,7 @@ function ChangeItem(
                     />
                   ) : (
                     <Badge
-                      content={UNTRACKED_USAGE_LABEL[change.usageTracking]}
+                      content="Usage isn't tracked for this kind of change"
                       variants={{ variant: 'secondary' }}
                     />
                   )

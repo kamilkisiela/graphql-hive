@@ -1469,7 +1469,7 @@ const SchemaVersionSummary_SchemaVersionFragment = graphql(`
         node {
           isSafeBasedOnUsage
           severityLevel
-          usageTracking
+          isUsageTracked
         }
       }
     }
@@ -1484,7 +1484,7 @@ const SchemaVersionSummary_ContractVersionFragment = graphql(`
         node {
           isSafeBasedOnUsage
           severityLevel
-          usageTracking
+          isUsageTracked
         }
       }
     }

@@ -540,21 +540,6 @@ export default gql`
   """
   Describes a schema change for either a schema version ('SchemaVersion') or schema check ('SchemaCheck').
   """
-  enum SchemaChangeUsageTracking {
-    """
-    Usage is recorded for the field, argument, input field or enum value the change touches.
-    """
-    TRACKED
-    """
-    Usage is recorded on the fields that use the type, never on the type itself.
-    """
-    ON_REFERENCING_FIELDS
-    """
-    No usage is recorded for what the change touches, so "safe based on usage" means nothing.
-    """
-    NOT_TRACKED
-  }
-
   type SchemaChange {
     criticality: CriticalityLevel!
       @deprecated(
@@ -599,7 +584,7 @@ export default gql`
     Whether usage is recorded for what this change touches, so whether 'isSafeBasedOnUsage' can be
     trusted. Only meaningful for breaking changes.
     """
-    usageTracking: SchemaChangeUsageTracking!
+    isUsageTracked: Boolean!
     """
     The type of this change, such as FIELD_REMOVED (the same value as 'SchemaChangeGroup.kind').
     """
