@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Accordion } from './accordion';
+import * as styles from './accordion.css';
 
 const ITEMS = [
   { value: 'a', label: 'Breaking', content: <p>Breaking panel</p>, attrs: { 'data-cy': 'row-a' } },
@@ -70,12 +71,13 @@ describe('Accordion', () => {
     const { container, rerender } = render(<Accordion items={ITEMS} variant="boxed" />);
     const header = () =>
       screen.getByRole('button', { name: 'Breaking' }).closest('h3')!.parentElement!;
-    expect(header().className).toContain('hover]:bg-surface-hover');
+    const boxedHeader = styles.headerRowVariants.classNames.variants.variant.boxed;
+    expect(header().className).toContain(boxedHeader);
     expect((container.firstElementChild!.firstElementChild as HTMLElement).className).toContain(
-      'overflow-hidden',
+      styles.itemVariants.classNames.variants.variant.boxed,
     );
 
     rerender(<Accordion items={ITEMS} variant="list" />);
-    expect(header().className).not.toContain('bg-surface-hover');
+    expect(header().className).not.toContain(boxedHeader);
   });
 });

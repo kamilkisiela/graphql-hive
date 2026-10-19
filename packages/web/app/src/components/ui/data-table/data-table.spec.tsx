@@ -3,6 +3,9 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { DataTable } from './data-table';
 import { DataTableCell, formatAbsolute, formatRelative } from './data-table-cell';
+import * as cellStyles from './data-table-cell.css';
+import * as partStyles from './data-table-components.css';
+import * as tableStyles from './data-table.css';
 
 type Row = { id: string; name: string; count: number; status: 'open' | 'solved' };
 
@@ -51,11 +54,11 @@ describe('DataTable', () => {
       [...container.querySelectorAll('tbody td:first-child')].map(td => td.textContent);
     expect(names()).toEqual(['alpha', 'beta', 'gamma']);
     const arrow = () => screen.getByText('Count').querySelector('svg')?.getAttribute('class');
-    expect(arrow()).not.toContain('text-success');
+    expect(arrow()).not.toContain(tableStyles.sortHeaderArrowDown2);
     // A numeric column sorts descending first, so the biggest count leads.
     fireEvent.click(screen.getByText('Count'));
     expect(names()).toEqual(['alpha', 'gamma', 'beta']);
-    expect(arrow()).toContain('text-success');
+    expect(arrow()).toContain(tableStyles.sortHeaderArrowDown2);
     fireEvent.click(screen.getByText('Count'));
     expect(names()).toEqual(['beta', 'gamma', 'alpha']);
   });
@@ -73,7 +76,7 @@ describe('DataTable', () => {
       [...container.querySelectorAll('tbody td:first-child')].map(td => td.textContent);
     const arrow = () => screen.getByText('Count').querySelector('svg')?.getAttribute('class');
     expect(names()).toEqual(['alpha', 'gamma', 'beta']);
-    expect(arrow()).toContain('text-success');
+    expect(arrow()).toContain(tableStyles.sortHeaderArrowDown2);
     fireEvent.click(screen.getByText('Count'));
     expect(names()).toEqual(['beta', 'gamma', 'alpha']);
   });
@@ -154,12 +157,16 @@ describe('DataTable', () => {
     expect(screen.getByRole('status', { name: 'Sorting' }).closest('th')).not.toBeNull();
     expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
     expect(screen.getByRole('table').getAttribute('aria-busy')).toBe('true');
-    expect(screen.getByText('alpha').closest('tbody')!.className).toContain('opacity-50');
+    expect(screen.getByText('alpha').closest('tbody')!.className).toContain(
+      partStyles.dataTableBodyTbody2,
+    );
   });
 
   it('dims the rows it keeps while refreshing, without touching the header', () => {
     render(<DataTable data={ROWS} columns={COLUMNS} getRowId={row => row.id} refreshing />);
-    expect(screen.getByText('alpha').closest('tbody')!.className).toContain('pointer-events-none');
+    expect(screen.getByText('alpha').closest('tbody')!.className).toContain(
+      partStyles.dataTableBodyTbody2,
+    );
     expect(screen.getByRole('table').getAttribute('aria-busy')).toBe('true');
     expect(screen.queryByRole('status')).toBeNull();
 
@@ -224,7 +231,7 @@ describe('DataTable', () => {
       <DataTable data={ROWS} columns={COLUMNS} getRowId={row => row.id} />,
     );
     const wrapper = () => container.firstElementChild as HTMLElement;
-    expect(wrapper().className).toContain('border');
+    expect(wrapper().className).toContain(partStyles.wrapperClassClass2);
     expect(wrapper().className).toContain('bg-neutral-1');
 
     rerender(
@@ -235,7 +242,7 @@ describe('DataTable', () => {
         variants={{ bordered: false }}
       />,
     );
-    expect(wrapper().className).not.toContain('border');
+    expect(wrapper().className).not.toContain(partStyles.wrapperClassClass2);
     expect(wrapper().className).not.toContain('bg-');
   });
 
@@ -254,9 +261,9 @@ describe('DataTable', () => {
       <DataTable data={ROWS} columns={columns} getRowId={row => row.id} />,
     );
     const cell = container.querySelector('tbody td') as HTMLElement;
-    expect(cell.className).toContain('max-w-0');
+    expect(cell.className).toContain(partStyles.widthClassFill);
     const link = cell.querySelector('a') as HTMLElement;
-    expect(link.className).toContain('truncate');
+    expect(link.className).toContain(cellStyles.dataTableCellDestination2);
     expect(link.title).toBe('alpha');
   });
 
@@ -277,8 +284,8 @@ describe('DataTable', () => {
       />,
     );
     const rows = [...container.querySelectorAll('tbody tr')];
-    expect(rows[0].className).toContain('opacity-40');
-    expect(rows[1].className).toContain('text-fg-secondary');
+    expect(rows[0].className).toContain(partStyles.dataTableRowTr8);
+    expect(rows[1].className).toContain(partStyles.dataTableRowTr7);
     expect(rows[2].getAttribute('data-state')).toBe('selected');
   });
 
@@ -362,13 +369,12 @@ describe('DataTable', () => {
       <DataTable data={ROWS} columns={COLUMNS} getRowId={row => row.id} />,
     );
     const row = () => container.querySelector('tbody tr')!;
-    expect(row().className).not.toContain('hover:bg-');
+    expect(row().className).not.toContain(partStyles.dataTableRowTr6);
 
     rerender(
       <DataTable data={ROWS} columns={COLUMNS} getRowId={row => row.id} onRowClick={() => {}} />,
     );
-    expect(row().className).toContain('hover:bg-');
-    expect(row().className).toContain('cursor-pointer');
+    expect(row().className).toContain(partStyles.dataTableRowTr6);
   });
 
   it('shows no paging bar when a cursor connection has a single page', () => {
@@ -613,15 +619,15 @@ describe('DataTableCell', () => {
       />,
     );
     const rows = [...container.querySelectorAll('tbody > tr')];
-    expect(rows.map(tr => tr.className.includes('bg-critical-tint-subtle'))).toEqual([
+    expect(rows.map(tr => tr.className.includes(partStyles.dataTableRowTr3))).toEqual([
       false,
       true,
       false,
     ]);
     // The second row would take the stripe; the critical tint replaces it.
     expect(rows[1].className).not.toContain('bg-neutral-2/60');
-    expect(screen.getByText('beta').className).toContain('line-through');
-    expect(screen.getByText('alpha').className).not.toContain('line-through');
+    expect(screen.getByText('beta').className).toContain(cellStyles.dataTableCellSpan23);
+    expect(screen.getByText('alpha').className).not.toContain(cellStyles.dataTableCellSpan23);
   });
 
   it('shows only the label when a link-out cell has nowhere to go', () => {
@@ -641,7 +647,7 @@ describe('DataTableCell', () => {
   it('lights at least one bar segment for any share above zero', () => {
     const lit = (container: HTMLElement) =>
       [...container.querySelectorAll('[role="meter"] span')].filter(segment =>
-        segment.className.includes('bg-success'),
+        segment.className.includes(cellStyles.dataTableCellSpan30),
       ).length;
     const { container, rerender } = render(<DataTableCell kind="bar" value={0.09} max={100} />);
     expect(lit(container)).toBe(1);

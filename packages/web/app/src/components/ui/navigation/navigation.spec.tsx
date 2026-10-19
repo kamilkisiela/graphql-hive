@@ -2,6 +2,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { RouterAt } from '../../../../foundry.router';
 import { Navigation, type NavigationItem } from './navigation';
+import * as styles from './navigation.css';
 
 const TARGET = { organizationSlug: 'a', projectSlug: 'b', targetSlug: 'c' };
 
@@ -91,12 +92,12 @@ describe('Navigation', () => {
     renderAt('/a/b/c/checks', <Navigation aria-label="Target" items={TARGET_ITEMS} />);
     await current();
     const checks = screen.getByRole('link', { name: 'Checks' });
-    expect(checks.classList.contains('border-accent')).toBe(true);
-    expect(checks.classList.contains('border-transparent')).toBe(false);
+    expect(checks.classList.contains(styles.activeClassesUnderline)).toBe(true);
+    expect(checks.classList.contains(styles.inactiveClassesUnderline)).toBe(false);
     // The underline is the link's own border, so any radius would round its ends.
     expect([...checks.classList].some(name => /^rounded/.test(name))).toBe(false);
     const schema = screen.getByRole('link', { name: 'Schema' });
-    expect(schema.classList.contains('border-transparent')).toBe(true);
+    expect(schema.classList.contains(styles.inactiveClassesUnderline)).toBe(true);
   });
 
   it('renders the list variant as a column with the sub-page classes', async () => {
@@ -106,13 +107,15 @@ describe('Navigation', () => {
     );
     await current();
     const nav = screen.getByRole('navigation', { name: 'Sections' });
-    expect(nav.querySelector('ul')?.className).toContain('flex-col');
-    expect(screen.getByRole('link', { name: 'Checks' }).classList.contains('bg-neutral-5')).toBe(
-      true,
+    expect(nav.querySelector('ul')?.className).toContain(
+      styles.listVariants.classNames.variants.variant.list,
     );
-    expect(screen.getByRole('link', { name: 'Schema' }).classList.contains('bg-neutral-5')).toBe(
-      false,
-    );
+    expect(
+      screen.getByRole('link', { name: 'Checks' }).classList.contains(styles.activeClassesList),
+    ).toBe(true);
+    expect(
+      screen.getByRole('link', { name: 'Schema' }).classList.contains(styles.activeClassesList),
+    ).toBe(false);
   });
 
   it('puts item attrs on the anchor', async () => {

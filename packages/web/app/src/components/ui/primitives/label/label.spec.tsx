@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
 import { Label } from './label';
+import * as styles from './label.css';
 
 describe('Label', () => {
   it('labels the control it points at', () => {
@@ -27,10 +28,11 @@ describe('Label', () => {
 
   it('is small caps by default and sentence case inline, beside a switch', () => {
     const { rerender } = render(<Label htmlFor="x" label="Toggle Diff" />);
-    expect(screen.getByText('Toggle Diff').className).toContain('uppercase');
+    const { caps, inline } = styles.labelVariants.classNames.variants.variant;
+    expect(screen.getByText('Toggle Diff').className).toContain(caps);
     rerender(<Label htmlFor="x" label="Toggle Diff" variant="inline" />);
     const label = screen.getByText('Toggle Diff');
-    expect(label.className).not.toContain('uppercase');
-    expect(label.className).toContain('text-xs');
+    expect(label.className).not.toContain(caps);
+    expect(label.className).toContain(inline);
   });
 });

@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/primitives/form/form';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Textarea } from './textarea';
+import * as inputStyles from '../input/input.css';
+import * as shared from '../shared-styles.css';
 
 function ReactHookFormField(props: { onSubmit: (values: { description: string }) => void }) {
   const form = useForm<{ description: string }>({ defaultValues: { description: '' } });
@@ -41,7 +43,7 @@ describe('Textarea', () => {
     expect(ref.current).toBe(textarea);
     expect(textarea.getAttribute('rows')).toBe('3');
     expect(textarea.getAttribute('maxlength')).toBe('5000');
-    expect(textarea.className).toContain('text-fg');
+    expect(textarea.className).toContain(inputStyles.fieldClass);
     expect(textarea.className).toContain('text-sm');
   });
 
@@ -49,7 +51,7 @@ describe('Textarea', () => {
     const onSubmit = vi.fn();
     render(<ReactHookFormField onSubmit={onSubmit} />);
     const textarea = screen.getByPlaceholderText('Description');
-    expect(textarea.className).toContain('rounded-sm');
+    expect(textarea.className).toContain(inputStyles.fieldClass2);
     expect(textarea.getAttribute('aria-invalid')).toBeNull();
 
     fireEvent.click(screen.getByText('Save'));
@@ -75,7 +77,7 @@ describe('Textarea', () => {
   it('paints the raised surface for a field inside a sheet or dialog', () => {
     render(<Textarea placeholder="Description" onSurface="raised" />);
     const textarea = screen.getByPlaceholderText('Description');
-    expect(textarea.className).toContain('bg-surface-control-raised');
+    expect(textarea.className).toContain(shared.controlSurfaceRaised);
     expect(textarea.className).toContain('dark:focus:bg-neutral-6');
     expect(textarea.className.split(' ')).not.toContain('bg-surface-control');
   });

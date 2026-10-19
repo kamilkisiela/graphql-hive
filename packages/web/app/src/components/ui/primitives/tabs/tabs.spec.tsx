@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Tabs } from './tabs';
+import * as styles from './tabs.css';
 
 const ITEMS = [
   {
@@ -17,11 +18,13 @@ describe('Tabs', () => {
   it('wraps a horizontal strip in a sideways scroller and leaves a vertical one alone', () => {
     const { rerender } = render(<Tabs items={ITEMS} defaultValue="details" />);
     const list = screen.getByRole('tablist');
-    expect(list.className).toContain('w-max');
-    expect(list.parentElement!.className).toContain('overflow-x-auto');
+    const horizontalList = styles.listVariants.classNames.variants.orientation.horizontal;
+    const horizontalScroller = styles.scrollerVariants.classNames.variants.orientation.horizontal;
+    expect(list.className).toContain(horizontalList);
+    expect(list.parentElement!.className).toContain(horizontalScroller);
 
     rerender(<Tabs items={ITEMS} defaultValue="details" orientation="vertical" />);
-    expect(screen.getByRole('tablist').parentElement!.className).not.toContain('overflow-x-auto');
+    expect(screen.getByRole('tablist').parentElement!.className).not.toContain(horizontalScroller);
   });
 
   it('renders a tab per item, shows the active panel, and switches on click', () => {
@@ -63,7 +66,7 @@ describe('Tabs', () => {
       const outgoing = screen.getByText('Details panel').closest('[role="tabpanel"]')!;
       expect(outgoing.hasAttribute('data-ending-style')).toBe(true);
       expect(outgoing.hasAttribute('inert')).toBe(true);
-      expect(outgoing.className).toContain('data-[ending-style]:hidden');
+      expect(outgoing.className).toContain(styles.panelVariants.classNames.base);
       expect(screen.getByText('Schema panel')).toBeTruthy();
 
       await act(async () => {

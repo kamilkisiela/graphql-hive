@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import * as badgeStyles from '@/components/ui/primitives/badge/badge.css';
 import { render } from '@testing-library/react';
 import {
   CompositionErrorMessage,
@@ -84,14 +85,15 @@ describe('layoutProseLine', () => {
   });
 });
 
+// The field badges are the warning variant; the class is the first of its composed names.
+const warningBadge = badgeStyles.badgeVariants.classNames.variants.variant.warning.split(' ')[0];
+
 describe('CompositionErrorMessage', () => {
   const rendered = (message: string) => {
     const { container } = render(<CompositionErrorMessage message={message} />);
     return {
       container,
-      badges: [...container.querySelectorAll('[class*="bg-warning-tint"]')].map(
-        el => el.textContent,
-      ),
+      badges: [...container.querySelectorAll(`.${warningBadge}`)].map(el => el.textContent),
       subgraphs: [...container.querySelectorAll('[title]')].map(el => el.getAttribute('title')),
     };
   };
