@@ -211,6 +211,7 @@ export async function makeFetchCall(
         `${config.method} ${endpoint} (x-request-id=${requestId}) failed with status ${response.status}.`,
         response.status,
         response.statusText,
+        response.headers.get('x-request-id') ?? undefined,
       );
 
       if (response.status >= 400 && response.status < 500) {
@@ -237,6 +238,8 @@ export class HTTPResponseError extends Error {
     message: string,
     public readonly status: number,
     public readonly statusText: string,
+    /** The request id the server returned in its `x-request-id` response header, if any. */
+    public readonly requestId?: string,
   ) {
     super(message);
     this.name = 'HTTPResponseError';

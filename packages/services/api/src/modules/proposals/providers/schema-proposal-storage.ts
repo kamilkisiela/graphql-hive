@@ -1,7 +1,7 @@
 /**
  * This wraps the database calls for schema proposals and required validation
  */
-import { Inject, Injectable, Scope } from 'graphql-modules';
+import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
 import { PostgresDatabasePool, psql } from '@hive/postgres';
 import {
@@ -41,6 +41,7 @@ export class SchemaProposalStorage {
     private storage: Storage,
     @Inject(SCHEMA_PROPOSALS_ENABLED) private schemaProposalsEnabled: boolean,
     private taskScheduler: TaskScheduler,
+    @Inject(CONTEXT) private context: GraphQLModules.ModuleContext,
   ) {
     this.logger = logger.child({ source: 'SchemaProposalStorage' });
   }
@@ -55,7 +56,9 @@ export class SchemaProposalStorage {
     };
     native: boolean;
   }) {
-    await this.taskScheduler.scheduleTask(SchemaProposalCompositionTask, input);
+    await this.taskScheduler.scheduleTask(SchemaProposalCompositionTask, input, {
+      requestId: this.context.requestId,
+    });
   }
 
   private async assertSchemaProposalsEnabled(args: {
