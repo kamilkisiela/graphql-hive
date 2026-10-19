@@ -22,6 +22,7 @@
     "build:libraries": "pnpm prebuild && pnpm graphql:generate && pnpm turbo build --filter=./packages/libraries/* --color",
     "build:services": "pnpm prebuild && pnpm turbo build --filter=./packages/services/**/* --filter=./packages/migrations --color",
     "build:web": "pnpm prebuild && pnpm turbo build --filter=./packages/web/* --color",
+    "codemod:tailwind-to-ve": "tsx scripts/tailwind-to-ve/cli.ts",
     "dev:hive": "turbo dev:hive --ui tui --concurrency 100",
     "dev:integration": "cd integration-tests && pnpm dev:integration",
     "dev:observability": "docker compose -f ./docker/docker-compose.dev.yml --profile observability up -d",
