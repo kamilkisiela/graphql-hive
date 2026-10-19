@@ -310,6 +310,7 @@ overrides:
   '@graphql-hive/gateway-plugin-console-sdk': 'workspace:'
   '@graphql-hive/yoga': 'workspace:'
   '@graphql-hive/core': 'workspace:'
+  '@graphql-tools/url-loader@7.x.x>@graphql-tools/executor-legacy-ws': '-'
   graphql@16.x.x: 16.14.2
 
 patchedDependencies:
@@ -4577,11 +4578,6 @@ packages:
   '@graphql-tools/executor-http@3.4.1':
     resolution: {integrity: sha512-OcIfgG/F8ysubB20PCf9SiCcxkwMOd8n9GmnpwpYhU7s/DDF13Ady969dPzRzAsgjNWjSS5DqzvVN8e2OphtiA==}
     engines: {node: '>=20.0.0'}
-    peerDependencies:
-      graphql: 16.14.2
-
-  '@graphql-tools/executor-legacy-ws@0.0.11':
-    resolution: {integrity: sha512-4ai+NnxlNfvIQ4c70hWFvOZlSUN8lt7yc+ZsrwtNFbFPH/EroIzFMapAxM9zwyv9bH38AdO3TQxZ5zNxgBdvUw==}
     peerDependencies:
       graphql: 16.14.2
 
@@ -21277,18 +21273,6 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@graphql-tools/executor-legacy-ws@0.0.11(graphql@16.14.2)':
-    dependencies:
-      '@graphql-tools/utils': 9.2.1(graphql@16.14.2)
-      '@types/ws': 8.18.1
-      graphql: 16.14.2
-      isomorphic-ws: 5.0.0(ws@8.22.0)
-      tslib: 2.8.1
-      ws: 8.22.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
   '@graphql-tools/executor-legacy-ws@1.1.37(graphql@16.14.2)':
     dependencies:
       '@graphql-tools/utils': 12.0.3(graphql@16.14.2)
@@ -21604,7 +21588,6 @@ snapshots:
       '@graphql-tools/delegate': 9.0.35(graphql@16.14.2)
       '@graphql-tools/executor-graphql-ws': 0.0.14(graphql@16.14.2)
       '@graphql-tools/executor-http': 0.1.10(@types/node@24.13.3)(graphql@16.14.2)
-      '@graphql-tools/executor-legacy-ws': 0.0.11(graphql@16.14.2)
       '@graphql-tools/utils': 9.2.1(graphql@16.14.2)
       '@graphql-tools/wrap': 9.4.2(graphql@16.14.2)
       '@types/ws': 8.18.1
@@ -21626,7 +21609,6 @@ snapshots:
       '@graphql-tools/delegate': 9.0.35(graphql@16.14.2)
       '@graphql-tools/executor-graphql-ws': 0.0.14(graphql@16.14.2)
       '@graphql-tools/executor-http': 0.1.10(@types/node@25.9.9)(graphql@16.14.2)
-      '@graphql-tools/executor-legacy-ws': 0.0.11(graphql@16.14.2)
       '@graphql-tools/utils': 9.2.1(graphql@16.14.2)
       '@graphql-tools/wrap': 9.4.2(graphql@16.14.2)
       '@types/ws': 8.18.1
