@@ -591,6 +591,10 @@ export default gql`
     """
     isUsageTracked: Boolean!
     """
+    The type of this change, such as FIELD_REMOVED (the same value as 'SchemaChangeGroup.kind').
+    """
+    kind: SchemaChangeKind!
+    """
     Usage statistics about the schema change if it is not safe based on usage.
     The statistics are determined based on the breaking change configuration.
     The usage statistics are only available for breaking changes and only represent a snapshot of the usage data at the time of the schema check/schema publish.

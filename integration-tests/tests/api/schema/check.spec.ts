@@ -3162,6 +3162,7 @@ const SchemaCheckChangePagesQuery = graphql(/* GraphQL */ `
           edges {
             node {
               message
+              kind
             }
           }
         }
@@ -3176,6 +3177,7 @@ const SchemaCheckChangePagesQuery = graphql(/* GraphQL */ `
             edges {
               node {
                 message
+                kind
               }
             }
           }
@@ -3276,6 +3278,15 @@ test.concurrent(
       { kind: 'TYPE_ADDED', totalCount: 3, pageSize: 2, hasNextPage: true },
     ]);
     expect(firstPage.typeAdded).toEqual([{ kind: 'TYPE_ADDED' }]);
+    // Each change names its own kind, the same value its group is keyed by.
+    expect(new Set(firstPage.breakingPage!.edges.map(edge => edge.node.kind))).toEqual(
+      new Set(['FIELD_REMOVED']),
+    );
+    for (const group of firstPage.safeSchemaChangeGroups) {
+      for (const edge of group.changes.edges) {
+        expect(edge.node.kind).toBe(group.kind);
+      }
+    }
   },
 );
 

@@ -145,6 +145,7 @@ export function PagedBreakingChanges(props: {
     <PageControls paging={paging}>
       <ChangesBlock
         schemaCheckId={props.schemaCheckId}
+        explorerLinks="check"
         title={<CountedTitle count={props.totalCount}>{props.title}</CountedTitle>}
         changesWithUsage={paging.rows}
         conditionBreakingChangeMetadata={props.conditionBreakingChangeMetadata}
@@ -175,7 +176,11 @@ function SafeChangeGroupPage(props: {
   });
   return (
     <PageControls paging={paging}>
-      <ChangesBlock schemaCheckId={props.schemaCheckId} changes={paging.rows} />
+      <ChangesBlock
+        schemaCheckId={props.schemaCheckId}
+        explorerLinks="check"
+        changes={paging.rows}
+      />
     </PageControls>
   );
 }

@@ -203,6 +203,7 @@ export function breakingSchemaCheck(
                   approval: null,
                   isSafeBasedOnUsage: options.safe ?? false,
                   isUsageTracked: true,
+                  kind: 'FIELD_REMOVED',
                   usageStatistics: {
                     __typename: 'SchemaChangeUsageStatistics' as const,
                     topAffectedOperations: [
@@ -312,6 +313,7 @@ function removedFieldAt(index: number) {
     approval: null,
     isSafeBasedOnUsage: false,
     isUsageTracked: true,
+    kind: 'FIELD_REMOVED',
     usageStatistics: null,
     affectedAppDeployments: null,
   };
@@ -331,6 +333,7 @@ function safeChangeAt(kind: string, index: number) {
     approval: null,
     isSafeBasedOnUsage: false,
     isUsageTracked: false,
+    kind,
   };
 }
 
@@ -470,6 +473,7 @@ function breakingChange(change: {
   severityReason: string | null;
   isSafeBasedOnUsage: boolean;
   isUsageTracked: boolean;
+  kind: string;
 }) {
   return {
     __typename: 'SchemaChangeEdge' as const,
@@ -506,6 +510,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                 severityReason: null,
                 isSafeBasedOnUsage: true,
                 isUsageTracked: false,
+                kind: 'TYPE_REMOVED',
               }),
               breakingChange({
                 path: ['SearchResult'],
@@ -514,6 +519,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                   'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
                 isSafeBasedOnUsage: true,
                 isUsageTracked: false,
+                kind: 'UNION_MEMBER_REMOVED',
               }),
               // Tracked, but with no reason and no usage to show.
               breakingChange({
@@ -523,6 +529,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                 severityReason: null,
                 isSafeBasedOnUsage: true,
                 isUsageTracked: true,
+                kind: 'FIELD_TYPE_CHANGED',
               }),
             ],
           },

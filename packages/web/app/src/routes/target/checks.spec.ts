@@ -769,6 +769,68 @@ describe('breaking changes without recorded usage', () => {
   });
 });
 
+describe('Explorer links', () => {
+  const TARGET = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}`;
+  // The page nav has its own "Explorer" link; a change's opens in a new tab.
+  const changeLinks = () =>
+    screen
+      .queryAllByRole('link', { name: 'Explorer' })
+      .filter(link => link.getAttribute('target') === '_blank');
+
+  it(
+    'links each changed coordinate to Explorer in a new tab, outside the row toggle',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          untrackedUsageSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-untracked`, { client: testClient });
+
+      await screen.findByText(/changed type from/, {}, { timeout: 10_000 });
+      expect(changeLinks().map(link => link.getAttribute('href'))).toEqual([
+        `${TARGET}/explorer/Currency`,
+        `${TARGET}/explorer/SearchResult`,
+        `${TARGET}/explorer/ConversionRate?search=fromCurrency`,
+      ]);
+      for (const link of changeLinks()) {
+        expect(link.closest('button')).toBeNull();
+      }
+    },
+  );
+
+  it("leaves a check's additions unlinked", { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        manyChangesSchemaCheck(variables as { schemaCheckId: string }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+    await screen.findByText('Safe Changes', {}, { timeout: 10_000 });
+    const breakingLinks = changeLinks().length;
+    expect(breakingLinks).toBeGreaterThan(0);
+    const badges = screen.queryAllByText('StressType_0').length;
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Type added/ }));
+    });
+    // The opened group's first row, "Type 'StressType_0' was added", is on screen.
+    await waitFor(() =>
+      expect(screen.queryAllByText('StressType_0').length).toBeGreaterThan(badges),
+    );
+    expect(changeLinks()).toHaveLength(breakingLinks);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Type description changed/ }));
+    });
+    await waitFor(() => expect(changeLinks().length).toBeGreaterThan(breakingLinks));
+  });
+});
+
 describe('schema policy warnings', () => {
   it(
     'shows no warnings section and no Policy tab when the policy found nothing',

@@ -1,11 +1,15 @@
 import { ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
-import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon } from 'lucide-react';
+import { ActivityIcon, BoxIcon, CheckIcon, CircleCheckIcon, ExternalLinkIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
 import { BreakingChangeTargets } from '@/components/target/history/breaking-change-targets';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
+import {
+  explorerLinkForChange,
+  type ExplorerLinkPage,
+} from '@/components/target/history/explorer-link';
 import { DataTable } from '@/components/ui/data-table/data-table';
 import { DataTableCell } from '@/components/ui/data-table/data-table-cell';
 import { Accordion } from '@/components/ui/primitives/accordion/accordion';
@@ -82,6 +86,7 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
     }
     isSafeBasedOnUsage
     isUsageTracked
+    kind
     usageStatistics {
       topAffectedOperations {
         hash
@@ -152,6 +157,7 @@ export const ChangesBlock_SchemaChangeFragment = graphql(`
     }
     isSafeBasedOnUsage
     isUsageTracked
+    kind
   }
 `);
 
@@ -170,6 +176,8 @@ export function ChangesBlock(
     title?: string | React.ReactElement;
     /** The check being viewed, when there is one: a schema version shows the same changes without. */
     schemaCheckId?: string;
+    /** Links each change to its coordinate in Explorer, judged for the page listing it. */
+    explorerLinks?: ExplorerLinkPage;
     conditionBreakingChangeMetadata?: FragmentType<
       typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
     > | null;
@@ -201,6 +209,7 @@ export function ChangesBlock(
         {props.changesWithUsage?.map((change, index) => (
           <ChangeItem
             schemaCheckId={props.schemaCheckId}
+            explorerLinks={props.explorerLinks}
             key={keys[index]}
             change={null}
             changeWithUsage={change}
@@ -210,6 +219,7 @@ export function ChangesBlock(
         {props.changes?.map((change, index) => (
           <ChangeItem
             schemaCheckId={props.schemaCheckId}
+            explorerLinks={props.explorerLinks}
             key={keys[index]}
             change={change}
             changeWithUsage={null}
@@ -251,6 +261,7 @@ function ChangeItem(
       typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
     > | null;
     schemaCheckId?: string;
+    explorerLinks?: ExplorerLinkPage;
   } & (
     | {
         change: FragmentType<typeof ChangesBlock_SchemaChangeFragment>;
@@ -262,7 +273,7 @@ function ChangeItem(
       }
   ),
 ) {
-  const { organizationSlug, projectSlug } = useSlugs('target');
+  const { organizationSlug, projectSlug, targetSlug } = useSlugs('target');
   const cchange = useFragment(ChangesBlock_SchemaChangeFragment, props.change);
   const cchangeWithUsage = useFragment(
     ChangesBlock_SchemaChangeWithUsageFragment,
@@ -278,6 +289,7 @@ function ChangeItem(
   );
 
   const usageStatistics = 'usageStatistics' in change ? (change.usageStatistics ?? null) : null;
+  const explorer = props.explorerLinks ? explorerLinkForChange(change, props.explorerLinks) : null;
 
   // Older checks have no per-target counts and keep the old layout.
   const targetUsage =
@@ -458,6 +470,29 @@ function ChangeItem(
                 {change.approval ? <ApprovedByBadge approval={change.approval} /> : null}
               </span>
             ) : undefined,
+          action: explorer ? (
+            <Button
+              variant="ghost"
+              size="compact"
+              render={
+                <Link
+                  to="/$organizationSlug/$projectSlug/$targetSlug/explorer/$typename"
+                  params={{
+                    organizationSlug,
+                    projectSlug,
+                    targetSlug,
+                    typename: explorer.typename,
+                  }}
+                  search={explorer.search ? { search: explorer.search } : {}}
+                  target="_blank"
+                  preload={false}
+                />
+              }
+            >
+              Explorer
+              <ExternalLinkIcon className="size-3" />
+            </Button>
+          ) : undefined,
           content:
             change.approval || details ? (
               <div

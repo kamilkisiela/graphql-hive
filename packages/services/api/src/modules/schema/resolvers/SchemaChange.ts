@@ -1,4 +1,5 @@
 import { CriticalityLevel as CriticalityLevelEnum } from '@graphql-inspector/core';
+import type { Change } from '@hive/storage';
 import { isSchemaChangeUsageTracked } from '../lib/schema-change-usage-tracking';
 import { BreakingSchemaChangeUsageHelper } from '../providers/breaking-schema-changes-helper';
 import type {
@@ -27,6 +28,7 @@ export const SchemaChange: Pick<
   | 'criticalityReason'
   | 'isSafeBasedOnUsage'
   | 'isUsageTracked'
+  | 'kind'
   | 'message'
   | 'path'
   | 'severityLevel'
@@ -39,6 +41,8 @@ export const SchemaChange: Pick<
       : change.message;
   },
   path: change => change.path?.split('.') ?? null,
+  // Read through SchemaChangeModel, so the type is one of its kinds; the transform widens it.
+  kind: change => change.type as Change['type'],
   criticality: change => criticalityMap[change.criticality],
   criticalityReason: change => change.reason,
   approval: change => change.approvalMetadata,
