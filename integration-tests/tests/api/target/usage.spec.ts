@@ -3854,7 +3854,7 @@ test('removing a used scalar or union is not safe based on usage', async () => {
 
   client.collectUsage().finish(
     {
-      document: parse(/* GraphQL */ `
+      document: parse(`
         query rates {
           rate {
             fromCurrency
