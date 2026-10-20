@@ -746,6 +746,7 @@ export const errorCatalog: ReadonlyArray<HiveCLIErrorClass> = [
   UnsupportedServerError,
   RequestTimeoutError,
   InvalidInputError,
+  InvalidPersistedDocumentsError,
   InvalidHeaderError,
   UnexpectedError,
   SchemaFileNotFoundError,
