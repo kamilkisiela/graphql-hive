@@ -586,6 +586,15 @@ export default gql`
     """
     isSafeBasedOnUsage: Boolean! @tag(name: "public")
     """
+    Whether usage is recorded for what this change touches, so whether 'isSafeBasedOnUsage' can be
+    trusted. Only meaningful for breaking changes.
+    """
+    isUsageTracked: Boolean!
+    """
+    The type of this change, such as FIELD_REMOVED (the same value as 'SchemaChangeGroup.kind').
+    """
+    kind: SchemaChangeKind!
+    """
     Usage statistics about the schema change if it is not safe based on usage.
     The statistics are determined based on the breaking change configuration.
     The usage statistics are only available for breaking changes and only represent a snapshot of the usage data at the time of the schema check/schema publish.
@@ -838,6 +847,116 @@ export default gql`
     total: Int! @deprecated(reason: "This field will be removed in the future.")
     edges: [SchemaChangeEdge!]! @tag(name: "public")
     pageInfo: PageInfo! @tag(name: "public")
+    """
+    The number of changes in the whole list, not only this page.
+    """
+    totalCount: Int!
+  }
+
+  """
+  The type of a schema change: an Inspector change type such as TYPE_DESCRIPTION_CHANGED, or
+  REGISTRY_SERVICE_URL_CHANGED when a service's URL changes.
+  """
+  enum SchemaChangeKind {
+    DIRECTIVE_ADDED
+    DIRECTIVE_ARGUMENT_ADDED
+    DIRECTIVE_ARGUMENT_DEFAULT_VALUE_CHANGED
+    DIRECTIVE_ARGUMENT_DESCRIPTION_CHANGED
+    DIRECTIVE_ARGUMENT_REMOVED
+    DIRECTIVE_ARGUMENT_TYPE_CHANGED
+    DIRECTIVE_DESCRIPTION_CHANGED
+    DIRECTIVE_LOCATION_ADDED
+    DIRECTIVE_LOCATION_REMOVED
+    DIRECTIVE_REMOVED
+    DIRECTIVE_REPEATABLE_ADDED
+    DIRECTIVE_REPEATABLE_REMOVED
+    DIRECTIVE_USAGE_ARGUMENT_ADDED
+    DIRECTIVE_USAGE_ARGUMENT_DEFINITION_ADDED
+    DIRECTIVE_USAGE_ARGUMENT_DEFINITION_REMOVED
+    DIRECTIVE_USAGE_ARGUMENT_REMOVED
+    DIRECTIVE_USAGE_ENUM_ADDED
+    DIRECTIVE_USAGE_ENUM_REMOVED
+    DIRECTIVE_USAGE_ENUM_VALUE_ADDED
+    DIRECTIVE_USAGE_ENUM_VALUE_REMOVED
+    DIRECTIVE_USAGE_FIELD_ADDED
+    DIRECTIVE_USAGE_FIELD_DEFINITION_ADDED
+    DIRECTIVE_USAGE_FIELD_DEFINITION_REMOVED
+    DIRECTIVE_USAGE_FIELD_REMOVED
+    DIRECTIVE_USAGE_INPUT_FIELD_DEFINITION_ADDED
+    DIRECTIVE_USAGE_INPUT_FIELD_DEFINITION_REMOVED
+    DIRECTIVE_USAGE_INPUT_OBJECT_ADDED
+    DIRECTIVE_USAGE_INPUT_OBJECT_REMOVED
+    DIRECTIVE_USAGE_INTERFACE_ADDED
+    DIRECTIVE_USAGE_INTERFACE_REMOVED
+    DIRECTIVE_USAGE_OBJECT_ADDED
+    DIRECTIVE_USAGE_OBJECT_REMOVED
+    DIRECTIVE_USAGE_SCALAR_ADDED
+    DIRECTIVE_USAGE_SCALAR_REMOVED
+    DIRECTIVE_USAGE_SCHEMA_ADDED
+    DIRECTIVE_USAGE_SCHEMA_REMOVED
+    DIRECTIVE_USAGE_UNION_MEMBER_ADDED
+    DIRECTIVE_USAGE_UNION_MEMBER_REMOVED
+    ENUM_VALUE_ADDED
+    ENUM_VALUE_DEPRECATION_REASON_ADDED
+    ENUM_VALUE_DEPRECATION_REASON_CHANGED
+    ENUM_VALUE_DEPRECATION_REASON_REMOVED
+    ENUM_VALUE_DESCRIPTION_CHANGED
+    ENUM_VALUE_REMOVED
+    FIELD_ADDED
+    FIELD_ARGUMENT_ADDED
+    FIELD_ARGUMENT_DEFAULT_CHANGED
+    FIELD_ARGUMENT_DESCRIPTION_CHANGED
+    FIELD_ARGUMENT_REMOVED
+    FIELD_ARGUMENT_TYPE_CHANGED
+    FIELD_DEPRECATION_ADDED
+    FIELD_DEPRECATION_REASON_ADDED
+    FIELD_DEPRECATION_REASON_CHANGED
+    FIELD_DEPRECATION_REASON_REMOVED
+    FIELD_DEPRECATION_REMOVED
+    FIELD_DESCRIPTION_ADDED
+    FIELD_DESCRIPTION_CHANGED
+    FIELD_DESCRIPTION_REMOVED
+    FIELD_REMOVED
+    FIELD_TYPE_CHANGED
+    INPUT_FIELD_ADDED
+    INPUT_FIELD_DEFAULT_VALUE_CHANGED
+    INPUT_FIELD_DESCRIPTION_ADDED
+    INPUT_FIELD_DESCRIPTION_CHANGED
+    INPUT_FIELD_DESCRIPTION_REMOVED
+    INPUT_FIELD_REMOVED
+    INPUT_FIELD_TYPE_CHANGED
+    OBJECT_TYPE_INTERFACE_ADDED
+    OBJECT_TYPE_INTERFACE_REMOVED
+    REGISTRY_SERVICE_URL_CHANGED
+    SCHEMA_MUTATION_TYPE_CHANGED
+    SCHEMA_QUERY_TYPE_CHANGED
+    SCHEMA_SUBSCRIPTION_TYPE_CHANGED
+    TYPE_ADDED
+    TYPE_DESCRIPTION_ADDED
+    TYPE_DESCRIPTION_CHANGED
+    TYPE_DESCRIPTION_REMOVED
+    TYPE_KIND_CHANGED
+    TYPE_REMOVED
+    UNION_MEMBER_ADDED
+    UNION_MEMBER_REMOVED
+  }
+
+  """
+  Schema changes of one kind (an Inspector change type such as TYPE_DESCRIPTION_CHANGED).
+  """
+  type SchemaChangeGroup {
+    kind: SchemaChangeKind!
+    totalCount: Int!
+    changes(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection!
   }
 
   type SchemaChangeEdge {
@@ -1616,14 +1735,35 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: SchemaChangeKind): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
     """
     Results of the contracts
     """
     contractChecks: ContractCheckConnection @tag(name: "public")
+    """
+    One contract's result, by the contract check's id.
+    """
+    contractCheck(id: ID!): ContractCheck
     """
     Conditional breaking change metadata.
     """
@@ -1673,8 +1813,25 @@ export default gql`
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
 
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: SchemaChangeKind): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
 
     compositeSchemaSDL: String @tag(name: "public")
     supergraphSDL: String @tag(name: "public")
@@ -1842,8 +1999,25 @@ export default gql`
     """
     Breaking changes can exist in an successful schema check if the check was manually approved.
     """
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: SchemaChangeKind): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     """
     Schema policy errors can exist in an successful schema check if the check was manually approved.
@@ -1856,6 +2030,10 @@ export default gql`
     Results of the contracts
     """
     contractChecks: ContractCheckConnection @tag(name: "public")
+    """
+    One contract's result, by the contract check's id.
+    """
+    contractCheck(id: ID!): ContractCheck
     """
     Conditional breaking change metadata.
     """
@@ -1948,8 +2126,25 @@ export default gql`
     schemaProposalChanges: SchemaChangeConnection
 
     schemaChanges: SchemaChangeConnection @tag(name: "public")
-    breakingSchemaChanges: SchemaChangeConnection
+    breakingSchemaChanges(
+      """
+      How many changes to return. Without it, every change from 'offset' on is returned.
+      """
+      first: Int
+      """
+      How many changes to skip from the start of the list.
+      """
+      offset: Int = 0
+    ): SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
+    """
+    Safe changes grouped by kind, smallest group first. 'kind' narrows the list to one group.
+    """
+    safeSchemaChangeGroups(kind: SchemaChangeKind): [SchemaChangeGroup!]!
+    """
+    How many breaking changes are neither approved nor safe based on usage.
+    """
+    unapprovedBreakingSchemaChangeCount: Int!
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
 
@@ -1959,6 +2154,10 @@ export default gql`
     Results of the contracts
     """
     contractChecks: ContractCheckConnection @tag(name: "public")
+    """
+    One contract's result, by the contract check's id.
+    """
+    contractCheck(id: ID!): ContractCheck
     """
     Conditional breaking change metadata.
     """

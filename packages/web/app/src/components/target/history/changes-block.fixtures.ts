@@ -1,16 +1,20 @@
 import { makeFragmentData } from '@/gql';
-import { SeverityLevelType } from '@/gql/graphql';
+import { SchemaChangeKind, SeverityLevelType } from '@/gql/graphql';
 import {
   ChangesBlock_SchemaChangeWithUsageFragment,
   ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment,
 } from './errors-and-changes';
 
-// Not named `*.preview.tsx`, so foundry does not mount it; shared by the ChangesBlock and TabbedView previews.
+// Not named `*.preview.tsx`, so foundry does not mount it; shared by the ChangesBlock, paging and TabbedView previews.
 
 export const PATH = '/the-guild/graphql-hive/staging';
 const PERIOD = { from: '2026-10-01T10:00:00.000Z', to: '2026-10-08T10:00:00.000Z' };
 
-type PreviewTarget = { id: string; slug: string; target: { id: string; slug: string } | null };
+export type PreviewTarget = {
+  id: string;
+  slug: string;
+  target: { id: string; slug: string } | null;
+};
 
 const TARGET_SLUGS = [
   'production-eu',
@@ -111,6 +115,8 @@ export function buildChanges(args: {
         severityReason:
           'Removing a type is a breaking change. It is preferable to deprecate and remove all references to this type first.',
         isSafeBasedOnUsage: false,
+        isUsageTracked: false,
+        kind: SchemaChangeKind.TypeRemoved,
         approval: null,
         usageStatistics: {
           __typename: 'SchemaChangeUsageStatistics' as const,

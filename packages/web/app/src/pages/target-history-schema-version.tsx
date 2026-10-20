@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from 'urql';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
+import { changeSafetyStats } from '@/components/target/history/change-safety-stats';
 import { CompositionErrorsCard } from '@/components/target/history/composition-errors-card';
 import { ChangesBlock } from '@/components/target/history/errors-and-changes';
 import { CodeScrollArea, File, FileDiff } from '@/components/ui/diffs';
@@ -556,7 +557,7 @@ function GraphQLSchemaView(props: {
               before={props.previousSdl ?? ''}
               after={props.currentSdl}
               sorted
-              tooLargeHint="Switch to View to see the full schema."
+              tooLargeMessage="Every change is listed under Changes. To browse the full schema, switch to View."
             />
           )}
         </GenericGraphCard>
@@ -635,7 +636,7 @@ function FilterableSchemaChangeBlock(props: {
         <div className="px-5">
           {filteredChanges?.length ? (
             <div className="pt-2 pb-8">
-              <ChangesBlock changes={filteredChanges} />
+              <ChangesBlock explorerLinks="version" changes={filteredChanges} />
             </div>
           ) : selectedChangeType !== null ? (
             <div className="py-3 text-xs">No changes of this change type.</div>
@@ -898,7 +899,10 @@ function GraphVersionSubgraphChangesView(props: {
                 <div className="px-5">
                   {edges?.length ? (
                     <div className="mb-8 pt-2">
-                      <ChangesBlock changes={edges?.map(edge => edge.node) ?? []} />
+                      <ChangesBlock
+                        explorerLinks="version"
+                        changes={edges?.map(edge => edge.node) ?? []}
+                      />
                     </div>
                   ) : selectedChangeType === null ? (
                     <div className="py-5 text-xs">No changes available.</div>
@@ -957,8 +961,8 @@ export function SDLDiffView(props: {
   after: string;
   /** Compare sorted copies, for composed schemas whose definition order carries no meaning. */
   sorted?: boolean;
-  /** Where to see the full schema when the diff is too large to show. */
-  tooLargeHint?: ReactNode;
+  /** What to read instead when the diff is too large to show: where the changes and the schema are. */
+  tooLargeMessage?: ReactNode;
 }) {
   const result = useSdlDiff(props.before, props.after, props.sorted ?? false);
 
@@ -992,7 +996,7 @@ export function SDLDiffView(props: {
           icon={<InfoIcon className="size-4 text-fg-muted" />}
           title="Diff too large to display"
         >
-          The schemas differ in too many lines to compare here. {props.tooLargeHint}
+          {props.tooLargeMessage ?? 'The schemas differ in too many lines to compare here.'}
         </SDLDiffNotice>
       );
     case 'diff':
@@ -1411,6 +1415,7 @@ const SchemaVersionSummary_SchemaVersionFragment = graphql(`
         node {
           isSafeBasedOnUsage
           severityLevel
+          isUsageTracked
         }
       }
     }
@@ -1425,6 +1430,7 @@ const SchemaVersionSummary_ContractVersionFragment = graphql(`
         node {
           isSafeBasedOnUsage
           severityLevel
+          isUsageTracked
         }
       }
     }
@@ -1481,26 +1487,13 @@ export const SchemaVersionSummary = (props: {
     return data;
   }, [schemaVersion.subgraphDiffs]);
 
-  const publicChangeStats = useMemo(() => {
-    const data = {
-      totalChanges: (contractVersion ?? schemaVersion).sdlChanges?.edges.length ?? 0,
-      breakingChanges: 0,
-      notSafeChanges: 0,
-    };
-
-    for (const change of (contractVersion ?? schemaVersion).sdlChanges?.edges ?? []) {
-      if (change.node.severityLevel === SeverityLevelType.Breaking) {
-        data.breakingChanges++;
-
-        if (!change.node.isSafeBasedOnUsage) {
-          console.log(change.node);
-          data.notSafeChanges++;
-        }
-      }
-    }
-
-    return data;
-  }, [schemaVersion.sdlChanges, contractVersion?.sdlChanges]);
+  const publicChangeStats = useMemo(
+    () =>
+      changeSafetyStats(
+        (contractVersion ?? schemaVersion).sdlChanges?.edges.map(edge => edge.node) ?? [],
+      ),
+    [schemaVersion.sdlChanges, contractVersion?.sdlChanges],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -1512,15 +1505,15 @@ export const SchemaVersionSummary = (props: {
           value={publicChangeStats.breakingChanges}
           additionalValue={
             publicChangeStats.breakingChanges && schemaVersion.isComposable ? (
-              publicChangeStats.notSafeChanges ? (
+              publicChangeStats.notSafe ? (
                 <Tooltip
                   trigger={
                     <span className="ml-2 flex items-center gap-0.5 text-xs text-critical lg:text-sm">
                       <ShieldAlertIcon size="14" className="inline" />
-                      {publicChangeStats.notSafeChanges} not safe
+                      {publicChangeStats.notSafe} not safe
                     </span>
                   }
-                  content="Some changes are not safe based on usage data."
+                  content="Some changes are in use, or usage isn't recorded for what they touch."
                 />
               ) : (
                 <Tooltip

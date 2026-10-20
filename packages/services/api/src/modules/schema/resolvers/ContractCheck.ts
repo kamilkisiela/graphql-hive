@@ -37,4 +37,19 @@ export const ContractCheck: ContractCheckResolvers = {
   async baseline(contractCheck, _arg, { injector }) {
     return injector.get(ContractsManager).getContractBaselineForContractCheck(contractCheck);
   },
+  safeSchemaChangeGroups: (contractCheck, args, { injector }) => {
+    return injector
+      .get(ContractsManager)
+      .getSafeSchemaChangeGroupsForContractCheck(contractCheck, args.kind);
+  },
+  unapprovedBreakingSchemaChangeCount: (contractCheck, _, { injector }) => {
+    return injector
+      .get(ContractsManager)
+      .getUnapprovedBreakingSchemaChangeCountForContractCheck(contractCheck);
+  },
+  breakingSchemaChanges: (contractCheck, args, { injector }) => {
+    return injector
+      .get(ContractsManager)
+      .getBreakingSchemaChangesPageForContractCheck(contractCheck, args);
+  },
 };

@@ -125,6 +125,7 @@ export default defineConfig({
         { label: 'PagePending' },
         { label: 'RefreshButton' },
         { label: 'Resizable' },
+        { label: 'SchemaChangePaging' },
         { label: 'ScopeBar' },
         { label: 'StatCard' },
         { label: 'Stepper' },

@@ -24,6 +24,7 @@ import type { JoinOrganizationPage_JoinOrganizationMutation } from '@/pages/orga
 import type { CreateOrganizationMutation } from '@/pages/organization-new';
 import type { DeleteOrganizationDocument } from '@/pages/organization-settings';
 import type { DeleteProjectMutation } from '@/pages/project-settings';
+import type { ApproveFailedSchemaCheckMutation } from '@/pages/target-checks-single';
 import {
   ManageFilters_SavedFiltersQuery,
   type ManageFilters_DeleteSavedFilterMutation,
@@ -473,6 +474,29 @@ const addMetricAlertRule: TypedDocumentNodeUpdateResolver<
 };
 
 // UpdateResolver
+const approveFailedSchemaCheck: TypedDocumentNodeUpdateResolver<
+  typeof ApproveFailedSchemaCheckMutation
+> = ({ approveFailedSchemaCheck }, _args, cache) => {
+  const check = approveFailedSchemaCheck.ok?.schemaCheck;
+  if (!check) {
+    return;
+  }
+  // The result rewrites the first page of breaking changes; later pages are read again on demand.
+  const keys = [
+    cache.keyOfEntity({ __typename: check.__typename, id: check.id }),
+    ...(check.contractChecks?.edges.map(edge =>
+      cache.keyOfEntity({ __typename: 'ContractCheck', id: edge.node.id }),
+    ) ?? []),
+  ];
+  for (const key of keys) {
+    for (const field of key ? cache.inspectFields(key) : []) {
+      if (field.fieldName === 'breakingSchemaChanges' && field.arguments?.offset) {
+        cache.invalidate(key, field.fieldName, field.arguments);
+      }
+    }
+  }
+};
+
 export const Mutation = {
   createOrganization,
   joinOrganization,
@@ -495,6 +519,7 @@ export const Mutation = {
   createCdnAccessToken,
   deleteCdnAccessToken,
   addMetricAlertRule,
+  approveFailedSchemaCheck,
 };
 
 const updateMetricAlertRuleOptimistic: OptimisticMutationResolver = args => {
@@ -572,6 +597,7 @@ export const cacheOptions = {
     DurationValues: noKey,
     OrganizationPayload: noKey,
     SchemaChange: noKey,
+    SchemaChangeGroup: noKey,
     SchemaChangeUsageStatisticsAffectedTarget: noKey,
     GitHubIntegration: noKey,
     GitHubRepository: noKey,

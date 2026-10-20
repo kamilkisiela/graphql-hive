@@ -2597,17 +2597,24 @@ export async function createStorage(
       return check;
     },
     async findSchemaCheck(args) {
+      const withSDL = args.withSDL ?? true;
       const result = await pool.maybeOne(psql`/* findSchemaCheck */
         SELECT
-          ${schemaCheckSQLFields()}
+          ${schemaCheckSQLFields({ sdl: withSDL })}
         FROM
           "schema_checks" as c
-        LEFT JOIN "sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
-        LEFT JOIN "sdl_store" as s_baseline_schema       ON s_baseline_schema."id" = c."baseline_schema_sdl_store_id"
-        LEFT JOIN "sdl_store" as s_baseline_public       ON s_baseline_public."id" = c."baseline_composite_schema_sdl_store_id"
-        LEFT JOIN "sdl_store" as s_baseline_supergraph   ON s_baseline_supergraph."id" = c."baseline_supergraph_sdl_store_id"
-        LEFT JOIN "sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
-        LEFT JOIN "sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
+        ${
+          withSDL
+            ? psql`
+              LEFT JOIN "sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
+              LEFT JOIN "sdl_store" as s_baseline_schema       ON s_baseline_schema."id" = c."baseline_schema_sdl_store_id"
+              LEFT JOIN "sdl_store" as s_baseline_public       ON s_baseline_public."id" = c."baseline_composite_schema_sdl_store_id"
+              LEFT JOIN "sdl_store" as s_baseline_supergraph   ON s_baseline_supergraph."id" = c."baseline_supergraph_sdl_store_id"
+              LEFT JOIN "sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
+              LEFT JOIN "sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
+            `
+            : psql``
+        }
         WHERE
           c."id" = ${args.schemaCheckId}
           AND c."target_id" = ${args.targetId}
@@ -3536,6 +3543,7 @@ const schemaCheckSQLFields = (include?: { sdl?: boolean; changes?: boolean }) =>
       `
   }
   , c."service_name" as "serviceName"
+  , c."baseline_schema_sdl_store_id" IS NOT NULL as "hasBaselineSchemaSDL"
   , c."baseline_schema_hash" as "baselineSchemaHash"
   , c."baseline_schema_composition_errors" as "baselineCompositionErrors"
   , c."service_url" as "serviceUrl"

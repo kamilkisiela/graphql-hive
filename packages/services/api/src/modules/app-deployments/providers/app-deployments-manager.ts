@@ -14,6 +14,7 @@ import {
 } from '../../shared/providers/registry-operation-metrics';
 import { TargetManager } from '../../target/providers/target-manager';
 import { AppDeployments, type AppDeploymentRecord } from './app-deployments';
+import type { PreprocessedDocument } from './persisted-document-ingester';
 
 export type AppDeploymentStatus = 'pending' | 'active' | 'retired';
 
@@ -151,7 +152,60 @@ export class AppDeploymentsManager {
     },
     signal: AbortSignal,
   ) {
-    return this.internalAddDocumentsToAppDeployment(args, signal).then(
+    return this.trackDocumentUpload(
+      () => this.internalAddDocumentsToAppDeployment(args, signal),
+      signal,
+    );
+  }
+
+  async addPreprocessedDocumentsToAppDeployment(
+    args: {
+      reference: GraphQLSchema.TargetReferenceInput | null;
+      appDeployment: { name: string; version: string };
+      documents: ReadonlyArray<PreprocessedDocument>;
+    },
+    signal: AbortSignal,
+  ) {
+    return this.trackDocumentUpload(
+      () => this.internalAddPreprocessedDocumentsToAppDeployment(args, signal),
+      signal,
+    );
+  }
+
+  private async internalAddPreprocessedDocumentsToAppDeployment(
+    args: {
+      reference: GraphQLSchema.TargetReferenceInput | null;
+      appDeployment: { name: string; version: string };
+      documents: ReadonlyArray<PreprocessedDocument>;
+    },
+    signal: AbortSignal,
+  ) {
+    const selector = await this.idTranslator.resolveTargetReference({ reference: args.reference });
+    if (!selector) {
+      this.session.raise('appDeployment:create');
+    }
+
+    await this.session.assertPerformAction({
+      action: 'appDeployment:create',
+      organizationId: selector.organizationId,
+      params: {
+        organizationId: selector.organizationId,
+        projectId: selector.projectId,
+        targetId: selector.targetId,
+        appDeploymentName: args.appDeployment.name,
+      },
+    });
+
+    const target = await this.targetManager.getTargetById(selector);
+    const graph = await this.graphs.getDefaultGraphForTargetId(target.id);
+    return this.appDeployments.addPreprocessedDocumentsToAppDeployment(
+      { graph, appDeployment: args.appDeployment, documents: args.documents },
+      signal,
+    );
+  }
+
+  private trackDocumentUpload<T>(operation: () => Promise<T>, signal: AbortSignal): Promise<T> {
+    return operation().then(
       result => {
         registryOperationOutcomeCount.inc({
           operation: 'persisted_document_upload',

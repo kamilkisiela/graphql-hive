@@ -76,7 +76,12 @@ function createAuditLogManager(fetchImpl: (...args: any[]) => any) {
 describe('AuditLogManager S3 upload uses signQuery', () => {
   it('PUT upload includes aws.signQuery: true', async () => {
     const { manager, fetchSpy } = createAuditLogManager(
-      vi.fn().mockResolvedValue({ ok: true, url: 'https://s3.example.com/key' }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        statusCode: 200,
+        headers: {},
+        url: 'https://s3.example.com/key',
+      }),
     );
 
     await manager.exportAndSendEmail('org-1', {
@@ -95,7 +100,12 @@ describe('AuditLogManager S3 upload uses signQuery', () => {
 
   it('GET presigned URL includes aws.signQuery: true', async () => {
     const { manager, fetchSpy } = createAuditLogManager(
-      vi.fn().mockResolvedValue({ ok: true, url: 'https://s3.example.com/key' }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        statusCode: 200,
+        headers: {},
+        url: 'https://s3.example.com/key',
+      }),
     );
 
     await manager.exportAndSendEmail('org-1', {

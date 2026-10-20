@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/primitives/button/button';
 import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 import { MergeStatus } from '@/pages/target-proposal-details';
 import type { Change } from '@graphql-inspector/core';
-import { labelize } from '../history/errors-and-changes';
+import { ChangesTitle, labelize } from '../history/errors-and-changes';
 
 export function ProposalChangeDetail(props: {
   change: Change<any>;
@@ -23,7 +23,7 @@ export function ProposalChangeDetail(props: {
               <div className="min-w-fit grow pr-2 md:flex-none">{props.icon}</div>
             </div>
           ),
-          content: props.error?.message ?? 'No details available for this change.',
+          content: props.error?.message,
         },
       ]}
     />
@@ -42,10 +42,12 @@ export function ChangeBlock(props: {
   return (
     props.changes.length !== 0 && (
       <>
-        <h2 className="mt-6 mb-2 flex items-center font-bold text-fg-secondary">
-          {props.title}
-          {props.info && <ChangesBlockTooltip info={props.info} />}
-        </h2>
+        <div className="mt-6">
+          <ChangesTitle>
+            {props.title}
+            {props.info && <ChangesBlockTooltip info={props.info} />}
+          </ChangesTitle>
+        </div>
         <div className="list-inside list-disc space-y-2 text-sm leading-relaxed">
           {props.changes.map(({ change, error, mergeStatus }, i) => {
             let icon: ReactNode | undefined;
@@ -83,7 +85,7 @@ function ChangesBlockTooltip(props: { info: string }) {
     <Popover
       trigger={
         <Button variant="ghost" size="icon-sm" aria-label="More about this change">
-          <Info className="size-4" />
+          <Info className="size-3" />
         </Button>
       }
       openOnHover

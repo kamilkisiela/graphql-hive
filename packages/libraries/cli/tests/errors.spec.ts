@@ -100,6 +100,7 @@ describe('error catalog', () => {
         302: SchemaPublishMissingServiceError,
         303: SchemaPublishMissingUrlError,
         400: PersistedOperationsMalformedError,
+        401: InvalidPersistedDocumentsError,
         500: SchemaNotFoundError,
         501: InvalidSchemaError,
         600: ServiceAndUrlLengthMismatch,

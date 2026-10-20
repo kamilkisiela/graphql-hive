@@ -158,6 +158,9 @@ export default gql`
     addDocumentsToAppDeployment(
       input: AddDocumentsToAppDeploymentInput!
     ): AddDocumentsToAppDeploymentResult!
+    addPreprocessedDocumentsToAppDeployment(
+      input: AddPreprocessedDocumentsToAppDeploymentInput!
+    ): AddDocumentsToAppDeploymentResult!
     activateAppDeployment(input: ActivateAppDeploymentInput!): ActivateAppDeploymentResult!
     retireAppDeployment(
       input: RetireAppDeploymentInput! @tag(name: "public")
@@ -298,6 +301,21 @@ export default gql`
     A list of operations to add to the app deployment. (max 100 per single batch)
     """
     documents: [DocumentInput!]!
+  }
+
+  input PreprocessedDocumentInput {
+    hash: String!
+    body: String!
+    operationName: String
+    schemaCoordinates: [String!]!
+    insightsHash: String!
+  }
+
+  input AddPreprocessedDocumentsToAppDeploymentInput {
+    target: TargetReferenceInput
+    appName: String!
+    appVersion: String!
+    documents: [PreprocessedDocumentInput!]!
   }
 
   type AddDocumentsToAppDeploymentErrorDetails {

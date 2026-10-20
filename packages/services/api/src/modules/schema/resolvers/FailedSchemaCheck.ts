@@ -10,8 +10,8 @@ export const FailedSchemaCheck: FailedSchemaCheckResolvers = {
   safeSchemaChanges: (schemaCheck, _, { injector }) => {
     return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
   },
-  breakingSchemaChanges: (schemaCheck, _, { injector }) => {
-    return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
+  breakingSchemaChanges: (schemaCheck, args, { injector }) => {
+    return injector.get(SchemaCheckManager).getBreakingSchemaChangesPage(schemaCheck, args);
   },
   compositionErrors: schemaCheck => {
     return schemaCheck.schemaCompositionErrors;
@@ -51,5 +51,14 @@ export const FailedSchemaCheck: FailedSchemaCheckResolvers = {
   },
   baseline: async (schemaCheck, _arg, { injector }) => {
     return injector.get(SchemaCheckManager).getGraphQLSchemaCheckBaseline(schemaCheck);
+  },
+  contractCheck: (schemaCheck, args, { injector }) => {
+    return injector.get(ContractsManager).getContractCheckForSchemaCheck(schemaCheck, args.id);
+  },
+  safeSchemaChangeGroups: (schemaCheck, args, { injector }) => {
+    return injector.get(SchemaCheckManager).getSafeSchemaChangeGroups(schemaCheck, args.kind);
+  },
+  unapprovedBreakingSchemaChangeCount: (schemaCheck, _, { injector }) => {
+    return injector.get(SchemaCheckManager).getUnapprovedBreakingSchemaChangeCount(schemaCheck);
   },
 };

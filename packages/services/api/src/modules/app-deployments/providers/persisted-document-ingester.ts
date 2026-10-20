@@ -3,6 +3,7 @@ import {
   DirectiveDefinitionNode,
   DocumentNode,
   GraphQLError,
+  GraphQLSchema,
   Kind,
   parse,
   print,
@@ -10,12 +11,14 @@ import {
   TypeInfo,
   validate,
 } from 'graphql';
+import { Injectable } from 'graphql-modules';
 import PromiseQueue from 'p-queue';
 import { z } from 'zod';
 import { collectSchemaCoordinates, preprocessOperation } from '@graphql-hive/core';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
-import { ServiceLogger, setErrorSource } from '@hive/service-common';
+import { setErrorSource, traceFn, traceInlineSync } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';
+import { Logger } from '../../shared/providers/logger';
 import { S3Writer } from '../../shared/providers/s3-writer';
 import type { R2ErrorTraceSummary, S3WriteMetric } from '../../shared/providers/s3-writer';
 import type { SerializedWorkerError } from './persisted-document-scheduler';
@@ -29,6 +32,14 @@ type DocumentRecord = {
   body: string;
   operationName: string | null;
   schemaCoordinates: Array<string>;
+};
+
+export type PreprocessedDocument = {
+  hash: string;
+  body: string;
+  operationName: string | null;
+  schemaCoordinates: ReadonlyArray<string>;
+  insightsHash: string;
 };
 
 const AppDeploymentOperationHashModel = z
@@ -100,6 +111,11 @@ function injectMcpDirectives(schemaSdl: string): string {
 export type BatchProcessEvent = {
   event: 'PROCESS';
   id: string;
+  /** W3C trace context of the request, so the worker's spans join its trace. */
+  traceContext: Record<string, string>;
+  requestId: string | undefined;
+  /** When the scheduler posted the message; the worker records how long it waited for a thread. */
+  enqueuedAt: number;
   data: {
     schemaSdl: string;
     targetId: string;
@@ -150,14 +166,19 @@ export type BatchCancelEvent = {
   reason: string;
 };
 
+type DocumentValidationResult =
+  | Extract<BatchProcessedEvent['data'], { type: 'error' }>
+  | { type: 'ok'; documents: Array<DocumentRecord> };
+
+@Injectable()
 export class PersistedDocumentIngester {
   private promiseQueue = new PromiseQueue({ concurrency: 30 });
-  private logger: ServiceLogger;
+  private logger: Logger;
 
   constructor(
     private clickhouse: ClickHouse,
     private s3: S3Writer,
-    logger: ServiceLogger,
+    logger: Logger,
   ) {
     this.logger = logger.child({ source: 'PersistedDocumentIngester' });
   }
@@ -170,28 +191,222 @@ export class PersistedDocumentIngester {
       data.documents.length,
     );
 
-    const schemaSdl = injectMcpDirectives(data.schemaSdl);
-    const schema = buildSchema(schemaSdl);
-    const typeInfo = new TypeInfo(schema);
+    const { schema, typeInfo } = this.buildValidationSchema(data);
+    const validation = this.validateDocuments(data, schema, typeInfo);
+
+    if (validation.type === 'error') {
+      return validation;
+    }
+
+    if (validation.documents.length) {
+      this.logger.debug(
+        'inserting documents into clickhouse and s3. (targetId=%s, appDeployment=%s, documentCount=%d)',
+        data.targetId,
+        data.appDeployment.id,
+        validation.documents.length,
+      );
+
+      await this.insertDocuments({
+        targetId: data.targetId,
+        appDeployment: data.appDeployment,
+        documents: validation.documents,
+        signal,
+      });
+    }
+
+    return {
+      type: 'success' as const,
+    };
+  }
+
+  private buildValidationSchema = traceInlineSync<
+    [BatchProcessEvent['data']],
+    { schema: GraphQLSchema; typeInfo: TypeInfo }
+  >(
+    'PersistedDocumentIngester.buildSchema',
+    {
+      initAttributes: data => ({
+        'hive.target.id': data.targetId,
+        'hive.appDeployment.id': data.appDeployment.id,
+        'hive.schema.sdl.length': data.schemaSdl.length,
+      }),
+    },
+    data => {
+      const schema = buildSchema(injectMcpDirectives(data.schemaSdl));
+      return { schema, typeInfo: new TypeInfo(schema) };
+    },
+  );
+
+  private validateDocuments = traceInlineSync<
+    [BatchProcessEvent['data'], GraphQLSchema, TypeInfo],
+    DocumentValidationResult
+  >(
+    'PersistedDocumentIngester.validateDocuments',
+    {
+      initAttributes: data => ({
+        'hive.target.id': data.targetId,
+        'hive.appDeployment.id': data.appDeployment.id,
+        'hive.appDeployment.documentCount': data.documents.length,
+      }),
+      resultAttributes: result =>
+        result.type === 'error'
+          ? {
+              'hive.validation.result': 'error',
+              'hive.validation.failed_index': result.error.details.index,
+              'hive.validation.error': result.error.message,
+            }
+          : { 'hive.validation.result': 'ok' },
+    },
+    (data, schema, typeInfo) => {
+      const documents: Array<DocumentRecord> = [];
+
+      let index = 0;
+      for (const operation of data.documents) {
+        const hashValidation = AppDeploymentOperationHashModel.safeParse(operation.hash);
+        const bodyValidation = AppDeploymentOperationBodyModel.safeParse(operation.body);
+
+        if (hashValidation.success === false || bodyValidation.success === false) {
+          this.logger.debug(
+            'Invalid operation provided. Processing failed. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
+            data.targetId,
+            data.appDeployment.id,
+            index,
+          );
+
+          return {
+            type: 'error' as const,
+            error: {
+              // TODO: we should add more details (what hash is affected etc.)
+              message: 'Invalid input, please check the operations.',
+              details: {
+                index,
+                message:
+                  hashValidation.error?.issues[0].message ??
+                  bodyValidation.error?.issues[0].message ??
+                  'Invalid hash or body provided',
+              },
+            },
+          };
+        }
+        let documentNode: DocumentNode;
+        try {
+          documentNode = parse(operation.body);
+        } catch (err) {
+          if (err instanceof GraphQLError) {
+            console.error(err);
+            this.logger.debug(
+              'Failed parsing GraphQL operation. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
+              data.targetId,
+              data.appDeployment.id,
+              index,
+            );
+
+            return {
+              type: 'error' as const,
+              error: {
+                message: 'Failed to parse a GraphQL operation.',
+                details: {
+                  index,
+                  message: err.message,
+                },
+              },
+            };
+          }
+          throw err;
+        }
+        const errors = validate(schema, documentNode, undefined, {
+          maxErrors: 1,
+        });
+
+        if (errors.length > 0) {
+          this.logger.debug(
+            'GraphQL operation did not pass validation against latest valid schema version. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
+            data.targetId,
+            data.appDeployment.id,
+            index,
+          );
+
+          return {
+            type: 'error' as const,
+            error: {
+              message: 'The GraphQL operation is not valid against the latest schema version.',
+              details: {
+                index,
+                message: errors[0].message,
+              },
+            },
+          };
+        }
+
+        const operationNames = getOperationNames(documentNode);
+        if (operationNames.length > 1) {
+          return {
+            type: 'error' as const,
+            error: {
+              message: 'Only one executable operation definition is allowed per document.',
+              details: {
+                index,
+                message:
+                  'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
+              },
+            },
+          };
+        }
+
+        const operationName = operationNames[0] ?? null;
+
+        const schemaCoordinates = collectSchemaCoordinates({
+          documentNode,
+          processVariables: false,
+          variables: null,
+          schema,
+          typeInfo,
+        });
+
+        const normalizedOperation = preprocessOperation({
+          document: documentNode,
+          operationName,
+          schemaCoordinates,
+        });
+
+        documents.push({
+          appDeploymentId: data.appDeployment.id,
+          hash: operation.hash,
+          internalHash: normalizedOperation?.hash ?? operation.hash,
+          body: operation.body,
+          operationName,
+          schemaCoordinates: Array.from(schemaCoordinates),
+        });
+
+        index++;
+      }
+
+      return { type: 'ok', documents };
+    },
+  );
+
+  async processPreprocessedBatch(
+    data: {
+      targetId: string;
+      appDeployment: {
+        id: string;
+        name: string;
+        version: string;
+      };
+      documents: ReadonlyArray<PreprocessedDocument>;
+    },
+    signal: AbortSignal,
+  ) {
     const documents: Array<DocumentRecord> = [];
 
-    let index = 0;
-    for (const operation of data.documents) {
-      const hashValidation = AppDeploymentOperationHashModel.safeParse(operation.hash);
-      const bodyValidation = AppDeploymentOperationBodyModel.safeParse(operation.body);
+    for (const [index, document] of data.documents.entries()) {
+      const hashValidation = AppDeploymentOperationHashModel.safeParse(document.hash);
+      const bodyValidation = AppDeploymentOperationBodyModel.safeParse(document.body);
 
       if (hashValidation.success === false || bodyValidation.success === false) {
-        this.logger.debug(
-          'Invalid operation provided. Processing failed. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
-          data.targetId,
-          data.appDeployment.id,
-          index,
-        );
-
         return {
           type: 'error' as const,
           error: {
-            // TODO: we should add more details (what hash is affected etc.)
             message: 'Invalid input, please check the operations.',
             details: {
               index,
@@ -203,120 +418,36 @@ export class PersistedDocumentIngester {
           },
         };
       }
-      let documentNode: DocumentNode;
-      try {
-        documentNode = parse(operation.body);
-      } catch (err) {
-        if (err instanceof GraphQLError) {
-          console.error(err);
-          this.logger.debug(
-            'Failed parsing GraphQL operation. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
-            data.targetId,
-            data.appDeployment.id,
-            index,
-          );
-
-          return {
-            type: 'error' as const,
-            error: {
-              message: 'Failed to parse a GraphQL operation.',
-              details: {
-                index,
-                message: err.message,
-              },
-            },
-          };
-        }
-        throw err;
-      }
-      const errors = validate(schema, documentNode, undefined, {
-        maxErrors: 1,
-      });
-
-      if (errors.length > 0) {
-        this.logger.debug(
-          'GraphQL operation did not pass validation against latest valid schema version. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
-          data.targetId,
-          data.appDeployment.id,
-          index,
-        );
-
-        return {
-          type: 'error' as const,
-          error: {
-            message: 'The GraphQL operation is not valid against the latest schema version.',
-            details: {
-              index,
-              message: errors[0].message,
-            },
-          },
-        };
-      }
-
-      const operationNames = getOperationNames(documentNode);
-      if (operationNames.length > 1) {
-        return {
-          type: 'error' as const,
-          error: {
-            message: 'Only one executable operation definition is allowed per document.',
-            details: {
-              index,
-              message:
-                'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
-            },
-          },
-        };
-      }
-
-      const operationName = operationNames[0] ?? null;
-
-      const schemaCoordinates = collectSchemaCoordinates({
-        documentNode,
-        processVariables: false,
-        variables: null,
-        schema,
-        typeInfo,
-      });
-
-      const normalizedOperation = preprocessOperation({
-        document: documentNode,
-        operationName,
-        schemaCoordinates,
-      });
 
       documents.push({
         appDeploymentId: data.appDeployment.id,
-        hash: operation.hash,
-        internalHash: normalizedOperation?.hash ?? operation.hash,
-        body: operation.body,
-        operationName,
-        schemaCoordinates: Array.from(schemaCoordinates),
+        hash: document.hash,
+        internalHash: document.insightsHash,
+        body: document.body,
+        operationName: document.operationName,
+        schemaCoordinates: Array.from(document.schemaCoordinates),
       });
-
-      index++;
     }
 
     if (documents.length) {
-      this.logger.debug(
-        'inserting documents into clickhouse and s3. (targetId=%s, appDeployment=%s, documentCount=%d)',
-        data.targetId,
-        data.appDeployment.id,
-        documents.length,
-      );
-
       await this.insertDocuments({
         targetId: data.targetId,
         appDeployment: data.appDeployment,
-        documents: documents,
+        documents,
         signal,
       });
     }
 
-    return {
-      type: 'success' as const,
-    };
+    return { type: 'success' as const };
   }
 
+  @traceFn('PersistedDocumentIngester.insertClickHouseDocuments', {
+    initAttributes: args => ({
+      'hive.target.id': args.targetId,
+      'hive.appDeployment.id': args.appDeployment.id,
+      'hive.appDeployment.documentCount': args.documents.length,
+    }),
+  })
   private async insertClickHouseDocuments(args: {
     targetId: string;
     appDeployment: {
@@ -367,6 +498,13 @@ export class PersistedDocumentIngester {
     );
   }
 
+  @traceFn('PersistedDocumentIngester.insertS3Documents', {
+    initAttributes: args => ({
+      'hive.target.id': args.targetId,
+      'hive.appDeployment.id': args.appDeployment.id,
+      'hive.appDeployment.documentCount': args.documents.length,
+    }),
+  })
   private async insertS3Documents(args: {
     targetId: string;
     appDeployment: {

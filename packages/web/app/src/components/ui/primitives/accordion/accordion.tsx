@@ -13,7 +13,8 @@ export type AccordionItem = {
   trailing?: ReactNode;
   /** Beside the trigger, outside it: a menu button. A button cannot nest in a button. */
   action?: ReactNode;
-  content: ReactNode;
+  /** Nothing (`null` or `undefined`) makes a static row: the same header, nothing to open. */
+  content?: ReactNode;
   disabled?: boolean;
   /** Test hooks and the like, landed on the item. */
   attrs?: Record<string, string>;
@@ -74,6 +75,39 @@ const headerRowVariants = cva('flex items-center', {
       list: '',
       boxed: 'px-4 transition-colors [&:not(:has(>h3>[data-disabled])):hover]:bg-surface-hover',
       plain: '',
+    },
+  },
+});
+
+// A static row has no button, so no hover fill and no hover text change.
+const staticHeaderRowVariants = cva('flex items-center', {
+  variants: {
+    variant: {
+      list: '',
+      boxed: 'px-4',
+      plain: '',
+    },
+  },
+});
+
+const staticRowVariants = cva('flex w-full items-center gap-2 text-left font-medium', {
+  variants: {
+    size: {
+      default: 'py-3 text-sm',
+      sm: 'py-2 text-xs',
+    },
+    tone: {
+      default: 'text-fg',
+      accent: 'text-accent',
+    },
+  },
+});
+
+const chevronSpacerVariants = cva('shrink-0', {
+  variants: {
+    size: {
+      default: 'size-4',
+      sm: 'size-3',
     },
   },
 });
@@ -162,35 +196,59 @@ export function Accordion({
       className={rootVariants({ variant })}
       {...attrs}
     >
-      {items.map(item => (
-        <BaseAccordion.Item
-          key={item.value}
-          value={item.value}
-          disabled={item.disabled}
-          className={itemVariants({ variant })}
-          {...item.attrs}
-        >
-          <div className={headerRowVariants({ variant })}>
-            <BaseAccordion.Header className="flex min-w-0 grow">
-              <BaseAccordion.Trigger
-                className={triggerVariants({ size, tone })}
-                {...item.triggerAttrs}
-              >
-                {chevron === 'start' ? chevronIcon : null}
-                <span className="min-w-0 grow">{item.label}</span>
-                {item.trailing != null ? (
-                  <span className="ml-auto shrink-0">{item.trailing}</span>
-                ) : null}
-                {chevron === 'end' ? chevronIcon : null}
-              </BaseAccordion.Trigger>
-            </BaseAccordion.Header>
-            {item.action != null ? <div className="shrink-0 pl-2">{item.action}</div> : null}
+      {items.map(item =>
+        item.content == null ? (
+          // Outside BaseAccordion.Item: an Item expects a trigger and a panel to wire together.
+          <div key={item.value} className={itemVariants({ variant })} {...item.attrs}>
+            <div className={staticHeaderRowVariants({ variant })}>
+              <h3 className="flex min-w-0 grow" {...item.triggerAttrs}>
+                <span className={staticRowVariants({ size, tone })}>
+                  {/* Holds the chevron's place, so labels and trailing line up with open-able rows. */}
+                  {chevron === 'start' ? (
+                    <span aria-hidden className={chevronSpacerVariants({ size })} />
+                  ) : null}
+                  <span className="min-w-0 grow">{item.label}</span>
+                  {item.trailing != null ? (
+                    <span className="ml-auto shrink-0">{item.trailing}</span>
+                  ) : null}
+                  {chevron === 'end' ? (
+                    <span aria-hidden className={chevronSpacerVariants({ size })} />
+                  ) : null}
+                </span>
+              </h3>
+              {item.action != null ? <div className="shrink-0 pl-2">{item.action}</div> : null}
+            </div>
           </div>
-          <BaseAccordion.Panel className={panelVariants()}>
-            <div className={panelInnerVariants({ variant, size })}>{item.content}</div>
-          </BaseAccordion.Panel>
-        </BaseAccordion.Item>
-      ))}
+        ) : (
+          <BaseAccordion.Item
+            key={item.value}
+            value={item.value}
+            disabled={item.disabled}
+            className={itemVariants({ variant })}
+            {...item.attrs}
+          >
+            <div className={headerRowVariants({ variant })}>
+              <BaseAccordion.Header className="flex min-w-0 grow">
+                <BaseAccordion.Trigger
+                  className={triggerVariants({ size, tone })}
+                  {...item.triggerAttrs}
+                >
+                  {chevron === 'start' ? chevronIcon : null}
+                  <span className="min-w-0 grow">{item.label}</span>
+                  {item.trailing != null ? (
+                    <span className="ml-auto shrink-0">{item.trailing}</span>
+                  ) : null}
+                  {chevron === 'end' ? chevronIcon : null}
+                </BaseAccordion.Trigger>
+              </BaseAccordion.Header>
+              {item.action != null ? <div className="shrink-0 pl-2">{item.action}</div> : null}
+            </div>
+            <BaseAccordion.Panel className={panelVariants()}>
+              <div className={panelInnerVariants({ variant, size })}>{item.content}</div>
+            </BaseAccordion.Panel>
+          </BaseAccordion.Item>
+        ),
+      )}
     </BaseAccordion.Root>
   );
 }

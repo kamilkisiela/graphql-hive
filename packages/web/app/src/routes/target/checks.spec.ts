@@ -2,18 +2,27 @@
 import {
   activeSchemaCheck,
   BREAKING_PERIOD,
+  breakingChangesPage,
   breakingSchemaCheck,
   CHECKS,
+  checkSdl,
   checksFixtures,
+  MANY_CHANGES,
+  manyChangesSchemaCheck,
+  noPolicyWarningsSchemaCheck,
   policyFailedSchemaCheck,
+  safeChangesPage,
   SERVICES,
+  untrackedUsageSchemaCheck,
 } from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
 import { renderAtUrl } from '@/lib/testing/router';
 import { createTestClient } from '@/lib/testing/urql';
 import { createAppRouter } from '@/router';
 import { createMemoryHistory } from '@tanstack/react-router';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+
+const PAGE = vi.hoisted(() => 50);
 
 // The tree imports every page; these stand in for what cannot load under jsdom.
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
@@ -27,6 +36,8 @@ vi.mock('@/components/schema-editor', async importOriginal => ({
   SchemaEditor: () => null,
 }));
 vi.mock('supertokens-auth-react', () => import('@/lib/testing/mocks/supertokens'));
+// Real pages hold 300 changes; mounting that many rows makes jsdom slow, and paging works the same.
+vi.mock('@/components/target/history/change-page-size', () => ({ CHANGES_PAGE_SIZE: PAGE }));
 vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/mocks/session'));
 
 const CHECKS_PAGE = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}/checks`;
@@ -444,6 +455,401 @@ describe('failed check status', () => {
       await screen.findByText('2 schema policy errors', {}, { timeout: 10_000 });
       expect(screen.getByText('Failed')).toBeTruthy();
       expect(screen.getByLabelText('Schema policy errors.')).toBeTruthy();
+    },
+  );
+});
+
+describe('paged changes', () => {
+  function pagedClient() {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        manyChangesSchemaCheck(variables as { schemaCheckId: string }),
+    );
+    testClient.fixtures.set('CheckBreakingChangesPageQuery', (variables: Record<string, unknown>) =>
+      breakingChangesPage(variables as { schemaCheckId: string; offset: number }),
+    );
+    testClient.fixtures.set('CheckSafeChangesPageQuery', (variables: Record<string, unknown>) =>
+      safeChangesPage(variables as { schemaCheckId: string; kind: string; offset: number }),
+    );
+    return testClient;
+  }
+
+  const change = (name: string) => screen.queryByRole('button', { name: new RegExp(`${name}$`) });
+
+  async function next(nav: HTMLElement) {
+    await act(async () => {
+      fireEvent.click(within(nav).getByRole('button', { name: 'Next page' }));
+    });
+  }
+
+  it(
+    'pages breaking changes and takes the unapproved count from the API',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = pagedClient();
+      renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+      await screen.findByText(
+        `${MANY_CHANGES.breaking} unapproved breaking changes`,
+        {},
+        { timeout: 10_000 },
+      );
+      const [breakingNav] = screen.getAllByRole('navigation', { name: 'Pagination' });
+      expect(within(breakingNav).getByText('1 / 3')).toBeTruthy();
+      expect(change('StressType_0')).toBeTruthy();
+
+      await next(breakingNav);
+
+      await waitFor(() => expect(change(`StressType_${PAGE}`)).toBeTruthy());
+      expect(change('StressType_0')).toBeNull();
+      expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(1);
+      expect(testClient.requests('CheckBreakingChangesPageQuery')[0].variables).toMatchObject({
+        offset: PAGE,
+      });
+
+      // A page already seen comes from memory.
+      await act(async () => {
+        fireEvent.click(within(breakingNav).getByRole('button', { name: 'Previous page' }));
+      });
+      await waitFor(() => expect(change('StressType_0')).toBeTruthy());
+      expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(1);
+    },
+  );
+
+  it('collapses an expanded change when the page moves on', { timeout: 30_000 }, async () => {
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: pagedClient() });
+    const first = await screen.findByRole('button', { name: /StressType_0$/ }, { timeout: 10_000 });
+    await act(async () => {
+      fireEvent.click(first);
+    });
+    expect(first.getAttribute('aria-expanded')).toBe('true');
+
+    await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
+
+    // The change now first on the page is another one, so it starts closed.
+    const firstOfNextPage = await screen.findByRole('button', {
+      name: new RegExp(`StressType_${PAGE}$`),
+    });
+    expect(firstOfNextPage.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('groups safe changes by kind and pages a long group', { timeout: 30_000 }, async () => {
+    const testClient = pagedClient();
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+    await screen.findByText('Safe Changes', {}, { timeout: 10_000 });
+    const groupTrigger = (label: string) => screen.getByRole('button', { name: new RegExp(label) });
+    expect(groupTrigger('Type added').textContent).toContain('2');
+    expect(groupTrigger('Type description changed').textContent).toContain(
+      String(MANY_CHANGES.descriptions),
+    );
+
+    // A group smaller than a page has no pagination; only the breaking list's bar is up.
+    await act(async () => {
+      fireEvent.click(groupTrigger('Type added'));
+    });
+    expect(screen.getAllByRole('navigation', { name: 'Pagination' })).toHaveLength(1);
+
+    await act(async () => {
+      fireEvent.click(groupTrigger('Type description changed'));
+    });
+    const groupNav = (await screen.findAllByRole('navigation', { name: 'Pagination' }))[1];
+    expect(within(groupNav).getByText('1 / 3')).toBeTruthy();
+
+    await next(groupNav);
+
+    await waitFor(() =>
+      expect(testClient.requests('CheckSafeChangesPageQuery')[0]?.variables).toMatchObject({
+        kind: 'TYPE_DESCRIPTION_CHANGED',
+        offset: PAGE,
+      }),
+    );
+    await waitFor(() => expect(within(groupNav).getByText('2 / 3')).toBeTruthy());
+  });
+
+  it('shows the approval on pages visited before approving', { timeout: 30_000 }, async () => {
+    const testClient = pagedClient();
+    const approval = {
+      __typename: 'SchemaChangeApproval' as const,
+      approvedBy: { __typename: 'User' as const, id: 'user-1', displayName: 'User' },
+      cliApprovalMetadata: null,
+      approvedAt: '2026-10-16T00:00:00.000Z',
+      schemaCheckId: 'check-many',
+    };
+    // Approving turns the check successful and every breaking change approved.
+    function approved(check: {
+      breakingSchemaChanges: { edges: Array<{ node: object }> };
+    }): Record<string, unknown> {
+      return {
+        ...check,
+        __typename: 'SuccessfulSchemaCheck' as const,
+        breakingSchemaChanges: {
+          ...check.breakingSchemaChanges,
+          edges: check.breakingSchemaChanges.edges.map(edge => ({
+            ...edge,
+            node: { ...edge.node, approval },
+          })),
+        },
+      };
+    }
+    let isApproved = false;
+    testClient.fixtures.set(
+      'CheckBreakingChangesPageQuery',
+      (variables: Record<string, unknown>) => {
+        const page = breakingChangesPage(variables as { schemaCheckId: string; offset: number });
+        return isApproved
+          ? { ...page, target: { ...page.target, schemaCheck: approved(page.target.schemaCheck) } }
+          : page;
+      },
+    );
+    testClient.fixtures.set(
+      'ApproveFailedSchemaCheckModal_ApproveFailedSchemaCheckMutation',
+      (variables: Record<string, unknown>) => {
+        isApproved = true;
+        const check = manyChangesSchemaCheck({
+          schemaCheckId: (variables as { input: { schemaCheckId: string } }).input.schemaCheckId,
+        }).project.target.schemaCheck;
+        return {
+          __typename: 'Mutation' as const,
+          approveFailedSchemaCheck: {
+            __typename: 'ApproveFailedSchemaCheckResult' as const,
+            ok: {
+              __typename: 'ApproveFailedSchemaCheckOk' as const,
+              schemaCheck: {
+                ...approved(check),
+                isApproved: true,
+                approvedBy: { ...approval.approvedBy, email: 'user@the-guild.dev' },
+                approvalComment: null,
+              },
+            },
+            error: null,
+          },
+        };
+      },
+    );
+    // An approved row's name runs on into its badge, so the type name ends at the last digit.
+    const row = (name: string) =>
+      screen.queryByRole('button', { name: new RegExp(`${name}(?!\\d)`) });
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+    await screen.findByText(
+      `${MANY_CHANGES.breaking} unapproved breaking changes`,
+      {},
+      { timeout: 10_000 },
+    );
+    await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
+    await waitFor(() => expect(row(`StressType_${PAGE}`)).toBeTruthy());
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /^Approve/ }));
+    });
+    await act(async () => {
+      fireEvent.click(await screen.findByRole('button', { name: 'Approve Changes' }));
+    });
+
+    // The approved check starts over on its first page, already showing the approval.
+    await waitFor(() => expect(row('StressType_0')?.textContent).toContain('Approved by User'));
+    await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
+
+    // The page seen before approving is read again rather than shown from memory.
+    await waitFor(() =>
+      expect(row(`StressType_${PAGE}`)?.textContent).toContain('Approved by User'),
+    );
+    expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(2);
+  });
+});
+
+describe('schema tabs', () => {
+  // The SDL viewer virtualizes with observers jsdom does not have; nothing here scrolls.
+  beforeEach(() => {
+    class NoopObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    }
+    vi.stubGlobal('IntersectionObserver', NoopObserver);
+    vi.stubGlobal('ResizeObserver', NoopObserver);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('loads the SDLs once, when a schema tab first opens', { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set('ActiveSchemaCheck_ActiveSchemaCheckQuery', activeSchemaCheck);
+    testClient.fixtures.set('CheckSdlQuery', (variables: Record<string, unknown>) =>
+      checkSdl(variables as { schemaCheckId: string }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-sdl`, { client: testClient });
+
+    const details = await screen.findByTestId('details-view-btn', {}, { timeout: 10_000 });
+    expect(testClient.requests('CheckSdlQuery')).toHaveLength(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('schema-view-btn'));
+    });
+    await waitFor(() => expect(screen.queryByText('Loading schema…')).toBeNull());
+    expect(screen.queryByText('The schema could not be loaded.')).toBeNull();
+    expect(testClient.requests('CheckSdlQuery').map(request => request.variables)).toEqual([
+      expect.objectContaining({ schemaCheckId: 'check-sdl' }),
+    ]);
+
+    // Back and forth again reads the SDLs from the cache.
+    await act(async () => {
+      fireEvent.click(details);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('supergraph-view-btn'));
+    });
+    await waitFor(() => expect(screen.queryByText('Loading schema…')).toBeNull());
+    expect(testClient.requests('CheckSdlQuery')).toHaveLength(1);
+  });
+});
+
+describe('breaking changes without recorded usage', () => {
+  function renderCheck() {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        untrackedUsageSchemaCheck(variables as { schemaCheckId: string }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-untracked`, { client: testClient });
+  }
+
+  it(
+    'labels a removed type as untracked and leaves it closed, with nothing to open',
+    { timeout: 30_000 },
+    async () => {
+      renderCheck();
+      // The type removal and the union member change; the type removal comes first.
+      const labels = await screen.findAllByText(
+        "Usage isn't tracked for this kind of change",
+        {},
+        { timeout: 10_000 },
+      );
+      expect(labels).toHaveLength(2);
+      expect(labels[0].closest('button')).toBeNull();
+      expect(screen.queryByRole('button', { name: /Currency was removed/ })).toBeNull();
+      // Only the tracked field change still says safe based on usage.
+      expect(screen.getAllByText('Safe based on usage data')).toHaveLength(1);
+      expect(screen.queryByText(/No details available/)).toBeNull();
+    },
+  );
+
+  it(
+    'labels an untracked change that has a reason, and still opens to it',
+    { timeout: 30_000 },
+    async () => {
+      renderCheck();
+      const union = await screen.findByRole(
+        'button',
+        { name: /Movie was removed from Union type SearchResult/ },
+        { timeout: 10_000 },
+      );
+      expect(union.textContent).toContain("Usage isn't tracked for this kind of change");
+      await act(async () => {
+        fireEvent.click(union);
+      });
+      expect(
+        screen.getByText(/can cause existing queries that use this union member/),
+      ).toBeTruthy();
+    },
+  );
+
+  it('leaves a tracked change with nothing to show closed too', { timeout: 30_000 }, async () => {
+    renderCheck();
+    await screen.findByText(/changed type from/, {}, { timeout: 10_000 });
+    expect(screen.queryByRole('button', { name: /changed type from/ })).toBeNull();
+  });
+});
+
+describe('Explorer links', () => {
+  const TARGET = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}`;
+  // The page nav has its own "Explorer" link; a change's opens in a new tab.
+  const changeLinks = () =>
+    screen
+      .queryAllByRole('link', { name: 'Explorer' })
+      .filter(link => link.getAttribute('target') === '_blank');
+
+  it(
+    'links each changed coordinate to Explorer in a new tab, outside the row toggle',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          untrackedUsageSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-untracked`, { client: testClient });
+
+      await screen.findByText(/changed type from/, {}, { timeout: 10_000 });
+      expect(changeLinks().map(link => link.getAttribute('href'))).toEqual([
+        `${TARGET}/explorer/Currency`,
+        `${TARGET}/explorer/SearchResult`,
+        `${TARGET}/explorer/ConversionRate?search=fromCurrency`,
+      ]);
+      for (const link of changeLinks()) {
+        expect(link.closest('button')).toBeNull();
+      }
+    },
+  );
+
+  it("leaves a check's additions unlinked", { timeout: 30_000 }, async () => {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        manyChangesSchemaCheck(variables as { schemaCheckId: string }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-many`, { client: testClient });
+
+    await screen.findByText('Safe Changes', {}, { timeout: 10_000 });
+    const breakingLinks = changeLinks().length;
+    expect(breakingLinks).toBeGreaterThan(0);
+    const badges = screen.queryAllByText('StressType_0').length;
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Type added/ }));
+    });
+    // The opened group's first row, "Type 'StressType_0' was added", is on screen.
+    await waitFor(() =>
+      expect(screen.queryAllByText('StressType_0').length).toBeGreaterThan(badges),
+    );
+    expect(changeLinks()).toHaveLength(breakingLinks);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Type description changed/ }));
+    });
+    await waitFor(() => expect(changeLinks().length).toBeGreaterThan(breakingLinks));
+  });
+});
+
+describe('schema policy warnings', () => {
+  it(
+    'shows no warnings section and no Policy tab when the policy found nothing',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          noPolicyWarningsSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-no-warnings`, { client: testClient });
+
+      const policyTab = await screen.findByTestId('policy-view-btn', {}, { timeout: 10_000 });
+      expect(screen.queryByText('Schema Policy Warnings')).toBeNull();
+      expect(
+        policyTab.hasAttribute('data-disabled') ||
+          policyTab.getAttribute('aria-disabled') === 'true',
+      ).toBe(true);
     },
   );
 });

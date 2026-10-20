@@ -1,3 +1,5 @@
+import { CHANGES_PAGE_SIZE } from '@/components/target/history/change-page-size';
+
 const TARGET_ID = 'target-1';
 
 type Variables = {
@@ -126,12 +128,10 @@ export function activeSchemaCheck(variables: { schemaCheckId: string }) {
           hasSchemaCompositionErrors: false,
           hasSchemaChanges: false,
           hasUnapprovedBreakingChanges: false,
-          schemaSDL: 'type Query { products: [String!]! }',
           baseline: null,
-          compositeSchemaSDL: null,
-          supergraphSDL: null,
+          unapprovedBreakingSchemaChangeCount: 0,
           breakingSchemaChanges: null,
-          safeSchemaChanges: null,
+          safeSchemaChangeGroups: [],
           schemaPolicyWarnings: null,
           schemaPolicyErrors: null,
           conditionalBreakingChangeMetadata: null,
@@ -187,8 +187,10 @@ export function breakingSchemaCheck(
           ...active.project.target.schemaCheck,
           hasSchemaChanges: true,
           hasUnapprovedBreakingChanges: true,
+          unapprovedBreakingSchemaChangeCount: options.safe ? 0 : 1,
           breakingSchemaChanges: {
             __typename: 'SchemaChangeConnection' as const,
+            totalCount: 1,
             edges: [
               {
                 __typename: 'SchemaChangeEdge' as const,
@@ -200,6 +202,8 @@ export function breakingSchemaCheck(
                   severityReason: null,
                   approval: null,
                   isSafeBasedOnUsage: options.safe ?? false,
+                  isUsageTracked: true,
+                  kind: 'FIELD_REMOVED',
                   usageStatistics: {
                     __typename: 'SchemaChangeUsageStatistics' as const,
                     topAffectedOperations: [
@@ -286,6 +290,267 @@ export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
               policyError('Object type is unreachable'),
             ],
           },
+        },
+      },
+    },
+  };
+}
+
+const PAGE_SIZE = CHANGES_PAGE_SIZE;
+
+// Inspector's reason for removing a field that was not deprecated.
+const FIELD_REMOVED_REASON =
+  'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.';
+
+/** A breaking removal of `StressType_<n>.value7`, without usage data. */
+function removedFieldAt(index: number) {
+  return {
+    __typename: 'SchemaChange' as const,
+    path: [`StressType_${index}`, 'value7'],
+    message: `Field 'value7' was removed from object type 'StressType_${index}'`,
+    severityLevel: 'BREAKING',
+    severityReason: FIELD_REMOVED_REASON,
+    approval: null,
+    isSafeBasedOnUsage: false,
+    isUsageTracked: true,
+    kind: 'FIELD_REMOVED',
+    usageStatistics: null,
+    affectedAppDeployments: null,
+  };
+}
+
+/** A safe change of `kind` on `StressType_<n>`. */
+function safeChangeAt(kind: string, index: number) {
+  return {
+    __typename: 'SchemaChange' as const,
+    path: [`StressType_${index}`],
+    message:
+      kind === 'TYPE_ADDED'
+        ? `Type 'StressType_${index}' was added`
+        : `Description 'old' on type 'StressType_${index}' has changed to 'new'`,
+    severityLevel: 'SAFE',
+    severityReason: null,
+    approval: null,
+    isSafeBasedOnUsage: false,
+    isUsageTracked: false,
+    kind,
+  };
+}
+
+function edgesOf<T>(nodes: T[]) {
+  return nodes.map(node => ({ __typename: 'SchemaChangeEdge' as const, node }));
+}
+
+function pageOf<T>(offset: number, total: number, at: (index: number) => T) {
+  return Array.from({ length: Math.max(0, Math.min(PAGE_SIZE, total - offset)) }, (_, index) =>
+    at(offset + index),
+  );
+}
+
+/** Group sizes and the breaking total of `manyChangesSchemaCheck`. */
+// Two full pages and a partial third, whatever the page size.
+const THREE_PAGES = CHANGES_PAGE_SIZE * 2 + 20;
+export const MANY_CHANGES = { breaking: THREE_PAGES, typeAdded: 2, descriptions: THREE_PAGES };
+
+const groupTotals: Record<string, number> = {
+  TYPE_ADDED: MANY_CHANGES.typeAdded,
+  TYPE_DESCRIPTION_CHANGED: MANY_CHANGES.descriptions,
+};
+
+/** A failed check with 120 breaking changes and two safe groups, one long enough to page. */
+export function manyChangesSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          __typename: 'FailedSchemaCheck' as const,
+          canBeApproved: true,
+          canBeApprovedByViewer: true,
+          compositionErrors: null,
+          hasSchemaChanges: true,
+          hasUnapprovedBreakingChanges: true,
+          unapprovedBreakingSchemaChangeCount: MANY_CHANGES.breaking,
+          breakingSchemaChanges: {
+            __typename: 'SchemaChangeConnection' as const,
+            totalCount: MANY_CHANGES.breaking,
+            edges: edgesOf(pageOf(0, MANY_CHANGES.breaking, removedFieldAt)),
+          },
+          safeSchemaChangeGroups: Object.entries(groupTotals).map(([kind, totalCount]) => ({
+            __typename: 'SchemaChangeGroup' as const,
+            kind,
+            totalCount,
+            changes: {
+              __typename: 'SchemaChangeConnection' as const,
+              edges: edgesOf(pageOf(0, totalCount, index => safeChangeAt(kind, index))),
+            },
+          })),
+        },
+      },
+    },
+  };
+}
+
+/** `CheckBreakingChangesPageQuery` for `manyChangesSchemaCheck`. */
+export function breakingChangesPage(variables: { schemaCheckId: string; offset: number }) {
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'FailedSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        breakingSchemaChanges: {
+          __typename: 'SchemaChangeConnection' as const,
+          edges: edgesOf(pageOf(variables.offset, MANY_CHANGES.breaking, removedFieldAt)),
+        },
+      },
+    },
+  };
+}
+
+/** `CheckSafeChangesPageQuery` for `manyChangesSchemaCheck`. */
+export function safeChangesPage(variables: {
+  schemaCheckId: string;
+  kind: string;
+  offset: number;
+}) {
+  const total = groupTotals[variables.kind] ?? 0;
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'FailedSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        safeSchemaChangeGroups: [
+          {
+            __typename: 'SchemaChangeGroup' as const,
+            kind: variables.kind,
+            changes: {
+              __typename: 'SchemaChangeConnection' as const,
+              edges: edgesOf(
+                pageOf(variables.offset, total, index => safeChangeAt(variables.kind, index)),
+              ),
+            },
+          },
+        ],
+      },
+    },
+  };
+}
+
+const PRODUCTS_SDL = 'type Query { products: [String!]! }';
+
+/** `CheckSdlQuery`: the SDLs a schema tab loads when it first opens. */
+export function checkSdl(variables: { schemaCheckId: string }) {
+  return {
+    __typename: 'Query' as const,
+    target: {
+      __typename: 'Target' as const,
+      id: TARGET_ID,
+      schemaCheck: {
+        __typename: 'SuccessfulSchemaCheck' as const,
+        id: variables.schemaCheckId,
+        schemaSDL: PRODUCTS_SDL,
+        baseline: null,
+        compositeSchemaSDL: PRODUCTS_SDL,
+        supergraphSDL: PRODUCTS_SDL,
+      },
+    },
+  };
+}
+
+function breakingChange(change: {
+  path: string[];
+  message: string;
+  severityReason: string | null;
+  isSafeBasedOnUsage: boolean;
+  isUsageTracked: boolean;
+  kind: string;
+}) {
+  return {
+    __typename: 'SchemaChangeEdge' as const,
+    node: {
+      __typename: 'SchemaChange' as const,
+      ...change,
+      severityLevel: 'BREAKING',
+      approval: null,
+      usageStatistics: null,
+      affectedAppDeployments: null,
+    },
+  };
+}
+
+/** A check whose breaking changes found no usage, some because usage is never recorded for them. */
+export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          hasSchemaChanges: true,
+          breakingSchemaChanges: {
+            __typename: 'SchemaChangeConnection' as const,
+            totalCount: 3,
+            edges: [
+              breakingChange({
+                path: ['Currency'],
+                message: "Type 'Currency' was removed",
+                severityReason: null,
+                isSafeBasedOnUsage: true,
+                isUsageTracked: false,
+                kind: 'TYPE_REMOVED',
+              }),
+              breakingChange({
+                path: ['SearchResult'],
+                message: "Member 'Movie' was removed from Union type 'SearchResult'",
+                severityReason:
+                  'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
+                isSafeBasedOnUsage: true,
+                isUsageTracked: false,
+                kind: 'UNION_MEMBER_REMOVED',
+              }),
+              // Tracked, but with no reason and no usage to show.
+              breakingChange({
+                path: ['ConversionRate', 'fromCurrency'],
+                message:
+                  "Field 'ConversionRate.fromCurrency' changed type from 'Currency!' to 'ForexCurrency!'",
+                severityReason: null,
+                isSafeBasedOnUsage: true,
+                isUsageTracked: true,
+                kind: 'FIELD_TYPE_CHANGED',
+              }),
+            ],
+          },
+        },
+      },
+    },
+  };
+}
+
+/** A check whose policy ran and found nothing: an empty warnings list, not null. */
+export function noPolicyWarningsSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          schemaPolicyWarnings: { __typename: 'SchemaPolicyWarningConnection' as const, edges: [] },
         },
       },
     },

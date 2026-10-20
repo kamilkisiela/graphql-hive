@@ -246,6 +246,101 @@ export const Disabled = createPreview(() => (
   </div>
 ));
 
+// The call sites that will have rows with nothing to open: errors-and-changes.tsx ChangeItem and
+// proposals/change-detail.tsx. Each renders one Accordion per change, stacked. The labels here are
+// plain text; Components → ChangesBlock → UsageLabels shows the real ChangeItem with its chips.
+type Row = { value: string; label: string; badge?: ReactNode; body?: string };
+
+function OnePerChange(props: { variant: 'boxed' | 'list'; rows: Row[]; gap: string }) {
+  return (
+    <div className={props.gap}>
+      {props.rows.map(row => (
+        <Accordion
+          key={row.value}
+          variant={props.variant}
+          items={[
+            {
+              value: row.value,
+              label: row.label,
+              trailing: row.badge,
+              content: row.body ? <Copy>{row.body}</Copy> : null,
+            },
+          ]}
+        />
+      ))}
+    </div>
+  );
+}
+
+const BREAKING: Row[] = [
+  {
+    value: 'field-type',
+    label: "Field 'ConversionRate.fromCurrency' changed type from 'Currency!' to 'ForexCurrency!'",
+    badge: (
+      <Badge content="10 operations by 11 clients affected" variants={{ variant: 'critical' }} />
+    ),
+    // In the app this panel holds the usage tables, which this primitive story leaves out.
+    body: 'Affected operations and clients.',
+  },
+  {
+    value: 'type-removed',
+    label: "Type 'Currency' was removed",
+    badge: (
+      <Badge
+        content="Usage isn't tracked for this kind of change"
+        variants={{ variant: 'secondary' }}
+      />
+    ),
+  },
+  {
+    value: 'union-member',
+    label: "Member 'Movie' was removed from Union type 'SearchResult'",
+    badge: (
+      <Badge
+        content="Usage isn't tracked for this kind of change"
+        variants={{ variant: 'secondary' }}
+      />
+    ),
+    body: 'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
+  },
+];
+
+const SAFE: Row[] = [
+  {
+    value: 'description',
+    label:
+      "Description 'Stress type 12, used to test large schemas.' on type 'StressType_12' has changed to 'Stress type 12, used to test large schemas (revised).'",
+  },
+  { value: 'field-added', label: "Field 'value8' was added to object type 'StressType_12'" },
+  {
+    value: 'union-member-added',
+    label: "Member 'Podcast' was added to Union type 'SearchResult'",
+    body: 'Adding a possible type to Unions may break existing clients that were not programming defensively against a new possible type.',
+  },
+];
+
+/**
+ * An item without `content` is a static row: the same header, no chevron, nothing to open. Its
+ * label and trailing line up with the rows around it that do open.
+ */
+export const StaticRows = createPreview(() => (
+  <div className="flex w-[56rem] flex-col gap-10">
+    <Labelled label="Breaking changes on a check: boxed, one accordion per change (ChangeItem)">
+      <OnePerChange variant="boxed" rows={BREAKING} gap="flex flex-col gap-4" />
+    </Labelled>
+    <Labelled label="Safe changes, and the history page: list, one accordion per change (ChangeItem)">
+      <OnePerChange variant="list" rows={SAFE} gap="flex flex-col gap-2" />
+    </Labelled>
+    <Labelled label="Proposals: list, one item, no error to show (ProposalChangeDetail)">
+      <OnePerChange
+        variant="list"
+        rows={[{ value: 'proposal', label: "Field 'Query.products' was removed" }]}
+        gap=""
+      />
+    </Labelled>
+  </div>
+));
+
 export const Playground = createPreview({
   controls: controlsFor(Accordion, {
     variant: { type: 'radio', options: ['list', 'boxed', 'plain'], default: 'list' },
