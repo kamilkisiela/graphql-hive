@@ -374,6 +374,15 @@
       "anchor": "errors-400"
     },
     {
+      "code": 401,
+      "name": "InvalidPersistedDocumentsError",
+      "title": "Invalid operations",
+      "category": "App create",
+      "exitCode": 1,
+      "fix": "Fix the listed operations so they comply with the requirements.",
+      "anchor": "errors-401"
+    },
+    {
       "code": 500,
       "name": "SchemaNotFoundError",
       "title": "Schema not found in the registry",
