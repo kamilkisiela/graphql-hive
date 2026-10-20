@@ -16,8 +16,7 @@ import PromiseQueue from 'p-queue';
 import { z } from 'zod';
 import { collectSchemaCoordinates, preprocessOperation } from '@graphql-hive/core';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
-import { ServiceLogger, setErrorSource, traceFn, traceInlineSync } from '@hive/service-common';
-import { setErrorSource } from '@hive/service-common';
+import { setErrorSource, traceFn, traceInlineSync } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';
 import { Logger } from '../../shared/providers/logger';
 import { S3Writer } from '../../shared/providers/s3-writer';
@@ -441,7 +440,6 @@ export class PersistedDocumentIngester {
 
     return { type: 'success' as const };
   }
-
 
   @traceFn('PersistedDocumentIngester.insertClickHouseDocuments', {
     initAttributes: args => ({
