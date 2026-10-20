@@ -1,5 +1,159 @@
 # hive
 
+## 14.1.0
+
+### Minor Changes
+
+- [#8679](https://github.com/graphql-hive/console/pull/8679)
+  [`bd8f0f2`](https://github.com/graphql-hive/console/commit/bd8f0f211e5e5fdebe84ad2093b9f7087cc8a3a5)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Record which targets a breaking
+  change was used in. Schema checks and publishes with conditional breaking changes now store
+  per-target request counts for each breaking change and for each of its top affected operations,
+  exposed as `affectedTargets` on `SchemaChangeUsageStatistics` and
+  `SchemaChangeUsageStatisticsAffectedOperation` in the public GraphQL API.
+
+- [#8734](https://github.com/graphql-hive/console/pull/8734)
+  [`a6eaf2e`](https://github.com/graphql-hive/console/commit/a6eaf2e857ccb2a1d6f9293d3cd26b2d4e3bf79e)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Support uploading preprocessed app deployment
+  documents. This omits the need of workers and does not make worker availability the bottleneck of
+  the app deployment upload process.
+
+- [#8736](https://github.com/graphql-hive/console/pull/8736)
+  [`367c53b`](https://github.com/graphql-hive/console/commit/367c53b3ada4fb056e9a9bffe46f25435d07b57c)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Support routing server-side OAuth requests through
+  the request broker so OAuth providers do not see the IP addresses of Hive cluster nodes. This
+  applies to GitHub, Google, Okta, and organization OIDC token and user-information requests.
+
+  Self-hosters who need to hide their cluster IP addresses must configure the `server` service with:
+
+  - `REQUEST_BROKER=1`
+  - `REQUEST_BROKER_ENDPOINT=<broker URL>`
+  - `REQUEST_BROKER_SIGNATURE=<shared broker signature>`
+
+- [#8679](https://github.com/graphql-hive/console/pull/8679)
+  [`bd8f0f2`](https://github.com/graphql-hive/console/commit/bd8f0f211e5e5fdebe84ad2093b9f7087cc8a3a5)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Expose `SchemaChange.path` and
+  `SchemaCheckConditionalBreakingChangeMetadata.settings` on the public GraphQL API, so the targets
+  and schema coordinate behind a breaking change's usage can be read without parsing the change
+  message.
+
+### Patch Changes
+
+- [#8708](https://github.com/graphql-hive/console/pull/8708)
+  [`d3bfbf4`](https://github.com/graphql-hive/console/commit/d3bfbf41b43e9a0c4c9baacef7e766c771923e96)
+  Thanks [@jdolle](https://github.com/jdolle)! - Upload persisted documents of an app deployment to
+  the primary and mirror object storage concurrently instead of one after the other. Slow object
+  storage writes made `hive app:create` uploads fail with `Unexpected error.` or time out in the
+  CLI.
+
+- [#8679](https://github.com/graphql-hive/console/pull/8679)
+  [`bd8f0f2`](https://github.com/graphql-hive/console/commit/bd8f0f211e5e5fdebe84ad2093b9f7087cc8a3a5)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Check access before resolving
+  `BreakingChangeMetadataTarget.target`; load a schema check's changes in `Target.schemaChecks` when
+  only `hasSchemaChanges`, `hasUnapprovedBreakingChanges` or `cliApprovalMetadata` is selected;
+  expose `breakingChangeFormula`, `requestCount` and the excluded app deployments on a check's
+  conditional breaking change settings; and stop storing usage statistics for changes found safe by
+  the nullability check.
+
+- [#8717](https://github.com/graphql-hive/console/pull/8717)
+  [`4512feb`](https://github.com/graphql-hive/console/commit/4512feb5ca9c5e068ce0309543b0371a85766566)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Upgrade `got` to v16 to fix ClickHouse
+  requests failing with `write ECANCELED` (`Canceled because of SSL destruction`) instead of being
+  retried.
+
+  Since Node.js v24.20.0, a connection that closes while a request body is still being sent reports
+  the error to `got` in a way that `got` v14 turned into an immediate failure, skipping the retry
+  logic of the ClickHouse clients.
+
+  `got` v16.1.0 also retries requests with a `FormData` body, which the ClickHouse client uses for
+  audit log inserts and some operations queries.
+
+- [#8714](https://github.com/graphql-hive/console/pull/8714)
+  [`0a100e4`](https://github.com/graphql-hive/console/commit/0a100e4885bbf616f399eb99537e9f6a09d25f7d)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Fix the schema check page
+  freezing on checks with thousands of schema changes. Safe changes are now grouped by kind, and
+  breaking changes and each group are paginated 50 at a time, so the 5 types a check added are no
+  longer buried among thousands of description edits. A check's schemas are only loaded when a
+  schema tab is opened, so the check itself loads without them.
+
+- [#8726](https://github.com/graphql-hive/console/pull/8726)
+  [`e085b8e`](https://github.com/graphql-hive/console/commit/e085b8e1ef7a9197d285b2f3b4264fb47bf1a963)
+  Thanks [@jdolle](https://github.com/jdolle)! - Use one request id per API request. The id is the
+  incoming `x-request-id` header, or a generated UUID when none was sent, and it is now the same
+  value on the API's own log lines, the `request.id` trace attribute, the `x-request-id` response
+  header, and the requests forwarded to the schema, policy and commerce services. Logs and traces of
+  those services can therefore be correlated with the API request that triggered them even when no
+  proxy supplied an id. Every response from a Hive service now carries that id in the `x-request-id`
+  header, including error responses produced before a request handler runs. Background proposal
+  compositions run by the workflows service now carry the id of the API request that scheduled them.
+  The schema, policy, commerce and usage services log a warning when a request arrives without an
+  `x-request-id` header: their callers (other Hive services, and the Hive client libraries reporting
+  usage) always send one, so a missing id means a caller is not propagating it.
+
+- [#8709](https://github.com/graphql-hive/console/pull/8709)
+  [`28023c3`](https://github.com/graphql-hive/console/commit/28023c38c223b38dcc2dc038e73505b1833677d9)
+  Thanks [@jdolle](https://github.com/jdolle)! - When a persisted-document upload of an app
+  deployment is aborted by the client, times out on the server, or one of its storage writes fails,
+  every remaining object storage and ClickHouse request of that batch is cancelled, including
+  pending retries. Previously the worker kept uploading the whole batch after the request was
+  already over.
+
+- [#8730](https://github.com/graphql-hive/console/pull/8730)
+  [`b3cb83a`](https://github.com/graphql-hive/console/commit/b3cb83ae9a0f3fdf072a64667761b68efedcce32)
+  Thanks [@jdolle](https://github.com/jdolle)! - Trace persisted document ingestion inside the
+  GraphQL API's worker threads. The worker's spans (schema build, document validation, the
+  ClickHouse insert, every S3 object write with its status and retry count, and how long a batch
+  waited for a worker) now join the request's trace, every log line a batch produces in the worker
+  carries the request id, and spans still buffered when a worker exits or the API shuts down are
+  flushed first.
+
+- [#8714](https://github.com/graphql-hive/console/pull/8714)
+  [`0a100e4`](https://github.com/graphql-hive/console/commit/0a100e4885bbf616f399eb99537e9f6a09d25f7d)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Paged `SchemaChangeConnection`
+  results (a schema check's `breakingSchemaChanges`, `safeSchemaChanges`, `schemaChanges` and the
+  `changes` of a safe-change group, on the check and on its contract checks) now report their
+  position: `edges.cursor` encodes the change's offset, `hasNextPage` and `hasPreviousPage` say
+  whether more follow or precede the page, `startCursor` is empty on the first page and `endCursor`
+  empty on the last, and `total` and `totalCount` count the whole list rather than the page.
+
+- [#8679](https://github.com/graphql-hive/console/pull/8679)
+  [`bd8f0f2`](https://github.com/graphql-hive/console/commit/bd8f0f211e5e5fdebe84ad2093b9f7087cc8a3a5)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Listing `Target.schemaChecks`
+  with only `hasSchemaChanges` or `hasUnapprovedBreakingChanges` selected no longer loads each
+  check's change lists; both flags are computed in the database.
+
+- [#8679](https://github.com/graphql-hive/console/pull/8679)
+  [`bd8f0f2`](https://github.com/graphql-hive/console/commit/bd8f0f211e5e5fdebe84ad2093b9f7087cc8a3a5)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Fix `Target.schemaChecks`
+  returning no changes when they are selected through the `SchemaCheck` interface or through
+  `schemaChanges`, which made the public API list every check without its changes.
+
+- [#8696](https://github.com/graphql-hive/console/pull/8696)
+  [`27b04ab`](https://github.com/graphql-hive/console/commit/27b04ab335aec5c0b54d2ff3ba38fd3428b492c1)
+  Thanks [@Abhist17](https://github.com/Abhist17)! - Fix links in emails sent with
+  `EMAIL_PROVIDER=sendmail` losing a dot (for example `…prod.proddsl.example…` arriving as
+  `…prod.proddslexample…`). The body is now base64-encoded, so no line can start with a "." that the
+  receiving server would strip.
+
+  Closes [#7702](https://github.com/graphql-hive/platform/issues/7702)
+
+- [#8712](https://github.com/graphql-hive/console/pull/8712)
+  [`6c7ab24`](https://github.com/graphql-hive/console/commit/6c7ab246933674ce74fd0a208e366f1958306247)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Fix the schema check and history
+  pages freezing on the Public Schema and Supergraph diffs of large schemas. Both schemas are now
+  sorted before they are compared, so definitions that only moved (for example when types move
+  between subgraphs) no longer show as changes, and a diff too large to compute shows a notice
+  instead of locking the page. The unchanged Public Schema view of a check now shows the public
+  schema instead of the service SDL.
+
+- [#8721](https://github.com/graphql-hive/console/pull/8721)
+  [`52eb8f1`](https://github.com/graphql-hive/console/commit/52eb8f12f5da3c20a75e7daa4cf3134e63f865ae)
+  Thanks [@jonathanawesome](https://github.com/jonathanawesome)! - Stop calling breaking changes
+  "safe based on usage data" when Hive doesn't record usage for what they change, such as a removed
+  type, a removed union member or a new required argument. They now say that usage isn't tracked for
+  them, and the version history summary counts them as not checked against usage instead of safe.
+  Changes with nothing more to show no longer open to "No details available".
+
 ## 14.0.1
 
 ### Patch Changes

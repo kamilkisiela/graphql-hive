@@ -1,5 +1,29 @@
 # @graphql-hive/cli
 
+## 0.68.0
+
+### Minor Changes
+
+- [#8734](https://github.com/graphql-hive/console/pull/8734)
+  [`a6eaf2e`](https://github.com/graphql-hive/console/commit/a6eaf2e857ccb2a1d6f9293d3cd26b2d4e3bf79e)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Validate and preprocess app deployment documents in
+  the CLI before uploading them, reducing server-side processing and rejecting invalid operations
+  earlier.
+
+### Patch Changes
+
+- [#8726](https://github.com/graphql-hive/console/pull/8726)
+  [`e085b8e`](https://github.com/graphql-hive/console/commit/e085b8e1ef7a9197d285b2f3b4264fb47bf1a963)
+  Thanks [@jdolle](https://github.com/jdolle)! - Surface the registry's request id on HTTP errors.
+  `HTTPResponseError` thrown by the core HTTP client now carries the `x-request-id` the server
+  returned, and the CLI prints it as `Request ID` on HTTP error responses (for example a request
+  rejected because its body is too large), the same way it already does for GraphQL errors.
+  Previously only the client-generated id was visible, which does not match anything on the server.
+
+- Updated dependencies
+  [[`e085b8e`](https://github.com/graphql-hive/console/commit/e085b8e1ef7a9197d285b2f3b4264fb47bf1a963)]:
+  - @graphql-hive/core@0.23.2
+
 ## 0.67.1
 
 ### Patch Changes
