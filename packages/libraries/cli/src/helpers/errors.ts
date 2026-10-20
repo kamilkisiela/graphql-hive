@@ -602,6 +602,22 @@ export class PersistedOperationsMalformedError extends HiveCLIError {
   }
 }
 
+export class InvalidPersistedDocumentsError extends HiveCLIError {
+  static readonly code = errorCode(ErrorCategory.APP_CREATE, 1);
+  static readonly exitCode = ExitCode.ERROR;
+  static readonly title = 'Invalid operations';
+  static readonly fix = 'Fix the listed operations so they comply with the requirements.';
+
+  constructor(invalidDocuments: InvalidDocumentsErrors) {
+    const message = invalidDocuments
+      .map(doc => {
+        return `${Texture.failure(doc.source)}\n${doc.errors.map(e => ` - ${Texture.boldQuotedWords(e.message)}`).join('\n')}`;
+      })
+      .join('\n');
+    super(`The following operations are not valid persisted documents:\n${message}`);
+  }
+}
+
 export class SchemaNotFoundError extends HiveCLIError {
   static readonly code = errorCode(ErrorCategory.ARTIFACT_FETCH, 0);
   static readonly exitCode = ExitCode.ERROR;
@@ -679,17 +695,18 @@ export class InvalidCompositionResultError extends HiveCLIError {
   }
 }
 
+export type InvalidDocumentsErrors = Array<{
+  source: string | Source;
+  errors: ReadonlyArray<GraphQLError>;
+}>;
+
 export class InvalidDocumentsError extends HiveCLIError {
   static readonly code = errorCode(ErrorCategory.OPERATIONS_CHECK, 0);
   static readonly exitCode = ExitCode.ERROR;
   static readonly title = 'Invalid operations';
   static readonly fix = 'Fix the listed operations so that they are valid against the schema.';
-  constructor(
-    invalidDocuments: Array<{
-      source: string | Source;
-      errors: ReadonlyArray<GraphQLError>;
-    }>,
-  ) {
+
+  constructor(invalidDocuments: InvalidDocumentsErrors) {
     const message = invalidDocuments
       .map(doc => {
         return `${Texture.failure(doc.source)}\n${doc.errors.map(e => ` - ${Texture.boldQuotedWords(e.message)}`).join('\n')}`;
@@ -729,6 +746,7 @@ export const errorCatalog: ReadonlyArray<HiveCLIErrorClass> = [
   UnsupportedServerError,
   RequestTimeoutError,
   InvalidInputError,
+  InvalidPersistedDocumentsError,
   InvalidHeaderError,
   UnexpectedError,
   SchemaFileNotFoundError,
