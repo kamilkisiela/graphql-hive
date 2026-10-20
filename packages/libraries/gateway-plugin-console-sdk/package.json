@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/gateway-plugin-console-sdk",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "description": "Hive Console + Hive Gateway",
   "repository": {
