@@ -3,6 +3,7 @@ import {
   GraphQLError,
   Kind,
   parse,
+  Source,
   specifiedRules,
   TypeInfo,
   validate,
@@ -18,6 +19,8 @@ import { loadAppOperations } from '../../helpers/app-operations';
 import { graphqlEndpoint } from '../../helpers/config';
 import {
   APIError,
+  InvalidDocumentsErrors,
+  InvalidPersistedDocumentsError,
   InvalidTargetError,
   MissingArgumentsError,
   MissingEndpointError,
@@ -141,21 +144,37 @@ export default class AppCreate extends Command<typeof AppCreate> {
       assumeValid: true,
     });
     const typeInfo = new TypeInfo(schema);
-    const preprocessedDocuments = operations.map((operation, index) => {
-      let document: DocumentNode;
+    const processedDocuments: {
+      hash: string;
+      body: string;
+      operationName: string | null;
+      schemaCoordinates: string[];
+      insightsHash: string;
+    }[] = [];
+    const allErrors: InvalidDocumentsErrors = [];
+
+    for (const [index, operation] of operations.entries()) {
+      let document: DocumentNode | null = null;
       try {
         document = parse(operation.content);
       } catch (error) {
-        throw new APIError(
-          `Failed to parse document at index ${index}: ${
-            error instanceof GraphQLError ? error.message : String(error)
-          }`,
-        );
+        allErrors.push({
+          source: new Source(operation.content, operation.operationHash),
+          errors: [error instanceof GraphQLError ? error : new GraphQLError(String(error))],
+        });
+      }
+
+      if (!document) {
+        continue;
       }
 
       const errors = validate(schema, document, [...specifiedRules, SingleOperationDefinitionRule]);
       if (errors.length > 0) {
-        throw new APIError(`Invalid document at index ${index}: ${errors[0].message}`);
+        allErrors.push({
+          source: new Source(operation.content, operation.operationHash),
+          errors,
+        });
+        continue;
       }
 
       const operationName = getOperationName(document);
@@ -169,17 +188,27 @@ export default class AppCreate extends Command<typeof AppCreate> {
       const processed = preprocessOperation({ document, operationName, schemaCoordinates });
 
       if (!processed) {
-        throw new APIError(`Document at index ${index} has no executable operation definition.`);
+        allErrors.push({
+          source: new Source(operation.content, operation.operationHash),
+          errors: [
+            new GraphQLError(`Document at index ${index} has no executable operation definition.`),
+          ],
+        });
+        continue;
       }
 
-      return {
+      processedDocuments.push({
         hash: operation.operationHash,
         body: operation.content,
         operationName,
         schemaCoordinates: Array.from(schemaCoordinates),
         insightsHash: processed.hash,
-      };
-    });
+      });
+    }
+
+    if (allErrors.length) {
+      throw new InvalidPersistedDocumentsError(allErrors);
+    }
 
     const result = await this.registryApi(endpoint, accessToken).request({
       operation: CreateAppDeploymentMutation,
