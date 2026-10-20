@@ -1,5 +1,6 @@
 import { ChevronDown, Copy, ListFilter, Plus, RefreshCw, X } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { Card } from '../card/card';
 import { Button } from './button';
 
 export const nav: NavPath = 'Primitives/Button';
@@ -150,15 +151,19 @@ export const FullWidth = createPreview(() => (
 /** Without `raised`, the default fill disappears into a dialog or sheet in dark mode. */
 export const OnRaisedSurface = createPreview(() => (
   <div className="flex flex-wrap gap-6">
-    <div className="flex w-[24rem] flex-col gap-3 rounded-md border border-line-subtle bg-neutral-2 p-6 dark:bg-neutral-3">
-      <Button type="submit" width="full" onSurface="raised">
-        Sign in
-      </Button>
-      <Button variant="outline" width="full">
-        Login with GitHub
-      </Button>
+    <div className="w-[24rem]">
+      <Card variants={{ onSurface: 'raised' }}>
+        <div className="flex flex-col gap-3">
+          <Button type="submit" width="full" onSurface="raised">
+            Sign in
+          </Button>
+          <Button variant="outline" width="full">
+            Login with GitHub
+          </Button>
+        </div>
+      </Card>
     </div>
-    <div className="flex w-[28rem] flex-col gap-6 rounded-md border border-line bg-neutral-3 p-6">
+    <div className="flex w-[28rem] flex-col gap-6 rounded-md border border-line bg-surface-overlay p-6">
       <div className="flex justify-end gap-2">
         <Button variant="outline">Cancel</Button>
         <Button onSurface="raised">Transfer this organization</Button>

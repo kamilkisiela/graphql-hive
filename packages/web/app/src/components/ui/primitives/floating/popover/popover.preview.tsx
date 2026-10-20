@@ -1,8 +1,11 @@
 import { useRef, useState } from 'react';
 import { Info } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { TagSuggestions } from '@/components/target/settings/contract-form';
+import { cn } from '@/lib/utils';
 import { Button } from '../../button/button';
 import { Input } from '../../input/input';
+import { floatingVariants } from '../shared-styles';
 import { Popover } from './popover';
 
 export const nav: NavPath = 'Primitives/Floating/Popover';
@@ -156,7 +159,7 @@ export const AnchoredToSibling = createPreview(() => {
   return (
     <div
       ref={panel}
-      className="flex w-72 flex-col gap-3 rounded-md border border-line bg-neutral-2 p-4 dark:bg-neutral-3"
+      className={cn(floatingVariants({ padding: 'md' }), 'flex w-72 flex-col gap-3 p-4')}
     >
       <span className="text-xs text-fg-default">A panel with a field in it</span>
       <div className="flex items-center gap-2">
@@ -181,42 +184,42 @@ export const AnchoredToSibling = createPreview(() => {
   );
 });
 
-/**
- * An Input as the trigger. `initialFocus={false}` keeps focus in the field while the popup is
- * open, so typing filters the suggestions instead of being swallowed by the popup.
- */
-export const InputTrigger = createPreview(() => {
-  const [value, setValue] = useState('');
+// The contract form's tag field: the Input is the `anchor`, not the trigger, and
+// `initialFocus={false}` keeps the caret in the field while the suggestions are open.
+export const InputAnchor = createPreview(() => {
+  const [draft, setDraft] = useState('');
+  const [selected, setSelected] = useState(['public']);
   const [open, setOpen] = useState(false);
-  const tags = ['public', 'internal', 'deprecated', 'beta'].filter(t => t.includes(value));
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="w-64">
+      <Input
+        ref={inputRef}
+        placeholder="Add a tag"
+        autoComplete="off"
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onFocus={() => setOpen(true)}
+        onClick={() => setOpen(true)}
+      />
       <Popover
-        open={open && tags.length > 0}
+        open={open}
         onOpenChange={setOpen}
+        anchor={inputRef}
+        align="start"
         initialFocus={false}
         padding="none"
         width="auto"
-        align="start"
-        trigger={
-          <Input
-            placeholder="Add a tag"
-            value={value}
-            onChange={e => {
-              setValue(e.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
-          />
-        }
         content={
-          <ul className="w-48 text-sm text-fg-default">
-            {tags.map(t => (
-              <li key={t} className="cursor-pointer px-3 py-1.5 hover:bg-neutral-4">
-                {t}
-              </li>
-            ))}
-          </ul>
+          <TagSuggestions
+            tags={['public', 'internal', 'deprecated', 'beta']}
+            selected={selected}
+            onToggle={tag =>
+              setSelected(prev =>
+                prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag],
+              )
+            }
+          />
         }
       />
     </div>

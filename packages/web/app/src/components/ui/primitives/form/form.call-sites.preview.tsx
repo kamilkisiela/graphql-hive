@@ -127,6 +127,7 @@ import {
 import {
   DangerousChangesForm,
   DangerousChangesFormSchema,
+  SavedLabel,
   type DangerousChangesFormValues,
 } from '@/components/target/settings/dangerous-changes-form';
 import {
@@ -140,6 +141,7 @@ import {
   type RegistryTokenFormValues,
 } from '@/components/target/settings/registry-token-form';
 import { Button } from '@/components/ui/primitives/button/button';
+import { Card } from '@/components/ui/primitives/card/card';
 import { Form } from '@/components/ui/primitives/form/form';
 import {
   UserSettingsForm,
@@ -361,8 +363,17 @@ const panelWidth = {
 
 /** The raised panel a dialog, sheet or card puts the form on, at that overlay's width. */
 function Raised(props: { children: ReactNode; width: keyof typeof panelWidth }) {
+  if (props.width === 'card') {
+    return (
+      <div className={panelWidth.card}>
+        <Card variants={{ onSurface: 'raised' }}>{props.children}</Card>
+      </div>
+    );
+  }
   return (
-    <div className={`rounded-md border border-line bg-neutral-3 p-6 ${panelWidth[props.width]}`}>
+    <div
+      className={`rounded-md border border-line bg-surface-overlay p-6 ${panelWidth[props.width]}`}
+    >
       {props.children}
     </div>
   );
@@ -1127,12 +1138,7 @@ function DangerousChangesExample() {
       note="A changed row gets a pending dot until it is saved. The status beside the button is the page's own saved / just saved / unsaved label."
     >
       <div className="w-[36rem]">
-        <DangerousChangesForm
-          form={form}
-          onSubmit={setSubmitted}
-          enabled
-          status={<span className="text-sm text-fg-secondary">Saved</span>}
-        />
+        <DangerousChangesForm form={form} onSubmit={setSubmitted} enabled status={<SavedLabel />} />
         <Submitted values={submitted} />
       </div>
     </CallSite>

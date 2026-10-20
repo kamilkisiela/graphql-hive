@@ -87,7 +87,7 @@ export const Default = createPreview(() => (
  * dialog or raised card. The block behind it here is that surface.
  */
 export const OnSurface = createPreview(() => (
-  <div className="w-[56rem] rounded-md border border-line bg-neutral-3 p-6">
+  <div className="w-[56rem] rounded-md border border-line bg-surface-overlay p-6">
     <DataTable
       data={CHECKS.slice(0, 4)}
       columns={COLUMNS}
@@ -854,7 +854,7 @@ export const Playground = createPreview({
       <div
         className={
           v.onSurface === 'raised'
-            ? 'w-[56rem] rounded-md border border-line bg-neutral-3 p-6'
+            ? 'w-[56rem] rounded-md border border-line bg-surface-overlay p-6'
             : 'w-[52rem]'
         }
       >

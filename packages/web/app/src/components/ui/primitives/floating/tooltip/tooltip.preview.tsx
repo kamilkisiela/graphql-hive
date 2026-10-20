@@ -60,18 +60,16 @@ export const MaxWidths = createPreview(() => {
   );
 });
 
-/** `padding="lg"` with `maxWidth="lg"` is the paragraph shape: an explanation, not a label. */
+/** `padding="lg"` with `maxWidth="lg"` is the paragraph shape: an explanation, not a label. No app call site uses it yet. */
 export const Paragraph = createPreview(() => (
   <Tooltip
     trigger={
-      <button type="button" className="text-warning">
-        <CircleHelp className="size-4" />
-      </button>
+      <Button layout="iconOnly" icon={CircleHelp} variant="ghost" aria-label="Why inactive" />
     }
     content={
       <p>
-        This Contract is no longer active and no more contract versions or artifacts will be
-        published for it.
+        The organization owner has full access to everything within the organization. The role of
+        the owner can not be changed.
       </p>
     }
     maxWidth="lg"
@@ -217,10 +215,10 @@ export const Infotip = createPreview(() => (
       }
     />
     <div className="flex items-center">
-      <span className="text-warning">Inactive</span>
+      <span className="text-fg-default">Default role</span>
       <Popover
         trigger={
-          <Button variant="ghost" size="icon-sm" aria-label="Why inactive">
+          <Button variant="ghost" size="icon-sm" aria-label="About the default role">
             <Info className="size-4" />
           </Button>
         }
@@ -228,13 +226,7 @@ export const Infotip = createPreview(() => (
         width="lg"
         content={
           <div className="text-sm font-normal text-fg-default">
-            <p>
-              This Contract is no longer active and no more contract versions or contract checks
-              will be published for it.
-            </p>
-            <p className="mt-1">
-              It is not possible to enable a contract again. Please create a new contract instead.
-            </p>
+            <p>New members will be assigned to this role by default.</p>
           </div>
         }
       />

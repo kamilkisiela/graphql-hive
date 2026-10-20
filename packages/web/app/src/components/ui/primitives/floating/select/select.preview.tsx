@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { AlertTriangle, Check, GitCompare } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
+import { cn } from '@/lib/utils';
 import { Button } from '../../button/button';
+import { Card } from '../../card/card';
+import { StatusDot } from '../../status-dot/status-dot';
+import { floatingVariants } from '../shared-styles';
 import { Select, type SelectOption } from './select';
 
 export const nav: NavPath = 'Primitives/Floating/Select';
@@ -25,8 +29,6 @@ const CLIENTS: SelectOption[] = [
   'grafbase-cli',
   'envelop-plugin',
 ].map(name => ({ value: name, label: name }));
-
-const STATUS_DOT = 'size-2 rounded-full';
 
 export const Default = createPreview(() => {
   const [value, setValue] = useState('TRAFFIC');
@@ -54,14 +56,14 @@ export const WithIcons = createPreview(() => {
         {
           value: 'healthy',
           label: 'Healthy',
-          icon: <span className={`bg-success ${STATUS_DOT}`} />,
+          icon: <StatusDot color="success" />,
         },
         {
           value: 'degraded',
           label: 'Degraded',
-          icon: <span className={`bg-warning ${STATUS_DOT}`} />,
+          icon: <StatusDot color="warning" />,
         },
-        { value: 'down', label: 'Down', icon: <span className={`bg-critical ${STATUS_DOT}`} /> },
+        { value: 'down', label: 'Down', icon: <StatusDot color="critical" /> },
       ]}
       value={value}
       onValueChange={setValue}
@@ -304,11 +306,15 @@ export const OnSurface = createPreview(() => {
   );
   return (
     <div className="flex flex-wrap gap-6">
-      <div className="flex w-[20rem] flex-col gap-3 rounded-md border border-line-subtle bg-neutral-2 p-4 dark:bg-neutral-3">
-        <span className="text-xs text-fg-default">A card</span>
-        {pair}
+      <div className="w-[20rem]">
+        <Card variants={{ onSurface: 'raised' }}>
+          <div className="flex flex-col gap-3">
+            <span className="text-xs text-fg-default">A card</span>
+            {pair}
+          </div>
+        </Card>
       </div>
-      <div className="flex w-[20rem] flex-col gap-3 rounded-md border border-line bg-neutral-2 p-4 shadow-md dark:bg-neutral-4">
+      <div className={cn(floatingVariants({ padding: 'md' }), 'flex w-[20rem] flex-col gap-3 p-4')}>
         <span className="text-xs text-fg-default">A floating panel</span>
         {pair}
       </div>

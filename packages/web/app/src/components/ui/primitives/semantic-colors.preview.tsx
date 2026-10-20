@@ -174,27 +174,6 @@ export const Roles = createPreview(() => {
   );
 });
 
-export const SurfaceNesting = createPreview(() => (
-  <div className="flex w-[28rem] flex-col gap-4 bg-surface-page p-5 text-fg-default">
-    <div className="flex flex-col gap-3 rounded-md border border-line-subtle bg-surface-card p-4">
-      <span className="text-sm font-medium text-fg">surface-card</span>
-      <div className="rounded-sm border border-line-control bg-surface-control px-3 py-2 text-sm text-fg-subtle">
-        surface-control
-      </div>
-    </div>
-    <div className="flex flex-col gap-3 rounded-lg border border-line bg-surface-overlay p-4 shadow-lg">
-      <span className="text-sm font-medium text-fg">surface-overlay</span>
-      <div className="rounded-sm border border-line-control bg-surface-control-raised px-3 py-2 text-sm text-fg-subtle">
-        surface-control-raised
-      </div>
-      <div className="flex flex-col rounded-md border border-line bg-surface-floating p-1 text-sm shadow-md">
-        <span className="rounded-sm px-2 py-1">surface-floating</span>
-        <span className="rounded-sm bg-surface-selected px-2 py-1 text-fg">surface-selected</span>
-      </div>
-    </div>
-  </div>
-));
-
 /** Every raised control on surface-overlay; all four should rest on the same fill and border. */
 export const RaisedControls = createPreview(() => {
   const [metric, setMetric] = useState('TRAFFIC');

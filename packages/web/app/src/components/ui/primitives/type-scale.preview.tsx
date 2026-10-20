@@ -1,4 +1,6 @@
 import { createPreview, type NavPath } from 'react-foundry';
+import { Badge } from './badge/badge';
+import { Button } from './button/button';
 
 export const nav: NavPath = 'Primitives/Foundations/TypeScale';
 
@@ -45,10 +47,8 @@ export const Steps = createPreview(() => (
  */
 export const SideBySide = createPreview(() => (
   <div className="flex items-center gap-3">
-    <span className="rounded-sm border border-line bg-neutral-2 px-3 py-1.5 text-control font-medium text-fg-default dark:bg-neutral-3">
-      Filter
-    </span>
+    <Button size="compact" label="Filter" />
     <span className="text-xs text-fg-default">3 dimensions selected</span>
-    <span className="rounded-sm bg-neutral-4 px-1.5 py-0.5 text-2xs text-fg uppercase">beta</span>
+    <Badge content="BETA" variants={{ variant: 'secondary', size: 'sm' }} />
   </div>
 ));

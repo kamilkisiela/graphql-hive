@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
 import { Input } from '../../input/input';
+import { Label } from '../../label/label';
 import { ScrollArea } from '../../scroll-area/scroll-area';
 import { Sheet } from './sheet';
 
@@ -16,19 +17,23 @@ export const nav: NavPath = 'Primitives/Overlays/Sheet';
 function TokenFields({ count = 3 }: { count?: number }) {
   return (
     <div className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5 text-sm">
-        Title
-        <Input onSurface="raised" placeholder="CI deploy token" />
-      </label>
-      <label className="flex flex-col gap-1.5 text-sm">
-        Description
-        <Input onSurface="raised" placeholder="Publishes the gateway schema from CI" />
-      </label>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="token-title" label="Title" />
+        <Input id="token-title" onSurface="raised" placeholder="CI deploy token" />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="token-description" label="Description" />
+        <Input
+          id="token-description"
+          onSurface="raised"
+          placeholder="Publishes the gateway schema from CI"
+        />
+      </div>
       {Array.from({ length: count }, (_, i) => (
-        <label key={i} className="flex flex-col gap-1.5 text-sm">
-          Permission {i + 1}
-          <Input onSurface="raised" placeholder="schema:publish" />
-        </label>
+        <div key={i} className="flex flex-col gap-1.5">
+          <Label htmlFor={`token-permission-${i}`} label={`Permission ${i + 1}`} />
+          <Input id={`token-permission-${i}`} onSurface="raised" placeholder="schema:publish" />
+        </div>
       ))}
     </div>
   );

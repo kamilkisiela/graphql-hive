@@ -5,7 +5,7 @@ import { RadioGroup } from '@/components/ui/primitives/radio-group/radio-group';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 
-const planCollection: {
+export const planCollection: {
   [key in BillingPlanType]: {
     description: string;
     features: (ReactNode | string)[];
@@ -63,7 +63,7 @@ const planCollection: {
   },
 };
 
-function Plan(plan: {
+export function Plan(plan: {
   isActive: boolean;
   name: string;
   price: string | number;

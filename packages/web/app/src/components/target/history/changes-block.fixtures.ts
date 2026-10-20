@@ -5,7 +5,7 @@ import {
   ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment,
 } from './errors-and-changes';
 
-/** Breaking changes with per-target usage, shared by the ChangesBlock and paging previews. */
+// Not named `*.preview.tsx`, so foundry does not mount it; shared by the ChangesBlock, paging and TabbedView previews.
 
 export const PATH = '/the-guild/graphql-hive/staging';
 const PERIOD = { from: '2026-10-01T10:00:00.000Z', to: '2026-10-08T10:00:00.000Z' };

@@ -1,9 +1,11 @@
-import { XCircleIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { CallSite } from '@/components/inventory/shared';
-import { CompositionErrorMessage } from './composition-error-message';
-import { CompositionErrorsPopover } from './composition-errors-popover';
-import { CompositionErrorsList } from './errors-and-changes';
+import { makeFragmentData } from '@/gql';
+import { CompositionErrorsCard } from './composition-errors-card';
+import {
+  CompositionErrorsList,
+  CompositionErrorsSection_SchemaErrorConnection,
+} from './errors-and-changes';
 
 export const nav: NavPath = 'Components/CompositionErrors';
 
@@ -13,9 +15,6 @@ export const nav: NavPath = 'Components/CompositionErrors';
  * produced them (native or Apollo Federation v2, Federation v1, graphql-js validation, or the schema
  * service itself), so each fixture is a library template with neutral names; `A1` is a real
  * production message.
- *
- * The checks-page container is the real `CompositionErrorsList`. The version-page card is page-local
- * and transcribed from `pages/target-history-schema-version.tsx`.
  */
 
 type Fixture = { id: string; label: string; message: string };
@@ -312,53 +311,6 @@ const ALL: readonly Fixture[] = Object.values(GROUPS).flat();
 // The select control wants a non-empty tuple, which a map over a readonly array cannot prove.
 const FIXTURE_IDS = ALL.map(fixture => fixture.id) as [string, ...string[]];
 
-/**
- * `pages/target-history-schema-version.tsx:1299-1336` with the fragment swapped for a plain array,
- * the critical row numbers and separators, a little room under the heading, and the shipped
- * renderer in each row.
- */
-function VersionPageCard(props: { errors: ReadonlyArray<{ message: string }> }) {
-  return (
-    <div className="overflow-hidden rounded-xl border border-critical-line">
-      <div className="flex items-start gap-3 border-b border-critical-line bg-critical-tint-subtle px-5 py-4">
-        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-critical-line">
-          <XCircleIcon className="h-4 w-4 text-critical" />
-        </div>
-
-        <div className="min-w-0 text-fg">
-          <h3 className="text-sm font-semibold">Supergraph not composable</h3>
-          <p className="mt-0.5 text-[12.5px]">
-            Errors occurred while attempting to compose the supergraph from its subgraphs.
-          </p>
-        </div>
-
-        <span className="ml-auto inline-flex items-center rounded-full border border-critical-line bg-critical-tint px-2.5 py-0.5 text-2xs font-semibold text-critical transition-colors focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:outline-none">
-          <span className="mr-1 h-1.5 w-1.5 rounded-full bg-critical" />
-          {props.errors.length} error
-          {props.errors.length === 1 ? '' : 's'}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-2 px-5 pt-4 pb-1 text-fg">
-        <span className="text-sm font-medium">Composition errors</span>
-        <CompositionErrorsPopover />
-      </div>
-
-      <ul className="divide-y divide-critical-line-subtle px-1 pb-2">
-        {props.errors.map((err, idx) => (
-          <li key={idx} className="flex gap-3 px-4 py-3">
-            <span className="mt-0.5 w-6 shrink-0 font-mono text-xs text-critical select-none">
-              {String(idx + 1).padStart(2, '0')}
-            </span>
-
-            <CompositionErrorMessage message={err.message} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 /** Which fixture sits at which row number, since the containers show only the messages. */
 function Legend(props: { fixtures: readonly Fixture[] }) {
   return (
@@ -376,13 +328,29 @@ function Legend(props: { fixtures: readonly Fixture[] }) {
 
 function BothContainers(props: { fixtures: readonly Fixture[] }) {
   const errors = props.fixtures.map(fixture => ({ message: fixture.message }));
+  const connection = makeFragmentData(
+    {
+      __typename: 'SchemaErrorConnection' as const,
+      edges: errors.map(error => ({
+        __typename: 'SchemaErrorEdge' as const,
+        node: { __typename: 'SchemaError' as const, ...error },
+      })),
+    },
+    CompositionErrorsSection_SchemaErrorConnection,
+  );
   return (
     <div className="flex w-[56rem] flex-col gap-8">
       <Legend fixtures={props.fixtures} />
-      <CallSite source="pages/target-history-schema-version.tsx:1299-1336" origin="raw">
-        <VersionPageCard errors={errors} />
+      <CallSite
+        source="pages/target-history-schema-version.tsx (CompositionErrorsCard)"
+        origin="base"
+      >
+        <CompositionErrorsCard compositionErrors={connection} />
       </CallSite>
-      <CallSite source="components/target/history/errors-and-changes.tsx:681-704" origin="ui">
+      <CallSite
+        source="components/target/history/errors-and-changes.tsx (CompositionErrorsList)"
+        origin="ui"
+      >
         <CompositionErrorsList title="Composition Errors" errors={errors} />
       </CallSite>
     </div>

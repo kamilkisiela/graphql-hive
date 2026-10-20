@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Button } from '../../button/button';
 import { Input } from '../../input/input';
+import { Label } from '../../label/label';
 import { Dialog } from './dialog';
 
 export const nav: NavPath = 'Primitives/Overlays/Dialog';
@@ -17,14 +18,18 @@ export const nav: NavPath = 'Primitives/Overlays/Dialog';
 function CollectionFields() {
   return (
     <div className="flex flex-col gap-4">
-      <label className="flex flex-col gap-1.5 text-sm">
-        Name
-        <Input onSurface="raised" placeholder="Checkout" />
-      </label>
-      <label className="flex flex-col gap-1.5 text-sm">
-        Description
-        <Input onSurface="raised" placeholder="Operations the checkout flow runs" />
-      </label>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="collection-name" label="Collection Name" />
+        <Input id="collection-name" onSurface="raised" placeholder="Checkout" />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="collection-description" label="Collection Description" />
+        <Input
+          id="collection-description"
+          onSurface="raised"
+          placeholder="Operations the checkout flow runs"
+        />
+      </div>
     </div>
   );
 }

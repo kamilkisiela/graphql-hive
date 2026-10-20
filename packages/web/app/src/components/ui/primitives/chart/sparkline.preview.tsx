@@ -1,14 +1,13 @@
 import { createPreview, type NavPath } from 'react-foundry';
-import { Card } from '@/components/ui/primitives/card/card';
+import { ResourceCard } from '@/components/common/resource-card';
 import { week } from './preview-data';
-import { Sparkline } from './sparkline';
 
 export const nav: NavPath = 'Primitives/Charts/Sparkline';
 
-const BUSY = week(12_000);
-const QUIET = week(2500, 7);
+const BUSY = week(12_000).map(([date, value]) => ({ date, value }));
+const QUIET = week(2500, 7).map(([date, value]) => ({ date, value }));
 
-const HIGHEST = Math.max(...BUSY.map(([, value]) => value));
+const HIGHEST = Math.max(...BUSY.map(({ value }) => value));
 
 /**
  * A row of project cards. They share `max`, so the quiet project reads as quiet next to the busy
@@ -17,15 +16,20 @@ const HIGHEST = Math.max(...BUSY.map(([, value]) => value));
 export const SharedScale = createPreview(() => (
   <div className="grid w-[48rem] grid-cols-2 gap-5">
     {[
-      { name: 'gateway', data: BUSY },
-      { name: 'billing', data: QUIET },
+      { name: 'gateway', data: BUSY, versions: 12 },
+      { name: 'billing', data: QUIET, versions: 3 },
     ].map(project => (
-      <Card key={project.name} variants={{ onSurface: 'raised', bodyPadding: 'none' }}>
-        <div className="pt-4 pb-5">
-          <Sparkline name="Requests" data={project.data} max={HIGHEST} />
-          <h4 className="px-4 pt-4 text-lg font-bold">{project.name}</h4>
-        </div>
-      </Card>
+      <ResourceCard
+        key={project.name}
+        kind="project"
+        name={project.name}
+        subtitle="Federation"
+        renderLink={children => <a href="#">{children}</a>}
+        highestNumberOfRequests={HIGHEST}
+        requestsOverTime={project.data}
+        schemaVersionsCount={project.versions}
+        days={7}
+      />
     ))}
   </div>
 ));
@@ -36,18 +40,14 @@ export const SharedScale = createPreview(() => (
  */
 export const Loading = createPreview(() => (
   <div className="w-[24rem]">
-    <Card variants={{ onSurface: 'raised', bodyPadding: 'none' }}>
-      <div className="pt-4 pb-5">
-        <Sparkline
-          name="Requests"
-          data={[
-            [BUSY[0][0], 0],
-            [BUSY[BUSY.length - 1][0], 0],
-          ]}
-          max={HIGHEST}
-          animation={false}
-        />
-      </div>
-    </Card>
+    <ResourceCard
+      kind="project"
+      name={null}
+      renderLink={children => <a href="#">{children}</a>}
+      highestNumberOfRequests={HIGHEST}
+      requestsOverTime={null}
+      schemaVersionsCount={null}
+      days={7}
+    />
   </div>
 ));

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Copy } from 'lucide-react';
 import { createPreview, type NavPath } from 'react-foundry';
 import { Button } from './button/button';
+import { Card } from './card/card';
 import { Checkbox } from './checkbox/checkbox';
 import { Select } from './floating/select/select';
 import { Input } from './input/input';
@@ -69,9 +70,13 @@ export const TextOnThePage = createPreview(() => (
 
 /** The same controls on a raised surface: the outline sits off the edge, so the fill does not matter. */
 export const OnRaised = createPreview(() => (
-  <div className="flex w-[26rem] flex-wrap items-center gap-3 rounded-md border border-line-subtle bg-neutral-2 p-4 dark:bg-neutral-3">
-    <Button variant="outline">On a card</Button>
-    <Button label="Raised trigger" onSurface="raised" />
-    <Switch defaultChecked aria-label="Enable" />
+  <div className="w-[26rem]">
+    <Card variants={{ onSurface: 'raised' }}>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button variant="outline">On a card</Button>
+        <Button label="Raised trigger" onSurface="raised" />
+        <Switch defaultChecked aria-label="Enable" />
+      </div>
+    </Card>
   </div>
 ));

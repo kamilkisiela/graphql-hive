@@ -2,6 +2,8 @@ import { useState, type ReactNode } from 'react';
 import { FolderIcon, FolderOpenIcon, MoreHorizontal, Plus } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from '../badge/badge';
+import { Button } from '../button/button';
+import { Card } from '../card/card';
 import { Menu } from '../floating/menu/menu';
 import { Accordion } from './accordion';
 
@@ -143,20 +145,22 @@ export const Boxed = createPreview(() => (
  * small, the chevron at the start, and the accent tone to call it out.
  */
 export const SmallAccentDisclosure = createPreview(() => (
-  <div className="w-[28rem] rounded-md border border-line bg-neutral-2 p-4 dark:bg-neutral-3">
-    <Accordion
-      variant="plain"
-      size="sm"
-      chevron="start"
-      tone="accent"
-      items={[
-        {
-          value: 'advanced',
-          label: 'Advanced settings',
-          content: <Copy>On filter, hold minutes.</Copy>,
-        },
-      ]}
-    />
+  <div className="w-[28rem]">
+    <Card variants={{ onSurface: 'raised' }}>
+      <Accordion
+        variant="plain"
+        size="sm"
+        chevron="start"
+        tone="accent"
+        items={[
+          {
+            value: 'advanced',
+            label: 'Advanced settings',
+            content: <Copy>On filter, hold minutes.</Copy>,
+          },
+        ]}
+      />
+    </Card>
   </div>
 ));
 
@@ -193,14 +197,9 @@ export const WithAction = createPreview(() => {
           action: (
             <Menu
               align="end"
+              // The laboratory styles this trigger with GraphiQL's toolbar class, which foundry does not load.
               trigger={
-                <button
-                  type="button"
-                  aria-label="More"
-                  className="rounded-sm p-1 hover:bg-neutral-4"
-                >
-                  <MoreHorizontal className="size-4" />
-                </button>
+                <Button layout="iconOnly" icon={MoreHorizontal} variant="ghost" aria-label="More" />
               }
               sections={[
                 [{ label: 'Add operation', trailingIcon: Plus, onClick: () => {} }],

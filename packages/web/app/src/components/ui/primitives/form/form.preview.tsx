@@ -18,22 +18,22 @@ export const nav: NavPath = 'Primitives/FormControls/Form';
  * as its legend, for a radio group or a selector that is not one input.
  */
 
-const AlertFormSchema = z.object({
+const DemoFormSchema = z.object({
   name: z.string().min(3, 'Alert name must be at least 3 characters.'),
   threshold: z.string().regex(/^\d+$/, 'Threshold must be a whole number.'),
   severity: z.enum(['INFO', 'WARNING', 'CRITICAL']),
 });
 
-type AlertFormValues = z.infer<typeof AlertFormSchema>;
+type DemoFormValues = z.infer<typeof DemoFormSchema>;
 
-function AlertForm({
+function DemoForm({
   defaultValues,
   submitOnMount,
 }: {
-  defaultValues: AlertFormValues;
+  defaultValues: DemoFormValues;
   submitOnMount?: boolean;
 }) {
-  const form = useForm({ resolver: zodResolver(AlertFormSchema), defaultValues });
+  const form = useForm({ resolver: zodResolver(DemoFormSchema), defaultValues });
   useEffect(() => {
     if (submitOnMount) void form.trigger();
   }, [submitOnMount]);
@@ -100,10 +100,10 @@ function AlertForm({
 
 /** Submit with an invalid value to see the message appear on its reserved line. */
 export const Default = createPreview(() => (
-  <AlertForm defaultValues={{ name: '', threshold: '', severity: 'WARNING' }} />
+  <DemoForm defaultValues={{ name: '', threshold: '', severity: 'WARNING' }} />
 ));
 
 /** The same form after a failed submit: the fields turn critical and the messages fill their lines. */
 export const WithErrors = createPreview(() => (
-  <AlertForm defaultValues={{ name: 'P9', threshold: '5ms', severity: 'WARNING' }} submitOnMount />
+  <DemoForm defaultValues={{ name: 'P9', threshold: '5ms', severity: 'WARNING' }} submitOnMount />
 ));

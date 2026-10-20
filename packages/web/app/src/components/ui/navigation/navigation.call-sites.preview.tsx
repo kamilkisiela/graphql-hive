@@ -1,7 +1,7 @@
-import { type ReactNode } from 'react';
 import { ChartPieIcon, FileDiffIcon, LinkIcon, ListIcon, PencilIcon, PlusIcon } from 'lucide-react';
 import { createPreview, type NavPath } from 'react-foundry';
 import { CallSite, CallSiteGroup, InventoryList } from '@/components/inventory/shared';
+import { SecondaryNavigation } from '@/components/navigation/secondary-navigation';
 import { GraphQLIcon } from '@/components/ui/brand-icon';
 import { PageLayout, PageLayoutContent } from '@/components/ui/page-content-layout';
 import { Button } from '@/components/ui/primitives/button/button';
@@ -19,7 +19,7 @@ export const nav: NavPath = 'Components/Navigation/Component Examples';
 
 const ENTRIES = [
   {
-    source: 'components/navigation/secondary-navigation.tsx:22',
+    source: 'components/navigation/secondary-navigation.tsx:5',
     origin: 'base',
     what: 'The bar under the organization, project and target headers, mounted by the three layouts',
     coveredBy: 'Bars',
@@ -37,32 +37,32 @@ const ENTRIES = [
     coveredBy: 'Proposal sections',
   },
   {
-    source: 'pages/target-alerts.tsx:90',
-    origin: 'raw',
-    what: 'Activity, Rules and Create beside the alerts page: router links styled as a list',
+    source: 'pages/target-alerts.tsx:25',
+    origin: 'base',
+    what: 'Activity, Rules and Create beside the alerts page, as a list',
     coveredBy: 'Alerts sections',
   },
   {
-    source: 'pages/target-settings.tsx:1418',
-    origin: 'raw',
+    source: 'pages/target-settings.tsx:1350',
+    origin: 'base',
     what: 'The settings sections of a target, gated on permissions and project type',
     coveredBy: 'Settings sections',
   },
   {
-    source: 'pages/organization-settings.tsx:614',
-    origin: 'raw',
+    source: 'pages/organization-settings.tsx:581',
+    origin: 'base',
     what: 'The settings sections of an organization',
     coveredBy: 'Settings sections',
   },
   {
-    source: 'pages/project-settings.tsx:530',
-    origin: 'raw',
+    source: 'pages/project-settings.tsx:523',
+    origin: 'base',
     what: 'The settings sections of a project',
     coveredBy: 'Settings sections',
   },
   {
-    source: 'pages/organization-members.tsx:83',
-    origin: 'raw',
+    source: 'pages/organization-members.tsx:120',
+    origin: 'base',
     what: 'Members, Roles, Groups and Invitations of an organization',
     coveredBy: 'Members sections',
   },
@@ -75,10 +75,9 @@ export const Inventory = createPreview({
       component="base/navigation/navigation"
       summary={
         <>
-          Eight mounts in three shapes: the three layout bars and the explorer filter that already
-          use the base bar, the proposal sections driven by a search param, and the four vertical
-          lists (alerts, three settings pages, members) that today are buttons or hand-styled links
-          switching a <code>?page=</code> param.
+          Eight mounts in three shapes, all on the base component: the three layout bars and the
+          explorer filter, the proposal sections driven by a search param, and the five vertical
+          lists (alerts, three settings pages, members) on <code>variant="list"</code>.
         </>
       }
       entries={ENTRIES}
@@ -90,15 +89,6 @@ const ORGANIZATION = { organizationSlug: 'the-guild' };
 const PROJECT = { ...ORGANIZATION, projectSlug: 'gateway' };
 const TARGET = { ...PROJECT, targetSlug: 'production' };
 const TARGET_PATH = '/the-guild/gateway/production';
-
-/** The chrome from components/navigation/secondary-navigation.tsx, which mounts the base nav. */
-function ChromeBar(props: { children: ReactNode }) {
-  return (
-    <div className="relative h-(--tabs-navbar-height) border-b border-line bg-neutral-2 dark:bg-neutral-3">
-      <div className="container">{props.children}</div>
-    </div>
-  );
-}
 
 const ORGANIZATION_LINKS: NavigationItem[] = [
   {
@@ -210,19 +200,17 @@ export const Bars = createPreview({
         note="On /the-guild/view/members?page=roles. Members, Settings, Support and Subscription are each gated on a permission; the action is gated on creating projects. Members no longer carries search={{ page: 'list' }}: the router would count it current only on that exact page."
       >
         <RouterAt path="/the-guild/view/members?page=roles">
-          <ChromeBar>
-            <Navigation
-              items={ORGANIZATION_LINKS}
-              actions={
-                <Button variant="link">
-                  <span className="flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
-                    New project
-                  </span>
-                </Button>
-              }
-            />
-          </ChromeBar>
+          <SecondaryNavigation
+            links={ORGANIZATION_LINKS}
+            actions={
+              <Button variant="link">
+                <span className="flex items-center">
+                  <PlusIcon size={16} className="mr-2" />
+                  New project
+                </span>
+              </Button>
+            }
+          />
         </RouterAt>
       </CallSite>
       <CallSite
@@ -231,19 +219,17 @@ export const Bars = createPreview({
         note="On /the-guild/gateway?search=prod, the project root with a search param: Targets is current because it is exact on the path only. Alerts and Settings gated; the action is gated on creating targets."
       >
         <RouterAt path="/the-guild/gateway?search=prod">
-          <ChromeBar>
-            <Navigation
-              items={PROJECT_LINKS}
-              actions={
-                <Button variant="link">
-                  <span className="flex items-center">
-                    <PlusIcon size={16} className="mr-2" />
-                    New target
-                  </span>
-                </Button>
-              }
-            />
-          </ChromeBar>
+          <SecondaryNavigation
+            links={PROJECT_LINKS}
+            actions={
+              <Button variant="link">
+                <span className="flex items-center">
+                  <PlusIcon size={16} className="mr-2" />
+                  New target
+                </span>
+              </Button>
+            }
+          />
         </RouterAt>
       </CallSite>
       <CallSite
@@ -252,21 +238,19 @@ export const Bars = createPreview({
         note="On a single check. Eleven pages, six of them gated. History still links to the latest version's URL, so it is current only there; it moves to the bare /history path with the URL changes. Connect to CDN shows when the CDN is enabled and hides below md."
       >
         <RouterAt path={`${TARGET_PATH}/checks/abc123`}>
-          <ChromeBar>
-            <Navigation
-              items={TARGET_LINKS}
-              actions={
-                <div className="hidden md:block">
-                  <Button variant="link">
-                    <span className="flex items-center whitespace-nowrap">
-                      <LinkIcon size={16} className="mr-2" />
-                      Connect to CDN
-                    </span>
-                  </Button>
-                </div>
-              }
-            />
-          </ChromeBar>
+          <SecondaryNavigation
+            links={TARGET_LINKS}
+            actions={
+              <div className="hidden md:block">
+                <Button variant="link">
+                  <span className="flex items-center whitespace-nowrap">
+                    <LinkIcon size={16} className="mr-2" />
+                    Connect to CDN
+                  </span>
+                </Button>
+              </div>
+            }
+          />
         </RouterAt>
       </CallSite>
       <CallSite
@@ -274,9 +258,7 @@ export const Bars = createPreview({
         origin="base"
         note="Placeholders hold the bar's height until the organization, project and target resolve."
       >
-        <ChromeBar>
-          <Navigation loading items={[]} />
-        </ChromeBar>
+        <SecondaryNavigation loading links={[]} />
       </CallSite>
     </div>
   ),
@@ -411,7 +393,7 @@ export const AlertsSections = createPreview({
   render: () => (
     <CallSite
       source="pages/target-alerts.tsx"
-      origin="raw"
+      origin="base"
       note="On /alerts/rules. Activity is the bare alerts URL, so it is exact."
     >
       <SectionsPage
@@ -539,8 +521,8 @@ export const SettingsSections = createPreview({
     <div className="flex flex-col gap-8">
       <CallSiteGroup label="Sections become child routes; the bare settings URL is General, so General is exact.">
         <CallSite
-          source="pages/target-settings.tsx:1418"
-          origin="raw"
+          source="pages/target-settings.tsx:1350"
+          origin="base"
           note="On /settings/cdn. Base Schema on non-federation projects, Schema Contracts on federation; Registry and CDN Tokens gated. Each link keeps its data-cy, which the usage e2e clicks."
         >
           <SectionsPage
@@ -550,8 +532,8 @@ export const SettingsSections = createPreview({
           />
         </CallSite>
         <CallSite
-          source="pages/organization-settings.tsx:614"
-          origin="raw"
+          source="pages/organization-settings.tsx:581"
+          origin="base"
           note="On the bare /view/settings: General is current and no other item is, despite sharing its prefix."
         >
           <SectionsPage
@@ -561,8 +543,8 @@ export const SettingsSections = createPreview({
           />
         </CallSite>
         <CallSite
-          source="pages/project-settings.tsx:530"
-          origin="raw"
+          source="pages/project-settings.tsx:523"
+          origin="base"
           note="On /view/settings/composition."
         >
           <SectionsPage
@@ -580,8 +562,8 @@ export const MembersSections = createPreview({
   label: 'Members sections',
   render: () => (
     <CallSite
-      source="pages/organization-members.tsx:83"
-      origin="raw"
+      source="pages/organization-members.tsx:120"
+      origin="base"
       note="On /view/members/roles. Roles and Invitations gated; the list is the bare URL and keeps its search filter, which is why Members is exact on the path only."
     >
       <SectionsPage

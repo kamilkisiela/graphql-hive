@@ -104,7 +104,7 @@ export default defineConfig({
     // coverage checklist to migrate through. Entries are deleted as their component lands.
     {
       label: 'Inventory',
-      children: [{ label: 'Presentational' }, { label: 'V2Leftovers' }],
+      children: [{ label: 'Presentational' }],
     },
     // Composites and app components, built from the primitives above. Each preview reproduces
     // real call sites so a primitive change can be judged against the compositions that ship.
