@@ -1,7 +1,7 @@
 # `@hive/policy`
 
-Service for running [GraphQL-ESLint](https://github.com/B2o5T/graphql-eslint) as part of Hive schema
-policy checks.
+Service for running Hive schema policy checks. The lint rules in `src/engine` are copied from
+[graphql-eslint](https://github.com/graphql-hive/graphql-eslint) 3.20.1 and run without ESLint.
 
 ## Configuration
 

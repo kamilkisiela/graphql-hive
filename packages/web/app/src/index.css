@@ -159,7 +159,7 @@
   }
 
   :root {
-    color-scheme: light dark;
+    color-scheme: light;
 
     @apply font-sans subpixel-antialiased;
 
@@ -242,6 +242,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --neutral-1: 210 21% 5%;
     --neutral-2: 210 16% 7%;
     --neutral-3: 214 14% 10%;

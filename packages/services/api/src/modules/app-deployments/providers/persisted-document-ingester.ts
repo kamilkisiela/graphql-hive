@@ -3,6 +3,7 @@ import {
   DirectiveDefinitionNode,
   DocumentNode,
   GraphQLError,
+  GraphQLSchema,
   Kind,
   parse,
   print,
@@ -14,7 +15,7 @@ import PromiseQueue from 'p-queue';
 import { z } from 'zod';
 import { collectSchemaCoordinates, preprocessOperation } from '@graphql-hive/core';
 import { buildOperationS3BucketKey } from '@hive/cdn-script/artifact-storage-reader';
-import { ServiceLogger, setErrorSource } from '@hive/service-common';
+import { ServiceLogger, setErrorSource, traceFn, traceInlineSync } from '@hive/service-common';
 import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-client';
 import { S3Writer } from '../../shared/providers/s3-writer';
 import type { R2ErrorTraceSummary, S3WriteMetric } from '../../shared/providers/s3-writer';
@@ -100,6 +101,11 @@ function injectMcpDirectives(schemaSdl: string): string {
 export type BatchProcessEvent = {
   event: 'PROCESS';
   id: string;
+  /** W3C trace context of the request, so the worker's spans join its trace. */
+  traceContext: Record<string, string>;
+  requestId: string | undefined;
+  /** When the scheduler posted the message; the worker records how long it waited for a thread. */
+  enqueuedAt: number;
   data: {
     schemaSdl: string;
     targetId: string;
@@ -143,6 +149,17 @@ export type BatchProcessingErrorEvent = {
   r2ErrorTraceSummary: R2ErrorTraceSummary;
 };
 
+/** Sent by the scheduler when the request was aborted or timed out; the worker stops that batch. */
+export type BatchCancelEvent = {
+  event: 'CANCEL';
+  id: string;
+  reason: string;
+};
+
+type DocumentValidationResult =
+  | Extract<BatchProcessedEvent['data'], { type: 'error' }>
+  | { type: 'ok'; documents: Array<DocumentRecord> };
+
 export class PersistedDocumentIngester {
   private promiseQueue = new PromiseQueue({ concurrency: 30 });
   private logger: ServiceLogger;
@@ -155,7 +172,7 @@ export class PersistedDocumentIngester {
     this.logger = logger.child({ source: 'PersistedDocumentIngester' });
   }
 
-  async processBatch(data: BatchProcessEvent['data']) {
+  async processBatch(data: BatchProcessEvent['data'], signal: AbortSignal) {
     this.logger.debug(
       'Processing batch. (targetId=%s, appDeploymentId=%s, operationCount=%d)',
       data.targetId,
@@ -163,144 +180,26 @@ export class PersistedDocumentIngester {
       data.documents.length,
     );
 
-    const schemaSdl = injectMcpDirectives(data.schemaSdl);
-    const schema = buildSchema(schemaSdl);
-    const typeInfo = new TypeInfo(schema);
-    const documents: Array<DocumentRecord> = [];
+    const { schema, typeInfo } = this.buildValidationSchema(data);
+    const validation = this.validateDocuments(data, schema, typeInfo);
 
-    let index = 0;
-    for (const operation of data.documents) {
-      const hashValidation = AppDeploymentOperationHashModel.safeParse(operation.hash);
-      const bodyValidation = AppDeploymentOperationBodyModel.safeParse(operation.body);
-
-      if (hashValidation.success === false || bodyValidation.success === false) {
-        this.logger.debug(
-          'Invalid operation provided. Processing failed. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
-          data.targetId,
-          data.appDeployment.id,
-          index,
-        );
-
-        return {
-          type: 'error' as const,
-          error: {
-            // TODO: we should add more details (what hash is affected etc.)
-            message: 'Invalid input, please check the operations.',
-            details: {
-              index,
-              message:
-                hashValidation.error?.issues[0].message ??
-                bodyValidation.error?.issues[0].message ??
-                'Invalid hash or body provided',
-            },
-          },
-        };
-      }
-      let documentNode: DocumentNode;
-      try {
-        documentNode = parse(operation.body);
-      } catch (err) {
-        if (err instanceof GraphQLError) {
-          console.error(err);
-          this.logger.debug(
-            'Failed parsing GraphQL operation. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
-            data.targetId,
-            data.appDeployment.id,
-            index,
-          );
-
-          return {
-            type: 'error' as const,
-            error: {
-              message: 'Failed to parse a GraphQL operation.',
-              details: {
-                index,
-                message: err.message,
-              },
-            },
-          };
-        }
-        throw err;
-      }
-      const errors = validate(schema, documentNode, undefined, {
-        maxErrors: 1,
-      });
-
-      if (errors.length > 0) {
-        this.logger.debug(
-          'GraphQL operation did not pass validation against latest valid schema version. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
-          data.targetId,
-          data.appDeployment.id,
-          index,
-        );
-
-        return {
-          type: 'error' as const,
-          error: {
-            message: 'The GraphQL operation is not valid against the latest schema version.',
-            details: {
-              index,
-              message: errors[0].message,
-            },
-          },
-        };
-      }
-
-      const operationNames = getOperationNames(documentNode);
-      if (operationNames.length > 1) {
-        return {
-          type: 'error' as const,
-          error: {
-            message: 'Only one executable operation definition is allowed per document.',
-            details: {
-              index,
-              message:
-                'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
-            },
-          },
-        };
-      }
-
-      const operationName = operationNames[0] ?? null;
-
-      const schemaCoordinates = collectSchemaCoordinates({
-        documentNode,
-        processVariables: false,
-        variables: null,
-        schema,
-        typeInfo,
-      });
-
-      const normalizedOperation = preprocessOperation({
-        document: documentNode,
-        operationName,
-        schemaCoordinates,
-      });
-
-      documents.push({
-        appDeploymentId: data.appDeployment.id,
-        hash: operation.hash,
-        internalHash: normalizedOperation?.hash ?? operation.hash,
-        body: operation.body,
-        operationName,
-        schemaCoordinates: Array.from(schemaCoordinates),
-      });
-
-      index++;
+    if (validation.type === 'error') {
+      return validation;
     }
 
-    if (documents.length) {
+    if (validation.documents.length) {
       this.logger.debug(
         'inserting documents into clickhouse and s3. (targetId=%s, appDeployment=%s, documentCount=%d)',
         data.targetId,
         data.appDeployment.id,
-        documents.length,
+        validation.documents.length,
       );
 
       await this.insertDocuments({
         targetId: data.targetId,
         appDeployment: data.appDeployment,
-        documents: documents,
+        documents: validation.documents,
+        signal,
       });
     }
 
@@ -309,12 +208,186 @@ export class PersistedDocumentIngester {
     };
   }
 
+  private buildValidationSchema = traceInlineSync<
+    [BatchProcessEvent['data']],
+    { schema: GraphQLSchema; typeInfo: TypeInfo }
+  >(
+    'PersistedDocumentIngester.buildSchema',
+    {
+      initAttributes: data => ({
+        'hive.target.id': data.targetId,
+        'hive.appDeployment.id': data.appDeployment.id,
+        'hive.schema.sdl.length': data.schemaSdl.length,
+      }),
+    },
+    data => {
+      const schema = buildSchema(injectMcpDirectives(data.schemaSdl));
+      return { schema, typeInfo: new TypeInfo(schema) };
+    },
+  );
+
+  private validateDocuments = traceInlineSync<
+    [BatchProcessEvent['data'], GraphQLSchema, TypeInfo],
+    DocumentValidationResult
+  >(
+    'PersistedDocumentIngester.validateDocuments',
+    {
+      initAttributes: data => ({
+        'hive.target.id': data.targetId,
+        'hive.appDeployment.id': data.appDeployment.id,
+        'hive.appDeployment.documentCount': data.documents.length,
+      }),
+      resultAttributes: result =>
+        result.type === 'error'
+          ? {
+              'hive.validation.result': 'error',
+              'hive.validation.failed_index': result.error.details.index,
+              'hive.validation.error': result.error.message,
+            }
+          : { 'hive.validation.result': 'ok' },
+    },
+    (data, schema, typeInfo) => {
+      const documents: Array<DocumentRecord> = [];
+
+      let index = 0;
+      for (const operation of data.documents) {
+        const hashValidation = AppDeploymentOperationHashModel.safeParse(operation.hash);
+        const bodyValidation = AppDeploymentOperationBodyModel.safeParse(operation.body);
+
+        if (hashValidation.success === false || bodyValidation.success === false) {
+          this.logger.debug(
+            'Invalid operation provided. Processing failed. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
+            data.targetId,
+            data.appDeployment.id,
+            index,
+          );
+
+          return {
+            type: 'error' as const,
+            error: {
+              // TODO: we should add more details (what hash is affected etc.)
+              message: 'Invalid input, please check the operations.',
+              details: {
+                index,
+                message:
+                  hashValidation.error?.issues[0].message ??
+                  bodyValidation.error?.issues[0].message ??
+                  'Invalid hash or body provided',
+              },
+            },
+          };
+        }
+        let documentNode: DocumentNode;
+        try {
+          documentNode = parse(operation.body);
+        } catch (err) {
+          if (err instanceof GraphQLError) {
+            console.error(err);
+            this.logger.debug(
+              'Failed parsing GraphQL operation. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
+              data.targetId,
+              data.appDeployment.id,
+              index,
+            );
+
+            return {
+              type: 'error' as const,
+              error: {
+                message: 'Failed to parse a GraphQL operation.',
+                details: {
+                  index,
+                  message: err.message,
+                },
+              },
+            };
+          }
+          throw err;
+        }
+        const errors = validate(schema, documentNode, undefined, {
+          maxErrors: 1,
+        });
+
+        if (errors.length > 0) {
+          this.logger.debug(
+            'GraphQL operation did not pass validation against latest valid schema version. (targetId=%s, appDeploymentId=%s, operationIndex=%d)',
+            data.targetId,
+            data.appDeployment.id,
+            index,
+          );
+
+          return {
+            type: 'error' as const,
+            error: {
+              message: 'The GraphQL operation is not valid against the latest schema version.',
+              details: {
+                index,
+                message: errors[0].message,
+              },
+            },
+          };
+        }
+
+        const operationNames = getOperationNames(documentNode);
+        if (operationNames.length > 1) {
+          return {
+            type: 'error' as const,
+            error: {
+              message: 'Only one executable operation definition is allowed per document.',
+              details: {
+                index,
+                message:
+                  'Multiple operation definitions found. Only one executable operation definition is allowed per document.',
+              },
+            },
+          };
+        }
+
+        const operationName = operationNames[0] ?? null;
+
+        const schemaCoordinates = collectSchemaCoordinates({
+          documentNode,
+          processVariables: false,
+          variables: null,
+          schema,
+          typeInfo,
+        });
+
+        const normalizedOperation = preprocessOperation({
+          document: documentNode,
+          operationName,
+          schemaCoordinates,
+        });
+
+        documents.push({
+          appDeploymentId: data.appDeployment.id,
+          hash: operation.hash,
+          internalHash: normalizedOperation?.hash ?? operation.hash,
+          body: operation.body,
+          operationName,
+          schemaCoordinates: Array.from(schemaCoordinates),
+        });
+
+        index++;
+      }
+
+      return { type: 'ok', documents };
+    },
+  );
+
+  @traceFn('PersistedDocumentIngester.insertClickHouseDocuments', {
+    initAttributes: args => ({
+      'hive.target.id': args.targetId,
+      'hive.appDeployment.id': args.appDeployment.id,
+      'hive.appDeployment.documentCount': args.documents.length,
+    }),
+  })
   private async insertClickHouseDocuments(args: {
     targetId: string;
     appDeployment: {
       id: string;
     };
     documents: Array<DocumentRecord>;
+    signal: AbortSignal;
   }) {
     // 1. Insert into ClickHouse
     this.logger.debug(
@@ -347,6 +420,7 @@ export class PersistedDocumentIngester {
       ]),
       timeout: 10_000,
       queryId: 'insert_app_deployment_documents',
+      signal: args.signal,
     });
 
     this.logger.debug(
@@ -357,6 +431,13 @@ export class PersistedDocumentIngester {
     );
   }
 
+  @traceFn('PersistedDocumentIngester.insertS3Documents', {
+    initAttributes: args => ({
+      'hive.target.id': args.targetId,
+      'hive.appDeployment.id': args.appDeployment.id,
+      'hive.appDeployment.documentCount': args.documents.length,
+    }),
+  })
   private async insertS3Documents(args: {
     targetId: string;
     appDeployment: {
@@ -365,6 +446,7 @@ export class PersistedDocumentIngester {
       version: string;
     };
     documents: Array<DocumentRecord>;
+    controller: AbortController;
   }) {
     this.logger.debug(
       'Inserting documents into S3. (targetId=%s, appDeployment=%s, documentCount=%d)',
@@ -385,25 +467,36 @@ export class PersistedDocumentIngester {
       );
 
       tasks.push(
-        this.promiseQueue.add(async () => {
-          const responses = await this.s3.write(s3Key, 'persisted_document', {
-            headers: {
-              'content-type': 'text/plain',
-            },
-            body: document.body,
-          });
+        this.promiseQueue.add(
+          async () => {
+            try {
+              const responses = await this.s3.writeConcurrently(s3Key, 'persisted_document', {
+                headers: {
+                  'content-type': 'text/plain',
+                },
+                body: document.body,
+                signal: args.controller.signal,
+              });
 
-          for (const response of responses) {
-            if (response.statusCode !== 200) {
-              throw setErrorSource(
-                new Error(
-                  `Failed to upload operation to S3 object storage (${response.url}): [${response.statusCode}] ${response.statusMessage}`,
-                ),
-                `s3 ${new URL(response.url).origin}`,
-              );
+              for (const response of responses) {
+                if (response.statusCode !== 200) {
+                  throw setErrorSource(
+                    new Error(
+                      `Failed to upload operation to S3 object storage (${response.url}): [${response.statusCode}] ${response.statusMessage}`,
+                    ),
+                    `s3 ${new URL(response.url).origin}`,
+                  );
+                }
+              }
+            } catch (error) {
+              // Abort here, not in the caller: p-queue starts the next queued upload as soon as
+              // this task settles, which would be before the caller's catch runs.
+              args.controller.abort(error);
+              throw error;
             }
-          }
-        }),
+          },
+          { signal: args.controller.signal },
+        ),
       );
     }
 
@@ -417,7 +510,11 @@ export class PersistedDocumentIngester {
     );
   }
 
-  /** inserts operations of an app deployment into clickhouse and s3 */
+  /**
+   * Inserts operations of an app deployment into clickhouse and s3.
+   * Every request of the batch shares one signal: it aborts when the caller's signal aborts
+   * or when the first request fails, so nothing keeps running or retrying after that.
+   */
   private async insertDocuments(args: {
     targetId: string;
     appDeployment: {
@@ -426,12 +523,26 @@ export class PersistedDocumentIngester {
       version: string;
     };
     documents: Array<DocumentRecord>;
+    signal: AbortSignal;
   }) {
-    await Promise.all([
-      // prettier-ignore
-      this.insertClickHouseDocuments(args),
-      this.insertS3Documents(args),
-    ]);
+    const { signal, ...batch } = args;
+    signal.throwIfAborted();
+
+    const controller = new AbortController();
+    const onAbort = () => controller.abort(signal.reason);
+    signal.addEventListener('abort', onAbort, { once: true });
+
+    try {
+      await Promise.all([
+        this.insertClickHouseDocuments({ ...batch, signal: controller.signal }),
+        this.insertS3Documents({ ...batch, controller }),
+      ]);
+    } catch (error) {
+      controller.abort(error);
+      throw signal.aborted ? signal.reason : error;
+    } finally {
+      signal.removeEventListener('abort', onAbort);
+    }
   }
 }
 

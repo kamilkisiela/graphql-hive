@@ -79,21 +79,21 @@ jobs:
           done
           echo "$EOF" >> "$GITHUB_ENV"
 
-      # npm publish returns before the new version is visible to npm install, so the
-      # docker build would otherwise fail with ETARGET when it runs right after publishing.
       - name: wait for CLI version on npm
         env:
           CLI_VERSION: ${{ inputs.cliVersion }}
         run: |
+          cd "$(mktemp -d)"
           for attempt in $(seq 1 60); do
-            if npm view "@graphql-hive/cli@${CLI_VERSION}" version >/dev/null 2>&1; then
-              echo "@graphql-hive/cli@${CLI_VERSION} is available on npm"
+            if output=$(npm install --dry-run --prefer-online "@graphql-hive/cli@${CLI_VERSION}" 2>&1); then
+              echo "@graphql-hive/cli@${CLI_VERSION} and its dependencies are available on npm"
               exit 0
             fi
-            echo "Attempt ${attempt}: @graphql-hive/cli@${CLI_VERSION} is not on npm yet, retrying in 15s"
+            echo "Attempt ${attempt}: @graphql-hive/cli@${CLI_VERSION} is not installable from npm yet, retrying in 15s"
+            grep 'npm error notarget No matching version' <<<"$output" || true
             sleep 15
           done
-          echo "::error::@graphql-hive/cli@${CLI_VERSION} did not become available on npm within 15 minutes"
+          echo "::error::@graphql-hive/cli@${CLI_VERSION} did not become installable from npm after 60 attempts"
           exit 1
 
       - name: build docker images

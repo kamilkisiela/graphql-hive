@@ -47,6 +47,7 @@ async function main() {
   const server = await createServer({
     name: 'commerce',
     sentryErrorHandler: true,
+    warnOnMissingRequestId: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,

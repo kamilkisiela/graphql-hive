@@ -225,6 +225,11 @@ export default gql`
       filters: SchemaChecksFilter
     ): SchemaCheckConnection! @tag(name: "public")
     """
+    Lowercased, sorted names of the services that have schema checks in this target.
+    Null for single-schema projects.
+    """
+    schemaCheckServiceNames: [String!]
+    """
     Paginated list of schema versions, ordered from recent to oldest.
     """
     schemaVersions(
@@ -1252,11 +1257,6 @@ export default gql`
     For federation these are the subgraphs/services.
     """
     schemas: SchemaConnection! @tag(name: "public")
-    """
-    Lowercased, sorted names of the services published in this version.
-    Null for single-schema projects.
-    """
-    serviceNames: [String!]
     """
     The supergraph SDL for a federation schema.
     """
