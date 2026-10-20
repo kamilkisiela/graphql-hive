@@ -44,8 +44,8 @@ export function ContractFailuresTable(props: {
       meta: { align: 'right' },
       cell: ({ row }) =>
         row.original.onView ? (
-          <Button variant="ghost" size="compact" onClick={row.original.onView}>
-            View
+          <Button variant="primary" size="compact" onClick={row.original.onView}>
+            View contract
           </Button>
         ) : null,
     },
