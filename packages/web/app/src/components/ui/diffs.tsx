@@ -89,10 +89,11 @@ function useWorkerPool(theme: PierreTheme) {
   return useContext(GetWorkerPoolContext)?.(theme);
 }
 
-// Has a height because the virtualizer only renders lines inside its own scroll region.
+// Has a height because the virtualizer only renders lines inside its own scroll region. A pane
+// that fills the viewport raises the cap through the variable.
 export function CodeScrollArea(props: { className?: string; children: ReactNode }) {
   return (
-    <Virtualizer className={cn('max-h-[70vh] overflow-auto', props.className)}>
+    <Virtualizer className={cn('max-h-[var(--code-max-h,70vh)] overflow-auto', props.className)}>
       {props.children}
     </Virtualizer>
   );
