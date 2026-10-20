@@ -24,6 +24,7 @@ import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 import { QueryError } from '../ui/query-error';
 import { OrganizationLayoutQuery } from './queries';
+import * as styles from './organization.css';
 
 export function OrganizationLayout({ children }: { children: ReactNode }): ReactElement | null {
   const { organizationSlug } = useSlugs('organization');
@@ -92,8 +93,8 @@ export function OrganizationLayout({ children }: { children: ReactNode }): React
           currentOrganization?.viewerCanCreateProject ? (
             <>
               <Button onClick={toggleModalOpen} variant="link" data-cy="new-project-button">
-                <span className="flex items-center">
-                  <PlusIcon size={16} className="mr-2" />
+                <span className={styles.organizationLayoutSpan}>
+                  <PlusIcon size={16} className={styles.organizationLayoutPlusIcon} />
                   New project
                 </span>
               </Button>
@@ -107,7 +108,7 @@ export function OrganizationLayout({ children }: { children: ReactNode }): React
         }
       />
       {currentOrganization ? (
-        <div className="container">
+        <div className={styles.organizationLayoutDiv}>
           <ProPlanBilling organization={currentOrganization} />
           <RateLimitWarn organization={currentOrganization} />
         </div>
@@ -221,8 +222,9 @@ function CreateProjectModal(props: {
       title="Create a project"
       description={
         <>
-          A Hive <span className="font-medium text-fg">project</span> represents a{' '}
-          <span className="font-medium text-fg">GraphQL API</span> running a GraphQL schema.
+          A Hive <span className={styles.createProjectModalSpan}>project</span> represents a{' '}
+          <span className={styles.createProjectModalSpan2}>GraphQL API</span> running a GraphQL
+          schema.
         </>
       }
     >

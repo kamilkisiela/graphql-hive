@@ -26,7 +26,6 @@
     --text-xl: 1.25rem;
     --text-xl--line-height: calc(1.75 / 1.25);
     --text-2xl: 1.5rem;
-    --text-2xl--line-height: calc(2 / 1.5);
     --text-3xl: 1.875rem;
     --text-3xl--line-height: calc(2.25 / 1.875);
     --text-4xl: 2.25rem;
@@ -38,12 +37,10 @@
     --font-weight-bold: 700;
     --tracking-tight: -0.025em;
     --tracking-wide: 0.025em;
-    --tracking-wider: 0.05em;
     --leading-tight: 1.25;
     --leading-snug: 1.375;
     --leading-relaxed: 1.625;
     --radius-xl: 0.75rem;
-    --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --animate-spin: spin 1s linear infinite;
     --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -108,21 +105,8 @@
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
-      --tw-backdrop-blur: initial;
-      --tw-backdrop-brightness: initial;
-      --tw-backdrop-contrast: initial;
-      --tw-backdrop-grayscale: initial;
-      --tw-backdrop-hue-rotate: initial;
-      --tw-backdrop-invert: initial;
-      --tw-backdrop-opacity: initial;
-      --tw-backdrop-saturate: initial;
-      --tw-backdrop-sepia: initial;
       --tw-duration: initial;
       --tw-ease: initial;
-      --tw-contain-size: initial;
-      --tw-contain-layout: initial;
-      --tw-contain-paint: initial;
-      --tw-contain-style: initial;
       --tw-content: '';
     }
   }
@@ -332,63 +316,11 @@
   syntax: '*';
   inherits: false;
 }
-@property --tw-backdrop-blur {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-brightness {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-contrast {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-grayscale {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-hue-rotate {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-invert {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-opacity {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-saturate {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-backdrop-sepia {
-  syntax: '*';
-  inherits: false;
-}
 @property --tw-duration {
   syntax: '*';
   inherits: false;
 }
 @property --tw-ease {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-contain-size {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-contain-layout {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-contain-paint {
-  syntax: '*';
-  inherits: false;
-}
-@property --tw-contain-style {
   syntax: '*';
   inherits: false;
 }

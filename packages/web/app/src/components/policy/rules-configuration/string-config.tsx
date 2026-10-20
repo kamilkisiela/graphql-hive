@@ -4,6 +4,7 @@ import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 import { Input } from '@/components/ui/primitives/input/input';
 import { useConfigurationHelper } from '../form-helper';
 import { PolicyConfigBox } from '../policy-config-box';
+import * as styles from './string-config.css';
 
 export const PolicyStringInputConfig = (props: {
   rule: string;
@@ -24,17 +25,21 @@ export const PolicyStringInputConfig = (props: {
   return (
     <PolicyConfigBox
       title={
-        <div className="flex items-center">
+        <div className={styles.policyStringInputConfigDiv}>
           <div>{props.title}</div>
           {props.tooltip ? (
             <Popover
               trigger={
-                <button type="button" aria-label="About this option" className="ml-2 text-accent">
-                  <InfoIcon className="size-4" />
+                <button
+                  type="button"
+                  aria-label="About this option"
+                  className={styles.policyStringInputConfigButton}
+                >
+                  <InfoIcon className={styles.policyStringInputConfigInfoIcon} />
                 </button>
               }
               openOnHover
-              content={<p className="text-sm text-fg-default">{props.tooltip}</p>}
+              content={<p className={styles.policyStringInputConfigP}>{props.tooltip}</p>}
             />
           ) : null}
         </div>

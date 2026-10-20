@@ -3,6 +3,7 @@ import { createPreview, type NavPath } from 'react-foundry';
 import { Combobox } from '@/components/ui/combobox';
 import { Markdown } from '@/components/ui/markdown';
 import { CallSite, InventoryList } from './shared';
+import * as styles from './v2-leftovers.preview.css';
 
 export const nav: NavPath = 'Inventory/V2Leftovers';
 
@@ -65,13 +66,13 @@ function ComboboxExample() {
   const [value, setValue] = useState([{ label: 'web-app', value: 'web-app' }]);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className={styles.comboboxExampleDiv}>
       <CallSite
         source="pages/target-settings.tsx:356, :429"
         origin="v2"
         note="Two identical multi-select tag pickers - client names and app deployment names - both mapping a string[] to { label, value } pairs on the way in and back on the way out. Type to filter, click an x to remove."
       >
-        <div className="w-[28rem]">
+        <div className={styles.comboboxExampleDiv2}>
           <Combobox
             name="clientNames"
             placeholder="Select..."
@@ -93,11 +94,11 @@ function ComboboxExample() {
         origin="v2"
         note="The third site, w-full inside a policy rule row. Same shape again: three call sites, one pattern, and react-select carried for all of it. With v2/autocomplete deleted, this is the dependency's last consumer."
       >
-        <div className="w-[28rem]">
+        <div className={styles.comboboxExampleDiv3}>
           <Combobox
             name="options"
             placeholder="Select Options"
-            className="w-full"
+            className={styles.comboboxExampleCombobox}
             options={[
               { label: 'camelCase', value: 'camelCase' },
               { label: 'PascalCase', value: 'PascalCase' },
@@ -119,15 +120,15 @@ function ComboboxExample() {
 export const MarkdownPreview = createPreview({
   label: 'Markdown',
   render: () => (
-    <div className="flex flex-col gap-8">
+    <div className={styles.div}>
       <CallSite
         source="components/target/explorer/common.tsx:26"
         origin="v2"
         note="Renders a GraphQL schema description. snarkdown converts, dompurify sanitises, and the result goes in through dangerouslySetInnerHTML - the sanitiser is the only thing between a schema description and script injection, so it is load-bearing rather than decorative. Styling comes from a global .hive-markdown class in index.css, not from the component."
       >
-        <div className="w-[32rem]">
+        <div className={styles.div2}>
           <Markdown
-            className="text-left text-sm text-fg-secondary"
+            className={styles.markdown}
             content={
               'The `products` connection returns a paginated list.\n\nSee the [pagination guide](https://example.com) for cursor semantics. Supports **forward** and *backward* paging.'
             }
@@ -140,9 +141,9 @@ export const MarkdownPreview = createPreview({
         origin="v2"
         note="The same component inside a tooltip, rendering a deprecation reason. Markdown in a tooltip is the case most likely to overflow, since the content is author-supplied."
       >
-        <div className="w-[20rem] rounded-md border border-line p-2">
+        <div className={styles.div3}>
           <Markdown
-            className="text-fg-secondary"
+            className={styles.markdown2}
             content="Use `productsConnection` instead. This field will be removed in **v3**."
           />
         </div>
@@ -153,10 +154,10 @@ export const MarkdownPreview = createPreview({
         origin="v2"
         note="A policy rule description at text-sm, followed by a DocsLink. Five sites in total and four of the five pass a className, all of them adjusting colour or size."
       >
-        <div className="w-[32rem]">
+        <div className={styles.div4}>
           <Markdown
             content="Requires all types and fields to have a description. Set `ignoreTypes` to skip specific types."
-            className="text-sm"
+            className={styles.markdown3}
           />
         </div>
       </CallSite>

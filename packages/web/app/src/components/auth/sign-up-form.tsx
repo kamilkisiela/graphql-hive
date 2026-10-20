@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from '@/components/ui/primitives/form/form';
 import { Input } from '@/components/ui/primitives/input/input';
+import * as styles from './sign-up-form.css';
 
 export const PasswordStringModel = z
   .string({
@@ -52,7 +53,7 @@ export function SignUpForm(props: {
   const { form } = props;
   return (
     <Form form={form} onSubmit={props.onSubmit}>
-      <div className="grid grid-cols-2 gap-4">
+      <div className={styles.signUpFormDiv}>
         <FormField
           control={form.control}
           name="firstName"

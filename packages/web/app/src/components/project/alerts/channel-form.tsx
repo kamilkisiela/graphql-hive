@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/primitives/form/form';
 import { Input } from '@/components/ui/primitives/input/input';
 import { AlertChannelType } from '@/gql/graphql';
+import * as styles from './channel-form.css';
 
 /** The dialog footer's submit button lives outside the form and targets it by this id. */
 export const CHANNEL_FORM_ID = 'create-channel-form';
@@ -144,7 +145,7 @@ export function ChannelForm(props: {
                   href={setupGuide.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm text-accent hover:text-accent-muted"
+                  className={styles.channelFormA}
                 >
                   {setupGuide.label}
                 </a>

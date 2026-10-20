@@ -3,6 +3,7 @@ import { Checkbox } from '@/components/ui/primitives/checkbox/checkbox';
 import { Tooltip } from '@/components/ui/primitives/floating/tooltip/tooltip';
 import { useConfigurationHelper } from '../form-helper';
 import { PolicyConfigBox } from '../policy-config-box';
+import * as styles from './boolean-config.css';
 
 export const PolicyBooleanToggle = (props: {
   rule: string;
@@ -22,7 +23,7 @@ export const PolicyBooleanToggle = (props: {
 
   const label = (
     <label
-      className="pb-1 pl-2 font-mono text-xs text-fg-secondary"
+      className={styles.policyBooleanToggleLabel}
       htmlFor={`${props.rule}_${props.propertyName}`}
     >
       {props.title}
@@ -39,7 +40,7 @@ export const PolicyBooleanToggle = (props: {
           onCheckedChange={newValue => setConfig(props.propertyName, newValue)}
         />
       </div>
-      <div className="grow">
+      <div className={styles.policyBooleanToggleDiv}>
         {props.tooltip ? <Tooltip trigger={label} content={props.tooltip} /> : label}
       </div>
     </PolicyConfigBox>

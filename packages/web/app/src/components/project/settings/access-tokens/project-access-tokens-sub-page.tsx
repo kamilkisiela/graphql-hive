@@ -12,6 +12,7 @@ import { AccessTokenCreatedDialog } from '../../../organization/settings/access-
 import { CreateAccessTokenState } from '../../../organization/settings/access-tokens/access-tokens-sub-page';
 import { CreateProjectAccessTokenSheetContent } from './create-project-access-token-sheet-content';
 import { ProjectAccessTokensTable } from './project-access-tokens-table';
+import * as styles from './project-access-tokens-sub-page.css';
 
 export const ProjectAccessTokensSubPage_OrganizationQuery = graphql(`
   query ProjectAccessTokensSubPage_OrganizationQuery(
@@ -63,7 +64,10 @@ export function ProjectAccessTokensSubPage(): React.ReactNode {
           text: 'Learn more about Access Tokens',
         }}
       />
-      <div className="my-3.5 space-y-4" data-cy="organization-settings-personal-access-tokens">
+      <div
+        className={styles.projectAccessTokensSubPageDiv}
+        data-cy="organization-settings-personal-access-tokens"
+      >
         {query.data?.organization?.project ? (
           <>
             {/* Outside the keyed sheet, so it is still there to take focus back on close. */}

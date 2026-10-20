@@ -7,6 +7,7 @@ import { TimeSeriesChart } from '@/components/ui/primitives/chart/time-series-ch
 import Stat from '@/components/ui/stat';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import type { ColumnDef } from '@tanstack/react-table';
+import * as styles from './admin-stats.css';
 
 interface Organization {
   id: string;
@@ -244,8 +245,8 @@ export function AdminStats({
   return (
     <DataWrapper query={query} organizationSlug={null}>
       {({ data }) => (
-        <div className="flex flex-col gap-6">
-          <div className="flex justify-between rounded-md border border-line bg-surface-inset p-5">
+        <div className={styles.adminStatsDiv}>
+          <div className={styles.adminStatsDiv2}>
             <OverallStat label="Users" value={overall.users} />
             <OverallStat label="Organizations" value={overall.organizations} />
             <OverallStat label="Projects" value={overall.projects} />

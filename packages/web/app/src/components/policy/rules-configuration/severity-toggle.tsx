@@ -5,6 +5,7 @@ import { ToggleGroup } from '@/components/ui/primitives/toggle-group/toggle-grou
 import { RuleInstanceSeverityLevel } from '@/gql/graphql';
 import { useConfigurationHelper } from '../form-helper';
 import { PolicyConfigBox } from '../policy-config-box';
+import * as styles from './severity-toggle.css';
 
 export const SeverityLevelToggle = (props: { rule: string; canTurnOff: boolean }): ReactElement => {
   const config = useConfigurationHelper().ruleConfig(props.rule);
@@ -15,9 +16,11 @@ export const SeverityLevelToggle = (props: { rule: string; canTurnOff: boolean }
       icon: (active: boolean) => (
         <TriangleAlert
           className={clsx(
-            'size-4',
-            active ? 'text-warning' : 'text-fg-subtle',
-            'hover:text-warning',
+            styles.severityLevelToggleTriangleAlert,
+            active
+              ? styles.severityLevelToggleTriangleAlert2
+              : styles.severityLevelToggleTriangleAlert3,
+            styles.severityLevelToggleTriangleAlert4,
           )}
         />
       ),
@@ -28,9 +31,9 @@ export const SeverityLevelToggle = (props: { rule: string; canTurnOff: boolean }
       icon: (active: boolean) => (
         <CircleX
           className={clsx(
-            'size-4',
-            active ? 'text-critical' : 'text-fg-subtle',
-            'hover:text-critical',
+            styles.severityLevelToggleCircleX,
+            active ? styles.severityLevelToggleCircleX2 : styles.severityLevelToggleCircleX3,
+            styles.severityLevelToggleCircleX4,
           )}
         />
       ),
@@ -43,14 +46,20 @@ export const SeverityLevelToggle = (props: { rule: string; canTurnOff: boolean }
       label: 'Disables a rule defined at the organization level',
       icon: (active: boolean) => (
         <CircleMinus
-          className={clsx('size-4', active ? 'text-fg' : 'text-fg-subtle', 'hover:text-fg')}
+          className={clsx(
+            styles.severityLevelToggleCircleMinus,
+            active
+              ? styles.severityLevelToggleCircleMinus2
+              : styles.severityLevelToggleCircleMinus3,
+            styles.severityLevelToggleCircleMinus4,
+          )}
         />
       ),
     });
   }
 
   return (
-    <PolicyConfigBox title="severity" className="row-start-1 row-end-6 first:pl-0">
+    <PolicyConfigBox title="severity" className={styles.severityLevelTogglePolicyConfigBox}>
       <ToggleGroup
         options={options.map(level => ({
           value: level.value,

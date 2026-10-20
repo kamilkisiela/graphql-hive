@@ -14,6 +14,7 @@ import {
   ExternalCompositionFormSchema,
   type ExternalCompositionFormValues,
 } from './external-composition-form';
+import * as styles from './external-composition.css';
 
 const ExternalCompositionStatus_TestQuery = graphql(`
   query ExternalCompositionStatus_TestQuery($selector: TestExternalSchemaCompositionInput!) {
@@ -120,9 +121,9 @@ const ExternalCompositionStatus = () => {
       {testState === TestState.LOADING ? (
         <Tooltip
           trigger={
-            <span className="inline-flex">
+            <span className={styles.externalCompositionStatusSpan}>
               <RefreshCw
-                className="size-5 animate-spin cursor-default text-fg-secondary"
+                className={styles.externalCompositionStatusRefreshCw}
                 onClick={e => e.preventDefault()}
               />
             </span>
@@ -142,7 +143,7 @@ const ExternalCompositionStatus = () => {
                 executeTestQuery();
               }}
             >
-              <RotateCw className="size-5" />
+              <RotateCw className={styles.externalCompositionStatusRotateCw} />
             </button>
           }
           content="Execute test"
@@ -153,11 +154,8 @@ const ExternalCompositionStatus = () => {
         <Tooltip
           defaultOpen
           trigger={
-            <span className="inline-flex">
-              <X
-                className="size-5 cursor-default text-critical"
-                onClick={e => e.preventDefault()}
-              />
+            <span className={styles.externalCompositionStatusSpan2}>
+              <X className={styles.externalCompositionStatusX} onClick={e => e.preventDefault()} />
             </span>
           }
           content={error}
@@ -168,9 +166,9 @@ const ExternalCompositionStatus = () => {
       {testState === TestState.SUCCESS && !hidden ? (
         <Tooltip
           trigger={
-            <span className="inline-flex">
+            <span className={styles.externalCompositionStatusSpan3}>
               <Check
-                className="size-5 cursor-default text-success"
+                className={styles.externalCompositionStatusCheck}
                 onClick={e => e.preventDefault()}
               />
             </span>
@@ -285,9 +283,9 @@ export const ExternalCompositionSettings = (props: {
   }
 
   return (
-    <div className="flex flex-col items-start gap-y-6">
+    <div className={styles.externalCompositionSettingsDiv}>
       <div>
-        <p className="max-w-2xl text-sm text-fg-secondary">
+        <p className={styles.externalCompositionSettingsP}>
           For advanced users, you can configure an endpoint for external schema compositions. This
           can be used to implement custom composition logic.
         </p>
@@ -296,7 +294,7 @@ export const ExternalCompositionSettings = (props: {
           text="Read about external schema composition in our documentation."
         />
       </div>
-      <div className="flex justify-between">
+      <div className={styles.externalCompositionSettingsDiv2}>
         <ExternalCompositionForm
           form={form}
           onSubmit={onSubmit}

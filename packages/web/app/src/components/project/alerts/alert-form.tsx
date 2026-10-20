@@ -10,6 +10,7 @@ import {
   FormMessage,
 } from '@/components/ui/primitives/form/form';
 import { AlertType } from '@/gql/graphql';
+import * as styles from './alert-form.css';
 
 /** The dialog footer's submit button lives outside the form and targets it by this id. */
 export const ALERT_FORM_ID = 'create-alert-form';
@@ -116,7 +117,7 @@ export function AlertForm(props: {
           </FormItem>
         )}
       />
-      {props.error ? <div className="text-sm text-critical">{props.error}</div> : null}
+      {props.error ? <div className={styles.alertFormDiv}>{props.error}</div> : null}
     </Form>
   );
 }

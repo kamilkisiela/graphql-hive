@@ -15,6 +15,7 @@ import {
 } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import * as styles from './native-composition.css';
 
 const IncrementalNativeCompositionSwitch_TargetFragment = graphql(`
   fragment IncrementalNativeCompositionSwitch_TargetFragment on Target {
@@ -44,20 +45,20 @@ const IncrementalNativeCompositionSwitch = (props: {
   return (
     <div
       className={cn(
-        'flex flex-row items-center gap-x-10 rounded-sm border border-line bg-surface-card p-4',
-        mutation.fetching && 'animate-pulse',
+        styles.incrementalNativeCompositionSwitchDiv,
+        mutation.fetching && styles.incrementalNativeCompositionSwitchDiv2,
       )}
     >
       <div>
-        <div className="text-sm font-semibold">{target.slug}</div>
-        <div className="min-w-32 text-xs">
+        <div className={styles.incrementalNativeCompositionSwitchDiv3}>{target.slug}</div>
+        <div className={styles.incrementalNativeCompositionSwitchDiv4}>
           {target.experimental_forcedLegacySchemaComposition ? 'Legacy' : 'Native'} composition
         </div>
       </div>
       <div>
         <Tooltip
           trigger={
-            <span className="inline-flex">
+            <span className={styles.incrementalNativeCompositionSwitchSpan}>
               <Switch
                 disabled={mutation.fetching}
                 onCheckedChange={nativeComposition => {
@@ -77,7 +78,7 @@ const IncrementalNativeCompositionSwitch = (props: {
           sideOffset={2}
           content={
             <>
-              <span className="font-semibold">
+              <span className={styles.incrementalNativeCompositionSwitchSpan2}>
                 {target.experimental_forcedLegacySchemaComposition ? 'Enable' : 'Disable'}
               </span>{' '}
               native composition for the target
@@ -214,28 +215,28 @@ export function NativeCompositionSettings(props: {
   }, [toast, props.onMutate, organization.slug, project.slug]);
 
   return (
-    <div className="flex flex-col items-start gap-y-6">
+    <div className={styles.nativeCompositionSettingsDiv}>
       <div>
-        <p className="text-sm text-fg-secondary">
+        <p className={styles.nativeCompositionSettingsP}>
           Recommended for most users. Use native GraphQL Federation v2 composition for your project.
         </p>
       </div>
 
       {props.activeCompositionMode === 'native' &&
       project.experimental_nativeCompositionPerTarget === true ? (
-        <div className="space-y-4">
+        <div className={styles.nativeCompositionSettingsDiv2}>
           <div>
-            <div className="flex flex-row items-center gap-x-2">
-              <div className="font-semibold">Incremental migration</div>
+            <div className={styles.nativeCompositionSettingsDiv3}>
+              <div className={styles.nativeCompositionSettingsDiv4}>Incremental migration</div>
               <Badge content="experimental" variants={{ variant: 'outline' }} />
             </div>
-            <div className="text-sm text-fg-secondary">
+            <div className={styles.nativeCompositionSettingsDiv5}>
               Your project is using the experimental incremental migration feature. <br />
               Migrate targets one by one to the native schema composition.
             </div>
           </div>
           <div>
-            <div className="flex flex-row gap-4">
+            <div className={styles.nativeCompositionSettingsDiv6}>
               {project.targets.edges.map(edge => (
                 <IncrementalNativeCompositionSwitch key={edge.node.id} target={edge.node} />
               ))}
@@ -247,34 +248,34 @@ export function NativeCompositionSettings(props: {
       {projectQuery.fetching ? (
         <Spinner />
       ) : projectQuery.error ? (
-        <div className="flex flex-row items-center gap-x-4">
+        <div className={styles.nativeCompositionSettingsDiv7}>
           <div>
-            <HeartCrackIcon className="size-10 text-critical" />
+            <HeartCrackIcon className={styles.nativeCompositionSettingsHeartCrackIcon} />
           </div>
           <div>
-            <div className="text-base font-semibold">
+            <div className={styles.nativeCompositionSettingsDiv8}>
               Failed to check compatibility. Please try again later.
             </div>
           </div>
         </div>
       ) : projectQuery.data?.project ? (
-        <div className="flex flex-row items-center gap-x-4">
+        <div className={styles.nativeCompositionSettingsDiv9}>
           <div>
             {projectQuery.data.project.nativeFederationCompatibility.status ===
             NativeFederationCompatibilityStatusType.Compatible ? (
-              <PartyPopperIcon className="size-10 text-success" />
+              <PartyPopperIcon className={styles.nativeCompositionSettingsPartyPopperIcon} />
             ) : null}
             {projectQuery.data.project.nativeFederationCompatibility.status ===
             NativeFederationCompatibilityStatusType.Incompatible ? (
-              <HeartCrackIcon className="size-10 text-critical" />
+              <HeartCrackIcon className={styles.nativeCompositionSettingsHeartCrackIcon2} />
             ) : null}
             {projectQuery.data.project.nativeFederationCompatibility.status ===
             NativeFederationCompatibilityStatusType.Unknown ? (
-              <FlaskConicalIcon className="size-10 text-accent" />
+              <FlaskConicalIcon className={styles.nativeCompositionSettingsFlaskConicalIcon} />
             ) : null}
           </div>
           <div>
-            <div className="text-base font-semibold">
+            <div className={styles.nativeCompositionSettingsDiv10}>
               {projectQuery.data.project.nativeFederationCompatibility.status ===
               NativeFederationCompatibilityStatusType.Compatible
                 ? 'Your project is compatible'
@@ -288,13 +289,13 @@ export function NativeCompositionSettings(props: {
                 ? 'Unclear whether your project is compatible'
                 : null}
             </div>
-            <div className="text-sm text-fg-secondary">
+            <div className={styles.nativeCompositionSettingsDiv11}>
               {projectQuery.data.project.nativeFederationCompatibility.status ===
               NativeFederationCompatibilityStatusType.Compatible ? (
                 <>
                   Subgraphs of this project are composed and validated correctly by our{' '}
                   <a
-                    className="font-semibold text-fg-secondary underline-offset-4 hover:underline"
+                    className={styles.nativeCompositionSettingsA}
                     href="https://github.com/the-guild-org/federation"
                   >
                     Open Source composition library
@@ -307,7 +308,7 @@ export function NativeCompositionSettings(props: {
                 <>
                   Our{' '}
                   <a
-                    className="font-semibold text-fg-secondary underline-offset-4 hover:underline"
+                    className={styles.nativeCompositionSettingsA2}
                     href="https://github.com/the-guild-org/federation"
                   >
                     Open Source composition library
@@ -333,7 +334,7 @@ export function NativeCompositionSettings(props: {
                   Your project appears to lack any subgraphs at the moment, making it impossible for
                   us to assess compatibility with our{' '}
                   <a
-                    className="font-semibold text-fg-secondary underline-offset-4 hover:underline"
+                    className={styles.nativeCompositionSettingsA3}
                     href="https://github.com/the-guild-org/federation"
                   >
                     Open Source composition library
@@ -346,14 +347,14 @@ export function NativeCompositionSettings(props: {
         </div>
       ) : null}
 
-      <div className="flex flex-row items-center gap-x-2">
+      <div className={styles.nativeCompositionSettingsDiv12}>
         <Button
           onClick={() => enableNativeComposition()}
           disabled={isMutating || props.activeCompositionMode === 'native'}
         >
           {isMutating ? (
             <>
-              <RefreshCcwIcon className="mr-2 size-4 animate-spin" />
+              <RefreshCcwIcon className={styles.nativeCompositionSettingsRefreshCcwIcon} />
               Please wait
             </>
           ) : props.activeCompositionMode === 'native' ? (

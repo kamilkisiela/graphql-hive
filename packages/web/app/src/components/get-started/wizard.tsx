@@ -2,6 +2,7 @@ import { ReactElement } from 'react';
 import { Circle, CircleCheck } from 'lucide-react';
 import { Sheet } from '@/components/ui/primitives/overlays/sheet/sheet';
 import { cn } from '@/lib/utils';
+import * as styles from './wizard.css';
 
 export function GetStartedWizard({
   isOpen,
@@ -28,7 +29,7 @@ export function GetStartedWizard({
       title="Get Started"
       description="Follow the steps to set up your organization and experience the full power of GraphQL Hive"
     >
-      <div className="space-y-3">
+      <div className={styles.getStartedWizardDiv}>
         <Task
           link={docsUrl('/schema-registry/management/projects#create-a-new-project')}
           completed={tasks.creatingProject}
@@ -91,20 +92,17 @@ function Task({
       href={link ?? undefined}
       target="_blank"
       rel="noreferrer"
-      className={cn(
-        'relative block rounded-lg border border-line bg-surface-hover p-4 hover:bg-surface-selected',
-        completed ? 'opacity-70' : null,
-      )}
+      className={cn(styles.taskA, completed ? styles.taskA2 : null)}
     >
-      <div className="flex items-start space-x-3">
+      <div className={styles.taskDiv}>
         {completed ? (
-          <CircleCheck className="size-5 text-accent" />
+          <CircleCheck className={styles.taskCircleCheck} />
         ) : (
-          <Circle className="size-5 text-accent" />
+          <Circle className={styles.taskCircle} />
         )}
-        <div className="w-0 flex-1">
-          <p className="leading-5 font-medium text-fg">{title}</p>
-          <p className="mt-1 text-sm text-fg-secondary">{description}</p>
+        <div className={styles.taskDiv2}>
+          <p className={styles.taskP}>{title}</p>
+          <p className={styles.taskP2}>{description}</p>
         </div>
       </div>
     </a>

@@ -4,6 +4,7 @@ import { Combobox } from '@/components/ui/combobox';
 import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 import { useConfigurationHelper } from '../form-helper';
 import { PolicyConfigBox } from '../policy-config-box';
+import * as styles from './multiselect-config.css';
 
 export const PolicyMultiSelect = (props: {
   rule: string;
@@ -29,17 +30,21 @@ export const PolicyMultiSelect = (props: {
   return (
     <PolicyConfigBox
       title={
-        <div className="flex items-center">
+        <div className={styles.policyMultiSelectDiv}>
           <div>{props.title}</div>
           {props.tooltip ? (
             <Popover
               trigger={
-                <button type="button" aria-label="About this option" className="ml-2 text-accent">
-                  <InfoIcon className="size-4" />
+                <button
+                  type="button"
+                  aria-label="About this option"
+                  className={styles.policyMultiSelectButton}
+                >
+                  <InfoIcon className={styles.policyMultiSelectInfoIcon} />
                 </button>
               }
               openOnHover
-              content={<p className="text-sm text-fg-default">{props.tooltip}</p>}
+              content={<p className={styles.policyMultiSelectP}>{props.tooltip}</p>}
             />
           ) : null}
         </div>
@@ -49,7 +54,7 @@ export const PolicyMultiSelect = (props: {
         name="options"
         inputId={`${props.rule}_${props.propertyName}`}
         placeholder="Select Options"
-        className="w-full"
+        className={styles.policyMultiSelectCombobox}
         onBlur={() => {}}
         onChange={newValue => {
           setConfig(

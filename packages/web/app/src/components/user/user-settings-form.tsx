@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/primitives/form/form';
 import { Input } from '@/components/ui/primitives/input/input';
+import * as styles from './user-settings-form.css';
 
 /** The dialog footer's submit button lives outside the form and targets it by this id. */
 export const USER_SETTINGS_FORM_ID = 'user-settings-form';
@@ -56,7 +57,7 @@ export function UserSettingsForm(props: {
           </FormItem>
         )}
       />
-      {props.error ? <div className="text-sm text-critical">{props.error}</div> : null}
+      {props.error ? <div className={styles.userSettingsFormDiv}>{props.error}</div> : null}
     </Form>
   );
 }

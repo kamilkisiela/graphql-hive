@@ -9,6 +9,7 @@ import { PolicyEnumSelect } from './enum-config';
 import { PolicyMultiSelect } from './multiselect-config';
 import { NamingConventionConfigEditor } from './naming-convention-rule-editor';
 import { PolicyStringInputConfig } from './string-config';
+import * as styles from './index.css';
 
 /** Rule configs are checked against their JSON Schema by the policy service on save. */
 export const PolicyFormSchema = z.object({
@@ -30,7 +31,11 @@ function composeTooltipContent(input: {
 }): undefined | ReactElement {
   const elements = [
     input.description ? (
-      <Markdown key="docs" className="text-sm" content={input.description} />
+      <Markdown
+        key="docs"
+        className={styles.composeTooltipContentMarkdown}
+        content={input.description}
+      />
     ) : null,
     input.documentationUrl ? (
       <DocsLink key="link" href={input.documentationUrl} text="read more" />

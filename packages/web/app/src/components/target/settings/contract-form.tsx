@@ -50,10 +50,10 @@ function TagSuggestions(props: {
           key={value}
           type="button"
           onClick={() => props.onToggle(value)}
-          className={itemVariants({
-            selected: props.selected.includes(value),
-            className: 'w-full hover:bg-surface-hover hover:text-fg',
-          })}
+          className={cn(
+            itemVariants({ selected: props.selected.includes(value) }),
+            'w-full hover:bg-surface-hover hover:text-fg',
+          )}
         >
           <Check
             className={cn(

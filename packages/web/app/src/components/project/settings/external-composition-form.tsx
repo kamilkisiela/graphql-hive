@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from '@/components/ui/primitives/form/form';
 import { Input } from '@/components/ui/primitives/input/input';
+import * as styles from './external-composition-form.css';
 
 export const ExternalCompositionFormSchema = z.object({
   endpoint: z
@@ -43,7 +44,7 @@ export function ExternalCompositionForm(props: {
   const { form } = props;
   return (
     <Form form={form} onSubmit={props.onSubmit}>
-      <div className="flex flex-wrap gap-x-24 gap-y-5">
+      <div className={styles.externalCompositionFormDiv}>
         <FormField
           control={form.control}
           name="endpoint"
@@ -53,7 +54,7 @@ export function ExternalCompositionForm(props: {
                 label="HTTP Endpoint"
                 tooltip="A POST request will be sent to that endpoint"
               />
-              <div className="flex w-full items-center gap-2">
+              <div className={styles.externalCompositionFormDiv2}>
                 <FormControl>
                   <Input
                     width="md"
@@ -92,7 +93,7 @@ export function ExternalCompositionForm(props: {
           )}
         />
       </div>
-      {props.error ? <div className="text-xs text-critical">{props.error}</div> : null}
+      {props.error ? <div className={styles.externalCompositionFormDiv3}>{props.error}</div> : null}
       <div>
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {props.submitLabel}

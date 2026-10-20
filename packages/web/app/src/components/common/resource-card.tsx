@@ -6,6 +6,7 @@ import { Tooltip } from '@/components/ui/primitives/floating/tooltip/tooltip';
 import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
 import { pluralize } from '@/lib/utils';
+import * as styles from './resource-card.css';
 
 export function ResourceCard(props: {
   /** Names the resource in the schema-versions tooltip, and reserves a skeleton line for `subtitle`. */
@@ -44,12 +45,12 @@ export function ResourceCard(props: {
   const schemaVersionsInDateRange = useFormattedNumber(totalNumberOfVersions);
 
   return (
-    <div className="h-full self-start">
+    <div className={styles.resourceCardDiv}>
       <Card variants={{ onSurface: 'raised', interactive: true, bodyPadding: 'none' }}>
         {props.renderLink(
           <>
-            <div className="flex items-start gap-x-2">
-              <div className="grow">
+            <div className={styles.resourceCardDiv2}>
+              <div className={styles.resourceCardDiv3}>
                 <div>
                   <Sparkline
                     name="Requests"
@@ -58,31 +59,31 @@ export function ResourceCard(props: {
                     animation={props.name != null}
                   />
                 </div>
-                <div className="flex flex-row items-center justify-between gap-y-3 px-4 pt-4">
+                <div className={styles.resourceCardDiv4}>
                   {props.name != null ? (
                     <div>
-                      <h4 className="line-clamp-2 text-lg font-bold">{props.name}</h4>
+                      <h4 className={styles.resourceCardH4}>{props.name}</h4>
                       {props.subtitle ? (
-                        <p className="text-xs text-fg-default">{props.subtitle}</p>
+                        <p className={styles.resourceCardP}>{props.subtitle}</p>
                       ) : null}
                     </div>
                   ) : (
                     <div>
-                      <div className="h-4 w-48 animate-pulse rounded-full bg-surface-skeleton py-2" />
+                      <div className={styles.resourceCardDiv5} />
                       {/* Only reserve the second line for a kind that has a subtitle to load into. */}
                       {props.kind === 'project' ? (
-                        <div className="mt-4 h-2 w-24 animate-pulse rounded-full bg-surface-skeleton" />
+                        <div className={styles.resourceCardDiv6} />
                       ) : null}
                     </div>
                   )}
-                  <div className="flex flex-col gap-y-2 py-1">
+                  <div className={styles.resourceCardDiv7}>
                     {props.name != null ? (
                       <>
                         <Tooltip
                           trigger={
-                            <div className="flex flex-row items-center gap-x-2">
-                              <Globe className="size-4 text-fg-secondary" />
-                              <div className="text-xs">
+                            <div className={styles.resourceCardDiv8}>
+                              <Globe className={styles.resourceCardGlobe} />
+                              <div className={styles.resourceCardDiv9}>
                                 {requestsInDateRange}{' '}
                                 {pluralize(totalNumberOfRequests, 'request', 'requests')}
                               </div>
@@ -92,9 +93,9 @@ export function ResourceCard(props: {
                         />
                         <Tooltip
                           trigger={
-                            <div className="flex flex-row items-center gap-x-2">
-                              <History className="size-4 text-fg-secondary" />
-                              <div className="text-xs">
+                            <div className={styles.resourceCardDiv10}>
+                              <History className={styles.resourceCardHistory} />
+                              <div className={styles.resourceCardDiv11}>
                                 {schemaVersionsInDateRange}{' '}
                                 {pluralize(totalNumberOfVersions, 'commit', 'commits')}
                               </div>
@@ -105,8 +106,8 @@ export function ResourceCard(props: {
                       </>
                     ) : (
                       <>
-                        <div className="my-1 h-2 w-16 animate-pulse rounded-full bg-surface-skeleton" />
-                        <div className="my-1 h-2 w-16 animate-pulse rounded-full bg-surface-skeleton" />
+                        <div className={styles.resourceCardDiv12} />
+                        <div className={styles.resourceCardDiv13} />
                       </>
                     )}
                   </div>

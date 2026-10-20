@@ -4,6 +4,7 @@ import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { GetStartedWizard } from './wizard';
+import * as styles from './trigger.css';
 
 const GetStartedWizard_GetStartedProgress = graphql(`
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
@@ -38,21 +39,15 @@ export function GetStartedProgress(props: {
 
   return (
     <>
-      <button
-        onClick={toggle}
-        className={cn(
-          'cursor-pointer rounded-sm px-4 py-2 text-left hover:opacity-80',
-          props.className,
-        )}
-      >
-        <div className="text-sm font-medium text-fg-default">Get Started</div>
-        <div className="text-xs text-fg-secondary">
+      <button onClick={toggle} className={cn(styles.getStartedProgressButton, props.className)}>
+        <div className={styles.getStartedProgressDiv}>Get Started</div>
+        <div className={styles.getStartedProgressDiv2}>
           {remaining} remaining task{remaining > 1 ? 's' : ''}
         </div>
         <div>
-          <div className="relative mt-1 h-[5px] w-full overflow-hidden rounded-sm bg-accent-tint-strong">
+          <div className={styles.getStartedProgressDiv3}>
             <div
-              className="h-full bg-accent-muted"
+              className={styles.getStartedProgressDiv4}
               style={{ width: `${(completed / total) * 100}%` }}
             />
           </div>

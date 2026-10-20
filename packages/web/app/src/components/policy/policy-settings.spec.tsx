@@ -4,6 +4,7 @@ import { makeFragmentData } from '@/gql';
 import { RuleInstanceSeverityLevel, type SchemaPolicyInput } from '@/gql/graphql';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { PolicySettings, PolicySettings_SchemaPolicyFragment } from './policy-settings';
+import * as editorStyles from './rules-configuration/naming-convention-rule-editor.css';
 
 /** The stub the mocked urql query hook reads from. */
 const urql = vi.hoisted(() => ({
@@ -433,7 +434,9 @@ describe('PolicySettings', () => {
     await act(async () => {
       fireEvent.change(editor(), { target: { value: '{"types":' } });
     });
-    await waitFor(() => expect(editor().className).toContain('border-critical'));
+    await waitFor(() =>
+      expect(editor().className).toContain(editorStyles.namingConventionConfigEditorMonacoEditor2),
+    );
     expect(updateButton().disabled).toBe(true);
 
     // Configs are checked against the rule's JSON Schema by the policy service on save, not here.

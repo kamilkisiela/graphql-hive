@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import * as styles from './shared.css';
 
 /**
  * Shared furniture for the inventory previews in this folder.
@@ -29,13 +30,13 @@ export function CallSite(props: {
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <span className="flex items-center gap-1.5">
+    <div className={styles.callSiteDiv}>
+      <div className={styles.callSiteDiv2}>
+        <span className={styles.callSiteSpan}>
           <OriginTag origin={props.origin} />
-          <code className="font-mono text-xs text-fg-secondary">{props.source}</code>
+          <code className={styles.callSiteCode}>{props.source}</code>
         </span>
-        {props.note ? <p className="max-w-prose text-xs text-fg-default">{props.note}</p> : null}
+        {props.note ? <p className={styles.callSiteP}>{props.note}</p> : null}
       </div>
       {props.children}
     </div>
@@ -45,8 +46,8 @@ export function CallSite(props: {
 /** Several call sites that share a shape, shown together under one heading. */
 export function CallSiteGroup(props: { label: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-6">
-      <h3 className="text-sm font-medium text-fg">{props.label}</h3>
+    <section className={styles.callSiteGroupSection}>
+      <h3 className={styles.callSiteGroupH3}>{props.label}</h3>
       {props.children}
     </section>
   );
@@ -104,25 +105,20 @@ export function InventoryList(props: {
   entries: readonly InventoryEntry[];
 }) {
   return (
-    <div className="flex max-w-3xl flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <h3 className="text-sm font-medium text-fg">{props.component}</h3>
-        <p className="text-xs text-fg-default">{props.entries.length} call sites</p>
-        {props.summary ? (
-          <div className="max-w-prose text-xs text-fg-default">{props.summary}</div>
-        ) : null}
+    <div className={styles.inventoryListDiv}>
+      <div className={styles.inventoryListDiv2}>
+        <h3 className={styles.inventoryListH3}>{props.component}</h3>
+        <p className={styles.inventoryListP}>{props.entries.length} call sites</p>
+        {props.summary ? <div className={styles.inventoryListDiv3}>{props.summary}</div> : null}
       </div>
-      <ul className="flex flex-col">
+      <ul className={styles.inventoryListUl}>
         {props.entries.map(entry => (
-          <li
-            key={entry.source}
-            className="flex flex-col gap-0.5 border-b border-line py-2 last:border-b-0"
-          >
-            <span className="flex items-center gap-1.5">
+          <li key={entry.source} className={styles.inventoryListLi}>
+            <span className={styles.inventoryListSpan}>
               <OriginTag origin={entry.origin} />
-              <code className="font-mono text-xs text-fg-default">{entry.source}</code>
+              <code className={styles.inventoryListCode}>{entry.source}</code>
             </span>
-            <span className="text-xs text-fg-secondary">
+            <span className={styles.inventoryListSpan2}>
               {entry.what}
               {entry.coveredBy ? ` — covered by "${entry.coveredBy}"` : null}
             </span>

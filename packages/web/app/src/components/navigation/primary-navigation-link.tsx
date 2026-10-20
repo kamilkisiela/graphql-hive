@@ -1,4 +1,5 @@
 import { Link, LinkProps } from '@tanstack/react-router';
+import * as styles from './primary-navigation-link.css';
 
 type PrimaryNavigationLinkProps = {
   linkText: string;
@@ -7,11 +8,7 @@ type PrimaryNavigationLinkProps = {
 
 export function PrimaryNavigationLink({ linkProps, linkText }: PrimaryNavigationLinkProps) {
   return (
-    <Link
-      to={linkProps.to}
-      params={linkProps.params}
-      className="max-w-[200px] shrink-0 truncate text-sm font-medium text-fg-default"
-    >
+    <Link to={linkProps.to} params={linkProps.params} className={styles.primaryNavigationLinkLink}>
       {linkText}
     </Link>
   );

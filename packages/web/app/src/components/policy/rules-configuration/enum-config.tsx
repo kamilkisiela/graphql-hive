@@ -4,6 +4,7 @@ import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 import { ToggleGroup } from '@/components/ui/primitives/toggle-group/toggle-group';
 import { useConfigurationHelper } from '../form-helper';
 import { PolicyConfigBox } from '../policy-config-box';
+import * as styles from './enum-config.css';
 
 export const PolicyEnumSelect = (props: {
   rule: string;
@@ -28,17 +29,21 @@ export const PolicyEnumSelect = (props: {
   return (
     <PolicyConfigBox
       title={
-        <div className="flex items-center">
+        <div className={styles.policyEnumSelectDiv}>
           <div>{props.title}</div>
           {props.tooltip ? (
             <Popover
               trigger={
-                <button type="button" aria-label="About this option" className="ml-2 text-accent">
-                  <InfoIcon className="size-4" />
+                <button
+                  type="button"
+                  aria-label="About this option"
+                  className={styles.policyEnumSelectButton}
+                >
+                  <InfoIcon className={styles.policyEnumSelectInfoIcon} />
                 </button>
               }
               openOnHover
-              content={<p className="text-sm text-fg-default">{props.tooltip}</p>}
+              content={<p className={styles.policyEnumSelectP}>{props.tooltip}</p>}
             />
           ) : null}
         </div>

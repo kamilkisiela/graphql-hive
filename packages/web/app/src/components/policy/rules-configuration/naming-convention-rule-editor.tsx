@@ -5,6 +5,7 @@ import { Spinner } from '@/components/ui/primitives/spinner/spinner';
 import { cn } from '@/lib/utils';
 import MonacoEditor, { type Monaco } from '@monaco-editor/react';
 import { useConfigurationHelper } from '../form-helper';
+import * as styles from './naming-convention-rule-editor.css';
 
 const DEFAULT_VALUE = {
   types: 'PascalCase',
@@ -63,15 +64,15 @@ export function NamingConventionConfigEditor(props: {
   const validationErrorMessage = getValidationStatus('').message;
 
   return (
-    <div className="col-span-4">
+    <div className={styles.namingConventionConfigEditorDiv}>
       <MonacoEditor
         theme={monacoTheme}
         loading={<Spinner />}
         height="40vh"
         beforeMount={handleEditorWillMount}
         className={cn(
-          'rounded-md border border-transparent',
-          validationErrorMessage ? 'border-critical' : '',
+          styles.namingConventionConfigEditorMonacoEditor,
+          validationErrorMessage ? styles.namingConventionConfigEditorMonacoEditor2 : '',
         )}
         width="100%"
         language="json"
