@@ -3,8 +3,7 @@
 '@graphql-hive/apollo': patch
 '@graphql-hive/envelop': patch
 '@graphql-hive/yoga': patch
+'@graphql-hive/gateway-plugin-console-sdk': patch
 ---
 
-Report scalars returned by fields as used schema coordinates, including built-in scalars such as `String` and `ID`. Previously, a scalar was only reported when it was used as an input (argument, input object field or variable), so a scalar that was only returned by fields was considered unused.
-
-**Every operation hash changes after upgrading.** The operation hash is computed from the reported schema coordinates, and every operation that selects a scalar field now reports additional coordinates. In Hive Console Insights, each operation appears as a new entry with a new hash once a client on this version starts reporting; the entries under the previous hash remain until their retention period expires. Links, saved filters and alerts that reference an operation by hash need to be updated.
+Report the type returned by every field and the type condition of every fragment as used schema coordinates: scalars (including built-ins such as `String` and `ID`), enums, objects, interfaces and unions. Previously, a type was only reported when it was used as an input or when one of its own fields was selected, so a scalar that was only returned by fields or a union was considered unused, and removing it passed schema checks as safe based on usage.

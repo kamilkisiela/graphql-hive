@@ -92,7 +92,7 @@ describe('collectSchemaCoordinates', () => {
       typeInfo: new TypeInfo(schema),
     });
 
-    expect(Array.from(result)).toEqual(['Query.hello', 'Option.World', 'Option.You']);
+    expect(Array.from(result)).toEqual(['Query.hello', 'Option', 'Option.World', 'Option.You']);
   });
 
   test('collected fields of interface selection set does not contain exact resolutions (User.id, Animal.id)', () => {
@@ -126,7 +126,7 @@ describe('collectSchemaCoordinates', () => {
       variables: null,
       typeInfo: new TypeInfo(schema),
     });
-    expect(Array.from(result)).toEqual(['Query.node', 'Node.id', 'ID']);
+    expect(Array.from(result)).toEqual(['Query.node', 'Node', 'Node.id', 'ID']);
   });
   test('collected fields contain exact resolutions on inline fragment spread', () => {
     const schema = buildSchema(/* GraphQL */ `
@@ -162,7 +162,9 @@ describe('collectSchemaCoordinates', () => {
       variables: null,
       typeInfo: new TypeInfo(schema),
     });
-    expect(Array.from(result).sort()).toEqual(['Query.node', 'Node.id', 'User.id', 'ID'].sort());
+    expect(Array.from(result).sort()).toEqual(
+      ['Query.node', 'Node', 'Node.id', 'ID', 'User', 'User.id'].sort(),
+    );
   });
 
   test('custom scalar as argument', () => {
@@ -674,6 +676,7 @@ describe('collectSchemaCoordinates', () => {
         'ID',
         'Int',
         'PaginationInput.limit',
+        'Project',
         'Project.id',
         'Project.name',
         'ProjectType.FEDERATION',
@@ -685,5 +688,106 @@ describe('collectSchemaCoordinates', () => {
         'String',
       ].sort(),
     );
+  });
+
+  test('object, union and interface return types and fragment type conditions', () => {
+    const schema = buildSchema(/* GraphQL */ `
+      type Query {
+        search: [SearchResult!]!
+        node: Node
+      }
+
+      union SearchResult = Movie | Book
+
+      interface Node {
+        id: ID!
+      }
+
+      type Movie implements Node {
+        id: ID!
+        title: String
+      }
+
+      type Book implements Node {
+        id: ID!
+        author: Author
+      }
+
+      type Author {
+        name: String
+      }
+    `);
+    const result = collectSchemaCoordinates({
+      documentNode: parse(/* GraphQL */ `
+        query {
+          search {
+            ... on Movie {
+              title
+            }
+            ...BookFields
+          }
+          node {
+            ... on Movie {
+              id
+            }
+          }
+        }
+
+        fragment BookFields on Book {
+          author {
+            name
+          }
+        }
+      `),
+      schema,
+      processVariables: false,
+      variables: null,
+      typeInfo: new TypeInfo(schema),
+    });
+    expect(Array.from(result).sort()).toEqual(
+      [
+        'Query.search',
+        'SearchResult',
+        'Movie',
+        'Movie.title',
+        'String',
+        'Book',
+        'Book.author',
+        'Author',
+        'Author.name',
+        'Query.node',
+        'Node',
+        'Movie.id',
+        'ID',
+      ].sort(),
+    );
+  });
+
+  test('a fragment on the parent type records the type once', () => {
+    const schema = buildSchema(/* GraphQL */ `
+      type Query {
+        me: User
+      }
+
+      type User {
+        id: ID!
+      }
+    `);
+    const result = collectSchemaCoordinates({
+      documentNode: parse(/* GraphQL */ `
+        query {
+          me {
+            ... on User {
+              id
+            }
+          }
+        }
+      `),
+      schema,
+      processVariables: false,
+      variables: null,
+      typeInfo: new TypeInfo(schema),
+    });
+    expect(Array.from(result)).toEqual(['Query.me', 'User', 'User.id', 'ID']);
   });
 });

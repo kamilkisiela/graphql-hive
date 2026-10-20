@@ -1266,6 +1266,12 @@ function isInputFieldAddedChange(change: Change): change is z.TypeOf<typeof Inpu
   return change.type === 'INPUT_FIELD_ADDED';
 }
 
+function isUnionMemberRemovedChange(
+  change: Change,
+): change is z.TypeOf<typeof UnionMemberRemovedModel> {
+  return change.type === 'UNION_MEMBER_REMOVED';
+}
+
 const AffectedAppDeploymentModel = z.object({
   id: z.string(),
   name: z.string(),
@@ -1369,6 +1375,10 @@ export const HiveSchemaChangeModel = z
           change.meta.isAddedInputFieldTypeNullable === false
         ) {
           breakingChangeSchemaCoordinate = change.meta.inputName;
+        }
+
+        if (isUnionMemberRemovedChange(change)) {
+          breakingChangeSchemaCoordinate = change.meta.removedUnionMemberTypeName;
         }
       }
 

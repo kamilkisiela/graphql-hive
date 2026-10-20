@@ -154,6 +154,13 @@ export function collectSchemaCoordinates(args: {
     }
   }
 
+  function markTypeConditionAsUsed() {
+    const type = args.typeInfo.getType();
+    if (type) {
+      markAsUsed(makeId(getNamedType(type).name));
+    }
+  }
+
   function valueExists(v: unknown) {
     return v !== null && v !== undefined;
   }
@@ -213,17 +220,18 @@ export function collectSchemaCoordinates(args: {
 
         markAsUsed(makeId(parent.name, field.name));
 
-        // Collect the entire type if it's an enum.
-        // Deleting an enum value that is used,
-        // should be a breaking change
-        // as it changes the output of the field.
-        // Scalars are collected for the same reason.
         const fieldType = getNamedType(field.type);
+        markAsUsed(makeId(fieldType.name));
+        // Deleting a used enum value changes the output of the field, so collect every value.
         if (fieldType instanceof GraphQLEnumType) {
           markEntireTypeAsUsed(fieldType);
-        } else if (isScalarType(fieldType)) {
-          markAsUsed(makeId(fieldType.name));
         }
+      },
+      InlineFragment() {
+        markTypeConditionAsUsed();
+      },
+      FragmentDefinition() {
+        markTypeConditionAsUsed();
       },
       VariableDefinition(node) {
         const inputType = args.typeInfo.getInputType();

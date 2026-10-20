@@ -1475,7 +1475,7 @@ test.concurrent(
 );
 
 test.concurrent(
-  'same operation but with different schema coordinates should result in different hash',
+  'same operation with different schema coordinates shares one hash',
   async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
@@ -1517,21 +1517,21 @@ test.concurrent(
   `);
 
     expect(coordinatesResult.rows).toEqual(4);
+    expect(new Set(coordinatesResult.data.map(row => row.hash)).size).toEqual(1);
 
     const operationCollectionResult = await clickHouseQuery<{
       hash: string;
     }>(`SELECT hash FROM operation_collection WHERE target = '${target.id}' GROUP BY hash`);
 
-    expect(operationCollectionResult.rows).toEqual(2);
+    expect(operationCollectionResult.rows).toEqual(1);
 
     const operationsResult = await clickHouseQuery<{
-      target: string;
-      client_name: string | null;
       hash: string;
-      total: number;
-    }>(`SELECT hash FROM operation_collection WHERE target = '${target.id}' GROUP BY hash`);
+      total: string;
+    }>(`SELECT hash, count() AS total FROM operations WHERE target = '${target.id}' GROUP BY hash`);
 
-    expect(operationsResult.rows).toEqual(2);
+    expect(operationsResult.rows).toEqual(1);
+    expect(ensureNumber(operationsResult.data[0].total)).toEqual(2);
   },
 );
 
@@ -3004,13 +3004,13 @@ test('subscription operation is used for conditional breaking change detection',
     expect(node.usageStatistics?.topAffectedOperations).toEqual([
       {
         countFormatted: '1',
-        hash: '8bc74b99fdc4d7d2470258a845947af7',
+        hash: '0904ba53d51eb37dac769c4321b2a7d2',
         name: 'anonymous',
         percentage: 100,
         percentageFormatted: '100.00%',
         operation: {
           body: 'subscription{a}',
-          hash: '8bc74b99fdc4d7d2470258a845947af7',
+          hash: '0904ba53d51eb37dac769c4321b2a7d2',
           name: 'anonymous',
           type: 'SUBSCRIPTION',
         },
@@ -3364,10 +3364,10 @@ test.concurrent('(legacy) collect an operation from "unknown" client', async ({ 
                 p95: 200,
                 p99: 200,
               },
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
+              id: bf4c7df3e7823aa13d72933f913b5149,
               kind: query,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
               percentage: 100,
             },
           },
@@ -3391,9 +3391,9 @@ test.concurrent('(legacy) collect an operation from "unknown" client', async ({ 
           {
             node: {
               count: 1,
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              id: bf4c7df3e7823aa13d72933f913b5149,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
             },
           },
         ],
@@ -3488,10 +3488,10 @@ test.concurrent('collect an operation from "unknown" client', async ({ expect })
                 p95: 200,
                 p99: 200,
               },
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
+              id: bf4c7df3e7823aa13d72933f913b5149,
               kind: query,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
               percentage: 100,
             },
           },
@@ -3515,9 +3515,9 @@ test.concurrent('collect an operation from "unknown" client', async ({ expect })
           {
             node: {
               count: 1,
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              id: bf4c7df3e7823aa13d72933f913b5149,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
             },
           },
         ],
@@ -3612,10 +3612,10 @@ test.concurrent('collect an operation from undefined client', async ({ expect })
                 p95: 200,
                 p99: 200,
               },
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
+              id: bf4c7df3e7823aa13d72933f913b5149,
               kind: query,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
               percentage: 100,
             },
           },
@@ -3639,9 +3639,9 @@ test.concurrent('collect an operation from undefined client', async ({ expect })
           {
             node: {
               count: 1,
-              id: 8f87d0bc9744ad3d50af125d20c355c0,
-              name: 798a_ping,
-              operationHash: 798ae10ebeef9f632ceec2fbe85a2052,
+              id: bf4c7df3e7823aa13d72933f913b5149,
+              name: 6dd4_ping,
+              operationHash: 6dd4e6cdccad20d0a09178a08d6760d4,
             },
           },
         ],
@@ -3786,4 +3786,153 @@ describe('exclude filters', () => {
       expect(excludedClientNames).toEqual(['mobile', 'web']);
     },
   );
+});
+
+test('removing a used scalar or union is not safe based on usage', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { project, target, createTargetAccessToken, toggleTargetValidation } = await createProject(
+    ProjectType.Single,
+  );
+  const token = await createTargetAccessToken({});
+
+  const sdl = /* GraphQL */ `
+    type Query {
+      rate: ConversionRate
+      search: [SearchResult!]!
+    }
+
+    type ConversionRate {
+      fromCurrency: Currency!
+    }
+
+    scalar Currency
+
+    union SearchResult = Movie | Book
+
+    type Movie {
+      title: String
+    }
+
+    type Book {
+      title: String
+    }
+  `;
+  const schema = buildASTSchema(parse(sdl));
+
+  const schemaPublishResult = await token
+    .publishSchema({ sdl, author: 'Kamil', commit: 'initial' })
+    .then(res => res.expectNoGraphQLErrors());
+  expect(schemaPublishResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+  await toggleTargetValidation(true);
+
+  const usageAddress = await getServiceHost('usage', 8081);
+  const client = createHive({
+    enabled: true,
+    token: token.secret,
+    usage: true,
+    debug: false,
+    agent: {
+      logger: createLogger('debug'),
+      maxSize: 1,
+    },
+    selfHosting: {
+      usageEndpoint: 'http://' + usageAddress,
+      graphqlEndpoint: 'http://noop/',
+      applicationUrl: 'http://noop/',
+    },
+  });
+
+  const request = new Request('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: {
+      'x-graphql-client-name': 'integration-tests',
+      'x-graphql-client-version': '6.6.6',
+    },
+  });
+
+  client.collectUsage().finish(
+    {
+      document: parse(`
+        query rates {
+          rate {
+            fromCurrency
+          }
+          search {
+            ... on Movie {
+              title
+            }
+          }
+        }
+      `),
+      schema,
+      contextValue: { request },
+    },
+    {},
+  );
+
+  await waitForExpectations(async () => {
+    const coordinates = await clickHouseQuery<{ coordinate: string }>(`
+      SELECT coordinate FROM coordinates_daily WHERE target = '${target.id}' GROUP BY coordinate
+    `);
+    expect(coordinates.data.map(row => row.coordinate)).toEqual(
+      expect.arrayContaining(['Currency', 'SearchResult', 'Movie']),
+    );
+  });
+
+  const checkResult = await token
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        rate: ConversionRate
+        search: [Movie!]!
+      }
+
+      type ConversionRate {
+        fromCurrency: Money!
+      }
+
+      scalar Money
+
+      type Movie {
+        title: String
+      }
+
+      type Book {
+        title: String
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  if (checkResult.schemaCheck.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${checkResult.schemaCheck.__typename}`);
+  }
+
+  const schemaCheck = await execute({
+    document: SubscriptionSchemaCheckQuery,
+    variables: {
+      id: checkResult.schemaCheck.schemaCheck!.id,
+      selector: {
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
+      },
+    },
+    authToken: token.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  const changes = schemaCheck.target?.schemaCheck?.breakingSchemaChanges?.nodes ?? [];
+  for (const path of ['Currency', 'SearchResult']) {
+    const change = changes.find(node => node.path?.join('.') === path);
+    expect(change?.message).toEqual(`Type '${path}' was removed`);
+    expect(change?.isSafeBasedOnUsage).toEqual(false);
+    expect(change?.usageStatistics?.topAffectedOperations).toEqual([
+      expect.objectContaining({
+        name: 'rates',
+        operation: expect.objectContaining({
+          body: 'query rates{rate{fromCurrency}search{...on Movie{title}}}',
+        }),
+      }),
+    ]);
+  }
 });
