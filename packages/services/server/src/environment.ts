@@ -34,6 +34,17 @@ const TestUtilsModel = zod.object({
   EXPOSE_MEMORY_UTILS: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
+const RequestBrokerModel = zod.union([
+  zod.object({
+    REQUEST_BROKER: emptyString(zod.literal('0').optional()),
+  }),
+  zod.object({
+    REQUEST_BROKER: zod.literal('1'),
+    REQUEST_BROKER_ENDPOINT: zod.string().min(1),
+    REQUEST_BROKER_SIGNATURE: zod.string().min(1),
+  }),
+]);
+
 const EnvironmentModel = zod.object({
   PORT: emptyString(NumberFromString.optional()),
   SERVER_HOST: emptyString(zod.string().optional()),
@@ -355,6 +366,7 @@ const processEnv = process.env;
 
 const configs = {
   testUtils: TestUtilsModel.safeParse(processEnv),
+  requestBroker: RequestBrokerModel.safeParse(processEnv),
   base: EnvironmentModel.safeParse(processEnv),
   commerce: CommerceModel.safeParse(processEnv),
   sentry: SentryModel.safeParse(processEnv),
@@ -537,6 +549,7 @@ const tracing = extractConfig(configs.tracing);
 const hivePersistedDocuments = extractConfig(configs.hivePersistedDocuments);
 const oidcWorkloadFederation = extractConfig(configs.oidcWorkloadFederation);
 const testUtils = extractConfig(configs.testUtils);
+const requestBroker = extractConfig(configs.requestBroker);
 
 const hiveUsageConfig =
   hive.HIVE_USAGE === '1'
@@ -563,6 +576,13 @@ export const env = {
   environment: base.ENVIRONMENT,
   exposeMemoryUtils: testUtils.EXPOSE_MEMORY_UTILS === '1',
   release: base.RELEASE ?? 'local',
+  requestBroker:
+    requestBroker.REQUEST_BROKER === '1'
+      ? {
+          endpoint: requestBroker.REQUEST_BROKER_ENDPOINT,
+          signature: requestBroker.REQUEST_BROKER_SIGNATURE,
+        }
+      : null,
   encryptionSecret: base.ENCRYPTION_SECRET,
   tracing: {
     enabled: !!tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT || hive.HIVE_TRACING === '1',

@@ -215,6 +215,7 @@ const graphql = deployGraphQL({
   githubApp,
   sentry,
   observability,
+  broker,
 });
 
 const hiveConfig = new pulumi.Config('hive');
