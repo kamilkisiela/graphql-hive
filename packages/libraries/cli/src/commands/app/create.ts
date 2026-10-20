@@ -247,7 +247,7 @@ export default class AppCreate extends Command<typeof AppCreate> {
       `App deployment "${flags['name']}@${version}" is created pending document upload. Uploading documents...`,
     );
 
-    let buffer: typeof preprocessedDocuments = [];
+    let buffer: typeof processedDocuments = [];
 
     let counter = 0;
 
@@ -299,7 +299,7 @@ export default class AppCreate extends Command<typeof AppCreate> {
       }
     };
 
-    for (const document of preprocessedDocuments) {
+    for (const document of processedDocuments) {
       buffer.push(document);
       counter++;
       await flush();
