@@ -115,6 +115,7 @@ export function buildChanges(args: {
         severityReason:
           'Removing a type is a breaking change. It is preferable to deprecate and remove all references to this type first.',
         isSafeBasedOnUsage: false,
+        isUsageTracked: false,
         approval: null,
         usageStatistics: {
           __typename: 'SchemaChangeUsageStatistics' as const,

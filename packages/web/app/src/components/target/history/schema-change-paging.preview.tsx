@@ -52,6 +52,7 @@ function safeChangeAt(kind: SafeKind, index: number) {
       severityReason: null,
       approval: null,
       isSafeBasedOnUsage: false,
+      isUsageTracked: false,
     },
     ChangesBlock_SchemaChangeFragment,
   );
@@ -66,8 +67,9 @@ function breakingChangeAt(index: number) {
       message: `Field 'value7' was removed from object type 'StressType_${index + 1}'`,
       severityLevel: SeverityLevelType.Breaking,
       severityReason:
-        'Removing a field is a breaking change. It is preferable to deprecate the field before removing it.',
+        'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
       isSafeBasedOnUsage: false,
+      isUsageTracked: true,
       approval: null,
       usageStatistics: null,
       affectedAppDeployments: null,

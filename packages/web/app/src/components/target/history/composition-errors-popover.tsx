@@ -1,13 +1,19 @@
 import { InfoIcon } from 'lucide-react';
+import { Button } from '@/components/ui/primitives/button/button';
 import { Popover } from '@/components/ui/primitives/floating/popover/popover';
 
 export function CompositionErrorsPopover() {
   return (
     <Popover
       trigger={
-        <button type="button" aria-label="About composition errors">
-          <InfoIcon className="h-3 w-3" />
-        </button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="About composition errors"
+          data-cy="composition-errors-info"
+        >
+          <InfoIcon className="size-3" />
+        </Button>
       }
       openOnHover
       width="lg"

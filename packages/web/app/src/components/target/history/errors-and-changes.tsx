@@ -81,6 +81,7 @@ export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
       ...ChangesBlock_SchemaChangeApprovalFragment
     }
     isSafeBasedOnUsage
+    isUsageTracked
     usageStatistics {
       topAffectedOperations {
         hash
@@ -150,6 +151,7 @@ export const ChangesBlock_SchemaChangeFragment = graphql(`
       ...ChangesBlock_SchemaChangeApprovalFragment
     }
     isSafeBasedOnUsage
+    isUsageTracked
   }
 `);
 
@@ -219,8 +221,12 @@ export function ChangesBlock(
   );
 }
 
-export function ChangesTitle(props: { children: ReactNode }) {
-  return <h2 className="mb-3 text-base font-bold text-fg">{props.children}</h2>;
+export function ChangesTitle(props: { children: ReactNode; 'data-cy'?: string }) {
+  return (
+    <h2 className="mb-3 text-base font-bold text-fg" data-cy={props['data-cy']}>
+      {props.children}
+    </h2>
+  );
 }
 
 /**
@@ -287,6 +293,104 @@ function ChangeItem(
         }
       : null;
 
+  // Null when there is nothing to show, which makes the row static rather than open to nothing.
+  const details = targetUsage ? (
+    <>
+      <BreakingChangeTargets
+        affectedTargets={targetUsage.affectedTargets}
+        targets={targetUsage.metadata.settings.targets}
+        coordinate={targetUsage.coordinate}
+        period={targetUsage.metadata.period}
+      />
+      <section className="space-y-2">
+        <h4 className="text-sm font-medium text-fg">Affected operations and clients</h4>
+        <UsageStatisticsPanels
+          usageStatistics={targetUsage.statistics}
+          targets={targetUsage.metadata.settings.targets}
+          period={targetUsage.metadata.period}
+          withTargets
+        />
+      </section>
+      {props.schemaCheckId &&
+      'affectedAppDeployments' in change &&
+      change.affectedAppDeployments?.edges?.length ? (
+        <AffectedAppDeploymentsPanel
+          schemaCheckId={props.schemaCheckId}
+          coordinate={change.path?.join('.')}
+          connection={change.affectedAppDeployments}
+        />
+      ) : null}
+    </>
+  ) : 'usageStatistics' in change && change.usageStatistics && metadata ? (
+    <div>
+      <h4 className="mb-1 text-sm font-medium text-fg">Affected Operations (based on usage)</h4>
+      <div className="mb-2 flex justify-between text-sm text-fg-secondary">
+        <span>Top 10 operations and clients affected by this change based on usage data.</span>
+        {metadata && (
+          <span className="text-xs text-fg-default">
+            See{' '}
+            {metadata.settings.targets.map((target, index, arr) => (
+              <>
+                {!target.target ? (
+                  <Tooltip
+                    key={index}
+                    trigger={target.slug}
+                    content="Target does no longer exist."
+                  />
+                ) : (
+                  <Link
+                    key={index}
+                    preload={false}
+                    className="text-accent-muted hover:text-accent"
+                    to="/$organizationSlug/$projectSlug/$targetSlug/insights/schema-coordinate/$coordinate"
+                    params={{
+                      organizationSlug,
+                      projectSlug,
+                      targetSlug: target.target.slug,
+                      coordinate: change.path!.join('.'),
+                    }}
+                    search={{ from: metadata.period.from, to: metadata.period.to }}
+                    target="_blank"
+                  >
+                    {target.slug}
+                  </Link>
+                )}
+                {index === arr.length - 1 ? null : index === arr.length - 2 ? ' and ' : ', '}
+              </>
+            ))}{' '}
+            target insights for live usage data.
+          </span>
+        )}
+      </div>
+      <UsageStatisticsPanels
+        usageStatistics={change.usageStatistics}
+        targets={metadata.settings.targets}
+        period={metadata.period}
+      />
+      {props.schemaCheckId &&
+      'affectedAppDeployments' in change &&
+      change.affectedAppDeployments?.edges?.length ? (
+        <div className="mt-6">
+          <AffectedAppDeploymentsPanel
+            schemaCheckId={props.schemaCheckId}
+            coordinate={change.path?.join('.')}
+            connection={change.affectedAppDeployments}
+          />
+        </div>
+      ) : null}
+    </div>
+  ) : props.schemaCheckId &&
+    'affectedAppDeployments' in change &&
+    change.affectedAppDeployments?.edges?.length ? (
+    <AffectedAppDeploymentsPanel
+      schemaCheckId={props.schemaCheckId}
+      coordinate={change.path?.join('.')}
+      connection={change.affectedAppDeployments}
+    />
+  ) : change.severityReason ? (
+    <>{change.severityReason}</>
+  ) : null;
+
   return (
     <Accordion
       variant={props.changeWithUsage ? 'boxed' : 'list'}
@@ -325,11 +429,19 @@ function ChangeItem(
             change.isSafeBasedOnUsage || usageStatistics || change.approval ? (
               <span className="flex items-center gap-2">
                 {change.isSafeBasedOnUsage ? (
-                  <Badge
-                    icon={CheckIcon}
-                    content="Safe based on usage data"
-                    variants={{ variant: 'warning' }}
-                  />
+                  // Zero usage only means "safe" where usage is recorded.
+                  change.isUsageTracked ? (
+                    <Badge
+                      icon={CheckIcon}
+                      content="Safe based on usage data"
+                      variants={{ variant: 'warning' }}
+                    />
+                  ) : (
+                    <Badge
+                      content="Usage isn't tracked for this kind of change"
+                      variants={{ variant: 'secondary' }}
+                    />
+                  )
                 ) : null}
                 {usageStatistics ? (
                   <Badge
@@ -346,129 +458,22 @@ function ChangeItem(
                 {change.approval ? <ApprovedByBadge approval={change.approval} /> : null}
               </span>
             ) : undefined,
-          content: (
-            <div
-              className={
-                targetUsage ? 'space-y-5' : props.changeWithUsage ? undefined : 'pt-4 pb-4'
-              }
-            >
-              {change.approval && (
-                <SchemaChangeApproval
-                  schemaCheckId={props.schemaCheckId}
-                  approval={change.approval}
-                />
-              )}
-              {targetUsage ? (
-                <>
-                  <BreakingChangeTargets
-                    affectedTargets={targetUsage.affectedTargets}
-                    targets={targetUsage.metadata.settings.targets}
-                    coordinate={targetUsage.coordinate}
-                    period={targetUsage.metadata.period}
+          content:
+            change.approval || details ? (
+              <div
+                className={
+                  targetUsage ? 'space-y-5' : props.changeWithUsage ? undefined : 'pt-4 pb-4'
+                }
+              >
+                {change.approval && (
+                  <SchemaChangeApproval
+                    schemaCheckId={props.schemaCheckId}
+                    approval={change.approval}
                   />
-                  <section className="space-y-2">
-                    <h4 className="text-sm font-medium text-fg">Affected operations and clients</h4>
-                    <UsageStatisticsPanels
-                      usageStatistics={targetUsage.statistics}
-                      targets={targetUsage.metadata.settings.targets}
-                      period={targetUsage.metadata.period}
-                      withTargets
-                    />
-                  </section>
-                  {props.schemaCheckId &&
-                  'affectedAppDeployments' in change &&
-                  change.affectedAppDeployments?.edges?.length ? (
-                    <AffectedAppDeploymentsPanel
-                      schemaCheckId={props.schemaCheckId}
-                      coordinate={change.path?.join('.')}
-                      connection={change.affectedAppDeployments}
-                    />
-                  ) : null}
-                </>
-              ) : 'usageStatistics' in change && change.usageStatistics && metadata ? (
-                <div>
-                  <h4 className="mb-1 text-sm font-medium text-fg">
-                    Affected Operations (based on usage)
-                  </h4>
-                  <div className="mb-2 flex justify-between text-sm text-fg-secondary">
-                    <span>
-                      Top 10 operations and clients affected by this change based on usage data.
-                    </span>
-                    {metadata && (
-                      <span className="text-xs text-fg-default">
-                        See{' '}
-                        {metadata.settings.targets.map((target, index, arr) => (
-                          <>
-                            {!target.target ? (
-                              <Tooltip
-                                key={index}
-                                trigger={target.slug}
-                                content="Target does no longer exist."
-                              />
-                            ) : (
-                              <Link
-                                key={index}
-                                preload={false}
-                                className="text-accent-muted hover:text-accent"
-                                to="/$organizationSlug/$projectSlug/$targetSlug/insights/schema-coordinate/$coordinate"
-                                params={{
-                                  organizationSlug,
-                                  projectSlug,
-                                  targetSlug: target.target.slug,
-                                  coordinate: change.path!.join('.'),
-                                }}
-                                search={{ from: metadata.period.from, to: metadata.period.to }}
-                                target="_blank"
-                              >
-                                {target.slug}
-                              </Link>
-                            )}
-                            {index === arr.length - 1
-                              ? null
-                              : index === arr.length - 2
-                                ? ' and '
-                                : ', '}
-                          </>
-                        ))}{' '}
-                        target insights for live usage data.
-                      </span>
-                    )}
-                  </div>
-                  <UsageStatisticsPanels
-                    usageStatistics={change.usageStatistics}
-                    targets={metadata.settings.targets}
-                    period={metadata.period}
-                  />
-                  {props.schemaCheckId &&
-                  'affectedAppDeployments' in change &&
-                  change.affectedAppDeployments?.edges?.length ? (
-                    <div className="mt-6">
-                      <AffectedAppDeploymentsPanel
-                        schemaCheckId={props.schemaCheckId}
-                        coordinate={change.path?.join('.')}
-                        connection={change.affectedAppDeployments}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              ) : props.schemaCheckId &&
-                'affectedAppDeployments' in change &&
-                change.affectedAppDeployments?.edges?.length ? (
-                <AffectedAppDeploymentsPanel
-                  schemaCheckId={props.schemaCheckId}
-                  coordinate={change.path?.join('.')}
-                  connection={change.affectedAppDeployments}
-                />
-              ) : (
-                <>
-                  {change.severityReason ??
-                    `No details available for this ${
-                      change.severityLevel === SeverityLevelType.Breaking ? 'breaking ' : ''
-                    }change.`}
-                </>
-              )}
-            </div>
-          ),
+                )}
+                {details}
+              </div>
+            ) : null,
         },
       ]}
     />
@@ -812,11 +817,11 @@ export function CompositionErrorsList(props: {
   description?: string;
 }) {
   return (
-    <div className="mb-2 px-2">
-      <div className="mb-3 flex items-center gap-1.5">
-        <h2 className="font-bold text-fg-default">{props.title}</h2>
+    <div className="mb-2">
+      <ChangesTitle data-cy="composition-errors-title">
+        {props.title}
         <CompositionErrorsPopover />
-      </div>
+      </ChangesTitle>
       {props.description ? (
         <p className="mb-2 text-sm text-fg-default">{props.description}</p>
       ) : null}

@@ -9,9 +9,11 @@ import {
   checksFixtures,
   MANY_CHANGES,
   manyChangesSchemaCheck,
+  noPolicyWarningsSchemaCheck,
   policyFailedSchemaCheck,
   safeChangesPage,
   SERVICES,
+  untrackedUsageSchemaCheck,
 } from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
 import { renderAtUrl } from '@/lib/testing/router';
@@ -707,4 +709,85 @@ describe('schema tabs', () => {
     await waitFor(() => expect(screen.queryByText('Loading schema…')).toBeNull());
     expect(testClient.requests('CheckSdlQuery')).toHaveLength(1);
   });
+});
+
+describe('breaking changes without recorded usage', () => {
+  function renderCheck() {
+    const testClient = client();
+    testClient.fixtures.set(
+      'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+      (variables: Record<string, unknown>) =>
+        untrackedUsageSchemaCheck(variables as { schemaCheckId: string }),
+    );
+    renderAtUrl(`${CHECKS_PAGE}/check-untracked`, { client: testClient });
+  }
+
+  it(
+    'labels a removed type as untracked and leaves it closed, with nothing to open',
+    { timeout: 30_000 },
+    async () => {
+      renderCheck();
+      // The type removal and the union member change; the type removal comes first.
+      const labels = await screen.findAllByText(
+        "Usage isn't tracked for this kind of change",
+        {},
+        { timeout: 10_000 },
+      );
+      expect(labels).toHaveLength(2);
+      expect(labels[0].closest('button')).toBeNull();
+      expect(screen.queryByRole('button', { name: /Currency was removed/ })).toBeNull();
+      // Only the tracked field change still says safe based on usage.
+      expect(screen.getAllByText('Safe based on usage data')).toHaveLength(1);
+      expect(screen.queryByText(/No details available/)).toBeNull();
+    },
+  );
+
+  it(
+    'labels an untracked change that has a reason, and still opens to it',
+    { timeout: 30_000 },
+    async () => {
+      renderCheck();
+      const union = await screen.findByRole(
+        'button',
+        { name: /Movie was removed from Union type SearchResult/ },
+        { timeout: 10_000 },
+      );
+      expect(union.textContent).toContain("Usage isn't tracked for this kind of change");
+      await act(async () => {
+        fireEvent.click(union);
+      });
+      expect(
+        screen.getByText(/can cause existing queries that use this union member/),
+      ).toBeTruthy();
+    },
+  );
+
+  it('leaves a tracked change with nothing to show closed too', { timeout: 30_000 }, async () => {
+    renderCheck();
+    await screen.findByText(/changed type from/, {}, { timeout: 10_000 });
+    expect(screen.queryByRole('button', { name: /changed type from/ })).toBeNull();
+  });
+});
+
+describe('schema policy warnings', () => {
+  it(
+    'shows no warnings section and no Policy tab when the policy found nothing',
+    { timeout: 30_000 },
+    async () => {
+      const testClient = client();
+      testClient.fixtures.set(
+        'ActiveSchemaCheck_ActiveSchemaCheckQuery',
+        (variables: Record<string, unknown>) =>
+          noPolicyWarningsSchemaCheck(variables as { schemaCheckId: string }),
+      );
+      renderAtUrl(`${CHECKS_PAGE}/check-no-warnings`, { client: testClient });
+
+      const policyTab = await screen.findByTestId('policy-view-btn', {}, { timeout: 10_000 });
+      expect(screen.queryByText('Schema Policy Warnings')).toBeNull();
+      expect(
+        policyTab.hasAttribute('data-disabled') ||
+          policyTab.getAttribute('aria-disabled') === 'true',
+      ).toBe(true);
+    },
+  );
 });

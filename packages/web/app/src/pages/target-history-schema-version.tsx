@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from 'urql';
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
+import { changeSafetyStats } from '@/components/target/history/change-safety-stats';
 import { CompositionErrorMessage } from '@/components/target/history/composition-error-message';
 import { CompositionErrorsPopover } from '@/components/target/history/composition-errors-popover';
 import {
@@ -1465,6 +1466,7 @@ const SchemaVersionSummary_SchemaVersionFragment = graphql(`
         node {
           isSafeBasedOnUsage
           severityLevel
+          isUsageTracked
         }
       }
     }
@@ -1479,6 +1481,7 @@ const SchemaVersionSummary_ContractVersionFragment = graphql(`
         node {
           isSafeBasedOnUsage
           severityLevel
+          isUsageTracked
         }
       }
     }
@@ -1535,26 +1538,13 @@ export const SchemaVersionSummary = (props: {
     return data;
   }, [schemaVersion.subgraphDiffs]);
 
-  const publicChangeStats = useMemo(() => {
-    const data = {
-      totalChanges: (contractVersion ?? schemaVersion).sdlChanges?.edges.length ?? 0,
-      breakingChanges: 0,
-      notSafeChanges: 0,
-    };
-
-    for (const change of (contractVersion ?? schemaVersion).sdlChanges?.edges ?? []) {
-      if (change.node.severityLevel === SeverityLevelType.Breaking) {
-        data.breakingChanges++;
-
-        if (!change.node.isSafeBasedOnUsage) {
-          console.log(change.node);
-          data.notSafeChanges++;
-        }
-      }
-    }
-
-    return data;
-  }, [schemaVersion.sdlChanges, contractVersion?.sdlChanges]);
+  const publicChangeStats = useMemo(
+    () =>
+      changeSafetyStats(
+        (contractVersion ?? schemaVersion).sdlChanges?.edges.map(edge => edge.node) ?? [],
+      ),
+    [schemaVersion.sdlChanges, contractVersion?.sdlChanges],
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -1566,15 +1556,15 @@ export const SchemaVersionSummary = (props: {
           value={publicChangeStats.breakingChanges}
           additionalValue={
             publicChangeStats.breakingChanges && schemaVersion.isComposable ? (
-              publicChangeStats.notSafeChanges ? (
+              publicChangeStats.notSafe ? (
                 <Tooltip
                   trigger={
                     <span className="ml-2 flex items-center gap-0.5 text-xs text-critical lg:text-sm">
                       <ShieldAlertIcon size="14" className="inline" />
-                      {publicChangeStats.notSafeChanges} not safe
+                      {publicChangeStats.notSafe} not safe
                     </span>
                   }
-                  content="Some changes are not safe based on usage data."
+                  content="Some changes are in use, or usage isn't recorded for what they touch."
                 />
               ) : (
                 <Tooltip

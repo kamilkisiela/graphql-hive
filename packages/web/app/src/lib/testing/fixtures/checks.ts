@@ -202,6 +202,7 @@ export function breakingSchemaCheck(
                   severityReason: null,
                   approval: null,
                   isSafeBasedOnUsage: options.safe ?? false,
+                  isUsageTracked: true,
                   usageStatistics: {
                     __typename: 'SchemaChangeUsageStatistics' as const,
                     topAffectedOperations: [
@@ -296,6 +297,10 @@ export function policyFailedSchemaCheck(variables: { schemaCheckId: string }) {
 
 const PAGE_SIZE = CHANGES_PAGE_SIZE;
 
+// Inspector's reason for removing a field that was not deprecated.
+const FIELD_REMOVED_REASON =
+  'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.';
+
 /** A breaking removal of `StressType_<n>.value7`, without usage data. */
 function removedFieldAt(index: number) {
   return {
@@ -303,9 +308,10 @@ function removedFieldAt(index: number) {
     path: [`StressType_${index}`, 'value7'],
     message: `Field 'value7' was removed from object type 'StressType_${index}'`,
     severityLevel: 'BREAKING',
-    severityReason: null,
+    severityReason: FIELD_REMOVED_REASON,
     approval: null,
     isSafeBasedOnUsage: false,
+    isUsageTracked: true,
     usageStatistics: null,
     affectedAppDeployments: null,
   };
@@ -324,6 +330,7 @@ function safeChangeAt(kind: string, index: number) {
     severityReason: null,
     approval: null,
     isSafeBasedOnUsage: false,
+    isUsageTracked: false,
   };
 }
 
@@ -452,6 +459,92 @@ export function checkSdl(variables: { schemaCheckId: string }) {
         baseline: null,
         compositeSchemaSDL: PRODUCTS_SDL,
         supergraphSDL: PRODUCTS_SDL,
+      },
+    },
+  };
+}
+
+function breakingChange(change: {
+  path: string[];
+  message: string;
+  severityReason: string | null;
+  isSafeBasedOnUsage: boolean;
+  isUsageTracked: boolean;
+}) {
+  return {
+    __typename: 'SchemaChangeEdge' as const,
+    node: {
+      __typename: 'SchemaChange' as const,
+      ...change,
+      severityLevel: 'BREAKING',
+      approval: null,
+      usageStatistics: null,
+      affectedAppDeployments: null,
+    },
+  };
+}
+
+/** A check whose breaking changes found no usage, some because usage is never recorded for them. */
+export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          hasSchemaChanges: true,
+          breakingSchemaChanges: {
+            __typename: 'SchemaChangeConnection' as const,
+            totalCount: 3,
+            edges: [
+              breakingChange({
+                path: ['Currency'],
+                message: "Type 'Currency' was removed",
+                severityReason: null,
+                isSafeBasedOnUsage: true,
+                isUsageTracked: false,
+              }),
+              breakingChange({
+                path: ['SearchResult'],
+                message: "Member 'Movie' was removed from Union type 'SearchResult'",
+                severityReason:
+                  'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
+                isSafeBasedOnUsage: true,
+                isUsageTracked: false,
+              }),
+              // Tracked, but with no reason and no usage to show.
+              breakingChange({
+                path: ['ConversionRate', 'fromCurrency'],
+                message:
+                  "Field 'ConversionRate.fromCurrency' changed type from 'Currency!' to 'ForexCurrency!'",
+                severityReason: null,
+                isSafeBasedOnUsage: true,
+                isUsageTracked: true,
+              }),
+            ],
+          },
+        },
+      },
+    },
+  };
+}
+
+/** A check whose policy ran and found nothing: an empty warnings list, not null. */
+export function noPolicyWarningsSchemaCheck(variables: { schemaCheckId: string }) {
+  const active = activeSchemaCheck(variables);
+  return {
+    ...active,
+    project: {
+      ...active.project,
+      target: {
+        ...active.project.target,
+        schemaCheck: {
+          ...active.project.target.schemaCheck,
+          schemaPolicyWarnings: { __typename: 'SchemaPolicyWarningConnection' as const, edges: [] },
+        },
       },
     },
   };

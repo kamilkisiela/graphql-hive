@@ -29,6 +29,7 @@ import {
 import { ContractFailuresTable } from '@/components/target/checks/contract-failures-table';
 import { ServiceFilterButton } from '@/components/target/checks/service-filter-button';
 import {
+  ChangesTitle,
   CompositionErrorsList,
   CompositionErrorsSection,
   labelize,
@@ -363,9 +364,9 @@ const PolicyInfo = () => {
   return (
     <Popover
       trigger={
-        <button type="button" aria-label="About policy line numbers">
-          <InfoIcon className="h-3 w-3" />
-        </button>
+        <Button variant="ghost" size="icon-sm" aria-label="About policy line numbers">
+          <InfoIcon className="size-3" />
+        </Button>
       }
       openOnHover
       width="lg"
@@ -388,10 +389,10 @@ const PolicyBlock = (props: {
   const policies = useFragment(SchemaPolicyEditor_PolicyWarningsFragment, props.policies);
   return (
     <div>
-      <div className="mb-3 flex items-center gap-1.5">
-        <h2 className="font-bold text-fg-default">{props.title}</h2>
+      <ChangesTitle>
+        {props.title}
         <PolicyInfo />
-      </div>
+      </ChangesTitle>
       <ul className="list-inside list-disc pl-3 text-sm/relaxed">
         {policies.edges.map((edge, key) => (
           <li
@@ -714,7 +715,7 @@ function useDefaultSchemaView(props: {
               />
             </div>
           ) : null}
-          {schemaCheck.schemaPolicyWarnings ? (
+          {schemaCheck.schemaPolicyWarnings?.edges.length ? (
             <div className="mb-5">
               <PolicyBlock
                 title="Schema Policy Warnings"
@@ -892,7 +893,7 @@ function useDefaultSchemaView(props: {
     icon: ScaleIcon,
     attrs: { 'data-testid': 'policy-view-btn' },
     disabled:
-      !schemaCheck.schemaPolicyWarnings &&
+      !schemaCheck.schemaPolicyWarnings?.edges.length &&
       !(
         schemaCheck.__typename === 'FailedSchemaCheck' &&
         schemaCheck.schemaPolicyErrors?.edges?.length

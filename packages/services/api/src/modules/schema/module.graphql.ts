@@ -586,6 +586,11 @@ export default gql`
     """
     isSafeBasedOnUsage: Boolean! @tag(name: "public")
     """
+    Whether usage is recorded for what this change touches, so whether 'isSafeBasedOnUsage' can be
+    trusted. Only meaningful for breaking changes.
+    """
+    isUsageTracked: Boolean!
+    """
     Usage statistics about the schema change if it is not safe based on usage.
     The statistics are determined based on the breaking change configuration.
     The usage statistics are only available for breaking changes and only represent a snapshot of the usage data at the time of the schema check/schema publish.

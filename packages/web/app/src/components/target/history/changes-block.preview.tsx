@@ -7,9 +7,11 @@ import { DescriptionList } from '@/components/ui/primitives/description-list/des
 import { Select } from '@/components/ui/primitives/floating/select/select';
 import { ScopeBar } from '@/components/ui/scope-bar/scope-bar';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
+import { makeFragmentData } from '@/gql';
+import { SeverityLevelType } from '@/gql/graphql';
 import { RouterAt } from '../../../../foundry.router';
 import { buildChanges, metadata, PATH } from './changes-block.fixtures';
-import { ChangesBlock } from './errors-and-changes';
+import { ChangesBlock, ChangesBlock_SchemaChangeWithUsageFragment } from './errors-and-changes';
 
 export const nav: NavPath = 'Components/ChangesBlock';
 
@@ -172,3 +174,76 @@ export const OnTheCheckPage = createPreview({
   controls: controlsFor(CheckPageView, countControls),
   render: v => <CheckPageView {...v} />,
 });
+
+// Inspector's messages and reasons, verbatim. A change marked safe based on usage whose usage is
+// never recorded gets an honest label, and a change with nothing to show is a static row.
+const USAGE_LABEL_CHANGES = [
+  {
+    path: ['Currency'],
+    message: "Type 'Currency' was removed",
+    severityReason: null,
+    isUsageTracked: false,
+  },
+  {
+    // Reached only through an interface, so no field change on the check points at it.
+    path: ['Dog'],
+    message: "Type 'Dog' was removed",
+    severityReason: null,
+    isUsageTracked: false,
+  },
+  {
+    path: ['SearchResult'],
+    message: "Member 'Movie' was removed from Union type 'SearchResult'",
+    severityReason:
+      'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
+    isUsageTracked: false,
+  },
+  {
+    path: ['Status'],
+    message: "'Status' kind changed from 'EnumTypeDefinition' to 'ScalarTypeDefinition'",
+    severityReason:
+      'Changing the kind of a type is a breaking change because it can cause existing queries to error. For example, turning an object type to a scalar type would break queries that define a selection set for this type.',
+    isUsageTracked: false,
+  },
+  {
+    path: ['Query', 'products', 'region'],
+    message: "Argument 'region: String!' added to field 'Query.products'",
+    severityReason: null,
+    isUsageTracked: false,
+  },
+  {
+    // Usage is recorded for fields, so "safe based on usage" holds here.
+    path: ['User', 'legacyId'],
+    message: "Field 'legacyId' was removed from object type 'User'",
+    severityReason:
+      'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
+    isUsageTracked: true,
+  },
+].map(change =>
+  makeFragmentData(
+    {
+      __typename: 'SchemaChange' as const,
+      ...change,
+      severityLevel: SeverityLevelType.Breaking,
+      isSafeBasedOnUsage: true,
+      approval: null,
+      usageStatistics: null,
+      affectedAppDeployments: null,
+    },
+    ChangesBlock_SchemaChangeWithUsageFragment,
+  ),
+);
+
+/** Breaking changes the check found no usage for, labelled by whether usage is recorded at all. */
+export const UsageLabels = createPreview(() => (
+  <RouterAt path={PATH}>
+    <div className="w-[72rem]">
+      <ChangesBlock
+        schemaCheckId="check-1"
+        title="Breaking Changes"
+        changesWithUsage={USAGE_LABEL_CHANGES}
+        conditionBreakingChangeMetadata={null}
+      />
+    </div>
+  </RouterAt>
+));
