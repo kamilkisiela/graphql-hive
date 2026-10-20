@@ -15,6 +15,7 @@ import {
 } from '@hive/api/modules/organization/providers/provisioned-users-store';
 import { RedisRateLimiter } from '@hive/api/modules/shared/providers/redis-rate-limiter';
 import { CommonQueryMethods, PostgresDatabasePool } from '@hive/postgres';
+import * as Sentry from '@sentry/node';
 
 const EmailSchemaModel = z.object({
   value: z.string().email(),
@@ -581,6 +582,16 @@ export const createSCIMPlugin =
 
     server.setErrorHandler(async (error, request, reply) => {
       request.log.error(error);
+
+      Sentry.withScope(scope => {
+        scope.setUser({ ip_address: request.ip });
+        scope.setTag('feature', 'scim');
+        scope.setTag('request_id', request.id);
+        scope.setTag('path', request.raw.url);
+        scope.setTag('method', request.raw.method);
+        Sentry.captureException(error);
+      });
+
       return reply.status(500).send(
         createSCIMError({
           status: 500,
