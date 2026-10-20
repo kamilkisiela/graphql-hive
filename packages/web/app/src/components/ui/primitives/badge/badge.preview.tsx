@@ -96,11 +96,7 @@ function CompositionErrorText(props: { padding: 'default' | 'tight' }) {
 export const WithIcon = createPreview(() => (
   <div className="flex flex-col gap-3">
     <div className="flex items-center gap-2">
-      <Badge
-        icon={ActivityIcon}
-        content="10+ operations by 2 clients affected"
-        variants={{ variant: 'critical' }}
-      />
+      <Badge icon={ActivityIcon} content="2 clients" variants={{ variant: 'critical' }} />
       <Badge icon={TriangleAlertIcon} content="Unapproved" variants={{ variant: 'warning' }} />
       <Badge icon={CheckIcon} content="Approved" variants={{ variant: 'success' }} />
       <Badge icon={ActivityIcon} content="Outline" variants={{ variant: 'outline' }} />
@@ -108,7 +104,7 @@ export const WithIcon = createPreview(() => (
     <div className="flex items-center gap-2">
       <Badge
         icon={ActivityIcon}
-        content="3 operations by 1 client affected"
+        content="1 client"
         variants={{ variant: 'critical', size: 'sm' }}
       />
       <Badge icon={CheckIcon} content="sm" variants={{ variant: 'success', size: 'sm' }} />

@@ -277,7 +277,11 @@ const BREAKING: Row[] = [
     value: 'field-type',
     label: "Field 'ConversionRate.fromCurrency' changed type from 'Currency!' to 'ForexCurrency!'",
     badge: (
-      <Badge content="10 operations by 11 clients affected" variants={{ variant: 'critical' }} />
+      <Badge
+        content="11 clients"
+        tooltip="10 operations by 11 clients affected"
+        variants={{ variant: 'critical' }}
+      />
     ),
     // In the app this panel holds the usage tables, which this primitive story leaves out.
     body: 'Affected operations and clients.',
@@ -287,7 +291,8 @@ const BREAKING: Row[] = [
     label: "Type 'Currency' was removed",
     badge: (
       <Badge
-        content="Usage isn't tracked for this kind of change"
+        content="Usage not tracked"
+        tooltip="Usage isn't tracked for this kind of change, so it can't be called safe"
         variants={{ variant: 'secondary' }}
       />
     ),
@@ -297,7 +302,8 @@ const BREAKING: Row[] = [
     label: "Member 'Movie' was removed from Union type 'SearchResult'",
     badge: (
       <Badge
-        content="Usage isn't tracked for this kind of change"
+        content="Usage not tracked"
+        tooltip="Usage isn't tracked for this kind of change, so it can't be called safe"
         variants={{ variant: 'secondary' }}
       />
     ),

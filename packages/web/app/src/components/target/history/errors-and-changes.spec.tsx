@@ -1,6 +1,18 @@
 // @vitest-environment jsdom
-import { render } from '@testing-library/react';
-import { CompositionErrorsList, labelize } from './errors-and-changes';
+import { makeFragmentData } from '@/gql';
+import { SchemaChangeKind, SeverityLevelType } from '@/gql/graphql';
+import { render, screen } from '@testing-library/react';
+import {
+  ChangesBlock,
+  ChangesBlock_SchemaChangeWithUsageFragment,
+  CompositionErrorsList,
+  labelize,
+} from './errors-and-changes';
+
+vi.mock('@/lib/hooks', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/hooks')>()),
+  useSlugs: () => ({ organizationSlug: 'acme', projectSlug: 'shop', targetSlug: 'production' }),
+}));
 
 describe('labelize', () => {
   it('wraps single- and double-quoted segments in a Label and drops the quotes', () => {
@@ -36,5 +48,59 @@ describe('CompositionErrorsList', () => {
     const heading = container.querySelector('[data-cy="composition-errors-title"]')!;
     expect(heading.textContent).toContain('Composition Errors');
     expect(heading.querySelector('[data-cy="composition-errors-info"]')).toBeTruthy();
+  });
+});
+
+describe('ChangesBlock', () => {
+  it('puts the deployment count beside the other badges, not in the message', () => {
+    const change = makeFragmentData(
+      {
+        __typename: 'SchemaChange' as const,
+        path: ['User', 'legacyId'],
+        message: "Field 'legacyId' was removed from object type 'User'",
+        severityLevel: SeverityLevelType.Breaking,
+        severityReason: 'Removing a field is a breaking change.',
+        isSafeBasedOnUsage: false,
+        isUsageTracked: true,
+        kind: SchemaChangeKind.FieldRemoved,
+        approval: null,
+        usageStatistics: {
+          __typename: 'SchemaChangeUsageStatistics' as const,
+          schemaCoordinate: 'User.legacyId',
+          topAffectedOperations: [
+            {
+              __typename: 'SchemaChangeUsageStatisticsAffectedOperation' as const,
+              hash: 'a0ec',
+              name: 'GetUser',
+              countFormatted: '12',
+              percentageFormatted: '100%',
+              affectedTargets: null,
+            },
+          ],
+          topAffectedClients: [
+            {
+              __typename: 'SchemaChangeUsageStatisticsAffectedClient' as const,
+              name: 'webapp',
+              countFormatted: '12',
+              percentageFormatted: '100%',
+            },
+          ],
+          affectedTargets: null,
+        },
+        affectedAppDeployments: {
+          __typename: 'SchemaChangeAffectedAppDeploymentsConnection' as const,
+          totalCount: 101,
+          edges: [],
+        },
+      },
+      ChangesBlock_SchemaChangeWithUsageFragment,
+    );
+    render(<ChangesBlock changesWithUsage={[change]} />);
+    const deployments = screen.getByText('101 deployments');
+    const clients = screen.getByText('1 client');
+    expect(deployments.parentElement).toBe(clients.parentElement);
+    expect(screen.getByText(/was removed from object type/).textContent).toBe(
+      'Field legacyId was removed from object type User',
+    );
   });
 });
