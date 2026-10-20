@@ -1,5 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { metrics, trace } from '@hive/service-common';
+import { context, metrics, SpanKind, SpanStatusCode, trace } from '@hive/service-common';
 import { AwsClient } from '../../cdn/providers/aws';
 import { S3Config, S3Destination } from './s3-config';
 
@@ -56,6 +56,8 @@ export function observeS3Write(metric: S3WriteMetric) {
 
 type S3RequestInit = Parameters<AwsClient['fetch']>[1];
 
+const tracer = trace.getTracer('s3-writer');
+
 @Injectable({ scope: Scope.Singleton, global: true })
 export class S3Writer {
   constructor(
@@ -73,24 +75,53 @@ export class S3Writer {
   ) {
     const startedAt = process.hrtime.bigint();
     let statusCode: S3WriteMetric['statusCode'] = 'none';
+    const hostname = new URL(s3.endpoint).hostname;
+    // The signed URL carries the credentials, so the key is recorded instead of `url.full`.
+    const span = tracer.startSpan(`S3 PUT ${operation}`, {
+      kind: SpanKind.CLIENT,
+      attributes: {
+        'http.request.method': 'PUT',
+        'server.address': hostname,
+        'hive.s3.bucket': s3.bucket,
+        'hive.s3.key': key,
+        'hive.s3.operation': operation,
+      },
+    });
 
     try {
-      const response = await s3.client.fetch([s3.endpoint, s3.bucket, key].join('/'), {
-        ...init,
-        method: 'PUT',
+      const response = await context.with(trace.setSpan(context.active(), span), () =>
+        s3.client.fetch([s3.endpoint, s3.bucket, key].join('/'), {
+          ...init,
+          method: 'PUT',
+        }),
+      );
+      const rayId = response.headers['cf-ray'];
+      span.setAttributes({
+        'http.response.status_code': response.statusCode,
+        'http.request.resend_count': response.retryCount,
+        ...(typeof rayId === 'string' ? { 'cloudflare.ray.id': rayId } : {}),
       });
-      if (
-        response.statusCode >= 400 &&
-        new URL(s3.endpoint).hostname.endsWith('.r2.cloudflarestorage.com')
-      ) {
-        const rayId = response.headers['cf-ray'];
-        if (typeof rayId === 'string') {
+      if (response.statusCode >= 400) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: `HTTP ${response.statusCode}` });
+        if (hostname.endsWith('.r2.cloudflarestorage.com') && typeof rayId === 'string') {
           this.r2ErrorObserver([{ rayId, statusCode: response.statusCode }]);
         }
       }
       statusCode = response.statusCode;
       return response;
+    } catch (error) {
+      if (error instanceof Error) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+        span.setAttributes({
+          'error.type': error.name,
+          ...('code' in error && typeof error.code === 'string'
+            ? { 'error.code': error.code }
+            : {}),
+        });
+      }
+      throw error;
     } finally {
+      span.end();
       this.observer({
         destination: s3.endpoint + '/' + s3.bucket,
         operation,
@@ -106,6 +137,15 @@ export class S3Writer {
       responses.push(await this.writeS3Object(destination, key, operation, init));
     }
     return responses;
+  }
+
+  /** Like `write`, but the mirror PUT does not wait for the primary PUT to finish. */
+  writeConcurrently(key: string, operation: S3WriteOperation, init: Omit<S3RequestInit, 'method'>) {
+    return Promise.all(
+      this.s3Config.destinations.map(destination =>
+        this.writeS3Object(destination, key, operation, init),
+      ),
+    );
   }
 
   writePrimary(key: string, operation: S3WriteOperation, init: Omit<S3RequestInit, 'method'>) {

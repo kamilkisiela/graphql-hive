@@ -4,16 +4,10 @@ import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useHive } from '@graphql-hive/yoga';
 import { type Registry } from '@hive/api';
 import { type AuthN } from '@hive/api/modules/auth/lib/authz';
-import { cleanRequestId, TracingInstance } from '@hive/service-common';
+import { requestIdStorage, TracingInstance } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
-import { asyncStorage } from './async-storage';
 import { type HiveUsageConfig } from './environment';
-import {
-  reqIdGenerate,
-  useHiveErrorHandler,
-  useHiveTracing,
-  type Context,
-} from './graphql-handler';
+import { useHiveErrorHandler, useHiveTracing, type Context } from './graphql-handler';
 import { createPublicGraphQLSchema } from './public-graphql-schema';
 import { useArmor } from './use-armor';
 
@@ -73,10 +67,9 @@ export const createPublicGraphQLHandler = (
   });
 
   return async (req, reply) => {
-    const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
-    const requestId = cleanRequestId(requestIdHeader);
+    const requestId = req.id;
 
-    await asyncStorage.run(
+    await requestIdStorage.run(
       {
         requestId,
       },
@@ -93,10 +86,6 @@ export const createPublicGraphQLHandler = (
         response.headers.forEach((value, key) => {
           void reply.header(key, value);
         });
-
-        if (!reply.hasHeader('x-request-id')) {
-          void reply.header('x-request-id', requestId || '');
-        }
 
         const accept = req.headers.accept;
 

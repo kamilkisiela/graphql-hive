@@ -61,7 +61,7 @@ export function graphqlRequest(config: {
         );
       } catch (e: any) {
         if (typeof e?.status === 'number') {
-          throw new HTTPError(config.endpoint, e.status, e.statusText || e.message);
+          throw new HTTPError(config.endpoint, e.status, e.statusText || e.message, e.requestId);
         }
         if (config.isHiveRegistry && isTimeoutError(e)) {
           throw new RequestTimeoutError(config.endpoint, e?.cause ?? e);
@@ -79,6 +79,7 @@ export function graphqlRequest(config: {
           config.endpoint,
           response.status,
           response.statusText ?? 'Invalid status code for HTTP call',
+          response.headers.get('x-request-id') ?? undefined,
         );
       }
 

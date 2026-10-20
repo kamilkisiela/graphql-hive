@@ -45,7 +45,6 @@
     "got": "catalog:",
     "graphql": "catalog:",
     "graphql-yoga": "catalog:",
-    "hyperid": "4.0.0",
     "openid-client": "6.8.2",
     "pino-pretty": "catalog:",
     "prom-client": "catalog:",

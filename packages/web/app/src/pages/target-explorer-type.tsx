@@ -20,13 +20,14 @@ import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-
 import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
 import { matchesSubgraphFilter } from '@/components/target/explorer/utils';
 import { presetLast7Days } from '@/components/ui/date-range-picker';
-import { NoSchemaVersion } from '@/components/ui/empty-list';
+import { EmptyList, NoSchemaVersion } from '@/components/ui/empty-list';
 import { Meta } from '@/components/ui/meta';
+import { Button } from '@/components/ui/primitives/button/button';
 import { QueryError } from '@/components/ui/query-error';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useLayoutQuery, useSlugs } from '@/lib/hooks';
-import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
-import { getRouteApi } from '@tanstack/react-router';
+import { carriedRange, useDateRangeController } from '@/lib/hooks/use-date-range-controller';
+import { getRouteApi, Link } from '@tanstack/react-router';
 
 export const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
@@ -152,6 +153,7 @@ function TypeExplorerPageContent(props: { typename: string }) {
   });
   // Resolved by the route loader, so the page and the loader ask for one period.
   const { period } = typeRoute.useLoaderData();
+  const search = typeRoute.useSearch();
   const [query] = useQuery({
     query: TargetExplorerTypenamePageQuery,
     variables: { organizationSlug, projectSlug, targetSlug, period, typename: props.typename },
@@ -196,13 +198,30 @@ function TypeExplorerPageContent(props: { typename: string }) {
           warnAboutUnusedArguments={false}
           filteredFallback={<ExplorerFilteredEmptyState />}
         />
-      ) : type ? (
+      ) : latestSchemaVersion ? (
+        // A mistyped URL lands here too, so this can't say the type was removed.
+        <EmptyList
+          title={`Type '${props.typename}' not found`}
+          description="There's no type with this name in the latest version."
+        >
+          <Button
+            variant="outline"
+            render={
+              <Link
+                to="/$organizationSlug/$projectSlug/$targetSlug/explorer"
+                params={{ organizationSlug, projectSlug, targetSlug }}
+                search={carriedRange(search)}
+              />
+            }
+          >
+            Browse all types
+          </Button>
+        </EmptyList>
+      ) : (
         <NoSchemaVersion
           recommendedAction="publish"
           projectType={query.data?.target?.project?.type ?? null}
         />
-      ) : (
-        <div>Not found</div>
       )}
     </>
   );

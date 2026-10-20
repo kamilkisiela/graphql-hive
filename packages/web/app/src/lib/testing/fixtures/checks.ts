@@ -46,7 +46,7 @@ export const CHECKS = {
   nextCursor: 'cursor-2',
 } as const;
 
-/** The services of the latest valid version, as `ChecksPageQuery` returns them. */
+/** The services that have checks, as `ChecksPageQuery` returns them. */
 export const SERVICES = ['products', 'users'] as const;
 
 /** `SchemaChecks_NavigationQuery`, answered per page and filter. */
@@ -84,11 +84,7 @@ export function checksPage(projectType: ProjectType = 'FEDERATION') {
       __typename: 'Target' as const,
       id: TARGET_ID,
       project: { __typename: 'Project' as const, id: 'project-1', type: projectType },
-      latestValidSchemaVersion: {
-        __typename: 'SchemaVersion' as const,
-        id: 'version-1',
-        serviceNames: projectType === 'SINGLE' ? null : [...SERVICES],
-      },
+      schemaCheckServiceNames: projectType === 'SINGLE' ? null : [...SERVICES],
       schemaChecks: {
         __typename: 'SchemaCheckConnection' as const,
         edges: [
@@ -206,7 +202,7 @@ export function breakingSchemaCheck(
                   severityReason: null,
                   approval: null,
                   isSafeBasedOnUsage: options.safe ?? false,
-                  usageTracking: 'TRACKED',
+                  isUsageTracked: true,
                   kind: 'FIELD_REMOVED',
                   usageStatistics: {
                     __typename: 'SchemaChangeUsageStatistics' as const,
@@ -316,7 +312,7 @@ function removedFieldAt(index: number) {
     severityReason: FIELD_REMOVED_REASON,
     approval: null,
     isSafeBasedOnUsage: false,
-    usageTracking: 'TRACKED',
+    isUsageTracked: true,
     kind: 'FIELD_REMOVED',
     usageStatistics: null,
     affectedAppDeployments: null,
@@ -336,7 +332,7 @@ function safeChangeAt(kind: string, index: number) {
     severityReason: null,
     approval: null,
     isSafeBasedOnUsage: false,
-    usageTracking: 'NOT_TRACKED',
+    isUsageTracked: false,
     kind,
   };
 }
@@ -476,7 +472,7 @@ function breakingChange(change: {
   message: string;
   severityReason: string | null;
   isSafeBasedOnUsage: boolean;
-  usageTracking: string;
+  isUsageTracked: boolean;
   kind: string;
 }) {
   return {
@@ -513,7 +509,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                 message: "Type 'Currency' was removed",
                 severityReason: null,
                 isSafeBasedOnUsage: true,
-                usageTracking: 'ON_REFERENCING_FIELDS',
+                isUsageTracked: false,
                 kind: 'TYPE_REMOVED',
               }),
               breakingChange({
@@ -522,7 +518,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                 severityReason:
                   'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
                 isSafeBasedOnUsage: true,
-                usageTracking: 'NOT_TRACKED',
+                isUsageTracked: false,
                 kind: 'UNION_MEMBER_REMOVED',
               }),
               // Tracked, but with no reason and no usage to show.
@@ -532,7 +528,7 @@ export function untrackedUsageSchemaCheck(variables: { schemaCheckId: string }) 
                   "Field 'ConversionRate.fromCurrency' changed type from 'Currency!' to 'ForexCurrency!'",
                 severityReason: null,
                 isSafeBasedOnUsage: true,
-                usageTracking: 'TRACKED',
+                isUsageTracked: true,
                 kind: 'FIELD_TYPE_CHANGED',
               }),
             ],

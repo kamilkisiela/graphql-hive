@@ -109,6 +109,7 @@ export function File<LAnnotation = undefined, Caret = undefined>(
         {...props}
         options={{
           theme: pierreTheme(resolvedTheme),
+          themeType: resolvedTheme,
           ...props.options,
         }}
       />
@@ -127,6 +128,7 @@ export function FileDiff<LAnnotation = undefined, Caret = undefined>(
         {...props}
         options={{
           theme: pierreTheme(resolvedTheme),
+          themeType: resolvedTheme,
           ...props.options,
         }}
       />

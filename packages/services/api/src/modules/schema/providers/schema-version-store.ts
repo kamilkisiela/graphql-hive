@@ -997,27 +997,6 @@ export class SchemaVersionStore {
       .then(z.array(SchemaPushLogModel).parse);
   }
 
-  async getServiceNamesBySchemaVersionId(schemaVersionId: string) {
-    return this.pg
-      .anyFirst(
-        psql`/* getServiceNamesOfVersion */
-          SELECT
-            lower(sl.service_name) AS service_name
-          FROM schema_version_to_log AS svl
-          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
-          LEFT JOIN projects AS p ON (p.id = sl.project_id)
-          WHERE
-            svl.version_id = ${schemaVersionId}
-            AND sl.action = 'PUSH'
-            AND sl.service_name IS NOT NULL
-            AND p.type != 'CUSTOM'
-          ORDER BY
-            lower(sl.service_name) ASC
-        `,
-      )
-      .then(z.array(z.string()).parse);
-  }
-
   async getSchemaRevisionsBySchemaLogIds(schemaLogIds: Array<string>) {
     if (schemaLogIds.length === 0) {
       return new Map<string, string>();

@@ -8,7 +8,7 @@ import { Select } from '@/components/ui/primitives/floating/select/select';
 import { ScopeBar } from '@/components/ui/scope-bar/scope-bar';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
 import { makeFragmentData } from '@/gql';
-import { SchemaChangeKind, SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
+import { SchemaChangeKind, SeverityLevelType } from '@/gql/graphql';
 import { RouterAt } from '../../../../foundry.router';
 import { buildChanges, metadata, PATH } from './changes-block.fixtures';
 import {
@@ -186,7 +186,7 @@ const USAGE_LABEL_CHANGES = [
     path: ['Currency'],
     message: "Type 'Currency' was removed",
     severityReason: null,
-    usageTracking: SchemaChangeUsageTracking.OnReferencingFields,
+    isUsageTracked: false,
     kind: SchemaChangeKind.TypeRemoved,
   },
   {
@@ -194,7 +194,7 @@ const USAGE_LABEL_CHANGES = [
     path: ['Dog'],
     message: "Type 'Dog' was removed",
     severityReason: null,
-    usageTracking: SchemaChangeUsageTracking.OnReferencingFields,
+    isUsageTracked: false,
     kind: SchemaChangeKind.TypeRemoved,
   },
   {
@@ -202,7 +202,7 @@ const USAGE_LABEL_CHANGES = [
     message: "Member 'Movie' was removed from Union type 'SearchResult'",
     severityReason:
       'Removing a union member from a union can cause existing queries that use this union member in a fragment spread to error.',
-    usageTracking: SchemaChangeUsageTracking.NotTracked,
+    isUsageTracked: false,
     kind: SchemaChangeKind.UnionMemberRemoved,
   },
   {
@@ -210,14 +210,14 @@ const USAGE_LABEL_CHANGES = [
     message: "'Status' kind changed from 'EnumTypeDefinition' to 'ScalarTypeDefinition'",
     severityReason:
       'Changing the kind of a type is a breaking change because it can cause existing queries to error. For example, turning an object type to a scalar type would break queries that define a selection set for this type.',
-    usageTracking: SchemaChangeUsageTracking.NotTracked,
+    isUsageTracked: false,
     kind: SchemaChangeKind.TypeKindChanged,
   },
   {
     path: ['Query', 'products', 'region'],
     message: "Argument 'region: String!' added to field 'Query.products'",
     severityReason: null,
-    usageTracking: SchemaChangeUsageTracking.NotTracked,
+    isUsageTracked: false,
     kind: SchemaChangeKind.FieldArgumentAdded,
   },
   {
@@ -226,7 +226,7 @@ const USAGE_LABEL_CHANGES = [
     message: "Field 'legacyId' was removed from object type 'User'",
     severityReason:
       'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
-    usageTracking: SchemaChangeUsageTracking.Tracked,
+    isUsageTracked: true,
     kind: SchemaChangeKind.FieldRemoved,
   },
 ].map(change =>
@@ -275,7 +275,7 @@ function plainChange(change: {
       severityReason: null,
       approval: null,
       isSafeBasedOnUsage: false,
-      usageTracking: SchemaChangeUsageTracking.NotTracked,
+      isUsageTracked: false,
     },
     ChangesBlock_SchemaChangeFragment,
   );

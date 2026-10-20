@@ -1,9 +1,9 @@
-import { SchemaChangeUsageTracking, SeverityLevelType } from '@/gql/graphql';
+import { SeverityLevelType } from '@/gql/graphql';
 
 type Change = {
   severityLevel: SeverityLevelType;
   isSafeBasedOnUsage: boolean;
-  usageTracking: SchemaChangeUsageTracking;
+  isUsageTracked: boolean;
 };
 
 /**
@@ -17,7 +17,7 @@ export function changeSafetyStats(changes: ReadonlyArray<Change>) {
       continue;
     }
     stats.breakingChanges++;
-    if (!change.isSafeBasedOnUsage || change.usageTracking !== SchemaChangeUsageTracking.Tracked) {
+    if (!change.isSafeBasedOnUsage || !change.isUsageTracked) {
       stats.notSafe++;
     }
   }

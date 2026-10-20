@@ -1,6 +1,6 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { AvailableRulesResponse, SchemaPolicyApi, SchemaPolicyApiInput } from '@hive/policy';
-import { errorSourceLink, traceFn } from '@hive/service-common';
+import { errorSourceLink, requestIdHeaders, traceFn } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { Logger } from '../../shared/providers/logger';
 import type { SchemaPolicyServiceConfig } from './tokens';
@@ -28,6 +28,7 @@ export class SchemaPolicyApiProvider {
             httpLink({
               url: `${config.endpoint}/trpc`,
               fetch,
+              headers: requestIdHeaders,
             }),
           ],
         })

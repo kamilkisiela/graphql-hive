@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer';
 import sm from 'sendmail';
 
+/** `sendmail` hands these to mailcomposer, which also reads `textEncoding`; the types omit it. */
+type SendmailMailInput = Parameters<ReturnType<typeof sm>>[0] & { textEncoding?: 'base64' };
+
 interface Email {
   to: string;
   subject: string;
@@ -150,7 +153,13 @@ function sendmail(_config: SendmailEmailProviderConfig, emailFrom: string) {
             to: email.to,
             subject: email.subject,
             html: email.body,
-          },
+            // `sendmail` writes the message into SMTP DATA without doubling a line's leading
+            // dot, as RFC 5321 §4.5.2 requires, so the receiving server drops that dot. Its
+            // default quoted-printable body wraps at 76 characters and can start a line with
+            // the "." of a URL: an invite to `…prod.proddsl.zzzzzzz…` arrived as
+            // `…prod.proddslzzzzzzz…` (#7702). Base64 has no "." in its alphabet.
+            textEncoding: 'base64',
+          } as SendmailMailInput,
           (err, reply) => {
             if (err) {
               reject(err);

@@ -174,16 +174,12 @@ describe('service filter', () => {
     });
   });
 
-  it(
-    'shows a service from the URL that the latest version does not know',
-    { timeout: 30_000 },
-    async () => {
-      renderAtUrl(`${CHECKS_PAGE}?filter_service=ghost`, { client: client() });
-      await screen.findByText(CHECKS.serviceOnly);
+  it('shows a service from the URL that no check lists', { timeout: 30_000 }, async () => {
+    renderAtUrl(`${CHECKS_PAGE}?filter_service=ghost`, { client: client() });
+    await screen.findByText(CHECKS.serviceOnly);
 
-      expect(screen.getByRole('combobox', { name: 'Service' }).textContent).toContain('ghost');
-    },
-  );
+    expect(screen.getByRole('combobox', { name: 'Service' }).textContent).toContain('ghost');
+  });
 
   it("filters to a service from a check row's service name", { timeout: 30_000 }, async () => {
     const testClient = client();
@@ -727,16 +723,18 @@ describe('breaking changes without recorded usage', () => {
   }
 
   it(
-    'labels a removed type honestly and leaves it closed, with nothing to open',
+    'labels a removed type as untracked and leaves it closed, with nothing to open',
     { timeout: 30_000 },
     async () => {
       renderCheck();
-      const label = await screen.findByText(
-        "Usage isn't counted for types, only for the fields that use them.",
+      // The type removal and the union member change; the type removal comes first.
+      const labels = await screen.findAllByText(
+        "Usage isn't tracked for this kind of change",
         {},
         { timeout: 10_000 },
       );
-      expect(label.closest('button')).toBeNull();
+      expect(labels).toHaveLength(2);
+      expect(labels[0].closest('button')).toBeNull();
       expect(screen.queryByRole('button', { name: /Currency was removed/ })).toBeNull();
       // Only the tracked field change still says safe based on usage.
       expect(screen.getAllByText('Safe based on usage data')).toHaveLength(1);

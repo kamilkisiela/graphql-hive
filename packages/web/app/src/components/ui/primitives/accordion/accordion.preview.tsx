@@ -288,7 +288,7 @@ const BREAKING: Row[] = [
     label: "Type 'Currency' was removed",
     badge: (
       <Badge
-        content="Usage isn't counted for types, only for the fields that use them."
+        content="Usage isn't tracked for this kind of change"
         variants={{ variant: 'secondary' }}
       />
     ),
