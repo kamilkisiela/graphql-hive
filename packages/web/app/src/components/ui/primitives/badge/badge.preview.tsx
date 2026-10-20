@@ -1,4 +1,4 @@
-import { ActivityIcon, CheckIcon, TriangleAlertIcon } from 'lucide-react';
+import { ActivityIcon, BoxIcon, CheckIcon, TriangleAlertIcon } from 'lucide-react';
 import { controlsFor, createPreview, type NavPath } from 'react-foundry';
 import { Badge } from './badge';
 
@@ -113,6 +113,35 @@ export const WithIcon = createPreview(() => (
       />
       <Badge icon={CheckIcon} content="sm" variants={{ variant: 'success', size: 'sm' }} />
     </div>
+  </div>
+));
+
+// A short badge with its full sentence on hover.
+export const WithTooltip = createPreview(() => (
+  <div className="flex items-center gap-2">
+    <Badge
+      icon={ActivityIcon}
+      content="2 clients"
+      tooltip="10+ operations by 2 clients affected"
+      variants={{ variant: 'critical' }}
+    />
+    <Badge
+      icon={BoxIcon}
+      content="101 deployments"
+      tooltip="101 app deployments affected"
+      variants={{ variant: 'warning' }}
+    />
+    <Badge
+      icon={CheckIcon}
+      content="Approved"
+      tooltip="Approved by User on 20th October 2026"
+      variants={{ variant: 'success' }}
+    />
+    <Badge
+      content="Usage not tracked"
+      tooltip="Usage isn't tracked for this kind of change, so it can't be called safe"
+      variants={{ variant: 'secondary' }}
+    />
   </div>
 ));
 

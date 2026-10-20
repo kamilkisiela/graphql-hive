@@ -1,8 +1,11 @@
+import type { ReactNode } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { LucideIcon } from 'lucide-react';
+import { Tooltip } from '../floating/tooltip/tooltip';
 
 const badgeVariants = cva(
-  'inline-flex w-fit shrink-0 cursor-default items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border font-medium',
+  // Takes the cursor of a trigger it sits in.
+  'inline-flex w-fit shrink-0 cursor-default in-[:is(a,button,[role=button])]:cursor-[inherit] items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-md border font-medium',
   {
     variants: {
       variant: {
@@ -51,10 +54,12 @@ type BadgeProps = {
   /** Leads the text, in the text's colour. */
   icon?: LucideIcon;
   variants?: VariantProps<typeof badgeVariants>;
+  // The sentence a short badge stands for.
+  tooltip?: ReactNode;
 };
 
-export function Badge({ content, icon: Icon, variants }: BadgeProps) {
-  return (
+export function Badge({ content, icon: Icon, variants, tooltip }: BadgeProps) {
+  const badge = (
     <span className={badgeVariants({ ...variants })}>
       {Icon ? (
         <Icon aria-hidden className={variants?.size === 'sm' ? 'size-3' : 'size-3.5'} />
@@ -62,4 +67,5 @@ export function Badge({ content, icon: Icon, variants }: BadgeProps) {
       {content}
     </span>
   );
+  return tooltip ? <Tooltip trigger={badge} content={tooltip} /> : badge;
 }
