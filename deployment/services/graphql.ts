@@ -128,7 +128,7 @@ export function deployGraphQL({
           LOG_LEVEL: 'info',
           SENTRY: sentry.enabled ? '1' : '0',
           REQUEST_LOGGING: '1',
-          REQUEST_BROKER: '1',
+          REQUEST_BROKER: '0',
           COMMERCE_ENDPOINT: serviceLocalEndpoint(commerce.service),
           SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
           SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),
