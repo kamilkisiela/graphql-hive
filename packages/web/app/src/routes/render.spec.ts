@@ -36,8 +36,8 @@ vi.mock('@/components/ui/primitives/chart/chart', () => ({ Chart: () => null }))
 // A signed-in session that never refreshes.
 vi.mock('@/lib/auth/session', () => import('@/lib/testing/mocks/auth-session'));
 // The OIDC interstitial redirects away unless the provider is on.
-vi.mock('@/lib/supertokens/thirdparty', async importOriginal => ({
-  ...(await importOriginal<typeof import('@/lib/supertokens/thirdparty')>()),
+vi.mock('@/lib/auth/providers', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/auth/providers')>()),
   isProviderEnabled: () => true,
 }));
 

@@ -16,7 +16,7 @@ import { env } from '@/env/frontend';
 import { signUp as signUpRequest } from '@/lib/auth/api';
 import { useLastAuthMethod } from '@/lib/supertokens/last-auth-method';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
-import { enabledProviders, isProviderEnabled } from '@/lib/supertokens/thirdparty';
+import { enabledProviders, isProviderEnabled } from '@/lib/auth/providers';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
