@@ -2610,6 +2610,14 @@ export async function createStorage(
       async args => {
         const withSDL = args[0].withSDL ?? true;
         const withChanges = args[0].withChanges ?? true;
+        const schemaCheckIds = args
+          .map(arg => arg.schemaCheckId)
+          .filter(schemaCheckId => z.string().uuid().safeParse(schemaCheckId).success);
+
+        if (schemaCheckIds.length === 0) {
+          return args.map(() => null);
+        }
+
         const result = await pool.any(psql`/* findSchemaChecks */
         SELECT
           ${schemaCheckSQLFields({ sdl: withSDL, changes: withChanges })}
@@ -2628,10 +2636,7 @@ export async function createStorage(
             : psql``
         }
         WHERE
-          c."id" = ANY(${psql.array(
-            args.map(arg => arg.schemaCheckId),
-            'uuid',
-          )})
+          c."id" = ANY(${psql.array(schemaCheckIds, 'uuid')})
           AND c."target_id" = ${args[0].targetId}
       `);
 
