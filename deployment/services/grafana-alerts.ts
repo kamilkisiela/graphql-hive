@@ -178,5 +178,83 @@ export function deployGrafanaAlerts(envName: string) {
     ],
   });
 
-  return { folder, ruleGroup };
+  // Egress policies (see `services/egress-policy.ts`), based on the Hubble metrics of the Cilium
+  // agents. Pairs with the Egress-Policies dashboard. Without Cilium + ACNS there's no data, so the
+  // rule stays OK.
+  const egressRuleGroup = new alerting.RuleGroup('egress-policies', {
+    folderUid: folder.uid,
+    name: 'egress-policies',
+    intervalSeconds: 60,
+    rules: [
+      {
+        name: 'EgressPolicyDrops',
+        for: '5m',
+        condition: 'C',
+        noDataState: 'OK',
+        execErrState: 'Alerting',
+        annotations: {
+          summary: 'Egress policy is dropping traffic for {{ $labels.source_workload }}',
+          description:
+            'The egress policy of {{ $labels.source_workload }} has been dropping packets for 5 minutes. Either a declaration is missing (allowExternal / allowInCluster), or the workload tried to reach a blocked destination (e.g. an internal address from a user-provided URL).',
+          runbook_url:
+            'https://github.com/graphql-hive/console/blob/main/deployment/services/egress-policy.ts',
+        },
+        labels: { severity: 'warning', component: 'egress-policies' },
+        isPaused: false,
+        datas: [
+          {
+            refId: 'A',
+            queryType: '',
+            relativeTimeRange: { from: 600, to: 0 },
+            datasourceUid: 'grafanacloud-prom',
+            model: JSON.stringify({
+              refId: 'A',
+              expr: 'sum by (source_workload) (increase(hubble_drop_total{reason=~"POLICY_DENIED|POLICY_DENY", source_namespace="default"}[5m]))',
+              instant: false,
+              range: true,
+              intervalMs: 30_000,
+              maxDataPoints: 43_200,
+            }),
+          },
+          {
+            // Reduce each series to its last point, so the threshold receives "reduced" data.
+            refId: 'B',
+            queryType: '',
+            relativeTimeRange: { from: 0, to: 0 },
+            datasourceUid: '__expr__',
+            model: JSON.stringify({
+              refId: 'B',
+              type: 'reduce',
+              reducer: 'last',
+              expression: 'A',
+              datasource: { type: '__expr__', uid: '__expr__' },
+            }),
+          },
+          {
+            refId: 'C',
+            queryType: '',
+            relativeTimeRange: { from: 0, to: 0 },
+            datasourceUid: '__expr__',
+            model: JSON.stringify({
+              refId: 'C',
+              type: 'threshold',
+              expression: 'B',
+              conditions: [
+                {
+                  type: 'query',
+                  evaluator: { type: 'gt', params: [0] },
+                  operator: { type: 'and' },
+                  query: { params: ['B'] },
+                  reducer: { type: 'last', params: [] },
+                },
+              ],
+              datasource: { type: '__expr__', uid: '__expr__' },
+            }),
+          },
+        ],
+      },
+    ],
+  });
+
+  return { folder, ruleGroup, egressRuleGroup };
 }

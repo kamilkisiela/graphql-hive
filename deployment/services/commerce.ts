@@ -4,6 +4,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
 import { Observability } from './observability';
 import { Postgres } from './postgres';
@@ -25,6 +26,7 @@ export function deployCommerce({
   postgres,
   clickhouse,
   sentry,
+  egressManager,
 }: {
   observability: Observability;
   image: string;
@@ -34,6 +36,7 @@ export function deployCommerce({
   postgres: Postgres;
   clickhouse: Clickhouse;
   sentry: Sentry;
+  egressManager: EgressPolicyManager;
 }) {
   const billingConfig = new pulumi.Config('billing');
   const stripeSecret = new StripeSecret('stripe', {
@@ -78,6 +81,17 @@ export function deployCommerce({
     .withSecret('CLICKHOUSE_PROTOCOL', clickhouse.secret, 'protocol')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
+
+  egressManager
+    ?.allowExternal(
+      deployment,
+      postgres.pgBouncerSecret.raw.host,
+      postgres.pgBouncerSecret.raw.port,
+    )
+    .allowExternal(deployment, clickhouse.secret.raw.host, clickhouse.secret.raw.port)
+    .allowExternal(deployment, 'https://api.stripe.com')
+    .allowExternal(deployment, sentry.secret?.raw.dsn)
+    .allowInCluster(deployment, observability.observability?.otlpCollectorService);
 
   return {
     deployment,
