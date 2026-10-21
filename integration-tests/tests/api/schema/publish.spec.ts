@@ -4701,3 +4701,116 @@ test.concurrent(
     });
   },
 );
+
+test.concurrent(
+  'publishing without a schema source returns SchemaPublishError',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createTargetAccessToken } = await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({});
+
+    const result = await token.publishSchema({}).then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish).toMatchObject({
+      __typename: 'SchemaPublishError',
+      valid: false,
+      errors: {
+        nodes: [
+          {
+            message:
+              "Provide exactly one schema source: 'PublishInput.sdl' or 'PublishInput.schema'.",
+          },
+        ],
+      },
+    });
+  },
+);
+
+test.concurrent(
+  'publishing with both sdl and schema returns SchemaPublishError',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createTargetAccessToken } = await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({});
+
+    const result = await token
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+        revision: 'some-revision',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish).toMatchObject({
+      __typename: 'SchemaPublishError',
+      valid: false,
+      errors: {
+        nodes: [
+          {
+            message:
+              "Provide exactly one schema source: 'PublishInput.sdl' or 'PublishInput.schema'.",
+          },
+        ],
+      },
+    });
+  },
+);
+
+test.concurrent('publishing an unparsable SDL returns SchemaPublishError', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createTargetAccessToken } = await createProject(ProjectType.Single);
+  const token = await createTargetAccessToken({});
+
+  const result = await token
+    .publishSchema({
+      sdl: `
+        type Query {
+          ping: String
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(result.schemaPublish).toMatchObject({
+    __typename: 'SchemaPublishError',
+    valid: false,
+    errors: {
+      nodes: [{ message: expect.stringContaining('The provided SDL is not valid') }],
+    },
+  });
+});
+
+test.concurrent(
+  'republishing with metadata that is not valid JSON returns SchemaPublishError',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createTargetAccessToken } = await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({});
+    const sdl = /* GraphQL */ `
+      type Query {
+        ping: String
+      }
+    `;
+
+    const first = await token.publishSchema({ sdl }).then(r => r.expectNoGraphQLErrors());
+    expect(first.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const second = await token
+      .publishSchema({ sdl, metadata: '{ not json' })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(second.schemaPublish).toMatchObject({
+      __typename: 'SchemaPublishError',
+      valid: false,
+      errors: {
+        nodes: [{ message: 'Failed to parse metadata' }],
+      },
+    });
+  },
+);
