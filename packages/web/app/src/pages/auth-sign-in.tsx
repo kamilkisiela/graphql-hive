@@ -138,8 +138,9 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
     return null;
   }
 
-  if (session.doesSessionExist) {
-    // Redirect to the home page if the user is already signed in
+  if (session.doesSessionExist && emailPasswordSignIn.isIdle && thirdPartySignIn.isIdle) {
+    // Already signed in on arrival. Once a sign-in started here, onSuccess owns the navigation
+    // (the store flips before the request resolves, and the page is still mounted afterwards).
     return <Navigate to="/" />;
   }
 

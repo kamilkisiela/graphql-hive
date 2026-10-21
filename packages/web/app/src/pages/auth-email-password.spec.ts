@@ -103,6 +103,8 @@ describe('email and password sign-in', () => {
     submit();
 
     await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: '/manage' }));
+    // Only onSuccess navigates; the page's own redirect for a signed-in visitor must stay quiet.
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -132,6 +134,7 @@ describe('email and password sign-up', () => {
     requireEmailVerification.current = true;
     const navigate = await signUpAt('/auth/sign-up?redirectToPath=%2Fmanage');
     await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: '/auth/verify-email' }));
+    expect(navigate).toHaveBeenCalledTimes(1);
     expect(api.signUp.mock.calls[0]?.[0]).toEqual({
       firstName: 'User',
       lastName: 'Example',
@@ -144,5 +147,6 @@ describe('email and password sign-up', () => {
     requireEmailVerification.current = false;
     const navigate = await signUpAt('/auth/sign-up?redirectToPath=%2Fmanage');
     await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: '/manage' }));
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
 });
