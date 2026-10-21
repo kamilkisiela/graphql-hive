@@ -3,7 +3,7 @@ import { OperationsManager } from '../../operations/providers/operations-manager
 import { Logger } from '../../shared/providers/logger';
 import { onlyDeprecatedDocumentNode } from '../lib/deprecated-graphql';
 import { extractSuperGraphInformation } from '../lib/federation-super-graph';
-import { isFieldRequestedDeep } from '../lib/is-field-requested';
+import { isFieldRequestedDeep } from '../lib/graphql-info-helper';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from '../lib/unused-graphql';
 import { Contracts } from '../providers/contracts';
 import { SchemaManager } from '../providers/schema-manager';

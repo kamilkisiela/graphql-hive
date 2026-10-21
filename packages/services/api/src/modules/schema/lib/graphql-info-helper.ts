@@ -90,3 +90,71 @@ export function isFieldRequestedDeep(
 
   return found;
 }
+
+export function areOnlyFieldsRequested(
+  info: GraphQLResolveInfo,
+  typeName: string,
+  allowedFields: ReadonlySet<string>,
+): boolean {
+  let foundField = false;
+
+  function visitSelections(
+    selections: readonly SelectionNode[],
+    parentType: GraphQLOutputType,
+  ): boolean {
+    const namedType = getNamedType(parentType);
+
+    for (const selection of selections) {
+      if (selection.kind === 'Field') {
+        if (namedType.name === typeName) {
+          foundField = true;
+          if (!allowedFields.has(selection.name.value)) {
+            return false;
+          }
+        } else if (
+          selection.selectionSet &&
+          (isObjectType(namedType) || isInterfaceType(namedType))
+        ) {
+          const fieldDef = namedType.getFields()[selection.name.value];
+          if (fieldDef && !visitSelections(selection.selectionSet.selections, fieldDef.type)) {
+            return false;
+          }
+        }
+      } else if (selection.kind === 'InlineFragment') {
+        const conditionName = selection.typeCondition?.name.value;
+        const fragmentType = conditionName
+          ? (info.schema.getType(conditionName) as GraphQLOutputType | undefined)
+          : parentType;
+        if (!visitSelections(selection.selectionSet.selections, fragmentType ?? parentType)) {
+          return false;
+        }
+      } else {
+        const fragment = info.fragments[selection.name.value];
+        const fragmentType = fragment
+          ? (info.schema.getType(fragment.typeCondition.name.value) as
+              | GraphQLOutputType
+              | undefined)
+          : undefined;
+        if (
+          fragment &&
+          !visitSelections(fragment.selectionSet.selections, fragmentType ?? parentType)
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  for (const fieldNode of info.fieldNodes) {
+    if (
+      fieldNode.selectionSet &&
+      !visitSelections(fieldNode.selectionSet.selections, info.returnType)
+    ) {
+      return false;
+    }
+  }
+
+  return foundField;
+}

@@ -1,7 +1,7 @@
 import { parseDateRangeInput } from '../../../shared/helpers';
 import { GraphStore } from '../../graph/providers/graph-store';
 import { OperationsManager } from '../../operations/providers/operations-manager';
-import { isFieldRequestedDeep } from '../lib/is-field-requested';
+import { isFieldRequestedDeep } from '../lib/graphql-info-helper';
 import { ContractsManager } from '../providers/contracts-manager';
 import { SchemaManager } from '../providers/schema-manager';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from '../to-graphql-schema-check';

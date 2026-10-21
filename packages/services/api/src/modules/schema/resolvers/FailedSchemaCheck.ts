@@ -1,11 +1,28 @@
+import { areOnlyFieldsRequested, isFieldRequestedDeep } from '../lib/graphql-info-helper';
 import { ContractsManager } from '../providers/contracts-manager';
 import { SchemaCheckManager } from '../providers/schema-check-manager';
 import { SchemaManager } from '../providers/schema-manager';
-import type { FailedSchemaCheckResolvers } from './../../../__generated__/types';
+import type { FailedSchemaCheckResolvers, SchemaVersion } from './../../../__generated__/types';
 
 export const FailedSchemaCheck: FailedSchemaCheckResolvers = {
-  schemaVersion: (schemaCheck, _, { injector }) => {
-    return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
+  schemaVersion(schemaCheck, _, { injector }, info) {
+    if (!schemaCheck.schemaVersionId) {
+      return null;
+    }
+
+    const manager = injector.get(SchemaCheckManager);
+
+    if (areOnlyFieldsRequested(info, 'SchemaVersion', new Set(['id', '__typename']))) {
+      return { id: schemaCheck.schemaVersionId } satisfies Pick<SchemaVersion, 'id'> as never;
+    }
+
+    return manager.getGraphQLSchemaVersion(schemaCheck, {
+      withSDL: isFieldRequestedDeep(info, [
+        ['SchemaVersion', 'sdl'],
+        ['SchemaVersion', 'supergraph'],
+      ]),
+      withChanges: isFieldRequestedDeep(info, [['SchemaVersion', 'supergraphChanges']]),
+    });
   },
   safeSchemaChanges: (schemaCheck, _, { injector }) => {
     return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);

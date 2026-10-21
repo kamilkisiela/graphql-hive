@@ -1,6 +1,6 @@
 import { buildSchema, execute, parse, type GraphQLResolveInfo } from 'graphql';
 import { describe, expect, test } from 'vitest';
-import { isFieldRequestedDeep } from '../lib/is-field-requested';
+import { areOnlyFieldsRequested, isFieldRequestedDeep } from '../lib/graphql-info-helper';
 import { isSDLRequested } from './Target';
 
 // The part of the Hive schema the gate looks at: the interface declares schemaSDL,
@@ -46,6 +46,7 @@ const schema = buildSchema(/* GraphQL */ `
   }
   interface SchemaCheck {
     id: ID!
+    schemaVersion: SchemaVersion
     schemaSDL: String!
     previousSchemaSDL: String
     baseline: SchemaCheckBaseline
@@ -65,6 +66,7 @@ const schema = buildSchema(/* GraphQL */ `
   }
   type SuccessfulSchemaCheck implements SchemaCheck {
     id: ID!
+    schemaVersion: SchemaVersion
     schemaSDL: String!
     previousSchemaSDL: String
     baseline: SchemaCheckBaseline
@@ -73,6 +75,7 @@ const schema = buildSchema(/* GraphQL */ `
   }
   type FailedSchemaCheck implements SchemaCheck {
     id: ID!
+    schemaVersion: SchemaVersion
     schemaSDL: String!
     previousSchemaSDL: String
     baseline: SchemaCheckBaseline
@@ -159,6 +162,27 @@ describe('isSDLRequested', () => {
       fragment Failed on FailedSchemaCheck { supergraphSDL }
     `);
     expect(isSDLRequested(info)).toBe(true);
+  });
+});
+
+describe('schemaVersion ID selection', () => {
+  test('detects an ID-only selection through a fragment', async () => {
+    const info = await schemaCheckInfo(`
+      { target { schemaCheck(id: "c") { schemaVersion { ...VersionId } } } }
+      fragment VersionId on SchemaVersion { __typename id }
+    `);
+
+    expect(areOnlyFieldsRequested(info, 'SchemaVersion', new Set(['id', '__typename']))).toBe(true);
+  });
+
+  test('rejects a selection with another version field', async () => {
+    const info = await schemaCheckInfo(
+      '{ target { schemaCheck(id: "c") { schemaVersion { id sdl } } } }',
+    );
+
+    expect(areOnlyFieldsRequested(info, 'SchemaVersion', new Set(['id', '__typename']))).toBe(
+      false,
+    );
   });
 });
 

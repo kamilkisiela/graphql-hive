@@ -16,7 +16,7 @@ import {
   toSerializableSchemaChange,
 } from '@hive/storage';
 import type { Project, Target } from '../../../shared/entities';
-import { batch, cache } from '../../../shared/helpers';
+import { batch, batchBy, cache } from '../../../shared/helpers';
 import { Graph } from '../../graph/providers/graph-store';
 import { Logger, NoopLogger } from '../../shared/providers/logger';
 import { SchemaRevisionStore, SchemaRevisionUnavailableError } from './schema-revision-store';
@@ -1097,6 +1097,28 @@ export class SchemaVersionStore {
 
     return SchemaVersionModel.nullable().parse(result);
   }
+
+  getSchemaVersionByIdWithProjection = batchBy<
+    { schemaVersionId: string; withSDL: boolean; withChanges: boolean },
+    SchemaVersion | null
+  >(
+    args => `${args.withSDL}:${args.withChanges}`,
+    async args => {
+      const result = await this.pg.any(psql`/* getSchemaVersionsById */
+        SELECT
+          ${schemaVersionSQLFields(psql`sv.`, args[0])}
+        FROM "schema_versions" AS "sv"
+        WHERE "sv"."id" = ANY(${psql.array(
+          args.map(arg => arg.schemaVersionId),
+          'uuid',
+        )})
+      `);
+      const schemaVersions = z.array(SchemaVersionModel).parse(result);
+      const schemaVersionsById = new Map(schemaVersions.map(version => [version.id, version]));
+
+      return args.map(arg => schemaVersionsById.get(arg.schemaVersionId) ?? null);
+    },
+  );
 
   /**
    * Retrieve the paginated schema versions for a graph.
