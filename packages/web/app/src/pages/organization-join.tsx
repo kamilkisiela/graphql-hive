@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react';
 import { LogOutIcon } from 'lucide-react';
-import { SessionAuth, useSessionContext } from 'supertokens-auth-react/recipe/session';
 import { useMutation, useQuery } from 'urql';
 import { HiveLogo } from '@/components/ui/brand-icon';
 import { DataWrapper } from '@/components/ui/data-wrapper';
@@ -11,6 +10,7 @@ import { Card } from '@/components/ui/primitives/card/card';
 import { Spinner } from '@/components/ui/primitives/spinner/spinner';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { graphql } from '@/gql';
+import { useSession } from '@/lib/auth/use-session';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
 import { Link, useRouter } from '@tanstack/react-router';
 
@@ -50,7 +50,7 @@ const JoinOrganizationPage_OrganizationInvitationQuery = graphql(`
 
 export function JoinOrganizationPage(props: { inviteCode: string }) {
   const router = useRouter();
-  const session = useSessionContext();
+  const session = useSession();
   const { toast } = useToast();
   const code = props.inviteCode;
   const [query] = useQuery({
@@ -123,8 +123,7 @@ export function JoinOrganizationPage(props: { inviteCode: string }) {
   }
 
   return (
-    <SessionAuth>
-      <HiveStripeWrapper>
+    <HiveStripeWrapper>
         <Meta title={orgName ? `Invitation to ${orgName}` : 'Invitation'} />
         <DottedBackground className="min-h-[100vh]">
           <div className="absolute top-6 right-6">
@@ -200,7 +199,6 @@ export function JoinOrganizationPage(props: { inviteCode: string }) {
             </DataWrapper>
           </div>
         </DottedBackground>
-      </HiveStripeWrapper>
-    </SessionAuth>
+    </HiveStripeWrapper>
   );
 }

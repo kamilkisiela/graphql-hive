@@ -1,7 +1,7 @@
 import { createClient as createSSEClient } from 'graphql-sse';
-import Session from 'supertokens-auth-react/recipe/session';
 import { createClient, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
 import { env } from '@/env/frontend';
+import { attemptRefreshingSession, signOut } from '@/lib/auth/session';
 import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { cacheOptions } from './urql-cache';
@@ -19,6 +19,8 @@ export const urqlClient = createClient({
   // @urql/core 6 sends small queries as GET by default; the API is called with POST only.
   preferGetMethod: false,
   fetchOptions: {
+    // The session is cookies on the API origin, which is cross-origin in local development.
+    credentials: 'include',
     headers: {
       'graphql-client-name': 'hive-app',
       'graphql-client-version': env.release,
@@ -70,16 +72,31 @@ export const urqlClient = createClient({
           return false;
         },
         async refreshAuth() {
-          if (action.type === 'NEEDS_REFRESH' && (await Session.attemptRefreshingSession())) {
-            location.reload();
-          } else if (action.type === 'VERIFY_EMAIL') {
+          if (action.type === 'VERIFY_EMAIL') {
             window.location.href = '/auth/verify-email';
-          } else if (action.type === 'NEEDS_OIDC') {
-            window.location.href = `/${action.organizationSlug}/oidc-request?id=${action.oidcIntegrationId}&redirectToPath=${encodeURIComponent(window.location.pathname)}`;
-          } else {
-            await Session.signOut();
-            window.location.href = `/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`;
+            return;
           }
+          if (action.type === 'NEEDS_OIDC') {
+            window.location.href = `/${action.organizationSlug}/oidc-request?id=${action.oidcIntegrationId}&redirectToPath=${encodeURIComponent(window.location.pathname)}`;
+            return;
+          }
+          if (action.type === 'NEEDS_REFRESH') {
+            let refreshed: boolean;
+            try {
+              refreshed = await attemptRefreshingSession();
+            } catch {
+              // Rate limited or offline: the queued operations fail with this error and a retry
+              // starts over, instead of signing the user out.
+              throw new Error('Could not refresh your session');
+            }
+            if (refreshed) {
+              // The queued operations are re-sent with the rotated cookies. An operation that
+              // still answers NEEDS_REFRESH after that fails instead of refreshing again.
+              return;
+            }
+          }
+          await signOut();
+          window.location.href = `/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`;
         },
       };
     }),
@@ -145,5 +162,3 @@ type GraphQLPayload = {
     }
 );
 
-// @ts-expect-error for testing purposes ok
-window.__YOU_ARE_FIRED_attemptSessionRefresh = () => Session.attemptRefreshingSession();

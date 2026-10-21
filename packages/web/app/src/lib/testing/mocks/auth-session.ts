@@ -17,7 +17,6 @@ const standIn: typeof import('@/lib/auth/session') = {
   doesSessionExist: async () => true,
   attemptRefreshingSession: async () => true,
   signOut: async () => {},
-  requireSession: async () => {},
 };
 
 export const {
@@ -28,5 +27,4 @@ export const {
   doesSessionExist,
   attemptRefreshingSession,
   signOut,
-  requireSession,
 } = standIn;

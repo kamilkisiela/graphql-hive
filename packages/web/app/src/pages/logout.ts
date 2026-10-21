@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { signOut } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { signOut } from '@/lib/auth/session';
 import { useRouter } from '@tanstack/react-router';
 
 export function LogoutPage() {

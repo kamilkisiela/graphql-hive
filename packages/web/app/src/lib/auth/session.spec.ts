@@ -1,12 +1,8 @@
 // @vitest-environment jsdom
 import { isRedirect } from '@tanstack/react-router';
 import { applyFrontTokenHeader, clearFrontToken, getSession, getSnapshot } from './front-token';
-import {
-  attemptRefreshingSession,
-  doesSessionExist,
-  requireSession,
-  signOut,
-} from './session';
+import { requireSession } from './require-session';
+import { attemptRefreshingSession, doesSessionExist, signOut } from './session';
 
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
 

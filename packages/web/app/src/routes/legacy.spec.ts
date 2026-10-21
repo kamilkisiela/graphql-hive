@@ -6,9 +6,9 @@ import { createMemoryHistory } from '@tanstack/react-router';
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
 // Signed in unless a case says otherwise: the authenticated gate runs before every redirect below.
 const sessionExists = vi.hoisted(() => ({ current: true }));
-vi.mock('supertokens-auth-react/recipe/session', () => ({
-  default: { doesSessionExist: async () => sessionExists.current },
-  SessionAuth: (props: { children: unknown }) => props.children,
+vi.mock('@/lib/auth/session', async () => ({
+  ...(await import('@/lib/testing/mocks/auth-session')),
+  doesSessionExist: async () => sessionExists.current,
 }));
 vi.mock('@graphql-hive/laboratory', () => import('@/lib/testing/mocks/laboratory'));
 vi.mock(

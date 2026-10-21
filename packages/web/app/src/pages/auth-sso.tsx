@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
+import { useSession } from '@/lib/auth/use-session';
 import { AuthCard, AuthCardStack } from '@/components/auth';
 import { SSOForm, SSOFormSchema, type SSOFormValues } from '@/components/auth/sso-form';
 import { Meta } from '@/components/ui/meta';
@@ -44,7 +44,7 @@ async function fetchOidcId(input: { slug: string }) {
 }
 
 export function AuthSSOPage(props: { redirectToPath: string }) {
-  const session = useSessionContext();
+  const session = useSession();
   const router = useRouter();
   const sso = useMutation({
     mutationFn: fetchOidcId,

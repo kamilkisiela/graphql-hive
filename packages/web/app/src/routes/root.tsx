@@ -1,13 +1,12 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { SuperTokensWrapper } from 'supertokens-auth-react';
-import Session from 'supertokens-auth-react/recipe/session';
 import { Provider as UrqlProvider, type Client } from 'urql';
 import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { NotFound } from '@/components/ui/not-found/not-found';
 import { TooltipProvider } from '@/components/ui/primitives/floating/tooltip/tooltip';
 import { ToastProvider } from '@/components/ui/primitives/toast/toast';
+import { getSession } from '@/lib/auth/session';
 import { LogoutPage } from '@/pages/logout';
 import { JoinOrganizationPage } from '@/pages/organization-join';
 import { captureMessage, getCurrentScope } from '@sentry/react';
@@ -22,7 +21,7 @@ const LazyTanStackRouterDevtools = lazy(() =>
   })),
 );
 
-function identifyOnSentry(userId: string, email: string): void {
+function identifyOnSentry(userId: string, email: string | undefined): void {
   getCurrentScope().setUser({ id: userId, email });
 }
 
@@ -30,13 +29,10 @@ function RootComponent() {
   const { urqlClient } = root.useRouteContext();
 
   useEffect(() => {
-    void Session.doesSessionExist().then(async doesExist => {
-      if (!doesExist) {
-        return;
-      }
-      const payload = await Session.getAccessTokenPayloadSecurely();
-      identifyOnSentry(payload.superTokensUserId, payload.email);
-    });
+    const session = getSession();
+    if (session) {
+      identifyOnSentry(session.userId, session.email);
+    }
   }, []);
 
   return (
@@ -44,14 +40,12 @@ function RootComponent() {
       <TooltipProvider>
         <ToastProvider>
           <HelmetProvider>
-            <SuperTokensWrapper>
-              <QueryClientProvider client={queryClient}>
-                <UrqlProvider value={urqlClient}>
-                  <LoadingAPIIndicator />
-                  <Outlet />
-                </UrqlProvider>
-              </QueryClientProvider>
-            </SuperTokensWrapper>
+            <QueryClientProvider client={queryClient}>
+              <UrqlProvider value={urqlClient}>
+                <LoadingAPIIndicator />
+                <Outlet />
+              </UrqlProvider>
+            </QueryClientProvider>
             {/* eslint-disable-next-line no-process-env */}
             {process.env.NODE_ENV === 'development' && (
               <Suspense fallback={null}>

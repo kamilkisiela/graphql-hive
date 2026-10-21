@@ -1,23 +1,19 @@
-import Session from 'supertokens-auth-react/recipe/session';
 import { authenticated } from '@/components/authenticated-container';
+import { requireSession } from '@/lib/auth/require-session';
 import { DevPage } from '@/pages/dev';
 import { IndexPage } from '@/pages/index';
 import { ManagePage } from '@/pages/manage';
 import { NativeCompositionDiff } from '@/pages/native-composition-diff';
 import { NewOrgPage } from '@/pages/organization-new';
 import { OrganizationTransferPage } from '@/pages/organization-transfer';
-import { createRoute, Outlet, redirect } from '@tanstack/react-router';
+import { createRoute, Outlet } from '@tanstack/react-router';
 import { root } from './root';
 
 export const authenticatedRoute = createRoute({
   getParentRoute: () => root,
   id: 'authenticated',
-  // Loaders run before render, so an anonymous visitor is turned away here, not by `SessionAuth`.
-  beforeLoad: async ({ location }) => {
-    if (!(await Session.doesSessionExist())) {
-      throw redirect({ to: '/auth', search: { redirectToPath: location.href } });
-    }
-  },
+  // Loaders run before render, so an anonymous visitor is turned away here.
+  beforeLoad: requireSession,
   component: authenticated(function AuthenticatedRoute() {
     return <Outlet />;
   }),

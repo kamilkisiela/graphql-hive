@@ -1,4 +1,3 @@
-import { redirect } from '@tanstack/react-router';
 import { refreshSession, signOut as signOutRequest } from './api';
 import { clearFrontToken, getSnapshot, type FrontTokenSnapshot } from './front-token';
 
@@ -93,12 +92,5 @@ export async function signOut(): Promise<void> {
     console.error(error);
   } finally {
     clearFrontToken();
-  }
-}
-
-/** `beforeLoad` guard: sends an anonymous visitor to sign-in and back here afterwards. */
-export async function requireSession(args: { location: { href: string } }): Promise<void> {
-  if (!(await doesSessionExist())) {
-    throw redirect({ to: '/auth', search: { redirectToPath: args.location.href } });
   }
 }

@@ -1,9 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { CircleUserRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { sendVerificationEmail } from 'supertokens-auth-react/recipe/emailverification';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
-import { emailPasswordSignUp } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { useSession } from '@/lib/auth/use-session';
 import { AuthCard, AuthCardStack, AuthOrSeparator } from '@/components/auth';
 import {
   SignUpForm,
@@ -15,6 +13,7 @@ import { Meta } from '@/components/ui/meta';
 import { Button } from '@/components/ui/primitives/button/button';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { env } from '@/env/frontend';
+import { signUp as signUpRequest } from '@/lib/auth/api';
 import { useLastAuthMethod } from '@/lib/supertokens/last-auth-method';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { enabledProviders, isProviderEnabled } from '@/lib/supertokens/thirdparty';
@@ -27,40 +26,19 @@ import { SignInButton } from './auth-sign-in';
 export function AuthSignUpPage(props: { redirectToPath: string }) {
   const [lastAuthMethod] = useLastAuthMethod();
   const router = useRouter();
-  const session = useSessionContext();
-
-  const sendVerificationEmailMutation = useMutation({
-    mutationFn: () => sendVerificationEmail(),
-    onSuccess() {
-      void router.navigate({
-        to: '/auth/verify-email',
-      });
-    },
-    retry: 3,
-    onError() {
-      // In case of an error, we still want to redirect the user to the verify email page
-      // so they can request a new verification email, if needed
-      // and understand that the account was created.
-      void router.navigate({
-        to: '/auth/verify-email',
-      });
-    },
-  });
+  const session = useSession();
 
   const signUp = useMutation({
-    mutationFn: emailPasswordSignUp,
+    mutationFn: signUpRequest,
     onSuccess(data) {
       const status = data.status;
 
       switch (status) {
         case 'OK': {
-          if (env.auth.requireEmailVerification) {
-            sendVerificationEmailMutation.mutate();
-          } else {
-            void router.navigate({
-              to: props.redirectToPath,
-            });
-          }
+          // The verify-email page sends the verification email itself when it mounts.
+          void router.navigate({
+            to: env.auth.requireEmailVerification ? '/auth/verify-email' : props.redirectToPath,
+          });
           break;
         }
         case 'FIELD_ERROR': {
@@ -131,26 +109,7 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
   const onSubmit = useCallback(
     (data: SignUpFormValues) => {
       signUp.reset();
-      signUp.mutate({
-        formFields: [
-          {
-            id: 'email',
-            value: data.email,
-          },
-          {
-            id: 'password',
-            value: data.password,
-          },
-          {
-            id: 'firstName',
-            value: data.firstName,
-          },
-          {
-            id: 'lastName',
-            value: data.lastName,
-          },
-        ],
-      });
+      signUp.mutate(data);
     },
     [signUp.mutate],
   );
@@ -164,10 +123,6 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
     // Redirect to the home page if the user is already signed in
     return <Navigate to="/" />;
   }
-
-  const isVerificationSettled = env.auth.requireEmailVerification
-    ? sendVerificationEmailMutation.isSuccess || sendVerificationEmailMutation.isError
-    : true;
 
   return (
     <>
@@ -184,7 +139,7 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
                   onSubmit={onSubmit}
                   submit={
                     <Button type="submit" width="full" onSurface="raised" disabled={isPending}>
-                      {signUp.isSuccess && signUp.data.status === 'OK' && isVerificationSettled
+                      {signUp.isSuccess && signUp.data.status === 'OK'
                         ? 'Redirecting...'
                         : signUp.isPending
                           ? 'Creating account...'

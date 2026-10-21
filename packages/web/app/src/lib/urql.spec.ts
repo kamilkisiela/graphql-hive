@@ -12,11 +12,9 @@ vi.mock('@/env/frontend', async () => {
     },
   };
 });
-vi.mock('supertokens-auth-react/recipe/session', () => ({
-  default: {
-    attemptRefreshingSession: async () => true,
-    signOut: async () => {},
-  },
+vi.mock('@/lib/auth/session', () => ({
+  attemptRefreshingSession: async () => true,
+  signOut: async () => {},
 }));
 
 const fetchMock = vi.fn(
@@ -38,6 +36,8 @@ async function requestWith(prefix: string | null) {
   await urqlClient.query(probe, {}).toPromise();
   expect(fetchMock).toHaveBeenCalledTimes(1);
   const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+  // The session lives in cookies on the API origin, so every request has to carry them.
+  expect(init.credentials).toBe('include');
   return { method: init.method, body: JSON.parse(init.body as string) as Record<string, unknown> };
 }
 

@@ -1,10 +1,6 @@
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
-import {
-  sendPasswordResetEmail,
-  submitNewPassword,
-} from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
+import { useSession } from '@/lib/auth/use-session';
 import { AuthCard, AuthCardStack } from '@/components/auth';
 import {
   NewPasswordForm,
@@ -15,6 +11,7 @@ import {
   type ResetPasswordFormValues,
 } from '@/components/auth/reset-password-forms';
 import { Meta } from '@/components/ui/meta';
+import { sendPasswordResetEmail, submitNewPassword } from '@/lib/auth/api';
 import { Button } from '@/components/ui/primitives/button/button';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { exhaustiveGuard } from '@/lib/utils';
@@ -35,23 +32,6 @@ function AuthResetPasswordEmail(props: { email: string | null; redirectToPath: s
           toast({
             title: 'Email sent',
             description: 'Please check your email to reset your password.',
-          });
-          break;
-        }
-        case 'FIELD_ERROR': {
-          for (const field of data.formFields) {
-            form.setError(field.id as keyof ResetPasswordFormValues, {
-              type: 'manual',
-              message: field.error,
-            });
-          }
-          break;
-        }
-        case 'PASSWORD_RESET_NOT_ALLOWED': {
-          toast({
-            title: 'Password reset not allowed',
-            description: 'Please contact support for assistance.',
-            variant: 'destructive',
           });
           break;
         }
@@ -82,19 +62,12 @@ function AuthResetPasswordEmail(props: { email: string | null; redirectToPath: s
   const onSubmit = useCallback(
     (data: ResetPasswordFormValues) => {
       resetEmail.reset();
-      resetEmail.mutate({
-        formFields: [
-          {
-            id: 'email',
-            value: data.email,
-          },
-        ],
-      });
+      resetEmail.mutate(data);
     },
     [resetEmail.mutate],
   );
 
-  const session = useSessionContext();
+  const session = useSession();
 
   if (session.loading) {
     // AuthPage component already shows a loading state
@@ -172,7 +145,8 @@ function AuthResetPasswordEmail(props: { email: string | null; redirectToPath: s
 
 function AuthPasswordNew(props: { token: string; redirectToPath: string }) {
   const changePassword = useMutation({
-    mutationFn: submitNewPassword,
+    mutationFn: (data: NewPasswordFormValues) =>
+      submitNewPassword({ token: props.token, password: data.newPassword }),
     onSuccess(data) {
       const status = data.status;
 
@@ -236,19 +210,12 @@ function AuthPasswordNew(props: { token: string; redirectToPath: string }) {
   const onSubmit = useCallback(
     (data: NewPasswordFormValues) => {
       changePassword.reset();
-      changePassword.mutate({
-        formFields: [
-          {
-            id: 'password',
-            value: data.newPassword,
-          },
-        ],
-      });
+      changePassword.mutate(data);
     },
     [changePassword.mutate],
   );
 
-  const session = useSessionContext();
+  const session = useSession();
 
   if (session.loading) {
     // AuthPage component already shows a loading state

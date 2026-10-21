@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { LogOutIcon } from 'lucide-react';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
+import { useSession } from '@/lib/auth/use-session';
 import { Button } from '@/components/ui/primitives/button/button';
 import { isChunkLoadError, reloadOnChunkError } from '@/lib/chunk-error';
 import { captureException, flush } from '@sentry/react';
@@ -14,7 +14,7 @@ export const commonErrorStrings = {
 
 export function ErrorComponent(props: { error: any; message?: string }) {
   const router = useRouter();
-  const session = useSessionContext();
+  const session = useSession();
 
   useEffect(() => {
     // If this is a stale chunk error, attempt a single reload to fetch fresh
