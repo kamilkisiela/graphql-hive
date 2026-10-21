@@ -191,5 +191,9 @@ export async function lookupOidcId(input: { slug: string }): Promise<OidcIdLooku
   if (response.status >= 500) {
     throw new AuthApiError('Server error');
   }
-  return (await response.json()) as OidcIdLookupResult;
+  const data: unknown = await response.json().catch(() => undefined);
+  if (typeof data !== 'object' || data === null || typeof (data as any).ok !== 'boolean') {
+    throw new AuthApiError('Auth request returned an unexpected response.');
+  }
+  return data as OidcIdLookupResult;
 }
