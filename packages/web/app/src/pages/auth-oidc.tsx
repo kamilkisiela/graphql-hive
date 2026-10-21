@@ -1,8 +1,7 @@
 import { AuthCard } from '@/components/auth';
 import { DocsLink } from '@/components/ui/docs-note';
 import { Meta } from '@/components/ui/meta';
-import { env } from '@/env/frontend';
-import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
+import { startThirdPartyAuth } from '@/lib/auth/third-party';
 import { useQuery } from '@tanstack/react-query';
 
 function AuthOIDC(props: { oidcId: string; redirectToPath: string }) {
@@ -12,10 +11,7 @@ function AuthOIDC(props: { oidcId: string; redirectToPath: string }) {
     retry: false,
     retryOnMount: false,
     async queryFn() {
-      if (!env.auth.oidc) {
-        throw new Error('OIDC provider is not configured');
-      }
-      await startAuthFlowForOIDCProvider(props.oidcId);
+      await startThirdPartyAuth('oidc', props.redirectToPath, props.oidcId);
       // we need to return something, otherwise react-query will throw an error
       return true;
     },

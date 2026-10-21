@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/primitives/button/button';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { env } from '@/env/frontend';
 import { signUp as signUpRequest } from '@/lib/auth/api';
-import { useLastAuthMethod } from '@/lib/supertokens/last-auth-method';
-import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
+import { useLastAuthMethod } from '@/lib/auth/last-auth-method';
+import { startThirdPartyAuth } from '@/lib/auth/third-party';
 import { enabledProviders, isProviderEnabled } from '@/lib/auth/providers';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -74,7 +74,7 @@ export function AuthSignUpPage(props: { redirectToPath: string }) {
 
   const thirdPartySignIn = useMutation({
     async mutationFn(provider: 'github' | 'google' | 'okta') {
-      await startAuthFlowForProvider(provider, props.redirectToPath);
+      await startThirdPartyAuth(provider, props.redirectToPath);
     },
     onError(error) {
       console.error(error);

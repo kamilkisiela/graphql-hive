@@ -15,8 +15,8 @@ import { Tooltip } from '@/components/ui/primitives/floating/tooltip/tooltip';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { Text } from '@/components/ui/text';
 import { signIn } from '@/lib/auth/api';
-import { useLastAuthMethod } from '@/lib/supertokens/last-auth-method';
-import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
+import { useLastAuthMethod } from '@/lib/auth/last-auth-method';
+import { startThirdPartyAuth } from '@/lib/auth/third-party';
 import { enabledProviders, isProviderEnabled } from '@/lib/auth/providers';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -95,7 +95,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
 
   const thirdPartySignIn = useMutation({
     async mutationFn(provider: 'github' | 'google' | 'okta') {
-      await startAuthFlowForProvider(provider, props.redirectToPath);
+      await startThirdPartyAuth(provider, props.redirectToPath);
     },
     onError(error) {
       console.error(error);
