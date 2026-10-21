@@ -153,19 +153,7 @@ function toTargetPorts(target: InClusterTarget): pulumi.Output<PortRule[]> {
 }
 
 /**
- * Egress policies per deployment (one `CiliumNetworkPolicy` each), declared by the services:
- *
- * - `register(deployment)`: puts the deployment under the policy without allowing anything but DNS.
- * - `allowExternal(deployment, host, port?)`: an external host (hostname, `host:port`, URL or `*.` pattern).
- *   The port is required, either explicitly, in `host:port`, or from the URL scheme (http / https).
- * - `allowInCluster(from, to)`: pods of a deployment or service, in any namespace,
- *   on their declared container / target ports.
- * - `allowAnyExternal(deployment)`: any external destination except internal ranges.
- *   Meant for services calling user-provided URLs (webhooks, OIDC providers, external composition).
- *
- * Requires Azure CNI powered by Cilium with Advanced Container Networking Services (ACNS) enabled,
- * as the DNS and FQDN rules depend on the ACNS DNS proxy. Clusters without Cilium don't have the CRD,
- * so policies are only created when `cilium:egressPolicies` is set for the stack.
+ * Egress policies per deployment (one `CiliumNetworkPolicy` each), declared by the services.
  *
  * Modes (`cilium:egressPolicies`):
  * - unset: no policies are created.
