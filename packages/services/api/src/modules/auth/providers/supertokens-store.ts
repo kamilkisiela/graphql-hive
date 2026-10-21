@@ -672,8 +672,9 @@ export class SuperTokensStore {
     return await this.pool.transaction('updateEmailPasswordBasedOnResetToken', async t => {
       const resetToken = await t
         .maybeOne(emailPasswordResetTokenQuery)
-        .then(EmailPasswordResetTokenModel.parse);
+        .then(EmailPasswordResetTokenModel.nullable().parse);
 
+      // Unknown, expired-and-purged, or already used: the handler answers with an invalid-token status.
       if (!resetToken) {
         return null;
       }
