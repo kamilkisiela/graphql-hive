@@ -57,6 +57,7 @@ import { OrganizationAccessTokensCache } from '../../api/src/modules/organizatio
 import { TargetTokenCache } from '../../api/src/modules/token/providers/target-token-cache';
 import { internalApiRouter } from './api';
 import { env } from './environment';
+import { CorsError, handleRequestError } from './error-handler';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 import { createOtelAuthEndpoint } from './otel-auth-endpoint';
@@ -64,12 +65,6 @@ import { createPublicGraphQLHandler } from './public-graphql-handler';
 import { createSCIMPlugin } from './scim';
 import { registerSupertokensAtHome } from './supertokens-at-home';
 import { WorkloadIdentityFederationProvider } from './workload-identity-federation';
-
-class CorsError extends Error {
-  constructor() {
-    super('CORS origin not allowed.');
-  }
-}
 
 export async function main() {
   let tracing: TracingInstance | undefined;
@@ -128,14 +123,7 @@ export async function main() {
     },
   );
 
-  server.setErrorHandler((err, req, res) => {
-    if (err instanceof CorsError) {
-      return res.status(403).send(err.message);
-    }
-
-    server.log.error(err);
-    return res.status(500);
-  });
+  server.setErrorHandler(handleRequestError);
   await server.register(cors, (_: unknown): FastifyCorsOptionsDelegateCallback => {
     return (req, callback) => {
       // For CLI user we do not have a origin
