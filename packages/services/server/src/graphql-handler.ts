@@ -11,8 +11,11 @@ import {
 import { isGraphQLError } from '@envelop/core';
 import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useOpenTelemetry } from '@graphql-hive/plugin-opentelemetry';
-import { hive, trace } from '@graphql-hive/plugin-opentelemetry/api';
+import {
+  useOpenTelemetry,
+  type OpenTelemetryContextExtension,
+} from '@graphql-hive/plugin-opentelemetry';
+import { trace } from '@graphql-hive/plugin-opentelemetry/api';
 import { useHive } from '@graphql-hive/yoga';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
@@ -176,9 +179,17 @@ export function useHiveTracing(): Plugin {
         }) as Plugin,
       );
     },
-    onParams({ params: { variables }, context }) {
-      const otelCtx = hive.getOperationContext(context);
-      const operationSpan = otelCtx && trace.getSpan(otelCtx);
+    onContextBuilding({ context }) {
+      const otelCtx = (
+        context as Partial<OpenTelemetryContextExtension>
+      ).openTelemetry?.getOperationContext();
+
+      if (!otelCtx) {
+        return;
+      }
+
+      const operationSpan = trace.getSpan(otelCtx);
+      const variables = context.params?.variables;
 
       if (operationSpan && variables && typeof variables === 'object' && 'selector' in variables) {
         operationSpan?.setAttribute('hive.variables.selector', JSON.stringify(variables.selector));
