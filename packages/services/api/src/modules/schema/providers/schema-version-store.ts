@@ -16,7 +16,7 @@ import {
   toSerializableSchemaChange,
 } from '@hive/storage';
 import type { Project, Target } from '../../../shared/entities';
-import { batch, cache } from '../../../shared/helpers';
+import { batch, batchBy, cache } from '../../../shared/helpers';
 import { Graph } from '../../graph/providers/graph-store';
 import { Logger, NoopLogger } from '../../shared/providers/logger';
 import { SchemaRevisionStore, SchemaRevisionUnavailableError } from './schema-revision-store';
@@ -976,26 +976,41 @@ export class SchemaVersionStore {
       .then(SchemaPushLogModel.nullable().parse);
   }
 
-  async getSchemasBySchemaVersionId(schemaVersionId: string) {
-    return this.pg
-      .any(
-        psql`/* getSchemasOfVersion */
-          SELECT
-            ${schemaLogFields(psql`sl.`)}
-            , p.type
-          FROM schema_version_to_log AS svl
-          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
-          LEFT JOIN projects as p ON (p.id = sl.project_id)
-          WHERE
-            svl.version_id = ${schemaVersionId}
-            AND sl.action = 'PUSH'
-            AND p.type != 'CUSTOM'
-          ORDER BY
-            sl.created_at DESC
-        `,
-      )
-      .then(z.array(SchemaPushLogModel).parse);
-  }
+  getSchemasBySchemaVersionId = batchBy<
+    { schemaVersionId: string; withSDL: boolean },
+    Array<SinglePushSchemaLog | CompositePushSchemaLog>
+  >(
+    args => args.withSDL,
+    async args => {
+      const rows = await this.pg.any(psql`/* getSchemasOfVersions */
+        SELECT
+          "svl"."version_id" AS "schemaVersionId"
+          , ${schemaLogFields(psql`sl.`, { withSDL: args[0].withSDL })}
+          , "p"."type"
+        FROM "schema_version_to_log" AS "svl"
+        LEFT JOIN "schema_log" AS "sl" ON ("sl"."id" = "svl"."action_id")
+        LEFT JOIN "projects" AS "p" ON ("p"."id" = "sl"."project_id")
+        WHERE
+          "svl"."version_id" = ANY(${psql.array(
+            args.map(arg => arg.schemaVersionId),
+            'uuid',
+          )})
+          AND "sl"."action" = 'PUSH'
+          AND "p"."type" != 'CUSTOM'
+        ORDER BY
+          "sl"."created_at" DESC
+      `);
+      const schemas = z
+        .array(z.object({ schemaVersionId: z.string() }).and(SchemaPushLogModel))
+        .parse(rows);
+
+      return args.map(({ schemaVersionId }) =>
+        schemas
+          .filter(schema => schema.schemaVersionId === schemaVersionId)
+          .map(({ schemaVersionId: _, ...schema }) => schema),
+      );
+    },
+  );
 
   async getSchemaRevisionsBySchemaLogIds(schemaLogIds: Array<string>) {
     if (schemaLogIds.length === 0) {
@@ -1752,11 +1767,11 @@ const schemaVersionSQLFields = (
   , ${t}"source_schema_version_id" as "sourceSchemaVersionId"
 `;
 
-const schemaLogFields = (prefix = psql``) => psql`
+const schemaLogFields = (prefix = psql``, options: { withSDL?: boolean } = {}) => psql`
   ${prefix}"id"
   , ${prefix}"author"
   , ${prefix}"commit"
-  , ${prefix}"sdl"
+  , ${options.withSDL === false ? psql`''` : psql`${prefix}"sdl"`} AS "sdl"
   , ${prefix}"created_at" AS "date"
   , ${prefix}"metadata"
   , lower(${prefix}"service_name") AS "service_name"

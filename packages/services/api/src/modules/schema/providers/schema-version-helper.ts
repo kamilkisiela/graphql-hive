@@ -58,7 +58,10 @@ export class SchemaVersionHelper {
   @cache<SchemaVersion>(version => version.id)
   private async composeSchemaVersion(schemaVersion: SchemaVersion) {
     const [schemas, project, organization] = await Promise.all([
-      this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id),
+      this.schemaVersions.getSchemasBySchemaVersionId({
+        schemaVersionId: schemaVersion.id,
+        withSDL: true,
+      }),
       this.projectManager.getProjectById(schemaVersion.projectId),
       this.storage.getOrganization({
         organizationId: schemaVersion.organizationId,
@@ -225,8 +228,14 @@ export class SchemaVersionHelper {
     const incomingSdl = await this.getCompositeSchemaSdl(schemaVersion);
 
     const [schemaBefore, schemasAfter] = await Promise.all([
-      this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id),
-      this.schemaVersions.getSchemasBySchemaVersionId(previousVersion.id),
+      this.schemaVersions.getSchemasBySchemaVersionId({
+        schemaVersionId: schemaVersion.id,
+        withSDL: true,
+      }),
+      this.schemaVersions.getSchemasBySchemaVersionId({
+        schemaVersionId: previousVersion.id,
+        withSDL: true,
+      }),
     ]);
 
     if (!existingSdl || !incomingSdl) {
@@ -485,7 +494,10 @@ export class SchemaVersionHelper {
         let actionId = schemaVersion.origin.services?.[0].versionId;
 
         if (!actionId) {
-          const schemas = await this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id);
+          const schemas = await this.schemaVersions.getSchemasBySchemaVersionId({
+            schemaVersionId: schemaVersion.id,
+            withSDL: true,
+          });
           if (schemas[0]) {
             actionId = schemas[0].id;
           }

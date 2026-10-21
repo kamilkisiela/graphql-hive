@@ -26,6 +26,23 @@ const schema = buildSchema(/* GraphQL */ `
     schemaChanges: [String!]
     safeSchemaChanges: [String!]
     supergraphChanges: [String!]
+    schemas: SchemaConnection!
+  }
+  type SchemaConnection {
+    edges: [SchemaEdge!]!
+  }
+  type SchemaEdge {
+    node: Schema!
+  }
+  union Schema = SingleSchema | CompositeSchema
+  type SingleSchema {
+    author: String!
+    source: String!
+  }
+  type CompositeSchema {
+    author: String!
+    source: String!
+    service: String
   }
   interface SchemaCheck {
     id: ID!
@@ -162,5 +179,25 @@ describe('schemaVersions selections', () => {
     expect(isFieldRequestedDeep(selectedInfo, [['SchemaVersion', 'safeSchemaChanges']])).toBe(
       false,
     );
+  });
+
+  test('detects schema SDL only when source is selected', async () => {
+    const metadataInfo = await schemaVersionsInfo(`
+      { target { schemaVersions { edges { node { schemas { edges { node {
+        ... on CompositeSchema { author service }
+      } } } } } } } }
+    `);
+    const sourceInfo = await schemaVersionsInfo(`
+      { target { schemaVersions { edges { node { schemas { edges { node {
+        ... on SingleSchema { source }
+      } } } } } } } }
+    `);
+    const sourceFields = [
+      ['SingleSchema', 'source'],
+      ['CompositeSchema', 'source'],
+    ] as const;
+
+    expect(isFieldRequestedDeep(metadataInfo, sourceFields)).toBe(false);
+    expect(isFieldRequestedDeep(sourceInfo, sourceFields)).toBe(true);
   });
 });
