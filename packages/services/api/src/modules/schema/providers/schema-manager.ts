@@ -260,10 +260,7 @@ export class SchemaManager {
     } & TargetSelector,
   ) {
     this.logger.debug('Fetching non-empty list of schemas (selector=%o)', selector);
-    const schemas = await this.schemaVersions.getSchemasBySchemaVersionId({
-      schemaVersionId: selector.versionId,
-      withSDL: true,
-    });
+    const schemas = await this.schemaVersions.getSchemasBySchemaVersionId(selector.versionId);
 
     if (schemas.length === 0) {
       throw new HiveError('No schemas found for this version.');
@@ -282,10 +279,9 @@ export class SchemaManager {
   })
   async getMaybeSchemasOfVersion(schemaVersion: SchemaVersion, options = { withSDL: true }) {
     this.logger.debug('Fetching schemas (schemaVersionId=%s)', schemaVersion.id);
-    return this.schemaVersions.getSchemasBySchemaVersionId({
-      schemaVersionId: schemaVersion.id,
-      withSDL: options.withSDL,
-    });
+    return options.withSDL
+      ? this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id)
+      : this.schemaVersions.getSchemasWithoutSDLBySchemaVersionId(schemaVersion.id);
   }
 
   async getMatchingServiceSchemaOfVersions(versions: { before: string | null; after: string }) {
@@ -446,10 +442,7 @@ export class SchemaManager {
       return null;
     }
 
-    const schemas = await this.schemaVersions.getSchemasBySchemaVersionId({
-      schemaVersionId: schemaVersion.id,
-      withSDL: true,
-    });
+    const schemas = await this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id);
 
     return {
       version: schemaVersion,

@@ -16,7 +16,7 @@ import {
   toSerializableSchemaChange,
 } from '@hive/storage';
 import type { Project, Target } from '../../../shared/entities';
-import { batch, batchBy, cache } from '../../../shared/helpers';
+import { batch, cache } from '../../../shared/helpers';
 import { Graph } from '../../graph/providers/graph-store';
 import { Logger, NoopLogger } from '../../shared/providers/logger';
 import { SchemaRevisionStore, SchemaRevisionUnavailableError } from './schema-revision-store';
@@ -976,41 +976,46 @@ export class SchemaVersionStore {
       .then(SchemaPushLogModel.nullable().parse);
   }
 
-  getSchemasBySchemaVersionId = batchBy<
-    { schemaVersionId: string; withSDL: boolean },
-    Array<SinglePushSchemaLog | CompositePushSchemaLog>
-  >(
-    args => args.withSDL,
-    async args => {
-      const rows = await this.pg.any(psql`/* getSchemasOfVersions */
+  private getSchemasBySchemaVersionIdBatch = (withSDL: boolean) =>
+    batch<string, Array<SinglePushSchemaLog | CompositePushSchemaLog>>(async schemaVersionIds => {
+      const rows = await this.pg
+        .any(
+          psql`/* getSchemasOfVersions */
         SELECT
           "svl"."version_id" AS "schemaVersionId"
-          , ${schemaLogFields(psql`sl.`, { withSDL: args[0].withSDL })}
+          , ${schemaLogFields(psql`sl.`, { withSDL })}
           , "p"."type"
         FROM "schema_version_to_log" AS "svl"
         LEFT JOIN "schema_log" AS "sl" ON ("sl"."id" = "svl"."action_id")
         LEFT JOIN "projects" AS "p" ON ("p"."id" = "sl"."project_id")
         WHERE
-          "svl"."version_id" = ANY(${psql.array(
-            args.map(arg => arg.schemaVersionId),
-            'uuid',
-          )})
+          "svl"."version_id" = ANY(${psql.array(schemaVersionIds, 'uuid')})
           AND "sl"."action" = 'PUSH'
           AND "p"."type" != 'CUSTOM'
         ORDER BY
           "sl"."created_at" DESC
-      `);
-      const schemas = z
-        .array(z.object({ schemaVersionId: z.string() }).and(SchemaPushLogModel))
-        .parse(rows);
+      `,
+        )
+        .then(z.array(z.object({ schemaVersionId: z.string() }).passthrough()).parse);
 
-      return args.map(({ schemaVersionId }) =>
-        schemas
-          .filter(schema => schema.schemaVersionId === schemaVersionId)
-          .map(({ schemaVersionId: _, ...schema }) => schema),
-      );
-    },
-  );
+      const schemasByVersionId = new Map<
+        string,
+        Array<SinglePushSchemaLog | CompositePushSchemaLog>
+      >();
+
+      for (const row of rows) {
+        const schema = SchemaPushLogModel.parse(row);
+        const { schemaVersionId } = row;
+        const versionSchemas = schemasByVersionId.get(schemaVersionId) ?? [];
+        versionSchemas.push(schema);
+        schemasByVersionId.set(schemaVersionId, versionSchemas);
+      }
+
+      return schemaVersionIds.map(schemaVersionId => schemasByVersionId.get(schemaVersionId) ?? []);
+    });
+
+  getSchemasBySchemaVersionId = this.getSchemasBySchemaVersionIdBatch(true);
+  getSchemasWithoutSDLBySchemaVersionId = this.getSchemasBySchemaVersionIdBatch(false);
 
   async getSchemaRevisionsBySchemaLogIds(schemaLogIds: Array<string>) {
     if (schemaLogIds.length === 0) {
@@ -1737,7 +1742,10 @@ export class SchemaVersionStore {
 
 const schemaVersionSQLFields = (
   t = psql``,
-  options: { withSDL?: boolean; withChanges?: boolean } = {},
+  options: { withSDL?: boolean; withChanges?: boolean } = {
+    withSDL: true,
+    withChanges: true,
+  },
 ) => psql`
   ${t}"id"
   , ${t}"is_composable" as "isComposable"
