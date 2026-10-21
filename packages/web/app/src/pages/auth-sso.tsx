@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSession } from '@/lib/auth/use-session';
 import { AuthCard, AuthCardStack } from '@/components/auth';
 import { SSOForm, SSOFormSchema, type SSOFormValues } from '@/components/auth/sso-form';
 import { Meta } from '@/components/ui/meta';
@@ -8,6 +7,7 @@ import { Button } from '@/components/ui/primitives/button/button';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { env } from '@/env/frontend';
 import { isProviderEnabled } from '@/lib/auth/providers';
+import { useSession } from '@/lib/auth/use-session';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Link, Navigate, useRouter } from '@tanstack/react-router';

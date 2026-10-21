@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { redirectToPathSchema } from '@/lib/route-utils';
 import { isProviderEnabled } from '@/lib/auth/providers';
+import { redirectToPathSchema } from '@/lib/route-utils';
 import { OrganizationOIDCRequestPage } from '@/pages/organization-oidc-request';
 import { createRoute, redirect } from '@tanstack/react-router';
 import { withHeaderRoute } from './with-header';

@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { renderAtUrl } from '@/lib/testing/router';
 import { createTestClient } from '@/lib/testing/urql';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { createAppRouter } from '@/router';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 // The tree imports every page; these stand in for what cannot load under jsdom.
 const requireEmailVerification = vi.hoisted(() => ({ current: false }));
@@ -81,7 +81,10 @@ describe('email and password sign-in', () => {
     // Base UI announces the toast in a live region as well, so the text appears twice.
     await screen.findAllByText('Invalid email or password');
     // react-query passes a mutation context as the second argument.
-    expect(api.signIn.mock.calls[0]?.[0]).toEqual({ email: 'user@the-guild.dev', password: 'wrong' });
+    expect(api.signIn.mock.calls[0]?.[0]).toEqual({
+      email: 'user@the-guild.dev',
+      password: 'wrong',
+    });
   });
 
   it('goes back to where the visitor came from after signing in', async () => {

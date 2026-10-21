@@ -48,7 +48,10 @@ describe('third-party auth', () => {
     });
 
     it('passes the OIDC integration id along', async () => {
-      api.getAuthorisationUrl.mockResolvedValue({ status: 'OK', urlWithQueryParams: 'https://idp' });
+      api.getAuthorisationUrl.mockResolvedValue({
+        status: 'OK',
+        urlWithQueryParams: 'https://idp',
+      });
       await startThirdPartyAuth('oidc', undefined, 'integration-1');
       expect(api.getAuthorisationUrl.mock.calls[0]?.[0]).toMatchObject({
         thirdPartyId: 'oidc',
@@ -63,7 +66,9 @@ describe('third-party auth', () => {
     });
 
     it('surfaces the server message, which the OIDC page shows', async () => {
-      api.getAuthorisationUrl.mockRejectedValue(new Error('Something went wrong. Please try again'));
+      api.getAuthorisationUrl.mockRejectedValue(
+        new Error('Something went wrong. Please try again'),
+      );
       await expect(startThirdPartyAuth('oidc', '/', 'invalid')).rejects.toThrow(
         'Something went wrong. Please try again',
       );

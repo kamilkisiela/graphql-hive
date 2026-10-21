@@ -162,7 +162,10 @@ describe('auth api', () => {
   });
 
   it('throws the server message verbatim on GENERAL_ERROR', async () => {
-    respondWith(200, { status: 'GENERAL_ERROR', message: 'Something went wrong. Please try again' });
+    respondWith(200, {
+      status: 'GENERAL_ERROR',
+      message: 'Something went wrong. Please try again',
+    });
     await expect(
       api.getAuthorisationUrl({ thirdPartyId: 'oidc', redirectURIOnProviderDashboard: 'x' }),
     ).rejects.toThrow('Something went wrong. Please try again');
@@ -175,7 +178,9 @@ describe('auth api', () => {
     );
 
     respondWith(200, 401);
-    await expect(api.signIn({ email: 'e', password: 'p' })).rejects.toBeInstanceOf(api.AuthApiError);
+    await expect(api.signIn({ email: 'e', password: 'p' })).rejects.toBeInstanceOf(
+      api.AuthApiError,
+    );
   });
 
   it('looks up an OIDC id and only treats 5xx as an error', async () => {

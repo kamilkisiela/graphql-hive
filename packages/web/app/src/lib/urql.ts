@@ -161,4 +161,3 @@ type GraphQLPayload = {
       documentId: string;
     }
 );
-

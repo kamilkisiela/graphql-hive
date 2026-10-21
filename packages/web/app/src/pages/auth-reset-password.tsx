@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSession } from '@/lib/auth/use-session';
 import { AuthCard, AuthCardStack } from '@/components/auth';
 import {
   NewPasswordForm,
@@ -11,9 +10,10 @@ import {
   type ResetPasswordFormValues,
 } from '@/components/auth/reset-password-forms';
 import { Meta } from '@/components/ui/meta';
-import { sendPasswordResetEmail, submitNewPassword } from '@/lib/auth/api';
 import { Button } from '@/components/ui/primitives/button/button';
 import { useToast } from '@/components/ui/primitives/toast/toast';
+import { sendPasswordResetEmail, submitNewPassword } from '@/lib/auth/api';
+import { useSession } from '@/lib/auth/use-session';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';

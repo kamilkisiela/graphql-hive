@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { authenticated } from '@/components/authenticated-container';
+import { requireSession } from '@/lib/auth/require-session';
 import { redirectToPathSchema } from '@/lib/route-utils';
 import { AuthPage } from '@/pages/auth';
 import { AuthCallbackPage } from '@/pages/auth-callback';
@@ -9,7 +10,6 @@ import { AuthSignInPage } from '@/pages/auth-sign-in';
 import { AuthSignUpPage } from '@/pages/auth-sign-up';
 import { AuthSSOPage } from '@/pages/auth-sso';
 import { AuthVerifyEmailPage } from '@/pages/auth-verify-email';
-import { requireSession } from '@/lib/auth/require-session';
 import { createRoute, redirect } from '@tanstack/react-router';
 import { root } from './root';
 

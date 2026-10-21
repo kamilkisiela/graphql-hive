@@ -1,7 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { CircleUserRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useSession } from '@/lib/auth/use-session';
 import { AuthCard, AuthCardStack, AuthOrSeparator } from '@/components/auth';
 import {
   SignUpForm,
@@ -15,8 +14,9 @@ import { useToast } from '@/components/ui/primitives/toast/toast';
 import { env } from '@/env/frontend';
 import { signUp as signUpRequest } from '@/lib/auth/api';
 import { useLastAuthMethod } from '@/lib/auth/last-auth-method';
-import { startThirdPartyAuth } from '@/lib/auth/third-party';
 import { enabledProviders, isProviderEnabled } from '@/lib/auth/providers';
+import { startThirdPartyAuth } from '@/lib/auth/third-party';
+import { useSession } from '@/lib/auth/use-session';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
