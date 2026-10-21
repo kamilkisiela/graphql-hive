@@ -90,10 +90,13 @@ describe('ClickHouse insert', () => {
   let port: number;
   let handler: RequestHandler;
   let queryIds: Array<string | null>;
+  let requests: Array<URLSearchParams>;
 
   beforeAll(async () => {
     server = createServer((req, res) => {
-      queryIds.push(new URL(req.url ?? '/', 'http://localhost').searchParams.get('query_id'));
+      const params = new URL(req.url ?? '/', 'http://localhost').searchParams;
+      queryIds.push(params.get('query_id'));
+      requests.push(params);
       handler(req, res);
     });
     await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -107,6 +110,7 @@ describe('ClickHouse insert', () => {
 
   beforeEach(() => {
     queryIds = [];
+    requests = [];
     handler = respondOk;
   });
 
@@ -131,6 +135,19 @@ describe('ClickHouse insert', () => {
     await expect(createClient().insert(insertArgs)).resolves.toBeUndefined();
     expect(queryIds).toHaveLength(1);
     expect(queryIds[0]).toMatch(/^insert_test-[0-9a-f]+$/);
+  });
+
+  it('keeps the asynchronous insert by default', async () => {
+    await expect(createClient().insert(insertArgs)).resolves.toBeUndefined();
+    expect(requests[0].get('async_insert')).toBe('1');
+    expect(requests[0].get('wait_for_async_insert')).toBe('1');
+  });
+
+  it('writes synchronously in sync mode', async () => {
+    await expect(createClient().insert({ ...insertArgs, mode: 'sync' })).resolves.toBeUndefined();
+    expect(requests[0].get('async_insert')).toBe('0');
+    expect(requests[0].get('wait_for_async_insert')).toBeNull();
+    expect(requests[0].get('query_id')).toMatch(/^insert_test-[0-9a-f]+$/);
   });
 
   it('retries a connection error with a suffixed query id', async () => {

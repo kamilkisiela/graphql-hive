@@ -421,6 +421,10 @@ export class ClickHouse {
    *
    * `signal` is the deadline of the insert. `timeout` (55 s by default) only bounds a request
    * whose signal is missing or never fires.
+   *
+   * By default the data goes through ClickHouse's asynchronous insert queue, where it is
+   * coalesced with other inserts of the same shape and flushed by a shared pool. `mode: 'sync'`
+   * writes it in this request instead.
    */
   async insert(args: {
     query: SqlStatement;
@@ -428,6 +432,7 @@ export class ClickHouse {
     data: unknown[][];
     timeout?: number;
     signal?: AbortSignal;
+    mode?: 'async' | 'sync';
   }): Promise<void> {
     const startedAt = Date.now();
     const executionId = args.queryId + '-' + Math.random().toString(16).substring(2);
@@ -459,8 +464,10 @@ export class ClickHouse {
           searchParams: {
             query: args.query.sql,
             query_id: executionId,
-            async_insert: 1,
-            wait_for_async_insert: 1,
+            // `async_insert` defaults to 1 since ClickHouse 26.2, so sync mode has to say 0.
+            ...(args.mode === 'sync'
+              ? { async_insert: 0 }
+              : { async_insert: 1, wait_for_async_insert: 1 }),
             ...this.databaseParam(),
           },
           username: this.config.username,
@@ -476,9 +483,10 @@ export class ClickHouse {
             calculateDelay: info => {
               span.setAttribute('retry.count', info.attemptCount);
 
-              // Once the batch was sent it sits in ClickHouse's async insert buffer and gets
-              // flushed whether or not this request is still waiting; sending it again would
-              // store it twice.
+              // Once the batch was sent, ClickHouse keeps processing it whether or not this
+              // request is still waiting (an async insert sits in the buffer until flushed, a
+              // sync one runs on after the client disconnects); sending it again would store it
+              // twice.
               if (
                 args.signal?.aborted ||
                 (info.error instanceof TimeoutError && info.error.event === 'request')
