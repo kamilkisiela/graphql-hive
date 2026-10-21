@@ -31,19 +31,18 @@ export function useSession(): SessionState {
     };
   }, []);
 
+  // The mount check only matters for a token the API would reject; keeping it out of the memo
+  // otherwise means its arrival does not hand consumers a new object.
+  const pending = snapshot.status !== 'absent' && !isUsable(snapshot) ? checked : null;
+
   return useMemo((): SessionState => {
-    if (snapshot.status === 'absent') {
-      return ANONYMOUS;
-    }
-    if (!isUsable(snapshot)) {
-      if (checked === null) {
-        return LOADING;
-      }
-      if (!checked || snapshot.status !== 'valid') {
-        return ANONYMOUS;
-      }
-    }
     if (snapshot.status !== 'valid') {
+      return pending === null || pending === false ? ANONYMOUS : LOADING;
+    }
+    if (pending === null && !isUsable(snapshot)) {
+      return LOADING;
+    }
+    if (pending === false) {
       return ANONYMOUS;
     }
     return {
@@ -52,5 +51,5 @@ export function useSession(): SessionState {
       userId: snapshot.session.userId,
       email: snapshot.session.email,
     };
-  }, [snapshot, checked]);
+  }, [snapshot, pending]);
 }

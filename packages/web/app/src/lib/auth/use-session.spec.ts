@@ -73,11 +73,14 @@ describe('useSession', () => {
     );
   });
 
-  it('keeps the same result object across re-renders while nothing changed', () => {
+  it('keeps the same result object across re-renders while nothing changed', async () => {
     applyFrontTokenHeader(encode(Date.now() + 60_000));
     const { result, rerender } = renderHook(() => useSession());
     const first = result.current;
     rerender();
+    expect(result.current).toBe(first);
+    // The mount-time check resolves after render; it must not hand out a new object either.
+    await act(async () => {});
     expect(result.current).toBe(first);
 
     clearFrontToken();
