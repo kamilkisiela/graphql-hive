@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
+import { TimeoutError } from 'got';
 import { Inject, Injectable } from 'graphql-modules';
 import { printWithValues, sql, SqlStatement, toQueryParams } from '@hive/clickhouse';
 import { setErrorSource, SpanKind, trace } from '@hive/service-common';
@@ -415,12 +416,17 @@ export class ClickHouse {
     return response;
   }
 
-  /** Please insert data with this function :) */
+  /**
+   * Please insert data with this function :)
+   *
+   * `signal` is the deadline of the insert. `timeout` (55 s by default) only bounds a request
+   * whose signal is missing or never fires.
+   */
   async insert(args: {
     query: SqlStatement;
     queryId: string;
     data: unknown[][];
-    timeout: number;
+    timeout?: number;
     signal?: AbortSignal;
   }): Promise<void> {
     const startedAt = Date.now();
@@ -452,6 +458,7 @@ export class ClickHouse {
           ),
           searchParams: {
             query: args.query.sql,
+            query_id: executionId,
             async_insert: 1,
             wait_for_async_insert: 1,
             ...this.databaseParam(),
@@ -467,6 +474,23 @@ export class ClickHouse {
             // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
             enforceRetryRules: false,
             calculateDelay: info => {
+              span.setAttribute('retry.count', info.attemptCount);
+
+              // Once the batch was sent it sits in ClickHouse's async insert buffer and gets
+              // flushed whether or not this request is still waiting; sending it again would
+              // store it twice.
+              if (
+                args.signal?.aborted ||
+                (info.error instanceof TimeoutError && info.error.event === 'request')
+              ) {
+                this.logger.warn(
+                  'Not retrying ClickHouse insert after %s (executionId: %s)',
+                  info.error.name,
+                  executionId,
+                );
+                return 0;
+              }
+
               if (info.attemptCount >= maxRetry) {
                 this.logger.warn(
                   'Exceeded the retry limit (%s/%s) for %s',
@@ -486,12 +510,24 @@ export class ClickHouse {
             lookup: 2000,
             connect: 2000,
             secureConnect: 2000,
-            request: 30_000,
+            // override the provided timeout of an insert with the globally configured timeout
+            request: this.config.requestTimeout ?? args.timeout ?? 55_000,
           },
           signal: args.signal,
           agent: {
             http: httpAgent,
             https: httpsAgent,
+          },
+          hooks: {
+            beforeRequest: [
+              (options, { retryCount }) => {
+                if (retryCount > 0) {
+                  // Avoid QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING while the previous attempt still
+                  // runs server-side.
+                  options.searchParams.set('query_id', `${executionId}-r${retryCount}`);
+                }
+              },
+            ],
           },
         },
         span,

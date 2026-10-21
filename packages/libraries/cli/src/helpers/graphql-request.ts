@@ -37,6 +37,8 @@ export function graphqlRequest(config: {
         operation: TypedDocumentNode<TResult, TVariables>;
         /** timeout in milliseconds */
         timeout?: number;
+        /** Retry configuration. Set to `false` for having no retries. */
+        retry?: Parameters<typeof http.post>[2]['retry'];
       } & (TVariables extends Record<string, never>
         ? {
             variables?: never;
@@ -57,6 +59,7 @@ export function graphqlRequest(config: {
             logger: config.logger,
             headers: requestHeaders,
             timeout: args.timeout,
+            retry: args.retry,
           },
         );
       } catch (e: any) {
