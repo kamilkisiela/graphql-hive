@@ -9,7 +9,7 @@ import { deployCommerce } from './services/commerce';
 import { deployDatabaseCleanupJob } from './services/database-cleanup';
 import { deployDbMigrations } from './services/db-migrations';
 import { configureDocker } from './services/docker';
-import { deployEgressPolicy } from './services/egress-policy';
+import { initEgressPolicy } from './services/egress-policy';
 import { prepareEnvironment } from './services/environment';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
@@ -61,8 +61,7 @@ if (!hiveAppPersistedDocumentsAbsolutePath) {
 }
 
 optimizeAzureCluster();
-deployEgressPolicy();
-
+const egressManager = initEgressPolicy();
 const docker = configureDocker();
 const envName = pulumi.getStack();
 const heartbeatsConfig = new pulumi.Config('heartbeats');
@@ -134,6 +133,7 @@ const commerce = deployCommerce({
   sentry,
   observability,
   postgres,
+  egressManager,
 });
 
 const usage = deployUsage({
@@ -147,6 +147,7 @@ const usage = deployUsage({
   commerce,
   sentry,
   observability,
+  egressManager,
 });
 
 const usageIngestor = deployUsageIngestor({
@@ -158,6 +159,7 @@ const usageIngestor = deployUsageIngestor({
   dbMigrations,
   heartbeat: heartbeatsConfig.get('usageIngestor'),
   sentry,
+  egressManager,
 });
 
 const schema = deploySchema({
@@ -168,6 +170,7 @@ const schema = deploySchema({
   broker,
   sentry,
   observability,
+  egressManager,
 });
 
 const schemaPolicy = deploySchemaPolicy({
@@ -176,6 +179,7 @@ const schemaPolicy = deploySchemaPolicy({
   environment,
   sentry,
   observability,
+  egressManager,
 });
 
 deployWorkflows({
@@ -191,6 +195,7 @@ deployWorkflows({
   redis,
   clickhouse,
   dbMigrations,
+  egressManager,
 });
 
 const zendesk = configureZendesk({ environment });
@@ -218,6 +223,7 @@ const graphql = deployGraphQL({
   sentry,
   observability,
   broker,
+  egressManager,
 });
 
 const hiveConfig = new pulumi.Config('hive');
@@ -277,6 +283,7 @@ const otelCollector = deployOTELCollector({
   clickhouse,
   image: docker.factory.getImageId('otel-collector', imagesTag),
   docker,
+  egressManager,
 });
 
 const app = deployApp({
@@ -291,6 +298,7 @@ const app = deployApp({
   github: githubApp,
   slackApp,
   sentry,
+  egressManager,
 });
 
 const publicGraphQLAPIGateway = deployPublicGraphQLAPIGateway({
@@ -299,6 +307,7 @@ const publicGraphQLAPIGateway = deployPublicGraphQLAPIGateway({
   docker,
   observability,
   otelCollector,
+  egressManager,
 });
 
 const proxy = deployProxy({
@@ -326,6 +335,10 @@ deployCloudFlareSecurityTransform({
     '/api/slack',
   ],
 });
+
+// Redis doesn't call anything, so it only gets DNS once policies are enforced.
+egressManager?.register(redis.deployment);
+egressManager?.deploy();
 
 export const graphqlApiServiceId = graphql.service.id;
 export const usageApiServiceId = usage.service.id;

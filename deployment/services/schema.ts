@@ -2,6 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
 import { Docker } from './docker';
+import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
 import { Observability } from './observability';
 import { Redis } from './redis';
@@ -17,6 +18,7 @@ export function deploySchema({
   docker,
   sentry,
   observability,
+  egressManager,
 }: {
   observability: Observability;
   image: string;
@@ -25,11 +27,12 @@ export function deploySchema({
   broker: Broker;
   docker: Docker;
   sentry: Sentry;
+  egressManager: EgressPolicyManager;
 }) {
   const minuteInMS = 60 * 1000;
   const hourInMS = minuteInMS * 60;
 
-  return new ServiceDeployment(
+  const { deployment, service } = new ServiceDeployment(
     'schema-service',
     {
       image,
@@ -70,4 +73,14 @@ export function deploySchema({
     .withSecret('ENCRYPTION_SECRET', environment.encryptionSecret, 'encryptionPrivateKey')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
+
+  egressManager
+    ?.allowInCluster(deployment, redis.deployment)
+    .allowExternal(deployment, broker.secret.raw.baseUrl)
+    // Calls user-provided URLs (external composition).
+    .allowAnyExternal(deployment)
+    .allowExternal(deployment, sentry.secret?.raw.dsn)
+    .allowInCluster(deployment, observability.observability?.otlpCollectorService);
+
+  return { deployment, service };
 }

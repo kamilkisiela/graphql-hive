@@ -3,6 +3,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
 import { GraphQL } from './graphql';
 
@@ -15,8 +16,9 @@ export function deployOTELCollector(args: {
   clickhouse: Clickhouse;
   dbMigrations: DbMigrations;
   graphql: GraphQL;
+  egressManager: EgressPolicyManager;
 }) {
-  return new ServiceDeployment(
+  const { deployment, service } = new ServiceDeployment(
     'otel-collector',
     {
       image: args.image,
@@ -60,4 +62,10 @@ export function deployOTELCollector(args: {
     .withSecret('CLICKHOUSE_PASSWORD', args.clickhouse.secret, 'password')
     .withSecret('CLICKHOUSE_PROTOCOL', args.clickhouse.secret, 'protocol')
     .deploy();
+
+  args.egressManager
+    ?.allowExternal(deployment, args.clickhouse.secret.raw.host, args.clickhouse.secret.raw.port)
+    .allowInCluster(deployment, args.graphql.deployment);
+
+  return { deployment, service };
 }
