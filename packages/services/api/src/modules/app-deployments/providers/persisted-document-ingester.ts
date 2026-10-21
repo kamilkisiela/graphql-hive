@@ -494,6 +494,10 @@ export class PersistedDocumentIngester {
         document.internalHash,
       ]),
       queryId: 'insert_app_deployment_documents',
+      // A batch is at most 100 rows and the caller waits for it. Written synchronously it costs
+      // only its own rows; in the async queue it was coalesced with other uploads and waited
+      // behind other tables' flushes.
+      mode: 'sync',
       signal: args.signal,
     });
 
