@@ -20,6 +20,7 @@ import { SuperTokensCookieBasedSession } from '@hive/api/modules/auth/lib/supert
 import { requestIdStorage, type TracingInstance } from '@hive/service-common';
 import { captureException, runWithAsyncContext, withScope } from '@sentry/node';
 import { AuthN, Session } from '../../api/src/modules/auth/lib/authz';
+import { authenticateRequest } from './authenticate-request';
 import type { HivePersistedDocumentsConfig, HiveUsageConfig } from './environment';
 import { useArmor } from './use-armor';
 
@@ -195,7 +196,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         options.logger.error(err, 'Unexpected error occurred while handling exception.');
       }),
       useExtendContext(async context => ({
-        session: await options.authN.authenticate(context),
+        session: await authenticateRequest(options.authN, context),
       })),
       useHive({
         debug: true,
