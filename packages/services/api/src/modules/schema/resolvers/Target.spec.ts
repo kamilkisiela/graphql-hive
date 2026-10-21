@@ -1,7 +1,7 @@
 import { buildSchema, execute, parse, type GraphQLResolveInfo } from 'graphql';
 import { describe, expect, test } from 'vitest';
 import { areOnlyFieldsRequested, isFieldRequestedDeep } from '../lib/graphql-info-helper';
-import { isSDLRequested } from './Target';
+import { areSchemaCheckChangesRequested, isSDLRequested } from './Target';
 
 // The part of the Hive schema the gate looks at: the interface declares schemaSDL,
 // previousSchemaSDL and baseline; the composite SDLs live on the concrete types only.
@@ -50,6 +50,7 @@ const schema = buildSchema(/* GraphQL */ `
     schemaSDL: String!
     previousSchemaSDL: String
     baseline: SchemaCheckBaseline
+    schemaChanges: [String!]
   }
   type SchemaCheckBaseline {
     sdl: String
@@ -72,6 +73,9 @@ const schema = buildSchema(/* GraphQL */ `
     baseline: SchemaCheckBaseline
     compositeSchemaSDL: String
     supergraphSDL: String
+    schemaChanges: [String!]
+    safeSchemaChanges: [String!]
+    safeSchemaChangeGroups: [String!]!
   }
   type FailedSchemaCheck implements SchemaCheck {
     id: ID!
@@ -81,6 +85,9 @@ const schema = buildSchema(/* GraphQL */ `
     baseline: SchemaCheckBaseline
     compositeSchemaSDL: String
     supergraphSDL: String
+    schemaChanges: [String!]
+    breakingSchemaChanges: [String!]
+    unapprovedBreakingSchemaChangeCount: Int!
   }
 `);
 
@@ -183,6 +190,23 @@ describe('schemaVersion ID selection', () => {
     expect(areOnlyFieldsRequested(info, 'SchemaVersion', new Set(['id', '__typename']))).toBe(
       false,
     );
+  });
+});
+
+describe('schema check change selections', () => {
+  test('does not request changes for unrelated fields', async () => {
+    const info = await schemaCheckInfo('{ target { schemaCheck(id: "c") { id } } }');
+    expect(areSchemaCheckChangesRequested(info)).toBe(false);
+  });
+
+  test('requests changes for derived change fields', async () => {
+    const info = await schemaCheckInfo(`
+      { target { schemaCheck(id: "c") {
+        ... on SuccessfulSchemaCheck { safeSchemaChangeGroups }
+        ... on FailedSchemaCheck { unapprovedBreakingSchemaChangeCount }
+      } } }
+    `);
+    expect(areSchemaCheckChangesRequested(info)).toBe(true);
   });
 });
 

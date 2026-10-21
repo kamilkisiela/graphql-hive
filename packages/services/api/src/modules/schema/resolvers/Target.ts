@@ -56,7 +56,10 @@ export const Target: Pick<
   schemaCheck: async (target, args, { injector }, info) => {
     const schemaCheck = await injector
       .get(SchemaManager)
-      .findSchemaCheckForTarget(target, args.id, { withSDL: isSDLRequested(info) });
+      .findSchemaCheckForTarget(target, args.id, {
+        withSDL: isSDLRequested(info),
+        withChanges: areSchemaCheckChangesRequested(info),
+      });
 
     if (schemaCheck == null) {
       return null;
@@ -73,14 +76,7 @@ export const Target: Pick<
   schemaChecks: async (target, args, { injector }, info) => {
     const operationSelectsSDL = isSDLRequested(info);
 
-    const isSchemaChangesSelected = isFieldRequestedDeep(
-      info,
-      ['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
-        ['schemaChanges', 'safeSchemaChanges', 'breakingSchemaChanges', 'cliApprovalMetadata'].map(
-          fieldName => [typeName, fieldName] as const,
-        ),
-      ),
-    );
+    const isSchemaChangesSelected = areSchemaCheckChangesRequested(info);
 
     const result = await injector.get(SchemaManager).getPaginatedSchemaChecksForTarget(target, {
       first: args.first ?? null,
@@ -143,4 +139,20 @@ export function isSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0])
       fieldName => ['SchemaCheckBaseline', fieldName] as const,
     ),
   ]);
+}
+
+export function areSchemaCheckChangesRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
+  return isFieldRequestedDeep(
+    info,
+    ['SchemaCheck', 'SuccessfulSchemaCheck', 'FailedSchemaCheck'].flatMap(typeName =>
+      [
+        'schemaChanges',
+        'safeSchemaChanges',
+        'breakingSchemaChanges',
+        'safeSchemaChangeGroups',
+        'unapprovedBreakingSchemaChangeCount',
+        'cliApprovalMetadata',
+      ].map(fieldName => [typeName, fieldName] as const),
+    ),
+  );
 }

@@ -2598,15 +2598,21 @@ export async function createStorage(
       return check;
     },
     findSchemaCheck: batchBy<
-      { targetId: string; schemaCheckId: string; withSDL?: boolean },
+      {
+        targetId: string;
+        schemaCheckId: string;
+        withSDL?: boolean;
+        withChanges?: boolean;
+      },
       SchemaCheck | null
     >(
-      args => `${args.targetId}:${args.withSDL ?? true}`,
+      args => `${args.targetId}:${args.withSDL ?? true}:${args.withChanges ?? true}`,
       async args => {
         const withSDL = args[0].withSDL ?? true;
+        const withChanges = args[0].withChanges ?? true;
         const result = await pool.any(psql`/* findSchemaChecks */
         SELECT
-          ${schemaCheckSQLFields({ sdl: withSDL })}
+          ${schemaCheckSQLFields({ sdl: withSDL, changes: withChanges })}
         FROM
           "schema_checks" as c
         ${
