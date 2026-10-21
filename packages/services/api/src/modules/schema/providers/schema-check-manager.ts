@@ -112,6 +112,30 @@ export class SchemaCheckManager {
     });
   }
 
+  async getGraphQLSchemaVersion(
+    schemaCheck: SchemaCheck,
+    options: { withSDL: boolean; withChanges: boolean },
+  ) {
+    if (schemaCheck.schemaVersionId === null) {
+      return null;
+    }
+
+    const schemaVersion = await this.schemaVersions.getSchemaVersionByIdWithProjection({
+      schemaVersionId: schemaCheck.schemaVersionId,
+      ...options,
+    });
+
+    if (schemaVersion?.targetId !== schemaCheck.targetId) {
+      return null;
+    }
+
+    return {
+      ...schemaVersion,
+      organizationId: schemaCheck.selector.organizationId,
+      projectId: schemaCheck.selector.projectId,
+    };
+  }
+
   async getPreviousSchemaSDL(schemaCheck: SchemaCheck) {
     if (schemaCheck.baselineSchemaSDL !== null) {
       return schemaCheck.baselineSchemaSDL;

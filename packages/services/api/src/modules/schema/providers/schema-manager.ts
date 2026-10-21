@@ -751,7 +751,7 @@ export class SchemaManager {
   async findSchemaCheckForTarget(
     target: Target,
     schemaCheckId: string,
-    options: { withSDL?: boolean } = {},
+    options: { withSDL?: boolean; withChanges?: boolean } = {},
   ) {
     this.logger.debug(
       'Find schema check (targetId=%s, schemaCheckId=%s)',
@@ -773,6 +773,7 @@ export class SchemaManager {
       targetId: target.id,
       schemaCheckId,
       withSDL: options.withSDL,
+      withChanges: options.withChanges,
     });
 
     if (schemaCheck == null) {

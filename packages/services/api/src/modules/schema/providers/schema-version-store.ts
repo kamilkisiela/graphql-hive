@@ -16,7 +16,7 @@ import {
   toSerializableSchemaChange,
 } from '@hive/storage';
 import type { Project, Target } from '../../../shared/entities';
-import { batch, cache } from '../../../shared/helpers';
+import { batch, batchBy, cache } from '../../../shared/helpers';
 import { Graph } from '../../graph/providers/graph-store';
 import { Logger, NoopLogger } from '../../shared/providers/logger';
 import { SchemaRevisionStore, SchemaRevisionUnavailableError } from './schema-revision-store';
@@ -1098,6 +1098,28 @@ export class SchemaVersionStore {
     return SchemaVersionModel.nullable().parse(result);
   }
 
+  getSchemaVersionByIdWithProjection = batchBy<
+    { schemaVersionId: string; withSDL: boolean; withChanges: boolean },
+    SchemaVersion | null
+  >(
+    args => `${args.withSDL}:${args.withChanges}`,
+    async args => {
+      const result = await this.pg.any(psql`/* getSchemaVersionsById */
+        SELECT
+          ${schemaVersionSQLFields(psql`sv.`, args[0])}
+        FROM "schema_versions" AS "sv"
+        WHERE "sv"."id" = ANY(${psql.array(
+          args.map(arg => arg.schemaVersionId),
+          'uuid',
+        )})
+      `);
+      const schemaVersions = z.array(SchemaVersionModel).parse(result);
+      const schemaVersionsById = new Map(schemaVersions.map(version => [version.id, version]));
+
+      return args.map(arg => schemaVersionsById.get(arg.schemaVersionId) ?? null);
+    },
+  );
+
   /**
    * Retrieve the paginated schema versions for a graph.
    * Handles legacy schema version records that do not have a `graph_id` populated.
@@ -1754,6 +1776,7 @@ const schemaVersionSQLFields = (
   , ${t}"base_schema" as "baseSchema"
   , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
   , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
+  , ${options.withSDL !== false}::boolean as "hasLoadedSDL"
   , ${options.withSDL ? psql`${t}"composite_schema_sdl"` : psql`NULL`} as "compositeSchemaSDL"
   , ${options.withSDL ? psql`${t}"supergraph_sdl"` : psql`NULL`} as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
@@ -1938,6 +1961,7 @@ const SchemaVersionModel = z
     hasPersistedSchemaChanges: z.nullable(z.boolean()).transform(val => val ?? false),
     previousSchemaVersionId: z.nullable(z.string()),
     diffSchemaVersionId: z.nullable(z.string()),
+    hasLoadedSDL: z.boolean(),
     compositeSchemaSDL: z.nullable(z.string()),
     supergraphSDL: z.nullable(z.string()),
     supergraphChanges: z.array(HiveSchemaChangeModel).nullable(),

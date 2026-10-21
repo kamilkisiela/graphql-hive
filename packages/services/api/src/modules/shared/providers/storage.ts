@@ -510,6 +510,8 @@ export interface Storage {
     schemaCheckId: string;
     /** Skips reading the check's six SDLs; their fields come back empty. Defaults to true. */
     withSDL?: boolean;
+    /** Skips reading safe and breaking changes. Defaults to true. */
+    withChanges?: boolean;
   }): Promise<SchemaCheck | null>;
   /**
    * Retrieve paginated schema checks for a given target.
