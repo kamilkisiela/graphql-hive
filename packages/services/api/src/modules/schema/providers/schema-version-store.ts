@@ -1776,6 +1776,7 @@ const schemaVersionSQLFields = (
   , ${t}"base_schema" as "baseSchema"
   , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
   , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
+  , ${options.withSDL !== false} as "hasLoadedSDL"
   , ${options.withSDL ? psql`${t}"composite_schema_sdl"` : psql`NULL`} as "compositeSchemaSDL"
   , ${options.withSDL ? psql`${t}"supergraph_sdl"` : psql`NULL`} as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
@@ -1960,6 +1961,7 @@ const SchemaVersionModel = z
     hasPersistedSchemaChanges: z.nullable(z.boolean()).transform(val => val ?? false),
     previousSchemaVersionId: z.nullable(z.string()),
     diffSchemaVersionId: z.nullable(z.string()),
+    hasLoadedSDL: z.boolean(),
     compositeSchemaSDL: z.nullable(z.string()),
     supergraphSDL: z.nullable(z.string()),
     supergraphChanges: z.array(HiveSchemaChangeModel).nullable(),
