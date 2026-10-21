@@ -485,7 +485,7 @@ export class PersistedDocumentIngester {
         document.schemaCoordinates,
         document.internalHash,
       ]),
-      timeout: 10_000,
+      timeout: 20_000,
       queryId: 'insert_app_deployment_documents',
       signal: args.signal,
     });

@@ -277,10 +277,11 @@ export class SchemaManager {
       'hive.version.id': input.id,
     }),
   })
-  @atomic(stringifySelector)
-  async getMaybeSchemasOfVersion(schemaVersion: SchemaVersion) {
+  async getMaybeSchemasOfVersion(schemaVersion: SchemaVersion, options = { withSDL: true }) {
     this.logger.debug('Fetching schemas (schemaVersionId=%s)', schemaVersion.id);
-    return this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id);
+    return options.withSDL
+      ? this.schemaVersions.getSchemasBySchemaVersionId(schemaVersion.id)
+      : this.schemaVersions.getSchemasWithoutSDLBySchemaVersionId(schemaVersion.id);
   }
 
   async getMatchingServiceSchemaOfVersions(versions: { before: string | null; after: string }) {
@@ -454,12 +455,16 @@ export class SchemaManager {
     args: {
       first: number | null;
       cursor: null | string;
+      withSDL: boolean;
+      withChanges: boolean;
     },
   ) {
     const first = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
     const connection = await this.schemaVersions.getPaginatedSchemaVersionsForGraph(graph, {
       first,
       cursor: args.cursor,
+      withSDL: args.withSDL,
+      withChanges: args.withChanges,
     });
 
     return {
@@ -746,7 +751,7 @@ export class SchemaManager {
   async findSchemaCheckForTarget(
     target: Target,
     schemaCheckId: string,
-    options: { withSDL?: boolean } = {},
+    options: { withSDL?: boolean; withChanges?: boolean } = {},
   ) {
     this.logger.debug(
       'Find schema check (targetId=%s, schemaCheckId=%s)',
@@ -768,6 +773,7 @@ export class SchemaManager {
       targetId: target.id,
       schemaCheckId,
       withSDL: options.withSDL,
+      withChanges: options.withChanges,
     });
 
     if (schemaCheck == null) {

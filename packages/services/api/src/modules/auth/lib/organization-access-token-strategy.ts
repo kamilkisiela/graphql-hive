@@ -21,7 +21,7 @@ function hashToken(token: string) {
 export class OrganizationAccessTokenSession extends Session {
   public readonly organizationId: string;
   private policies: Array<AuthorizationPolicyStatement>;
-  private organizationAccessToken: CachedAccessToken;
+  readonly organizationAccessToken: CachedAccessToken;
   readonly id: string;
 
   constructor(

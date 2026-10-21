@@ -3,6 +3,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
 import { Kafka } from './kafka';
 import { Sentry } from './sentry';
@@ -18,6 +19,7 @@ export function deployUsageIngestor({
   image,
   docker,
   sentry,
+  egressManager,
 }: {
   image: string;
   environment: Environment;
@@ -27,6 +29,7 @@ export function deployUsageIngestor({
   heartbeat?: string;
   docker: Docker;
   sentry: Sentry;
+  egressManager: EgressPolicyManager;
 }) {
   const clickHouseConfig = new pulumi.Config('clickhouse');
 
@@ -37,7 +40,7 @@ export function deployUsageIngestor({
       ? clickHouseConfig.require('migrationV2DataIngestionStartDate')
       : '';
 
-  return new ServiceDeployment(
+  const { deployment, service } = new ServiceDeployment(
     'usage-ingestor-service',
     {
       image,
@@ -83,4 +86,12 @@ export function deployUsageIngestor({
     .withSecret('KAFKA_BROKER', kafka.secret, 'endpoint')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
+
+  egressManager
+    ?.allowExternal(deployment, clickhouse.secret.raw.host, clickhouse.secret.raw.port)
+    .allowExternal(deployment, kafka.secret.raw.endpoint)
+    .allowExternal(deployment, heartbeat)
+    .allowExternal(deployment, sentry.secret?.raw.dsn);
+
+  return { deployment, service };
 }

@@ -12,6 +12,7 @@ export function configureZendesk(input: { environment: Environment }) {
     return {
       enabled: false,
       secret: null,
+      baseUrl: null,
     };
   }
 
@@ -25,6 +26,7 @@ export function configureZendesk(input: { environment: Environment }) {
   return {
     enabled: true,
     secret,
+    baseUrl: zendeskConfig.require('baseUrl'),
   };
 }
 

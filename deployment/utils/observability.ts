@@ -18,6 +18,17 @@ const REVERSE_PROXY_METRICS = [
   'contour_httpproxy_invalid',
 ] as const;
 
+/**
+ * Hubble metrics exposed by the Cilium agents (Advanced Container Networking Services),
+ * used to monitor the egress policies (see `services/egress-policy.ts`).
+ * DNS metrics are only produced for pods selected by a policy with DNS rules.
+ */
+const HUBBLE_METRICS = [
+  'hubble_drop_total',
+  'hubble_dns_queries_total',
+  'hubble_dns_responses_total',
+] as const;
+
 export type ObservabilityConfig =
   | 'local'
   | {
@@ -400,6 +411,70 @@ export class Observability {
                     {
                       action: 'labeldrop',
                       regex: 'scrape_namespace',
+                    },
+                  ],
+                },
+                // Clusters without Cilium + ACNS have no matching pods, so the job is a no-op there.
+                {
+                  job_name: 'hubble-metrics',
+                  scheme: 'http',
+                  honor_labels: true,
+                  kubernetes_sd_configs: [
+                    {
+                      role: 'pod',
+                      namespaces: {
+                        names: ['kube-system'],
+                      },
+                    },
+                  ],
+                  relabel_configs: [
+                    {
+                      source_labels: ['__meta_kubernetes_pod_label_k8s_app'],
+                      action: 'keep',
+                      regex: 'cilium',
+                    },
+                    // Hubble metrics are served on a dedicated port of the (host network) agent.
+                    {
+                      source_labels: ['__address__'],
+                      action: 'replace',
+                      regex: '([^:]+)(?::\\d+)?',
+                      replacement: '$$1:9965',
+                      target_label: '__address__',
+                    },
+                    {
+                      source_labels: ['__meta_kubernetes_pod_node_name'],
+                      action: 'replace',
+                      target_label: 'instance',
+                    },
+                  ],
+                  metric_relabel_configs: [
+                    {
+                      source_labels: ['__name__'],
+                      action: 'keep',
+                      regex: HUBBLE_METRICS.join('|'),
+                    },
+                    // `source` / `destination` are "namespace/pod". Split them and reduce pods to
+                    // their workload (also dropping Pulumi's name suffix), so series survive
+                    // rollouts and cardinality stays low.
+                    ...(['source', 'destination'] as const).flatMap(label => [
+                      {
+                        source_labels: [label],
+                        action: 'replace',
+                        regex: '([^/]+)/.+',
+                        replacement: '$$1',
+                        target_label: `${label}_namespace`,
+                      },
+                      {
+                        source_labels: [label],
+                        action: 'replace',
+                        regex: '[^/]+/(.+?)(?:-[0-9a-f]{8})?(?:-[a-z0-9]{8,10})?-[a-z0-9]{5}',
+                        replacement: '$$1',
+                        target_label: `${label}_workload`,
+                      },
+                    ]),
+                    {
+                      action: 'labeldrop',
+                      regex: 'source|destination|ips_returned',
                     },
                   ],
                 },

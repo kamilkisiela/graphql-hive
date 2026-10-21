@@ -6,6 +6,7 @@ import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { type Docker } from './docker';
+import { type EgressPolicyManager } from './egress-policy';
 import { type Environment } from './environment';
 import { type GraphQL } from './graphql';
 import { type Observability } from './observability';
@@ -13,9 +14,22 @@ import { type OTELCollector } from './otel-collector';
 
 /**
  * Hive Gateway Docker Image Version
- * Bump this to update the used gateway version.
+ * Derived from the `@graphql-hive/gateway` version in `deployment/package.json`,
+ * so the deployed gateway matches the version the gateway config is typechecked against.
+ * Bump the dependency there to update the used gateway version.
  */
-const dockerImage = 'ghcr.io/graphql-hive/gateway:2.1.19';
+const gatewayVersion: string = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf-8'),
+).devDependencies['@graphql-hive/gateway'];
+
+// On global scope to fail early in case of a non-exact version (e.g. `^2.15.2`)
+if (!/^\d+\.\d+\.\d+$/.test(gatewayVersion)) {
+  throw new Error(
+    `Expected an exact '@graphql-hive/gateway' version in deployment/package.json, got '${gatewayVersion}'.`,
+  );
+}
+
+const dockerImage = `ghcr.io/graphql-hive/gateway:${gatewayVersion}`;
 
 const gatewayConfigDirectory = path.resolve(
   __dirname,
@@ -34,6 +48,7 @@ export function deployPublicGraphQLAPIGateway(args: {
   docker: Docker;
   observability: Observability;
   otelCollector: OTELCollector;
+  egressManager: EgressPolicyManager;
 }) {
   const apiConfig = new pulumi.Config('api');
 
@@ -63,7 +78,7 @@ export function deployPublicGraphQLAPIGateway(args: {
     },
   });
 
-  return new ServiceDeployment(
+  const { deployment, service } = new ServiceDeployment(
     'public-graphql-api-gateway',
     {
       imagePullSecret: args.docker.secret,
@@ -116,6 +131,14 @@ export function deployPublicGraphQLAPIGateway(args: {
     .withSecret('HIVE_CDN_ACCESS_TOKEN', publicGraphQLAPISecret, 'cdnAccessKeyId')
     .withSecret('HIVE_HIVE_TRACE_ACCESS_TOKEN', hiveConfigSecrets, 'otelTraceAccessToken')
     .deploy();
+
+  args.egressManager
+    ?.allowExternal(deployment, cdnEndpoint)
+    .allowInCluster(deployment, args.graphql.deployment)
+    .allowInCluster(deployment, args.otelCollector.deployment)
+    .allowInCluster(deployment, args.observability.observability?.otlpCollectorService);
+
+  return { deployment, service };
 }
 
 export type PublicGraphQLAPIGateway = ReturnType<typeof deployPublicGraphQLAPIGateway>;

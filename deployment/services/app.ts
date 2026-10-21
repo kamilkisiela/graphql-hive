@@ -5,6 +5,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { CommerceService } from './commerce';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
@@ -26,6 +27,7 @@ export function deployApp({
   commerce,
   sentry,
   environment,
+  egressManager,
 }: {
   environment: Environment;
   image: string;
@@ -38,11 +40,12 @@ export function deployApp({
   commerce: CommerceService;
   sentry: Sentry;
   publishAppDeploymentCommand: pulumi.Resource | undefined;
+  egressManager: EgressPolicyManager;
 }) {
   const appConfig = new pulumi.Config('app');
   const appEnv = appConfig.requireObject<Record<string, string>>('env');
 
-  return new ServiceDeployment(
+  const { deployment, service } = new ServiceDeployment(
     'app',
     {
       image,
@@ -82,4 +85,14 @@ export function deployApp({
     .withSecret('STRIPE_PUBLIC_KEY', commerce.stripeSecret, 'stripePublicKey')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
+
+  egressManager
+    // GRAPHQL_PUBLIC_ENDPOINT: the server-side calls (Slack / GitHub callbacks, lab) use the public
+    // endpoint, not SERVER_ENDPOINT.
+    ?.allowExternal(deployment, `https://${environment.appDns}`)
+    // Slack OAuth token exchange (/api/slack/callback)
+    .allowExternal(deployment, 'https://slack.com')
+    .allowExternal(deployment, sentry.secret?.raw.dsn);
+
+  return { deployment, service };
 }

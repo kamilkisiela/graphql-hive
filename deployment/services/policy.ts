@@ -1,5 +1,6 @@
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Docker } from './docker';
+import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
 import { Observability } from './observability';
 import { Sentry } from './sentry';
@@ -12,14 +13,16 @@ export function deploySchemaPolicy({
   docker,
   sentry,
   observability,
+  egressManager,
 }: {
   observability: Observability;
   image: string;
   environment: Environment;
   docker: Docker;
   sentry: Sentry;
+  egressManager: EgressPolicyManager;
 }) {
-  return new ServiceDeployment('schema-policy-service', {
+  const { deployment, service } = new ServiceDeployment('schema-policy-service', {
     image,
     imagePullSecret: docker.secret,
     env: {
@@ -37,4 +40,10 @@ export function deploySchemaPolicy({
   })
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
+
+  egressManager
+    ?.allowExternal(deployment, sentry.secret?.raw.dsn)
+    .allowInCluster(deployment, observability.observability?.otlpCollectorService);
+
+  return { deployment, service };
 }

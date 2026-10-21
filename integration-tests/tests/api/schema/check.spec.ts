@@ -301,6 +301,32 @@ test.concurrent(
   },
 );
 
+test.concurrent('malformed check IDs do not raise an exception', async ({ expect }) => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { project, target } = await createProject(ProjectType.Single);
+
+  const result = await execute({
+    document: ApproveFailedSchemaCheckMutation,
+    variables: {
+      input: {
+        organizationSlug: organization.slug,
+        projectSlug: project.slug,
+        targetSlug: target.slug,
+        schemaCheckId: 'malformed-id',
+      },
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(result.approveFailedSchemaCheck).toEqual({
+    ok: null,
+    error: {
+      message: "Schema check doesn't exist.",
+    },
+  });
+});
+
 test.concurrent(
   'successful check with previously published schema is persisted',
   async ({ expect }) => {

@@ -16,7 +16,7 @@ import {
   toSerializableSchemaChange,
 } from '@hive/storage';
 import type { Project, Target } from '../../../shared/entities';
-import { batch, cache } from '../../../shared/helpers';
+import { batch, batchBy, cache } from '../../../shared/helpers';
 import { Graph } from '../../graph/providers/graph-store';
 import { Logger, NoopLogger } from '../../shared/providers/logger';
 import { SchemaRevisionStore, SchemaRevisionUnavailableError } from './schema-revision-store';
@@ -976,26 +976,46 @@ export class SchemaVersionStore {
       .then(SchemaPushLogModel.nullable().parse);
   }
 
-  async getSchemasBySchemaVersionId(schemaVersionId: string) {
-    return this.pg
-      .any(
-        psql`/* getSchemasOfVersion */
-          SELECT
-            ${schemaLogFields(psql`sl.`)}
-            , p.type
-          FROM schema_version_to_log AS svl
-          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
-          LEFT JOIN projects as p ON (p.id = sl.project_id)
-          WHERE
-            svl.version_id = ${schemaVersionId}
-            AND sl.action = 'PUSH'
-            AND p.type != 'CUSTOM'
-          ORDER BY
-            sl.created_at DESC
-        `,
-      )
-      .then(z.array(SchemaPushLogModel).parse);
-  }
+  private getSchemasBySchemaVersionIdBatch = (withSDL: boolean) =>
+    batch<string, Array<SinglePushSchemaLog | CompositePushSchemaLog>>(async schemaVersionIds => {
+      const rows = await this.pg
+        .any(
+          psql`/* getSchemasOfVersions */
+        SELECT
+          "svl"."version_id" AS "schemaVersionId"
+          , ${schemaLogFields(psql`sl.`, { withSDL })}
+          , "p"."type"
+        FROM "schema_version_to_log" AS "svl"
+        LEFT JOIN "schema_log" AS "sl" ON ("sl"."id" = "svl"."action_id")
+        LEFT JOIN "projects" AS "p" ON ("p"."id" = "sl"."project_id")
+        WHERE
+          "svl"."version_id" = ANY(${psql.array(schemaVersionIds, 'uuid')})
+          AND "sl"."action" = 'PUSH'
+          AND "p"."type" != 'CUSTOM'
+        ORDER BY
+          "sl"."created_at" DESC
+      `,
+        )
+        .then(z.array(z.object({ schemaVersionId: z.string() }).passthrough()).parse);
+
+      const schemasByVersionId = new Map<
+        string,
+        Array<SinglePushSchemaLog | CompositePushSchemaLog>
+      >();
+
+      for (const row of rows) {
+        const schema = SchemaPushLogModel.parse(row);
+        const { schemaVersionId } = row;
+        const versionSchemas = schemasByVersionId.get(schemaVersionId) ?? [];
+        versionSchemas.push(schema);
+        schemasByVersionId.set(schemaVersionId, versionSchemas);
+      }
+
+      return schemaVersionIds.map(schemaVersionId => schemasByVersionId.get(schemaVersionId) ?? []);
+    });
+
+  getSchemasBySchemaVersionId = this.getSchemasBySchemaVersionIdBatch(true);
+  getSchemasWithoutSDLBySchemaVersionId = this.getSchemasBySchemaVersionIdBatch(false);
 
   async getSchemaRevisionsBySchemaLogIds(schemaLogIds: Array<string>) {
     if (schemaLogIds.length === 0) {
@@ -1078,6 +1098,28 @@ export class SchemaVersionStore {
     return SchemaVersionModel.nullable().parse(result);
   }
 
+  getSchemaVersionByIdWithProjection = batchBy<
+    { schemaVersionId: string; withSDL: boolean; withChanges: boolean },
+    SchemaVersion | null
+  >(
+    args => `${args.withSDL}:${args.withChanges}`,
+    async args => {
+      const result = await this.pg.any(psql`/* getSchemaVersionsById */
+        SELECT
+          ${schemaVersionSQLFields(psql`sv.`, args[0])}
+        FROM "schema_versions" AS "sv"
+        WHERE "sv"."id" = ANY(${psql.array(
+          args.map(arg => arg.schemaVersionId),
+          'uuid',
+        )})
+      `);
+      const schemaVersions = z.array(SchemaVersionModel).parse(result);
+      const schemaVersionsById = new Map(schemaVersions.map(version => [version.id, version]));
+
+      return args.map(arg => schemaVersionsById.get(arg.schemaVersionId) ?? null);
+    },
+  );
+
   /**
    * Retrieve the paginated schema versions for a graph.
    * Handles legacy schema version records that do not have a `graph_id` populated.
@@ -1087,6 +1129,8 @@ export class SchemaVersionStore {
     args: {
       first: number | null;
       cursor: null | string;
+      withSDL: boolean;
+      withChanges: boolean;
     },
   ) {
     const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
@@ -1122,7 +1166,7 @@ export class SchemaVersionStore {
     // reads at most 2 * (limit + 1) rows instead of sorting every version of the target.
     const result = await this.pg.any(psql`/* getPaginatedSchemaVersionsForGraph */
       SELECT
-        ${schemaVersionSQLFields()}
+        ${schemaVersionSQLFields(psql``, args)}
       FROM (
         ${
           graph.isBackfilled
@@ -1718,7 +1762,13 @@ export class SchemaVersionStore {
   }
 }
 
-const schemaVersionSQLFields = (t = psql``) => psql`
+const schemaVersionSQLFields = (
+  t = psql``,
+  options: { withSDL?: boolean; withChanges?: boolean } = {
+    withSDL: true,
+    withChanges: true,
+  },
+) => psql`
   ${t}"id"
   , ${t}"is_composable" as "isComposable"
   , to_json(${t}"created_at") as "createdAt"
@@ -1726,8 +1776,9 @@ const schemaVersionSQLFields = (t = psql``) => psql`
   , ${t}"base_schema" as "baseSchema"
   , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
   , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
-  , ${t}"composite_schema_sdl" as "compositeSchemaSDL"
-  , ${t}"supergraph_sdl" as "supergraphSDL"
+  , ${options.withSDL !== false}::boolean as "hasLoadedSDL"
+  , ${options.withSDL ? psql`${t}"composite_schema_sdl"` : psql`NULL`} as "compositeSchemaSDL"
+  , ${options.withSDL ? psql`${t}"supergraph_sdl"` : psql`NULL`} as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
@@ -1741,17 +1792,17 @@ const schemaVersionSQLFields = (t = psql``) => psql`
   , ${t}"target_id" as "targetId"
   , ${t}"origin"
   , ${t}"meta"
-  , ${t}"supergraph_changes" as "supergraphChanges"
+  , ${options.withChanges ? psql`${t}"supergraph_changes"` : psql`NULL`} as "supergraphChanges"
   , ${t}"graph_id" as "graphId"
   , ${t}"graph_metadata" as "graphMetadata"
   , ${t}"source_schema_version_id" as "sourceSchemaVersionId"
 `;
 
-const schemaLogFields = (prefix = psql``) => psql`
+const schemaLogFields = (prefix = psql``, options: { withSDL?: boolean } = {}) => psql`
   ${prefix}"id"
   , ${prefix}"author"
   , ${prefix}"commit"
-  , ${prefix}"sdl"
+  , ${options.withSDL === false ? psql`''` : psql`${prefix}"sdl"`} AS "sdl"
   , ${prefix}"created_at" AS "date"
   , ${prefix}"metadata"
   , lower(${prefix}"service_name") AS "service_name"
@@ -1910,6 +1961,7 @@ const SchemaVersionModel = z
     hasPersistedSchemaChanges: z.nullable(z.boolean()).transform(val => val ?? false),
     previousSchemaVersionId: z.nullable(z.string()),
     diffSchemaVersionId: z.nullable(z.string()),
+    hasLoadedSDL: z.boolean(),
     compositeSchemaSDL: z.nullable(z.string()),
     supergraphSDL: z.nullable(z.string()),
     supergraphChanges: z.array(HiveSchemaChangeModel).nullable(),
