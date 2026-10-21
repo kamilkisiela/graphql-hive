@@ -20,6 +20,7 @@ import {
   SchemaCheckModel,
   SchemaPolicyWarningModel,
   type SchemaChangeType,
+  type SchemaCheck,
   type SchemaCheckApprovalMetadata,
 } from './schema-change-model';
 
@@ -2596,9 +2597,14 @@ export async function createStorage(
 
       return check;
     },
-    async findSchemaCheck(args) {
-      const withSDL = args.withSDL ?? true;
-      const result = await pool.maybeOne(psql`/* findSchemaCheck */
+    findSchemaCheck: batchBy<
+      { targetId: string; schemaCheckId: string; withSDL?: boolean },
+      SchemaCheck | null
+    >(
+      args => `${args.targetId}:${args.withSDL ?? true}`,
+      async args => {
+        const withSDL = args[0].withSDL ?? true;
+        const result = await pool.any(psql`/* findSchemaChecks */
         SELECT
           ${schemaCheckSQLFields({ sdl: withSDL })}
         FROM
@@ -2616,16 +2622,21 @@ export async function createStorage(
             : psql``
         }
         WHERE
-          c."id" = ${args.schemaCheckId}
-          AND c."target_id" = ${args.targetId}
+          c."id" = ANY(${psql.array(
+            args.map(arg => arg.schemaCheckId),
+            'uuid',
+          )})
+          AND c."target_id" = ${args[0].targetId}
       `);
 
-      if (result == null) {
-        return null;
-      }
+        const schemaChecks = z.array(SchemaCheckModel).parse(result);
+        const schemaChecksById = new Map(
+          schemaChecks.map(schemaCheck => [schemaCheck.id, schemaCheck]),
+        );
 
-      return SchemaCheckModel.parse(result);
-    },
+        return args.map(arg => schemaChecksById.get(arg.schemaCheckId) ?? null);
+      },
+    ),
     async approveFailedSchemaCheck(args) {
       const schemaCheck = await this.findSchemaCheck({
         targetId: args.targetId,
