@@ -59,7 +59,9 @@ describe('useSession', () => {
     applyFrontTokenHeader(encode(Date.now() - 60_000));
     refreshSession.mockResolvedValue(404);
     const { result } = renderHook(() => useSession());
-    await waitFor(() => expect(result.current).toEqual({ loading: false, doesSessionExist: false }));
+    await waitFor(() =>
+      expect(result.current).toEqual({ loading: false, doesSessionExist: false }),
+    );
   });
 
   it('settles optimistically when the refresh fails transiently', async () => {
@@ -69,6 +71,20 @@ describe('useSession', () => {
     await waitFor(() =>
       expect(result.current).toMatchObject({ loading: false, doesSessionExist: true }),
     );
+  });
+
+  it('keeps the same result object across re-renders while nothing changed', () => {
+    applyFrontTokenHeader(encode(Date.now() + 60_000));
+    const { result, rerender } = renderHook(() => useSession());
+    const first = result.current;
+    rerender();
+    expect(result.current).toBe(first);
+
+    clearFrontToken();
+    const { result: anonymous, rerender: rerenderAnonymous } = renderHook(() => useSession());
+    const firstAnonymous = anonymous.current;
+    rerenderAnonymous();
+    expect(anonymous.current).toBe(firstAnonymous);
   });
 
   it('reacts to a sign-out', async () => {

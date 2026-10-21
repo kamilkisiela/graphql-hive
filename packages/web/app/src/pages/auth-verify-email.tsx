@@ -41,6 +41,7 @@ function AuthVerifyEmail() {
   const search = verifyEmailRoute.useSearch();
   const { toast } = useToast();
   const session = useSession();
+  const userId = !session.loading && session.doesSessionExist ? session.userId : null;
   const navigate = useNavigate();
 
   const [sendEmailMutation, sendEmailImpl] = useMutation(SendVerificationEmailMutation);
@@ -48,12 +49,12 @@ function AuthVerifyEmail() {
 
   const sendEmail = useCallback(
     async (resend?: boolean) => {
-      if (session.loading || !session.doesSessionExist) return;
+      if (userId === null) return;
 
       const result = await sendEmailImpl(
         {
           input: {
-            userIdentityId: session.userId,
+            userIdentityId: userId,
             resend,
           },
         },
@@ -82,7 +83,7 @@ function AuthVerifyEmail() {
         });
       }
     },
-    [session, sendEmailImpl, toast],
+    [userId, sendEmailImpl, toast],
   );
 
   useEffect(() => {
