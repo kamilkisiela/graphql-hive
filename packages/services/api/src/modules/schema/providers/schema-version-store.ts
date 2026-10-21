@@ -1087,6 +1087,8 @@ export class SchemaVersionStore {
     args: {
       first: number | null;
       cursor: null | string;
+      withSDL: boolean;
+      withChanges: boolean;
     },
   ) {
     const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
@@ -1122,7 +1124,7 @@ export class SchemaVersionStore {
     // reads at most 2 * (limit + 1) rows instead of sorting every version of the target.
     const result = await this.pg.any(psql`/* getPaginatedSchemaVersionsForGraph */
       SELECT
-        ${schemaVersionSQLFields()}
+        ${schemaVersionSQLFields(psql``, args)}
       FROM (
         ${
           graph.isBackfilled
@@ -1718,7 +1720,10 @@ export class SchemaVersionStore {
   }
 }
 
-const schemaVersionSQLFields = (t = psql``) => psql`
+const schemaVersionSQLFields = (
+  t = psql``,
+  options: { withSDL?: boolean; withChanges?: boolean } = {},
+) => psql`
   ${t}"id"
   , ${t}"is_composable" as "isComposable"
   , to_json(${t}"created_at") as "createdAt"
@@ -1726,8 +1731,8 @@ const schemaVersionSQLFields = (t = psql``) => psql`
   , ${t}"base_schema" as "baseSchema"
   , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
   , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
-  , ${t}"composite_schema_sdl" as "compositeSchemaSDL"
-  , ${t}"supergraph_sdl" as "supergraphSDL"
+  , ${options.withSDL ? psql`${t}"composite_schema_sdl"` : psql`NULL`} as "compositeSchemaSDL"
+  , ${options.withSDL ? psql`${t}"supergraph_sdl"` : psql`NULL`} as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
@@ -1741,7 +1746,7 @@ const schemaVersionSQLFields = (t = psql``) => psql`
   , ${t}"target_id" as "targetId"
   , ${t}"origin"
   , ${t}"meta"
-  , ${t}"supergraph_changes" as "supergraphChanges"
+  , ${options.withChanges ? psql`${t}"supergraph_changes"` : psql`NULL`} as "supergraphChanges"
   , ${t}"graph_id" as "graphId"
   , ${t}"graph_metadata" as "graphMetadata"
   , ${t}"source_schema_version_id" as "sourceSchemaVersionId"

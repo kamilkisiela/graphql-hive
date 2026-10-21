@@ -454,12 +454,16 @@ export class SchemaManager {
     args: {
       first: number | null;
       cursor: null | string;
+      withSDL: boolean;
+      withChanges: boolean;
     },
   ) {
     const first = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
     const connection = await this.schemaVersions.getPaginatedSchemaVersionsForGraph(graph, {
       first,
       cursor: args.cursor,
+      withSDL: args.withSDL,
+      withChanges: args.withChanges,
     });
 
     return {
