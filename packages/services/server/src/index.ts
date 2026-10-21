@@ -56,8 +56,8 @@ import { OrganizationAccessTokenValidationCache } from '../../api/src/modules/au
 import { OrganizationAccessTokensCache } from '../../api/src/modules/organization/providers/organization-access-tokens-cache';
 import { TargetTokenCache } from '../../api/src/modules/token/providers/target-token-cache';
 import { internalApiRouter } from './api';
+import { CorsError } from './cors-error';
 import { env } from './environment';
-import { CorsError, handleRequestError } from './error-handler';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 import { createOtelAuthEndpoint } from './otel-auth-endpoint';
@@ -123,7 +123,6 @@ export async function main() {
     },
   );
 
-  server.setErrorHandler(handleRequestError);
   await server.register(cors, (_: unknown): FastifyCorsOptionsDelegateCallback => {
     return (req, callback) => {
       // For CLI user we do not have a origin
