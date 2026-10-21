@@ -3,6 +3,7 @@ import { OperationsManager } from '../../operations/providers/operations-manager
 import { Logger } from '../../shared/providers/logger';
 import { onlyDeprecatedDocumentNode } from '../lib/deprecated-graphql';
 import { extractSuperGraphInformation } from '../lib/federation-super-graph';
+import { isFieldRequestedDeep } from '../lib/is-field-requested';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from '../lib/unused-graphql';
 import { Contracts } from '../providers/contracts';
 import { SchemaManager } from '../providers/schema-manager';
@@ -19,8 +20,13 @@ export const SchemaVersion: SchemaVersionResolvers = {
   log: async (version, _, { injector }) => {
     return injector.get(SchemaVersionHelper).getGraphQLRegistryLogForSchemaVersion(version);
   },
-  schemas: (version, _, { injector }) => {
-    return injector.get(SchemaManager).getMaybeSchemasOfVersion(version);
+  schemas: (version, _, { injector }, info) => {
+    return injector.get(SchemaManager).getMaybeSchemasOfVersion(version, {
+      withSDL: isFieldRequestedDeep(info, [
+        ['SingleSchema', 'source'],
+        ['CompositeSchema', 'source'],
+      ]),
+    });
   },
   schemaCompositionErrors: async (version, _, { injector }) => {
     return injector.get(SchemaVersionHelper).getSchemaCompositionErrors(version);

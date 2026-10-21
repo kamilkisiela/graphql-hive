@@ -23,11 +23,16 @@ export const Target: Pick<
   | 'schemaVersions'
   | 'schemaVersionsCount'
 > = {
-  schemaVersions: async (target, args, { injector }) => {
+  schemaVersions: async (target, args, { injector }, info) => {
     const graph = await injector.get(GraphStore).getDefaultGraphForTargetId(target.id);
     return injector.get(SchemaManager).getPaginatedSchemaVersionsForGraph(graph, {
       cursor: args.after ?? null,
       first: args.first ?? null,
+      withSDL: isFieldRequestedDeep(info, [
+        ['SchemaVersion', 'sdl'],
+        ['SchemaVersion', 'supergraph'],
+      ]),
+      withChanges: isFieldRequestedDeep(info, [['SchemaVersion', 'supergraphChanges']]),
     });
   },
   async schemaVersion(target, args, { injector }) {

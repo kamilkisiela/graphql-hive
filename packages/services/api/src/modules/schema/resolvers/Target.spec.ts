@@ -1,5 +1,6 @@
 import { buildSchema, execute, parse, type GraphQLResolveInfo } from 'graphql';
 import { describe, expect, test } from 'vitest';
+import { isFieldRequestedDeep } from '../lib/is-field-requested';
 import { isSDLRequested } from './Target';
 
 // The part of the Hive schema the gate looks at: the interface declares schemaSDL,
@@ -10,6 +11,38 @@ const schema = buildSchema(/* GraphQL */ `
   }
   type Target {
     schemaCheck(id: ID!): SchemaCheck
+    schemaVersions: SchemaVersionConnection!
+  }
+  type SchemaVersionConnection {
+    edges: [SchemaVersionEdge!]!
+  }
+  type SchemaVersionEdge {
+    node: SchemaVersion!
+  }
+  type SchemaVersion {
+    id: ID!
+    sdl: String
+    supergraph: String
+    schemaChanges: [String!]
+    safeSchemaChanges: [String!]
+    supergraphChanges: [String!]
+    schemas: SchemaConnection!
+  }
+  type SchemaConnection {
+    edges: [SchemaEdge!]!
+  }
+  type SchemaEdge {
+    node: Schema!
+  }
+  union Schema = SingleSchema | CompositeSchema
+  type SingleSchema {
+    author: String!
+    source: String!
+  }
+  type CompositeSchema {
+    author: String!
+    source: String!
+    service: String
   }
   interface SchemaCheck {
     id: ID!
@@ -69,6 +102,27 @@ async function schemaCheckInfo(operation: string) {
   return info;
 }
 
+/** The resolve info Target.schemaVersions receives for the operation. */
+async function schemaVersionsInfo(operation: string) {
+  let info: GraphQLResolveInfo | undefined;
+  await execute({
+    schema,
+    document: parse(operation),
+    rootValue: {
+      target: {
+        schemaVersions(_args: unknown, _context: unknown, resolveInfo: GraphQLResolveInfo) {
+          info = resolveInfo;
+          return { edges: [] };
+        },
+      },
+    },
+  });
+  if (!info) {
+    throw new Error('schemaVersions was not resolved');
+  }
+  return info;
+}
+
 describe('isSDLRequested', () => {
   test('a field with no SDL does not request it', async () => {
     const info = await schemaCheckInfo('{ target { schemaCheck(id: "c") { id } } }');
@@ -105,5 +159,45 @@ describe('isSDLRequested', () => {
       fragment Failed on FailedSchemaCheck { supergraphSDL }
     `);
     expect(isSDLRequested(info)).toBe(true);
+  });
+});
+
+describe('schemaVersions selections', () => {
+  test('detects SDL and stored changes only when selected', async () => {
+    const basicInfo = await schemaVersionsInfo(
+      '{ target { schemaVersions { edges { node { id } } } } }',
+    );
+    const selectedInfo = await schemaVersionsInfo(`
+      { target { schemaVersions { edges { node { ...VersionDetails } } } } }
+      fragment VersionDetails on SchemaVersion { sdl supergraphChanges }
+    `);
+
+    expect(isFieldRequestedDeep(basicInfo, [['SchemaVersion', 'sdl']])).toBe(false);
+    expect(isFieldRequestedDeep(basicInfo, [['SchemaVersion', 'supergraphChanges']])).toBe(false);
+    expect(isFieldRequestedDeep(selectedInfo, [['SchemaVersion', 'sdl']])).toBe(true);
+    expect(isFieldRequestedDeep(selectedInfo, [['SchemaVersion', 'supergraphChanges']])).toBe(true);
+    expect(isFieldRequestedDeep(selectedInfo, [['SchemaVersion', 'safeSchemaChanges']])).toBe(
+      false,
+    );
+  });
+
+  test('detects schema SDL only when source is selected', async () => {
+    const metadataInfo = await schemaVersionsInfo(`
+      { target { schemaVersions { edges { node { schemas { edges { node {
+        ... on CompositeSchema { author service }
+      } } } } } } } }
+    `);
+    const sourceInfo = await schemaVersionsInfo(`
+      { target { schemaVersions { edges { node { schemas { edges { node {
+        ... on SingleSchema { source }
+      } } } } } } } }
+    `);
+    const sourceFields = [
+      ['SingleSchema', 'source'],
+      ['CompositeSchema', 'source'],
+    ] as const;
+
+    expect(isFieldRequestedDeep(metadataInfo, sourceFields)).toBe(false);
+    expect(isFieldRequestedDeep(sourceInfo, sourceFields)).toBe(true);
   });
 });
