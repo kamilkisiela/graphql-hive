@@ -49,7 +49,7 @@ export function prepareEnvironment(input: {
         replicas: isProduction || isStaging ? 3 : 1,
       },
       graphqlApi: {
-        replicas: isProduction ? 6 : isStaging ? 3 : 1,
+        replicas: isProduction ? 12 : isStaging ? 3 : 1,
       },
       envoy: {
         replicas: isProduction || isStaging ? 3 : 1,
