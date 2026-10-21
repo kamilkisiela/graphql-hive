@@ -11,8 +11,11 @@ import {
 import { isGraphQLError } from '@envelop/core';
 import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useGraphQLModules } from '@envelop/graphql-modules';
-import { useOpenTelemetry } from '@graphql-hive/plugin-opentelemetry';
-import { hive, trace } from '@graphql-hive/plugin-opentelemetry/api';
+import {
+  useOpenTelemetry,
+  type OpenTelemetryContextExtension,
+} from '@graphql-hive/plugin-opentelemetry';
+import { trace } from '@graphql-hive/plugin-opentelemetry/api';
 import { useHive } from '@graphql-hive/yoga';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
@@ -20,6 +23,7 @@ import { SuperTokensCookieBasedSession } from '@hive/api/modules/auth/lib/supert
 import { requestIdStorage, type TracingInstance } from '@hive/service-common';
 import { captureException, runWithAsyncContext, withScope } from '@sentry/node';
 import { AuthN, Session } from '../../api/src/modules/auth/lib/authz';
+import { authenticateRequest } from './authenticate-request';
 import type { HivePersistedDocumentsConfig, HiveUsageConfig } from './environment';
 import { useArmor } from './use-armor';
 
@@ -175,9 +179,17 @@ export function useHiveTracing(): Plugin {
         }) as Plugin,
       );
     },
-    onParams({ params: { variables }, context }) {
-      const otelCtx = hive.getOperationContext(context);
-      const operationSpan = otelCtx && trace.getSpan(otelCtx);
+    onContextBuilding({ context }) {
+      const otelCtx = (
+        context as Partial<OpenTelemetryContextExtension>
+      ).openTelemetry?.getOperationContext();
+
+      if (!otelCtx) {
+        return;
+      }
+
+      const operationSpan = trace.getSpan(otelCtx);
+      const variables = context.params?.variables;
 
       if (operationSpan && variables && typeof variables === 'object' && 'selector' in variables) {
         operationSpan?.setAttribute('hive.variables.selector', JSON.stringify(variables.selector));
@@ -195,7 +207,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         options.logger.error(err, 'Unexpected error occurred while handling exception.');
       }),
       useExtendContext(async context => ({
-        session: await options.authN.authenticate(context),
+        session: await authenticateRequest(options.authN, context),
       })),
       useHive({
         debug: true,

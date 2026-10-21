@@ -14,9 +14,22 @@ import { type OTELCollector } from './otel-collector';
 
 /**
  * Hive Gateway Docker Image Version
- * Bump this to update the used gateway version.
+ * Derived from the `@graphql-hive/gateway` version in `deployment/package.json`,
+ * so the deployed gateway matches the version the gateway config is typechecked against.
+ * Bump the dependency there to update the used gateway version.
  */
-const dockerImage = 'ghcr.io/graphql-hive/gateway:2.1.19';
+const gatewayVersion: string = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf-8'),
+).devDependencies['@graphql-hive/gateway'];
+
+// On global scope to fail early in case of a non-exact version (e.g. `^2.15.2`)
+if (!/^\d+\.\d+\.\d+$/.test(gatewayVersion)) {
+  throw new Error(
+    `Expected an exact '@graphql-hive/gateway' version in deployment/package.json, got '${gatewayVersion}'.`,
+  );
+}
+
+const dockerImage = `ghcr.io/graphql-hive/gateway:${gatewayVersion}`;
 
 const gatewayConfigDirectory = path.resolve(
   __dirname,

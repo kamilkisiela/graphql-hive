@@ -6,6 +6,7 @@ import { type Registry } from '@hive/api';
 import { type AuthN } from '@hive/api/modules/auth/lib/authz';
 import { requestIdStorage, TracingInstance } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
+import { authenticateRequest } from './authenticate-request';
 import { type HiveUsageConfig } from './environment';
 import { useHiveErrorHandler, useHiveTracing, type Context } from './graphql-handler';
 import { createPublicGraphQLSchema } from './public-graphql-schema';
@@ -39,7 +40,7 @@ export const createPublicGraphQLHandler = (
       useGraphQLModules(args.registry),
       useSchema(publicSchema),
       useExtendContext(async context => ({
-        session: await args.authN.authenticate(context),
+        session: await authenticateRequest(args.authN, context),
       })),
       useHiveErrorHandler(err => {
         args.logger.error(err, 'Unexpected error occurred while handling exception.');

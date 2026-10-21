@@ -3,6 +3,7 @@ import type { AuthN } from '@hive/api/modules/auth/lib/authz';
 import type { TargetsByIdCache } from '@hive/api/modules/target/providers/targets-by-id-cache';
 import type { TargetsBySlugCache } from '@hive/api/modules/target/providers/targets-by-slug-cache';
 import { isUUID } from '@hive/api/shared/is-uuid';
+import { authenticateRequest } from './authenticate-request';
 
 export function createOtelAuthEndpoint(args: {
   server: FastifyInstance;
@@ -33,7 +34,7 @@ export function createOtelAuthEndpoint(args: {
 
     const targetRef = targetRefParseResult.data;
 
-    const session = await args.authN.authenticate({ req, reply });
+    const session = await authenticateRequest(args.authN, { req, reply });
 
     const target = await (targetRef.kind === 'id'
       ? args.targetsByIdCache.get(targetRef.targetId)
