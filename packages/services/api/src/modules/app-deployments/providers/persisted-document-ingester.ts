@@ -21,7 +21,10 @@ import { sql as c_sql, ClickHouse } from '../../operations/providers/clickhouse-
 import { Logger } from '../../shared/providers/logger';
 import { S3Writer } from '../../shared/providers/s3-writer';
 import type { R2ErrorTraceSummary, S3WriteMetric } from '../../shared/providers/s3-writer';
-import type { SerializedWorkerError } from './persisted-document-scheduler';
+import {
+  PERSISTED_DOCUMENT_BATCH_TIMEOUT_MS,
+  type SerializedWorkerError,
+} from './persisted-document-scheduler';
 
 type DocumentRecord = {
   appDeploymentId: string;
@@ -430,12 +433,17 @@ export class PersistedDocumentIngester {
     }
 
     if (documents.length) {
-      await this.insertDocuments({
-        targetId: data.targetId,
-        appDeployment: data.appDeployment,
-        documents,
-        signal,
-      });
+      const deadline = withBatchDeadline(signal);
+      try {
+        await this.insertDocuments({
+          targetId: data.targetId,
+          appDeployment: data.appDeployment,
+          documents,
+          signal: deadline.signal,
+        });
+      } finally {
+        deadline.dispose();
+      }
     }
 
     return { type: 'success' as const };
@@ -485,8 +493,11 @@ export class PersistedDocumentIngester {
         document.schemaCoordinates,
         document.internalHash,
       ]),
-      timeout: 20_000,
       queryId: 'insert_app_deployment_documents',
+      // A batch is at most 100 rows and the caller waits for it. Written synchronously it costs
+      // only its own rows; in the async queue it was coalesced with other uploads and waited
+      // behind other tables' flushes.
+      mode: 'sync',
       signal: args.signal,
     });
 
@@ -611,6 +622,42 @@ export class PersistedDocumentIngester {
       signal.removeEventListener('abort', onAbort);
     }
   }
+}
+
+/**
+ * Batches processed by the worker are bounded by the scheduler. Preprocessed batches run on the
+ * main thread with only the request's signal, so the same budget is applied here.
+ */
+function withBatchDeadline(signal: AbortSignal): { signal: AbortSignal; dispose: () => void } {
+  const controller = new AbortController();
+  const onAbort = () => controller.abort(signal.reason);
+
+  if (signal.aborted) {
+    onAbort();
+  } else {
+    signal.addEventListener('abort', onAbort, { once: true });
+  }
+
+  const timer = setTimeout(() => {
+    controller.abort(
+      setErrorSource(
+        // got reports an abort whose reason is named TimeoutError as a timeout, so the storage
+        // spans record a deadline rather than a cancellation.
+        Object.assign(new Error('Timeout, persisted documents were not written within time.'), {
+          name: 'TimeoutError',
+        }),
+        'persisted-document-ingester',
+      ),
+    );
+  }, PERSISTED_DOCUMENT_BATCH_TIMEOUT_MS);
+
+  return {
+    signal: controller.signal,
+    dispose: () => {
+      clearTimeout(timer);
+      signal.removeEventListener('abort', onAbort);
+    },
+  };
 }
 
 function getOperationNames(query: DocumentNode): Array<string> {

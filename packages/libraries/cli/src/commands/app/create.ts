@@ -256,6 +256,7 @@ export default class AppCreate extends Command<typeof AppCreate> {
         const result = await this.registryApi(endpoint, accessToken).request({
           operation: AddDocumentsToAppDeploymentMutation,
           timeout: 55_000,
+          retry: { retries: 2 },
           variables: {
             input: {
               target,
