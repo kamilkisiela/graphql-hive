@@ -1,4 +1,5 @@
 import { password as seededPassword } from 'testkit/auth';
+import { pollFor } from 'testkit/flow';
 import { initSeed } from 'testkit/seed';
 import { getServiceHost } from 'testkit/utils';
 import * as emails from '../../../testkit/emails';
@@ -35,43 +36,52 @@ function resetPassword(token: string, password: string) {
 
 /** The reset email is sent by a background task, so it arrives shortly after the request answers. */
 async function waitForResetToken(email: string): Promise<string> {
-  const deadline = Date.now() + 20_000;
-  while (Date.now() < deadline) {
-    for (const message of await emails.history(email)) {
-      const token = message.body.match(/[?&](?:amp;)?token=([0-9a-f]+)/)?.[1];
-      if (token) {
-        return token;
+  let token: string | undefined;
+  await pollFor(
+    async () => {
+      for (const message of await emails.history(email)) {
+        token = message.body.match(/[?&](?:amp;)?token=([0-9a-f]+)/)?.[1];
+        if (token) {
+          return true;
+        }
       }
-    }
-    await new Promise(resolve => setTimeout(resolve, 500));
+      return false;
+    },
+    { maxWait: 20_000 },
+  );
+  if (!token) {
+    throw new Error(`No password reset email for ${email}`);
   }
-  throw new Error(`No password reset email for ${email}`);
+  return token;
 }
 
-test('an unknown reset token is refused', async () => {
+test.concurrent('an unknown reset token is refused', async ({ expect }) => {
   await expect(resetPassword('0'.repeat(64), 'Ilikebigturtles!47')).resolves.toEqual({
     status: 'RESET_PASSWORD_INVALID_TOKEN_ERROR',
   });
 });
 
-test('a reset token changes the password once and is refused afterwards', async () => {
-  const { ownerEmail } = await initSeed().createOwner();
-  const newPassword = 'Ilikebigturtles!47';
+test.concurrent(
+  'a reset token changes the password once and is refused afterwards',
+  async ({ expect }) => {
+    const { ownerEmail } = await initSeed().createOwner();
+    const newPassword = 'Ilikebigturtles!47';
 
-  await expect(
-    post('/auth-api/user/password/reset/token', {
-      formFields: [{ id: 'email', value: ownerEmail }],
-    }),
-  ).resolves.toEqual({ status: 'OK' });
-  const token = await waitForResetToken(ownerEmail);
+    await expect(
+      post('/auth-api/user/password/reset/token', {
+        formFields: [{ id: 'email', value: ownerEmail }],
+      }),
+    ).resolves.toEqual({ status: 'OK' });
+    const token = await waitForResetToken(ownerEmail);
 
-  await expect(resetPassword(token, newPassword)).resolves.toEqual({ status: 'OK' });
-  await expect(signIn(ownerEmail, seededPassword)).resolves.toMatchObject({
-    status: 'WRONG_CREDENTIALS_ERROR',
-  });
-  await expect(signIn(ownerEmail, newPassword)).resolves.toMatchObject({ status: 'OK' });
+    await expect(resetPassword(token, newPassword)).resolves.toEqual({ status: 'OK' });
+    await expect(signIn(ownerEmail, seededPassword)).resolves.toMatchObject({
+      status: 'WRONG_CREDENTIALS_ERROR',
+    });
+    await expect(signIn(ownerEmail, newPassword)).resolves.toMatchObject({ status: 'OK' });
 
-  await expect(resetPassword(token, 'Anotherturtle!48')).resolves.toEqual({
-    status: 'RESET_PASSWORD_INVALID_TOKEN_ERROR',
-  });
-});
+    await expect(resetPassword(token, 'Anotherturtle!48')).resolves.toEqual({
+      status: 'RESET_PASSWORD_INVALID_TOKEN_ERROR',
+    });
+  },
+);
