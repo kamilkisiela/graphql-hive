@@ -1,7 +1,11 @@
 import { buildSchema, execute, parse, type GraphQLResolveInfo } from 'graphql';
 import { describe, expect, test } from 'vitest';
 import { areOnlyFieldsRequested, isFieldRequestedDeep } from '../lib/graphql-info-helper';
-import { areSchemaCheckChangesRequested, isSDLRequested } from './Target';
+import {
+  areSchemaCheckChangesRequested,
+  isSchemaVersionSDLRequested,
+  isSDLRequested,
+} from './Target';
 
 // The part of the Hive schema the gate looks at: the interface declares schemaSDL,
 // previousSchemaSDL and baseline; the composite SDLs live on the concrete types only.
@@ -23,6 +27,9 @@ const schema = buildSchema(/* GraphQL */ `
     id: ID!
     sdl: String
     supergraph: String
+    explorer: String
+    unusedSchema: String
+    deprecatedSchema: String
     schemaChanges: [String!]
     safeSchemaChanges: [String!]
     supergraphChanges: [String!]
@@ -228,6 +235,17 @@ describe('schemaVersions selections', () => {
       false,
     );
   });
+
+  test.each(['sdl', 'supergraph', 'explorer', 'unusedSchema', 'deprecatedSchema'])(
+    'loads SDL when %s is selected',
+    async fieldName => {
+      const info = await schemaVersionsInfo(`
+        { target { schemaVersions { edges { node { ${fieldName} } } } } }
+      `);
+
+      expect(isSchemaVersionSDLRequested(info)).toBe(true);
+    },
+  );
 
   test('detects schema SDL only when source is selected', async () => {
     const metadataInfo = await schemaVersionsInfo(`

@@ -3,6 +3,7 @@ import { ContractsManager } from '../providers/contracts-manager';
 import { SchemaCheckManager } from '../providers/schema-check-manager';
 import { SchemaManager } from '../providers/schema-manager';
 import type { FailedSchemaCheckResolvers, SchemaVersion } from './../../../__generated__/types';
+import { isSchemaVersionSDLRequested } from './Target';
 
 export const FailedSchemaCheck: FailedSchemaCheckResolvers = {
   schemaVersion(schemaCheck, _, { injector }, info) {
@@ -17,10 +18,7 @@ export const FailedSchemaCheck: FailedSchemaCheckResolvers = {
     }
 
     return manager.getGraphQLSchemaVersion(schemaCheck, {
-      withSDL: isFieldRequestedDeep(info, [
-        ['SchemaVersion', 'sdl'],
-        ['SchemaVersion', 'supergraph'],
-      ]),
+      withSDL: isSchemaVersionSDLRequested(info),
       withChanges: isFieldRequestedDeep(info, [['SchemaVersion', 'supergraphChanges']]),
     });
   },

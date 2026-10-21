@@ -28,10 +28,7 @@ export const Target: Pick<
     return injector.get(SchemaManager).getPaginatedSchemaVersionsForGraph(graph, {
       cursor: args.after ?? null,
       first: args.first ?? null,
-      withSDL: isFieldRequestedDeep(info, [
-        ['SchemaVersion', 'sdl'],
-        ['SchemaVersion', 'supergraph'],
-      ]),
+      withSDL: isSchemaVersionSDLRequested(info),
       withChanges: isFieldRequestedDeep(info, [['SchemaVersion', 'supergraphChanges']]),
     });
   },
@@ -139,6 +136,15 @@ export function isSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0])
       fieldName => ['SchemaCheckBaseline', fieldName] as const,
     ),
   ]);
+}
+
+export function isSchemaVersionSDLRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
+  return isFieldRequestedDeep(
+    info,
+    ['sdl', 'supergraph', 'explorer', 'unusedSchema', 'deprecatedSchema'].map(
+      fieldName => ['SchemaVersion', fieldName] as const,
+    ),
+  );
 }
 
 export function areSchemaCheckChangesRequested(info: Parameters<typeof isFieldRequestedDeep>[0]) {
