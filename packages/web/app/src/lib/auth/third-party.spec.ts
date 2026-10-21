@@ -43,7 +43,10 @@ describe('third-party auth', () => {
       expect(location.assign).toHaveBeenCalledWith(
         'https://github.com/login/oauth/authorize?state=server-state&x=1',
       );
-      expect(sessionStorage.getItem('hive:auth-redirect')).toBe('/org/x');
+      expect(JSON.parse(sessionStorage.getItem('hive:auth-flow')!)).toEqual({
+        state: 'server-state',
+        redirectToPath: '/org/x',
+      });
       expect(document.cookie).toContain('last-used-auth-method=github');
     });
 
@@ -57,7 +60,10 @@ describe('third-party auth', () => {
         thirdPartyId: 'oidc',
         oidcId: 'integration-1',
       });
-      expect(sessionStorage.getItem('hive:auth-redirect')).toBe('/');
+      expect(JSON.parse(sessionStorage.getItem('hive:auth-flow')!)).toEqual({
+        state: null,
+        redirectToPath: '/',
+      });
     });
 
     it('refuses a provider that is not configured, without a request', async () => {
@@ -77,9 +83,13 @@ describe('third-party auth', () => {
   });
 
   describe('complete', () => {
-    it('forwards every callback parameter and hands back the stashed path once', async () => {
+    function stash(flow: { state: string | null; redirectToPath: string }) {
+      sessionStorage.setItem('hive:auth-flow', JSON.stringify(flow));
+    }
+
+    it('forwards every callback parameter and hands back the stashed path, once', async () => {
       location.search = '?code=c&state=s&iss=https%3A%2F%2Fidp&session_state=ss';
-      sessionStorage.setItem('hive:auth-redirect', '/org/x?tab=1');
+      stash({ state: 's', redirectToPath: '/org/x?tab=1' });
       api.thirdPartySignInUp.mockResolvedValue({ status: 'OK' });
 
       await expect(completeThirdPartyAuth('oidc')).resolves.toEqual({
@@ -92,30 +102,55 @@ describe('third-party auth', () => {
         redirectURIQueryParams: { code: 'c', state: 's', iss: 'https://idp', session_state: 'ss' },
       });
 
-      await expect(completeThirdPartyAuth('oidc')).resolves.toEqual({
-        status: 'OK',
-        redirectToPath: null,
-      });
+      // The flow is consumed: the same callback cannot be completed twice.
+      await expect(completeThirdPartyAuth('oidc')).rejects.toThrow('not started from this browser');
+      expect(api.thirdPartySignInUp).toHaveBeenCalledTimes(1);
+    });
+
+    it('refuses a callback whose state this browser did not ask for', async () => {
+      location.search = '?code=c&state=someone-elses';
+      stash({ state: 's', redirectToPath: '/' });
+      await expect(completeThirdPartyAuth('github')).rejects.toThrow(
+        'not started from this browser',
+      );
+      expect(api.thirdPartySignInUp).not.toHaveBeenCalled();
+
+      location.search = '?code=c&state=s';
+      await expect(completeThirdPartyAuth('github')).rejects.toThrow(
+        'not started from this browser',
+      );
+      expect(api.thirdPartySignInUp).not.toHaveBeenCalled();
     });
 
     it('drops a stashed path that does not stay in the app', async () => {
       location.search = '?code=c&state=s';
-      sessionStorage.setItem('hive:auth-redirect', 'https://evil.example/');
+      stash({ state: 's', redirectToPath: 'https://evil.example/' });
       api.thirdPartySignInUp.mockResolvedValue({ status: 'OK' });
       await expect(completeThirdPartyAuth('github')).resolves.toEqual({
         status: 'OK',
-        redirectToPath: null,
+        redirectToPath: '/',
       });
     });
 
-    it('reports a provider error before calling the server', async () => {
+    it('reports a provider error with fixed copy, before calling the server', async () => {
       location.search = '?error=access_denied&error_description=User+said+no&state=s';
-      await expect(completeThirdPartyAuth('github')).rejects.toThrow('User said no');
+      stash({ state: 's', redirectToPath: '/' });
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      await expect(completeThirdPartyAuth('github')).rejects.toThrow(
+        'The sign-in provider reported an error',
+      );
       expect(api.thirdPartySignInUp).not.toHaveBeenCalled();
+      expect(consoleError).toHaveBeenCalledWith(
+        'Sign-in provider error',
+        'access_denied',
+        'User said no',
+      );
+      consoleError.mockRestore();
     });
 
     it('passes a refusal through', async () => {
       location.search = '?code=c&state=s';
+      stash({ state: 's', redirectToPath: '/' });
       api.thirdPartySignInUp.mockResolvedValue({
         status: 'SIGN_IN_UP_NOT_ALLOWED',
         reason: 'Sign in not allowed.',

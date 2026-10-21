@@ -8,9 +8,11 @@ import {
 } from './api';
 import { updateLastAuthMethod } from './last-auth-method';
 
-// Where to go after the provider sends the user back. The round trip leaves the app, so it lives
-// in sessionStorage for the duration; a callback opened in another tab starts from `/`.
-const REDIRECT_PATH_KEY = 'hive:auth-redirect';
+// The flow this browser started: the server's `state` and where to go afterwards. The round trip
+// leaves the app, so it lives in sessionStorage; a callback opened in another tab has no flow.
+const FLOW_KEY = 'hive:auth-flow';
+
+type PendingFlow = { state: string | null; redirectToPath: string };
 
 function assertProviderEnabled(provider: ThirdPartyProvider) {
   if (!env.auth[provider]) {
@@ -23,19 +25,33 @@ function callbackUrl(provider: ThirdPartyProvider): string {
   return new URL(`/auth/callback/${provider}`, env.appBaseUrl).href;
 }
 
-function stashRedirectPath(redirectToPath: string | undefined) {
+function stashFlow(flow: PendingFlow) {
   try {
-    sessionStorage.setItem(REDIRECT_PATH_KEY, redirectToPath ?? '/');
+    sessionStorage.setItem(FLOW_KEY, JSON.stringify(flow));
   } catch {
-    // Storage can be unavailable; the callback then falls back to the route default.
+    // Storage can be unavailable; the callback is then refused and the user starts over.
   }
 }
 
-function takeRedirectPath(): string | null {
+function takeFlow(): PendingFlow | null {
   try {
-    const value = sessionStorage.getItem(REDIRECT_PATH_KEY);
-    sessionStorage.removeItem(REDIRECT_PATH_KEY);
-    return value !== null && isSafeRedirectPath(value) ? value : null;
+    const raw = sessionStorage.getItem(FLOW_KEY);
+    sessionStorage.removeItem(FLOW_KEY);
+    if (raw === null) {
+      return null;
+    }
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) {
+      return null;
+    }
+    const { state, redirectToPath } = parsed as Record<string, unknown>;
+    return {
+      state: typeof state === 'string' ? state : null,
+      redirectToPath:
+        typeof redirectToPath === 'string' && isSafeRedirectPath(redirectToPath)
+          ? redirectToPath
+          : '/',
+    };
   } catch {
     return null;
   }
@@ -56,13 +72,16 @@ export async function startThirdPartyAuth(
     redirectURIOnProviderDashboard: callbackUrl(provider),
     oidcId,
   });
-  stashRedirectPath(redirectToPath);
+  stashFlow({
+    state: new URL(result.urlWithQueryParams).searchParams.get('state'),
+    redirectToPath: redirectToPath ?? '/',
+  });
   updateLastAuthMethod(provider);
   window.location.assign(result.urlWithQueryParams);
 }
 
 export type ThirdPartyAuthCompletion =
-  | { status: 'OK'; redirectToPath: string | null }
+  | { status: 'OK'; redirectToPath: string }
   | Exclude<ThirdPartySignInUpResult, { status: 'OK' }>;
 
 /**
@@ -75,10 +94,24 @@ export async function completeThirdPartyAuth(
 ): Promise<ThirdPartyAuthCompletion> {
   assertProviderEnabled(provider);
   const params = Object.fromEntries(new URLSearchParams(window.location.search));
+  const flow = takeFlow();
   const providerError = params['error'];
   if (providerError !== undefined) {
-    // Reported before calling the server: the server's state record is single-use.
-    throw new Error(params['error_description'] ?? providerError);
+    // Reported before calling the server: the server's state record is single-use. The text is
+    // the provider's (or anyone's who crafted the link), so it is logged rather than shown.
+    console.error('Sign-in provider error', providerError, params['error_description']);
+    throw new Error('The sign-in provider reported an error. Please try again.');
+  }
+  // The callback must answer the sign-in this browser asked for. Without this check a link
+  // carrying someone else's code and state would sign this browser into their account.
+  const notStartedHere = new Error(
+    'This sign-in was not started from this browser. Please try again.',
+  );
+  if (flow === null) {
+    throw notStartedHere;
+  }
+  if (flow.state === null || params['state'] !== flow.state) {
+    throw notStartedHere;
   }
   const result = await thirdPartySignInUp({
     thirdPartyId: provider,
@@ -88,5 +121,5 @@ export async function completeThirdPartyAuth(
   if (result.status !== 'OK') {
     return result;
   }
-  return { status: 'OK', redirectToPath: takeRedirectPath() };
+  return { status: 'OK', redirectToPath: flow.redirectToPath };
 }

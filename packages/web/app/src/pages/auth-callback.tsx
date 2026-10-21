@@ -34,7 +34,7 @@ const providerDetailsMap: {
   },
 };
 
-function AuthCallback(props: { provider: ThirdPartyProvider; redirectToPath: string }) {
+function AuthCallback(props: { provider: ThirdPartyProvider }) {
   const router = useRouter();
   const auth = useQuery({
     gcTime: 0, // disabled caching
@@ -56,7 +56,7 @@ function AuthCallback(props: { provider: ThirdPartyProvider; redirectToPath: str
   if (auth.isSuccess) {
     if (auth.data.status === 'OK') {
       void router.navigate({
-        to: auth.data.redirectToPath ?? props.redirectToPath,
+        to: auth.data.redirectToPath,
       });
     } else {
       return <AuthCard title={providerDetails.failure} description={auth.data.reason} />;
@@ -71,11 +71,11 @@ function AuthCallback(props: { provider: ThirdPartyProvider; redirectToPath: str
   );
 }
 
-export function AuthCallbackPage(props: { provider: ThirdPartyProvider; redirectToPath: string }) {
+export function AuthCallbackPage(props: { provider: ThirdPartyProvider }) {
   return (
     <>
       <Meta title="Redirecting" />
-      <AuthCallback provider={props.provider} redirectToPath={props.redirectToPath} />
+      <AuthCallback provider={props.provider} />
     </>
   );
 }

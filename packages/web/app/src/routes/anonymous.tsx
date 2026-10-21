@@ -113,10 +113,10 @@ export const authCallbackRoute = createRoute({
     return AuthSharedSearch.parse(search);
   },
   component() {
-    const { redirectToPath } = authCallbackRoute.useSearch();
     const params = authCallbackRoute.useParams();
     const { provider } = AuthCallbackRouteParams.parse(params);
-    return AuthCallbackPage({ provider, redirectToPath });
+    // Where to go next was stashed when the flow started; the search param is only tolerated.
+    return AuthCallbackPage({ provider });
   },
 });
 
