@@ -1776,7 +1776,7 @@ const schemaVersionSQLFields = (
   , ${t}"base_schema" as "baseSchema"
   , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
   , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
-  , ${options.withSDL !== false} as "hasLoadedSDL"
+  , ${options.withSDL !== false}::boolean as "hasLoadedSDL"
   , ${options.withSDL ? psql`${t}"composite_schema_sdl"` : psql`NULL`} as "compositeSchemaSDL"
   , ${options.withSDL ? psql`${t}"supergraph_sdl"` : psql`NULL`} as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
