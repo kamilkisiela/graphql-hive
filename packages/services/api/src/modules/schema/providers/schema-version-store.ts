@@ -857,6 +857,8 @@ export class SchemaVersionStore {
     args: {
       first: number | null;
       cursor: string | null;
+      withSchemaChanges: boolean;
+      withSDL: boolean;
     },
   ) {
     let cursor: null | {
@@ -872,7 +874,7 @@ export class SchemaVersionStore {
 
     const query = psql`/* getPaginatedSchemaVersionsForTargetId */
       SELECT
-        ${schemaVersionSQLFields()}
+        ${schemaVersionSQLFields(psql``, args)}
       FROM
         "schema_versions"
       WHERE
@@ -1450,7 +1452,10 @@ export class SchemaVersionStore {
   }
 }
 
-const schemaVersionSQLFields = (t = psql``) => psql`
+export const schemaVersionSQLFields = (
+  t = psql``,
+  options: { withSchemaChanges?: boolean; withSDL?: boolean } = {},
+) => psql`
   ${t}"id"
   , ${t}"is_composable" as "isComposable"
   , to_json(${t}"created_at") as "createdAt"
@@ -1458,8 +1463,8 @@ const schemaVersionSQLFields = (t = psql``) => psql`
   , ${t}"base_schema" as "baseSchema"
   , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
   , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
-  , ${t}"composite_schema_sdl" as "compositeSchemaSDL"
-  , ${t}"supergraph_sdl" as "supergraphSDL"
+  , ${options.withSDL === false ? psql`NULL` : psql`${t}"composite_schema_sdl"`} as "compositeSchemaSDL"
+  , ${options.withSDL === false ? psql`NULL` : psql`${t}"supergraph_sdl"`} as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
@@ -1467,13 +1472,17 @@ const schemaVersionSQLFields = (t = psql``) => psql`
   , ${t}"record_version" as "recordVersion"
   , ${t}"tags"
   , ${t}"has_contract_composition_errors" as "hasContractCompositionErrors"
-  , ${t}"conditional_breaking_change_metadata" as "conditionalBreakingChangeMetadata"
+  , ${
+    options.withSchemaChanges === false
+      ? psql`NULL`
+      : psql`${t}"conditional_breaking_change_metadata"`
+  } as "conditionalBreakingChangeMetadata"
   , ${t}"schema_metadata" as "schemaMetadata"
   , ${t}"metadata_attributes" as "metadataAttributes"
   , ${t}"target_id" as "targetId"
   , ${t}"origin"
   , ${t}"meta"
-  , ${t}"supergraph_changes" as "supergraphChanges"
+  , ${options.withSchemaChanges === false ? psql`NULL` : psql`${t}"supergraph_changes"`} as "supergraphChanges"
 `;
 
 const schemaLogFields = (prefix = psql``) => psql`

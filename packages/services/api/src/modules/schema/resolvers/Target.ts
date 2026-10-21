@@ -23,10 +23,26 @@ export const Target: Pick<
   | 'schemaVersions'
   | 'schemaVersionsCount'
 > = {
-  schemaVersions: async (target, args, { injector }) => {
+  schemaVersions: async (target, args, { injector }, info) => {
+    const withSchemaChanges = isFieldRequestedDeep(info, [
+      ['SchemaVersion', 'hasSchemaChanges'],
+      ['SchemaVersion', 'schemaChanges'],
+      ['SchemaVersion', 'breakingSchemaChanges'],
+      ['SchemaVersion', 'safeSchemaChanges'],
+    ]);
+    const withSDL = isFieldRequestedDeep(info, [
+      ['SchemaVersion', 'sdl'],
+      ['SchemaVersion', 'supergraph'],
+      ['SchemaVersion', 'explorer'],
+      ['SchemaVersion', 'unusedSchema'],
+      ['SchemaVersion', 'deprecatedSchema'],
+    ]);
+
     return injector.get(SchemaManager).getPaginatedSchemaVersionsForTargetId(target, {
       cursor: args.after ?? null,
       first: args.first ?? null,
+      withSchemaChanges,
+      withSDL,
     });
   },
   schemaVersion: async (target, args, { injector }) => {

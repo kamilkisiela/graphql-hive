@@ -429,6 +429,8 @@ export class SchemaManager {
     args: {
       first: number | null;
       cursor: null | string;
+      withSchemaChanges: boolean;
+      withSDL: boolean;
     },
   ) {
     const connection = await this.schemaVersions.getPaginatedSchemaVersionsForTarget(target, args);
