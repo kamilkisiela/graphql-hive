@@ -30,11 +30,7 @@ export const urqlClient = createClient({
     cacheExchange(cacheOptions),
     networkStatusExchange,
     authExchange(async () => {
-      let action:
-        | { type: 'NEEDS_REFRESH' | 'VERIFY_EMAIL' | 'UNAUTHENTICATED' }
-        | { type: 'NEEDS_OIDC'; organizationSlug: string; oidcIntegrationId: string } = {
-        type: 'UNAUTHENTICATED',
-      };
+      let action: 'NEEDS_REFRESH' | 'UNAUTHENTICATED' | 'REDIRECTED' = 'UNAUTHENTICATED';
 
       return {
         addAuthToOperation(operation) {
@@ -44,43 +40,43 @@ export const urqlClient = createClient({
           return false;
         },
         didAuthError(error) {
-          if (error.graphQLErrors.some(e => e.extensions?.code === 'UNAUTHENTICATED')) {
-            action = { type: 'UNAUTHENTICATED' };
+          const codes = error.graphQLErrors.map(e => e.extensions?.code);
+          if (codes.includes('UNAUTHENTICATED')) {
+            action = 'UNAUTHENTICATED';
             return true;
           }
 
-          if (error.graphQLErrors.some(e => e.extensions?.code === 'VERIFY_EMAIL')) {
-            action = { type: 'VERIFY_EMAIL' };
-            return true;
-          }
-
-          if (error.graphQLErrors.some(e => e.extensions?.code === 'NEEDS_REFRESH')) {
-            action = { type: 'NEEDS_REFRESH' };
+          // The two redirects happen here rather than in refreshAuth: an operation re-sent after
+          // a refresh is never refreshed again, but its answer must still send the user on.
+          if (codes.includes('VERIFY_EMAIL')) {
+            action = 'REDIRECTED';
+            window.location.assign('/auth/verify-email');
             return true;
           }
 
           const oidcError = error.graphQLErrors.find(e => e.extensions?.code === 'NEEDS_OIDC');
           if (oidcError) {
-            action = {
-              type: 'NEEDS_OIDC',
-              organizationSlug: oidcError.extensions?.organizationSlug as string,
-              oidcIntegrationId: oidcError.extensions?.oidcIntegrationId as string,
-            };
+            action = 'REDIRECTED';
+            const organizationSlug = oidcError.extensions?.organizationSlug as string;
+            const oidcIntegrationId = oidcError.extensions?.oidcIntegrationId as string;
+            window.location.assign(
+              `/${organizationSlug}/oidc-request?id=${oidcIntegrationId}&redirectToPath=${encodeURIComponent(window.location.pathname)}`,
+            );
+            return true;
+          }
+
+          if (codes.includes('NEEDS_REFRESH')) {
+            action = 'NEEDS_REFRESH';
             return true;
           }
 
           return false;
         },
         async refreshAuth() {
-          if (action.type === 'VERIFY_EMAIL') {
-            window.location.href = '/auth/verify-email';
+          if (action === 'REDIRECTED') {
             return;
           }
-          if (action.type === 'NEEDS_OIDC') {
-            window.location.href = `/${action.organizationSlug}/oidc-request?id=${action.oidcIntegrationId}&redirectToPath=${encodeURIComponent(window.location.pathname)}`;
-            return;
-          }
-          if (action.type === 'NEEDS_REFRESH') {
+          if (action === 'NEEDS_REFRESH') {
             let refreshed: boolean;
             try {
               refreshed = await attemptRefreshingSession();
@@ -96,7 +92,9 @@ export const urqlClient = createClient({
             }
           }
           await signOut();
-          window.location.href = `/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`;
+          window.location.assign(
+            `/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`,
+          );
         },
       };
     }),
