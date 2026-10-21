@@ -117,6 +117,8 @@ export function deployWorkflows({
     )
     .allowExternal(deployment, clickhouse.secret.raw.host, clickhouse.secret.raw.port)
     .allowExternal(deployment, 'https://api.postmarkapp.com')
+    // Slack metric-alert notifications
+    .allowExternal(deployment, 'https://slack.com')
     .allowExternal(deployment, heartbeat)
     .allowInCluster(deployment, redis.deployment)
     .allowInCluster(deployment, schema.deployment)

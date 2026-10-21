@@ -101,6 +101,16 @@ export function deployGraphQL({
     bypassRateLimitKey: supertokensConfig.requireSecret('bypassRateLimitKey'),
   });
 
+  // OAuth sign-in (GitHub, Google, Okta, organization OIDC) goes through the request broker when
+  // enabled. Also controls the egress rules below.
+  const requestBrokerEnabled = false;
+
+  const hiveTracingEndpoint = environment.isProduction
+    ? 'https://api.graphql-hive.com/otel/v1/traces'
+    : environment.isStaging
+      ? 'https://api.hiveready.dev/otel/v1/traces'
+      : 'https://api.buzzcheck.dev/otel/v1/traces';
+
   const { deployment, service } = new ServiceDeployment(
     'graphql-api',
     {
@@ -130,7 +140,7 @@ export function deployGraphQL({
         LOG_LEVEL: 'info',
         SENTRY: sentry.enabled ? '1' : '0',
         REQUEST_LOGGING: '1',
-        REQUEST_BROKER: '0',
+        REQUEST_BROKER: requestBrokerEnabled ? '1' : '0',
         COMMERCE_ENDPOINT: serviceLocalEndpoint(commerce.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
         SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),
@@ -142,11 +152,7 @@ export function deployGraphQL({
         HIVE_USAGE_ENDPOINT: serviceLocalEndpoint(usage.service),
         HIVE_FIELD_USAGE_ENABLED: '1',
         HIVE_TRACING: '1',
-        HIVE_TRACING_ENDPOINT: environment.isProduction
-          ? 'https://api.graphql-hive.com/otel/v1/traces'
-          : environment.isStaging
-            ? 'https://api.hiveready.dev/otel/v1/traces'
-            : 'https://api.buzzcheck.dev/otel/v1/traces',
+        HIVE_TRACING_ENDPOINT: hiveTracingEndpoint,
         HIVE_PERSISTED_DOCUMENTS: '1',
         ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
         ...(zendesk.baseUrl ? { ZENDESK_BASE_URL: zendesk.baseUrl } : {}),
@@ -254,15 +260,11 @@ export function deployGraphQL({
     .allowExternal(deployment, s3Mirror.secret.raw.endpoint)
     .allowExternal(deployment, s3AuditLog.secret.raw.endpoint)
     .allowExternal(deployment, cdn.secret.raw.baseUrl)
-    // REQUEST_BROKER_ENDPOINT
-    .allowExternal(deployment, broker.secret.raw.baseUrl)
-    // HIVE_TRACING_ENDPOINT (self-reporting through Cloudflare)
-    .allowExternal(deployment, `https://${environment.apiDns}`)
+    .allowExternal(deployment, hiveTracingEndpoint)
+    .allowExternal(deployment, apiEnv.HIVE_PERSISTED_DOCUMENTS_CDN_ENDPOINT)
+    // GitHub App (Octokit)
     .allowExternal(deployment, 'https://api.github.com')
-    .allowExternal(deployment, 'https://github.com')
-    .allowExternal(deployment, 'https://accounts.google.com')
-    .allowExternal(deployment, 'https://oauth2.googleapis.com')
-    .allowExternal(deployment, 'https://www.googleapis.com')
+    // Slack alerts
     .allowExternal(deployment, 'https://slack.com')
     .allowExternal(deployment, zendesk.baseUrl)
     .allowInCluster(deployment, commerce.deployment)
@@ -270,10 +272,22 @@ export function deployGraphQL({
     .allowInCluster(deployment, schemaPolicy.deployment)
     .allowInCluster(deployment, usage.deployment)
     .allowInCluster(deployment, redis.deployment)
-    // Calls user-provided URLs (OIDC providers, alert webhooks).
+    // Calls user-provided URLs directly: Discord / MS Teams alert webhooks, and organization OIDC
+    // providers when the request broker is disabled.
     .allowAnyExternal(deployment)
     .allowExternal(deployment, sentry.secret?.raw.dsn)
     .allowInCluster(deployment, observability.observability?.otlpCollectorService);
+
+  if (requestBrokerEnabled) {
+    egressManager?.allowExternal(deployment, broker.secret.raw.baseUrl);
+  } else {
+    // OAuth sign-in, called directly
+    egressManager
+      ?.allowExternal(deployment, 'https://github.com')
+      .allowExternal(deployment, 'https://oauth2.googleapis.com')
+      .allowExternal(deployment, 'https://www.googleapis.com')
+      .allowExternal(deployment, apiEnv.AUTH_OKTA === '1' ? apiEnv.AUTH_OKTA_ENDPOINT : null);
+  }
 
   return { deployment, service };
 }

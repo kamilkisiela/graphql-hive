@@ -122,7 +122,12 @@ export function deployUsage({
     .allowInCluster(deployment, redis.deployment)
     .allowInCluster(deployment, commerce.deployment)
     .allowExternal(deployment, sentry.secret?.raw.dsn)
-    .allowInCluster(deployment, observability.observability?.otlpCollectorService);
+    .allowInCluster(
+      deployment,
+      observability.enabledForUsageService
+        ? observability.observability?.otlpCollectorService
+        : null,
+    );
 
   return { deployment, service };
 }

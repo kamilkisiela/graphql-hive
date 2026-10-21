@@ -87,7 +87,11 @@ export function deployApp({
     .deploy();
 
   egressManager
-    ?.allowInCluster(deployment, graphql.deployment)
+    // GRAPHQL_PUBLIC_ENDPOINT: the server-side calls (Slack / GitHub callbacks, lab) use the public
+    // endpoint, not SERVER_ENDPOINT.
+    ?.allowExternal(deployment, `https://${environment.appDns}`)
+    // Slack OAuth token exchange (/api/slack/callback)
+    .allowExternal(deployment, 'https://slack.com')
     .allowExternal(deployment, sentry.secret?.raw.dsn);
 
   return { deployment, service };
