@@ -35,7 +35,10 @@ export default gql`
 
   extend schema
     @link(url: "https://specs.apollo.dev/link/v1.0")
-    @link(url: "https://specs.apollo.dev/federation/v2.9", import: ["@tag", "@composeDirective"])
+    @link(
+      url: "https://specs.apollo.dev/federation/v2.9"
+      import: ["@tag", "@composeDirective", "@listSize", "@cost"]
+    )
     @link(url: "https://github.com/graphql/graphql-spec/pull/825/v0.1", import: ["@oneOf"])
     @composeDirective(name: "@oneOf")
 
@@ -43,6 +46,17 @@ export default gql`
 
   directive @link(url: String!, import: [String!]) repeatable on SCHEMA
   directive @composeDirective(name: String!) repeatable on SCHEMA
+
+  directive @listSize(
+    assumedSize: Int
+    slicingArguments: [String!]
+    sizedFields: [String!]
+    requireOneSlicingArgument: Boolean = true
+  ) on FIELD_DEFINITION
+
+  directive @cost(
+    weight: Int!
+  ) on ARGUMENT_DEFINITION | ENUM | FIELD_DEFINITION | INPUT_FIELD_DEFINITION | OBJECT | SCALAR
 
   directive @tag(
     name: String!
