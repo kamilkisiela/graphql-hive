@@ -15,29 +15,32 @@ vi.mock('@/lib/urql', () => {
   throw new Error('the router module must not import @/lib/urql');
 });
 
-const superTokensInit = vi.hoisted(() => vi.fn());
-vi.mock('supertokens-auth-react', async importOriginal => ({
-  ...(await importOriginal<typeof import('supertokens-auth-react')>()),
-  default: { init: superTokensInit },
-}));
-
 const sentryInit = vi.hoisted(() => vi.fn());
 vi.mock('@sentry/react', async importOriginal => ({
   ...(await importOriginal<typeof import('@sentry/react')>()),
   init: sentryInit,
 }));
 
+// The dynamic import below is cached across the cases, so the stub has to be in place before the first one.
+const fetchSpy = vi.fn();
+beforeAll(() => {
+  vi.stubGlobal('fetch', fetchSpy);
+});
+afterAll(() => {
+  vi.unstubAllGlobals();
+});
+
 describe('router module', () => {
   it(
-    'can be imported without initializing SuperTokens or Sentry',
+    'can be imported without initializing Sentry or touching the network',
     { timeout: 30_000 },
     async () => {
       const { createAppRouter } = await import('./router');
       const router = createAppRouter({ urqlClient: createTestClient() });
 
       expect(router.routeTree).toBeDefined();
-      expect(superTokensInit).not.toHaveBeenCalled();
       expect(sentryInit).not.toHaveBeenCalled();
+      expect(fetchSpy).not.toHaveBeenCalled();
     },
   );
 

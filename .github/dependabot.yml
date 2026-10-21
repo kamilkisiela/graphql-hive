@@ -44,11 +44,6 @@ updates:
         patterns:
           - '@trpc/'
           - 'trpc'
-      supertokens:
-        patterns:
-          - 'supertokens'
-          - '@supertokens/*'
-          - 'supertokens-*'
       graphql-codegen:
         patterns:
           - '@graphql-codegen/*'
