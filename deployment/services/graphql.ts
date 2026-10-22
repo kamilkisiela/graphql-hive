@@ -103,7 +103,7 @@ export function deployGraphQL({
 
   // OAuth sign-in (GitHub, Google, Okta, organization OIDC) goes through the request broker when
   // enabled. Also controls the egress rules below.
-  const requestBrokerEnabled = false;
+  const requestBrokerEnabled = true;
 
   const hiveTracingEndpoint = environment.isProduction
     ? 'https://api.graphql-hive.com/otel/v1/traces'
