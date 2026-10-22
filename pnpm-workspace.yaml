@@ -96,7 +96,7 @@ catalog:
   typescript: 5.7.3
   undici: 7.30.0
   vite-tsconfig-paths: 5.1.4
-  vitest: 4.1.11
+  vitest: 4.1.12
   ws: 8.22.0
   zod-validation-error: 3.4.0
   graphql-ws: 6.0.6
