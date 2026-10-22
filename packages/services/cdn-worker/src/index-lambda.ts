@@ -1,25 +1,49 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { z } from 'zod';
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
-import { AwsClient } from './aws';
+import { AwsClient, type AwsCredentials } from './aws';
 import { createIsAppDeploymentActive } from './is-app-deployment-active';
 import { createIsKeyValid } from './key-validation';
 
 const env = z
   .object({
-    AWS_S3_ACCESS_KEY_ID: z.string(),
-    AWS_S3_ACCESSS_KEY_SECRET: z.string(),
+    AWS_S3_IAM_AUTH_ENABLED: z.enum(['0', '1']).default('0'),
+    AWS_S3_ACCESS_KEY_ID: z.string().optional(),
+    AWS_S3_ACCESSS_KEY_SECRET: z.string().optional(),
     AWS_S3_ENDPOINT: z.string(),
     AWS_S3_BUCKET_NAME: z.string(),
   })
   .parse((globalThis as any).process.env);
 
-const s3 = {
-  client: new AwsClient({
+let getCredentials: () => Promise<AwsCredentials>;
+
+if (env.AWS_S3_IAM_AUTH_ENABLED === '1') {
+  getCredentials = fromNodeProviderChain();
+} else {
+  if (!env.AWS_S3_ACCESS_KEY_ID || !env.AWS_S3_ACCESSS_KEY_SECRET) {
+    throw new Error(
+      'AWS_S3_ACCESS_KEY_ID and AWS_S3_ACCESSS_KEY_SECRET are required when AWS_S3_IAM_AUTH_ENABLED is false',
+    );
+  }
+
+  const credentials: AwsCredentials = {
     accessKeyId: env.AWS_S3_ACCESS_KEY_ID,
     secretAccessKey: env.AWS_S3_ACCESSS_KEY_SECRET,
+  };
+
+  getCredentials = async () => {
+    return credentials;
+  };
+}
+
+const s3 = {
+  client: new AwsClient({
+    credentialProvider: {
+      getCredentials,
+    },
     service: 's3',
   }),
   endpoint: env.AWS_S3_ENDPOINT,

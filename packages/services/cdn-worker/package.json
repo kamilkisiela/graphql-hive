@@ -17,6 +17,7 @@
     "graphql": "^16.0.0"
   },
   "devDependencies": {
+    "@aws-sdk/credential-providers": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@hive/service-common": "workspace:*",
     "@types/service-worker-mock": "catalog:",

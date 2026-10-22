@@ -1508,6 +1508,9 @@ importers:
 
   packages/services/cdn-worker:
     devDependencies:
+      '@aws-sdk/credential-providers':
+        specifier: 'catalog:'
+        version: 3.1035.0
       '@cloudflare/workers-types':
         specifier: 'catalog:'
         version: 4.20250913.0
