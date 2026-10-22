@@ -34,11 +34,15 @@ test('increase the defaultBytesPerOperation estimation by 5% when over 100 calls
     limitInBytes: eventHubLimitInBytes,
     useEstimator: true,
     onRetry,
+    onDrop: vi.fn(),
     isTooLargePayloadError() {
       return true;
     },
     calculateReportSize(report) {
       return report.size;
+    },
+    isSplittable(report) {
+      return report.size > 1;
     },
     split(report, numOfChunks) {
       const reports: Array<{
@@ -159,7 +163,11 @@ test('buffer should split the report into multiple reports when the estimated si
     calculateReportSize(report) {
       return report.size;
     },
+    isSplittable(report) {
+      return report.size > 1;
+    },
     onRetry() {},
+    onDrop: vi.fn(),
     split(report, numOfChunks) {
       const reports: Array<{
         id: string;
@@ -224,8 +232,9 @@ test('buffer should split the report into multiple reports when the estimated si
   await buffer.stop();
 });
 
-test('buffer should not recursively split a report that cannot get smaller', async () => {
-  const split = vi.fn((report: { size: number }) => [{ size: 0 }, report]);
+test('buffer drops a report immediately when it cannot be split any smaller', async () => {
+  const split = vi.fn((report: { size: number }) => [report]);
+  const onDrop = vi.fn();
   const buffer = createKVBuffer<{ size: number }>({
     logger: { info: vi.fn(), error: vi.fn() } as any,
     size: 1,
@@ -233,8 +242,12 @@ test('buffer should not recursively split a report that cannot get smaller', asy
     limitInBytes: 100,
     useEstimator: true,
     calculateReportSize: report => report.size,
+    // Simulates a report that is already at the irreducible floor (e.g. a single
+    // operation shape) - splitting it further would be a no-op.
+    isSplittable: () => false,
     split,
-    onRetry() {},
+    onRetry: vi.fn(),
+    onDrop,
     isTooLargePayloadError() {
       return false;
     },
@@ -243,13 +256,173 @@ test('buffer should not recursively split a report that cannot get smaller', asy
     },
   });
 
-  // The first flush teaches the estimator that one unit exceeds the byte limit.
   buffer.add({ size: 1 });
   await buffer.stop();
 
-  expect(() => buffer.add({ size: 1 })).not.toThrow();
+  expect(split).not.toHaveBeenCalled();
+  expect(onDrop).toHaveBeenCalledTimes(1);
+});
+
+test('buffer keeps splitting across multiple rounds until every piece fits or is irreducible', async () => {
+  const split = vi.fn((report: { id: string; size: number }, numOfChunks: number) => {
+    const pieces: Array<{ id: string; size: number }> = [];
+    for (let i = 0; i < numOfChunks; i++) {
+      pieces.push({
+        id: `${report.id}-${i}`,
+        size: calculateChunkSize(report.size, numOfChunks, i),
+      });
+    }
+    return pieces;
+  });
+  const onDrop = vi.fn();
+  const buffer = createKVBuffer<{ id: string; size: number }>({
+    logger: { info: vi.fn(), error: vi.fn() } as any,
+    size: 10,
+    interval: 60_000,
+    limitInBytes: 100,
+    useEstimator: true,
+    calculateReportSize: report => report.size,
+    isSplittable: report => report.size > 1,
+    split,
+    onRetry: vi.fn(),
+    onDrop,
+    isTooLargePayloadError() {
+      return false;
+    },
+    async sender(reports, _estimatedBytes, _batchId, validateSize) {
+      const totalSize = reports.reduce((sum, report) => sum + report.size, 0);
+      // Only a group whose total size has been reduced to 1 fits; anything bigger
+      // reports as oversized, forcing another round of splitting.
+      validateSize(totalSize > 1 ? totalSize * 60 : 50);
+    },
+  });
+
+  buffer.add({ id: 'root', size: 10 });
   await buffer.stop();
-  expect(split.mock.calls.length).toBeLessThan(10);
+
+  // 1 top-level split (10 -> 6 pieces of size 1/1/2/2/2/2) plus a second round for
+  // each size-2 piece that is still oversized (4 more splits) - more than one round.
+  expect(split.mock.calls.length).toBeGreaterThan(1);
+  expect(onDrop).not.toHaveBeenCalled();
+});
+
+test('buffer redistributes whole reports before splitting any individual report internals', async () => {
+  const split = vi.fn((report: { id: string; size: number }) => [report]);
+  const onDrop = vi.fn();
+  const buffer = createKVBuffer<{ id: string; size: number }>({
+    logger: { info: vi.fn(), error: vi.fn() } as any,
+    size: 100,
+    interval: 60_000,
+    limitInBytes: 100,
+    useEstimator: true,
+    calculateReportSize: report => report.size,
+    isSplittable: report => report.size > 1,
+    split,
+    onRetry: vi.fn(),
+    onDrop,
+    isTooLargePayloadError() {
+      return false;
+    },
+    async sender(reports, _estimatedBytes, _batchId, validateSize) {
+      const totalSize = reports.reduce((sum, report) => sum + report.size, 0);
+      validateSize(totalSize > 1 ? totalSize * 60 : 50);
+    },
+  });
+
+  buffer.add({ id: 'a', size: 1 });
+  buffer.add({ id: 'b', size: 1 });
+  buffer.add({ id: 'c', size: 1 });
+  await buffer.stop();
+
+  // Redistributing the 3 whole reports into smaller groups resolves the overflow -
+  // no individual report ever needs its internals split.
+  expect(split).not.toHaveBeenCalled();
+  expect(onDrop).not.toHaveBeenCalled();
+});
+
+test('buffer skips empty groups when redistributing more chunks than reports', async () => {
+  const sender = vi.fn(
+    async (
+      reports: readonly { id: string; size: number }[],
+      _estimatedBytes: number,
+      _batchId: string,
+      validateSize: (bytes: number) => void,
+    ) => {
+      validateSize(reports.length > 1 ? 500 : 50);
+    },
+  );
+  const onDrop = vi.fn();
+  const buffer = createKVBuffer<{ id: string; size: number }>({
+    logger: { info: vi.fn(), error: vi.fn() } as any,
+    size: 100,
+    interval: 60_000,
+    limitInBytes: 100,
+    useEstimator: true,
+    calculateReportSize: () => 1,
+    isSplittable: () => false,
+    split: report => [report],
+    onRetry: vi.fn(),
+    onDrop,
+    isTooLargePayloadError() {
+      return false;
+    },
+    sender,
+  });
+
+  buffer.add({ id: 'a', size: 1 });
+  buffer.add({ id: 'b', size: 1 });
+  await buffer.stop();
+
+  // 1 initial (oversized) call + exactly the non-empty retry groups - never a call
+  // with an empty array, even though numOfChunks (5) exceeds the report count (2).
+  expect(sender).toHaveBeenCalledTimes(3);
+  for (const call of sender.mock.calls) {
+    expect(call[0].length).toBeGreaterThan(0);
+  }
+  expect(onDrop).not.toHaveBeenCalled();
+});
+
+test('buffer isolates a disproportionately large report via regrouping before splitting its internals', async () => {
+  const split = vi.fn((report: { id: string; size: number }, numOfChunks: number) => {
+    const pieces: Array<{ id: string; size: number }> = [];
+    for (let i = 0; i < numOfChunks; i++) {
+      pieces.push({
+        id: `${report.id}-${i}`,
+        size: calculateChunkSize(report.size, numOfChunks, i),
+      });
+    }
+    return pieces;
+  });
+  const onDrop = vi.fn();
+  const buffer = createKVBuffer<{ id: string; size: number }>({
+    logger: { info: vi.fn(), error: vi.fn() } as any,
+    size: 100,
+    interval: 60_000,
+    limitInBytes: 100,
+    useEstimator: true,
+    calculateReportSize: report => report.size,
+    isSplittable: report => report.size > 1,
+    split,
+    onRetry: vi.fn(),
+    onDrop,
+    isTooLargePayloadError() {
+      return false;
+    },
+    async sender(reports, _estimatedBytes, _batchId, validateSize) {
+      const totalSize = reports.reduce((sum, report) => sum + report.size, 0);
+      validateSize(totalSize > 1 ? totalSize * 60 : 50);
+    },
+  });
+
+  buffer.add({ id: 'small', size: 1 });
+  buffer.add({ id: 'big', size: 10 });
+  await buffer.stop();
+
+  // The small report is isolated by whole-report regrouping and never touched by
+  // split; only the big report, once alone and still oversized, gets split.
+  expect(split.mock.calls.length).toBeGreaterThan(0);
+  expect(split.mock.calls.some(call => call[0].id === 'small')).toBe(false);
+  expect(onDrop).not.toHaveBeenCalled();
 });
 
 test('buffer create two chunks out of one buffer when actual buffer size is too big', async () => {
@@ -302,7 +475,11 @@ test('buffer create two chunks out of one buffer when actual buffer size is too 
     calculateReportSize(report) {
       return report.size;
     },
+    isSplittable(report) {
+      return report.size > 1;
+    },
     onRetry,
+    onDrop: vi.fn(),
     split,
     async sender(reports, _bytes, batchId, validateSize) {
       const receivedSize = reports.reduce((sum, report) => report.size + sum, 0);

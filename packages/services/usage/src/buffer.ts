@@ -125,8 +125,10 @@ export function createKVBuffer<T>(config: {
   limitInBytes: number;
   useEstimator: boolean;
   calculateReportSize(report: T): number;
+  isSplittable(report: T): boolean;
   split(report: T, numOfChunks: number): readonly T[];
   onRetry(reports: readonly T[]): void;
+  onDrop(reports: readonly T[]): void;
   isTooLargePayloadError(error: unknown): boolean;
   sender(
     reports: readonly T[],
@@ -168,12 +170,25 @@ export function createKVBuffer<T>(config: {
     return reports.reduce((sum, report) => sum + config.calculateReportSize(report), 0);
   }
 
-  async function flushBuffer(
-    reports: readonly T[],
-    size: number,
-    batchId: string,
-    isChunkedBuffer = false,
-  ) {
+  // Splits `items` into `numOfChunks` groups by count, dropping any group that ends
+  // up empty (e.g. when there are fewer items than numOfChunks) so nothing recurses
+  // on an effectively-empty payload.
+  function distributeIntoChunks<X>(items: readonly X[], numOfChunks: number): X[][] {
+    const chunks: X[][] = [];
+    let endedAt = 0;
+    for (let chunkIndex = 0; chunkIndex < numOfChunks; chunkIndex++) {
+      const chunkSize = calculateChunkSize(items.length, numOfChunks, chunkIndex);
+      const start = endedAt;
+      const end = start + chunkSize;
+      endedAt = end;
+      if (chunkSize > 0) {
+        chunks.push(items.slice(start, end));
+      }
+    }
+    return chunks;
+  }
+
+  async function flushBuffer(reports: readonly T[], size: number, batchId: string) {
     logger.info(`Flushing (reports=%s, bufferSize=%s, id=%s)`, reports.length, size, batchId);
     const estimatedSizeInBytes = estimator.estimate(size);
     await config
@@ -202,45 +217,61 @@ export function createKVBuffer<T>(config: {
         }
       })
       .catch(error => {
-        if (isChunkedBuffer) {
+        if (!(error instanceof BufferTooBigError)) {
           return Promise.reject(error);
         }
 
-        if (error instanceof BufferTooBigError) {
+        const numOfChunks = Math.ceil(error.bytes / config.limitInBytes);
+
+        if (reports.length > 1) {
+          // The array itself is what got serialized together as one payload - try
+          // redistributing the existing, untouched reports into more/smaller arrays
+          // first. No individual report's internals are touched here.
           config.onRetry(reports);
           logger.info(`Retrying (reports=%s, bufferSize=%s, id=%s)`, reports.length, size, batchId);
 
-          const numOfChunks = Math.ceil(error.bytes / config.limitInBytes);
-
-          // We split reports into chunks in case we have few big reports (or even single big report)
-          const newReports: T[] = [];
-          for (const report of reports) {
-            newReports.push(...config.split(report, numOfChunks));
-          }
-
-          const chunks: T[][] = [];
-          let endedAt = 0;
-          for (let chunkIndex = 0; chunkIndex < numOfChunks; chunkIndex++) {
-            const chunkSize = calculateChunkSize(newReports.length, numOfChunks, chunkIndex);
-            const start = endedAt;
-            const end = start + chunkSize;
-            endedAt = end;
-            chunks.push(newReports.slice(start, end));
-          }
-
+          const chunks = distributeIntoChunks(reports, numOfChunks);
           return Promise.all(
             chunks.map((chunk, chunkIndex) =>
               flushBuffer(
                 chunk,
                 calculateBufferSize(chunk),
                 batchId + '--retry-chunk-' + chunkIndex,
-                true,
               ),
             ),
           );
         }
 
-        return Promise.reject(error);
+        // Down to a single report that is still too big on its own - only now does
+        // splitting its internals make sense. Only keep splitting while it can still
+        // be divided into smaller pieces (more than one distinct unit); once it's at
+        // that irreducible floor, splitting again would be a no-op (and could recurse
+        // forever), so drop instead.
+        if (!reports.some(config.isSplittable)) {
+          logger.error(
+            `Dropping reports that cannot be split any smaller (reports=%s, bytes=%s, id=%s)`,
+            reports.length,
+            error.bytes,
+            batchId,
+          );
+          config.onDrop(reports);
+          return;
+        }
+
+        config.onRetry(reports);
+        logger.info(`Retrying (reports=%s, bufferSize=%s, id=%s)`, reports.length, size, batchId);
+
+        const newReports: T[] = [];
+        for (const report of reports) {
+          newReports.push(...config.split(report, numOfChunks));
+        }
+
+        const chunks = distributeIntoChunks(newReports, numOfChunks);
+        return Promise.all(
+          chunks.map((chunk, chunkIndex) =>
+            flushBuffer(chunk, calculateBufferSize(chunk), batchId + '--retry-chunk-' + chunkIndex),
+          ),
+        );
       });
   }
 

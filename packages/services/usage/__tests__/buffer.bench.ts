@@ -16,8 +16,10 @@ function fillCurrent(count: number) {
     limitInBytes: 500_000,
     useEstimator: true,
     calculateReportSize: value => Object.keys(value.map).length,
+    isSplittable: value => Object.keys(value.map).length > 1,
     split: value => [value],
     onRetry: noop,
+    onDrop: noop,
     isTooLargePayloadError: () => false,
     sender: async () => {},
   });

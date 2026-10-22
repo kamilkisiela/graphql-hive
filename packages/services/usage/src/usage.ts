@@ -53,7 +53,7 @@ const retryOptions = {
   retries: 5,
 } satisfies RetryOptions; // why satisfies? To be able to use `retryOptions.retries` and get `number` instead of `number | undefined`
 
-export function splitReport(report: RawReport, numOfChunks: number) {
+export function splitReport(report: RawReport, numOfChunks: number): RawReport[] {
   const reports: RawReport[] = [];
   const operationMapLength = Object.keys(report.map).length;
 
@@ -67,11 +67,19 @@ export function splitReport(report: RawReport, numOfChunks: number) {
     const start = endedAt;
     const end = start + chunkSize;
     endedAt = end;
-    const chunk = operationMapEntries.slice(start, end);
 
+    if (chunkSize === 0) {
+      // numOfChunks exceeded the number of distinct operationMapKeys - nothing to
+      // assign here. Skip it rather than emitting an empty report that would become
+      // its own near-empty Kafka message.
+      continue;
+    }
+
+    const chunk = operationMapEntries.slice(start, end);
     const operationMap: RawOperationMap = {};
+    const reportIndex = reports.length;
     for (const [key, record] of chunk) {
-      keyReportIndexMap[key] = chunkIndex;
+      keyReportIndexMap[key] = reportIndex;
       operationMap[key] = record;
     }
 
@@ -91,7 +99,37 @@ export function splitReport(report: RawReport, numOfChunks: number) {
     reports[chunkIndex].size += 1;
   }
 
+  if (report.subscriptionOperations) {
+    for (const subscriptionOp of report.subscriptionOperations) {
+      const chunkIndex = keyReportIndexMap[subscriptionOp.operationMapKey];
+      const chunkReport = reports[chunkIndex];
+      (chunkReport.subscriptionOperations ??= []).push(subscriptionOp);
+      // report.size counts operations + subscriptionOperations (see usage-processor-2.ts) - keep that invariant per chunk.
+      chunkReport.size += 1;
+    }
+  }
+
+  if (report.errors) {
+    for (const errorRecord of report.errors) {
+      const chunkIndex = keyReportIndexMap[errorRecord.operationMapKey];
+      (reports[chunkIndex].errors ??= []).push(errorRecord);
+    }
+  }
+
+  if (report.appDeploymentUsageTimestamps && reports.length > 0) {
+    // Not keyed by operationMapKey, so it can't be partitioned like the fields above.
+    // Attach it to exactly one (guaranteed non-empty) chunk rather than duplicating it
+    // into every chunk - duplication wastes Kafka bytes on every split and could
+    // inflate every chunk's size by the same amount, risking that all chunks stay
+    // oversized (and get dropped) because of a payload the split wasn't even about.
+    reports[reports.length - 1].appDeploymentUsageTimestamps = report.appDeploymentUsageTimestamps;
+  }
+
   return reports;
+}
+
+export function isSplittable(report: RawReport): boolean {
+  return Object.keys(report.map).length > 1;
 }
 
 export function createUsage(config: {
@@ -206,14 +244,38 @@ export function createUsage(config: {
     calculateReportSize(report) {
       return Object.keys(report.map).length;
     },
+    isSplittable,
     split(report, numOfChunks) {
-      logger.debug('Splitting report into %s (id=%s)', numOfChunks, report.id);
+      logger.debug('Splitting report into %s chunks (id=%s)', numOfChunks, report.id);
       return splitReport(report, numOfChunks);
     },
-    onRetry(reports) {
-      // Because we do a retry, we need to decrease the number of failures
+    onRetry() {
+      // No-op: an oversized-payload retry never incremented rawOperationFailures in
+      // the first place (the size check throws before sender()'s try/catch, the only
+      // place that increments it), so there's nothing to offset here. Retries-in-
+      // progress are deliberately excluded from the failure count; buffer.ts already
+      // logs every retry attempt itself.
+    },
+    onDrop(reports) {
       const numOfOperations = reports.reduce((sum, report) => report.size + sum, 0);
-      rawOperationFailures.dec(numOfOperations);
+      const numOfErrors = reports.reduce(
+        (sum, report) => sum + (report.errors?.reduce((s, e) => s + e.errors.length, 0) ?? 0),
+        0,
+      );
+      droppedOversizedOperations.inc(numOfOperations);
+      // These operations never went through sender()'s catch (the size check throws
+      // before reaching it), so they were never counted as failing. They're being
+      // permanently dropped, never collected, so count them now - and correctly never
+      // decrement, since they're gone for good.
+      rawOperationFailures.inc(numOfOperations);
+      logger.error(
+        'Dropped %s operations (%s error entries) - report cannot be split any smaller and still exceeds the Kafka size limit',
+        numOfOperations,
+        numOfErrors,
+      );
+      Sentry.captureException(
+        new Error('Dropped usage reports that cannot be split below the Kafka size limit'),
+      );
     },
     async sender(reports, estimatedSizeInBytes, batchId, validateSize) {
       const numOfOperations = reports.reduce((sum, report) => report.size + sum, 0);
