@@ -314,7 +314,6 @@ overrides:
   '@graphql-hive/yoga': 'workspace:'
   '@graphql-hive/core': 'workspace:'
   '@graphql-tools/url-loader@7.x.x>@graphql-tools/executor-legacy-ws': '-'
-  follow-redirects@1.x.x: ^1.16.1
   graphql@16.x.x: 16.14.2
 
 patchedDependencies:
@@ -13871,8 +13870,8 @@ packages:
     resolution: {integrity: sha512-8y/eV9QQZCiyn1SprXSrCmqJN0yNRATe+PO8ztwqrvrbdRLA3eYJF0yaR0YayLWkMbsQSKWS9N2gPcGEc4UsZg==}
     engines: {node: '>=0.10.0'}
 
-  markdown-it@14.3.2:
-    resolution: {integrity: sha512-sHHjZ5fJKlgrG4qns2YwVcdNep35h5fERrfkD2YNsb9UFk0UIHarbiTaHKVMlPuWAoiilyK8Fv/jAm11slsY7Q==}
+  markdown-it@14.3.3:
+    resolution: {integrity: sha512-L//tDAkjTjJCU6pBUSBTgs3Kg4InVaZuUZog/b6V12UKhcDQ7S78877ibbCanRExwPuYP1CZD7Gd2dxSy1GXRg==}
     hasBin: true
 
   math-intrinsics@1.1.0:
@@ -19881,7 +19880,7 @@ snapshots:
       get-value: 3.0.1
       graphql: 16.14.2
       graphql-language-service: 5.5.0(graphql@16.14.2)
-      markdown-it: 14.3.2
+      markdown-it: 14.3.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       set-value: 4.1.0
@@ -32110,7 +32109,7 @@ snapshots:
 
   map-cache@0.2.2: {}
 
-  markdown-it@14.3.2:
+  markdown-it@14.3.3:
     dependencies:
       argparse: 2.0.1
       entities: 4.5.0
