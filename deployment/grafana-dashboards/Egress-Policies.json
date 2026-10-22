@@ -32,7 +32,7 @@
           "queryType": "instant",
           "refId": "A",
           "legendFormat": "",
-          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` | allowlisted=\"no\" [$__range]))) or vector(0)"
+          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\", match=\"flow.policy_match_type\" | regexp `\"k8s:app=(?P<workload>[^\"]+)\"` | label_format host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if eq .match \"4\" }}no{{ else }}yes{{ end }}` | allowlisted=\"no\" [$__range]))) or vector(0)"
         }
       ],
       "fieldConfig": {
@@ -88,7 +88,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` | verdict=\"DROPPED\" [$__range])) or vector(0)",
+          "expr": "sum(count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\", match=\"flow.policy_match_type\" | regexp `\"k8s:app=(?P<workload>[^\"]+)\"` | label_format host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if eq .match \"4\" }}no{{ else }}yes{{ end }}` | verdict=\"DROPPED\" [$__range])) or vector(0)",
           "legendFormat": "",
           "refId": "A",
           "queryType": "instant"
@@ -147,7 +147,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` [$__range])))",
+          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\", match=\"flow.policy_match_type\" | regexp `\"k8s:app=(?P<workload>[^\"]+)\"` | label_format host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if eq .match \"4\" }}no{{ else }}yes{{ end }}` [$__range])))",
           "legendFormat": "",
           "refId": "A",
           "queryType": "instant"
@@ -304,7 +304,7 @@
       "id": 5,
       "type": "table",
       "title": "External destinations per workload",
-      "description": "Every workload -> host:port from `default` to the internet in the selected time range, with the number of new connections. Allowlisted = allowed by the service's declarations (`allowExternal` / `allowAnyExternal`). In `observe` mode, rows with Allowlisted = no would be blocked once enforced. Host falls back to the IP when the connection wasn't preceded by a DNS lookup.",
+      "description": "Every workload -> host:port from `default` to the internet in the selected time range, with the number of new connections. Allowlisted = matched a declaration of the service (`allowExternal` / `allowAnyExternal`). In `observe` mode, rows with Allowlisted = no only matched the observe-mode allow-all policy, and would be blocked once enforced. Host falls back to the IP when the connection wasn't preceded by a DNS lookup.",
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
@@ -322,7 +322,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (workload, host, port, allowlisted, verdict) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` [$__range]))",
+          "expr": "sum by (workload, host, port, allowlisted, verdict) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\", match=\"flow.policy_match_type\" | regexp `\"k8s:app=(?P<workload>[^\"]+)\"` | label_format host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if eq .match \"4\" }}no{{ else }}yes{{ end }}` [$__range]))",
           "legendFormat": "",
           "refId": "A",
           "queryType": "instant",
@@ -382,18 +382,6 @@
       },
       "transformations": [
         {
-          "id": "convertFieldType",
-          "options": {
-            "fields": {},
-            "conversions": [
-              {
-                "targetField": "port",
-                "destinationType": "string"
-              }
-            ]
-          }
-        },
-        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -441,7 +429,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (workload) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` [$__interval]))",
+          "expr": "sum by (workload) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\", match=\"flow.policy_match_type\" | regexp `\"k8s:app=(?P<workload>[^\"]+)\"` | label_format host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if eq .match \"4\" }}no{{ else }}yes{{ end }}` [$__interval]))",
           "legendFormat": "{{workload}}",
           "refId": "A",
           "queryType": "range"
@@ -492,7 +480,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` | verdict=\"DROPPED\" [$__interval]))",
+          "expr": "sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\", match=\"flow.policy_match_type\" | regexp `\"k8s:app=(?P<workload>[^\"]+)\"` | label_format host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if eq .match \"4\" }}no{{ else }}yes{{ end }}` | verdict=\"DROPPED\" [$__interval]))",
           "legendFormat": "{{workload}} -> {{host}}:{{port}}",
           "refId": "A",
           "queryType": "range"

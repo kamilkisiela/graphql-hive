@@ -211,7 +211,7 @@ export function deployGrafanaAlerts(envName: string) {
             datasourceUid: 'grafanacloud-logs',
             model: JSON.stringify({
               refId: 'A',
-              expr: 'sum by (workload) (count_over_time({namespace="kube-system", container_name="hubble-egress-exporter"} | json workload="flow.source.workloads[0].name", verdict="flow.verdict" | verdict="DROPPED" | label_format workload=`{{ regexReplaceAll "-[0-9a-f]{8}$" .workload "" }}` [5m]))',
+              expr: 'sum by (workload) (count_over_time({namespace="kube-system", container_name="hubble-egress-exporter"} | json verdict="flow.verdict" | verdict="DROPPED" | regexp `"k8s:app=(?P<workload>[^"]+)"` [5m]))',
               queryType: 'range',
               intervalMs: 30_000,
               maxDataPoints: 43_200,
