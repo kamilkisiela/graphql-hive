@@ -7,10 +7,8 @@ import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { EgressPolicyManager } from './egress-policy';
 import { Environment } from './environment';
-import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
 import { Sentry } from './sentry';
-import { SlackApp } from './slack-app';
 import { Zendesk } from './zendesk';
 
 export type App = ReturnType<typeof deployApp>;
@@ -22,8 +20,6 @@ export function deployApp({
   image,
   docker,
   zendesk,
-  github,
-  slackApp,
   commerce,
   sentry,
   environment,
@@ -35,8 +31,6 @@ export function deployApp({
   dbMigrations: DbMigrations;
   docker: Docker;
   zendesk: Zendesk;
-  github: GitHubApp;
-  slackApp: SlackApp;
   commerce: CommerceService;
   sentry: Sentry;
   publishAppDeploymentCommand: pulumi.Resource | undefined;
@@ -64,7 +58,6 @@ export function deployApp({
         SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),
         APP_BASE_URL: `https://${environment.appDns}/`,
         INTEGRATION_SLACK: '1',
-        INTEGRATION_GITHUB_APP_NAME: github.name,
         GA_TRACKING_ID: appEnv.GA_TRACKING_ID,
         DOCS_URL: 'https://the-guild.dev/graphql/hive/docs',
         GRAPHQL_PERSISTED_OPERATIONS: publishAppDeploymentCommand ? '1' : '0',
@@ -80,18 +73,13 @@ export function deployApp({
     },
     [graphql.service, graphql.deployment, dbMigrations, publishAppDeploymentCommand],
   )
-    .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
-    .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')
     .withSecret('STRIPE_PUBLIC_KEY', commerce.stripeSecret, 'stripePublicKey')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 
   egressManager
-    // GRAPHQL_PUBLIC_ENDPOINT: the server-side calls (Slack / GitHub callbacks, lab) use the public
-    // endpoint, not SERVER_ENDPOINT.
+    // GRAPHQL_PUBLIC_ENDPOINT: server-side lab calls use the public endpoint, not SERVER_ENDPOINT.
     ?.allowExternal(deployment, `https://${environment.appDns}`)
-    // Slack OAuth token exchange (/api/slack/callback)
-    .allowExternal(deployment, 'https://slack.com')
     .allowExternal(deployment, sentry.secret?.raw.dsn);
 
   return { deployment, service };

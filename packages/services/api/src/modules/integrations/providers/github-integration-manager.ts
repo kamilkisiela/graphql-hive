@@ -63,6 +63,14 @@ export class GitHubIntegrationManager {
     return !!this.app;
   }
 
+  assertCanModify(selector: OrganizationSelector) {
+    return this.session.assertPerformAction({
+      action: 'gitHubIntegration:modify',
+      organizationId: selector.organizationId,
+      params: { organizationId: selector.organizationId },
+    });
+  }
+
   async register(
     input: OrganizationSelector & {
       installationId: string;
@@ -73,13 +81,7 @@ export class GitHubIntegrationManager {
       input.organizationId,
       input.installationId,
     );
-    await this.session.assertPerformAction({
-      action: 'gitHubIntegration:modify',
-      organizationId: input.organizationId,
-      params: {
-        organizationId: input.organizationId,
-      },
-    });
+    await this.assertCanModify(input);
     this.logger.debug('Updating organization');
     const result = await this.storage.addGitHubIntegration({
       organizationId: input.organizationId,

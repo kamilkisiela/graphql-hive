@@ -3,10 +3,8 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import FastifyStatic from '@fastify/static';
 import { env, getPublicEnvVars } from '../env/backend';
-import { connectGithub } from './github';
 import { connectLab } from './lab';
 import { registerPreflightWorkerEmbedRoute } from './preflight-embed';
-import { connectSlack } from './slack';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 // The root directory of @hive/app (where the package.json is located)
@@ -85,8 +83,6 @@ async function main() {
       .send(`window.__ENV = ${JSON.stringify(publicEnvVars)};`);
   });
 
-  connectSlack(server);
-  connectGithub(server);
   connectLab(server);
 
   registerPreflightWorkerEmbedRoute(

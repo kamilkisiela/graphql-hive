@@ -31,19 +31,21 @@ export class SlackIntegrationManager {
     });
   }
 
+  assertCanModify(selector: OrganizationSelector) {
+    return this.session.assertPerformAction({
+      action: 'slackIntegration:modify',
+      organizationId: selector.organizationId,
+      params: { organizationId: selector.organizationId },
+    });
+  }
+
   async register(
     input: OrganizationSelector & {
       token: string;
     },
   ): Promise<void> {
     this.logger.debug('Registering Slack integration (organization=%s)', input.organizationId);
-    await this.session.assertPerformAction({
-      action: 'slackIntegration:modify',
-      organizationId: input.organizationId,
-      params: {
-        organizationId: input.organizationId,
-      },
-    });
+    await this.assertCanModify(input);
     this.logger.debug('Updating organization');
     const result = await this.storage.addSlackIntegration({
       organizationId: input.organizationId,

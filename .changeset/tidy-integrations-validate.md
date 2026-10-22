@@ -2,4 +2,4 @@
 'hive': patch
 ---
 
-Reject invalid organization identifiers when connecting GitHub or Slack integrations.
+Move GitHub and Slack integration callbacks to the server service and reject invalid organization identifiers.

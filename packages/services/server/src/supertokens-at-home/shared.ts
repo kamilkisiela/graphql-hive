@@ -1,4 +1,3 @@
-import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import type { User } from '@hive/api';
 import {
@@ -113,8 +112,4 @@ export async function createNewSession(
     refreshToken,
     accessToken,
   };
-}
-
-export function createOIDCState() {
-  return randomBytes(32).toString('hex');
 }

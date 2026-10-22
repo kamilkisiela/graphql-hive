@@ -2,9 +2,7 @@ import { gql } from 'graphql-modules';
 
 export default gql`
   extend type Mutation {
-    addSlackIntegration(input: AddSlackIntegrationInput!): Boolean!
     deleteSlackIntegration(input: OrganizationSelectorInput!): DeleteSlackIntegrationResult!
-    addGitHubIntegration(input: AddGitHubIntegrationInput!): Boolean!
     deleteGitHubIntegration(input: OrganizationSelectorInput!): DeleteGitHubIntegrationResult!
     enableProjectNameInGithubCheck(input: ProjectSelectorInput!): Project!
   }
@@ -18,7 +16,6 @@ export default gql`
   }
 
   extend type Query {
-    organizationByGitHubInstallationId(installation: ID!): Organization
     isGitHubIntegrationFeatureEnabled: Boolean!
   }
 
@@ -28,16 +25,6 @@ export default gql`
     gitHubIntegration: GitHubIntegration
     viewerCanModifySlackIntegration: Boolean!
     viewerCanModifyGitHubIntegration: Boolean!
-  }
-
-  input AddSlackIntegrationInput {
-    organizationSlug: String!
-    token: String!
-  }
-
-  input AddGitHubIntegrationInput {
-    organizationSlug: String!
-    installationId: ID!
   }
 
   type GitHubIntegration {
