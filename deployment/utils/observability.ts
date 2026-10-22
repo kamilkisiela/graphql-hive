@@ -312,6 +312,23 @@ export class Observability {
               },
             ],
           },
+          // Every hop reports the same x-request-id under a different attribute name
+          // (Envoy: guid:x-request-id, Hive Gateway: hive.request.id, Hive services: request.id).
+          // Expose a single `request.id` so traces can be searched by one attribute.
+          'transform/normalize_request_id': {
+            error_mode: 'ignore',
+            trace_statements: [
+              {
+                context: 'span',
+                statements: [
+                  'set(attributes["request.id"], attributes["guid:x-request-id"]) where attributes["request.id"] == nil and attributes["guid:x-request-id"] != nil',
+                  'delete_key(attributes, "guid:x-request-id")',
+                  'set(attributes["request.id"], attributes["hive.request.id"]) where attributes["request.id"] == nil and attributes["hive.request.id"] != nil',
+                  'delete_key(attributes, "hive.request.id")',
+                ],
+              },
+            ],
+          },
         },
         receivers: {
           otlp: {
@@ -488,6 +505,7 @@ export class Observability {
                 'resource/trace_cleanup',
                 'attributes/trace_filter',
                 'transform/patch_envoy_spans',
+                'transform/normalize_request_id',
                 'tail_sampling',
                 'batch',
               ],
