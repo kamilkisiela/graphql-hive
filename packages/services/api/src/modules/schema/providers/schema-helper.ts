@@ -187,12 +187,25 @@ export class SchemaHelper {
     hasher.update(print(sortDocumentNode(this.createSchemaObject(schema).document)), 'utf-8');
     hasher.update(`service_name: ${schema.serviceName ?? ''}`, 'utf-8');
     hasher.update(`service_url: ${schema.serviceUrl ?? ''}`, 'utf-8');
-    hasher.update(
-      `metadata: ${schema.metadata ? objectHash(JSON.parse(schema.metadata)) : ''}`,
-      'utf-8',
-    );
+    hasher.update(`metadata: ${hashMetadata(schema.metadata)}`, 'utf-8');
 
     return hasher.digest('hex');
+  }
+}
+
+/**
+ * Metadata that is not valid JSON is rejected by the metadata check,
+ * so it only needs a checksum that differs from any stored metadata.
+ */
+function hashMetadata(metadata: string | null | undefined): string {
+  if (!metadata) {
+    return '';
+  }
+
+  try {
+    return objectHash(JSON.parse(metadata));
+  } catch {
+    return objectHash(metadata);
   }
 }
 
