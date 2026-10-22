@@ -2,7 +2,7 @@
   "annotations": {
     "list": []
   },
-  "description": "Cilium egress policies (see deployment/services/egress-policy.ts): drops and DNS lookups per workload, from the Hubble metrics of Advanced Container Networking Services.",
+  "description": "Cilium egress policies (see deployment/services/egress-policy.ts). Workload -> host:port from the Hubble egress flow logs (Loki); drops and DNS from the ACNS Hubble metrics (per node).",
   "editable": true,
   "graphTooltip": 1,
   "links": [],
@@ -10,14 +10,14 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "Policy drops",
-      "description": "Packets dropped by the egress policies (`default` namespace) in the selected time range. Expected to be 0 in `observe` mode.",
+      "title": "Denied egress connections",
+      "description": "New connections from `default` to the internet that an egress policy denied, in the selected time range. Expected to be 0 in `observe` mode.",
       "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
+        "type": "loki",
+        "uid": "grafanacloud-logs"
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 0,
         "y": 0
@@ -25,15 +25,14 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
+            "type": "loki",
+            "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum(increase(hubble_drop_total{reason=~\"POLICY_DENIED|POLICY_DENY\", source_namespace=\"default\", source_workload=~\"$workload\"}[$__range])) or vector(0)",
-          "legendFormat": "Drops",
+          "expr": "sum(count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | verdict=\"DROPPED\" [$__range])) or vector(0)",
+          "legendFormat": "",
           "refId": "A",
-          "range": false,
-          "instant": true
+          "queryType": "instant"
         }
       ],
       "fieldConfig": {
@@ -70,16 +69,71 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Failed DNS lookups",
-      "description": "DNS responses other than NOERROR in the selected time range (e.g. unknown domains, or lookups refused by the DNS rules).",
+      "title": "External destinations",
+      "description": "Distinct workload -> host:port pairs seen in the selected time range.",
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` [$__range])))",
+          "legendFormat": "",
+          "refId": "A",
+          "queryType": "instant"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Policy drops (all nodes)",
+      "description": "Packets dropped by any network policy, cluster wide (ACNS metrics are per node, without workload context).",
       "datasource": {
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
-        "x": 6,
+        "x": 12,
         "y": 0
       },
       "targets": [
@@ -89,11 +143,71 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum(increase(hubble_dns_responses_total{rcode!=\"No Error\", source_namespace=\"default\", source_workload=~\"$workload\"}[$__range])) or vector(0)",
-          "legendFormat": "Failures",
+          "expr": "sum(increase(hubble_drop_total{reason=~\"POLICY_DENIED|POLICY_DENY\"}[$__range])) or vector(0)",
+          "legendFormat": "",
           "refId": "A",
-          "range": false,
-          "instant": true
+          "instant": true,
+          "range": false
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Failed DNS lookups (all nodes)",
+      "description": "DNS responses other than NOERROR, for pods selected by a policy with DNS rules (e.g. unknown domains, search-domain expansion, refused lookups).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(hubble_dns_responses_total{rcode!=\"No Error\"}[$__range])) or vector(0)",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true,
+          "range": false
         }
       ],
       "fieldConfig": {
@@ -128,32 +242,32 @@
       }
     },
     {
-      "id": 3,
-      "type": "stat",
-      "title": "Workloads resolving DNS through the policy",
-      "description": "Workloads with DNS visibility, i.e. selected by an egress policy.",
+      "id": 5,
+      "type": "table",
+      "title": "External destinations per workload",
+      "description": "Every workload -> host:port from `default` to the internet in the selected time range, with the policy verdict and the number of new connections. Compare with each service's `allowExternal` declarations before enforcing. Host falls back to the IP when the connection wasn't preceded by a DNS lookup.",
       "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
+        "type": "loki",
+        "uid": "grafanacloud-logs"
       },
       "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 0
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 5
       },
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
+            "type": "loki",
+            "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "count(count by (source_workload) (increase(hubble_dns_queries_total{source_namespace=\"default\", source_workload=~\"$workload\"}[$__range]) > 0)) or vector(0)",
-          "legendFormat": "Workloads",
+          "expr": "sum by (workload, host, port, verdict) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` [$__range]))",
+          "legendFormat": "",
           "refId": "A",
-          "range": false,
-          "instant": true
+          "queryType": "instant",
+          "format": "table"
         }
       ],
       "fieldConfig": {
@@ -164,152 +278,70 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      }
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "Policy drops by workload",
-      "description": "Egress packets dropped by the policies, per source workload and protocol.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 6
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (source_workload, protocol) (rate(hubble_drop_total{reason=~\"POLICY_DENIED|POLICY_DENY\", source_namespace=\"default\", source_workload=~\"$workload\"}[$__rate_interval]))",
-          "legendFormat": "{{source_workload}} ({{protocol}})",
-          "refId": "A",
-          "range": true,
-          "instant": false
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "pps",
-          "min": 0,
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Workload",
+            "desc": false
           }
-        },
-        "overrides": []
+        ]
       },
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "calcs": ["max", "lastNotNull"]
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 5,
-      "type": "timeseries",
-      "title": "All drops by reason",
-      "description": "Every packet drop for the selected workloads, by reason (policy and non-policy).",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 6
-      },
-      "targets": [
+      "transformations": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (reason) (rate(hubble_drop_total{source_namespace=\"default\", source_workload=~\"$workload\"}[$__rate_interval]))",
-          "legendFormat": "{{reason}}",
-          "refId": "A",
-          "range": true,
-          "instant": false
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "pps",
-          "min": 0,
-          "custom": {
-            "drawStyle": "line",
-            "fillOpacity": 10
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "workload": 0,
+              "host": 1,
+              "port": 2,
+              "verdict": 3,
+              "Value": 4
+            },
+            "renameByName": {
+              "workload": "Workload",
+              "host": "Host",
+              "port": "Port",
+              "verdict": "Verdict",
+              "Value": "Connections"
+            }
           }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "calcs": ["max", "lastNotNull"]
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
         }
-      }
+      ]
     },
     {
       "id": 6,
       "type": "timeseries",
-      "title": "DNS lookups by workload",
-      "description": "DNS queries per workload, as seen by the Cilium DNS proxy.",
+      "title": "New external connections by workload",
+      "description": "New connections from `default` to the internet, per workload.",
       "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
+        "type": "loki",
+        "uid": "grafanacloud-logs"
       },
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 15
+        "y": 19
       },
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
+            "type": "loki",
+            "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (source_workload) (rate(hubble_dns_queries_total{source_namespace=\"default\", source_workload=~\"$workload\"}[$__rate_interval]))",
-          "legendFormat": "{{source_workload}}",
+          "expr": "sum by (workload) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` [$__interval]))",
+          "legendFormat": "{{workload}}",
           "refId": "A",
-          "range": true,
-          "instant": false
+          "queryType": "range"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "reqps",
+          "unit": "short",
           "min": 0,
           "custom": {
             "drawStyle": "line",
@@ -333,17 +365,68 @@
     {
       "id": 7,
       "type": "timeseries",
-      "title": "Failed DNS lookups by workload",
-      "description": "DNS responses other than NOERROR, per workload and response code.",
+      "title": "Denied egress connections",
+      "description": "Connections denied by an egress policy, per workload and destination.",
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | verdict=\"DROPPED\" [$__interval]))",
+          "legendFormat": "{{workload}} -> {{host}}:{{port}}",
+          "refId": "A",
+          "queryType": "range"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "lastNotNull"]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Drops by reason (all nodes)",
+      "description": "Every packet drop, by reason (policy and non-policy).",
       "datasource": {
         "type": "prometheus",
         "uid": "PROM_DATASOURCE_UID"
       },
       "gridPos": {
         "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 15
+        "w": 8,
+        "x": 0,
+        "y": 28
       },
       "targets": [
         {
@@ -352,11 +435,115 @@
             "uid": "PROM_DATASOURCE_UID"
           },
           "editorMode": "code",
-          "expr": "sum by (source_workload, rcode) (rate(hubble_dns_responses_total{rcode!=\"No Error\", source_namespace=\"default\", source_workload=~\"$workload\"}[$__rate_interval]))",
-          "legendFormat": "{{source_workload}} ({{rcode}})",
+          "expr": "sum by (reason) (rate(hubble_drop_total[$__rate_interval]))",
+          "legendFormat": "{{reason}}",
           "refId": "A",
-          "range": true,
-          "instant": false
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "lastNotNull"]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Policy drops by node",
+      "description": "Packets dropped by network policies, per node and protocol.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 28
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (instance, protocol) (rate(hubble_drop_total{reason=~\"POLICY_DENIED|POLICY_DENY\"}[$__rate_interval]))",
+          "legendFormat": "{{instance}} ({{protocol}})",
+          "refId": "A",
+          "instant": false,
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "min": 0,
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "lastNotNull"]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "DNS responses by code (all nodes)",
+      "description": "DNS responses seen by the Cilium DNS proxy, by response code.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PROM_DATASOURCE_UID"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 28
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PROM_DATASOURCE_UID"
+          },
+          "editorMode": "code",
+          "expr": "sum by (rcode) (rate(hubble_dns_responses_total[$__rate_interval]))",
+          "legendFormat": "{{rcode}}",
+          "refId": "A",
+          "instant": false,
+          "range": true
         }
       ],
       "fieldConfig": {
@@ -381,100 +568,13 @@
           "sort": "desc"
         }
       }
-    },
-    {
-      "id": 8,
-      "type": "table",
-      "title": "External hosts per workload",
-      "description": "Hostnames each workload resolved in the selected time range (cluster-internal names excluded). Compare with the `allowExternal` declarations of each service before enforcing.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PROM_DATASOURCE_UID"
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PROM_DATASOURCE_UID"
-          },
-          "editorMode": "code",
-          "expr": "sum by (source_workload, query) (increase(hubble_dns_queries_total{query!~\".*\\\\.cluster\\\\.local\\\\.?\", source_namespace=\"default\", source_workload=~\"$workload\"}[$__range])) > 0",
-          "legendFormat": "",
-          "refId": "A",
-          "range": false,
-          "instant": true,
-          "format": "table"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0
-        },
-        "overrides": []
-      },
-      "options": {
-        "showHeader": true,
-        "sortBy": [
-          {
-            "displayName": "source_workload",
-            "desc": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true
-            },
-            "renameByName": {
-              "source_workload": "Workload",
-              "query": "Host",
-              "Value": "Lookups"
-            }
-          }
-        }
-      ]
     }
   ],
   "refresh": "1m",
   "schemaVersion": 38,
   "tags": ["hive", "network"],
   "templating": {
-    "list": [
-      {
-        "name": "workload",
-        "label": "Workload",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PROM_DATASOURCE_UID"
-        },
-        "query": {
-          "query": "label_values(hubble_dns_queries_total{source_namespace=\"default\"}, source_workload)",
-          "refId": "workload"
-        },
-        "definition": "label_values(hubble_dns_queries_total{source_namespace=\"default\"}, source_workload)",
-        "includeAll": true,
-        "multi": true,
-        "allValue": ".*",
-        "refresh": 2,
-        "sort": 1,
-        "current": {
-          "selected": true,
-          "text": ["All"],
-          "value": ["$__all"]
-        }
-      }
-    ]
+    "list": []
   },
   "time": {
     "from": "now-24h",

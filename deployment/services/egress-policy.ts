@@ -153,6 +153,70 @@ function toTargetPorts(target: InClusterTarget): pulumi.Output<PortRule[]> {
 }
 
 /**
+ * Streams the egress policy verdicts of new connections from the `default` namespace to the internet,
+ * from Hubble Relay into the pod logs (JSON, one line per connection). Vector ships them to Loki,
+ * where the Egress-Policies dashboard and alert turn them into workload -> host:port views.
+ *
+ * The Hubble metrics of ACNS have no workload context, and its DNS metrics no query names,
+ * so flows are the only source for "which workload talks to which host and port".
+ * Hubble attaches the resolved hostname (`destination_names`) to each flow, as the policies
+ * send DNS through the Cilium DNS proxy.
+ *
+ * Runs in `kube-system`, next to the relay's client certificates (rotated by AKS).
+ */
+function deployEgressFlowExporter() {
+  const labels = { app: 'hubble-egress-exporter' };
+
+  return new k8s.apps.v1.Deployment('hubble-egress-exporter', {
+    metadata: {
+      name: 'hubble-egress-exporter',
+      namespace: 'kube-system',
+    },
+    spec: {
+      replicas: 1,
+      selector: { matchLabels: labels },
+      template: {
+        metadata: { labels },
+        spec: {
+          containers: [
+            {
+              name: 'hubble-egress-exporter',
+              image: 'quay.io/cilium/hubble:v1.16.4',
+              args: [
+                'observe',
+                '--server=hubble-relay.kube-system.svc.cluster.local:443',
+                '--tls',
+                '--tls-server-name=instance.hubble-relay.cilium.io',
+                '--tls-ca-cert-files=/certs/ca.crt',
+                '--tls-client-cert-file=/certs/tls.crt',
+                '--tls-client-key-file=/certs/tls.key',
+                '--follow',
+                '--output=jsonpb',
+                // One policy verdict per new connection (allowed or denied)
+                '--type=policy-verdict',
+                '--from-namespace=default',
+                '--to-label=reserved:world',
+              ],
+              resources: {
+                requests: { cpu: '10m', memory: '32Mi' },
+                limits: { cpu: '200m', memory: '128Mi' },
+              },
+              volumeMounts: [{ name: 'certs', mountPath: '/certs', readOnly: true }],
+            },
+          ],
+          volumes: [
+            {
+              name: 'certs',
+              secret: { secretName: 'hubble-relay-client-certs' },
+            },
+          ],
+        },
+      },
+    },
+  });
+}
+
+/**
  * Egress policies per deployment (one `CiliumNetworkPolicy` each), declared by the services.
  *
  * Modes (`cilium:egressPolicies`):
@@ -220,7 +284,7 @@ export function initEgressPolicy() {
       return this;
     },
     deploy() {
-      return Array.from(workloads.values()).map(rules => {
+      const policies = Array.from(workloads.values()).map(rules => {
         const name = pulumi.resourceName(rules.workload);
 
         const egress: pulumi.Input<object[]>[] = [
@@ -294,6 +358,10 @@ export function initEgressPolicy() {
           },
         });
       });
+
+      deployEgressFlowExporter();
+
+      return policies;
     },
   };
 }

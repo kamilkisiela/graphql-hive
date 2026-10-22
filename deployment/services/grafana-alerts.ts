@@ -178,8 +178,9 @@ export function deployGrafanaAlerts(envName: string) {
     ],
   });
 
-  // Egress policies (see `services/egress-policy.ts`), based on the Hubble metrics of the Cilium
-  // agents. Pairs with the Egress-Policies dashboard. Without Cilium + ACNS there's no data, so the
+  // Egress policies (see `services/egress-policy.ts`), based on the egress flow logs that the
+  // hubble-egress-exporter ships to Loki (the ACNS Hubble metrics have no workload context).
+  // Pairs with the Egress-Policies dashboard. Without Cilium + ACNS there's no data, so the
   // rule stays OK.
   const egressRuleGroup = new alerting.RuleGroup('egress-policies', {
     folderUid: folder.uid,
@@ -188,14 +189,15 @@ export function deployGrafanaAlerts(envName: string) {
     rules: [
       {
         name: 'EgressPolicyDrops',
-        for: '5m',
+        // A single denied connection keeps the 5m count above 0 for 5 minutes, so this still fires.
+        for: '1m',
         condition: 'C',
         noDataState: 'OK',
         execErrState: 'Alerting',
         annotations: {
-          summary: 'Egress policy is dropping traffic for {{ $labels.source_workload }}',
+          summary: 'Egress policy is denying connections for {{ $labels.workload }}',
           description:
-            'The egress policy of {{ $labels.source_workload }} has been dropping packets for 5 minutes. Either a declaration is missing (allowExternal / allowInCluster), or the workload tried to reach a blocked destination (e.g. an internal address from a user-provided URL).',
+            'The egress policy of {{ $labels.workload }} denied new connections to the internet in the last 5 minutes. Either a declaration is missing (allowExternal), or the workload tried to reach a blocked destination (e.g. an internal address from a user-provided URL). See the Egress-Policies dashboard for the hosts and ports.',
           runbook_url:
             'https://github.com/graphql-hive/console/blob/main/deployment/services/egress-policy.ts',
         },
@@ -206,12 +208,11 @@ export function deployGrafanaAlerts(envName: string) {
             refId: 'A',
             queryType: '',
             relativeTimeRange: { from: 600, to: 0 },
-            datasourceUid: 'grafanacloud-prom',
+            datasourceUid: 'grafanacloud-logs',
             model: JSON.stringify({
               refId: 'A',
-              expr: 'sum by (source_workload) (increase(hubble_drop_total{reason=~"POLICY_DENIED|POLICY_DENY", source_namespace="default"}[5m]))',
-              instant: false,
-              range: true,
+              expr: 'sum by (workload) (count_over_time({namespace="kube-system", container_name="hubble-egress-exporter"} | json workload="flow.source.workloads[0].name", verdict="flow.verdict" | verdict="DROPPED" | label_format workload=`{{ regexReplaceAll "-[0-9a-f]{8}$" .workload "" }}` [5m]))',
+              queryType: 'range',
               intervalMs: 30_000,
               maxDataPoints: 43_200,
             }),
