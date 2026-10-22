@@ -34,6 +34,19 @@ the following command:
 curl -sSL https://graphql-hive.com/install.sh | sh
 ```
 
+Each version's standalone archives and `SHA256SUMS` manifest are attached to its GitHub release. The
+manifest is also available from `https://cli.graphql-hive.com/versions/VERSION/SHA256SUMS`. The
+exact version currently promoted to the standalone stable channel is available as plain text from
+`https://cli.graphql-hive.com/channels/stable/VERSION`; its body is the semantic version followed by
+a newline.
+
+Historical versions whose standalone archives are retained anywhere under `versions/VERSION/`
+receive manifests through the manual **Backfill CLI checksum manifests** workflow. Run it from
+`main` with `publish` disabled to preview missing manifests, then run it again with `publish`
+enabled. The workflow preserves existing manifests, creates only missing `SHA256SUMS` objects,
+verifies each through the public endpoint, and fails if any retained version remains without a
+manifest.
+
 ## Commands
 
 <!-- commands -->

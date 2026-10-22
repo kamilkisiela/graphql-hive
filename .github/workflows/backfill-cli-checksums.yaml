@@ -1,0 +1,40 @@
+name: Backfill CLI checksum manifests
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish missing manifests (leave disabled to preview)
+        default: false
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    name: ${{ inputs.publish && 'Publish' || 'Preview' }} checksum backfill
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+      AWS_S3_ENDPOINT: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
+    steps:
+      - name: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: test checksum backfill
+        run: packages/libraries/cli/scripts/backfill-checksums.test.sh
+
+      - name: backfill checksum manifests
+        env:
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          if [[ "$PUBLISH" == 'true' ]]; then
+            packages/libraries/cli/scripts/backfill-checksums.sh
+          else
+            packages/libraries/cli/scripts/backfill-checksums.sh --dry-run
+          fi

@@ -182,17 +182,75 @@ jobs:
         working-directory: packages/libraries/cli
         run: pnpm oclif:pack
 
-      - name: upload tarballs
+      - name: generate CLI tarball checksums
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli/dist
+        run: sha256sum *.tar.gz > SHA256SUMS
+
+      - name: upload CLI tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
         run: pnpm oclif:upload
 
-      - name: promote tarballs
+      - name: upload CLI checksum manifest
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        env:
+          AWS_DEFAULT_REGION: auto
+          VERSION: ${{ steps.cli.outputs.version }}
+        run: |
+          aws s3 cp dist/SHA256SUMS \
+            "s3://graphql-hive-cli/versions/$VERSION/SHA256SUMS" \
+            --endpoint-url "$AWS_S3_ENDPOINT" \
+            --content-type text/plain
+
+      - name: verify CLI checksum manifest
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        env:
+          VERSION: ${{ steps.cli.outputs.version }}
+        run: |
+          curl --fail --retry 5 \
+            "https://cli.graphql-hive.com/versions/$VERSION/SHA256SUMS" \
+            --output /tmp/SHA256SUMS
+          cmp dist/SHA256SUMS /tmp/SHA256SUMS
+
+      - name: attach CLI tarballs and checksums to GitHub release
+        if: steps.cli.outputs.publish == 'true'
+        working-directory: packages/libraries/cli
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: '@graphql-hive/cli@${{ steps.cli.outputs.version }}'
+        run: gh release upload "$RELEASE_TAG" dist/*.tar.gz dist/SHA256SUMS --clobber
+
+      - name: promote CLI tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
         env:
           VERSION: ${{ steps.cli.outputs.version }}
         run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION
+
+      - name: publish stable CLI version
+        if: steps.cli.outputs.publish == 'true'
+        env:
+          AWS_DEFAULT_REGION: auto
+          VERSION: ${{ steps.cli.outputs.version }}
+        run: |
+          printf '%s\n' "$VERSION" > /tmp/CLI_STABLE_VERSION
+          aws s3 cp /tmp/CLI_STABLE_VERSION \
+            s3://graphql-hive-cli/channels/stable/VERSION \
+            --endpoint-url "$AWS_S3_ENDPOINT" \
+            --content-type text/plain \
+            --cache-control no-store
+
+      - name: verify stable CLI version
+        if: steps.cli.outputs.publish == 'true'
+        run: |
+          curl --fail --retry 5 \
+            "https://cli.graphql-hive.com/channels/stable/VERSION?release=$GITHUB_SHA" \
+            --output /tmp/PUBLISHED_CLI_STABLE_VERSION
+          cmp /tmp/CLI_STABLE_VERSION /tmp/PUBLISHED_CLI_STABLE_VERSION
 
   stable-changeset-version:
     needs: stable

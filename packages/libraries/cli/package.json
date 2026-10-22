@@ -33,6 +33,7 @@
   "scripts": {
     "build": "tsc --build",
     "build:watch": "tsc --build --watch",
+    "checksums:backfill:test": "bash scripts/backfill-checksums.test.sh",
     "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz",
     "oclif:readme": "pnpm oclif readme && node scripts/generate-errors.mjs && npx prettier --write README.md errors.json",
     "oclif:upload": "pnpm oclif upload tarballs --no-xz",
