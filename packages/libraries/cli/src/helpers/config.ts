@@ -8,7 +8,8 @@ const LegacyConfigModel = z.object({
   token: z.string().optional(),
 });
 
-const ConfigModel = z.object({
+/** Keep `hive.schema.json` in step with this; `tests/config.spec.ts` checks that they agree. */
+export const ConfigModel = z.object({
   registry: z
     .object({
       endpoint: z.string().url().optional(),

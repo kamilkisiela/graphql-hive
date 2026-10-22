@@ -707,6 +707,7 @@ This is how the structure of the config file should look like:
 
 ```json
 {
+  "$schema": "./node_modules/@graphql-hive/cli/hive.schema.json",
   "registry": {
     "endpoint": "<yourRegistryURL>",
     "accessToken": "<yourtoken>"
@@ -717,6 +718,10 @@ This is how the structure of the config file should look like:
   }
 }
 ```
+
+The `$schema` line is optional. It points your editor at the JSON schema shipped with the CLI, so it
+can autocomplete and check the keys. If the CLI isn't installed in the project, use
+`https://unpkg.com/@graphql-hive/cli/hive.schema.json` instead.
 
 <!-- errors -->
 

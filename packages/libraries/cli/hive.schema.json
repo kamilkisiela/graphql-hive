@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unpkg.com/@graphql-hive/cli/hive.schema.json",
+  "title": "Hive CLI configuration (hive.json)",
+  "description": "Configuration for the Hive CLI. CLI arguments override environment variables, which override this file.",
+  "type": "object",
+  "anyOf": [
+    { "$ref": "#/definitions/config" },
+    { "$ref": "#/definitions/legacyConfig" },
+    { "$ref": "#/definitions/spaces" }
+  ],
+  "definitions": {
+    "config": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "The JSON schema for this file."
+        },
+        "registry": {
+          "type": "object",
+          "description": "The Hive registry: schema checks, publishes, app deployments and so on.",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "format": "uri",
+              "description": "GraphQL endpoint of the registry. Same as `--registry.endpoint` or `HIVE_REGISTRY`. Defaults to https://app.graphql-hive.com/graphql."
+            },
+            "accessToken": {
+              "type": "string",
+              "description": "Registry access token. Same as `--registry.accessToken` or `HIVE_TOKEN`."
+            },
+            "headers": {
+              "type": "object",
+              "description": "Extra HTTP headers sent with every request to the registry.",
+              "additionalProperties": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "cdn": {
+          "type": "object",
+          "description": "The Hive CDN, used by `artifact:fetch`.",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "format": "uri",
+              "description": "CDN endpoint. Same as `--cdn.endpoint` or `HIVE_CDN_ENDPOINT`."
+            },
+            "accessToken": {
+              "type": "string",
+              "description": "CDN access token. Same as `--cdn.accessToken` or `HIVE_CDN_ACCESS_TOKEN`."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "legacyConfig": {
+      "type": "object",
+      "description": "The legacy format. Prefer `registry.endpoint` and `registry.accessToken`.",
+      "deprecated": true,
+      "properties": {
+        "$schema": { "type": "string" },
+        "registry": { "type": "string", "description": "Registry endpoint." },
+        "token": { "type": "string", "description": "Registry access token." }
+      },
+      "anyOf": [{ "required": ["registry"] }, { "required": ["token"] }],
+      "additionalProperties": false
+    },
+    "spaces": {
+      "type": "object",
+      "description": "Several configurations in one file, keyed by name. The CLI reads the one named by `HIVE_SPACE`, or `default` when `HIVE_SPACE` is not set.",
+      "properties": {
+        "$schema": { "type": "string" }
+      },
+      "additionalProperties": {
+        "anyOf": [{ "$ref": "#/definitions/config" }, { "$ref": "#/definitions/legacyConfig" }]
+      }
+    }
+  }
+}
