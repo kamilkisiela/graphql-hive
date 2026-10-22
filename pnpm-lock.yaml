@@ -2234,7 +2234,7 @@ importers:
         version: 10.1.5
       '@fastify/vite':
         specifier: 9.2.0
-        version: 9.2.0(fastify@5.12.5)(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
+        version: 9.2.0(fastify@5.12.5)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
       '@graphiql/plugin-explorer':
         specifier: 4.0.0-alpha.2
         version: 4.0.0-alpha.2(@graphiql/react@1.0.0-alpha.4(patch_hash=1018befc9149cbc43bc2bf8982d52090a580e68df34b46674234f4e58eb6d0a0)(@codemirror/language@6.0.0)(@types/node@25.9.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql-ws@6.0.6(graphql@16.14.2)(ws@8.22.0))(graphql@16.14.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.14.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2294,7 +2294,7 @@ importers:
         version: 5.5.0
       '@tailwindcss/vite':
         specifier: 'catalog:'
-        version: 4.3.3(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
+        version: 4.3.3(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
       '@tanstack/react-query':
         specifier: 5.104.1
         version: 5.104.1(react@18.3.1)
@@ -2348,7 +2348,7 @@ importers:
         version: 9.0.2(@urql/core@6.0.3(graphql@16.14.2))(graphql@16.14.2)
       '@vitejs/plugin-react':
         specifier: 5.1.2
-        version: 5.1.2(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
+        version: 5.1.2(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -2488,14 +2488,14 @@ importers:
         specifier: 10.1.1
         version: 10.1.1(react@18.3.1)
       vite:
-        specifier: 7.3.6
-        version: 7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
+        specifier: 7.3.7
+        version: 7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
       vite-plugin-monaco-editor:
         specifier: 1.1.0
         version: 1.1.0(monaco-editor@0.52.2)
       vite-tsconfig-paths:
         specifier: 'catalog:'
-        version: 5.1.4(typescript@5.7.3)(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
+        version: 5.1.4(typescript@5.7.3)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
       wonka:
         specifier: 6.3.6
         version: 6.3.6
@@ -17145,8 +17145,8 @@ packages:
       vite:
         optional: true
 
-  vite@7.3.6:
-    resolution: {integrity: sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==}
+  vite@7.3.7:
+    resolution: {integrity: sha512-AHEzTORMbi7/7aXp7w7KZ5+DCUdSeLsJz0grY8xHpc9DHdYb0vQu6DqJfm2tOw3gDExNgPgnJTXxM6syYFHaCA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -19799,7 +19799,7 @@ snapshots:
       fastq: 1.19.1
       glob: 13.0.6
 
-  '@fastify/vite@9.2.0(fastify@5.12.5)(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
+  '@fastify/vite@9.2.0(fastify@5.12.5)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
     dependencies:
       '@fastify/deepmerge': 3.2.1
       '@fastify/middie': 9.3.2
@@ -19809,7 +19809,7 @@ snapshots:
       fs-extra: 11.4.0
       klaw: 4.1.0
       package-directory: 8.2.0
-      vite: 7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
+      vite: 7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
 
   '@floating-ui/core@1.7.4':
     dependencies:
@@ -26788,12 +26788,12 @@ snapshots:
       tailwindcss: 4.3.3
       vite: rolldown-vite@7.1.14(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(less@4.2.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
 
-  '@tailwindcss/vite@4.3.3(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
+  '@tailwindcss/vite@4.3.3(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
     dependencies:
       '@tailwindcss/node': 4.3.3
       '@tailwindcss/oxide': 4.3.3
       tailwindcss: 4.3.3
-      vite: 7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
+      vite: 7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
 
   '@tanstack/devtools-event-client@0.4.0': {}
 
@@ -27639,7 +27639,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@5.1.2(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
+  '@vitejs/plugin-react@5.1.2(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.7)
@@ -27647,7 +27647,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.53
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
+      vite: 7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -36095,13 +36095,13 @@ snapshots:
     dependencies:
       monaco-editor: 0.52.2
 
-  vite-tsconfig-paths@5.1.4(typescript@5.7.3)(vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)):
+  vite-tsconfig-paths@5.1.4(typescript@5.7.3)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)):
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       globrex: 0.1.2
       tsconfck: 3.0.3(typescript@5.7.3)
     optionalDependencies:
-      vite: 7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
+      vite: 7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -36117,14 +36117,14 @@ snapshots:
       - supports-color
       - typescript
 
-  vite@7.3.6(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3):
+  vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3):
     dependencies:
       esbuild: 0.28.1
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
       postcss: 8.5.25
       rollup: 4.59.0
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 25.9.9
       fsevents: 2.3.3
