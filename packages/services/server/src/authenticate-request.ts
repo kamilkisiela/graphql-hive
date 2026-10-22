@@ -38,28 +38,28 @@ export async function authenticateRequest(
 function getActorAttributes(session: Session): Attributes | null {
   if (session instanceof TargetAccessTokenSession) {
     return {
-      'hive.actor.type': 'targetAccessToken',
-      'hive.organization.id': session.organizationId,
-      'hive.project.id': session.projectId,
-      'hive.target.id': session.targetId,
+      'hive_console.actor.type': 'targetAccessToken',
+      'hive_console.actor.organization_id': session.organizationId,
+      'hive_console.actor.project_id': session.projectId,
+      'hive_console.actor.target_id': session.targetId,
     };
   }
 
   if (session instanceof SuperTokensCookieBasedSession) {
     return {
-      'hive.actor.type': 'user',
-      'hive.user.id': session.userId ?? '',
+      'hive_console.actor.type': 'user',
+      'hive_console.actor.user_id': session.userId ?? '',
     };
   }
 
   if (session instanceof OrganizationAccessTokenSession) {
     const accessToken = session.organizationAccessToken;
     return {
-      'hive.actor.type': 'organizationAccessToken',
-      'hive.access_token.id': accessToken.id,
-      'hive.organization.id': accessToken.organizationId,
-      ...(accessToken.projectId ? { 'hive.project.id': accessToken.projectId } : {}),
-      ...(accessToken.userId ? { 'hive.user.id': accessToken.userId } : {}),
+      'hive_console.actor.type': 'organizationAccessToken',
+      'hive_console.actor.access_token_id': accessToken.id,
+      'hive_console.actor.organization_id': accessToken.organizationId,
+      ...(accessToken.projectId ? { 'hive_console.actor.project_id': accessToken.projectId } : {}),
+      ...(accessToken.userId ? { 'hive_console.actor.user_id': accessToken.userId } : {}),
     };
   }
 
