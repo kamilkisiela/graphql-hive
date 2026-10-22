@@ -1,0 +1,13 @@
+{
+  "skills": ["hive-ci"],
+  "query": "We run GitLab CI/CD with merge trains on a Premium plan and a self-hosted Hive at https://hive.internal.example.com/graphql. Set up schema checks on merge requests and publishing on merge to the default branch for our single-schema project (schema.graphql at the repo root). Hive project: acme/api, target: staging.",
+  "files": [],
+  "expected_behavior": [
+    "Recommends flow A or C and explains that flow B is not available on GitLab because merge train pipelines do not expose the commit an entry is built on, and asks the user to choose before writing .gitlab-ci.yml",
+    "Sets HIVE_REGISTRY to the self-hosted registry endpoint for the CLI, and never uses HIVE_ENDPOINT or --registry",
+    "Runs the jobs in the pinned CLI image with entrypoint: [''] and excludes merge train pipelines from the check job with a merge_train rule",
+    "Passes --commit ${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA:-$CI_COMMIT_SHA}, --author $CI_COMMIT_AUTHOR and --contextId $CI_PROJECT_PATH#$CI_MERGE_REQUEST_IID on the check",
+    "Leaves out --service and --url because the project is a single schema",
+    "Keeps the check token unprotected and the publish token protected, both as masked CI/CD variables"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "skills": ["hive-ci"],
+  "query": "Our Hive schema check started failing in CI. The step runs `hive schema:check schema.graphql --commit \"$CI_COMMIT_SHA\" --author \"$CI_COMMIT_AUTHOR\"` with HIVE_TOKEN set from a project access token, and the log ends with an error whose code is [102]. What is wrong?",
+  "files": [],
+  "expected_behavior": [
+    "Looks up error code 102 on the Hive CLI errors page (https://the-guild.dev/graphql/hive/docs/api-reference/cli#errors) instead of guessing its meaning",
+    "Identifies that the command has no --target, and that project and organization access tokens need --target <organization>/<project>/<target> (or a target ID) on every command",
+    "Suggests running hive whoami with the same token to confirm its permissions if the error persists after the fix",
+    "Proposes the corrected command using only flags confirmed in the CLI command reference",
+    "Does not suggest deprecated flags such as --token or --registry"
+  ]
+}

@@ -291,7 +291,7 @@ installing the app, you should be redirected back to Hive.
 3. Setup a GitHub repo with CI/CD actions like this one:
    https://github.com/n1ru4l/hive-federation-subgraph/.
 4. Add the token to the repo's secrets as `HIVE_TOKEN`.
-5. Add Hive endpoint to the repo's secrets as `HIVE_ENDPOINT`
+5. If self hosting, add Hive endpoint to the repo's secrets as `HIVE_REGISTRY`
    (`https://hive-<your-name>.loophole.site/graphql`).
 6. Make sure your GitHub app is installed on that repo.
 7. Push a commit to the repo and check if the CI/CD action is triggered.
