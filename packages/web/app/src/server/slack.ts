@@ -11,19 +11,21 @@ const SlackIntegration_addSlackIntegration = graphql(/* GraphQL */ `
   }
 `);
 
+const OrganizationSlug = z
+  .string()
+  .min(1)
+  .max(50)
+  .regex(/^[a-z0-9-]+$/);
+
 const CallBackQuery = z.object({
   code: z.string({
     required_error: 'Invalid code',
   }),
-  state: z.string({
-    required_error: 'Invalid state',
-  }),
+  state: OrganizationSlug,
 });
 
 const ConnectParams = z.object({
-  organizationSlug: z.string({
-    required_error: 'Invalid organizationSlug',
-  }),
+  organizationSlug: OrganizationSlug,
 });
 
 const SlackOAuthv2AccessResponse = z.discriminatedUnion('ok', [

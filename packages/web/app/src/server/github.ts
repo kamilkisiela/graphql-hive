@@ -18,30 +18,28 @@ const GithubIntegration_addGitHubIntegration = graphql(/* GraphQL */ `
   }
 `);
 
+const OrganizationSlug = z
+  .string()
+  .min(1)
+  .max(50)
+  .regex(/^[a-z0-9-]+$/);
+
 const CallbackQuery = z.object({
   installation_id: z.string({
     required_error: 'Invalid installation_id',
   }),
-  state: z.string({
-    required_error: 'Invalid state',
-  }),
+  state: OrganizationSlug,
 });
 
 const SetupCallbackQuery = z.object({
   installation_id: z.string({
     required_error: 'Invalid installation_id',
   }),
-  state: z
-    .string({
-      required_error: 'Invalid state',
-    })
-    .optional(),
+  state: OrganizationSlug.optional(),
 });
 
 const ConnectParams = z.object({
-  organizationSlug: z.string({
-    required_error: 'Invalid organizationSlug',
-  }),
+  organizationSlug: OrganizationSlug,
 });
 
 export function connectGithub(server: FastifyInstance) {
