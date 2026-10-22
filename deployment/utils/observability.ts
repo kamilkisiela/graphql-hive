@@ -455,6 +455,13 @@ export class Observability {
                       action: 'keep',
                       regex: HUBBLE_METRICS.join('|'),
                     },
+                    // IPv6 control packets (router solicitation, neighbor discovery) on IPv4-only
+                    // clusters, dropped by Cilium as it has no IPv6 datapath. Harmless noise.
+                    {
+                      source_labels: ['__name__', 'reason'],
+                      action: 'drop',
+                      regex: 'hubble_drop_total;UNSUPPORTED_L3_PROTOCOL',
+                    },
                     {
                       action: 'labeldrop',
                       regex: 'ips_returned',

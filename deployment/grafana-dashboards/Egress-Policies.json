@@ -272,7 +272,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
+          "unit": "none",
           "decimals": 0
         },
         "overrides": []
@@ -288,6 +288,18 @@
       },
       "transformations": [
         {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "port",
+                "destinationType": "string"
+              }
+            ]
+          }
+        },
+        {
           "id": "organize",
           "options": {
             "excludeByName": {
@@ -298,14 +310,14 @@
               "host": 1,
               "port": 2,
               "verdict": 3,
-              "Value": 4
+              "Value #A": 4
             },
             "renameByName": {
               "workload": "Workload",
               "host": "Host",
               "port": "Port",
               "verdict": "Verdict",
-              "Value": "Connections"
+              "Value #A": "Connections"
             }
           }
         }
