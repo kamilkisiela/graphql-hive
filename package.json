@@ -139,7 +139,9 @@
     "overrides.@graphql-hive/gateway-plugin-console-sdk": "Use the in-repository version.",
     "overrides.@graphql-hive/yoga": "Use the in-repository version.",
     "overrides.@graphql-hive/core": "Use the in-repository version.",
+    "overrides.graphql-jit": "Bump graphql-jit to 0.8.10",
     "overrides": {
+      "graphql-jit@0.8.x": "0.8.10",
       "graphile-worker>@types/pg": "8.11.10",
       "esbuild": "0.28.1",
       "csstype": "3.1.2",
