@@ -182,6 +182,7 @@ function deployEgressFlowExporter() {
             {
               name: 'hubble-egress-exporter',
               image: 'quay.io/cilium/hubble:v1.16.4',
+              command: ['/usr/bin/hubble'],
               args: [
                 'observe',
                 '--server=hubble-relay.kube-system.svc.cluster.local:443',
