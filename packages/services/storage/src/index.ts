@@ -3375,8 +3375,8 @@ export function decodeCreatedAtAndHashBasedCursor(cursor: string) {
 const OIDCIntegrationBaseModel = z.object({
   id: z.string(),
   linkedOrganizationId: z.string(),
-  clientId: z.string(),
-  clientSecret: z.string(),
+  clientId: z.string().trim(),
+  clientSecret: z.string().trim(),
   additionalScopes: z
     .array(z.string())
     .nullable()
@@ -3386,7 +3386,7 @@ const OIDCIntegrationBaseModel = z.object({
   defaultRoleId: z.string().nullable(),
   defaultAssignedResources: z.any().nullable(),
   requireInvitation: z.boolean(),
-  userIdClaim: z.string().nullable(),
+  userIdClaim: z.string().trim().nullable(),
   /** Whether a user needs to be provisioned before login. */
   userProvisioningRequired: z.boolean(),
   /** Whether a user with a verified domain needs to log in through the OIDC flow. */
@@ -3394,7 +3394,7 @@ const OIDCIntegrationBaseModel = z.object({
 });
 
 const OIDCIntegrationLegacyModel = OIDCIntegrationBaseModel.extend({
-  oauthApiUrl: z.string().url(),
+  oauthApiUrl: z.string().trim().url(),
 }).transform(record => ({
   id: record.id,
   clientId: record.clientId,
@@ -3416,9 +3416,9 @@ const OIDCIntegrationLegacyModel = OIDCIntegrationBaseModel.extend({
 
 const LatestOIDCIntegrationModel = OIDCIntegrationBaseModel.extend({
   oauthApiUrl: z.null(),
-  tokenEndpoint: z.string().url(),
-  userinfoEndpoint: z.string().url(),
-  authorizationEndpoint: z.string().url(),
+  tokenEndpoint: z.string().trim().url(),
+  userinfoEndpoint: z.string().trim().url(),
+  authorizationEndpoint: z.string().trim().url(),
 }).transform(record => ({
   id: record.id,
   clientId: record.clientId,
