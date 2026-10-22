@@ -153,13 +153,79 @@ function toTargetPorts(target: InClusterTarget): pulumi.Output<PortRule[]> {
 }
 
 /**
+ * Streams the egress policy verdicts of new connections from the `default` namespace to the internet,
+ * from Hubble Relay into the pod logs (JSON, one line per connection). Vector ships them to Loki,
+ * where the Egress-Policies dashboard and alert turn them into workload -> host:port views.
+ *
+ * The Hubble metrics of ACNS have no workload context, and its DNS metrics no query names,
+ * so flows are the only source for "which workload talks to which host and port".
+ * Hubble attaches the resolved hostname (`destination_names`) to each flow, as the policies
+ * send DNS through the Cilium DNS proxy.
+ *
+ * Runs in `kube-system`, next to the relay's client certificates (rotated by AKS).
+ */
+function deployEgressFlowExporter() {
+  const labels = { app: 'hubble-egress-exporter' };
+
+  return new k8s.apps.v1.Deployment('hubble-egress-exporter', {
+    metadata: {
+      name: 'hubble-egress-exporter',
+      namespace: 'kube-system',
+    },
+    spec: {
+      replicas: 1,
+      selector: { matchLabels: labels },
+      template: {
+        metadata: { labels },
+        spec: {
+          containers: [
+            {
+              name: 'hubble-egress-exporter',
+              image: 'quay.io/cilium/hubble:v1.16.4',
+              command: ['/usr/bin/hubble'],
+              args: [
+                'observe',
+                '--server=hubble-relay.kube-system.svc.cluster.local:443',
+                '--tls',
+                '--tls-server-name=instance.hubble-relay.cilium.io',
+                '--tls-ca-cert-files=/certs/ca.crt',
+                '--tls-client-cert-file=/certs/tls.crt',
+                '--tls-client-key-file=/certs/tls.key',
+                '--follow',
+                '--output=jsonpb',
+                // One policy verdict per new connection (allowed or denied)
+                '--type=policy-verdict',
+                '--from-namespace=default',
+                '--to-label=reserved:world',
+              ],
+              resources: {
+                requests: { cpu: '10m', memory: '32Mi' },
+                limits: { cpu: '200m', memory: '128Mi' },
+              },
+              volumeMounts: [{ name: 'certs', mountPath: '/certs', readOnly: true }],
+            },
+          ],
+          volumes: [
+            {
+              name: 'certs',
+              secret: { secretName: 'hubble-relay-client-certs' },
+            },
+          ],
+        },
+      },
+    },
+  });
+}
+
+/**
  * Egress policies per deployment (one `CiliumNetworkPolicy` each), declared by the services.
  *
  * Modes (`cilium:egressPolicies`):
  * - unset: no policies are created.
- * - `observe`: all egress is allowed, but DNS lookups go through the Cilium DNS proxy,
- *   so Hubble records the FQDNs every workload resolves. The declared rules are rendered as well,
- *   so they can be reviewed before enforcing.
+ * - `observe`: all egress is allowed (by a separate `<deployment>-egress-observe` policy), while
+ *   DNS lookups go through the Cilium DNS proxy and the declared rules are rendered as in `enforce`.
+ *   The policy verdicts then show whether a connection matches a declaration, or only the
+ *   observe-mode allow-all rule and would be blocked once enforced (Egress-Policies dashboard).
  * - `enforce`: egress is limited to the declared rules.
  *
  * Deleting a policy restores the default allow-all behavior for its deployment instantly.
@@ -220,7 +286,7 @@ export function initEgressPolicy() {
       return this;
     },
     deploy() {
-      return Array.from(workloads.values()).map(rules => {
+      const policies = Array.from(workloads.values()).map(rules => {
         const name = pulumi.resourceName(rules.workload);
 
         const egress: pulumi.Input<object[]>[] = [
@@ -268,22 +334,18 @@ export function initEgressPolicy() {
           egress.push([{ toEntities: ['world'] }]);
         }
 
-        if (mode === 'observe') {
-          // Keeps all egress allowed while observing.
-          egress.push([{ toEntities: ['cluster', 'kube-apiserver', 'world'] }]);
-        }
+        const namespace = rules.workload.metadata.namespace;
+        const endpointSelector = { matchLabels: rules.workload.spec.selector.matchLabels };
 
-        return new k8s.apiextensions.CustomResource(`${name}-egress`, {
+        const policy = new k8s.apiextensions.CustomResource(`${name}-egress`, {
           apiVersion: 'cilium.io/v2',
           kind: 'CiliumNetworkPolicy',
           metadata: {
             name: `${name}-egress`,
-            namespace: rules.workload.metadata.namespace,
+            namespace,
           },
           spec: {
-            endpointSelector: {
-              matchLabels: rules.workload.spec.selector.matchLabels,
-            },
+            endpointSelector,
             // Hostnames and ports aren't secret, even when derived from secret config
             // (e.g. connection strings). Keeps the rules reviewable in `pulumi preview`.
             egress: pulumi.unsecret(pulumi.all(egress).apply(rules => rules.flat())),
@@ -293,7 +355,34 @@ export function initEgressPolicy() {
               : {}),
           },
         });
+
+        if (mode !== 'observe') {
+          return [policy];
+        }
+
+        // Keeps all egress allowed while observing. `all` is the least specific rule (an allow-all
+        // match), and Cilium always reports the most specific matching rule in the policy verdicts
+        // (`policy_match_type`). So a connection reported as an allow-all match isn't covered by any
+        // declaration, and would be blocked once enforced (Egress-Policies dashboard).
+        const observePolicy = new k8s.apiextensions.CustomResource(`${name}-egress-observe`, {
+          apiVersion: 'cilium.io/v2',
+          kind: 'CiliumNetworkPolicy',
+          metadata: {
+            name: `${name}-egress-observe`,
+            namespace,
+          },
+          spec: {
+            endpointSelector,
+            egress: [{ toEntities: ['all'] }],
+          },
+        });
+
+        return [policy, observePolicy];
       });
+
+      deployEgressFlowExporter();
+
+      return policies.flat();
     },
   };
 }

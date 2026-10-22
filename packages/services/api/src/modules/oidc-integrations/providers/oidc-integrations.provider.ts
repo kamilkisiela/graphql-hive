@@ -880,15 +880,17 @@ export class OIDCIntegrationsProvider {
 
 const OIDCIntegrationClientIdModel = zod
   .string()
+  .trim()
   .min(3, 'Must be at least 3 characters long.')
   .max(100, 'Can not be longer than 100 characters.');
 
 const OIDCClientSecretModel = zod
   .string()
+  .trim()
   .min(3, 'Must be at least 3 characters long.')
   .max(200, 'Can not be longer than 200 characters.');
 
-const OAuthAPIUrlModel = zod.string().url('Must be a valid OAuth API url.');
+const OAuthAPIUrlModel = zod.string().trim().url('Must be a valid OAuth API url.');
 
 const OIDCScopeModel = zod
   .string()
@@ -912,6 +914,7 @@ const maybe = <TSchema>(schema: zod.ZodSchema<TSchema>) => zod.union([schema, zo
 
 const FQDNModel = zod
   .string()
+  .trim()
   .min(3, 'Must be at least 3 characters long')
   .max(255, 'Must be at most 255 characters long.')
   .regex(/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]+$/, 'Invalid domain provided.');

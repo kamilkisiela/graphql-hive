@@ -98,6 +98,7 @@ const cdn = deployCFCDN({
 const lambdaFunction = deployAWSArtifactsLambdaFunction({
   s3Mirror,
   environment,
+  awsIamAuthEnabled: true,
 });
 
 const broker = deployCFBroker({

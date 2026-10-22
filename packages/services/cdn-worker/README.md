@@ -159,7 +159,8 @@ curl --fail --location \
 ```
 
 1. Create a Lambda execution role whose trust policy allows `lambda.amazonaws.com` to assume it, and
-   attach the AWS-managed `AWSLambdaBasicExecutionRole` policy for CloudWatch logging.
+   attach the AWS-managed `AWSLambdaBasicExecutionRole` policy for CloudWatch logging. To use IAM
+   authentication for S3, also grant the role `s3:GetObject` access to the artifact bucket.
 2. Create the function with these settings:
    - Runtime: Node.js 22.x
    - Package type: ZIP
@@ -168,12 +169,22 @@ curl --fail --location \
    - Memory: 448 MB
    - Timeout: 10 seconds
 3. Upload `hive-cdn-aws-lambda.zip` as the function code.
-4. Configure all four required environment variables:
+4. Configure the required storage environment variables:
+
    - `AWS_S3_ENDPOINT`: the S3-compatible endpoint URL.
    - `AWS_S3_BUCKET_NAME`: the artifact bucket name.
-   - `AWS_S3_ACCESS_KEY_ID`: the storage access key ID.
-   - `AWS_S3_ACCESSS_KEY_SECRET`: the storage secret access key. The three consecutive `S`
-     characters in `ACCESSS` are required by the current runtime contract.
+   - To use the Lambda execution role, set `AWS_S3_IAM_AUTH_ENABLED` to `1`. For example:
+
+     ```sh
+     AWS_S3_IAM_AUTH_ENABLED=1
+     AWS_S3_ENDPOINT=https://s3.us-east-1.amazonaws.com
+     AWS_S3_BUCKET_NAME=my-artifacts-bucket
+     ```
+
+   - To use static credentials, leave `AWS_S3_IAM_AUTH_ENABLED` unset or set it to `0`, then set
+     `AWS_S3_ACCESS_KEY_ID` and `AWS_S3_ACCESSS_KEY_SECRET`. The three consecutive `S` characters in
+     `ACCESSS` are required by the current runtime contract.
+
 5. Create a Lambda Function URL. The current Hive deployment uses `NONE` authentication and buffered
    invocation. Review the exposure of an unauthenticated URL before using that setting.
 

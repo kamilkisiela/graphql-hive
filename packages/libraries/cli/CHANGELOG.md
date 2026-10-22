@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.68.1
+
+### Patch Changes
+
+- [#8756](https://github.com/graphql-hive/console/pull/8756)
+  [`2f51407`](https://github.com/graphql-hive/console/commit/2f51407d2c819103d8c238c424834262ee144738)
+  Thanks [@jdolle](https://github.com/jdolle)! - `app:create` retries a failed document upload batch
+  at most twice (three attempts in total) instead of five times.
+
 ## 0.68.0
 
 ### Minor Changes

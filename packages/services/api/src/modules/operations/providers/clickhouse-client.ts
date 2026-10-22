@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
+import { TimeoutError } from 'got';
 import { Inject, Injectable } from 'graphql-modules';
 import { printWithValues, sql, SqlStatement, toQueryParams } from '@hive/clickhouse';
 import { setErrorSource, SpanKind, trace } from '@hive/service-common';
@@ -415,13 +416,23 @@ export class ClickHouse {
     return response;
   }
 
-  /** Please insert data with this function :) */
+  /**
+   * Please insert data with this function :)
+   *
+   * `signal` is the deadline of the insert. `timeout` (55 s by default) only bounds a request
+   * whose signal is missing or never fires.
+   *
+   * By default the data goes through ClickHouse's asynchronous insert queue, where it is
+   * coalesced with other inserts of the same shape and flushed by a shared pool. `mode: 'sync'`
+   * writes it in this request instead.
+   */
   async insert(args: {
     query: SqlStatement;
     queryId: string;
     data: unknown[][];
-    timeout: number;
+    timeout?: number;
     signal?: AbortSignal;
+    mode?: 'async' | 'sync';
   }): Promise<void> {
     const startedAt = Date.now();
     const executionId = args.queryId + '-' + Math.random().toString(16).substring(2);
@@ -452,8 +463,11 @@ export class ClickHouse {
           ),
           searchParams: {
             query: args.query.sql,
-            async_insert: 1,
-            wait_for_async_insert: 1,
+            query_id: executionId,
+            // `async_insert` defaults to 1 since ClickHouse 26.2, so sync mode has to say 0.
+            ...(args.mode === 'sync'
+              ? { async_insert: 0 }
+              : { async_insert: 1, wait_for_async_insert: 1 }),
             ...this.databaseParam(),
           },
           username: this.config.username,
@@ -467,6 +481,24 @@ export class ClickHouse {
             // let `calculateDelay` decide on every error, got only calls it for retries allowed by its default rules otherwise
             enforceRetryRules: false,
             calculateDelay: info => {
+              span.setAttribute('retry.count', info.attemptCount);
+
+              // Once the batch was sent, ClickHouse keeps processing it whether or not this
+              // request is still waiting (an async insert sits in the buffer until flushed, a
+              // sync one runs on after the client disconnects); sending it again would store it
+              // twice.
+              if (
+                args.signal?.aborted ||
+                (info.error instanceof TimeoutError && info.error.event === 'request')
+              ) {
+                this.logger.warn(
+                  'Not retrying ClickHouse insert after %s (executionId: %s)',
+                  info.error.name,
+                  executionId,
+                );
+                return 0;
+              }
+
               if (info.attemptCount >= maxRetry) {
                 this.logger.warn(
                   'Exceeded the retry limit (%s/%s) for %s',
@@ -486,12 +518,24 @@ export class ClickHouse {
             lookup: 2000,
             connect: 2000,
             secureConnect: 2000,
-            request: 30_000,
+            // override the provided timeout of an insert with the globally configured timeout
+            request: this.config.requestTimeout ?? args.timeout ?? 55_000,
           },
           signal: args.signal,
           agent: {
             http: httpAgent,
             https: httpsAgent,
+          },
+          hooks: {
+            beforeRequest: [
+              (options, { retryCount }) => {
+                if (retryCount > 0) {
+                  // Avoid QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING while the previous attempt still
+                  // runs server-side.
+                  options.searchParams.set('query_id', `${executionId}-r${retryCount}`);
+                }
+              },
+            ],
           },
         },
         span,

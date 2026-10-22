@@ -1,5 +1,44 @@
 # hive
 
+## 14.1.1
+
+### Patch Changes
+
+- [#8749](https://github.com/graphql-hive/console/pull/8749)
+  [`95c2ad4`](https://github.com/graphql-hive/console/commit/95c2ad404f69cf8ecbfe42884ae38b6689102b83)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Improve schema check data loading performance.
+
+- [#8756](https://github.com/graphql-hive/console/pull/8756)
+  [`2f51407`](https://github.com/graphql-hive/console/commit/2f51407d2c819103d8c238c424834262ee144738)
+  Thanks [@jdolle](https://github.com/jdolle)! - Bound the ClickHouse insert of persisted documents
+  by the upload's abort signal (55 s fallback) instead of a fixed 30 s request timeout, send a query
+  id with it so server-side logs can be matched to traces, and stop re-sending a batch after a
+  timeout: with asynchronous inserts the first copy is already buffered server-side, so a retry
+  stored it twice. The `addPreprocessedDocumentsToAppDeployment` path now has the same 50 s budget
+  as the worker path.
+
+- [#8752](https://github.com/graphql-hive/console/pull/8752)
+  [`0b844b3`](https://github.com/graphql-hive/console/commit/0b844b3dda0a4af4b1d77077ca632bd132ea817f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Increase the timeout for writing persisted
+  documents to clickhouse.
+
+- [#8748](https://github.com/graphql-hive/console/pull/8748)
+  [`8ee6aa4`](https://github.com/graphql-hive/console/commit/8ee6aa4de4119d6fc932e8cd56c58864297e59e2)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Improve performance of loading schema history from
+  the database.
+
+- [#8757](https://github.com/graphql-hive/console/pull/8757)
+  [`9224191`](https://github.com/graphql-hive/console/commit/922419170743e5b000332948968785aac067c67b)
+  Thanks [@jdolle](https://github.com/jdolle)! - Persisted documents are written to ClickHouse with
+  a synchronous insert. A batch no longer joins the server-wide asynchronous insert queue, where it
+  was coalesced with other uploads and waited behind other tables' flushes; its latency and memory
+  are now those of its own rows.
+
+- [#8750](https://github.com/graphql-hive/console/pull/8750)
+  [`57edffb`](https://github.com/graphql-hive/console/commit/57edffbda9e91dab42626149dba7893ad0c45639)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add authenticated actor and resource identifiers to
+  request traces.
+
 ## 14.1.0
 
 ### Minor Changes

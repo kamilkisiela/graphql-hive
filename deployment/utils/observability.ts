@@ -22,6 +22,8 @@ const REVERSE_PROXY_METRICS = [
  * Hubble metrics exposed by the Cilium agents (Advanced Container Networking Services),
  * used to monitor the egress policies (see `services/egress-policy.ts`).
  * DNS metrics are only produced for pods selected by a policy with DNS rules.
+ * ACNS exposes them per node only (no source / destination workload, no DNS query names);
+ * the per-workload view comes from the egress flow logs in Loki.
  */
 const HUBBLE_METRICS = [
   'hubble_drop_total',
@@ -107,14 +109,14 @@ export class Observability {
         ? {
             stdout: {
               type: 'console',
-              inputs: ['kubernetes_logs'],
+              inputs: ['kubernetes_logs', 'hubble_egress_logs'],
               encoding: { codec: 'json' },
             },
           }
         : {
             grafana_lab: {
               type: 'loki',
-              inputs: ['kubernetes_logs', 'envoy_error_logs'],
+              inputs: ['kubernetes_logs', 'envoy_error_logs', 'hubble_egress_logs'],
               endpoint: interpolate`https://${this.config.loki.endpoint}`,
               auth: {
                 strategy: 'basic',
@@ -453,28 +455,16 @@ export class Observability {
                       action: 'keep',
                       regex: HUBBLE_METRICS.join('|'),
                     },
-                    // `source` / `destination` are "namespace/pod". Split them and reduce pods to
-                    // their workload (also dropping Pulumi's name suffix), so series survive
-                    // rollouts and cardinality stays low.
-                    ...(['source', 'destination'] as const).flatMap(label => [
-                      {
-                        source_labels: [label],
-                        action: 'replace',
-                        regex: '([^/]+)/.+',
-                        replacement: '$$1',
-                        target_label: `${label}_namespace`,
-                      },
-                      {
-                        source_labels: [label],
-                        action: 'replace',
-                        regex: '[^/]+/(.+?)(?:-[0-9a-f]{8})?(?:-[a-z0-9]{8,10})?-[a-z0-9]{5}',
-                        replacement: '$$1',
-                        target_label: `${label}_workload`,
-                      },
-                    ]),
+                    // IPv6 control packets (router solicitation, neighbor discovery) on IPv4-only
+                    // clusters, dropped by Cilium as it has no IPv6 datapath. Harmless noise.
+                    {
+                      source_labels: ['__name__', 'reason'],
+                      action: 'drop',
+                      regex: 'hubble_drop_total;UNSUPPORTED_L3_PROTOCOL',
+                    },
                     {
                       action: 'labeldrop',
-                      regex: 'source|destination|ips_returned',
+                      regex: 'ips_returned',
                     },
                   ],
                 },
@@ -545,6 +535,12 @@ export class Observability {
           envoy_logs: {
             type: 'kubernetes_logs',
             extra_field_selector: 'metadata.namespace=contour',
+          },
+          // Egress policy verdicts per connection (see `deployment/services/egress-policy.ts`)
+          hubble_egress_logs: {
+            type: 'kubernetes_logs',
+            extra_field_selector: 'metadata.namespace=kube-system',
+            extra_label_selector: 'app=hubble-egress-exporter',
           },
         },
         transforms: {
