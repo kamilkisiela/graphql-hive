@@ -8,17 +8,17 @@
   "links": [],
   "panels": [
     {
-      "id": 1,
+      "id": 11,
       "type": "stat",
-      "title": "Denied egress connections",
-      "description": "New connections from `default` to the internet that an egress policy denied, in the selected time range. Expected to be 0 in `observe` mode.",
+      "title": "Would be blocked once enforced",
+      "description": "Distinct workload -> host:port pairs in the selected time range that are only allowed by the observe-mode policy, i.e. not declared. Expected to be 0 before switching to `enforce`.",
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
+        "w": 5,
         "x": 0,
         "y": 0
       },
@@ -29,7 +29,66 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum(count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | verdict=\"DROPPED\" [$__range])) or vector(0)",
+          "queryType": "instant",
+          "refId": "A",
+          "legendFormat": "",
+          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` | allowlisted=\"no\" [$__range]))) or vector(0)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      }
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Denied egress connections",
+      "description": "New connections from `default` to the internet that an egress policy denied, in the selected time range. Expected to be 0 in `observe` mode.",
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 5,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` | verdict=\"DROPPED\" [$__range])) or vector(0)",
           "legendFormat": "",
           "refId": "A",
           "queryType": "instant"
@@ -77,8 +136,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 6,
+        "w": 5,
+        "x": 10,
         "y": 0
       },
       "targets": [
@@ -88,7 +147,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` [$__range])))",
+          "expr": "count(sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` [$__range])))",
           "legendFormat": "",
           "refId": "A",
           "queryType": "instant"
@@ -132,8 +191,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 12,
+        "w": 5,
+        "x": 15,
         "y": 0
       },
       "targets": [
@@ -192,8 +251,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 6,
-        "x": 18,
+        "w": 4,
+        "x": 20,
         "y": 0
       },
       "targets": [
@@ -245,7 +304,7 @@
       "id": 5,
       "type": "table",
       "title": "External destinations per workload",
-      "description": "Every workload -> host:port from `default` to the internet in the selected time range, with the policy verdict and the number of new connections. Compare with each service's `allowExternal` declarations before enforcing. Host falls back to the IP when the connection wasn't preceded by a DNS lookup.",
+      "description": "Every workload -> host:port from `default` to the internet in the selected time range, with the number of new connections. Allowlisted = allowed by the service's declarations (`allowExternal` / `allowAnyExternal`). In `observe` mode, rows with Allowlisted = no would be blocked once enforced. Host falls back to the IP when the connection wasn't preceded by a DNS lookup.",
       "datasource": {
         "type": "loki",
         "uid": "grafanacloud-logs"
@@ -263,7 +322,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (workload, host, port, verdict) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` [$__range]))",
+          "expr": "sum by (workload, host, port, allowlisted, verdict) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` [$__range]))",
           "legendFormat": "",
           "refId": "A",
           "queryType": "instant",
@@ -275,13 +334,48 @@
           "unit": "none",
           "decimals": 0
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Allowlisted"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "no": {
+                        "color": "orange",
+                        "index": 0,
+                        "text": "no"
+                      },
+                      "yes": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "yes"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "showHeader": true,
         "sortBy": [
           {
-            "displayName": "Workload",
+            "displayName": "Allowlisted",
             "desc": false
           }
         ]
@@ -309,13 +403,15 @@
               "workload": 0,
               "host": 1,
               "port": 2,
-              "verdict": 3,
-              "Value #A": 4
+              "allowlisted": 3,
+              "verdict": 4,
+              "Value #A": 5
             },
             "renameByName": {
               "workload": "Workload",
               "host": "Host",
               "port": "Port",
+              "allowlisted": "Allowlisted",
               "verdict": "Verdict",
               "Value #A": "Connections"
             }
@@ -345,7 +441,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (workload) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` [$__interval]))",
+          "expr": "sum by (workload) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` [$__interval]))",
           "legendFormat": "{{workload}}",
           "refId": "A",
           "queryType": "range"
@@ -396,7 +492,7 @@
             "uid": "grafanacloud-logs"
           },
           "editorMode": "code",
-          "expr": "sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | verdict=\"DROPPED\" [$__interval]))",
+          "expr": "sum by (workload, host, port) (count_over_time({namespace=\"kube-system\", container_name=\"hubble-egress-exporter\"} | json workload=\"flow.source.workloads[0].name\", host=\"flow.destination_names[0]\", ip=\"flow.IP.destination\", port=\"flow.l4.TCP.destination_port\", verdict=\"flow.verdict\" | label_format workload=`{{ regexReplaceAll \"-[0-9a-f]{8}$\" .workload \"\" }}`, host=`{{ if .host }}{{ .host }}{{ else }}{{ .ip }}{{ end }}` | label_format allowlisted=`{{ if contains (printf \"\\\"name\\\":\\\"%s-egress\\\"\" .workload) __line__ }}yes{{ else }}no{{ end }}` | verdict=\"DROPPED\" [$__interval]))",
           "legendFormat": "{{workload}} -> {{host}}:{{port}}",
           "refId": "A",
           "queryType": "range"

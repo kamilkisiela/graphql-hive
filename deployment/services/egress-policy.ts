@@ -222,9 +222,10 @@ function deployEgressFlowExporter() {
  *
  * Modes (`cilium:egressPolicies`):
  * - unset: no policies are created.
- * - `observe`: all egress is allowed, but DNS lookups go through the Cilium DNS proxy,
- *   so Hubble records the FQDNs every workload resolves. The declared rules are rendered as well,
- *   so they can be reviewed before enforcing.
+ * - `observe`: all egress is allowed (by a separate `<deployment>-egress-observe` policy), while
+ *   DNS lookups go through the Cilium DNS proxy and the declared rules are rendered as in `enforce`.
+ *   The policy verdicts then show whether a connection is allowed by the declarations or would be
+ *   blocked once enforced (Egress-Policies dashboard).
  * - `enforce`: egress is limited to the declared rules.
  *
  * Deleting a policy restores the default allow-all behavior for its deployment instantly.
@@ -333,22 +334,18 @@ export function initEgressPolicy() {
           egress.push([{ toEntities: ['world'] }]);
         }
 
-        if (mode === 'observe') {
-          // Keeps all egress allowed while observing.
-          egress.push([{ toEntities: ['cluster', 'kube-apiserver', 'world'] }]);
-        }
+        const namespace = rules.workload.metadata.namespace;
+        const endpointSelector = { matchLabels: rules.workload.spec.selector.matchLabels };
 
-        return new k8s.apiextensions.CustomResource(`${name}-egress`, {
+        const policy = new k8s.apiextensions.CustomResource(`${name}-egress`, {
           apiVersion: 'cilium.io/v2',
           kind: 'CiliumNetworkPolicy',
           metadata: {
             name: `${name}-egress`,
-            namespace: rules.workload.metadata.namespace,
+            namespace,
           },
           spec: {
-            endpointSelector: {
-              matchLabels: rules.workload.spec.selector.matchLabels,
-            },
+            endpointSelector,
             // Hostnames and ports aren't secret, even when derived from secret config
             // (e.g. connection strings). Keeps the rules reviewable in `pulumi preview`.
             egress: pulumi.unsecret(pulumi.all(egress).apply(rules => rules.flat())),
@@ -358,11 +355,33 @@ export function initEgressPolicy() {
               : {}),
           },
         });
+
+        if (mode !== 'observe') {
+          return [policy];
+        }
+
+        // Keeps all egress allowed while observing. A separate policy, so the policy verdicts
+        // (`egress_allowed_by`) tell connections allowed by the declarations apart from the ones
+        // only allowed here, which would be blocked once enforced.
+        const observePolicy = new k8s.apiextensions.CustomResource(`${name}-egress-observe`, {
+          apiVersion: 'cilium.io/v2',
+          kind: 'CiliumNetworkPolicy',
+          metadata: {
+            name: `${name}-egress-observe`,
+            namespace,
+          },
+          spec: {
+            endpointSelector,
+            egress: [{ toEntities: ['cluster', 'kube-apiserver', 'world'] }],
+          },
+        });
+
+        return [policy, observePolicy];
       });
 
       deployEgressFlowExporter();
 
-      return policies;
+      return policies.flat();
     },
   };
 }
