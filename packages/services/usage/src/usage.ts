@@ -13,7 +13,7 @@ import {
   traceInlineSync,
   type ServiceLogger,
 } from '@hive/service-common';
-import type { RawOperationMap, RawReport } from '@hive/usage-common';
+import type { RawOperationErrors, RawOperationMap, RawReport } from '@hive/usage-common';
 import { compressZstd } from '@hive/usage-common';
 import * as Sentry from '@sentry/node';
 import { calculateChunkSize, createKVBuffer } from './buffer';
@@ -54,6 +54,13 @@ const retryOptions = {
 } satisfies RetryOptions; // why satisfies? To be able to use `retryOptions.retries` and get `number` instead of `number | undefined`
 
 export function splitReport(report: RawReport, numOfChunks: number): RawReport[] {
+  if (Object.keys(report.map).length > 1) {
+    return splitReportByMapKey(report, numOfChunks);
+  }
+  return splitReportByEntries(report, numOfChunks);
+}
+
+function splitReportByMapKey(report: RawReport, numOfChunks: number): RawReport[] {
   const reports: RawReport[] = [];
   const operationMapLength = Object.keys(report.map).length;
 
@@ -104,7 +111,6 @@ export function splitReport(report: RawReport, numOfChunks: number): RawReport[]
       const chunkIndex = keyReportIndexMap[subscriptionOp.operationMapKey];
       const chunkReport = reports[chunkIndex];
       (chunkReport.subscriptionOperations ??= []).push(subscriptionOp);
-      // report.size counts operations + subscriptionOperations (see usage-processor-2.ts) - keep that invariant per chunk.
       chunkReport.size += 1;
     }
   }
@@ -128,8 +134,98 @@ export function splitReport(report: RawReport, numOfChunks: number): RawReport[]
   return reports;
 }
 
+function distributeByCount<X>(items: readonly X[], numOfChunks: number): X[][] {
+  const chunks: X[][] = [];
+  let endedAt = 0;
+  for (let chunkIndex = 0; chunkIndex < numOfChunks; chunkIndex++) {
+    const chunkSize = calculateChunkSize(items.length, numOfChunks, chunkIndex);
+    const start = endedAt;
+    const end = start + chunkSize;
+    endedAt = end;
+    chunks.push(items.slice(start, end));
+  }
+  return chunks;
+}
+
+// When at a single map key, then map-based division can't reduce anything
+// further. This divides the operations/subscriptionOperations/errors arrays directly
+// instead.
+function splitReportByEntries(report: RawReport, numOfChunks: number): RawReport[] {
+  const operationChunks = distributeByCount(report.operations, numOfChunks);
+  const subscriptionOperationChunks = distributeByCount(
+    report.subscriptionOperations ?? [],
+    numOfChunks,
+  );
+
+  // Mapping the the operation key and timestamp to the chunk index allows linking
+  // errors back to the correct chunk. Route each error into whichever chunk its operation landed in,
+  // so a chunk that's later dropped or sent independently  doesn't separate an operation from the errors it produced.
+  const chunkIndexByOperationIdentity = new Map<string, number>();
+  operationChunks.forEach((operations, chunkIndex) => {
+    for (const operation of operations) {
+      chunkIndexByOperationIdentity.set(`${operation.operationMapKey}|${operation.timestamp}`, chunkIndex);
+    }
+  });
+
+  const errorChunks: RawOperationErrors[][] = Array.from({ length: numOfChunks }, () => []);
+  distributeByCount(report.errors ?? [], numOfChunks).forEach((slice, fallbackChunkIndex) => {
+    for (const errorRecord of slice) {
+      const chunkIndex =
+        chunkIndexByOperationIdentity.get(`${errorRecord.operationMapKey}|${errorRecord.timestamp}`) ??
+        fallbackChunkIndex;
+      errorChunks[chunkIndex].push(errorRecord);
+    }
+  });
+
+  const reports: RawReport[] = [];
+  for (let chunkIndex = 0; chunkIndex < numOfChunks; chunkIndex++) {
+    const operations = operationChunks[chunkIndex];
+    const subscriptionOperations = subscriptionOperationChunks[chunkIndex];
+    const errors = errorChunks[chunkIndex];
+
+    if (operations.length === 0 && subscriptionOperations.length === 0 && errors.length === 0) {
+      // numOfChunks exceeded the number of entries to distribute - nothing to
+      // assign here. Skip it rather than emitting an empty report.
+      continue;
+    }
+
+    reports.push({
+      id: `${report.id}--chunk-${chunkIndex}`,
+      size: operations.length + subscriptionOperations.length,
+      target: report.target,
+      organization: report.organization,
+      map: { ...report.map },
+      operations,
+      subscriptionOperations: subscriptionOperations.length ? subscriptionOperations : undefined,
+      errors: errors.length ? errors : undefined,
+    });
+  }
+
+  if (report.appDeploymentUsageTimestamps && reports.length > 0) {
+    reports[reports.length - 1].appDeploymentUsageTimestamps = report.appDeploymentUsageTimestamps;
+  }
+
+  return reports;
+}
+
+export function calculateReportSize(report: RawReport): number {
+  const errorCount = report.errors?.reduce((sum, entry) => sum + entry.errors.length, 0) ?? 0;
+  return (
+    Object.keys(report.map).length +
+    report.operations.length +
+    (report.subscriptionOperations?.length ?? 0) +
+    errorCount
+  );
+}
+
 export function isSplittable(report: RawReport): boolean {
-  return Object.keys(report.map).length > 1;
+  // Errors need no check of their own: each error entry is created from at most
+  // one operation, so errors.length can never exceed operations.length.
+  return (
+    Object.keys(report.map).length > 1 ||
+    report.operations.length > 1 ||
+    (report.subscriptionOperations?.length ?? 0) > 1
+  );
 }
 
 export function createUsage(config: {
@@ -241,9 +337,7 @@ export function createUsage(config: {
     isTooLargePayloadError(error) {
       return error instanceof Error && 'type' in error && error.type === 'MESSAGE_TOO_LARGE';
     },
-    calculateReportSize(report) {
-      return Object.keys(report.map).length;
-    },
+    calculateReportSize,
     isSplittable,
     split(report, numOfChunks) {
       logger.debug('Splitting report into %s chunks (id=%s)', numOfChunks, report.id);

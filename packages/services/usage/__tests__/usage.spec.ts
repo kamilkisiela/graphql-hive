@@ -1,5 +1,5 @@
 import type { RawReport } from '@hive/usage-common';
-import { isSplittable, splitReport } from '../src/usage';
+import { calculateReportSize, isSplittable, splitReport } from '../src/usage';
 
 test('should split report based on operation map length', () => {
   const now = Date.now();
@@ -168,11 +168,72 @@ test('should skip empty chunks when numOfChunks exceeds the number of map keys',
   }
 });
 
-test('should preserve all errors when splitting a report with one hot operation and many errors', () => {
+test('should skip empty chunks when numOfChunks exceeds the number of entries under one map key', () => {
   const now = Date.now();
   const report: RawReport = {
     id: 'test-id',
-    size: 1,
+    size: 3,
+    target: 'test-target',
+    organization: 'test-organization',
+    map: {
+      op1: { key: 'op1', operation: 'test-operation-1', fields: [] },
+    },
+    operations: [
+      { operationMapKey: 'op1', timestamp: now, execution: { ok: true, errorsTotal: 0, duration: 1 } },
+      { operationMapKey: 'op1', timestamp: now, execution: { ok: true, errorsTotal: 0, duration: 1 } },
+      { operationMapKey: 'op1', timestamp: now, execution: { ok: true, errorsTotal: 0, duration: 1 } },
+    ],
+  };
+
+  const reports = splitReport(report, 10);
+
+  expect(reports).toHaveLength(3);
+  const totalOperations = reports.reduce((sum, r) => sum + r.operations.length, 0);
+  expect(totalOperations).toEqual(3);
+  for (const chunk of reports) {
+    expect(chunk.operations.length).toBeGreaterThan(0);
+    expect(chunk.map).toEqual(report.map);
+  }
+});
+
+test('should divide subscriptionOperations under one map key when there are no operations', () => {
+  const now = Date.now();
+  const subscriptionOperations = Array.from({ length: 4 }, () => ({
+    operationMapKey: 'op1',
+    timestamp: now,
+  }));
+  const report: RawReport = {
+    id: 'test-id',
+    size: 4,
+    target: 'test-target',
+    organization: 'test-organization',
+    map: {
+      op1: { key: 'op1', operation: 'test-operation-1', fields: [] },
+    },
+    operations: [],
+    subscriptionOperations,
+  };
+
+  const reports = splitReport(report, 2);
+
+  expect(reports).toHaveLength(2);
+  const totalSubscriptionOperations = reports.reduce(
+    (sum, r) => sum + (r.subscriptionOperations?.length ?? 0),
+    0,
+  );
+  expect(totalSubscriptionOperations).toEqual(4);
+  for (const chunk of reports) {
+    expect(chunk.operations).toEqual([]);
+    expect(chunk.subscriptionOperations?.length).toEqual(2);
+    expect(chunk.map).toEqual(report.map);
+  }
+});
+
+test('should divide a hot operation (one map key, many operations) by entries, not by map key', () => {
+  const baseTime = Date.now();
+  const report: RawReport = {
+    id: 'test-id',
+    size: 8,
     target: 'test-target',
     organization: 'test-organization',
     map: {
@@ -182,28 +243,107 @@ test('should preserve all errors when splitting a report with one hot operation 
         fields: ['test-field-1'],
       },
     },
+    operations: Array.from({ length: 8 }, (_, i) => ({
+      operationMapKey: 'op1',
+      timestamp: baseTime + i,
+      execution: { ok: i % 2 === 0, errorsTotal: i % 2 === 0 ? 0 : 1, duration: 1 },
+    })),
+  };
+
+  // A single map key can't be divided further, but the 8 operations under it can -
+  // the split must divide them across multiple reports rather than collapsing
+  // everything into one, while keeping the (duplicated) map entry available in
+  // every chunk so each operation's operationMapKey still resolves.
+  const reports = splitReport(report, 4);
+  expect(reports).toHaveLength(4);
+
+  const totalOperations = reports.reduce((sum, r) => sum + r.operations.length, 0);
+  expect(totalOperations).toEqual(8);
+  for (const chunk of reports) {
+    expect(chunk.operations.length).toEqual(2);
+    expect(chunk.map).toEqual(report.map);
+  }
+});
+
+test('should route each error into the same chunk as the operation it came from', () => {
+  const baseTime = Date.now();
+  // usage-processor-2.ts tags an error with its originating operation's own
+  // operationMapKey + timestamp - the only link back to it, since the two arrays
+  // share no index/id. Only the odd-indexed operations produced an error here.
+  const operations = Array.from({ length: 8 }, (_, i) => ({
+    operationMapKey: 'op1',
+    timestamp: baseTime + i,
+    execution: { ok: i % 2 === 0, errorsTotal: i % 2 === 0 ? 0 : 1, duration: 1 },
+  }));
+  const errors = operations
+    .filter((_, i) => i % 2 === 1)
+    .map(op => ({
+      operationMapKey: op.operationMapKey,
+      timestamp: op.timestamp,
+      errors: [{ code: 'FIELD_ERROR', coordinate: 'Query.field' }],
+    }));
+
+  const report: RawReport = {
+    id: 'test-id',
+    size: operations.length,
+    target: 'test-target',
+    organization: 'test-organization',
+    map: {
+      op1: { key: 'op1', operation: 'test-operation-1', fields: ['test-field-1'] },
+    },
+    operations,
+    errors,
+  };
+
+  const reports = splitReport(report, 4);
+
+  const totalErrors = reports.reduce((sum, r) => sum + (r.errors?.length ?? 0), 0);
+  expect(totalErrors).toEqual(errors.length);
+
+  // Every error must end up in the same chunk as the operation with the matching
+  // timestamp - never separated from the operation it describes.
+  for (const chunk of reports) {
+    const operationTimestamps = new Set(chunk.operations.map(op => op.timestamp));
+    for (const errorRecord of chunk.errors ?? []) {
+      expect(operationTimestamps.has(errorRecord.timestamp)).toBe(true);
+    }
+  }
+});
+
+test('calculateReportSize counts operations, subscriptionOperations, map keys, and error entries', () => {
+  const now = Date.now();
+  const report: RawReport = {
+    id: 'test-id',
+    size: 2,
+    target: 'test-target',
+    organization: 'test-organization',
+    map: {
+      op1: { key: 'op1', operation: 'test-operation-1', fields: [] },
+      op2: { key: 'op2', operation: 'test-operation-2', fields: [] },
+    },
     operations: [
       {
         operationMapKey: 'op1',
         timestamp: now,
-        execution: { ok: false, errorsTotal: 300, duration: 100 },
+        execution: { ok: true, errorsTotal: 0, duration: 1 },
       },
     ],
-    errors: Array.from({ length: 300 }, (_, i) => ({
-      operationMapKey: 'op1',
-      timestamp: now,
-      errors: [{ code: 'FIELD_ERROR', coordinate: `Query.field${i}` }],
-    })),
+    subscriptionOperations: [{ operationMapKey: 'op2', timestamp: now }],
+    errors: [
+      {
+        operationMapKey: 'op1',
+        timestamp: now,
+        errors: [{ coordinate: 'a' }, { coordinate: 'b' }],
+      },
+    ],
   };
 
-  // A single map key can't actually be divided further (see isSplittable), but the
-  // split must still preserve every error rather than silently dropping them.
-  const reports = splitReport(report, 4);
-  const totalErrors = reports.reduce((sum, r) => sum + (r.errors?.length ?? 0), 0);
-  expect(totalErrors).toEqual(300);
+  // 2 map keys + 1 operation + 1 subscriptionOperation + 2 error entries
+  expect(calculateReportSize(report)).toEqual(6);
 });
 
-test('isSplittable is true only when a report has more than one operation map key', () => {
+test('isSplittable is true when a report has more than one map key, operation, or subscriptionOperation', () => {
+  const now = Date.now();
   const baseReport: Omit<RawReport, 'map'> = {
     id: 'test-id',
     size: 0,
@@ -211,14 +351,23 @@ test('isSplittable is true only when a report has more than one operation map ke
     organization: 'test-organization',
     operations: [],
   };
+  const singleMap = { op1: { key: 'op1', operation: 'a', fields: [] } };
+  const op = {
+    operationMapKey: 'op1',
+    timestamp: now,
+    execution: { ok: true, errorsTotal: 0, duration: 1 },
+  };
+  const subscriptionOp = { operationMapKey: 'op1', timestamp: now };
 
+  // The true floor: nothing left to divide by any axis.
   expect(isSplittable({ ...baseReport, map: {} })).toBe(false);
+  expect(isSplittable({ ...baseReport, map: singleMap })).toBe(false);
+  expect(isSplittable({ ...baseReport, map: singleMap, operations: [op] })).toBe(false);
   expect(
-    isSplittable({
-      ...baseReport,
-      map: { op1: { key: 'op1', operation: 'a', fields: [] } },
-    }),
+    isSplittable({ ...baseReport, map: singleMap, subscriptionOperations: [subscriptionOp] }),
   ).toBe(false);
+
+  // More than one map key is splittable by key, regardless of operations.
   expect(
     isSplittable({
       ...baseReport,
@@ -226,6 +375,17 @@ test('isSplittable is true only when a report has more than one operation map ke
         op1: { key: 'op1', operation: 'a', fields: [] },
         op2: { key: 'op2', operation: 'b', fields: [] },
       },
+    }),
+  ).toBe(true);
+
+  // A single map key with more than one operation (or subscriptionOperation) is
+  // still splittable by dividing those entries, even though the map can't shrink.
+  expect(isSplittable({ ...baseReport, map: singleMap, operations: [op, op] })).toBe(true);
+  expect(
+    isSplittable({
+      ...baseReport,
+      map: singleMap,
+      subscriptionOperations: [subscriptionOp, subscriptionOp],
     }),
   ).toBe(true);
 });
