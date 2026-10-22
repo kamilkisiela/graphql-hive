@@ -224,8 +224,8 @@ function deployEgressFlowExporter() {
  * - unset: no policies are created.
  * - `observe`: all egress is allowed (by a separate `<deployment>-egress-observe` policy), while
  *   DNS lookups go through the Cilium DNS proxy and the declared rules are rendered as in `enforce`.
- *   The policy verdicts then show whether a connection is allowed by the declarations or would be
- *   blocked once enforced (Egress-Policies dashboard).
+ *   The policy verdicts then show whether a connection matches a declaration, or only the
+ *   observe-mode allow-all rule and would be blocked once enforced (Egress-Policies dashboard).
  * - `enforce`: egress is limited to the declared rules.
  *
  * Deleting a policy restores the default allow-all behavior for its deployment instantly.
@@ -360,9 +360,10 @@ export function initEgressPolicy() {
           return [policy];
         }
 
-        // Keeps all egress allowed while observing. A separate policy, so the policy verdicts
-        // (`egress_allowed_by`) tell connections allowed by the declarations apart from the ones
-        // only allowed here, which would be blocked once enforced.
+        // Keeps all egress allowed while observing. `all` is the least specific rule (an allow-all
+        // match), and Cilium always reports the most specific matching rule in the policy verdicts
+        // (`policy_match_type`). So a connection reported as an allow-all match isn't covered by any
+        // declaration, and would be blocked once enforced (Egress-Policies dashboard).
         const observePolicy = new k8s.apiextensions.CustomResource(`${name}-egress-observe`, {
           apiVersion: 'cilium.io/v2',
           kind: 'CiliumNetworkPolicy',
@@ -372,7 +373,7 @@ export function initEgressPolicy() {
           },
           spec: {
             endpointSelector,
-            egress: [{ toEntities: ['cluster', 'kube-apiserver', 'world'] }],
+            egress: [{ toEntities: ['all'] }],
           },
         });
 
