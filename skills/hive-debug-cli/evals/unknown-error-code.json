@@ -1,0 +1,10 @@
+{
+  "skills": ["hive-debug-cli"],
+  "query": "What does this hive-cli error mean?\n\n$ hive schema:publish schema.graphql --service search\nError HIVE999: Unexpected internal failure during publish.",
+  "expected_behavior": [
+    "Checks the CLI error docs (https://the-guild.dev/graphql/hive/docs/api-reference/cli#errors) for HIVE999 rather than answering from memory",
+    "Recognizes that HIVE999 is not a documented error code (the docs only cover specific ranges like 1xx/2xx/3xx/6xx, not 999)",
+    "Explicitly tells the user it doesn't know the cause/fix for this code, instead of guessing or fabricating a plausible-sounding explanation",
+    "Does not invent a fix that isn't grounded in the documentation"
+  ]
+}

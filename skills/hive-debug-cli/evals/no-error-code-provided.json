@@ -1,0 +1,10 @@
+{
+  "skills": ["hive-debug-cli"],
+  "query": "hive-cli just hung and then printed 'command failed' with no other details, what's going on?",
+  "expected_behavior": [
+    "Recognizes that no error code was given, so step 2 (look up the error code) cannot be completed as described",
+    "Does not fabricate an error code or guess a specific cause from the CLI error docs without one",
+    "Asks the user for the missing information (the full command, its parameters, and/or the exact error output/code) rather than guessing",
+    "Does not run commands on the user's behalf to try to reproduce the failure"
+  ]
+}

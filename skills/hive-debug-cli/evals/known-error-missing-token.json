@@ -1,0 +1,12 @@
+{
+  "skills": ["hive-debug-cli"],
+  "query": "I ran this and it failed, can you tell me why?\n\n$ hive schema:publish schema.graphql --service accounts --url http://localhost:4001/graphql\nError HIVE103: A registry token is required to perform the action.",
+  "expected_behavior": [
+    "Does not run any commands while analyzing the command, parameters, and error code (steps 1-2 of the skill)",
+    "Identifies the error as HIVE103 (missing/invalid registry token)",
+    "Fetches or references the CLI error docs (https://the-guild.dev/graphql/hive/docs/api-reference/cli#errors) to ground the explanation",
+    "Explains the cause: no valid authentication token was provided for the command",
+    "Suggests a concrete fix: set the token via the HIVE_TOKEN environment variable, --registry.accessToken argument, or hive.json config",
+    "Does not suggest an unrelated fix (e.g. schema syntax, composition conflicts)"
+  ]
+}

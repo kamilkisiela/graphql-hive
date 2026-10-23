@@ -1,0 +1,12 @@
+{
+  "skills": ["hive-debug-cli"],
+  "query": "hive-cli is giving me this error, not sure what it means:\n\n$ hive schema:publish schema.graphql --service billing\nError HIVE301: The SDL is not valid at line 12, column 3: Unexpected token '{'.",
+  "expected_behavior": [
+    "Does not run any commands while analyzing the command and error code (steps 1-2 of the skill)",
+    "Identifies the error as HIVE301 (invalid SDL / GraphQL syntax error)",
+    "Fetches or references the CLI error docs (https://the-guild.dev/graphql/hive/docs/api-reference/cli#errors) to ground the explanation",
+    "Explains the cause as a GraphQL syntax error in the schema file, pointing at the reported line/column",
+    "Suggests the fix: correct the syntax error in schema.graphql near line 12 and retry",
+    "Does not confuse this with a composition or token error"
+  ]
+}
