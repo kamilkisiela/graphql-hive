@@ -69,12 +69,14 @@ module.exports = {
       parser: '@graphql-eslint/eslint-plugin',
       plugins: ['@graphql-eslint'],
       parserOptions: {
-        schema: SCHEMA_PATH,
-        operations: OPERATIONS_PATHS,
+        graphQLConfig: {
+          schema: SCHEMA_PATH,
+          documents: OPERATIONS_PATHS,
+        },
       },
       rules: {
         '@graphql-eslint/no-deprecated': 'error',
-        '@graphql-eslint/require-id-when-available': 'error',
+        '@graphql-eslint/require-selections': ['error', { fieldName: ['id'] }],
       },
     },
     {
@@ -87,7 +89,7 @@ module.exports = {
       plugins: ['@graphql-eslint'],
       rules: {
         '@graphql-eslint/no-deprecated': 'error',
-        '@graphql-eslint/require-id-when-available': 'error',
+        '@graphql-eslint/require-selections': ['error', { fieldName: ['id'] }],
       },
     },
     {
