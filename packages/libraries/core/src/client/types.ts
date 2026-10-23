@@ -53,10 +53,27 @@ export type FinishSubRequestCallback = (args: {
   document: DocumentNode;
 }) => void;
 
+/**
+ * Identifies the graph version (e.g. the supergraph fetched from the Hive CDN) an operation was executed against.
+ * The values are provided by `createCDNArtifactFetcher` via the `graphId` and `graphVersionId` fields.
+ * Both values are required (and must be UUIDs) for the graph version to be reported.
+ */
+export type GraphVersionInfo = {
+  /** The graph id the operation was executed against (as provided by the CDN artifact fetcher). */
+  graphId: string;
+  /** The graph version id the operation was executed against (as provided by the CDN artifact fetcher). */
+  graphVersionId: string;
+};
+
 export type CollectUsage = {
   trackGatewayErrors: TrackGatewayErrorsCallback;
   subrequest: SubRequestCallback;
   finish: CollectUsageCallback;
+};
+
+export type CollectUsageOptions = {
+  /** The graph the operation is executed against (as provided by the CDN artifact fetcher). */
+  graph?: GraphVersionInfo | null;
 };
 
 export interface HiveClient {
@@ -65,7 +82,7 @@ export interface HiveClient {
   info(): void | Promise<void>;
   reportSchema: SchemaReporter['report'];
   /** Collect usage for Query and Mutation operations */
-  collectUsage(): CollectUsage;
+  collectUsage(options?: CollectUsageOptions): CollectUsage;
   /** Collect usage for Query and Mutation operations */
   collectRequest(args: {
     args: ExecutionArgs;
@@ -76,6 +93,8 @@ export interface HiveClient {
      * It needs to be provided in order to collect app deployment specific information.
      */
     experimental__persistedDocumentHash?: string;
+    /** The graph the operation was executed against (as provided by the CDN artifact fetcher). */
+    graph?: GraphVersionInfo | null;
   }): void;
   /** Collect usage for Subscription operations */
   collectSubscriptionUsage(args: {
@@ -85,6 +104,8 @@ export interface HiveClient {
      * It needs to be provided in order to collect app deployment specific information.
      */
     experimental__persistedDocumentHash?: string;
+    /** The graph the operation was executed against (as provided by the CDN artifact fetcher). */
+    graph?: GraphVersionInfo | null;
   }): void;
   createInstrumentedExecute(executeImpl: any): any;
   createInstrumentedSubscribe(executeImpl: any): any;

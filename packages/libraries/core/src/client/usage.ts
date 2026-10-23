@@ -22,7 +22,9 @@ import type {
   ClientInfo,
   CollectUsage,
   CollectUsageCallback,
+  CollectUsageOptions,
   GraphQLResult,
+  GraphVersionInfo,
   HiveInternalPluginOptions,
   HiveUsagePluginOptions,
   TrackedGraphQLError,
@@ -38,7 +40,7 @@ import {
 } from './utils.js';
 
 interface UsageCollector {
-  collect(): CollectUsage;
+  collect(options?: CollectUsageOptions): CollectUsage;
   /** collect a short lived GraphQL request (mutation/query operation) */
   collectRequest(args: {
     args: ExecutionArgs;
@@ -49,11 +51,15 @@ interface UsageCollector {
     /** Optionally send subgraph request information. This provides a deeper level of usage metrics */
     fetches?: CollectedOperationSubRequest[] | null;
     gatewayErrors?: TrackedGraphQLError[] | null;
+    /** The graph the operation was executed against. */
+    graph?: GraphVersionInfo | null;
   }): void;
   /** collect a long-lived GraphQL request/subscription (subscription operation) */
   collectSubscription(args: {
     args: ExecutionArgs;
     experimental__persistedDocumentHash?: string;
+    /** The graph the operation was executed against. */
+    graph?: GraphVersionInfo | null;
   }): void;
   dispose(): Promise<void>;
 }
@@ -175,6 +181,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
               },
               metadata: {
                 client: operation.client ?? undefined,
+                graph: operation.graph,
               },
               persistedDocumentHash: operation.persistedDocumentHash,
             });
@@ -185,6 +192,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
               timestamp: operation.timestamp,
               metadata: {
                 client: operation.client ?? undefined,
+                graph: operation.graph,
               },
               persistedDocumentHash: operation.persistedDocumentHash,
             });
@@ -355,6 +363,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
                         : createDefaultClientInfo()(args.args.contextValue),
                     ),
                 persistedDocumentHash: args.experimental__persistedDocumentHash,
+                graph: toGraphMetadata(args.graph),
               },
             };
           }),
@@ -366,6 +375,26 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
     }
   };
 
+  /**
+   * The usage API requires both graphId and graphVersionId to be valid UUIDs and rejects the whole report otherwise.
+   * Omit the graph metadata instead of losing the whole batch.
+   */
+  function toGraphMetadata(
+    graph: GraphVersionInfo | null | undefined,
+  ): GraphVersionInfo | undefined {
+    if (graph == null) {
+      return undefined;
+    }
+    const { graphId, graphVersionId } = graph;
+    if (uuidRegex.test(graphId) && uuidRegex.test(graphVersionId)) {
+      return { graphId, graphVersionId };
+    }
+    logger.debug(
+      `Ignoring graph metadata (graphId="${graphId}", graphVersionId="${graphVersionId}"). Both must be UUIDs.`,
+    );
+    return undefined;
+  }
+
   return {
     dispose: agent.dispose,
     /** The raw request collection function */
@@ -374,7 +403,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
      * A more advanced method of collecting the request that includes calculating durations
      * automatically and supports subrequest data.
      */
-    collect() {
+    collect(collectOptions) {
       const sinceStart = measureDuration();
       const subRequests: CollectedOperationSubRequest[] = [];
       let gatewayErrors: any[] | Error[] | GraphQLError[][] | undefined = undefined;
@@ -411,6 +440,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
             duration,
             experimental__persistedDocumentHash,
             fetches: subRequests.length > 0 ? subRequests : null,
+            graph: collectOptions?.graph,
             gatewayErrors: gatewayErrors
               ?.map(err =>
                 toTrackedError(
@@ -425,7 +455,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
         },
       };
     },
-    async collectSubscription({ args, experimental__persistedDocumentHash }) {
+    async collectSubscription({ args, experimental__persistedDocumentHash, graph }) {
       const document = args.document;
       const rootOperation = document.definitions.find(
         o => o.kind === Kind.OPERATION_DEFINITION,
@@ -472,6 +502,7 @@ export function createUsage(pluginOptions: HiveInternalPluginOptions): UsageColl
                   ? options.clientInfo(args.contextValue)
                   : createDefaultClientInfo()(args.contextValue),
               persistedDocumentHash: experimental__persistedDocumentHash,
+              graph: toGraphMetadata(graph),
             },
           })),
         );
@@ -630,6 +661,7 @@ interface CollectedOperation {
   };
   persistedDocumentHash?: string;
   client?: ClientInfo | null;
+  graph?: GraphVersionInfo;
 }
 
 interface CollectedSubscriptionOperation {
@@ -640,6 +672,7 @@ interface CollectedSubscriptionOperation {
   fields: string[];
   persistedDocumentHash?: string;
   client?: ClientInfo | null;
+  graph?: GraphVersionInfo;
 }
 
 interface RequestOperation {
@@ -655,6 +688,7 @@ interface RequestOperation {
   persistedDocumentHash?: string;
   metadata?: {
     client?: ClientInfo;
+    graph?: GraphVersionInfo;
   };
 }
 
@@ -664,6 +698,7 @@ interface SubscriptionOperation {
   persistedDocumentHash?: string;
   metadata?: {
     client?: ClientInfo;
+    graph?: GraphVersionInfo;
   };
 }
 
@@ -676,6 +711,8 @@ interface OperationMapRecord {
 interface OperationMap {
   [key: string]: OperationMapRecord;
 }
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const defaultClientNameHeaders = ['x-graphql-client-name', 'graphql-client-name'];
 const defaultClientVersionHeaders = ['x-graphql-client-version', 'graphql-client-version'];

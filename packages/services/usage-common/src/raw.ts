@@ -20,6 +20,11 @@ export interface ClientMetadata {
   version?: string;
 }
 
+export interface GraphMetadata {
+  graphId?: string;
+  graphVersionId?: string;
+}
+
 export interface RawOperation {
   operationMapKey: string;
   timestamp: number;
@@ -33,6 +38,7 @@ export interface RawOperation {
   };
   metadata?: {
     client?: ClientMetadata;
+    graph?: GraphMetadata;
   };
 }
 
@@ -49,6 +55,7 @@ export type RawSubscriptionOperation = {
   expiresAt?: number;
   metadata?: {
     client?: ClientMetadata;
+    graph?: GraphMetadata;
   };
 };
 

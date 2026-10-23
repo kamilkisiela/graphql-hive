@@ -1,141 +1,338 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Report",
-  "additionalProperties": false,
   "type": "object",
   "properties": {
     "size": {
       "type": "integer",
-      "minimum": 0
+      "minimum": 1
     },
     "map": {
       "type": "object",
-      "patternProperties": {
-        "^(.*)$": {
-          "title": "OperationMapRecord",
-          "additionalProperties": false,
-          "type": "object",
-          "properties": {
-            "operation": {
-              "type": "string"
-            },
-            "operationName": {
-              "type": "string"
-            },
-            "fields": {
-              "minItems": 1,
+      "additionalProperties": {
+        "$ref": "#/definitions/OperationMapRecord"
+      }
+    },
+    "operations": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RequestOperation"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "subscriptionOperations": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubscriptionOperation"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": ["size", "map"],
+  "additionalProperties": false,
+  "definitions": {
+    "Client": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": ["name", "version"],
+      "additionalProperties": false
+    },
+    "Execution": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "duration": {
+          "description": "How long the operation took. Unsigned 64-bit integer, capped at 2^63.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "errorsTotal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "fetches": {
+          "anyOf": [
+            {
               "type": "array",
+              "items": {
+                "$ref": "#/definitions/SubgraphRequest"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gatewayErrors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TrackedError"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": ["ok", "duration", "errorsTotal"],
+      "additionalProperties": false
+    },
+    "Graph": {
+      "type": "object",
+      "properties": {
+        "graphId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "graphVersionId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": ["graphId", "graphVersionId"],
+      "additionalProperties": false
+    },
+    "Metadata": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Client"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "graph": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Graph"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "OperationMapRecord": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string"
+        },
+        "operationName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["operation", "fields"],
+      "additionalProperties": false
+    },
+    "PersistedDocumentHash": {
+      "description": "Persisted document identifier in the format \"appName~appVersion~hash\".",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{1,64}~[a-zA-Z0-9._-]{1,64}~([A-Za-z]|[0-9]|_){1,128}$"
+    },
+    "RequestOperation": {
+      "description": "Query or mutation operation.",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Unix timestamp in milliseconds.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "operationMapKey": {
+          "type": "string"
+        },
+        "execution": {
+          "$ref": "#/definitions/Execution"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Metadata"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "persistedDocumentHash": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PersistedDocumentHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": ["timestamp", "operationMapKey", "execution"],
+      "additionalProperties": false
+    },
+    "SubgraphRequest": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "Delta start time from \"timestamp\". Unsigned 64-bit integer, capped at 2^63.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "duration": {
+          "description": "How long the request took. Unsigned 64-bit integer, capped at 2^63.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854776000
+        },
+        "status": {
+          "description": "HTTP status code.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 599
+        },
+        "fields": {
+          "description": "Number of times each field has been requested, regardless of success or failure.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TrackedError"
+          }
+        },
+        "subgraph": {
+          "description": "Which subgraph resolved this path.",
+          "type": "string"
+        },
+        "paths": {
+          "description": "If this is an entity request, the coordinate in the original operation that is being resolved. If undefined, the path is assumed to be 'Query'.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
               "items": {
                 "type": "string"
               }
             }
-          },
-          "required": ["operation", "fields"]
-        }
-      }
-    },
-    "operations": {
-      "type": "array",
-      "items": {
-        "title": "RequestOperation",
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "operationMapKey": {
-            "type": "string"
-          },
-          "execution": {
-            "title": "Execution",
-            "additionalProperties": false,
-            "type": "object",
-            "properties": {
-              "ok": {
-                "type": "boolean"
-              },
-              "duration": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "errorsTotal": {
-                "type": "integer",
-                "minimum": 0
-              }
+          ]
+        },
+        "type": {
+          "description": "ROOT if resolving a root query/mutation field, ENTITY if resolving an entity type in federation.",
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "ROOT"
             },
-            "required": ["ok", "duration", "errorsTotal"]
-          },
-          "metadata": {
-            "title": "Metadata",
-            "additionalProperties": false,
-            "type": "object",
-            "properties": {
-              "client": {
-                "title": "Client",
-                "additionalProperties": false,
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "version": {
-                    "type": "string"
-                  }
-                },
-                "required": ["name", "version"]
-              }
+            {
+              "type": "string",
+              "const": "ENTITY"
             }
-          },
-          "persistedDocumentHash": {
-            "type": "string",
-            "title": "PersistedDocumentHash",
-            "pattern": "^[a-zA-Z0-9_-]{1,64}~[a-zA-Z0-9._-]{1,64}~([A-Za-z]|[0-9]|_){1,128}$"
-          }
-        },
-        "required": ["timestamp", "operationMapKey", "execution"]
-      }
+          ]
+        }
+      },
+      "required": ["start", "duration", "fields", "subgraph", "paths", "type"],
+      "additionalProperties": false
     },
-    "subscriptionOperations": {
-      "type": "array",
-      "items": {
-        "title": "SubscriptionOperation",
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "operationMapKey": {
-            "type": "string"
-          },
-          "metadata": {
-            "title": "Metadata",
-            "additionalProperties": false,
-            "type": "object",
-            "properties": {
-              "client": {
-                "title": "Client",
-                "additionalProperties": false,
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "version": {
-                    "type": "string"
-                  }
-                },
-                "required": ["name", "version"]
-              }
-            }
-          }
+    "SubscriptionOperation": {
+      "description": "Subscription or live query operation.",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Unix timestamp in milliseconds.",
+          "type": "integer",
+          "minimum": 0
         },
-        "required": ["timestamp", "operationMapKey"]
-      }
+        "operationMapKey": {
+          "type": "string"
+        },
+        "metadata": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Metadata"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "persistedDocumentHash": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PersistedDocumentHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": ["timestamp", "operationMapKey"],
+      "additionalProperties": false
+    },
+    "TrackedError": {
+      "description": "Error for a schema coordinate, with the code returned from the GraphQL extensions.",
+      "type": "object",
+      "properties": {
+        "coordinate": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        }
+      },
+      "required": ["coordinate"]
     }
-  },
-  "required": ["size", "map"]
+  }
 }

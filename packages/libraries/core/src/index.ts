@@ -5,6 +5,8 @@ export type {
   HiveClient,
   CollectUsageCallback,
   CollectUsage,
+  CollectUsageOptions,
+  GraphVersionInfo,
   LegacyLogger as Logger,
   PersistedDocumentsManifest,
   PersistedDocumentsCache,
