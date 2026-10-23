@@ -4,6 +4,7 @@ import { usePrettify } from '@/lib/hooks';
 
 export function GraphQLHighlight({
   code,
+  options,
   ...props
 }: Omit<SchemaEditorProps, 'schema'> & {
   code: string;
@@ -11,9 +12,7 @@ export function GraphQLHighlight({
   const pretty = usePrettify(code);
   return (
     <SchemaEditor
-      options={{
-        readOnly: true,
-      }}
+      options={{ readOnly: true, ...options }}
       height="100vh"
       {...props}
       schema={pretty ?? ''}

@@ -6,6 +6,7 @@ import { Heading } from './heading';
 
 export function GraphQLHighlight({
   code,
+  options,
   ...props
 }: Omit<SchemaEditorProps, 'schema'> & {
   code: string;
@@ -19,10 +20,7 @@ export function GraphQLHighlight({
       }}
     >
       <SchemaEditor
-        options={{
-          readOnly: true,
-          lineNumbers: 'on',
-        }}
+        options={{ readOnly: true, lineNumbers: 'on', ...options }}
         height="60vh"
         {...props}
         schema={pretty ?? ''}
