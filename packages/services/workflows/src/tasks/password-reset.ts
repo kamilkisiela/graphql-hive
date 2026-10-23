@@ -2,6 +2,9 @@ import { z } from 'zod';
 import { defineTask, implementTask } from '../kit.js';
 import { renderPasswordResetEmail } from '../lib/emails/templates/password-reset.js';
 
+/** How long a password reset link stays valid; the email states it and the server enforces it. */
+export const PASSWORD_RESET_LINK_VALID_MINUTES = 15;
+
 export const PasswordResetTask = defineTask({
   name: 'passwordReset',
   schema: z.object({
@@ -20,6 +23,7 @@ export const task = implementTask(PasswordResetTask, async args => {
     body: renderPasswordResetEmail({
       passwordResetLink: args.input.passwordResetLink,
       toEmail: args.input.user.email,
+      validForMinutes: PASSWORD_RESET_LINK_VALID_MINUTES,
     }),
   });
 });

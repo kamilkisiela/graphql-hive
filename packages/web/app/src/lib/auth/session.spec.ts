@@ -123,6 +123,13 @@ describe('session', () => {
       expect(fetchMock).not.toHaveBeenCalled();
     });
 
+    it('asks the server when there was no front token to begin with', async () => {
+      respondWith(200, { 'front-token': fresh });
+      await expect(attemptRefreshingSession()).resolves.toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(getSession()?.userId).toBe('user-1');
+    });
+
     it('still requests when the token it finds after the lock is also expired', async () => {
       applyFrontTokenHeader(expired);
       const otherExpired = encode({ uid: 'user-1', ate: Date.now() - 30_000 });

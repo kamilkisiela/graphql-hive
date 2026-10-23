@@ -2,6 +2,8 @@ import { password as seededPassword } from 'testkit/auth';
 import { pollFor } from 'testkit/flow';
 import { initSeed } from 'testkit/seed';
 import { getServiceHost } from 'testkit/utils';
+import { sha256 } from '@hive/api/modules/auth/lib/supertokens-at-home/crypto';
+import { psql } from '@hive/postgres';
 import * as emails from '../../../testkit/emails';
 
 const baseUrl = await getServiceHost('server', 3001).then(r => `http://${r}`);
@@ -35,13 +37,14 @@ function resetPassword(token: string, password: string) {
 }
 
 /** The reset email is sent by a background task, so it arrives shortly after the request answers. */
-async function waitForResetToken(email: string): Promise<string> {
-  let token: string | undefined;
+async function waitForResetEmail(email: string): Promise<{ token: string; body: string }> {
+  let found: { token: string; body: string } | undefined;
   await pollFor(
     async () => {
       for (const message of await emails.history(email)) {
-        token = message.body.match(/[?&](?:amp;)?token=([0-9a-f]+)/)?.[1];
+        const token = message.body.match(/[?&](?:amp;)?token=([0-9a-f]+)/)?.[1];
         if (token) {
+          found = { token, body: message.body };
           return true;
         }
       }
@@ -49,10 +52,10 @@ async function waitForResetToken(email: string): Promise<string> {
     },
     { maxWait: 20_000 },
   );
-  if (!token) {
+  if (!found) {
     throw new Error(`No password reset email for ${email}`);
   }
-  return token;
+  return found;
 }
 
 test.concurrent('an unknown reset token is refused', async ({ expect }) => {
@@ -72,7 +75,8 @@ test.concurrent(
         formFields: [{ id: 'email', value: ownerEmail }],
       }),
     ).resolves.toEqual({ status: 'OK' });
-    const token = await waitForResetToken(ownerEmail);
+    const { token, body } = await waitForResetEmail(ownerEmail);
+    expect(body).toContain('This link is valid for 15 minutes.');
 
     await expect(resetPassword(token, newPassword)).resolves.toEqual({ status: 'OK' });
     await expect(signIn(ownerEmail, seededPassword)).resolves.toMatchObject({
@@ -85,3 +89,27 @@ test.concurrent(
     });
   },
 );
+
+test.concurrent('an expired reset token is refused', async ({ expect }) => {
+  const seed = initSeed();
+  const { ownerEmail } = await seed.createOwner();
+
+  await expect(
+    post('/auth-api/user/password/reset/token', {
+      formFields: [{ id: 'email', value: ownerEmail }],
+    }),
+  ).resolves.toEqual({ status: 'OK' });
+  const { token } = await waitForResetEmail(ownerEmail);
+
+  await using connection = await seed.createDbConnection();
+  await connection.pool.query(psql`
+    UPDATE "supertokens_emailpassword_pswd_reset_tokens"
+    SET "token_expiry" = ${Date.now() - 1}
+    WHERE "token" = ${sha256(token)}
+  `);
+
+  await expect(resetPassword(token, 'Ilikebigturtles!47')).resolves.toEqual({
+    status: 'RESET_PASSWORD_INVALID_TOKEN_ERROR',
+  });
+  await expect(signIn(ownerEmail, seededPassword)).resolves.toMatchObject({ status: 'OK' });
+});
