@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { TargetLayoutQuery } from '@/components/layouts/queries';
 import { TargetLayout } from '@/components/layouts/target';
+import { DiffsWorkerPoolProvider } from '@/components/ui/diffs';
 import { loadQuery } from '@/lib/route-utils';
 import { TargetPage, TargetSchemaPageQuery } from '@/pages/target';
 import { createRoute, Outlet } from '@tanstack/react-router';
@@ -32,5 +33,11 @@ export const targetIndexRoute = createRoute({
     const { organizationSlug, projectSlug, targetSlug } = loader.params;
     void loadQuery(loader, TargetSchemaPageQuery, { organizationSlug, projectSlug, targetSlug });
   },
-  component: TargetPage,
+  component: function TargetIndexRoute() {
+    return (
+      <DiffsWorkerPoolProvider>
+        <TargetPage />
+      </DiffsWorkerPoolProvider>
+    );
+  },
 });
