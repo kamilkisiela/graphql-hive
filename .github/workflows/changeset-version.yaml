@@ -15,6 +15,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
+          persist-credentials: false
           # `changeset version` walks git history to find the commit that added
           # each changeset. On a shallow clone it deepens via `git fetch --deepen`
           # in a loop, which intermittently stalls and hangs the job. Full history
