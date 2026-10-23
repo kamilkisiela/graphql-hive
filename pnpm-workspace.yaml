@@ -59,7 +59,7 @@ catalog:
   bentocache: 1.5.1
   crypto-js: 4.2.0
   date-fns: 4.4.0
-  dompurify: 3.4.16
+  dompurify: 3.4.17
   dotenv: 16.4.7
   esbuild: 0.28.1
   fast-json-stable-stringify: 2.1.0

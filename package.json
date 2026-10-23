@@ -193,6 +193,7 @@
       "sprintf-js@<=1.1.3": "^1.1.3",
       "postcss-selector-parser@<=7.1.6": "^7.1.6",
       "@graphql-hive/gateway-plugin-console-sdk": "workspace:",
+      "@graphql-hive/laboratory": "workspace:",
       "@graphql-hive/yoga": "workspace:",
       "@graphql-hive/core": "workspace:",
       "@graphql-tools/url-loader@7.x.x>@graphql-tools/executor-legacy-ws": "-",
