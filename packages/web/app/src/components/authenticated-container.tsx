@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { SessionAuth } from 'supertokens-auth-react/recipe/session';
 import { HiveStripeWrapper } from '@/lib/billing/stripe';
 
 /**
@@ -9,10 +8,8 @@ export const authenticated =
   <TProps extends Record<string, any>>(Component: (props: TProps) => ReactElement | null) =>
   (props: TProps) => {
     return (
-      <SessionAuth>
-        <HiveStripeWrapper>
-          <Component {...props} />
-        </HiveStripeWrapper>
-      </SessionAuth>
+      <HiveStripeWrapper>
+        <Component {...props} />
+      </HiveStripeWrapper>
     );
   };

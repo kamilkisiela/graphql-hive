@@ -1,7 +1,7 @@
 import { BookIcon } from 'lucide-react';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
 import { GitHubIcon, HiveLogo } from '@/components/ui/brand-icon';
 import { Meta } from '@/components/ui/meta';
+import { useSession } from '@/lib/auth/use-session';
 import { Link, Outlet } from '@tanstack/react-router';
 
 function ExternalLink(props: { href: string; children: React.ReactNode }) {
@@ -17,7 +17,7 @@ function ExternalLink(props: { href: string; children: React.ReactNode }) {
 }
 
 export function AuthPage() {
-  const session = useSessionContext();
+  const session = useSession();
 
   return (
     <>

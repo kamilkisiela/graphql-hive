@@ -56,6 +56,7 @@ import { OrganizationAccessTokenValidationCache } from '../../api/src/modules/au
 import { OrganizationAccessTokensCache } from '../../api/src/modules/organization/providers/organization-access-tokens-cache';
 import { TargetTokenCache } from '../../api/src/modules/token/providers/target-token-cache';
 import { internalApiRouter } from './api';
+import { CorsError } from './cors-error';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
@@ -64,12 +65,6 @@ import { createPublicGraphQLHandler } from './public-graphql-handler';
 import { createSCIMPlugin } from './scim';
 import { registerSupertokensAtHome } from './supertokens-at-home';
 import { WorkloadIdentityFederationProvider } from './workload-identity-federation';
-
-class CorsError extends Error {
-  constructor() {
-    super('CORS origin not allowed.');
-  }
-}
 
 export async function main() {
   let tracing: TracingInstance | undefined;
@@ -128,14 +123,6 @@ export async function main() {
     },
   );
 
-  server.setErrorHandler((err, req, res) => {
-    if (err instanceof CorsError) {
-      return res.status(403).send(err.message);
-    }
-
-    server.log.error(err);
-    return res.status(500);
-  });
   await server.register(cors, (_: unknown): FastifyCorsOptionsDelegateCallback => {
     return (req, callback) => {
       // For CLI user we do not have a origin

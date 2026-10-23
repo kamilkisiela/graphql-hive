@@ -24,7 +24,8 @@ test('unmatching origin -> send CORS error', async () => {
   expect(request.headers.get('access-control-allow-origin')).toEqual(null);
   expect(request.headers.get('access-control-allow-credentials')).toEqual(null);
   expect(request.status).toEqual(403);
-  expect(await request.text()).toMatchInlineSnapshot(`CORS origin not allowed.`);
+  // The refusal goes through the shared error handler, so it has the shared JSON shape.
+  expect(await request.json()).toMatchObject({ error: 403, message: 'CORS origin not allowed.' });
 });
 
 test('matching origin -> send correct CORS headers', async () => {

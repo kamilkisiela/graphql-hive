@@ -9,8 +9,7 @@ vi.mock(
   '@/lib/laboratory-history-storage',
   () => import('@/lib/testing/mocks/laboratory-history-storage'),
 );
-vi.mock('supertokens-auth-react', () => import('@/lib/testing/mocks/supertokens'));
-vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/mocks/session'));
+vi.mock('@/lib/auth/session', () => import('@/lib/testing/mocks/auth-session'));
 
 // A diff past the time budget, without building one big enough to take that long.
 vi.mock('@/components/ui/sdl-diff', () => ({

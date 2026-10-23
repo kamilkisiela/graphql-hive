@@ -5,7 +5,10 @@ import zod from 'zod';
 import { PostgresDatabasePool, psql, TaggedTemplateLiteralInvocation } from '@hive/postgres';
 import { FastifyRequest } from '@hive/service-common';
 import { TaskScheduler } from '@hive/workflows/kit';
-import { EmailVerificationTask } from '@hive/workflows/tasks/email-verification';
+import {
+  EMAIL_VERIFICATION_LINK_VALID_MINUTES,
+  EmailVerificationTask,
+} from '@hive/workflows/tasks/email-verification';
 import { HiveError } from '../../../shared/errors';
 import { RedisRateLimiter } from '../../shared/providers/redis-rate-limiter';
 import { WEB_APP_URL } from '../../shared/providers/tokens';
@@ -175,7 +178,7 @@ export class EmailVerification {
             ${input.userIdentityId}
             , ${superTokensUser.email}
             , ${tokenHash}
-            , now() + INTERVAL '30 minutes'
+            , now() + make_interval(mins => ${EMAIL_VERIFICATION_LINK_VALID_MINUTES})
           )
           ON CONFLICT ("user_identity_id", "email") DO UPDATE SET
             "token_hash" = EXCLUDED.token_hash

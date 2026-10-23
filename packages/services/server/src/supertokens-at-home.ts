@@ -25,7 +25,10 @@ import { RedisRateLimiter } from '@hive/api/modules/shared/providers/redis-rate-
 import type { OIDCIntegration } from '@hive/api/shared/entities';
 import { Encryptor } from '@hive/service-common';
 import { TaskScheduler } from '@hive/workflows/kit';
-import { PasswordResetTask } from '@hive/workflows/tasks/password-reset';
+import {
+  PASSWORD_RESET_LINK_VALID_MINUTES,
+  PasswordResetTask,
+} from '@hive/workflows/tasks/password-reset';
 import { env } from './environment';
 import { createBrokerFetch } from './oauth-fetch';
 import { createNewSession, createOIDCState, validatePassword } from './supertokens-at-home/shared';
@@ -502,7 +505,7 @@ export async function registerSupertokensAtHome(
       await supertokensStore.createEmailPasswordResetToken({
         user,
         token: sha256(token),
-        expiresAt: Date.now() + 15 * 60 * 1000,
+        expiresAt: Date.now() + PASSWORD_RESET_LINK_VALID_MINUTES * 60 * 1000,
       });
 
       const passwordResetLink = new URL(env.hiveServices.webApp.url);

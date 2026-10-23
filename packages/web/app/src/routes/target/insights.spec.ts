@@ -21,8 +21,7 @@ vi.mock('@/components/schema-editor', async importOriginal => ({
 }));
 // ECharts draws on a canvas, which jsdom does not implement.
 vi.mock('@/components/ui/primitives/chart/chart', () => ({ Chart: () => null }));
-vi.mock('supertokens-auth-react', () => import('@/lib/testing/mocks/supertokens'));
-vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/mocks/session'));
+vi.mock('@/lib/auth/session', () => import('@/lib/testing/mocks/auth-session'));
 
 const TARGET = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}`;
 

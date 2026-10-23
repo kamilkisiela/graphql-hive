@@ -1,7 +1,5 @@
 import 'regenerator-runtime/runtime';
 import ReactDOM from 'react-dom/client';
-import SuperTokens from 'supertokens-auth-react';
-import { frontendConfig } from '@/config/supertokens/frontend';
 import { env } from '@/env/frontend';
 import { urqlClient } from '@/lib/urql';
 import { init } from '@sentry/react';
@@ -18,8 +16,7 @@ declare module '@tanstack/react-router' {
 }
 
 // App-wide side effects live here, not in the router module, so the route tree can be imported
-// (tests, previews) without initializing SuperTokens or Sentry.
-SuperTokens.init(frontendConfig());
+// (tests, previews) without initializing Sentry or touching the network.
 if (env.sentry) {
   init({
     dsn: env.sentry.dsn,

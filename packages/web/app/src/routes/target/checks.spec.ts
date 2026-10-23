@@ -35,10 +35,9 @@ vi.mock('@/components/schema-editor', async importOriginal => ({
   ...(await importOriginal<typeof import('@/components/schema-editor')>()),
   SchemaEditor: () => null,
 }));
-vi.mock('supertokens-auth-react', () => import('@/lib/testing/mocks/supertokens'));
+vi.mock('@/lib/auth/session', () => import('@/lib/testing/mocks/auth-session'));
 // Real pages hold 300 changes; mounting that many rows makes jsdom slow, and paging works the same.
 vi.mock('@/components/target/history/change-page-size', () => ({ CHANGES_PAGE_SIZE: PAGE }));
-vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/mocks/session'));
 
 const CHECKS_PAGE = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}/checks`;
 

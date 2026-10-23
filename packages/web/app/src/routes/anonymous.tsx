@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { authenticated } from '@/components/authenticated-container';
+import { requireSession } from '@/lib/auth/require-session';
 import { redirectToPathSchema } from '@/lib/route-utils';
 import { AuthPage } from '@/pages/auth';
 import { AuthCallbackPage } from '@/pages/auth-callback';
@@ -112,10 +113,10 @@ export const authCallbackRoute = createRoute({
     return AuthSharedSearch.parse(search);
   },
   component() {
-    const { redirectToPath } = authCallbackRoute.useSearch();
     const params = authCallbackRoute.useParams();
     const { provider } = AuthCallbackRouteParams.parse(params);
-    return AuthCallbackPage({ provider, redirectToPath });
+    // Where to go next was stashed when the flow started; the search param is only tolerated.
+    return AuthCallbackPage({ provider });
   },
 });
 
@@ -149,5 +150,7 @@ export const authVerifyEmailRoute = createRoute({
   validateSearch(search) {
     return AuthVerifyEmailSearch.parse(search);
   },
+  // Existence only: the page itself works for a session whose email is not verified yet.
+  beforeLoad: requireSession,
   component: authenticated(AuthVerifyEmailPage),
 });

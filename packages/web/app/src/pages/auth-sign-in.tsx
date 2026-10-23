@@ -1,8 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { CircleUserRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
-import { emailPasswordSignIn as superEmailPasswordSignIn } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { AuthCard, AuthCardStack, AuthOrSeparator } from '@/components/auth';
 import {
   SignInForm,
@@ -15,9 +13,11 @@ import { Button } from '@/components/ui/primitives/button/button';
 import { Tooltip } from '@/components/ui/primitives/floating/tooltip/tooltip';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { Text } from '@/components/ui/text';
-import { useLastAuthMethod } from '@/lib/supertokens/last-auth-method';
-import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
-import { enabledProviders, isProviderEnabled } from '@/lib/supertokens/thirdparty';
+import { signIn } from '@/lib/auth/api';
+import { useLastAuthMethod } from '@/lib/auth/last-auth-method';
+import { enabledProviders, isProviderEnabled } from '@/lib/auth/providers';
+import { startThirdPartyAuth } from '@/lib/auth/third-party';
+import { useSession } from '@/lib/auth/use-session';
 import { exhaustiveGuard } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -44,13 +44,13 @@ export function SignInButton(props: {
 }
 
 export function AuthSignInPage(props: { redirectToPath: string }) {
-  const session = useSessionContext();
+  const session = useSession();
   const [lastAuthMethod, setLastAuthMethod] = useLastAuthMethod();
   const router = useRouter();
   const { toast } = useToast();
 
   const emailPasswordSignIn = useMutation({
-    mutationFn: superEmailPasswordSignIn,
+    mutationFn: signIn,
     onSuccess(data) {
       const status = data.status;
 
@@ -68,15 +68,6 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
             description: 'Please check your email and password and try again.',
             variant: 'destructive',
           });
-          break;
-        }
-        case 'FIELD_ERROR': {
-          for (const field of data.formFields) {
-            form.setError(field.id as keyof SignInFormValues, {
-              type: 'manual',
-              message: field.error,
-            });
-          }
           break;
         }
         case 'SIGN_IN_NOT_ALLOWED': {
@@ -104,7 +95,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
 
   const thirdPartySignIn = useMutation({
     async mutationFn(provider: 'github' | 'google' | 'okta') {
-      await startAuthFlowForProvider(provider, props.redirectToPath);
+      await startThirdPartyAuth(provider, props.redirectToPath);
     },
     onError(error) {
       console.error(error);
@@ -137,18 +128,7 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
   const onSubmit = useCallback(
     (data: SignInFormValues) => {
       emailPasswordSignIn.reset();
-      emailPasswordSignIn.mutate({
-        formFields: [
-          {
-            id: 'email',
-            value: data.email,
-          },
-          {
-            id: 'password',
-            value: data.password,
-          },
-        ],
-      });
+      emailPasswordSignIn.mutate(data);
     },
     [emailPasswordSignIn.mutate],
   );
@@ -158,8 +138,9 @@ export function AuthSignInPage(props: { redirectToPath: string }) {
     return null;
   }
 
-  if (session.doesSessionExist) {
-    // Redirect to the home page if the user is already signed in
+  if (session.doesSessionExist && emailPasswordSignIn.isIdle && thirdPartySignIn.isIdle) {
+    // Already signed in on arrival. Once a sign-in started here, onSuccess owns the navigation
+    // (the store flips before the request resolves, and the page is still mounted afterwards).
     return <Navigate to="/" />;
   }
 

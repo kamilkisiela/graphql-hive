@@ -1,11 +1,11 @@
 import { useCallback, useEffect } from 'react';
-import { useSessionContext } from 'supertokens-auth-react/recipe/session';
 import { useMutation } from 'urql';
 import { AuthCard, AuthCardStack } from '@/components/auth';
 import { Meta } from '@/components/ui/meta';
 import { Button } from '@/components/ui/primitives/button/button';
 import { useToast } from '@/components/ui/primitives/toast/toast';
 import { graphql } from '@/gql';
+import { useSession } from '@/lib/auth/use-session';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 
 const verifyEmailRoute = getRouteApi('/anonymous/auth/verify-email');
@@ -40,7 +40,8 @@ const VerifyEmailMutation = graphql(`
 function AuthVerifyEmail() {
   const search = verifyEmailRoute.useSearch();
   const { toast } = useToast();
-  const session = useSessionContext();
+  const session = useSession();
+  const userId = !session.loading && session.doesSessionExist ? session.userId : null;
   const navigate = useNavigate();
 
   const [sendEmailMutation, sendEmailImpl] = useMutation(SendVerificationEmailMutation);
@@ -48,12 +49,12 @@ function AuthVerifyEmail() {
 
   const sendEmail = useCallback(
     async (resend?: boolean) => {
-      if (session.loading) return;
+      if (userId === null) return;
 
       const result = await sendEmailImpl(
         {
           input: {
-            userIdentityId: session.userId,
+            userIdentityId: userId,
             resend,
           },
         },
@@ -82,7 +83,7 @@ function AuthVerifyEmail() {
         });
       }
     },
-    [session.loading, sendEmailImpl, toast],
+    [userId, sendEmailImpl, toast],
   );
 
   useEffect(() => {

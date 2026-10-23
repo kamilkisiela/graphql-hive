@@ -315,7 +315,7 @@ new spec has to know:
 - Fixtures carry `__typename` on every object below the root and are checked against their document,
   with the missing paths named. Two documents that describe the same entity must agree, since the
   cache normalizes them into one.
-- The env, laboratory, SuperTokens and AutoSizer stand-ins live in `src/lib/testing/mocks/`, one
+- The env, laboratory, session and AutoSizer stand-ins live in `src/lib/testing/mocks/`, one
   `vi.mock` line each in the spec, since there is no app-scoped vitest project for `setupFiles`.
 - Route specs fake nothing but the clock (`vi.useFakeTimers({ toFake: ['Date'] })`); timers, the
   router and `waitFor` stay real, and a poll under test gets its interval mocked short. A hook spec

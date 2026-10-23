@@ -33,14 +33,13 @@ vi.mock('@/components/schema-editor', async importOriginal => ({
 // ECharts draws on a canvas, which jsdom does not implement.
 vi.mock('@/components/ui/primitives/chart/chart', () => ({ Chart: () => null }));
 
-// A signed-in session without SuperTokens: the wrappers pass through and the session exists.
-vi.mock('supertokens-auth-react', () => import('@/lib/testing/mocks/supertokens'));
+// A signed-in session that never refreshes.
+vi.mock('@/lib/auth/session', () => import('@/lib/testing/mocks/auth-session'));
 // The OIDC interstitial redirects away unless the provider is on.
-vi.mock('@/lib/supertokens/thirdparty', async importOriginal => ({
-  ...(await importOriginal<typeof import('@/lib/supertokens/thirdparty')>()),
+vi.mock('@/lib/auth/providers', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/auth/providers')>()),
   isProviderEnabled: () => true,
 }));
-vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/mocks/session'));
 
 // The layout queries are answered; every other query stays in flight, so pages show their loading
 // branch and the chrome around them is what gets asserted.

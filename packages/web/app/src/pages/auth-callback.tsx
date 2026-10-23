@@ -1,14 +1,12 @@
-import { thirdPartySignInAndUp } from 'supertokens-auth-react/recipe/thirdpartyemailpassword';
 import { AuthCard } from '@/components/auth';
 import { Meta } from '@/components/ui/meta';
-import { env } from '@/env/frontend';
+import { type ThirdPartyProvider } from '@/lib/auth/api';
+import { completeThirdPartyAuth } from '@/lib/auth/third-party';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 
-type Provider = 'github' | 'google' | 'okta' | 'oidc';
-
 const providerDetailsMap: {
-  [key in Provider]: {
+  [key in ThirdPartyProvider]: {
     name: string;
     failure: string;
     success: string;
@@ -36,20 +34,17 @@ const providerDetailsMap: {
   },
 };
 
-function AuthCallback(props: { provider: Provider; redirectToPath: string }) {
+function AuthCallback(props: { provider: ThirdPartyProvider }) {
   const router = useRouter();
   const auth = useQuery({
     gcTime: 0, // disabled caching
     queryKey: ['auth-callback', props.provider], // this is a unique key, but we don't use it really as cache is disabled (see gcTime)
     refetchOnWindowFocus: false,
     retryOnMount: false,
+    // The server accepts the callback's state once; a retry could only fail.
+    retry: false,
     queryFn() {
-      const provider = props.provider;
-      if (!env.auth[provider]) {
-        throw new Error(`Provider for ${provider} is not configured`);
-      }
-
-      return thirdPartySignInAndUp();
+      return completeThirdPartyAuth(props.provider);
     },
   });
   const providerDetails = providerDetailsMap[props.provider];
@@ -61,19 +56,10 @@ function AuthCallback(props: { provider: Provider; redirectToPath: string }) {
   if (auth.isSuccess) {
     if (auth.data.status === 'OK') {
       void router.navigate({
-        to: props.redirectToPath,
+        to: auth.data.redirectToPath,
       });
     } else {
-      return (
-        <AuthCard
-          title={providerDetails.failure}
-          description={
-            auth.data.status === 'NO_EMAIL_GIVEN_BY_PROVIDER'
-              ? 'No email address was provided by the auth provider. Please try again.'
-              : auth.data.reason
-          }
-        />
-      );
+      return <AuthCard title={providerDetails.failure} description={auth.data.reason} />;
     }
   }
 
@@ -85,11 +71,11 @@ function AuthCallback(props: { provider: Provider; redirectToPath: string }) {
   );
 }
 
-export function AuthCallbackPage(props: { provider: Provider; redirectToPath: string }) {
+export function AuthCallbackPage(props: { provider: ThirdPartyProvider }) {
   return (
     <>
       <Meta title="Redirecting" />
-      <AuthCallback provider={props.provider} redirectToPath={props.redirectToPath} />
+      <AuthCallback provider={props.provider} />
     </>
   );
 }

@@ -128,8 +128,9 @@ For the rest of the route state:
 - The urql client rides in router context: `createAppRouter({ urqlClient })` puts it there, the root
   component provides it to React, and a loader reads it as `context.urqlClient`. Only `src/main.tsx`
   imports the real client from `@/lib/urql`; `router.spec.ts` fails if a route module does.
-- `authenticated.tsx` checks the session in `beforeLoad`, so a loader never runs for an anonymous
-  visitor; `SessionAuth` still covers a session that expires mid-visit.
+- `authenticated.tsx` checks the session in `beforeLoad` (`requireSession`), so a loader never runs
+  for an anonymous visitor. A session that expires mid-visit is handled by the urql `authExchange`:
+  `NEEDS_REFRESH` refreshes and re-sends, `UNAUTHENTICATED` signs out and goes to `/auth`.
 - The viewer and layout documents, `useLayoutQuery`, `loadQuery`, request policies, pagination,
   preloading and the loading vocabulary are in [DATA.md](./DATA.md).
 
@@ -221,7 +222,7 @@ Run from the repo root: `pnpm vitest run packages/web/app/src`.
 
 `renderAtUrl(url, { client })` (`src/lib/testing/router.tsx`) renders the app in a memory history
 with `client` (a `createTestClient`) in router context. Specs that use it mock `@/env/frontend`,
-`@graphql-hive/laboratory`, the laboratory storage and SuperTokens through the stand-ins in
+`@graphql-hive/laboratory`, the laboratory storage and the session through the stand-ins in
 `src/lib/testing/mocks/`, one `vi.mock` line each in the spec, since there is no app-scoped vitest
 project to hold `setupFiles`. Fixtures for the viewer, layout and user-menu queries, each settings
 and members screen, checks, insights, history, apps, the explorer gates and proposals live in

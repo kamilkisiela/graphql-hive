@@ -12,11 +12,10 @@ vi.mock('@/env/frontend', async () => {
     },
   };
 });
-vi.mock('supertokens-auth-react/recipe/session', () => ({
-  default: {
-    attemptRefreshingSession: async () => true,
-    signOut: async () => {},
-  },
+const signOut = vi.hoisted(() => vi.fn(async () => {}));
+vi.mock('@/lib/auth/session', () => ({
+  attemptRefreshingSession: async () => true,
+  signOut,
 }));
 
 const fetchMock = vi.fn(
@@ -38,17 +37,81 @@ async function requestWith(prefix: string | null) {
   await urqlClient.query(probe, {}).toPromise();
   expect(fetchMock).toHaveBeenCalledTimes(1);
   const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+  // The session lives in cookies on the API origin, so every request has to carry them.
+  expect(init.credentials).toBe('include');
   return { method: init.method, body: JSON.parse(init.body as string) as Record<string, unknown> };
+}
+
+const location = {
+  assign: vi.fn(),
+  pathname: '/org-1/view/members',
+  search: '',
+  protocol: 'http:',
+};
+
+function graphqlError(code: string, extensions: Record<string, string> = {}) {
+  return new Response(
+    JSON.stringify({ errors: [{ message: code, extensions: { code, ...extensions } }] }),
+    { headers: { 'content-type': 'application/json' } },
+  );
 }
 
 describe('urqlClient', () => {
   beforeEach(() => {
     fetchMock.mockClear();
+    location.assign.mockClear();
+    signOut.mockClear();
     vi.stubGlobal('fetch', fetchMock);
+    vi.stubGlobal('location', location);
   });
   afterEach(() => {
     vi.unstubAllGlobals();
   });
+
+  it(
+    'still redirects when the operation re-sent after a refresh needs OIDC',
+    { timeout: 30_000 },
+    async () => {
+      fetchMock
+        .mockResolvedValueOnce(graphqlError('NEEDS_REFRESH'))
+        .mockResolvedValueOnce(
+          graphqlError('NEEDS_OIDC', { organizationSlug: 'org-1', oidcIntegrationId: 'int-1' }),
+        );
+      persistedOperationsPrefix.current = null;
+      vi.resetModules();
+      const { urqlClient } = await import('./urql');
+
+      await urqlClient.query(probe, {}).toPromise();
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(location.assign).toHaveBeenCalledWith(
+        '/org-1/oidc-request?id=int-1&redirectToPath=%2Forg-1%2Fview%2Fmembers',
+      );
+    },
+  );
+
+  it(
+    'signs out when the operation re-sent after a refresh is unauthenticated',
+    { timeout: 30_000 },
+    async () => {
+      fetchMock
+        .mockResolvedValueOnce(graphqlError('NEEDS_REFRESH'))
+        .mockResolvedValueOnce(graphqlError('UNAUTHENTICATED'));
+      persistedOperationsPrefix.current = null;
+      vi.resetModules();
+      const { urqlClient } = await import('./urql');
+
+      await urqlClient.query(probe, {}).toPromise();
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => {
+        expect(signOut).toHaveBeenCalledTimes(1);
+        expect(location.assign).toHaveBeenCalledWith(
+          '/auth?redirectToPath=%2Forg-1%2Fview%2Fmembers',
+        );
+      });
+    },
+  );
 
   it('sends a query as POST', { timeout: 30_000 }, async () => {
     const { method, body } = await requestWith(null);
