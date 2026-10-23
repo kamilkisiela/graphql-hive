@@ -39,7 +39,7 @@
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "tslib": "^2.8.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "dependencies": {
     "@graphql-tools/url-loader": "^9.1.12",
@@ -111,7 +111,7 @@
     "vite": "npm:rolldown-vite@7.1.14",
     "vite-plugin-monaco-editor": "^1.1.0",
     "ws": "catalog:",
-    "zod": "^4.6.5"
+    "zod": "4.6.6"
   },
   "publishConfig": {
     "access": "public"
