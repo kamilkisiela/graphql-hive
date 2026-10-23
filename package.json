@@ -171,7 +171,7 @@
       "yauzl@2.x.x": "^3.2.1",
       "glob@10.x.x": "^10.5.0",
       "path-to-regexp@0.x.x": "^0.1.13",
-      "ioredis": "5.10.1",
+      "ioredis": "6.0.0",
       "protobufjs@8.x.x": "8.6.4",
       "protobufjs@7.x.x": "7.6.5",
       "@opentelemetry/exporter-jaeger": "-",

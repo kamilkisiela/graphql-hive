@@ -41,7 +41,7 @@
     "aws-msk-iam-sasl-signer-js": "1.0.3",
     "fastify": "catalog:",
     "fastify-plugin": "6.0.0",
-    "ioredis": "5.10.1",
+    "ioredis": "6.0.0",
     "opentelemetry-instrumentation-fetch-node": "1.2.3",
     "p-retry": "6.2.1",
     "prom-client": "catalog:",
