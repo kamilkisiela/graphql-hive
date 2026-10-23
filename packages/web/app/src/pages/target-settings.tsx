@@ -251,6 +251,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }) => {
   const { organizationSlug, projectSlug, targetSlug } = useSlugs('target');
   const [mutation, mutate] = useMutation(Settings_UpdateBaseSchemaMutation);
   const [baseSchema, setBaseSchema] = useState(props.baseSchema);
+  const [syntaxError, setSyntaxError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isUnsaved = baseSchema?.trim() !== props.baseSchema?.trim();
@@ -270,7 +271,9 @@ const ExtendBaseSchema = (props: { baseSchema: string }) => {
         value={baseSchema}
         height={300}
         onChange={value => setBaseSchema(value ?? '')}
+        onSyntaxErrors={markers => setSyntaxError(markers[0]?.message ?? null)}
       />
+      {syntaxError && <div className="text-critical">{syntaxError}</div>}
       {mutation.data?.updateBaseSchema.error && (
         <div className="text-critical">{mutation.data.updateBaseSchema.error.message}</div>
       )}

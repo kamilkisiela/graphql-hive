@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen } from '@testing-library/react';
+import type { OnMount } from '@monaco-editor/react';
 import { SchemaEditor } from './schema-editor';
 
 /** Records what the mocked Monaco editor was rendered with. */
@@ -42,5 +43,93 @@ describe('SchemaEditor', () => {
     render(<SchemaEditor value="" theme="vs" />);
 
     expect(monaco.props?.theme).toBe('vs');
+  });
+});
+
+describe('SchemaEditor onSyntaxErrors', () => {
+  const brokenSdl = 'extend type Query { a: }';
+  const brokenSdlMarker = {
+    startLineNumber: 1,
+    startColumn: 24,
+    endLineNumber: 1,
+    endColumn: 25,
+    message: 'Syntax Error: Expected Name, found "}".',
+    severity: 8,
+  };
+
+  /** Stands in for the editor and monaco instances the wrapper hands to `onMount`. */
+  function fakeMonaco(initialText: string) {
+    let text = initialText;
+    const model = { getValue: () => text };
+    const contentListeners: Array<() => void> = [];
+    const disposeListeners: Array<() => void> = [];
+    const subscription = { dispose: vi.fn() };
+    const editor = {
+      getModel: () => model,
+      onDidChangeModelContent: vi.fn((listener: () => void) => {
+        contentListeners.push(listener);
+        return subscription;
+      }),
+      onDidDispose: vi.fn((listener: () => void) => {
+        disposeListeners.push(listener);
+        return { dispose: vi.fn() };
+      }),
+    };
+    const instance = { editor: { setModelMarkers: vi.fn() } };
+    return {
+      model,
+      editor,
+      instance,
+      subscription,
+      mount: () => (monaco.props?.onMount as OnMount)(editor as never, instance as never),
+      edit: (next: string) => {
+        text = next;
+        contentListeners.forEach(listener => listener());
+      },
+      dispose: () => disposeListeners.forEach(listener => listener()),
+    };
+  }
+
+  it('marks syntax errors on mount and after every edit, and reports them', () => {
+    const onSyntaxErrors = vi.fn();
+    render(<SchemaEditor value="type Query { a: String }" onSyntaxErrors={onSyntaxErrors} />);
+    const fake = fakeMonaco('type Query { a: String }');
+
+    fake.mount();
+    expect(fake.instance.editor.setModelMarkers).toHaveBeenLastCalledWith(
+      fake.model,
+      'graphql',
+      [],
+    );
+    expect(onSyntaxErrors).toHaveBeenLastCalledWith([]);
+
+    fake.edit(brokenSdl);
+    expect(fake.instance.editor.setModelMarkers).toHaveBeenLastCalledWith(fake.model, 'graphql', [
+      brokenSdlMarker,
+    ]);
+    expect(onSyntaxErrors).toHaveBeenLastCalledWith([brokenSdlMarker]);
+
+    fake.edit('');
+    expect(onSyntaxErrors).toHaveBeenLastCalledWith([]);
+  });
+
+  it('stops listening once the editor is disposed', () => {
+    render(<SchemaEditor value="" onSyntaxErrors={() => {}} />);
+    const fake = fakeMonaco('');
+
+    fake.mount();
+    fake.dispose();
+    expect(fake.subscription.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the editor alone without the prop and still forwards onMount', () => {
+    const onMount = vi.fn();
+    render(<SchemaEditor value={brokenSdl} onMount={onMount} />);
+    const fake = fakeMonaco(brokenSdl);
+
+    fake.mount();
+    expect(fake.instance.editor.setModelMarkers).not.toHaveBeenCalled();
+    expect(fake.editor.onDidChangeModelContent).not.toHaveBeenCalled();
+    expect(onMount).toHaveBeenCalledWith(fake.editor, fake.instance);
   });
 });
