@@ -32,7 +32,7 @@
     "bentocache": "catalog:",
     "dotenv": "catalog:",
     "got": "catalog:",
-    "graphile-worker": "0.16.6",
+    "graphile-worker": "0.18.0",
     "graphql": "catalog:",
     "graphql-yoga": "catalog:",
     "mjml": "4.14.0",

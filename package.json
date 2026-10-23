@@ -106,7 +106,7 @@
     "eslint-plugin-hive": "file:rules",
     "graphql": "catalog:",
     "jest-snapshot-serializer-raw": "2.0.0",
-    "pg": "8.13.1",
+    "pg": "8.23.0",
     "prettier": "catalog:",
     "prettier-plugin-sql": "0.18.1",
     "prettier-plugin-tailwindcss": "0.6.9",

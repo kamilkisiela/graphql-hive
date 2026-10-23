@@ -76,7 +76,7 @@ catalog:
   monaco-editor: 0.52.2
   nock: 14.0.10
   p-limit: 6.2.0
-  pg-promise: 11.10.2
+  pg-promise: 12.7.1
   pino-pretty: 11.3.0
   prettier: 3.4.2
   prom-client: 15.1.3

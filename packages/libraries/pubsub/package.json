@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@graphql-yoga/redis-event-target": "catalog:",
-    "graphile-worker": "0.16.0",
+    "graphile-worker": "0.18.0",
     "graphql-yoga": "catalog:"
   },
   "devDependencies": {
