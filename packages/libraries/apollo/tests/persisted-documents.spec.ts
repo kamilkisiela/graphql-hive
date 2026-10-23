@@ -271,6 +271,7 @@ test('usage reporting for persisted document', async () => {
           ace78a32bbf8a79071356e5d5b13c5c83baf4e14: {
             fields: [
               Query.hi,
+              String,
             ],
             operation: {hi},
             operationName: anonymous,

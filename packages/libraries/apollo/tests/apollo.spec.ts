@@ -281,6 +281,7 @@ describe('built-in HTTP usage reporting', async () => {
           e15a9b2c408491a7de1e557f240fd9b97db3972f: {
             fields: [
               Query.hi,
+              String,
             ],
             operation: {hi},
             operationName: anonymous,
@@ -366,6 +367,7 @@ describe('built-in HTTP usage reporting', async () => {
           7ed6f1c2474785a05302bb92320b793f661d22d8: {
             fields: [
               Mutation.hi,
+              String,
             ],
             operation: mutation{hi},
             operationName: anonymous,
@@ -456,6 +458,7 @@ describe('built-in HTTP usage reporting', async () => {
             e15a9b2c408491a7de1e557f240fd9b97db3972f: {
               fields: [
                 Query.hi,
+                String,
               ],
               operation: {hi},
               operationName: anonymous,
@@ -567,6 +570,7 @@ describe('built-in HTTP usage reporting', async () => {
             e15a9b2c408491a7de1e557f240fd9b97db3972f: {
               fields: [
                 Query.hi,
+                String,
               ],
               operation: {hi},
               operationName: anonymous,
@@ -722,6 +726,7 @@ describe('graphql-ws usage reporting setup', async () => {
             f25063b60ab942d0c0d14cdd9cd3172de2e7ebc4: {
               fields: [
                 Query.hi,
+                String,
               ],
               operation: {hi},
               operationName: anonymous,

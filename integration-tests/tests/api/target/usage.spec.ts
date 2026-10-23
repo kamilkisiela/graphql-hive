@@ -3445,13 +3445,13 @@ test('subscription operation is used for conditional breaking change detection',
     expect(node.usageStatistics?.topAffectedOperations).toEqual([
       {
         countFormatted: '1',
-        hash: 'c1bbc8385a4a6f4e4988be7394800adc',
+        hash: '8bc74b99fdc4d7d2470258a845947af7',
         name: 'anonymous',
         percentage: 100,
         percentageFormatted: '100.00%',
         operation: {
           body: 'subscription{a}',
-          hash: 'c1bbc8385a4a6f4e4988be7394800adc',
+          hash: '8bc74b99fdc4d7d2470258a845947af7',
           name: 'anonymous',
           type: 'SUBSCRIPTION',
         },
