@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react';
 // Import from `editor.api` rather than the `monaco-editor` main entry to keep
 // the bundle lean — the main entry auto-registers every basic language, which
 // bloats our client sourcemaps. We opt in to the contributions we actually use
@@ -18,8 +17,8 @@ import {
   loader,
   DiffEditor as MonacoDiffEditor,
   Editor as MonacoEditor,
+  type EditorProps,
 } from '@monaco-editor/react';
-import type { SchemaEditorProps } from '@theguild/editor';
 
 // Use the locally bundled Monaco (via vite-plugin-monaco-editor) instead of CDN
 // to ensure the editor and workers are from the same version.
@@ -28,24 +27,10 @@ loader.config({ monaco });
 export { MonacoDiffEditor };
 export { MonacoEditor };
 
-const LazySchemaEditor = lazy(async () => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  await import('regenerator-runtime/runtime');
-  const { SchemaEditor } = await import('@theguild/editor');
-  return { default: SchemaEditor };
-});
+export type SchemaEditorProps = Omit<EditorProps, 'language'>;
 
-/** Defaults Monaco's theme to the app theme; passing `theme` explicitly still wins. */
+/** Monaco with the GraphQL tokenizer. Defaults to the app theme; passing `theme` explicitly still wins. */
 export function SchemaEditor(props: SchemaEditorProps) {
   const monacoTheme = useMonacoTheme();
-
-  // A boundary of its own, so the chunk loading never suspends the route into its pending state.
-  return (
-    <Suspense fallback={null}>
-      <LazySchemaEditor theme={monacoTheme} {...props} />
-    </Suspense>
-  );
+  return <MonacoEditor theme={monacoTheme} {...props} language="graphql" />;
 }
-
-export type { SchemaEditorProps };

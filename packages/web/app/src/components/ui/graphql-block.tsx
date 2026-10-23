@@ -8,7 +8,7 @@ export function GraphQLHighlight({
   code,
   options,
   ...props
-}: Omit<SchemaEditorProps, 'schema'> & {
+}: SchemaEditorProps & {
   code: string;
 }): ReactElement {
   const pretty = usePrettify(code);
@@ -23,7 +23,7 @@ export function GraphQLHighlight({
         options={{ readOnly: true, lineNumbers: 'on', ...options }}
         height="60vh"
         {...props}
-        schema={pretty ?? ''}
+        value={pretty ?? ''}
       />
     </div>
   );
