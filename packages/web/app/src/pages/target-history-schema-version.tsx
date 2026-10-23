@@ -547,19 +547,25 @@ function GraphQLSchemaView(props: {
         />
       )}
       {viewMode === 'diff' && (
-        <GenericGraphCard title={titleNode}>
-          {(props.previousSdl ?? '') === props.currentSdl ? (
-            <div className="px-5 py-3">
-              <NoGraphChanges />
-            </div>
-          ) : (
-            <SDLDiffView
-              before={props.previousSdl ?? ''}
-              after={props.currentSdl}
-              sorted
-              tooLargeMessage="Every change is listed under Changes. To browse the full schema, switch to View."
-            />
-          )}
+        <GenericGraphCard
+          title={titleNode}
+          actions={<span className="text-xs text-fg-muted">Sorted by kind and name</span>}
+        >
+          {/* Fills the viewport below the tab strip and the two headers (11rem), as SdlPane does. */}
+          <div className="flex min-h-[var(--code-max-h)] flex-col [--code-max-h:calc(100vh-11rem)]">
+            {(props.previousSdl ?? '') === props.currentSdl ? (
+              <div className="px-5 py-3">
+                <NoGraphChanges />
+              </div>
+            ) : (
+              <SDLDiffView
+                before={props.previousSdl ?? ''}
+                after={props.currentSdl}
+                sorted
+                tooLargeMessage="Every change is listed under Changes. To browse the full schema, switch to View."
+              />
+            )}
+          </div>
         </GenericGraphCard>
       )}
       {viewMode === 'raw' && props.currentSdl && (
@@ -1001,22 +1007,15 @@ export function SDLDiffView(props: {
       );
     case 'diff':
       return (
-        <>
-          {props.sorted && (
-            <div className="border-b border-line-subtle px-5 py-2 text-xs text-fg-muted">
-              Sorted by kind and name
-            </div>
-          )}
-          <CodeScrollArea>
-            <FileDiff
-              fileDiff={result.fileDiff}
-              options={{
-                disableFileHeader: true,
-                diffStyle: 'unified',
-              }}
-            />
-          </CodeScrollArea>
-        </>
+        <CodeScrollArea>
+          <FileDiff
+            fileDiff={result.fileDiff}
+            options={{
+              disableFileHeader: true,
+              diffStyle: 'unified',
+            }}
+          />
+        </CodeScrollArea>
       );
   }
 }

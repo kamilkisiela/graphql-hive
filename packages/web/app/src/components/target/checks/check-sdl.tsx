@@ -150,6 +150,24 @@ function TabMessage(props: { children: React.ReactNode }) {
   );
 }
 
+// The body fills the viewport below the tab strip and toolbar (5rem), whatever it holds, so the
+// page is never shorter than one screen while a tab loads and the strip stays where it was.
+export function SdlPane(props: {
+  title?: React.ReactNode;
+  actions?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="w-full [--code-max-h:calc(100vh-5rem)]">
+      <div className="flex items-center justify-between border-b border-line-subtle px-2 py-1">
+        <div className="px-2 font-bold">{props.title}</div>
+        <div className="ml-auto flex h-[36px] items-center px-2">{props.actions}</div>
+      </div>
+      <div className="flex min-h-[var(--code-max-h)] flex-col">{props.children}</div>
+    </div>
+  );
+}
+
 /**
  * An SDL tab waits for its SDLs. Tab state comes from flags on the check, so a check that composed
  * should always have them; if one did not, the tab says so instead of rendering an empty diff.
@@ -162,20 +180,27 @@ export function withSdlState<T>(
   if (!SDL_TABS.has(item.value)) {
     return item;
   }
-  if (state.error) {
-    return { ...item, content: <TabMessage>The schema could not be loaded.</TabMessage> };
+  const message = state.error
+    ? 'The schema could not be loaded.'
+    : state.data
+      ? missing?.(state.data, item.value)
+      : null;
+  if (state.data && !message) {
+    return item;
   }
-  if (!state.data) {
-    return {
-      ...item,
-      content: (
-        <TabMessage>
-          <Spinner variants={{ size: 'sm' }} label="Loading schema" />
-          Loading schema…
-        </TabMessage>
-      ),
-    };
-  }
-  const message = missing?.(state.data, item.value);
-  return message ? { ...item, content: <TabMessage>{message}</TabMessage> } : item;
+  return {
+    ...item,
+    content: (
+      <SdlPane>
+        {message ? (
+          <TabMessage>{message}</TabMessage>
+        ) : (
+          <div className="flex grow flex-col items-center justify-center gap-3 text-sm text-fg-secondary">
+            <Spinner variants={{ size: 'lg' }} label="Loading schema" />
+            Loading schema…
+          </div>
+        )}
+      </SdlPane>
+    ),
+  };
 }

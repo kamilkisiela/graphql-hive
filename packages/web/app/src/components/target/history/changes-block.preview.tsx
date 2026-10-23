@@ -7,12 +7,13 @@ import { DescriptionList } from '@/components/ui/primitives/description-list/des
 import { Select } from '@/components/ui/primitives/floating/select/select';
 import { ScopeBar } from '@/components/ui/scope-bar/scope-bar';
 import { TabbedView } from '@/components/ui/tabbed-view/tabbed-view';
-import { makeFragmentData } from '@/gql';
+import { makeFragmentData, type DocumentType } from '@/gql';
 import { SchemaChangeKind, SeverityLevelType } from '@/gql/graphql';
 import { RouterAt } from '../../../../foundry.router';
 import { buildChanges, metadata, PATH } from './changes-block.fixtures';
 import {
   ChangesBlock,
+  ChangesBlock_SchemaChangeApprovalFragment,
   ChangesBlock_SchemaChangeFragment,
   ChangesBlock_SchemaChangeWithUsageFragment,
 } from './errors-and-changes';
@@ -179,6 +180,43 @@ export const OnTheCheckPage = createPreview({
   render: v => <CheckPageView {...v} />,
 });
 
+type UsageLabelChange = DocumentType<typeof ChangesBlock_SchemaChangeWithUsageFragment>;
+
+const APPROVAL = {
+  __typename: 'SchemaChangeApproval' as const,
+  ...makeFragmentData(
+    {
+      __typename: 'SchemaChangeApproval' as const,
+      approvedBy: { __typename: 'User' as const, id: 'user-1', displayName: 'User' },
+      cliApprovalMetadata: null,
+      approvedAt: '2026-10-20T10:00:00.000Z',
+      schemaCheckId: 'check-1',
+    },
+    ChangesBlock_SchemaChangeApprovalFragment,
+  ),
+};
+
+function usageLabelChange(
+  change: Pick<
+    UsageLabelChange,
+    'path' | 'message' | 'severityReason' | 'isUsageTracked' | 'kind'
+  > &
+    Partial<Pick<UsageLabelChange, 'approval' | 'affectedAppDeployments'>>,
+) {
+  return makeFragmentData(
+    {
+      __typename: 'SchemaChange' as const,
+      severityLevel: SeverityLevelType.Breaking,
+      isSafeBasedOnUsage: true,
+      approval: null,
+      usageStatistics: null,
+      affectedAppDeployments: null,
+      ...change,
+    },
+    ChangesBlock_SchemaChangeWithUsageFragment,
+  );
+}
+
 // Inspector's messages and reasons, verbatim. A change marked safe based on usage whose usage is
 // never recorded gets an honest label, and a change with nothing to show is a static row.
 const USAGE_LABEL_CHANGES = [
@@ -212,6 +250,7 @@ const USAGE_LABEL_CHANGES = [
       'Changing the kind of a type is a breaking change because it can cause existing queries to error. For example, turning an object type to a scalar type would break queries that define a selection set for this type.',
     isUsageTracked: false,
     kind: SchemaChangeKind.TypeKindChanged,
+    approval: APPROVAL,
   },
   {
     path: ['Query', 'products', 'region'],
@@ -228,21 +267,14 @@ const USAGE_LABEL_CHANGES = [
       'Removing a field is a breaking change. It is preferable to deprecate the field before removing it. This applies to removed union fields as well, since removal breaks client operations that contain fragments that reference the removed type through direct (... on RemovedType) or indirect means such as __typename in the consumers.',
     isUsageTracked: true,
     kind: SchemaChangeKind.FieldRemoved,
-  },
-].map(change =>
-  makeFragmentData(
-    {
-      __typename: 'SchemaChange' as const,
-      ...change,
-      severityLevel: SeverityLevelType.Breaking,
-      isSafeBasedOnUsage: true,
-      approval: null,
-      usageStatistics: null,
-      affectedAppDeployments: null,
+    approval: APPROVAL,
+    affectedAppDeployments: {
+      __typename: 'SchemaChangeAffectedAppDeploymentsConnection' as const,
+      totalCount: 101,
+      edges: [],
     },
-    ChangesBlock_SchemaChangeWithUsageFragment,
-  ),
-);
+  },
+].map(usageLabelChange);
 
 /** Breaking changes the check found no usage for, labelled by whether usage is recorded at all. */
 export const UsageLabels = createPreview(() => (

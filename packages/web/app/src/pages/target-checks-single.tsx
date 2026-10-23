@@ -20,6 +20,7 @@ import { useMutation, useQuery } from 'urql';
 import { useChangePageLoaders } from '@/components/target/checks/change-pages';
 import {
   SDL_TABS,
+  SdlPane,
   useCheckSdl,
   useContractCheckSdl,
   withCheckSdl,
@@ -132,17 +133,16 @@ function SDLSingleView(props: {
   downloadFileName?: string;
 }): ReactElement {
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between border-b border-line-subtle px-2 py-1">
-        <div className="px-2 font-bold">{props.title}</div>
-        <div className="ml-auto flex h-[36px] items-center px-2">
-          {props.sdl && props.downloadFileName && (
-            <DownloadButton fileName={props.downloadFileName} contents={props.sdl} />
-          )}
-        </div>
-      </div>
+    <SdlPane
+      title={props.title}
+      actions={
+        props.sdl && props.downloadFileName ? (
+          <DownloadButton fileName={props.downloadFileName} contents={props.sdl} />
+        ) : null
+      }
+    >
       <SDLView sdl={props.sdl} />
-    </div>
+    </SdlPane>
   );
 }
 
@@ -157,14 +157,16 @@ function SDLSingleDiffToggleView(props: {
   const title = props?.title ?? 'Diff View';
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between border-b border-line-subtle px-2 py-1">
-        <div className="px-2 font-bold">{title}</div>
-        <div className="ml-auto flex h-[36px] items-center px-2">
+    <SdlPane
+      title={title}
+      actions={
+        <>
+          {props.sorted && showDiff ? (
+            <span className="mr-2 text-xs text-fg-muted">Sorted by kind and name</span>
+          ) : null}
           {props.after && props.downloadFileName && (
             <DownloadButton fileName={props.downloadFileName} contents={props.after} />
           )}
-
           <div className="ml-2 flex items-center space-x-2">
             <Label variant="inline" htmlFor="toggle-diff-mode" label="Toggle Diff" />
             <Switch
@@ -173,8 +175,9 @@ function SDLSingleDiffToggleView(props: {
               onCheckedChange={isChecked => setShowDiff(isChecked)}
             />
           </div>
-        </div>
-      </div>
+        </>
+      }
+    >
       {showDiff ? (
         <SDLDiffView
           before={props.before ?? ''}
@@ -185,7 +188,7 @@ function SDLSingleDiffToggleView(props: {
       ) : (
         <SDLView sdl={props.after ?? ''} />
       )}
-    </div>
+    </SdlPane>
   );
 }
 

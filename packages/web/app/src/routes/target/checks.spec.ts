@@ -369,7 +369,7 @@ describe('breaking change usage', () => {
         { name: /was removed from object type/ },
         { timeout: 10_000 },
       );
-      expect(change.textContent).toContain('1 operation by 1 client affected');
+      expect(change.textContent).toContain('1 client');
       await act(async () => {
         fireEvent.click(change);
       });
@@ -406,7 +406,7 @@ describe('breaking change usage', () => {
         { name: /was removed from object type/ },
         { timeout: 10_000 },
       );
-      expect(change.textContent).toContain('Safe based on usage data');
+      expect(change.textContent).toContain('No usage');
       await act(async () => {
         fireEvent.click(change);
       });
@@ -650,13 +650,11 @@ describe('paged changes', () => {
     });
 
     // The approved check starts over on its first page, already showing the approval.
-    await waitFor(() => expect(row('StressType_0')?.textContent).toContain('Approved by User'));
+    await waitFor(() => expect(row('StressType_0')?.textContent).toContain('Approved'));
     await next(screen.getAllByRole('navigation', { name: 'Pagination' })[0]);
 
     // The page seen before approving is read again rather than shown from memory.
-    await waitFor(() =>
-      expect(row(`StressType_${PAGE}`)?.textContent).toContain('Approved by User'),
-    );
+    await waitFor(() => expect(row(`StressType_${PAGE}`)?.textContent).toContain('Approved'));
     expect(testClient.requests('CheckBreakingChangesPageQuery')).toHaveLength(2);
   });
 });
@@ -728,16 +726,12 @@ describe('breaking changes without recorded usage', () => {
     async () => {
       renderCheck();
       // The type removal and the union member change; the type removal comes first.
-      const labels = await screen.findAllByText(
-        "Usage isn't tracked for this kind of change",
-        {},
-        { timeout: 10_000 },
-      );
+      const labels = await screen.findAllByText('Usage not tracked', {}, { timeout: 10_000 });
       expect(labels).toHaveLength(2);
       expect(labels[0].closest('button')).toBeNull();
       expect(screen.queryByRole('button', { name: /Currency was removed/ })).toBeNull();
       // Only the tracked field change still says safe based on usage.
-      expect(screen.getAllByText('Safe based on usage data')).toHaveLength(1);
+      expect(screen.getAllByText('No usage')).toHaveLength(1);
       expect(screen.queryByText(/No details available/)).toBeNull();
     },
   );
@@ -752,7 +746,7 @@ describe('breaking changes without recorded usage', () => {
         { name: /Movie was removed from Union type SearchResult/ },
         { timeout: 10_000 },
       );
-      expect(union.textContent).toContain("Usage isn't tracked for this kind of change");
+      expect(union.textContent).toContain('Usage not tracked');
       await act(async () => {
         fireEvent.click(union);
       });

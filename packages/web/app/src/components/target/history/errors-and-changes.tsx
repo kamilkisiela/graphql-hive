@@ -60,7 +60,7 @@ export const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment =
   }
 `);
 
-const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
+export const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
   fragment ChangesBlock_SchemaChangeApprovalFragment on SchemaChangeApproval {
     approvedBy {
       id
@@ -289,6 +289,8 @@ function ChangeItem(
   );
 
   const usageStatistics = 'usageStatistics' in change ? (change.usageStatistics ?? null) : null;
+  const affectedDeployments =
+    'affectedAppDeployments' in change ? (change.affectedAppDeployments?.totalCount ?? 0) : 0;
   const explorer = props.explorerLinks ? explorerLinkForChange(change, props.explorerLinks) : null;
 
   // Older checks have no per-target counts and keep the old layout.
@@ -417,54 +419,43 @@ function ChangeItem(
                   (severityLevelMapping[change.severityLevel] ?? 'text-critical'),
               )}
             >
-              <div>
-                <span className="text-fg-secondary">{labelize(change.message)}</span>
-                {'affectedAppDeployments' in change && change.affectedAppDeployments?.totalCount ? (
-                  <>
-                    {' '}
-                    <span className="inline-flex items-center space-x-1 rounded-sm bg-warning px-2 py-1 align-middle font-bold text-fg-inverse">
-                      <BoxIcon className="size-4 stroke-[2px]" />
-                      <span className="text-xs">
-                        {change.affectedAppDeployments.totalCount}{' '}
-                        {change.affectedAppDeployments.totalCount === 1
-                          ? 'app deployment'
-                          : 'app deployments'}{' '}
-                        affected
-                      </span>
-                    </span>
-                  </>
-                ) : null}
-              </div>
+              <span className="text-fg-secondary">{labelize(change.message)}</span>
             </div>
           ),
           trailing:
-            change.isSafeBasedOnUsage || usageStatistics || change.approval ? (
+            change.isSafeBasedOnUsage ||
+            usageStatistics ||
+            affectedDeployments ||
+            change.approval ? (
               <span className="flex items-center gap-2">
                 {change.isSafeBasedOnUsage ? (
                   // Zero usage only means "safe" where usage is recorded.
                   change.isUsageTracked ? (
                     <Badge
                       icon={CheckIcon}
-                      content="Safe based on usage data"
-                      variants={{ variant: 'warning' }}
+                      content="No usage"
+                      tooltip={
+                        metadata
+                          ? `No usage recorded in the last ${formatCount(metadata.settings.retentionInDays, 'day')}`
+                          : 'Safe based on usage data'
+                      }
+                      variants={{ variant: 'info' }}
                     />
                   ) : (
                     <Badge
-                      content="Usage isn't tracked for this kind of change"
+                      content="Usage not tracked"
+                      tooltip="Usage isn't tracked for this kind of change, so it can't be called safe"
                       variants={{ variant: 'secondary' }}
                     />
                   )
                 ) : null}
-                {usageStatistics ? (
+                {usageStatistics ? <UsageBadge usageStatistics={usageStatistics} /> : null}
+                {affectedDeployments ? (
                   <Badge
-                    icon={ActivityIcon}
-                    content={`${formatCount(
-                      usageStatistics.topAffectedOperations.length,
-                      'operation',
-                      // Ten is the cap, so ten means at least ten.
-                      usageStatistics.topAffectedOperations.length >= 10 ? '10+' : undefined,
-                    )} by ${formatCount(usageStatistics.topAffectedClients.length, 'client')} affected`}
-                    variants={{ variant: 'critical' }}
+                    icon={BoxIcon}
+                    content={formatCount(affectedDeployments, 'deployment')}
+                    tooltip={`${formatCount(affectedDeployments, 'app deployment')} affected`}
+                    variants={{ variant: 'warning' }}
                   />
                 ) : null}
                 {change.approval ? <ApprovedByBadge approval={change.approval} /> : null}
@@ -785,8 +776,24 @@ function ApprovedByBadge(props: {
   return (
     <Badge
       icon={CheckIcon}
-      content={`Approved by ${approvalName}`}
+      content="Approved"
+      tooltip={`Approved by ${approvalName} on ${format(new Date(approval.approvedAt), 'do MMMM yyyy')}`}
       variants={{ variant: 'success' }}
+    />
+  );
+}
+
+function UsageBadge(props: { usageStatistics: UsageStatistics }) {
+  const operations = props.usageStatistics.topAffectedOperations.length;
+  const clients = props.usageStatistics.topAffectedClients.length;
+  // Ten is the cap, so ten means at least ten.
+  const operationsText = formatCount(operations, 'operation', operations >= 10 ? '10+' : undefined);
+  return (
+    <Badge
+      icon={ActivityIcon}
+      content={clients ? formatCount(clients, 'client') : operationsText}
+      tooltip={`${operationsText} by ${formatCount(clients, 'client')} affected`}
+      variants={{ variant: 'critical' }}
     />
   );
 }
