@@ -4,8 +4,8 @@ import { EphemeralStateStore } from '../../shared/providers/ephemeral-state-stor
 import { REDIS_INSTANCE, type Redis } from '../../shared/providers/redis';
 
 const IntegrationStateModel = z.discriminatedUnion('method', [
-  z.object({ method: z.literal('github'), organizationId: z.string().uuid() }),
-  z.object({ method: z.literal('slack'), organizationId: z.string().uuid() }),
+  z.object({ method: z.literal('github'), organizationId: z.string().uuid(), userId: z.string() }),
+  z.object({ method: z.literal('slack'), organizationId: z.string().uuid(), userId: z.string() }),
 ]);
 
 @Injectable({
