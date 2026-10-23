@@ -27,9 +27,11 @@ function withCrossTabLock<T>(callback: () => Promise<T>): Promise<T> {
 }
 
 async function refreshUnderLock(before: FrontTokenSnapshot): Promise<boolean> {
-  // Re-read after waiting for the lock: another tab may have finished with the same token.
+  // Re-read after waiting for the lock: another tab may have finished with the same token, or
+  // signed out. A token that was never there says nothing about the API cookies, so that case
+  // still asks the server (the caller was just told NEEDS_REFRESH).
   const current = getSnapshot();
-  if (current.status === 'absent') {
+  if (current.status === 'absent' && before.status !== 'absent') {
     return false;
   }
   if (current !== before && isUsable(current)) {

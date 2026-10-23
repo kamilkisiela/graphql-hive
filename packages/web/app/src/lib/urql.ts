@@ -1,5 +1,11 @@
 import { createClient as createSSEClient } from 'graphql-sse';
-import { createClient, fetchExchange, mapExchange, subscriptionExchange } from 'urql';
+import {
+  createClient,
+  fetchExchange,
+  mapExchange,
+  subscriptionExchange,
+  type CombinedError,
+} from 'urql';
 import { env } from '@/env/frontend';
 import { attemptRefreshingSession, signOut } from '@/lib/auth/session';
 import { authExchange } from '@urql/exchange-auth';
@@ -13,6 +19,41 @@ const sseClient = createSSEClient({
   url: env.graphqlPublicSubscriptionEndpoint,
   credentials: 'include',
 });
+
+let leaving: Promise<void> | null = null;
+
+/** Ends the session and sends the browser to sign-in, once, however many answers ask for it. */
+function leaveToSignIn(): Promise<void> {
+  leaving ??= signOut().then(() => {
+    window.location.assign(`/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`);
+  });
+  return leaving;
+}
+
+/**
+ * Answers that end the page rather than the operation. They are handled on every result instead
+ * of inside the auth exchange: that exchange never refreshes an operation it already re-sent after
+ * a refresh, so such an answer would otherwise reach the page as an error.
+ */
+function redirectOnAuthError(error: CombinedError): void {
+  const codes = error.graphQLErrors.map(e => e.extensions?.code);
+  if (codes.includes('UNAUTHENTICATED')) {
+    void leaveToSignIn();
+    return;
+  }
+  if (codes.includes('VERIFY_EMAIL')) {
+    window.location.assign('/auth/verify-email');
+    return;
+  }
+  const oidcError = error.graphQLErrors.find(e => e.extensions?.code === 'NEEDS_OIDC');
+  if (oidcError) {
+    const organizationSlug = oidcError.extensions?.organizationSlug as string;
+    const oidcIntegrationId = oidcError.extensions?.oidcIntegrationId as string;
+    window.location.assign(
+      `/${organizationSlug}/oidc-request?id=${oidcIntegrationId}&redirectToPath=${encodeURIComponent(window.location.pathname)}`,
+    );
+  }
+}
 
 export const urqlClient = createClient({
   url: env.graphqlPublicEndpoint,
@@ -29,75 +70,34 @@ export const urqlClient = createClient({
   exchanges: [
     cacheExchange(cacheOptions),
     networkStatusExchange,
-    authExchange(async () => {
-      let action: 'NEEDS_REFRESH' | 'UNAUTHENTICATED' | 'REDIRECTED' = 'UNAUTHENTICATED';
-
-      return {
-        addAuthToOperation(operation) {
-          return operation;
-        },
-        willAuthError() {
-          return false;
-        },
-        didAuthError(error) {
-          const codes = error.graphQLErrors.map(e => e.extensions?.code);
-          if (codes.includes('UNAUTHENTICATED')) {
-            action = 'UNAUTHENTICATED';
-            return true;
-          }
-
-          // The two redirects happen here rather than in refreshAuth: an operation re-sent after
-          // a refresh is never refreshed again, but its answer must still send the user on.
-          if (codes.includes('VERIFY_EMAIL')) {
-            action = 'REDIRECTED';
-            window.location.assign('/auth/verify-email');
-            return true;
-          }
-
-          const oidcError = error.graphQLErrors.find(e => e.extensions?.code === 'NEEDS_OIDC');
-          if (oidcError) {
-            action = 'REDIRECTED';
-            const organizationSlug = oidcError.extensions?.organizationSlug as string;
-            const oidcIntegrationId = oidcError.extensions?.oidcIntegrationId as string;
-            window.location.assign(
-              `/${organizationSlug}/oidc-request?id=${oidcIntegrationId}&redirectToPath=${encodeURIComponent(window.location.pathname)}`,
-            );
-            return true;
-          }
-
-          if (codes.includes('NEEDS_REFRESH')) {
-            action = 'NEEDS_REFRESH';
-            return true;
-          }
-
-          return false;
-        },
-        async refreshAuth() {
-          if (action === 'REDIRECTED') {
-            return;
-          }
-          if (action === 'NEEDS_REFRESH') {
-            let refreshed: boolean;
-            try {
-              refreshed = await attemptRefreshingSession();
-            } catch {
-              // Rate limited or offline: the queued operations fail with this error and a retry
-              // starts over, instead of signing the user out.
-              throw new Error('Could not refresh your session');
-            }
-            if (refreshed) {
-              // The queued operations are re-sent with the rotated cookies. An operation that
-              // still answers NEEDS_REFRESH after that fails instead of refreshing again.
-              return;
-            }
-          }
-          await signOut();
-          window.location.assign(
-            `/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`,
-          );
-        },
-      };
-    }),
+    // Before the auth exchange, so it also sees the answers of operations re-sent after a refresh.
+    mapExchange({ onError: redirectOnAuthError }),
+    authExchange(async () => ({
+      addAuthToOperation(operation) {
+        return operation;
+      },
+      willAuthError() {
+        return false;
+      },
+      didAuthError(error) {
+        return error.graphQLErrors.some(e => e.extensions?.code === 'NEEDS_REFRESH');
+      },
+      async refreshAuth() {
+        let refreshed: boolean;
+        try {
+          refreshed = await attemptRefreshingSession();
+        } catch {
+          // Rate limited or offline: the queued operations fail with this error and a retry
+          // starts over, instead of signing the user out.
+          throw new Error('Could not refresh your session');
+        }
+        if (!refreshed) {
+          await leaveToSignIn();
+        }
+        // Otherwise the queued operations are re-sent with the rotated cookies. One that still
+        // answers NEEDS_REFRESH after that fails instead of refreshing again.
+      },
+    })),
     env.graphql.persistedOperationsPrefix !== null
       ? mapExchange({
           /**

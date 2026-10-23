@@ -12,9 +12,10 @@ vi.mock('@/env/frontend', async () => {
     },
   };
 });
+const signOut = vi.hoisted(() => vi.fn(async () => {}));
 vi.mock('@/lib/auth/session', () => ({
   attemptRefreshingSession: async () => true,
-  signOut: async () => {},
+  signOut,
 }));
 
 const fetchMock = vi.fn(
@@ -59,6 +60,7 @@ describe('urqlClient', () => {
   beforeEach(() => {
     fetchMock.mockClear();
     location.assign.mockClear();
+    signOut.mockClear();
     vi.stubGlobal('fetch', fetchMock);
     vi.stubGlobal('location', location);
   });
@@ -85,6 +87,29 @@ describe('urqlClient', () => {
       expect(location.assign).toHaveBeenCalledWith(
         '/org-1/oidc-request?id=int-1&redirectToPath=%2Forg-1%2Fview%2Fmembers',
       );
+    },
+  );
+
+  it(
+    'signs out when the operation re-sent after a refresh is unauthenticated',
+    { timeout: 30_000 },
+    async () => {
+      fetchMock
+        .mockResolvedValueOnce(graphqlError('NEEDS_REFRESH'))
+        .mockResolvedValueOnce(graphqlError('UNAUTHENTICATED'));
+      persistedOperationsPrefix.current = null;
+      vi.resetModules();
+      const { urqlClient } = await import('./urql');
+
+      await urqlClient.query(probe, {}).toPromise();
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await vi.waitFor(() => {
+        expect(signOut).toHaveBeenCalledTimes(1);
+        expect(location.assign).toHaveBeenCalledWith(
+          '/auth?redirectToPath=%2Forg-1%2Fview%2Fmembers',
+        );
+      });
     },
   );
 
