@@ -191,7 +191,7 @@ export function registerIntegrationRoutes(
 
       const redirectUrl = `${config.publicUrl}/api/slack/callback`;
 
-      const slackResponse = await fetch('https://slack.com/api/oauth.v2.access', {
+      const slackResponse = await config.fetch('https://slack.com/api/oauth.v2.access', {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         body: stringify({
