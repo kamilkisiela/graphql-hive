@@ -191,6 +191,8 @@ export function deployGraphQL({
     // GitHub App
     .withSecret('INTEGRATION_GITHUB_APP_ID', githubApp.secret, 'appId')
     .withSecret('INTEGRATION_GITHUB_APP_PRIVATE_KEY', githubApp.secret, 'privateKey')
+    .withSecret('INTEGRATION_GITHUB_APP_CLIENT_ID', githubApp.secret, 'clientId')
+    .withSecret('INTEGRATION_GITHUB_APP_CLIENT_SECRET', githubApp.secret, 'clientSecret')
     .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
     .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')
     // Clickhouse

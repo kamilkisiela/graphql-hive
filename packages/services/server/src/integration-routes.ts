@@ -16,21 +16,23 @@ const OrganizationSlug = z
   .max(50)
   .regex(/^[a-z0-9-]+$/);
 
-const OAuthState = z.string().regex(/^[a-f0-9]{64}$/);
+const StateModel = z.string().regex(/^[a-f0-9]{64}$/);
 
 const GitHubCallbackQuery = z.object({
-  installation_id: z.string({ required_error: 'Invalid installation_id' }),
-  state: OAuthState,
+  installation_id: z
+    .string({ required_error: 'Invalid installation_id' })
+    .regex(/^\d+$/, 'Invalid installation_id'),
+  code: z.string().min(1).max(1000).optional(),
+  state: StateModel.optional(),
 });
 
-const GitHubSetupCallbackQuery = z.object({
-  installation_id: z.string({ required_error: 'Invalid installation_id' }),
-  state: OAuthState.optional(),
+const GitHubAccessTokenResponse = z.object({
+  access_token: z.string().min(1),
 });
 
 const SlackCallbackQuery = z.object({
   code: z.string({ required_error: 'Invalid code' }),
-  state: OAuthState,
+  state: StateModel,
 });
 
 const ConnectParams = z.object({
@@ -51,8 +53,9 @@ const SlackOAuthv2AccessResponse = z.discriminatedUnion('ok', [
 type IntegrationRoutesConfig = {
   publicUrl: string;
   webAppUrl: string;
-  github: { appName: string } | null;
+  github: { appName: string; clientId: string; clientSecret: string } | null;
   slack: { clientId: string; clientSecret: string } | null;
+  fetch: (url: string, init: RequestInit) => Promise<Response>;
   registry: Registry;
   authN: AuthN;
   stateStore: IntegrationStateStore;
@@ -74,7 +77,26 @@ export function registerIntegrationRoutes(
         return res.status(400).send(queryResult.error.flatten().fieldErrors);
       }
 
-      const { installation_id: installationId, state } = queryResult.data;
+      const { installation_id: installationId, code, state } = queryResult.data;
+      req.log.info('GitHub callback (installationId=%s, hasState=%s)', installationId, !!state);
+
+      if (!state) {
+        // Installed from GitHub directly; only link back to an organization that already uses it.
+        const organization = await injector
+          .get(GitHubIntegrationManager)
+          .getOrganization({ installation: installationId });
+
+        return res.redirect(
+          organization
+            ? `${config.webAppUrl}/${organization.slug}/view/settings`
+            : config.webAppUrl,
+        );
+      }
+
+      if (!config.github) {
+        throw new Error('GitHub is not set up.');
+      }
+
       const cacheRecord = await config.stateStore.get(state);
       const viewer = await injector.get(Session).getViewer();
 
@@ -82,61 +104,34 @@ export function registerIntegrationRoutes(
         return res.status(400).send('Invalid or expired state');
       }
 
+      // The installation_id query parameter can be spoofed, so we verify that the GitHub user
+      // who just authorized the app actually has access to the installation.
+      if (
+        !code ||
+        !(await canUserAccessGitHubInstallation({
+          github: config.github,
+          fetch: config.fetch,
+          code,
+          installationId,
+        }))
+      ) {
+        req.log.warn(
+          'Could not verify GitHub installation access (installationId=%s)',
+          installationId,
+        );
+        return res.status(403).send('Could not verify access to the GitHub installation');
+      }
+
       await injector.get(GitHubIntegrationManager).register({
         organizationId: cacheRecord.organizationId,
         installationId,
       });
+
       const organization = await injector
         .get(OrganizationManager)
         .getOrganization({ organizationId: cacheRecord.organizationId });
+
       return res.redirect(`${config.webAppUrl}/${organization.slug}/view/settings`);
-    }),
-  );
-
-  server.get(
-    '/api/github/setup-callback',
-    withInjector(async (req, res, injector) => {
-      const queryResult = GitHubSetupCallbackQuery.safeParse(req.query);
-      if (!queryResult.success) {
-        return res.status(400).send(queryResult.error.flatten().fieldErrors);
-      }
-
-      const { installation_id: installationId, state } = queryResult.data;
-      let organizationSlug: string | undefined;
-      req.log.info(
-        'GitHub setup callback (installationId=%s, hasState=%s)',
-        installationId,
-        !!state,
-      );
-
-      if (state) {
-        const cacheRecord = await config.stateStore.get(state);
-        const viewer = await injector.get(Session).getViewer();
-
-        if (cacheRecord?.method !== 'github' || cacheRecord.userId !== viewer.id) {
-          return res.status(400).send('Invalid or expired state');
-        }
-
-        await injector.get(GitHubIntegrationManager).register({
-          organizationId: cacheRecord.organizationId,
-          installationId,
-        });
-        const organization = await injector
-          .get(OrganizationManager)
-          .getOrganization({ organizationId: cacheRecord.organizationId });
-        organizationSlug = organization.slug;
-      } else {
-        const organization = await injector
-          .get(GitHubIntegrationManager)
-          .getOrganization({ installation: installationId });
-        organizationSlug = organization?.slug;
-      }
-
-      return res.redirect(
-        organizationSlug
-          ? `${config.webAppUrl}/${organizationSlug}/view/settings`
-          : config.webAppUrl,
-      );
     }),
   );
 
@@ -261,6 +256,49 @@ export function registerIntegrationRoutes(
       return res.redirect(slackUrl.toString());
     }),
   );
+}
+
+async function canUserAccessGitHubInstallation(args: {
+  github: NonNullable<IntegrationRoutesConfig['github']>;
+  fetch: IntegrationRoutesConfig['fetch'];
+  code: string;
+  installationId: string;
+}): Promise<boolean> {
+  const accessTokenResponse = await args.fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      accept: 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: args.github.clientId,
+      client_secret: args.github.clientSecret,
+      code: args.code,
+    }),
+  });
+
+  if (accessTokenResponse.status !== 200) {
+    return false;
+  }
+
+  const accessToken = GitHubAccessTokenResponse.safeParse(await accessTokenResponse.json());
+  if (!accessToken.success) {
+    return false;
+  }
+
+  const installationResponse = await args.fetch(
+    `https://api.github.com/user/installations/${args.installationId}/repositories?per_page=1`,
+    {
+      method: 'GET',
+      headers: {
+        accept: 'application/vnd.github+json',
+        authorization: `Bearer ${accessToken.data.access_token}`,
+        'x-github-api-version': '2022-11-28',
+      },
+    },
+  );
+
+  return installationResponse.status === 200;
 }
 
 function createWithInjector(config: IntegrationRoutesConfig) {

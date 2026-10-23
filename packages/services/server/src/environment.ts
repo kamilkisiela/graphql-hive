@@ -150,9 +150,17 @@ const GitHubModel = zod.union([
 ]);
 
 const IntegrationRoutesModel = zod.intersection(
-  zod.object({
-    INTEGRATION_GITHUB_APP_NAME: emptyString(zod.string().optional()),
-  }),
+  zod.union([
+    zod.object({
+      INTEGRATION_GITHUB_APP_NAME: emptyString(zod.undefined()),
+    }),
+    zod.object({
+      INTEGRATION_GITHUB_APP_NAME: zod.string(),
+      // Used for verifying that the installing user has access to the installation.
+      INTEGRATION_GITHUB_APP_CLIENT_ID: zod.string(),
+      INTEGRATION_GITHUB_APP_CLIENT_SECRET: zod.string(),
+    }),
+  ]),
   zod.union([
     zod.object({
       INTEGRATION_SLACK: emptyString(zod.literal('0').optional()),
@@ -634,9 +642,14 @@ export const env = {
     schema: { endpoint: base.SCHEMA_ENDPOINT },
   },
   integrationRoutes: {
-    github: integrationRoutes.INTEGRATION_GITHUB_APP_NAME
-      ? { appName: integrationRoutes.INTEGRATION_GITHUB_APP_NAME }
-      : null,
+    github:
+      'INTEGRATION_GITHUB_APP_CLIENT_ID' in integrationRoutes
+        ? {
+            appName: integrationRoutes.INTEGRATION_GITHUB_APP_NAME,
+            clientId: integrationRoutes.INTEGRATION_GITHUB_APP_CLIENT_ID,
+            clientSecret: integrationRoutes.INTEGRATION_GITHUB_APP_CLIENT_SECRET,
+          }
+        : null,
     slack:
       integrationRoutes.INTEGRATION_SLACK === '1'
         ? {

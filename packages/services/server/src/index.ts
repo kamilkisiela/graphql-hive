@@ -61,6 +61,7 @@ import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { registerIntegrationRoutes } from './integration-routes';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+import { createBrokerFetch } from './oauth-fetch';
 import { createOtelAuthEndpoint } from './otel-auth-endpoint';
 import { createPublicGraphQLHandler } from './public-graphql-handler';
 import { createSCIMPlugin } from './scim';
@@ -454,6 +455,7 @@ export async function main() {
       webAppUrl: env.hiveServices.webApp.url,
       github: env.integrationRoutes.github,
       slack: env.integrationRoutes.slack,
+      fetch: createBrokerFetch(fetch, env.requestBroker),
       registry,
       authN: privateAuthN,
       stateStore: registry.injector.get(IntegrationStateStore),
