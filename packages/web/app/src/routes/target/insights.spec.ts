@@ -168,6 +168,23 @@ describe('insights route', () => {
 });
 
 describe('operation route', () => {
+  // The operation body virtualizes with observers jsdom does not have; nothing here scrolls.
+  beforeEach(() => {
+    class NoopObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    }
+    vi.stubGlobal('IntersectionObserver', NoopObserver);
+    vi.stubGlobal('ResizeObserver', NoopObserver);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('receives the range the list row carries', { timeout: 30_000 }, async () => {
     const client = createTestClient(fixtures());
     renderAtUrl(INSIGHTS, { client });

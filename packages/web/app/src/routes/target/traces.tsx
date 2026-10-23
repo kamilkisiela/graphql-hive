@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { presetLast7Days } from '@/components/ui/date-range-picker';
+import { DiffsWorkerPoolProvider } from '@/components/ui/diffs';
 import { loaderPeriod } from '@/lib/hooks/use-date-range-controller';
 import {
   defaultRange,
@@ -95,11 +96,13 @@ export const targetTraceRoute = createRoute({
     const { traceId } = targetTraceRoute.useParams();
     const { activeSpanId, activeSpanTab } = targetTraceRoute.useSearch();
     return (
-      <TargetTracePage
-        traceId={traceId}
-        activeSpanId={activeSpanId ?? null}
-        activeSpanTab={activeSpanTab ?? null}
-      />
+      <DiffsWorkerPoolProvider>
+        <TargetTracePage
+          traceId={traceId}
+          activeSpanId={activeSpanId ?? null}
+          activeSpanTab={activeSpanTab ?? null}
+        />
+      </DiffsWorkerPoolProvider>
     );
   },
 });
