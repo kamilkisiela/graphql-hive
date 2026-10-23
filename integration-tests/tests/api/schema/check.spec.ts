@@ -2630,7 +2630,6 @@ test.concurrent(
     await schemaVersions.createPublishSchemaVersion({
       schema: brokenSdl,
       author: 'Jochen',
-      async actionFn() {},
       base_schema: null,
       commit: '123',
       changes: [],
@@ -2658,6 +2657,7 @@ test.concurrent(
       schemaMetadata: null,
       metadataAttributes: null,
       graph,
+      async writeCDNArtifacts() {},
     });
     await storage.destroy();
 

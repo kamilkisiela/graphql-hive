@@ -11,6 +11,7 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { createSupergraphManager } from '@graphql-hive/apollo';
+import { invariant } from '@hive/service-common';
 import { graphql } from '../../testkit/gql';
 import { execute } from '../../testkit/graphql';
 import { initSeed } from '../../testkit/seed';
@@ -98,6 +99,23 @@ const CreateContractMutation = graphql(`
       }
       error {
         message
+      }
+    }
+  }
+`);
+
+const LatestContractVersionsQuery = graphql(`
+  query LatestContractVersions($target: TargetReferenceInput!) {
+    target(reference: $target) {
+      latestSchemaVersion {
+        contractVersions {
+          edges {
+            node {
+              id
+              contractName
+            }
+          }
+        }
       }
     }
   }
@@ -1113,6 +1131,109 @@ function runArtifactsCDNTests(
       expect(metadataResponse.headers.get('x-hive-schema-version-id')).toBe(versionId);
     });
 
+    test.concurrent('publishes a graph manifest with valid artifact paths', async ({ expect }) => {
+      const { createOrg, ownerToken } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { createTargetAccessToken, createCdnAccess, target } = await createProject(
+        ProjectType.Federation,
+      );
+      const writeToken = await createTargetAccessToken({});
+
+      await writeToken
+        .publishSchema({
+          sdl: /* GraphQL */ `
+            extend schema
+              @link(url: "https://specs.apollo.dev/link/v1.0")
+              @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+            type Query {
+              hello: String
+              internal: String @tag(name: "internal")
+            }
+          `,
+          service: 'hello',
+          url: 'http://hello.com',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      const createContractResult = await execute({
+        document: CreateContractMutation,
+        variables: {
+          input: {
+            target: { byId: target.id },
+            contractName: 'my-contract',
+            removeUnreachableTypesFromPublicApiSchema: true,
+            includeTags: ['internal'],
+          },
+        },
+        authToken: ownerToken,
+      }).then(r => r.expectNoGraphQLErrors());
+      expect(createContractResult.createContract.error).toBeNull();
+
+      await writeToken
+        .publishSchema({
+          sdl: /* GraphQL */ `
+            extend schema
+              @link(url: "https://specs.apollo.dev/link/v1.0")
+              @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+            type Query {
+              hello: String
+              internal: String @tag(name: "internal")
+              goodbye: String
+            }
+          `,
+          service: 'hello',
+          url: 'http://hello.com',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      const cdnAccessResult = await createCdnAccess();
+      const endpointBaseUrl = await getBaseEndpoint();
+      const headers = { 'x-hive-cdn-key': cdnAccessResult.secretAccessToken };
+      const manifestResponse = await fetch(`${endpointBaseUrl}${target.id}/manifest.json`, {
+        headers,
+      });
+
+      expect(manifestResponse.status).toBe(200);
+      expect(manifestResponse.headers.get('content-type')).toContain('application/json');
+      const manifest = (await manifestResponse.json()) as {
+        graphs: Record<
+          string,
+          { id: string; currentVersion: { id: string; artifactPath: string } }
+        >;
+      };
+
+      expect(Object.keys(manifest.graphs)).toEqual(
+        expect.arrayContaining(['default', 'default/my-contract']),
+      );
+
+      for (const graph of Object.values(manifest.graphs)) {
+        expect(graph.id).toBeTruthy();
+        expect(graph.currentVersion.id).toBeTruthy();
+        expect(graph.currentVersion.artifactPath).toMatch(/^\/artifacts\/v1\//);
+
+        for (const artifactType of ['sdl', 'supergraph']) {
+          const artifactResponse = await fetch(
+            new URL(`${graph.currentVersion.artifactPath}/${artifactType}`, endpointBaseUrl),
+            { headers },
+          );
+          expect(
+            artifactResponse.status,
+            `${graph.currentVersion.artifactPath}/${artifactType}`,
+          ).toBe(200);
+
+          expect(artifactResponse.headers.get('x-hive-schema-version-id')).toBe(
+            graph.currentVersion.id,
+          );
+          expect(artifactResponse.headers.get('x-hive-graph-version-id')).toBe(
+            graph.currentVersion.id,
+          );
+          expect(artifactResponse.headers.get('x-hive-graph-id')).toBe(graph.id);
+        }
+      }
+    });
+
     test.concurrent(
       'access versioned contract artifact with valid credentials',
       async ({ expect }) => {
@@ -1157,6 +1278,7 @@ function runArtifactsCDNTests(
         }).then(r => r.expectNoGraphQLErrors());
 
         expect(createContractResult.createContract.error).toBeNull();
+        invariant(createContractResult.createContract.ok, 'Contract must be created');
 
         // Publish schema again to generate contract artifacts
         await writeToken
@@ -1179,7 +1301,18 @@ function runArtifactsCDNTests(
         // Fetch the latest valid version to get the version ID
         const latestVersion = await writeToken.fetchLatestValidSchema();
         const versionId = latestVersion.latestValidVersion?.id;
-        expect(versionId).toBeDefined();
+        invariant(versionId, 'version must exist');
+
+        const contractVersionsResult = await execute({
+          document: LatestContractVersionsQuery,
+          variables: { target: { byId: target.id } },
+          authToken: ownerToken,
+        }).then(r => r.expectNoGraphQLErrors());
+        const contractVersion =
+          contractVersionsResult.target?.latestSchemaVersion?.contractVersions?.edges.find(
+            edge => edge.node.contractName === 'my-contract',
+          )?.node;
+        invariant(contractVersion, 'Contract version must exist');
 
         const cdnAccessResult = await createCdnAccess();
         const endpointBaseUrl = await getBaseEndpoint();
@@ -1188,7 +1321,7 @@ function runArtifactsCDNTests(
         const versionedContractSdlUrl = buildVersionedContractEndpointUrl(
           endpointBaseUrl,
           target.id,
-          versionId!,
+          versionId,
           'my-contract',
           'sdl',
         );
@@ -1205,13 +1338,19 @@ function runArtifactsCDNTests(
         expect(contractSdlResponse.headers.get('cache-control')).toBe(
           'public, max-age=31536000, immutable',
         );
-        expect(contractSdlResponse.headers.get('x-hive-schema-version-id')).toBe(versionId);
+        expect(contractSdlResponse.headers.get('x-hive-graph-id')).toBe(
+          createContractResult.createContract.ok.createdContract.id,
+        );
+        expect(contractSdlResponse.headers.get('x-hive-schema-version-id')).toBe(
+          contractVersion.id,
+        );
+        expect(contractSdlResponse.headers.get('x-hive-graph-version-id')).toBe(contractVersion.id);
 
         // Test versioned contract supergraph endpoint
         const versionedContractSupergraphUrl = buildVersionedContractEndpointUrl(
           endpointBaseUrl,
           target.id,
-          versionId!,
+          versionId,
           'my-contract',
           'supergraph',
         );
@@ -1226,7 +1365,15 @@ function runArtifactsCDNTests(
         expect(contractSupergraphResponse.headers.get('cache-control')).toBe(
           'public, max-age=31536000, immutable',
         );
-        expect(contractSupergraphResponse.headers.get('x-hive-schema-version-id')).toBe(versionId);
+        expect(contractSupergraphResponse.headers.get('x-hive-graph-id')).toBe(
+          createContractResult.createContract.ok.createdContract.id,
+        );
+        expect(contractSupergraphResponse.headers.get('x-hive-schema-version-id')).toBe(
+          contractVersion.id,
+        );
+        expect(contractSupergraphResponse.headers.get('x-hive-graph-version-id')).toBe(
+          contractVersion.id,
+        );
       },
     );
   });

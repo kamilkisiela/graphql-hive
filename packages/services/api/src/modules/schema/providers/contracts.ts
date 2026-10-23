@@ -120,34 +120,38 @@ export class Contracts {
     };
   }
 
-  async deleteContractGraph(graph: ContractGraph) {
-    this.logger.debug('Delete contract (graphId=%s)', graph.id);
+  async deleteContractGraph(args: { graph: ContractGraph; writeGraphManifest(): Promise<void> }) {
+    this.logger.debug('Delete contract (graphId=%s)', args.graph.id);
 
-    await this.graphStore.deleteGraph(graph);
+    await this.pool.transaction('delete contract graph', async trx => {
+      this.logger.debug('Deleted contract graph. (graphId=%s)', args.graph.id);
 
-    this.logger.debug('Deleted contract graph. (graphId=%s)', graph.id);
+      await this.graphStore.deleteGraph(args.graph, trx);
 
-    this.logger.debug(
-      'Delete contract graph artifacts sdl and supergraph from CDN. (graphId=%s)',
-      graph.id,
-    );
+      this.logger.debug(
+        'Delete contract graph artifacts sdl and supergraph from CDN. (graphId=%s)',
+        args.graph.id,
+      );
 
-    await Promise.all([
-      this.artifactStorageWriter.deleteArtifact({
-        targetId: graph.targetId,
-        artifactType: 'sdl',
-        contractName: graph.name,
-      }),
-      this.artifactStorageWriter.deleteArtifact({
-        targetId: graph.targetId,
-        artifactType: 'supergraph',
-        contractName: graph.name,
-      }),
-    ]);
+      await args.writeGraphManifest();
+
+      await Promise.all([
+        this.artifactStorageWriter.deleteArtifact({
+          targetId: args.graph.targetId,
+          artifactType: 'sdl',
+          contractName: args.graph.name,
+        }),
+        this.artifactStorageWriter.deleteArtifact({
+          targetId: args.graph.targetId,
+          artifactType: 'supergraph',
+          contractName: args.graph.name,
+        }),
+      ]);
+    });
 
     return {
       type: 'success' as const,
-      contractId: graph.id,
+      contractId: args.graph.id,
     };
   }
 
