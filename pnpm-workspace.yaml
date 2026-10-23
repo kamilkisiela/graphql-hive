@@ -25,7 +25,6 @@ catalog:
   '@envelop/types': 5.2.2
   '@faker-js/faker': 10.6.0
   '@fastify/cors': 11.3.0
-  '@graphql-eslint/eslint-plugin': 3.20.1
   '@graphql-hive/plugin-opentelemetry': 1.5.4
   '@graphql-inspector/patch': 1.0.0
   '@graphql-tools/merge': 9.2.6

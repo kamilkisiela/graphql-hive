@@ -85,7 +85,7 @@
     "@graphql-codegen/typescript-operations": "6.1.10",
     "@graphql-codegen/typescript-resolvers": "6.1.1",
     "@graphql-codegen/urql-introspection": "4.0.1",
-    "@graphql-eslint/eslint-plugin": "catalog:",
+    "@graphql-eslint/eslint-plugin": "4.4.2",
     "@graphql-inspector/cli": "7.0.0",
     "@graphql-inspector/core": "8.0.0",
     "@graphql-inspector/patch": "catalog:",
