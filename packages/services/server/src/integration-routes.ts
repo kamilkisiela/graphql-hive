@@ -191,16 +191,18 @@ export function registerIntegrationRoutes(
 
       const redirectUrl = `${config.publicUrl}/api/slack/callback`;
 
-      const slackResponse = await config.fetch('https://slack.com/api/oauth.v2.access', {
-        method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        body: stringify({
-          client_id: config.slack.clientId,
-          client_secret: config.slack.clientSecret,
-          code,
-          redirect_uri: redirectUrl,
-        }),
-      }).then(response => response.json());
+      const slackResponse = await config
+        .fetch('https://slack.com/api/oauth.v2.access', {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: stringify({
+            client_id: config.slack.clientId,
+            client_secret: config.slack.clientSecret,
+            code,
+            redirect_uri: redirectUrl,
+          }),
+        })
+        .then(response => response.json());
 
       const slackResponseResult = SlackOAuthv2AccessResponse.safeParse(slackResponse);
 
