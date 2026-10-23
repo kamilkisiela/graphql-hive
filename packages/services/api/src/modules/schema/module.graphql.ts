@@ -223,7 +223,14 @@ export default gql`
       first: Int @tag(name: "public")
       after: String @tag(name: "public")
       filters: SchemaChecksFilter
-    ): SchemaCheckConnection! @tag(name: "public")
+    ): SchemaCheckConnection!
+      @tag(name: "public")
+      @cost(weight: 5)
+      @listSize(
+        slicingArguments: ["first"]
+        sizedFields: ["edges"]
+        requireOneSlicingArgument: false
+      )
     """
     Lowercased, sorted names of the services that have schema checks in this target.
     Null for single-schema projects.
@@ -235,7 +242,14 @@ export default gql`
     schemaVersions(
       first: Int @tag(name: "public")
       after: String @tag(name: "public")
-    ): SchemaVersionConnection! @tag(name: "public")
+    ): SchemaVersionConnection!
+      @tag(name: "public")
+      @listSize(
+        slicingArguments: ["first"]
+        sizedFields: ["edges"]
+        requireOneSlicingArgument: false
+      )
+
     """
     Retreive a specific schema version in this target by it's id.
     """
@@ -330,7 +344,8 @@ export default gql`
   type SingleSchema {
     id: ID!
     author: String! @tag(name: "public")
-    source: String! @tag(name: "public")
+    source: String! @tag(name: "public") @cost(weight: 20)
+
     date: DateTime!
     commit: ID! @tag(name: "public")
     metadata: String
@@ -340,7 +355,7 @@ export default gql`
   type CompositeSchema {
     id: ID!
     author: String! @tag(name: "public")
-    source: String! @tag(name: "public")
+    source: String! @tag(name: "public") @cost(weight: 20)
     date: DateTime!
     commit: ID! @tag(name: "public")
     url: String @tag(name: "public")
@@ -1256,15 +1271,16 @@ export default gql`
     The schemas that are composed within this schema version.
     For federation these are the subgraphs/services.
     """
-    schemas: SchemaConnection! @tag(name: "public")
+    schemas: SchemaConnection! @tag(name: "public") @cost(weight: 5) @listSize(assumedSize: 10)
+
     """
     The supergraph SDL for a federation schema.
     """
-    supergraph: String @tag(name: "public")
+    supergraph: String @tag(name: "public") @cost(weight: 35)
     """
     The (public) schema SDL.
     """
-    sdl: String @tag(name: "public")
+    sdl: String @tag(name: "public") @cost(weight: 25)
     """
     List of tags in the schema version. E.g. when using Federation.
     Tags can be used for filtering the schema via contracts.
@@ -1285,7 +1301,7 @@ export default gql`
       Defaults to the last 30 days, capped at the organization's usage retention.
       """
       period: SchemaExplorerPeriodInput @tag(name: "public")
-    ): UnusedSchemaExplorer @tag(name: "public")
+    ): UnusedSchemaExplorer @tag(name: "public") @cost(weight: 60)
     """
     An overview of deprecated fields and types with their usage in the GraphQL schema.
     """
@@ -1296,7 +1312,7 @@ export default gql`
       Defaults to the last 30 days, capped at the organization's usage retention.
       """
       period: SchemaExplorerPeriodInput @tag(name: "public")
-    ): DeprecatedSchemaExplorer @tag(name: "public")
+    ): DeprecatedSchemaExplorer @tag(name: "public") @cost(weight: 60)
 
     schemaCompositionErrors: SchemaErrorConnection @tag(name: "public")
 
@@ -1333,7 +1349,7 @@ export default gql`
     The diffs of the individual services compared to the latest version.
     This is only available for non monolithic projects.
     """
-    subgraphDiffs: [SubgraphDiff!]
+    subgraphDiffs: [SubgraphDiff!] @listSize(assumedSize: 10)
     origin: SchemaVersionOrigin! @tag(name: "public")
     """
     Additional metadata associated with the schema version that help identifying it.
@@ -1401,7 +1417,7 @@ export default gql`
     The types within the result only contain unused fields/values/members, all other entities are excluded,
     they are not a representation of the full GraphQL schema.
     """
-    types: [GraphQLNamedType!]! @tag(name: "public")
+    types: [GraphQLNamedType!]! @tag(name: "public") @listSize(assumedSize: 50)
   }
 
   """
@@ -1414,7 +1430,7 @@ export default gql`
     The types within the result only contain deprecated fields/values/members, all other entities are excluded,
     they are not a representation of the full GraphQL schema.
     """
-    types: [GraphQLNamedType!]! @tag(name: "public")
+    types: [GraphQLNamedType!]! @tag(name: "public") @listSize(assumedSize: 50)
   }
 
   """
@@ -1682,17 +1698,18 @@ export default gql`
     """
     The SDL of the schema that was checked.
     """
-    schemaSDL: String! @tag(name: "public")
+    schemaSDL: String! @tag(name: "public") @cost(weight: 20)
     """
     The previous schema SDL. For composite schemas this is the service.
     """
     previousSchemaSDL: String
       @tag(name: "public")
       @deprecated(reason: "Please use the 'SchemaCheck.baseline' field instead.")
+      @cost(weight: 20)
     """
     The schema used as the baseline for this check.
     """
-    baseline: SchemaCheckBaseline
+    baseline: SchemaCheckBaseline @cost(weight: 20)
     """
     The name of the service that owns the schema. Is null for non composite project types.
     """
@@ -1705,7 +1722,7 @@ export default gql`
     The schema version against this check was performed.
     Is null if there is no schema version published yet.
     """
-    schemaVersion: SchemaVersion @tag(name: "public")
+    schemaVersion: SchemaVersion @tag(name: "public") @cost(weight: 10)
     """
     The URL of the schema check on the Hive Web App.
     """
@@ -1759,7 +1776,7 @@ export default gql`
     """
     Results of the contracts
     """
-    contractChecks: ContractCheckConnection @tag(name: "public")
+    contractChecks: ContractCheckConnection @tag(name: "public") @cost(weight: 30)
     """
     One contract's result, by the contract check's id.
     """
@@ -1833,8 +1850,8 @@ export default gql`
     """
     unapprovedBreakingSchemaChangeCount: Int!
 
-    compositeSchemaSDL: String @tag(name: "public")
-    supergraphSDL: String @tag(name: "public")
+    compositeSchemaSDL: String @tag(name: "public") @cost(weight: 25)
+    supergraphSDL: String @tag(name: "public") @cost(weight: 35)
 
     isSuccess: Boolean! @tag(name: "public")
 
@@ -1846,7 +1863,7 @@ export default gql`
     """
     The contract schema used as the baseline for this check.
     """
-    baseline: ContractCheckBaseline
+    baseline: ContractCheckBaseline @cost(weight: 20)
   }
 
   type ContractCheckEdge {
@@ -1855,7 +1872,7 @@ export default gql`
   }
 
   type ContractCheckConnection {
-    edges: [ContractCheckEdge!]! @tag(name: "public")
+    edges: [ContractCheckEdge!]! @tag(name: "public") @listSize(assumedSize: 10)
     pageInfo: PageInfo! @tag(name: "public")
   }
 
@@ -1870,8 +1887,8 @@ export default gql`
     isComposable: Boolean! @tag(name: "public")
     schemaCompositionErrors: SchemaErrorConnection @tag(name: "public")
 
-    supergraphSDL: String @tag(name: "public")
-    compositeSchemaSDL: String @tag(name: "public")
+    supergraphSDL: String @tag(name: "public") @cost(weight: 35)
+    compositeSchemaSDL: String @tag(name: "public") @cost(weight: 25)
     """
     Whether this contract versions has schema changes.
     """
@@ -1910,15 +1927,15 @@ export default gql`
     """
     The service SDL of the baseline schema.
     """
-    sdl: String
+    sdl: String @cost(weight: 20)
     """
     The supergraph SDL of the baseline schema, if composition succeeded.
     """
-    supergraphSdl: String
+    supergraphSdl: String @cost(weight: 25)
     """
     The public SDL of the baseline schema, if composition succeeded.
     """
-    publicSdl: String
+    publicSdl: String @cost(weight: 35)
     """
     Composition errors produced by the baseline schema.
     """
@@ -1943,17 +1960,18 @@ export default gql`
     """
     The SDL of the schema that was checked.
     """
-    schemaSDL: String! @tag(name: "public")
+    schemaSDL: String! @tag(name: "public") @cost(weight: 20)
     """
     The previous schema SDL. For composite schemas this is the service.
     """
     previousSchemaSDL: String
       @tag(name: "public")
       @deprecated(reason: "Please use the 'SchemaCheck.baseline' field instead.")
+      @cost(weight: 20)
     """
     The schema used as the baseline for this check.
     """
-    baseline: SchemaCheckBaseline
+    baseline: SchemaCheckBaseline @cost(weight: 20)
     """
     The name of the service that owns the schema. Is null for non composite project types.
     """
@@ -1966,7 +1984,7 @@ export default gql`
     The schema version against this check was performed.
     Is null if there is no schema version published yet.
     """
-    schemaVersion: SchemaVersion @tag(name: "public")
+    schemaVersion: SchemaVersion @tag(name: "public") @cost(weight: 10)
     """
     The URL of the schema check on the Hive Web App.
     """
@@ -2024,12 +2042,12 @@ export default gql`
     """
     schemaPolicyErrors: SchemaPolicyWarningConnection
 
-    compositeSchemaSDL: String @tag(name: "public")
-    supergraphSDL: String @tag(name: "public")
+    compositeSchemaSDL: String @tag(name: "public") @cost(weight: 25)
+    supergraphSDL: String @tag(name: "public") @cost(weight: 35)
     """
     Results of the contracts
     """
-    contractChecks: ContractCheckConnection @tag(name: "public")
+    contractChecks: ContractCheckConnection @tag(name: "public") @cost(weight: 30)
     """
     One contract's result, by the contract check's id.
     """
@@ -2081,7 +2099,7 @@ export default gql`
     """
     The schema used as the baseline for this check.
     """
-    baseline: SchemaCheckBaseline
+    baseline: SchemaCheckBaseline @cost(weight: 20)
     """
     The name of the service that owns the schema. Is null for non composite project types.
     """
@@ -2094,7 +2112,7 @@ export default gql`
     The schema version against this check was performed.
     Is null if there is no schema version published yet.
     """
-    schemaVersion: SchemaVersion @tag(name: "public")
+    schemaVersion: SchemaVersion @tag(name: "public") @cost(weight: 10)
     """
     The URL of the schema check on the Hive Web App.
     """
@@ -2148,12 +2166,13 @@ export default gql`
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
 
-    compositeSchemaSDL: String @tag(name: "public")
-    supergraphSDL: String @tag(name: "public")
+    compositeSchemaSDL: String @tag(name: "public") @cost(weight: 25)
+    supergraphSDL: String @tag(name: "public") @cost(weight: 35)
+
     """
     Results of the contracts
     """
-    contractChecks: ContractCheckConnection @tag(name: "public")
+    contractChecks: ContractCheckConnection @tag(name: "public") @cost(weight: 30)
     """
     One contract's result, by the contract check's id.
     """
