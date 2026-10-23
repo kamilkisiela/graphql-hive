@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
 import { renderAtUrl } from '@/lib/testing/router';
+import { pickOption } from '@/lib/testing/select';
 import { createTestClient } from '@/lib/testing/urql';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 // The tree imports every page; these stand in for what cannot load under jsdom.
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
@@ -20,37 +21,32 @@ vi.mock('supertokens-auth-react/recipe/session', () => import('@/lib/testing/moc
 
 const SCHEMA_PAGE = `/${SLUGS.organizationSlug}/${SLUGS.projectSlug}/${SLUGS.targetSlug}`;
 
-function compositeSchema(service: string) {
-  return {
-    __typename: 'SchemaEdge' as const,
+/** A federation project whose latest version has a `users` and a `products` service. */
+function schemaPage() {
+  const edges = ['users', 'products'].map(service => ({
+    __typename: 'SchemaEdge',
     node: {
-      __typename: 'CompositeSchema' as const,
+      __typename: 'CompositeSchema',
       id: `schema-${service}`,
       source: `type Query { ${service}: String }`,
       service,
       url: `https://${service}.example`,
     },
-  };
-}
-
-function schemaPage() {
+  }));
   return {
-    __typename: 'Query' as const,
+    __typename: 'Query',
     project: {
-      __typename: 'Project' as const,
+      __typename: 'Project',
       id: 'project-1',
       type: 'FEDERATION',
       target: {
-        __typename: 'Target' as const,
+        __typename: 'Target',
         id: 'target-1',
         slug: SLUGS.targetSlug,
         latestSchemaVersion: {
-          __typename: 'SchemaVersion' as const,
+          __typename: 'SchemaVersion',
           id: 'version-42',
-          schemas: {
-            __typename: 'SchemaConnection' as const,
-            edges: [compositeSchema('users'), compositeSchema('products')],
-          },
+          schemas: { __typename: 'SchemaConnection', edges },
         },
       },
     },
@@ -59,21 +55,6 @@ function schemaPage() {
 
 function client() {
   return createTestClient(new Map([...layoutFixtures(), ['TargetSchemaPageQuery', schemaPage()]]));
-}
-
-// Base UI commits an option only while it is highlighted, so focus and click are separate acts.
-// An option is named by its label and its URL.
-async function pickService(name: string) {
-  await act(async () => {
-    fireEvent.click(screen.getByRole('combobox', { name: 'Service' }));
-  });
-  const option = await screen.findByRole('option', { name: new RegExp(`^${name}`) });
-  await act(async () => {
-    option.focus();
-  });
-  await act(async () => {
-    fireEvent.click(option);
-  });
 }
 
 // The select's trigger echoes the picked name, so a service is its header's deep-link anchor.
@@ -87,7 +68,7 @@ describe('target schema page', () => {
     expect(serviceHeader('products')).toBeTruthy();
     expect(clearButton()).toBeNull();
 
-    await pickService('products');
+    await pickOption('Service', /^products/);
 
     await waitFor(() => expect(router.state.location.search).toEqual({ service: 'products' }));
     await waitFor(() => expect(serviceHeader('users')).toBeNull());
