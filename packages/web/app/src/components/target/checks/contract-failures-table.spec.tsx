@@ -33,8 +33,8 @@ describe('ContractFailuresTable', () => {
     expect(rows[1].textContent).toContain('Unapproved breaking changes!');
 
     // Only the row with a handler gets a button.
-    expect(screen.getAllByRole('button', { name: 'View' })).toHaveLength(1);
-    fireEvent.click(screen.getByRole('button', { name: 'View' }));
+    expect(screen.getAllByRole('button', { name: 'View contract' })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'View contract' }));
     expect(onView).toHaveBeenCalledWith('mobile');
   });
 

@@ -3,7 +3,8 @@ import { cva } from 'class-variance-authority';
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { TabStrip, type TabItem } from '../primitives/tabs/tabs';
 
-const panelVariants = cva('outline-none', {
+// Hides the outgoing panel the moment it starts ending, as the tabs primitive does.
+const panelVariants = cva('outline-none data-[ending-style]:hidden', {
   variants: {
     bodyPadding: {
       default: 'p-5',
