@@ -241,8 +241,8 @@ catalogs:
       specifier: 4.19.2
       version: 4.19.2
     undici:
-      specifier: 7.30.0
-      version: 7.30.0
+      specifier: 7.30.1
+      version: 7.30.1
     vite-tsconfig-paths:
       specifier: 5.1.4
       version: 5.1.4
@@ -305,7 +305,7 @@ overrides:
   body-parser@1.x.x: 1.20.6
   prettier-plugin-sh: 0.19.0
   pacote@<21.5.1: ^21.5.1
-  miniflare@3>undici: 7.30.0
+  miniflare@3>undici: 7.30.1
   sprintf-js@<=1.1.3: ^1.1.3
   postcss-selector-parser@<=7.1.6: ^7.1.6
   '@graphql-hive/gateway-plugin-console-sdk': 'workspace:'
@@ -1493,7 +1493,7 @@ importers:
         version: 4.1.0
       undici:
         specifier: 'catalog:'
-        version: 7.30.0
+        version: 7.30.1
       vitest:
         specifier: 'catalog:'
         version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@25.9.9)(happy-dom@20.10.6)(jsdom@30.1.2(@noble/hashes@2.2.0))(msw@2.12.7(@types/node@25.9.9)(typescript@5.7.3))(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(less@4.2.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
@@ -1547,7 +1547,7 @@ importers:
         version: 4.1.0
       undici:
         specifier: 'catalog:'
-        version: 7.30.0
+        version: 7.30.1
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -16848,8 +16848,8 @@ packages:
     resolution: {integrity: sha512-R+RODBqp6i2pPflGdq+xIOUkl+RNfGgHwoinecKu/JCuf2uO06cOKoDbI2P7Dn6KcswdKwrczbU6IYJ6K8X+wg==}
     engines: {node: '>=18.17'}
 
-  undici@7.30.0:
-    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
   undici@8.11.2:
@@ -32324,7 +32324,7 @@ snapshots:
       exit-hook: 2.2.1
       glob-to-regexp: 0.4.1
       stoppable: 1.1.0
-      undici: 7.30.0
+      undici: 7.30.1
       workerd: 1.20250718.0
       ws: 8.22.0
       youch: 3.3.4
@@ -35614,7 +35614,7 @@ snapshots:
 
   undici@6.29.0: {}
 
-  undici@7.30.0: {}
+  undici@7.30.1: {}
 
   undici@8.11.2: {}
 
