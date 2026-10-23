@@ -79,7 +79,7 @@
               "id": "5b9b60be",
               "operator": "=",
               "scope": "span",
-              "tag": "guid:x-request-id",
+              "tag": "request.id",
               "value": ["$requestId"],
               "valueType": "string"
             }
