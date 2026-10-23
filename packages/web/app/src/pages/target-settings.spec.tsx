@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from 'react';
 import type * as Urql from 'urql';
+import type { SchemaEditorProps } from '@/components/schema-editor';
 import { ToastProvider } from '@/components/ui/primitives/toast/toast';
 import { DangerousChangeType } from '@/gql/graphql';
 import type * as Router from '@tanstack/react-router';
@@ -10,6 +11,7 @@ import {
   BreakingChanges,
   DangerousChangeTypeForm,
   GraphQLEndpointUrl,
+  TargetSettingsBaseSchemaSection,
 } from './target-settings';
 
 /** The stubs the mocked urql hooks read from; each test resets them. */
@@ -18,6 +20,9 @@ const urql = vi.hoisted(() => ({
   mutation: { data: undefined as unknown, fetching: false, error: undefined as unknown },
   mutate: vi.fn(),
 }));
+
+/** Records what the mocked schema editor was rendered with. */
+const schemaEditor = vi.hoisted(() => ({ props: undefined as SchemaEditorProps | undefined }));
 
 vi.mock('urql', async importOriginal => ({
   ...(await importOriginal<typeof Urql>()),
@@ -29,7 +34,12 @@ vi.mock('urql', async importOriginal => ({
 vi.mock('@/env/frontend', () => import('@/lib/testing/mocks/env'));
 
 // The page also mounts the Monaco editor and router links, neither of which runs in jsdom.
-vi.mock('@/components/schema-editor', () => ({ SchemaEditor: () => null }));
+vi.mock('@/components/schema-editor', () => ({
+  SchemaEditor: (props: SchemaEditorProps) => {
+    schemaEditor.props = props;
+    return null;
+  },
+}));
 vi.mock('@tanstack/react-router', async importOriginal => ({
   ...(await importOriginal<typeof Router>()),
   Link: (props: { children?: ReactNode }) => <a href="#">{props.children}</a>,
@@ -118,6 +128,49 @@ describe('GraphQLEndpointUrl', () => {
     urql.mutation.data = result.data;
     rerender(element());
     expect((await screen.findAllByText('Endpoint unreachable')).length).toBeGreaterThan(0);
+  });
+});
+
+describe('TargetSettingsBaseSchemaSection', () => {
+  const syntaxError = {
+    startLineNumber: 1,
+    startColumn: 24,
+    endLineNumber: 1,
+    endColumn: 25,
+    message: 'Syntax Error: Expected Name, found "}".',
+    severity: 8,
+  };
+
+  function renderSection(baseSchema: string) {
+    urql.query.data = {
+      organization: { id: 'org-1', project: { id: 'p-1', target: { id: 't-1', baseSchema } } },
+    };
+    return render(
+      <ToastProvider>
+        <TargetSettingsBaseSchemaSection />
+      </ToastProvider>,
+    );
+  }
+
+  const report = (markers: Array<typeof syntaxError>) =>
+    act(async () => {
+      schemaEditor.props?.onSyntaxErrors?.(markers);
+    });
+
+  beforeEach(() => {
+    urql.mutation.data = undefined;
+    urql.mutation.error = undefined;
+  });
+
+  it('shows the syntax error the editor reports under it until the schema parses again', async () => {
+    renderSection('extend type Query { a: }');
+    expect(schemaEditor.props?.value).toBe('extend type Query { a: }');
+
+    await report([syntaxError]);
+    expect(screen.getByText('Syntax Error: Expected Name, found "}".')).toBeTruthy();
+
+    await report([]);
+    expect(screen.queryByText('Syntax Error: Expected Name, found "}".')).toBeNull();
   });
 });
 

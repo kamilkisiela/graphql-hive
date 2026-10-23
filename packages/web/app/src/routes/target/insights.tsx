@@ -5,6 +5,7 @@ import {
 } from '@/components/target/insights/search-schemas';
 import { Stats_GeneralOperationsStatsQuery } from '@/components/target/insights/stats';
 import { presetLast1Day, presetLast7Days, type Preset } from '@/components/ui/date-range-picker';
+import { DiffsWorkerPoolProvider } from '@/components/ui/diffs';
 import { loaderPeriod } from '@/lib/hooks/use-date-range-controller';
 import {
   defaultRange,
@@ -204,7 +205,9 @@ export const targetInsightsOperationsRoute = createRoute({
   component: function TargetInsightsRoute() {
     const { operationName, operationHash } = targetInsightsOperationsRoute.useParams();
     return (
-      <TargetInsightsOperationPage operationName={operationName} operationHash={operationHash} />
+      <DiffsWorkerPoolProvider>
+        <TargetInsightsOperationPage operationName={operationName} operationHash={operationHash} />
+      </DiffsWorkerPoolProvider>
     );
   },
 });

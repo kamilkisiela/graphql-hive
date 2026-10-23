@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react';
 // Import from `editor.api` rather than the `monaco-editor` main entry to keep
 // the bundle lean — the main entry auto-registers every basic language, which
 // bloats our client sourcemaps. We opt in to the contributions we actually use
@@ -13,13 +12,16 @@ import 'monaco-editor/esm/vs/basic-languages/graphql/graphql.contribution.js';
 // the policy naming-convention rule editor, which configures JSON schema
 // diagnostics in `beforeMount`.
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
+import { useRef } from 'react';
 import { useMonacoTheme } from '@/components/theme/theme-provider';
+import { graphqlSyntaxMarkers } from '@/lib/graphql-syntax-markers';
 import {
   loader,
   DiffEditor as MonacoDiffEditor,
   Editor as MonacoEditor,
+  type EditorProps,
+  type OnMount,
 } from '@monaco-editor/react';
-import type { SchemaEditorProps } from '@theguild/editor';
 
 // Use the locally bundled Monaco (via vite-plugin-monaco-editor) instead of CDN
 // to ensure the editor and workers are from the same version.
@@ -28,24 +30,38 @@ loader.config({ monaco });
 export { MonacoDiffEditor };
 export { MonacoEditor };
 
-const LazySchemaEditor = lazy(async () => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  await import('regenerator-runtime/runtime');
-  const { SchemaEditor } = await import('@theguild/editor');
-  return { default: SchemaEditor };
-});
+export type SchemaEditorProps = Omit<EditorProps, 'language'> & {
+  /** Underlines GraphQL syntax errors in the editor and reports them, on mount and after every edit. */
+  onSyntaxErrors?: (markers: monaco.editor.IMarkerData[]) => void;
+};
 
-/** Defaults Monaco's theme to the app theme; passing `theme` explicitly still wins. */
-export function SchemaEditor(props: SchemaEditorProps) {
+/** Monaco with the GraphQL tokenizer. Defaults to the app theme; passing `theme` explicitly still wins. */
+export function SchemaEditor({ onSyntaxErrors, onMount, ...props }: SchemaEditorProps) {
   const monacoTheme = useMonacoTheme();
+  // The Monaco wrapper reads `onMount` once, at first render; refs keep the latest callbacks reachable.
+  const onSyntaxErrorsRef = useRef(onSyntaxErrors);
+  onSyntaxErrorsRef.current = onSyntaxErrors;
+  const onMountRef = useRef(onMount);
+  onMountRef.current = onMount;
 
-  // A boundary of its own, so the chunk loading never suspends the route into its pending state.
-  return (
-    <Suspense fallback={null}>
-      <LazySchemaEditor theme={monacoTheme} {...props} />
-    </Suspense>
-  );
+  const handleMount: OnMount = (editor, monacoInstance) => {
+    if (onSyntaxErrorsRef.current) {
+      const markSyntaxErrors = () => {
+        const model = editor.getModel();
+        if (!model) {
+          return;
+        }
+        const markers = graphqlSyntaxMarkers(model.getValue());
+        monacoInstance.editor.setModelMarkers(model, 'graphql', markers);
+        onSyntaxErrorsRef.current?.(markers);
+      };
+      markSyntaxErrors();
+      // The wrapper's `onChange` skips the edits it makes itself for a new `value`; the model event does not.
+      const subscription = editor.onDidChangeModelContent(markSyntaxErrors);
+      editor.onDidDispose(() => subscription.dispose());
+    }
+    onMountRef.current?.(editor, monacoInstance);
+  };
+
+  return <MonacoEditor theme={monacoTheme} {...props} language="graphql" onMount={handleMount} />;
 }
-
-export type { SchemaEditorProps };
