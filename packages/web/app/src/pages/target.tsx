@@ -14,7 +14,7 @@ import { QueryError } from '@/components/ui/query-error';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { useSlugs } from '@/lib/hooks';
-import { getRouteApi, Link, useRouter } from '@tanstack/react-router';
+import { getRouteApi, Link } from '@tanstack/react-router';
 
 const schemaRoute = getRouteApi(
   '/authenticated/with-header/$organizationSlug/$projectSlug/$targetSlug/',
@@ -157,13 +157,9 @@ function SchemaView(props: {
 }): ReactElement | null {
   const project = useFragment(SchemaView_ProjectFragment, props.project);
   const target = useFragment(SchemaView_TargetFragment, props.target);
-  const router = useRouter();
+  const { service } = schemaRoute.useSearch();
   const navigate = schemaRoute.useNavigate();
-  const selectedServiceName =
-    'service' in router.latestLocation.search &&
-    typeof router.latestLocation.search.service === 'string'
-      ? router.latestLocation.search.service
-      : null;
+  const selectedServiceName = service ?? null;
 
   const reset = () => {
     void navigate({
@@ -221,7 +217,7 @@ function SchemaView(props: {
                 width="lg"
               />
               {selectedServiceName ? (
-                <Button variant="outline" onClick={reset}>
+                <Button variant="outline" onClick={reset} aria-label="Clear service">
                   <XIcon width={16} height={16} />
                 </Button>
               ) : null}
