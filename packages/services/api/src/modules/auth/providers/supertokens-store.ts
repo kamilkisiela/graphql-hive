@@ -674,8 +674,9 @@ export class SuperTokensStore {
         .maybeOne(emailPasswordResetTokenQuery)
         .then(EmailPasswordResetTokenModel.nullable().parse);
 
-      // Unknown, expired-and-purged, or already used: the handler answers with an invalid-token status.
-      if (!resetToken) {
+      // Unknown or already used (the delete found nothing), or past its expiry: the handler answers
+      // with an invalid-token status.
+      if (!resetToken || resetToken.tokenExpiry < Date.now()) {
         return null;
       }
 

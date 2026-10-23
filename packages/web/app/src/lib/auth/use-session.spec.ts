@@ -73,6 +73,25 @@ describe('useSession', () => {
     );
   });
 
+  it('loads while an unreadable token refreshes and is anonymous when that fails', async () => {
+    document.cookie = 'sFrontToken=garbage; path=/';
+    let finish!: (status: number) => void;
+    refreshSession.mockImplementation(
+      () =>
+        new Promise<number>(resolve => {
+          finish = resolve;
+        }),
+    );
+
+    const { result } = renderHook(() => useSession());
+    expect(result.current).toEqual({ loading: true });
+
+    await act(async () => finish(401));
+    await waitFor(() =>
+      expect(result.current).toEqual({ loading: false, doesSessionExist: false }),
+    );
+  });
+
   it('keeps the same result object across re-renders while nothing changed', async () => {
     applyFrontTokenHeader(encode(Date.now() + 60_000));
     const { result, rerender } = renderHook(() => useSession());
