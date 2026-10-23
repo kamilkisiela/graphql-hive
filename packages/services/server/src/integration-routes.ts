@@ -227,7 +227,7 @@ export function registerIntegrationRoutes(
     slackUrl.searchParams.set('scope', 'incoming-webhook,chat:write,chat:write.public,commands');
     slackUrl.searchParams.set('client_id', config.slack.clientId);
     slackUrl.searchParams.set('state', state);
-    slackUrl.searchParams.set('redirect_url', redirectUrl);
+    slackUrl.searchParams.set('redirect_uri', redirectUrl);
 
     return res.redirect(slackUrl.toString());
   });
