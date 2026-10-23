@@ -189,6 +189,8 @@ export function registerIntegrationRoutes(
         return res.status(400).send('Invalid or expired state');
       }
 
+      const redirectUrl = `${config.publicUrl}/api/slack/callback`;
+
       const slackResponse = await fetch('https://slack.com/api/oauth.v2.access', {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -196,6 +198,7 @@ export function registerIntegrationRoutes(
           client_id: config.slack.clientId,
           client_secret: config.slack.clientSecret,
           code,
+          redirect_uri: redirectUrl,
         }),
       }).then(response => response.json());
 
