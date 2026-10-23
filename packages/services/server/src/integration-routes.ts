@@ -50,6 +50,7 @@ const SlackOAuthv2AccessResponse = z.discriminatedUnion('ok', [
 
 type IntegrationRoutesConfig = {
   publicUrl: string;
+  webAppUrl: string;
   github: { appName: string } | null;
   slack: { clientId: string; clientSecret: string } | null;
   registry: Registry;
@@ -81,7 +82,7 @@ export function registerIntegrationRoutes(
       });
     });
     const organization = await getOrganization(config, req, res, cacheRecord.organizationId);
-    return res.redirect(`${config.publicUrl}/${organization.slug}/view/settings`);
+    return res.redirect(`${config.webAppUrl}/${organization.slug}/view/settings`);
   });
 
   server.get('/api/github/setup-callback', async (req, res) => {
@@ -120,7 +121,7 @@ export function registerIntegrationRoutes(
     }
 
     return res.redirect(
-      organizationSlug ? `${config.publicUrl}/${organizationSlug}/view/settings` : config.publicUrl,
+      organizationSlug ? `${config.webAppUrl}/${organizationSlug}/view/settings` : config.webAppUrl,
     );
   });
 
@@ -199,7 +200,7 @@ export function registerIntegrationRoutes(
     });
 
     const organization = await getOrganization(config, req, res, cacheRecord.organizationId);
-    return res.redirect(`${config.publicUrl}/${organization.slug}/view/settings`);
+    return res.redirect(`${config.webAppUrl}/${organization.slug}/view/settings`);
   });
 
   server.get('/api/slack/connect/:organizationSlug', async (req, res) => {

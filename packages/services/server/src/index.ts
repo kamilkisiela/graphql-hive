@@ -451,6 +451,7 @@ export async function main() {
 
     registerIntegrationRoutes(server, {
       publicUrl: env.graphql.origin,
+      webAppUrl: env.hiveServices.webApp.url,
       github: env.integrationRoutes.github,
       slack: env.integrationRoutes.slack,
       registry,
