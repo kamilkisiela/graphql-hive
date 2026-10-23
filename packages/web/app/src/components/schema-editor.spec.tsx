@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react';
 import type { OnMount } from '@monaco-editor/react';
+import { render, screen } from '@testing-library/react';
 import { SchemaEditor } from './schema-editor';
 
 /** Records what the mocked Monaco editor was rendered with. */

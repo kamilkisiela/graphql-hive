@@ -23,7 +23,9 @@ describe('GraphQLHighlight', () => {
 
 describe('GraphQLBlock', () => {
   it('passes editorProps through and keeps the editor read-only', () => {
-    render(<GraphQLBlock sdl="type Query { a: String }" editorProps={{ options: { fontSize: 10 } }} />);
+    render(
+      <GraphQLBlock sdl="type Query { a: String }" editorProps={{ options: { fontSize: 10 } }} />,
+    );
 
     expect(screen.getByText('SDL')).toBeTruthy();
     expect(editor.props?.options).toEqual({ readOnly: true, lineNumbers: 'on', fontSize: 10 });
