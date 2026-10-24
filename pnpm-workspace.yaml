@@ -62,7 +62,7 @@ catalog:
   dotenv: 16.4.7
   esbuild: 0.28.1
   fast-json-stable-stringify: 2.1.0
-  fastify: 5.12.5
+  fastify: 5.12.6
   got: 16.1.0
   graphql-yoga: 5.24.4
   immer: 11.1.21

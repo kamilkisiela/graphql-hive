@@ -142,8 +142,8 @@ catalogs:
       specifier: 2.1.0
       version: 2.1.0
     fastify:
-      specifier: 5.12.5
-      version: 5.12.5
+      specifier: 5.12.6
+      version: 5.12.6
     got:
       specifier: 16.1.0
       version: 16.1.0
@@ -898,7 +898,7 @@ importers:
         version: 0.28.1
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -1261,7 +1261,7 @@ importers:
         version: 6.2.0
       pg-promise:
         specifier: 'catalog:'
-        version: 11.10.2(pg-query-stream@4.7.1(pg@8.20.0))
+        version: 11.10.2(pg-query-stream@4.7.1(pg@8.13.1))
       redlock:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2
@@ -1532,7 +1532,7 @@ importers:
         version: 0.28.1
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -1583,7 +1583,7 @@ importers:
         version: 16.4.7
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       pino-pretty:
         specifier: 'catalog:'
         version: 11.3.0
@@ -1677,7 +1677,7 @@ importers:
         version: 1.5.0
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       graphql:
         specifier: 'catalog:'
         version: 16.14.2
@@ -1740,7 +1740,7 @@ importers:
         version: 2.1.0
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       fastq:
         specifier: 1.19.1
         version: 1.19.1
@@ -1857,7 +1857,7 @@ importers:
         version: 16.4.7
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       got:
         specifier: 'catalog:'
         version: 16.1.0(patch_hash=2f8be9ec1afd3619d2e771aa4b85b2c6b0762210ce683903f181fce7b36861df)
@@ -1969,7 +1969,7 @@ importers:
         version: 1.0.3
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       fastify-plugin:
         specifier: 6.0.0
         version: 6.0.0
@@ -2026,7 +2026,7 @@ importers:
         version: 16.14.2
       pg-promise:
         specifier: 'catalog:'
-        version: 11.10.2(pg-query-stream@4.7.1(pg@8.20.0))
+        version: 11.10.2(pg-query-stream@4.7.1(pg@8.13.1))
       typescript:
         specifier: 5.7.3
         version: 5.7.3
@@ -2236,7 +2236,7 @@ importers:
         version: 10.1.5
       '@fastify/vite':
         specifier: 9.2.0
-        version: 9.2.0(fastify@5.12.5)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
+        version: 9.2.0(fastify@5.12.6)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))
       '@graphiql/plugin-explorer':
         specifier: 4.0.0-alpha.2
         version: 4.0.0-alpha.2(@graphiql/react@1.0.0-alpha.4(patch_hash=1018befc9149cbc43bc2bf8982d52090a580e68df34b46674234f4e58eb6d0a0)(@codemirror/language@6.0.0)(@types/node@25.9.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql-ws@6.0.6(graphql@16.14.2)(ws@8.22.0))(graphql@16.14.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.14.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2377,7 +2377,7 @@ importers:
         version: 6.1.0
       fastify:
         specifier: 'catalog:'
-        version: 5.12.5
+        version: 5.12.6
       graphiql:
         specifier: 4.0.0-alpha.5
         version: 4.0.0-alpha.5(patch_hash=87dedd0023d07eef741569477f4a97265c634e9c37040d4b435268abbd435b6d)(@codemirror/language@6.0.0)(@types/node@25.9.9)(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(graphql-ws@6.0.6(graphql@16.14.2)(ws@8.22.0))(graphql@16.14.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6649,18 +6649,21 @@ packages:
   '@opentelemetry/propagator-jaeger@2.10.0':
     resolution: {integrity: sha512-yw/IX8DL470dSMZJoE82ScfYGp7JWZ/G8kFJo35ZILUVTB2jFPTOaioN+8s09pH0RHsWNhweVZb+ZnjJJpCChg==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Package no longer supported. See https://github.com/open-telemetry/opentelemetry-js/pull/7077
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
   '@opentelemetry/propagator-jaeger@2.12.0':
     resolution: {integrity: sha512-Kz2Vz+NILW7S1WtN4rV1wr76fMtT/RRWvAMFBc91uTIi2dDMXxrfBKNe2KH7yaCfFp1X0xfAuabzuFczvoPB6A==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Package no longer supported. See https://github.com/open-telemetry/opentelemetry-js/pull/7077
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
   '@opentelemetry/propagator-jaeger@2.9.0':
     resolution: {integrity: sha512-4mYGty27rYvSM0jtp1ZUOqd3LfVRCYg9H5G9OFzSx5HViYToU21MFhWfco7x1HwXr7ER8yGOiCIHZUwjPksc0Q==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Package no longer supported. See https://github.com/open-telemetry/opentelemetry-js/pull/7077
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -6821,12 +6824,14 @@ packages:
   '@opentelemetry/sdk-trace-base@1.30.0':
     resolution: {integrity: sha512-RKQDaDIkV7PwizmHw+rE/FgfB2a6MBx+AEVVlAHXRG1YYxLiBpPX2KhmoB99R5vA4b72iJrjle68NDWnbrE9Dg==}
     engines: {node: '>=14'}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-base@1.30.1':
     resolution: {integrity: sha512-jVPgBbH1gCy2Lb7X0AVQ8XAfgg0pJ4nvl8/IiQA6nxOsPvS+0zMJaFSs2ltXe0J6C8dqjcnpyqINDJmU30+uOg==}
     engines: {node: '>=14'}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -6840,24 +6845,28 @@ packages:
   '@opentelemetry/sdk-trace-base@2.12.0':
     resolution: {integrity: sha512-JOERgZCxRM06FEJ5kEWxlSRChah6MmXDx3KwCruqEv/iEyLkTokCSemf2y1w8oIHtfrr8EVTpzebq/31vn2Cpg==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@1.30.0':
     resolution: {integrity: sha512-MeXkXEdBs9xq1JSGTr/3P1lHBSUBaVmo1+UpoQhUpviPMzDXy0MNsdTC7KKI6/YcG74lTX6eqeNjlC1jV4Rstw==}
     engines: {node: '>=14'}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@2.10.0':
     resolution: {integrity: sha512-GZK/G6oZyBLGlH1pUgeDch7D91KoHd2uotUGIkWCPi9GI5T9X0p4L7nNAMDR1BQjkRYoDqo+ddfVx9t5Uhys+Q==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@2.12.0':
     resolution: {integrity: sha512-9DufH1IlmQMoKAfot5y/FhTP1RnmhLb5K6eKmJO/bvzPjYwPAazoiAUbTZFdPbqxOXN0FEbhZx/e6SB1Og4jmg==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -11830,8 +11839,8 @@ packages:
   fastify-plugin@6.0.0:
     resolution: {integrity: sha512-fZOty7z3O7vOliF6d8bHE3wiEh1KcNnKEQensSgTk9C1DvN6nRLS++XVd86v33Hw/8u9Un8A1zDrQ8ujcQDHEg==}
 
-  fastify@5.12.5:
-    resolution: {integrity: sha512-OB2k1dlxs5/NAABqeKV2FUHkSD2BbENsCak8yULVcymn3fHIPDVa9TI3SDnJSWYSllZmSYuZXy2gTnsT+Sut1A==}
+  fastify@5.12.6:
+    resolution: {integrity: sha512-XeErl1DDsxdbhE9RPRJ05iNnfMhHRHHewVNNAJXaGTOaCY4wHb6rEizphhgzBq5YQe4JyqQWPpGd+hLh2PXXJA==}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -15128,6 +15137,7 @@ packages:
   prom-client@15.1.3:
     resolution: {integrity: sha512-6ZiOBfCywsD4k1BN9IX0uZhF+tJkV8q8llP64G5Hajs4JOeVLPCwpPVcpXy3BwYiUGgyJzsJJQeOIv7+hDSq8g==}
     engines: {node: ^16 || ^18 || >=20}
+    deprecated: prom-client has been replaced by @prometheus-io/client
 
   promise-all-reject-late@1.0.1:
     resolution: {integrity: sha512-vuf0Lf0lOxyQREH7GDIOUMLS7kz+gs8i6B+Yi8dC68a2sychGrHTJYghMBD6k7eUcH0H5P73EckCA48xijWqXw==}
@@ -19561,12 +19571,12 @@ snapshots:
       fastq: 1.19.1
       glob: 13.0.6
 
-  '@fastify/vite@9.2.0(fastify@5.12.5)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
+  '@fastify/vite@9.2.0(fastify@5.12.6)(vite@7.3.7(@types/node@25.9.9)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(terser@5.37.0)(tsx@4.19.2)(yaml@2.8.3))':
     dependencies:
       '@fastify/deepmerge': 3.2.1
       '@fastify/middie': 9.3.2
       '@fastify/static': 9.3.0
-      fastify: 5.12.5
+      fastify: 5.12.6
       fastify-plugin: 5.1.0
       fs-extra: 11.4.0
       klaw: 4.1.0
@@ -29407,7 +29417,7 @@ snapshots:
 
   fastify-plugin@6.0.0: {}
 
-  fastify@5.12.5:
+  fastify@5.12.6:
     dependencies:
       '@fastify/ajv-compiler': 4.0.5
       '@fastify/error': 4.2.0
@@ -32982,9 +32992,9 @@ snapshots:
     dependencies:
       pg: 8.20.0
 
-  pg-cursor@2.22.1(pg@8.20.0):
+  pg-cursor@2.22.1(pg@8.13.1):
     dependencies:
-      pg: 8.20.0
+      pg: 8.13.1
 
   pg-int8@1.0.1: {}
 
@@ -33000,12 +33010,12 @@ snapshots:
     dependencies:
       pg: 8.13.1
 
-  pg-promise@11.10.2(pg-query-stream@4.7.1(pg@8.20.0)):
+  pg-promise@11.10.2(pg-query-stream@4.7.1(pg@8.13.1)):
     dependencies:
       assert-options: 0.8.2
       pg: 8.13.1
       pg-minify: 1.6.5
-      pg-query-stream: 4.7.1(pg@8.20.0)
+      pg-query-stream: 4.7.1(pg@8.13.1)
       spex: 3.4.0
     transitivePeerDependencies:
       - pg-native
@@ -33019,10 +33029,10 @@ snapshots:
       pg: 8.20.0
       pg-cursor: 2.22.0(pg@8.20.0)
 
-  pg-query-stream@4.7.1(pg@8.20.0):
+  pg-query-stream@4.7.1(pg@8.13.1):
     dependencies:
-      pg: 8.20.0
-      pg-cursor: 2.22.1(pg@8.20.0)
+      pg: 8.13.1
+      pg-cursor: 2.22.1(pg@8.13.1)
 
   pg-types@2.2.0:
     dependencies:
