@@ -11,7 +11,7 @@
     "slonik": "48.19.0",
     "slonik-interceptor-query-logging": "48.19.0",
     "slonik-sql-tag-raw": "48.19.0",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",

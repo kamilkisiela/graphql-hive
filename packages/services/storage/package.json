@@ -27,7 +27,7 @@
     "graphql": "^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0",
     "pg-promise": "catalog:",
     "typescript": "catalog:",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   },
   "buildOptions": {
     "external": [

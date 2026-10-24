@@ -16,6 +16,6 @@
     "dotenv": "catalog:",
     "graphql": "catalog:",
     "lru-cache": "catalog:",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   }
 }

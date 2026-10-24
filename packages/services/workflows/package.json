@@ -39,6 +39,6 @@
     "nodemailer": "10.0.11",
     "p-limit": "catalog:",
     "sendmail": "1.6.1",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   }
 }

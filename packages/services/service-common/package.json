@@ -46,6 +46,6 @@
     "p-retry": "6.2.1",
     "prom-client": "catalog:",
     "vitest": "catalog:",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   }
 }

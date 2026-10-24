@@ -103,7 +103,7 @@
     "vite-plugin-monaco-editor": "1.1.0",
     "vite-tsconfig-paths": "catalog:",
     "wonka": "6.3.6",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   },
   "buildOptions": {
     "external": [
