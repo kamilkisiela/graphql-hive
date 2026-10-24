@@ -1,44 +1,24 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import z from 'zod';
-import { Logger } from '../../shared/providers/logger';
+import { EphemeralStateStore } from '../../shared/providers/ephemeral-state-store';
 import { REDIS_INSTANCE, type Redis } from '../../shared/providers/redis';
-import { sha256 } from '../lib/supertokens-at-home/crypto';
 
 @Injectable({
   scope: Scope.Singleton,
   global: true,
 })
-export class OAuthCache {
-  private logger: Logger;
+export class OAuthCache extends EphemeralStateStore<typeof OAuthRecordModel> {
+  protected readonly model = OAuthRecordModel;
+  protected readonly keyPrefix = 'oauth-cache';
 
-  constructor(
-    @Inject(REDIS_INSTANCE) private redis: Redis,
-    logger: Logger,
-  ) {
-    this.logger = logger.child({ module: 'OAuthCache' });
-  }
-
-  async put(state: string, data: Record) {
-    const encodedData = JSON.stringify(data);
-    const key = `oauth-cache:${sha256(state)}`;
-    await this.redis.set(key, encodedData, 'EX', 60 * 5);
-  }
-
-  async get(state: string) {
-    const key = `oauth-cache:${sha256(state)}`;
-    const encodedData = await this.redis.getdel(key);
-    if (!encodedData) {
-      return null;
-    }
-    const data = RecordModel.parse(JSON.parse(encodedData));
-    return data;
+  constructor(@Inject(REDIS_INSTANCE) redis: Redis) {
+    super(redis);
   }
 }
 
-const RecordModel = z.object({
-  oidIntegrationId: z.string().nullable(),
-  pkceVerifier: z.string(),
-  method: z.string(),
-});
-
-type Record = z.TypeOf<typeof RecordModel>;
+const OAuthRecordModel = z.discriminatedUnion('method', [
+  z.object({ method: z.literal('github'), oidIntegrationId: z.null(), pkceVerifier: z.string() }),
+  z.object({ method: z.literal('google'), oidIntegrationId: z.null(), pkceVerifier: z.string() }),
+  z.object({ method: z.literal('okta'), oidIntegrationId: z.null(), pkceVerifier: z.string() }),
+  z.object({ method: z.literal('oidc'), oidIntegrationId: z.string(), pkceVerifier: z.string() }),
+]);

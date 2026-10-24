@@ -221,6 +221,7 @@ const graphql = deployGraphQL({
   s3AuditLog,
   zendesk,
   githubApp,
+  slackApp,
   sentry,
   observability,
   broker,
@@ -296,8 +297,6 @@ const app = deployApp({
   docker,
   zendesk,
   commerce,
-  github: githubApp,
-  slackApp,
   sentry,
   egressManager,
 });

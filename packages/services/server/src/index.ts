@@ -18,6 +18,7 @@ import { AccessTokenKeyContainer } from '@hive/api/modules/auth/lib/supertokens-
 import { EmailVerification } from '@hive/api/modules/auth/providers/email-verification';
 import { OAuthCache } from '@hive/api/modules/auth/providers/oauth-cache';
 import { createDefaultCredentialProvider } from '@hive/api/modules/cdn/providers/aws';
+import { IntegrationStateStore } from '@hive/api/modules/integrations/providers/integration-state-store';
 import { OIDCIntegrationConfig } from '@hive/api/modules/oidc-integrations/providers/oidc-integration-config';
 import { OIDCIntegrationStore } from '@hive/api/modules/oidc-integrations/providers/oidc-integration.store';
 import { RedisRateLimiter } from '@hive/api/modules/shared/providers/redis-rate-limiter';
@@ -58,7 +59,9 @@ import { TargetTokenCache } from '../../api/src/modules/token/providers/target-t
 import { internalApiRouter } from './api';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
+import { registerIntegrationRoutes } from './integration-routes';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+import { createBrokerFetch } from './oauth-fetch';
 import { createOtelAuthEndpoint } from './otel-auth-endpoint';
 import { createPublicGraphQLHandler } from './public-graphql-handler';
 import { createSCIMPlugin } from './scim';
@@ -400,6 +403,34 @@ export async function main() {
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
+    const privateAuthN = new AuthN({
+      strategies: [
+        (logger: Logger) =>
+          new SuperTokensUserAuthNStrategy({
+            logger,
+            storage,
+            organizationMembers: new OrganizationMembers(
+              storage.pool,
+              new OrganizationMemberRoles(storage.pool, logger),
+              logger,
+            ),
+            emailVerification: env.auth.requireEmailVerification
+              ? registry.injector.get(EmailVerification)
+              : null,
+            accessTokenKey: new AccessTokenKeyContainer(env.supertokens.secrets.accessTokenKey),
+            oidcIntegrationStore: new OIDCIntegrationStore(storage.pool, redis, logger),
+            superadminForeignOrganizationActions: env.auth.superadminForeignOrganizationActions,
+            superadminOrganizationId: env.auth.superadminOrganizationId,
+          }),
+        organizationAccessTokenStrategy,
+        (logger: Logger) =>
+          new TargetAccessTokenStrategy({
+            logger,
+            cache: registry.injector.get(TargetTokenCache),
+          }),
+      ],
+    });
+
     const graphql = graphqlHandler({
       graphiqlEndpoint: graphqlPath,
       registry,
@@ -410,39 +441,24 @@ export async function main() {
       hivePersistedDocumentsConfig: env.hivePersistedDocuments,
       tracing,
       logger: logger as any,
-      authN: new AuthN({
-        strategies: [
-          (logger: Logger) =>
-            new SuperTokensUserAuthNStrategy({
-              logger,
-              storage,
-              organizationMembers: new OrganizationMembers(
-                storage.pool,
-                new OrganizationMemberRoles(storage.pool, logger),
-                logger,
-              ),
-              emailVerification: env.auth.requireEmailVerification
-                ? registry.injector.get(EmailVerification)
-                : null,
-              accessTokenKey: new AccessTokenKeyContainer(env.supertokens.secrets.accessTokenKey),
-              oidcIntegrationStore: new OIDCIntegrationStore(storage.pool, redis, logger),
-              superadminForeignOrganizationActions: env.auth.superadminForeignOrganizationActions,
-              superadminOrganizationId: env.auth.superadminOrganizationId,
-            }),
-          organizationAccessTokenStrategy,
-          (logger: Logger) =>
-            new TargetAccessTokenStrategy({
-              logger,
-              cache: registry.injector.get(TargetTokenCache),
-            }),
-        ],
-      }),
+      authN: privateAuthN,
     });
 
     server.route({
       method: ['GET', 'POST'],
       url: graphqlPath,
       handler: graphql,
+    });
+
+    registerIntegrationRoutes(server, {
+      publicUrl: env.graphql.origin,
+      webAppUrl: env.hiveServices.webApp.url,
+      github: env.integrationRoutes.github,
+      slack: env.integrationRoutes.slack,
+      fetch: createBrokerFetch(fetch, env.requestBroker),
+      registry,
+      authN: privateAuthN,
+      stateStore: registry.injector.get(IntegrationStateStore),
     });
 
     const authN = new AuthN({

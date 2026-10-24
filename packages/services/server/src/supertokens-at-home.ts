@@ -28,7 +28,7 @@ import { TaskScheduler } from '@hive/workflows/kit';
 import { PasswordResetTask } from '@hive/workflows/tasks/password-reset';
 import { env } from './environment';
 import { createBrokerFetch } from './oauth-fetch';
-import { createNewSession, createOIDCState, validatePassword } from './supertokens-at-home/shared';
+import { createNewSession, validatePassword } from './supertokens-at-home/shared';
 import type { WorkloadIdentityFederationProvider } from './workload-identity-federation';
 
 type BroadcastOIDCIntegrationLog = (oidcOrganizationId: string, message: string) => void;
@@ -729,7 +729,6 @@ export async function registerSupertokensAtHome(
           });
         }
 
-        const state = oidClient.randomState();
         const pkceVerifier = oidClient.randomPKCECodeVerifier();
         const codeChallenge = await oidClient.calculatePKCECodeChallenge(pkceVerifier);
 
@@ -739,15 +738,15 @@ export async function registerSupertokensAtHome(
         authorizeUrl.searchParams.set('client_id', env.auth.github.clientId);
         authorizeUrl.searchParams.set('redirect_uri', redirectUrl.toString());
         authorizeUrl.searchParams.set('scope', ['read:user', 'user:email'].join(' '));
-        authorizeUrl.searchParams.set('state', state);
         authorizeUrl.searchParams.set('code_challenge', codeChallenge);
         authorizeUrl.searchParams.set('code_challenge_method', 'S256');
 
-        await oauthCache.put(state, {
+        const state = await oauthCache.put({
           method: 'github',
           oidIntegrationId: null,
           pkceVerifier,
         });
+        authorizeUrl.searchParams.set('state', state);
 
         return rep.send({
           status: 'OK',
@@ -763,7 +762,6 @@ export async function registerSupertokensAtHome(
           });
         }
 
-        const state = oidClient.randomState();
         const pkceVerifier = oidClient.randomPKCECodeVerifier();
         const codeChallenge = await oidClient.calculatePKCECodeChallenge(pkceVerifier);
 
@@ -781,16 +779,15 @@ export async function registerSupertokensAtHome(
             'openid',
           ].join(' '),
         );
-        authorizeUrl.searchParams.set('state', state);
-        authorizeUrl.searchParams.set('state', state);
         authorizeUrl.searchParams.set('code_challenge', codeChallenge);
         authorizeUrl.searchParams.set('code_challenge_method', 'S256');
 
-        await oauthCache.put(state, {
+        const state = await oauthCache.put({
           method: 'google',
           oidIntegrationId: null,
           pkceVerifier,
         });
+        authorizeUrl.searchParams.set('state', state);
 
         return rep.send({
           status: 'OK',
@@ -806,7 +803,6 @@ export async function registerSupertokensAtHome(
           });
         }
 
-        const state = oidClient.randomState();
         const pkceVerifier = oidClient.randomPKCECodeVerifier();
         const codeChallenge = await oidClient.calculatePKCECodeChallenge(pkceVerifier);
 
@@ -822,16 +818,15 @@ export async function registerSupertokensAtHome(
           'scope',
           ['openid', 'email', 'profile', 'okta.users.read.self'].join(' '),
         );
-        authorizeUrl.searchParams.set('state', state);
-        authorizeUrl.searchParams.set('state', state);
         authorizeUrl.searchParams.set('code_challenge', codeChallenge);
         authorizeUrl.searchParams.set('code_challenge_method', 'S256');
 
-        await oauthCache.put(state, {
+        const state = await oauthCache.put({
           method: 'okta',
           oidIntegrationId: null,
           pkceVerifier,
         });
+        authorizeUrl.searchParams.set('state', state);
 
         return rep.send({
           status: 'OK',
@@ -904,14 +899,12 @@ export async function registerSupertokensAtHome(
         };
 
         let redirectTo = oidClient.buildAuthorizationUrl(oidClientConfig, parameters);
-        const state = createOIDCState();
-
-        redirectTo.searchParams.set('state', state);
-        await oauthCache.put(state, {
+        const state = await oauthCache.put({
           method: 'oidc',
           oidIntegrationId: oidcIntegration.id,
           pkceVerifier,
         });
+        redirectTo.searchParams.set('state', state);
 
         broadcastLog(
           oidcIntegration.id,
@@ -1381,7 +1374,7 @@ export async function registerSupertokensAtHome(
 
         const cacheRecord = await oauthCache.get(state);
 
-        if (!cacheRecord?.oidIntegrationId || cacheRecord.method !== 'oidc') {
+        if (cacheRecord?.method !== 'oidc') {
           req.log.debug('failed looking up pending oauth cache record.');
           return rep.status(200).send({
             status: 'SIGN_IN_UP_NOT_ALLOWED',

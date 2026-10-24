@@ -18,6 +18,7 @@ import { Redis } from './redis';
 import { S3 } from './s3';
 import { Schema } from './schema';
 import { Sentry } from './sentry';
+import { SlackApp } from './slack-app';
 import { Usage } from './usage';
 import { Zendesk } from './zendesk';
 
@@ -46,6 +47,7 @@ export function deployGraphQL({
   docker,
   postgres,
   githubApp,
+  slackApp,
   sentry,
   observability,
   broker,
@@ -53,6 +55,7 @@ export function deployGraphQL({
 }: {
   observability: Observability;
   githubApp: GitHubApp;
+  slackApp: SlackApp;
   postgres: Postgres;
   image: string;
   clickhouse: Clickhouse;
@@ -157,6 +160,8 @@ export function deployGraphQL({
         ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
         ...(zendesk.baseUrl ? { ZENDESK_BASE_URL: zendesk.baseUrl } : {}),
         INTEGRATION_GITHUB: '1',
+        INTEGRATION_GITHUB_APP_NAME: githubApp.name,
+        INTEGRATION_SLACK: '1',
         // Auth
         AUTH_GITHUB: '1',
         AUTH_GOOGLE: '1',
@@ -186,6 +191,10 @@ export function deployGraphQL({
     // GitHub App
     .withSecret('INTEGRATION_GITHUB_APP_ID', githubApp.secret, 'appId')
     .withSecret('INTEGRATION_GITHUB_APP_PRIVATE_KEY', githubApp.secret, 'privateKey')
+    .withSecret('INTEGRATION_GITHUB_APP_CLIENT_ID', githubApp.secret, 'clientId')
+    .withSecret('INTEGRATION_GITHUB_APP_CLIENT_SECRET', githubApp.secret, 'clientSecret')
+    .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
+    .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')
     // Clickhouse
     .withSecret('CLICKHOUSE_HOST', clickhouse.secret, 'host')
     .withSecret('CLICKHOUSE_PORT', clickhouse.secret, 'port')

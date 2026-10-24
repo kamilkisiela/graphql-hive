@@ -149,6 +149,30 @@ const GitHubModel = zod.union([
   }),
 ]);
 
+const IntegrationRoutesModel = zod.intersection(
+  zod.union([
+    zod.object({
+      INTEGRATION_GITHUB_APP_NAME: emptyString(zod.undefined()),
+    }),
+    zod.object({
+      INTEGRATION_GITHUB_APP_NAME: zod.string(),
+      // Used for verifying that the installing user has access to the installation.
+      INTEGRATION_GITHUB_APP_CLIENT_ID: zod.string(),
+      INTEGRATION_GITHUB_APP_CLIENT_SECRET: zod.string(),
+    }),
+  ]),
+  zod.union([
+    zod.object({
+      INTEGRATION_SLACK: emptyString(zod.literal('0').optional()),
+    }),
+    zod.object({
+      INTEGRATION_SLACK: zod.literal('1'),
+      INTEGRATION_SLACK_CLIENT_ID: zod.string(),
+      INTEGRATION_SLACK_CLIENT_SECRET: zod.string(),
+    }),
+  ]),
+);
+
 const CdnCFModel = zod.union([
   zod.object({
     CDN_CF: emptyString(zod.literal('0').optional()),
@@ -377,6 +401,7 @@ const configs = {
   authOkta: AuthOktaConfigSchema.safeParse(processEnv),
   authOktaMultiTenant: AuthOktaMultiTenantSchema.safeParse(processEnv),
   github: GitHubModel.safeParse(processEnv),
+  integrationRoutes: IntegrationRoutesModel.safeParse(processEnv),
   cdnCf: CdnCFModel.safeParse(processEnv),
   cdnApi: CdnApiModel.safeParse(processEnv),
   prometheus: PrometheusModel.safeParse(processEnv),
@@ -536,6 +561,7 @@ const authGoogle = extractConfig(configs.authGoogle);
 const authOkta = extractConfig(configs.authOkta);
 const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
 const github = extractConfig(configs.github);
+const integrationRoutes = extractConfig(configs.integrationRoutes);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
 const cdnCf = extractConfig(configs.cdnCf);
@@ -614,6 +640,23 @@ export const env = {
         }
       : null,
     schema: { endpoint: base.SCHEMA_ENDPOINT },
+  },
+  integrationRoutes: {
+    github:
+      'INTEGRATION_GITHUB_APP_CLIENT_ID' in integrationRoutes
+        ? {
+            appName: integrationRoutes.INTEGRATION_GITHUB_APP_NAME,
+            clientId: integrationRoutes.INTEGRATION_GITHUB_APP_CLIENT_ID,
+            clientSecret: integrationRoutes.INTEGRATION_GITHUB_APP_CLIENT_SECRET,
+          }
+        : null,
+    slack:
+      integrationRoutes.INTEGRATION_SLACK === '1'
+        ? {
+            clientId: integrationRoutes.INTEGRATION_SLACK_CLIENT_ID,
+            clientSecret: integrationRoutes.INTEGRATION_SLACK_CLIENT_SECRET,
+          }
+        : null,
   },
   http: {
     port: base.PORT ?? 3001,

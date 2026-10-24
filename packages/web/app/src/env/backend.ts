@@ -48,7 +48,6 @@ const BaseSchema = zod.object({
   GRAPHQL_PUBLIC_ENDPOINT: zod.string().url(),
   GRAPHQL_PUBLIC_SUBSCRIPTION_ENDPOINT: zod.string().url(),
   GRAPHQL_PUBLIC_ORIGIN: zod.string().url(),
-  INTEGRATION_GITHUB_APP_NAME: emptyString(zod.string().optional()),
   GA_TRACKING_ID: emptyString(zod.string().optional()),
   DOCS_URL: emptyString(zod.string().url().optional()),
   STRIPE_PUBLIC_KEY: emptyString(zod.string().optional()),
@@ -61,17 +60,6 @@ const BaseSchema = zod.object({
   ),
   ZENDESK_SUPPORT: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
-
-const IntegrationSlackSchema = zod.union([
-  zod.object({
-    INTEGRATION_SLACK: emptyString(zod.literal('0').optional()),
-  }),
-  zod.object({
-    INTEGRATION_SLACK: zod.literal('1'),
-    INTEGRATION_SLACK_CLIENT_ID: zod.string(),
-    INTEGRATION_SLACK_CLIENT_SECRET: zod.string(),
-  }),
-]);
 
 const AuthGitHubConfigSchema = zod.object({
   AUTH_GITHUB: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
@@ -132,7 +120,6 @@ const processEnv = process.env;
 function buildConfig() {
   const configs = {
     base: BaseSchema.safeParse(processEnv),
-    integrationSlack: IntegrationSlackSchema.safeParse(processEnv),
     sentry: SentryConfigSchema.safeParse(processEnv),
     authGithub: AuthGitHubConfigSchema.safeParse(processEnv),
     authGoogle: AuthGoogleConfigSchema.safeParse(processEnv),
@@ -164,7 +151,6 @@ function buildConfig() {
   }
 
   const base = extractConfig(configs.base);
-  const integrationSlack = extractConfig(configs.integrationSlack);
   const sentry = extractConfig(configs.sentry);
   const authGithub = extractConfig(configs.authGithub);
   const authGoogle = extractConfig(configs.authGoogle);
@@ -188,14 +174,6 @@ function buildConfig() {
     log: {
       level: log.LOG_LEVEL ?? 'info',
     },
-    slack:
-      integrationSlack.INTEGRATION_SLACK === '1'
-        ? {
-            clientId: integrationSlack.INTEGRATION_SLACK_CLIENT_ID,
-            clientSecret: integrationSlack.INTEGRATION_SLACK_CLIENT_SECRET,
-          }
-        : null,
-    github: base.INTEGRATION_GITHUB_APP_NAME ? { appName: base.INTEGRATION_GITHUB_APP_NAME } : null,
     analytics: {
       googleAnalyticsTrackingId: base.GA_TRACKING_ID,
     },
