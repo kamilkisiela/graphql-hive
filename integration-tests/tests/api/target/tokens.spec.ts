@@ -1,6 +1,7 @@
 import { readOrganizationInfo, readProjectInfo, readTargetInfo } from 'testkit/flow';
 import { ProjectType } from 'testkit/gql/graphql';
 import { initSeed } from '../../../testkit/seed';
+import { getServiceHost } from '../../../testkit/utils';
 
 test.concurrent(
   'setting no scopes equals to readonly for organization, project, target',
@@ -208,5 +209,32 @@ test.concurrent(
         }),
       }),
     );
+  },
+);
+
+test.concurrent(
+  'tokenInfo response cache is not shared between requests with different X-API-Token headers',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createTargetAccessToken } = await createProject(ProjectType.Single);
+    const token = await createTargetAccessToken({ mode: 'readOnly' });
+
+    const endpoint = `http://${await getServiceHost('server', 8082)}/graphql`;
+    // JWT-like value (contains a dot), so the target access token strategy ignores it
+    const authorization = `Bearer ${crypto.randomUUID()}.poison`;
+    const fetchTokenInfoTypename = (headers: Record<string, string>) =>
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization, ...headers },
+        body: JSON.stringify({ query: '{ tokenInfo { __typename } }' }),
+      })
+        .then(res => res.json())
+        .then(body => body.data?.tokenInfo?.__typename);
+
+    // authenticated via X-API-Token, response gets cached
+    expect(await fetchTokenInfoTypename({ 'x-api-token': token.secret })).toEqual('TokenInfo');
+    // same Authorization header, but no X-API-Token -> must not hit the cached response
+    expect(await fetchTokenInfoTypename({})).toEqual('TokenNotFoundError');
   },
 );

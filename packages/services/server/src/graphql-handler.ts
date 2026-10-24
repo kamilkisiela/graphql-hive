@@ -244,14 +244,17 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       }),
       useResponseCache({
         session: request => {
-          const sessionValue =
-            request.headers.get('authorization') ?? request.headers.get('x-api-token');
+          // The cache key MUST be derived from all headers that can influence authentication,
+          // otherwise a response authenticated via one header could be served to a request
+          // only sending the other header.
+          const authorization = request.headers.get('authorization');
+          const apiToken = request.headers.get('x-api-token');
 
-          if (sessionValue != null) {
-            return hashSessionId(sessionValue);
+          if (authorization == null && apiToken == null) {
+            return null;
           }
 
-          return null;
+          return hashSessionId(JSON.stringify({ authorization, apiToken }));
         },
         ttl: 0,
         ttlPerSchemaCoordinate: {
