@@ -1,5 +1,58 @@
 # hive
 
+## 14.1.2
+
+### Patch Changes
+
+- [#8768](https://github.com/graphql-hive/console/pull/8768)
+  [`e93f335`](https://github.com/graphql-hive/console/commit/e93f3359371464f54a454a1994eb563299c5009d)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Support using AWS IAM credentials for S3 access
+  from the artifacts Lambda instead of static access keys.
+
+  To use the Lambda execution role, grant it `s3:GetObject` access to the artifact bucket and
+  configure the Lambda environment variables as follows:
+
+  ```sh
+  AWS_S3_IAM_AUTH_ENABLED=1
+  AWS_S3_ENDPOINT=https://s3.us-east-1.amazonaws.com
+  AWS_S3_BUCKET_NAME=my-artifacts-bucket
+  ```
+
+- [#8763](https://github.com/graphql-hive/console/pull/8763)
+  [`8b21b39`](https://github.com/graphql-hive/console/commit/8b21b39d968773ac87e26ad73562062db973e75b)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Bump Node.js version from
+  [`24.22.0`](https://nodejs.org/en/blog/release/v24.22.0) to
+  [`24.22.1`](https://nodejs.org/en/blog/release/v24.22.1). Address
+  [disclosed vulnerabilities](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases).
+
+- [#8765](https://github.com/graphql-hive/console/pull/8765)
+  [`8b4c2ea`](https://github.com/graphql-hive/console/commit/8b4c2ea8936cf4d11b5b43ccdfc00827a83c72a3)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Strip whitespace from oidc related urls and trim
+  them when updating/creating an integration to avoid broker request failures.
+
+- [#8763](https://github.com/graphql-hive/console/pull/8763)
+  [`8b21b39`](https://github.com/graphql-hive/console/commit/8b21b39d968773ac87e26ad73562062db973e75b)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Address vulnerability
+  [GHSA-q3jh-wrc6-jgq8](https://github.com/advisories/GHSA-q3jh-wrc6-jgq8),
+  [GHSA-8r9p-f939-6h3c](https://github.com/advisories/GHSA-8r9p-f939-6h3c), and
+  [GHSA-gfr2-rv44-r23c](https://github.com/advisories/GHSA-gfr2-rv44-r23c).
+
+- [#8775](https://github.com/graphql-hive/console/pull/8775)
+  [`ca1cb72`](https://github.com/graphql-hive/console/commit/ca1cb7261076dfe69659d1fa891064cf71e66c3f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Address
+  [GHSA-cg2g-xh64-v4q7](https://github.com/advisories/GHSA-cg2g-xh64-v4q7).
+
+- [#8754](https://github.com/graphql-hive/console/pull/8754)
+  [`2fe05b9`](https://github.com/graphql-hive/console/commit/2fe05b9268dc9d906819afbc20c5d79b0f5552f2)
+  Thanks [@jdolle](https://github.com/jdolle)! - Schema publish now returns a `SchemaPublishError`
+  instead of a generic error when the request has no schema source or both `sdl` and `schema`, when
+  the SDL cannot be parsed, or when the metadata is not valid JSON.
+
+- [#8766](https://github.com/graphql-hive/console/pull/8766)
+  [`2c6998b`](https://github.com/graphql-hive/console/commit/2c6998bca0a0c5514866720521fc2ae2f6134cd4)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Use trace span names prefixed with `hive_console.`
+  instead of `hive.` to avoid confusion with gateway hive sdk span attributes.
+
 ## 14.1.1
 
 ### Patch Changes
