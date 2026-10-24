@@ -212,7 +212,7 @@ test.concurrent(
   },
 );
 
-test.concurrent.only(
+test.concurrent(
   'tokenInfo response cache is not shared between requests with different X-API-Token headers',
   async ({ expect }) => {
     const { createOrg } = await initSeed().createOwner();
