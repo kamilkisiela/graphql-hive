@@ -90,7 +90,7 @@
     "graphql": "^16.14.0",
     "graphql-ws": "catalog:",
     "graphql-yoga": "catalog:",
-    "happy-dom": "^20.10.6",
+    "happy-dom": "^21.0.4",
     "jsdom": "catalog:",
     "lodash": "^4.18.1",
     "lucide-react": "catalog:",
@@ -111,7 +111,7 @@
     "vite": "npm:rolldown-vite@7.1.14",
     "vite-plugin-monaco-editor": "^1.1.0",
     "ws": "catalog:",
-    "zod": "4.6.6"
+    "zod": "4.6.7"
   },
   "publishConfig": {
     "access": "public"
