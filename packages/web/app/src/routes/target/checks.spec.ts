@@ -17,6 +17,7 @@ import {
 } from '@/lib/testing/fixtures/checks';
 import { layoutFixtures, SLUGS } from '@/lib/testing/fixtures/layouts';
 import { renderAtUrl } from '@/lib/testing/router';
+import { pickOption } from '@/lib/testing/select';
 import { createTestClient } from '@/lib/testing/urql';
 import { createAppRouter } from '@/router';
 import { createMemoryHistory } from '@tanstack/react-router';
@@ -50,20 +51,6 @@ function client() {
 
 function listRequests(client: TestClient) {
   return client.requests('SchemaChecks_NavigationQuery').map(operation => operation.variables);
-}
-
-// Base UI commits an option only while it is highlighted, so focus and click are separate acts.
-async function pickService(name: string) {
-  await act(async () => {
-    fireEvent.click(screen.getByRole('combobox', { name: 'Service' }));
-  });
-  const option = await screen.findByRole('option', { name });
-  await act(async () => {
-    option.focus();
-  });
-  await act(async () => {
-    fireEvent.click(option);
-  });
 }
 
 describe('schema checks list', () => {
@@ -143,7 +130,7 @@ describe('service filter', () => {
       const { router } = renderAtUrl(`${CHECKS_PAGE}/check-2`, { client: testClient });
       await screen.findByText(CHECKS.first[1]);
 
-      await pickService(SERVICES[1]);
+      await pickOption('Service', SERVICES[1]);
 
       await screen.findByText(CHECKS.serviceOnly);
       expect(router.state.location.search).toMatchObject({ filter_service: SERVICES[1] });
@@ -164,7 +151,7 @@ describe('service filter', () => {
     });
     await screen.findByText(CHECKS.serviceOnly);
 
-    await pickService('All services');
+    await pickOption('Service', 'All services');
 
     await screen.findByText(CHECKS.first[0]);
     expect(router.state.location.search).not.toHaveProperty('filter_service');
