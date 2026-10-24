@@ -173,7 +173,7 @@
       "path-to-regexp@0.x.x": "^0.1.13",
       "ioredis": "5.10.1",
       "protobufjs@8.x.x": "8.6.4",
-      "protobufjs@7.x.x": "7.6.5",
+      "protobufjs@7.x.x": "7.6.6",
       "@opentelemetry/exporter-jaeger": "-",
       "uuid@<14.x.x": "^14.0.0",
       "tmp@<0.2.7": "0.2.7",
