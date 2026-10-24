@@ -31,6 +31,6 @@
     "itty-router-extras": "0.4.6",
     "toucan-js": "catalog:",
     "undici": "catalog:",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   }
 }

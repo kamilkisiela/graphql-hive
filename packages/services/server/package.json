@@ -49,7 +49,7 @@
     "pino-pretty": "catalog:",
     "prom-client": "catalog:",
     "reflect-metadata": "catalog:",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   },
   "buildOptions": {
     "external": [

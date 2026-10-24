@@ -18,6 +18,6 @@
     "undici": "catalog:",
     "vitest": "catalog:",
     "workers-loki-logger": "0.1.15",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   }
 }
